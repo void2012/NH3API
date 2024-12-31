@@ -1,0 +1,71 @@
+GENERAL:
+1) Avoid dynamic_cast, typeid, std::type_info, etc. at all costs!
+If you need to dispatch .exe types, use 'reinterpret_cast<uintptr_t>(get_vftable(this))'
+And switch vftables addresses.
+2) DO NOT use fast math flags!
+It will break the binary compability with the .exe code
+3) DO NOT use flags that affect vftables (such as clang's -fexperimental-relative-c++-abi-vtables)
+4) Please use listed compability options.
+Many players still play the game on WinXP machine with an old Pentium CPU.
+For performance reasons, you can dispatch between versions of your .dll
+For example,
+mymod.dll which switches two versions .dll depending on machine specs
+mymod_old_winxp.dll     (-march=i686, uses win32 system calls as of WinXP, slower)
+mymod_modern_win10.dll  (-march=haswell, uses win32 system calls up to Win10, faster)
+or something like this...
+
+List of supported compilers:
+Minimum supported version:
+MinGW GCC v5
+MinGW Clang v10
+Visual C++ v7.1 (Visual Studio 2005), Visual C++ 6.0 is unsupported due to the lack of _ReadWriteBarrier() and partial template specializations
+NOTE: Borland C++ support will be included in future releases
+Recommended version:
+MinGW GCC latest (with _WIN32_WINNT = WINVER = 0x0501)
+MinGW Clang latest (with _WIN32_WINNT = WINVER = 0x0501)
+Visual C++ v15 v141_xp (Visual Studio 2017)
+NOTE: Borland C++ support will be included in future releases
+
+MSVC:
+Mandatory options:
+Recommended optimization options:
+Compability options(please use them if it's possible):
+Use v141_xp toolkit with Visual Studio 2017 for compability with WinXP.
+It seems that v141_xp is broken since Visual Studio 2019
+v141_xp supports the C++14 standard and partially the C++17 standard
+It lacks support for <filesystem> and <string_view> but they can work even on C++11 via third-party libraries, such as
+https://github.com/gulrak/filesystem
+https://github.com/martinmoene/string-view-lite
+GCC(MinGW):
+Mandatory options:
+-DNH3API_DLLBUILD for .dll build or -DNH3API_STANDALONE for standalone build
+-m32
+-freg-struct-return
+-masm=intel
+Recommended optimization options:
+-fwhole-program
+-fomit-frame-pointers
+-O3
+-s
+-fno-rtti
+-flto=jobserver
+Compability options(please use them if it's possible):
+-march=i686
+-static
+-static-libgcc
+-static-libstdc++
+Clang:
+Mandatory options:
+-m32
+-masm=intel
+-freg-struct-return
+Recommended optimization options:
+-O3
+-s
+-fno-rtti
+-flto=jobserver
+-fomit-frame-pointer
+Compability options:
+-march=i686
+-static
+-lc++abi
