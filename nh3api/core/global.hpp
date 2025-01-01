@@ -409,8 +409,8 @@ struct game
 
         // offset: +0x4E7AC = +321452,  size = 0x10 = 16
         exe_vector<void*> recorded_events;
-
         //exe_vector<type_event_record*> recorded_events;
+        
         // offset: +0x4E7BC = +321468,  size = 0x10 = 16
         exe_vector<QuestMonster> quest_monsters;
 

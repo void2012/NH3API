@@ -243,28 +243,28 @@ struct has_scalar_deleting_destructor<T,
 decltype((void)declval<T>().scalar_deleting_destructor(declval<uint8_t>()))>
     : true_type {};
 #else
-template <typename Type>
+template <typename type>
 class scalar_deleting_destructor_test
 {
 class yes { char m;};
 class no { yes m[2];};
 
-struct BaseMixin
+struct base_mixin
 {
     void scalar_deleting_destructor(){}
 };
 
-struct Base : public Type, public BaseMixin {};
+struct base : public type, public base_mixin {};
 
-template <typename T, T t>  class Helper{};
+template <typename T, T t>  class helper{};
 
 template <typename U>
-static no deduce(U*, Helper<void (BaseMixin::*)(), &U::scalar_deleting_destructor>*
+static no deduce(U*, helper<void (base_mixin::*)(), &U::scalar_deleting_destructor>*
 = 0);
 static yes deduce(...);
 
 public:
-static const bool result = sizeof(yes) == sizeof(deduce((Base*)
+static const bool result = sizeof(yes) == sizeof(deduce((base*)
 (0)));
 
 };
@@ -328,13 +328,13 @@ struct return_value_check<T, void>
 };
 
 template <bool has, typename F>
-struct details
+struct deduce_impl
 {
     static const bool value = false;
 };
 
 template <typename arg1, typename r>
-struct details<true, r(arg1)>
+struct deduce_impl<true, r(arg1)>
 {
     static const bool value =
     sizeof(
@@ -346,7 +346,7 @@ details::void_exp_result<type>())
 
 };
 public:
-static const bool value = details<scalar_deleting_destructor_test<type>::result,
+static const bool value = deduce_impl<scalar_deleting_destructor_test<type>::result,
 call_details>::value;
 
 };
