@@ -78,7 +78,7 @@ virtual __thiscall int32_t Open(int32_t newPriority) override \
 virtual __thiscall void Close() override \
 { get_type_vftable(this)->Close(reinterpret_cast<baseManager*>(this)); }\
 virtual __thiscall int32_t Main(message& msg) override \
-{ return get_type_vftable(this)->Main(reinterpret_cast<baseManager*>(this), &msg); } 
+{ return get_type_vftable(this)->Main(reinterpret_cast<baseManager*>(this), &msg); }
 #endif // NH3API_VIRTUAL_OVERRIDE_BASEMANAGER
 
 #pragma pack(push, 4)

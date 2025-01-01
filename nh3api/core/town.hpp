@@ -19,78 +19,78 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 // Таблица побитовых масок.
 constexpr const std::array<uint64_t, 64> bitNumber =
 {
-	{
-		1ULL << 0ULL,
-		1ULL << 1ULL,
-		1ULL << 2ULL,
-		1ULL << 3ULL,
-		1ULL << 4ULL,
-		1ULL << 5ULL,
-		1ULL << 6ULL,
-		1ULL << 7ULL,
-		1ULL << 8ULL,
-		1ULL << 9ULL,
-		1ULL << 10ULL,
+    {
+        1ULL << 0ULL,
+        1ULL << 1ULL,
+        1ULL << 2ULL,
+        1ULL << 3ULL,
+        1ULL << 4ULL,
+        1ULL << 5ULL,
+        1ULL << 6ULL,
+        1ULL << 7ULL,
+        1ULL << 8ULL,
+        1ULL << 9ULL,
+        1ULL << 10ULL,
 
-		1ULL << 11ULL,
-		1ULL << 12ULL,
-		1ULL << 13ULL,
-		1ULL << 14ULL,
-		1ULL << 15ULL,
-		1ULL << 16ULL,
-		1ULL << 17ULL,
-		1ULL << 18ULL,
-		1ULL << 19ULL,
-		1ULL << 20ULL,
+        1ULL << 11ULL,
+        1ULL << 12ULL,
+        1ULL << 13ULL,
+        1ULL << 14ULL,
+        1ULL << 15ULL,
+        1ULL << 16ULL,
+        1ULL << 17ULL,
+        1ULL << 18ULL,
+        1ULL << 19ULL,
+        1ULL << 20ULL,
 
-		1ULL << 21ULL,
-		1ULL << 22ULL,
-		1ULL << 23ULL,
-		1ULL << 24ULL,
-		1ULL << 25ULL,
-		1ULL << 26ULL,
-		1ULL << 27ULL,
-		1ULL << 28ULL,
-		1ULL << 29ULL,
-		1ULL << 30ULL,
+        1ULL << 21ULL,
+        1ULL << 22ULL,
+        1ULL << 23ULL,
+        1ULL << 24ULL,
+        1ULL << 25ULL,
+        1ULL << 26ULL,
+        1ULL << 27ULL,
+        1ULL << 28ULL,
+        1ULL << 29ULL,
+        1ULL << 30ULL,
 
-		1ULL << 31ULL,
-		1ULL << 32ULL,
-		1ULL << 33ULL,
-		1ULL << 34ULL,
-		1ULL << 35ULL,
-		1ULL << 36ULL,
-		1ULL << 37ULL,
-		1ULL << 38ULL,
-		1ULL << 39ULL,
-		1ULL << 40ULL,
+        1ULL << 31ULL,
+        1ULL << 32ULL,
+        1ULL << 33ULL,
+        1ULL << 34ULL,
+        1ULL << 35ULL,
+        1ULL << 36ULL,
+        1ULL << 37ULL,
+        1ULL << 38ULL,
+        1ULL << 39ULL,
+        1ULL << 40ULL,
 
-		1ULL << 41ULL,
-		1ULL << 42ULL,
-		1ULL << 43ULL,
-		1ULL << 44ULL,
-		1ULL << 45ULL,
-		1ULL << 46ULL,
-		1ULL << 47ULL,
-		1ULL << 48ULL,
-		1ULL << 49ULL,
-		1ULL << 50ULL,
+        1ULL << 41ULL,
+        1ULL << 42ULL,
+        1ULL << 43ULL,
+        1ULL << 44ULL,
+        1ULL << 45ULL,
+        1ULL << 46ULL,
+        1ULL << 47ULL,
+        1ULL << 48ULL,
+        1ULL << 49ULL,
+        1ULL << 50ULL,
 
-		1ULL << 51ULL,
-		1ULL << 52ULL,
-		1ULL << 53ULL,
-		1ULL << 54ULL,
-		1ULL << 55ULL,
-		1ULL << 56ULL,
-		1ULL << 57ULL,
-		1ULL << 58ULL,
-		1ULL << 59ULL,
-		1ULL << 60ULL,
+        1ULL << 51ULL,
+        1ULL << 52ULL,
+        1ULL << 53ULL,
+        1ULL << 54ULL,
+        1ULL << 55ULL,
+        1ULL << 56ULL,
+        1ULL << 57ULL,
+        1ULL << 58ULL,
+        1ULL << 59ULL,
+        1ULL << 60ULL,
 
-		1ULL << 61ULL,
-		1ULL << 62ULL,
-		1ULL << 63ULL,
-	}
+        1ULL << 61ULL,
+        1ULL << 62ULL,
+        1ULL << 63ULL,
+    }
 };
 #else
 // Bit shift masks lookup table /
@@ -103,72 +103,72 @@ extern const std::array<uint64_t, 64>& bitNumber = get_global_var_ref(0x66CD98, 
 enum type_building_id : int32_t
 {
 
-	// Common buildings IDs /
-	// Общие для всех фракций ID построек.
+    // Common buildings IDs /
+    // Общие для всех фракций ID построек.
 
-	MAGE_GUILD_ID       = 0,  // Гильдия магов 1 уровня
-	MAGE_GUILD2_ID      = 1,  // Гильдия магов 2 уровня
-	MAGE_GUILD3_ID      = 2,  // Гильдия магов 3 уровня
-	MAGE_GUILD4_ID      = 3,  // Гильдия магов 4 уровня
-	MAGE_GUILD5_ID      = 4,  // Гильдия магов 5 уровня
-	TAVERN_ID           = 5,  // Таверна
-	DOCK_ID             = 6,  // Верфь
-	CASTLE_FORT_ID      = 7,  // Форт
-	CASTLE_CITADEL_ID   = 8,  // Цитадель
-	CASTLE_CASTLE_ID    = 9,  // Замок
-	HALL_VILLAGE_ID     = 10, // Decorative / Декор.
-	HALL_TOWN_ID        = 11, // Decorative / Декор.
-	HALL_CITY_ID        = 12, // Decorative / Декор.
-	HALL_CAPITOL_ID     = 13, // Капитолий.
-	MARKETPLACE_ID      = 14, // Рынок
-	MARKETPLACE_SILO_ID = 15, // Хранилище ресурсов
-	BLACKSMITH_ID       = 16, // Кузница
-	SPECIAL_BUILDING_ID = 17, // Unique building for every town type / Специальное строение города(см. аналогичные ID для каждой фракции).
-	HORDE_ID            = 18, // Орда (увеличивает прирост определенного существа)
-	HORDE_UPG_ID        = 19, // Is being built altogether with HORDE_ID / Строится одновременно с HORDE_ID.
-	DOCK_WITH_BOAT_ID   = 20, // Верфь с кораблём(TODO: выяснить технические подробности)
-	EXTRA_0_ID          = 21, // Unique building for every town type / Специальное строение города(см. аналогичные ID для каждой фракции).
-	EXTRA_1_ID          = 22, // Unique building for every town type / Специальное строение города(см. аналогичные ID для каждой фракции).
-	EXTRA_2_ID          = 23, // Decorative(upon building village, so always present) / Декорация(появляется сразу)
-	HORDE_2_ID          = 24, // Second horde building(if present) / Вторая орда(если есть)
-	HORDE_2_UPG_ID      = 25, // Is being built altogether with HORDE_2_ID / Строится одновременно с HORDE_2_ID.
-	HOLY_GRAIL_ID       = 26, // Постройка Грааля
-	EXTRA_3_ID          = 27, // Decorative(upon building town, so always present) / Декорация(появляется сразу)
-	EXTRA_4_ID          = 28, // Decorative / Декор.
-	EXTRA_5_ID          = 29, // Decorative / Декор.
-	DWELLING_0_ID       = 30, // Lvl. 1 creature dwelling / Жилище существ 1 уровня.
-	DWELLING_1_ID       = 31, // Lvl. 2 creature dwelling / Жилище существ 2 уровня
-	DWELLING_2_ID       = 32, // Lvl. 3 creature dwelling / Жилище существ 3 уровня
-	DWELLING_3_ID       = 33, // Lvl. 4 creature dwelling / Жилище существ 4 уровня
-	DWELLING_4_ID       = 34, // Lvl. 5 creature dwelling / Жилище существ 5 уровня
-	DWELLING_5_ID       = 35, // Lvl. 6 creature dwelling / Жилище существ 6 уровня
-	DWELLING_6_ID       = 36, // Lvl. 7 creature dwelling / Жилище существ 7 уровня
-	DWELLING_0_UPG_ID   = 37, // Lvl. 1 upgraded creature dwelling / Улучшенное жилище существ 1 уровня
-	DWELLING_1_UPG_ID   = 38, // Lvl. 2 upgraded creature dwelling / Улучшенное жилище существ 2 уровня
-	DWELLING_2_UPG_ID   = 39, // Lvl. 3 upgraded creature dwelling / Улучшенное жилище существ 3 уровня
-	DWELLING_3_UPG_ID   = 40, // Lvl. 4 upgraded creature dwelling / Улучшенное жилище существ 4 уровня
-	DWELLING_4_UPG_ID   = 41, // Lvl. 5 upgraded creature dwelling / Улучшенное жилище существ 5 уровня
-	DWELLING_5_UPG_ID   = 42, // Lvl. 6 upgraded creature dwelling / Улучшенное жилище существ 6 уровня
-	DWELLING_6_UPG_ID   = 43, // Lvl. 7 upgraded creature dwelling / Улучшенное жилище существ 7 уровня
-	MAX_BUILDING_TYPE   = 44, // Максимальное количество построек в городе.
+    MAGE_GUILD_ID       = 0,  // Гильдия магов 1 уровня
+    MAGE_GUILD2_ID      = 1,  // Гильдия магов 2 уровня
+    MAGE_GUILD3_ID      = 2,  // Гильдия магов 3 уровня
+    MAGE_GUILD4_ID      = 3,  // Гильдия магов 4 уровня
+    MAGE_GUILD5_ID      = 4,  // Гильдия магов 5 уровня
+    TAVERN_ID           = 5,  // Таверна
+    DOCK_ID             = 6,  // Верфь
+    CASTLE_FORT_ID      = 7,  // Форт
+    CASTLE_CITADEL_ID   = 8,  // Цитадель
+    CASTLE_CASTLE_ID    = 9,  // Замок
+    HALL_VILLAGE_ID     = 10, // Decorative / Декор.
+    HALL_TOWN_ID        = 11, // Decorative / Декор.
+    HALL_CITY_ID        = 12, // Decorative / Декор.
+    HALL_CAPITOL_ID     = 13, // Капитолий.
+    MARKETPLACE_ID      = 14, // Рынок
+    MARKETPLACE_SILO_ID = 15, // Хранилище ресурсов
+    BLACKSMITH_ID       = 16, // Кузница
+    SPECIAL_BUILDING_ID = 17, // Unique building for every town type / Специальное строение города(см. аналогичные ID для каждой фракции).
+    HORDE_ID            = 18, // Орда (увеличивает прирост определенного существа)
+    HORDE_UPG_ID        = 19, // Is being built altogether with HORDE_ID / Строится одновременно с HORDE_ID.
+    DOCK_WITH_BOAT_ID   = 20, // Верфь с кораблём(TODO: выяснить технические подробности)
+    EXTRA_0_ID          = 21, // Unique building for every town type / Специальное строение города(см. аналогичные ID для каждой фракции).
+    EXTRA_1_ID          = 22, // Unique building for every town type / Специальное строение города(см. аналогичные ID для каждой фракции).
+    EXTRA_2_ID          = 23, // Decorative(upon building village, so always present) / Декорация(появляется сразу)
+    HORDE_2_ID          = 24, // Second horde building(if present) / Вторая орда(если есть)
+    HORDE_2_UPG_ID      = 25, // Is being built altogether with HORDE_2_ID / Строится одновременно с HORDE_2_ID.
+    HOLY_GRAIL_ID       = 26, // Постройка Грааля
+    EXTRA_3_ID          = 27, // Decorative(upon building town, so always present) / Декорация(появляется сразу)
+    EXTRA_4_ID          = 28, // Decorative / Декор.
+    EXTRA_5_ID          = 29, // Decorative / Декор.
+    DWELLING_0_ID       = 30, // Lvl. 1 creature dwelling / Жилище существ 1 уровня.
+    DWELLING_1_ID       = 31, // Lvl. 2 creature dwelling / Жилище существ 2 уровня
+    DWELLING_2_ID       = 32, // Lvl. 3 creature dwelling / Жилище существ 3 уровня
+    DWELLING_3_ID       = 33, // Lvl. 4 creature dwelling / Жилище существ 4 уровня
+    DWELLING_4_ID       = 34, // Lvl. 5 creature dwelling / Жилище существ 5 уровня
+    DWELLING_5_ID       = 35, // Lvl. 6 creature dwelling / Жилище существ 6 уровня
+    DWELLING_6_ID       = 36, // Lvl. 7 creature dwelling / Жилище существ 7 уровня
+    DWELLING_0_UPG_ID   = 37, // Lvl. 1 upgraded creature dwelling / Улучшенное жилище существ 1 уровня
+    DWELLING_1_UPG_ID   = 38, // Lvl. 2 upgraded creature dwelling / Улучшенное жилище существ 2 уровня
+    DWELLING_2_UPG_ID   = 39, // Lvl. 3 upgraded creature dwelling / Улучшенное жилище существ 3 уровня
+    DWELLING_3_UPG_ID   = 40, // Lvl. 4 upgraded creature dwelling / Улучшенное жилище существ 4 уровня
+    DWELLING_4_UPG_ID   = 41, // Lvl. 5 upgraded creature dwelling / Улучшенное жилище существ 5 уровня
+    DWELLING_5_UPG_ID   = 42, // Lvl. 6 upgraded creature dwelling / Улучшенное жилище существ 6 уровня
+    DWELLING_6_UPG_ID   = 43, // Lvl. 7 upgraded creature dwelling / Улучшенное жилище существ 7 уровня
+    MAX_BUILDING_TYPE   = 44, // Максимальное количество построек в городе.
 
-	const_village_hall  = 10, // Decorative / Декор.
-	const_town_hall     = 11, // Decorative / Декор.
-	const_city_hall     = 12, // Decorative / Декор.
-	const_capitol_hall  = 13, // Decorative / Декор.
-	const_fort          = 7,  // Форт.
-	const_citadel       = 8,  // Цитадель.
-	const_castle        = 9,  // Замок.
-	const_tavern        = 5,  // Таверна.
-	const_blacksmith    = 16, // Кузница.
-	const_market        = 14, // Рынок.
-	const_resource_silo = 15, // Хранилище ресурсов.
-	const_mage_guild_1  = 0,  // Гильдия магов 1 уровня.
-	const_mage_guild_2  = 1,  // Гильдия магов 2 уровня.
-	const_mage_guild_3  = 2,  // Гильдия магов 3 уровня.
-	const_mage_guild_4  = 3,  // Гильдия магов 4 уровня.
-	const_mage_guild_5  = 4,  // Гильдия магов 5 уровня.
-	const_shipyard      = 6  // Верфь.
+    const_village_hall  = 10, // Decorative / Декор.
+    const_town_hall     = 11, // Decorative / Декор.
+    const_city_hall     = 12, // Decorative / Декор.
+    const_capitol_hall  = 13, // Decorative / Декор.
+    const_fort          = 7,  // Форт.
+    const_citadel       = 8,  // Цитадель.
+    const_castle        = 9,  // Замок.
+    const_tavern        = 5,  // Таверна.
+    const_blacksmith    = 16, // Кузница.
+    const_market        = 14, // Рынок.
+    const_resource_silo = 15, // Хранилище ресурсов.
+    const_mage_guild_1  = 0,  // Гильдия магов 1 уровня.
+    const_mage_guild_2  = 1,  // Гильдия магов 2 уровня.
+    const_mage_guild_3  = 2,  // Гильдия магов 3 уровня.
+    const_mage_guild_4  = 3,  // Гильдия магов 4 уровня.
+    const_mage_guild_5  = 4,  // Гильдия магов 5 уровня.
+    const_shipyard      = 6  // Верфь.
 };
 
 NH3API_FORCEINLINE
@@ -197,27 +197,27 @@ enum TCreatureType : int32_t;
 class town
 {
     public:
-		NH3API_FORCEINLINE
+        NH3API_FORCEINLINE
         town() NH3API_NOEXCEPT
-		NH3API_DELEGATE_DUMMY(town)
+        NH3API_DELEGATE_DUMMY(town)
         { THISCALL_1(void, 0x5BE280, this); }
 
-		NH3API_FORCEINLINE
-		town(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-			: SpellDisabledMask(tag),
-			  cName(tag),
-			  town_army(tag)
-		{}
+        NH3API_FORCEINLINE
+        town(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            : SpellDisabledMask(tag),
+              cName(tag),
+              town_army(tag)
+        {}
 
-		NH3API_FORCEINLINE
-		~town() NH3API_NOEXCEPT
-		{ THISCALL_1(void, 0x4ACDD0, this); }
+        NH3API_FORCEINLINE
+        ~town() NH3API_NOEXCEPT
+        { THISCALL_1(void, 0x4ACDD0, this); }
 
-	public:
-		// Get town location on the map /
-		// Координаты города.
-		type_point get_location() const 
-		{ return type_point(mapX, mapY, mapZ); }
+    public:
+        // Get town location on the map /
+        // Координаты города.
+        type_point get_location() const
+        { return type_point(mapX, mapY, mapZ); }
 
         // Does town has creatures in garrison? /
         // Есть ли в городе гарнизонные войска или герой с войсками?
@@ -249,15 +249,15 @@ class town
         bool buy_building(type_building_id building)
         { return THISCALL_2(bool, 0x5BF7C0, this, building); }
 
-		// Get citadel/castle growth bonus of <creature>. Returns 0 if none /
-		// Бонус прироста существа <creature>. Возвращает 0, если таких построек нет.
-		int32_t get_castle_growth_bonus(TCreatureType creature) const
-		{ return THISCALL_2(int32_t, 0x5BF970, this, creature); }
+        // Get citadel/castle growth bonus of <creature>. Returns 0 if none /
+        // Бонус прироста существа <creature>. Возвращает 0, если таких построек нет.
+        int32_t get_castle_growth_bonus(TCreatureType creature) const
+        { return THISCALL_2(int32_t, 0x5BF970, this, creature); }
 
-		// Get town gold income /
-		// Ежедневный доход в казну от города, в золоте. 
-		int16_t get_gold_income(bool include_silo = true) const
-		{ return THISCALL_2(int16_t, 0x5BFA00, this, include_silo); }
+        // Get town gold income /
+        // Ежедневный доход в казну от города, в золоте.
+        int16_t get_gold_income(bool include_silo = true) const
+        { return THISCALL_2(int16_t, 0x5BFA00, this, include_silo); }
 
         // Can player build building now? /
         // Может ли игрок построить <building> сейчас?
@@ -275,175 +275,175 @@ class town
         { return THISCALL_1(uint64_t, 0x5C1320, this); }
 
         // Fill array <resources> with the cost of the <building> /
-	    // Заполнить массив ресурсов <resources> стоимостью постройки <building>.
+        // Заполнить массив ресурсов <resources> стоимостью постройки <building>.
         void get_build_cost(type_building_id building, build_cost_array_t& resources) const
         { THISCALL_3(void, 0x5C14F0, this, building, resources.data()); }
 
-		// Get <building> cost as pointer to array of 7 ints /
-		// Получить массив ресурсов, необходимый для постройки <building>.
-		const build_cost_array_t& get_build_cost_array(type_building_id building) const
-		{ return *THISCALL_2(const build_cost_array_t*, 0x5C1480, this, building); }
+        // Get <building> cost as pointer to array of 7 ints /
+        // Получить массив ресурсов, необходимый для постройки <building>.
+        const build_cost_array_t& get_build_cost_array(type_building_id building) const
+        { return *THISCALL_2(const build_cost_array_t*, 0x5C1480, this, building); }
 
-		// Is building ever available in town?
-		// Возможно ли построить <building> в городе?
-		bool is_legal_building(type_building_id building) const
-		{ return static_cast<bool>(THISCALL_2(bool32_t, 0x5C16A0, this, building)); }
+        // Is building ever available in town?
+        // Возможно ли построить <building> в городе?
+        bool is_legal_building(type_building_id building) const
+        { return static_cast<bool>(THISCALL_2(bool32_t, 0x5C16A0, this, building)); }
 
-		// Town native terrain /
-		// Родная почва фракции.
-		TTerrainType GetNativeTerrain() const
-		{ return THISCALL_1(TTerrainType, 0x5C1840, this); }
+        // Town native terrain /
+        // Родная почва фракции.
+        TTerrainType GetNativeTerrain() const
+        { return THISCALL_1(TTerrainType, 0x5C1840, this); }
 
-		// Town type(fraction) name /
-		// Название типа(фракции) города.
-		const char* GetTypeName() const
-		{ return THISCALL_1(const char*, 0x5C1850, this); }
+        // Town type(fraction) name /
+        // Название типа(фракции) города.
+        const char* GetTypeName() const
+        { return THISCALL_1(const char*, 0x5C1850, this); }
 
-		// Current town army. Priority is garrison army /
-		// Текущая армия города. Приоритет отдаётся гарнизонной армии.
-		armyGroup& get_army() 
-		{ return *THISCALL_1(armyGroup*, 0x5C1860, this); }
-		
-		// Current town army. Priority is garrison army /
-		// Текущая армия города. Приоритет отдаётся гарнизонной армии.
-		const armyGroup& get_army() const
-		{ return *THISCALL_1(const armyGroup*, 0x5C1860, this); }
+        // Current town army. Priority is garrison army /
+        // Текущая армия города. Приоритет отдаётся гарнизонной армии.
+        armyGroup& get_army()
+        { return *THISCALL_1(armyGroup*, 0x5C1860, this); }
 
-		static type_building_id UpgradedDwellingID(type_building_id id)
-		{ return FASTCALL_1(type_building_id, 0x5C18A0, id); }
+        // Current town army. Priority is garrison army /
+        // Текущая армия города. Приоритет отдаётся гарнизонной армии.
+        const armyGroup& get_army() const
+        { return *THISCALL_1(const armyGroup*, 0x5C1860, this); }
 
-	public:
-		// Town id /
-		// Идентификатор города.
-		// offset: +0x0 = +0,  size = 0x1 = 1
-		int8_t id;
+        static type_building_id UpgradedDwellingID(type_building_id id)
+        { return FASTCALL_1(type_building_id, 0x5C18A0, id); }
 
-		// Player 
-		// Игрок-владелец города
-		// offset: +0x1 = +1,  size = 0x1 = 1
-		int8_t playerOwner;
+    public:
+        // Town id /
+        // Идентификатор города.
+        // offset: +0x0 = +0,  size = 0x1 = 1
+        int8_t id;
 
-		// A building was built during the current turn /
-		// На этом ходу было построено здание
-		// offset: +0x2 = +2,  size: 0x1 = 1
-		bool builtThisTurn;
+        // Player
+        // Игрок-владелец города
+        // offset: +0x1 = +1,  size = 0x1 = 1
+        int8_t playerOwner;
 
-		// AI: Has heroes that threaten the town /
-		// (ИИ) Есть угрожающие герои.
-		// offset: +0x3 = +3,  size: 0x1 = 1
-		bool threatening_heroes;
+        // A building was built during the current turn /
+        // На этом ходу было построено здание
+        // offset: +0x2 = +2,  size: 0x1 = 1
+        bool builtThisTurn;
 
-		// Town type(fraction) /
-		// Тип(фракция) города.
-		// offset: +0x4 = +4,  size = 0x1 = 1
-		int8_t townType;
+        // AI: Has heroes that threaten the town /
+        // (ИИ) Есть угрожающие герои.
+        // offset: +0x3 = +3,  size: 0x1 = 1
+        bool threatening_heroes;
 
-		// Town x coordinate on the map /
-		// X-координата города на карте
-		// offset: +0x5 = +5,  size = 0x1 = 1
-		uint8_t mapX;
+        // Town type(fraction) /
+        // Тип(фракция) города.
+        // offset: +0x4 = +4,  size = 0x1 = 1
+        int8_t townType;
 
-		// Town y coordinate on the map /
-		// Y-координата города на карте
-		// offset: +0x6 = +6,  size = 0x1 = 1
-		uint8_t mapY;
+        // Town x coordinate on the map /
+        // X-координата города на карте
+        // offset: +0x5 = +5,  size = 0x1 = 1
+        uint8_t mapX;
 
-		// Town z coordinate on the map /
-		// Z-координата города на карте
-		// offset: +0x7 = +7,  size = 0x1 = 1
-		uint8_t mapZ;
+        // Town y coordinate on the map /
+        // Y-координата города на карте
+        // offset: +0x6 = +6,  size = 0x1 = 1
+        uint8_t mapY;
 
-		// Boat generated by the town dock x coordinate /
-		// X-координата позиции установки лодки портом города на карте
-		// offset: +0x8 = +8,  size = 0x1 = 1
-		uint8_t boatX;
+        // Town z coordinate on the map /
+        // Z-координата города на карте
+        // offset: +0x7 = +7,  size = 0x1 = 1
+        uint8_t mapZ;
 
-		// Boat generated by the town dock y coordinate /
-		// X-координата позиции установки лодки портом города на карте
-		// offset: +0x9 = +9,  size = 0x1 = 1
-		uint8_t boatY;
+        // Boat generated by the town dock x coordinate /
+        // X-координата позиции установки лодки портом города на карте
+        // offset: +0x8 = +8,  size = 0x1 = 1
+        uint8_t boatX;
 
-		// Garrison hero ID /
-		// ID Героя в гарнизоне(сверху)
-		// offset: +0xC = +12,  size = 0x4 = 4
-		int32_t garrisonHero;
+        // Boat generated by the town dock y coordinate /
+        // X-координата позиции установки лодки портом города на карте
+        // offset: +0x9 = +9,  size = 0x1 = 1
+        uint8_t boatY;
 
-		// Occupying hero ID /
-		// ID Героя-гостя(снизу)
-		// offset: +0x10 = +16,  size = 0x4 = 4
-  		int32_t occupyingHero;
+        // Garrison hero ID /
+        // ID Героя в гарнизоне(сверху)
+        // offset: +0xC = +12,  size = 0x4 = 4
+        int32_t garrisonHero;
 
-		// Mage guild level (0 = no mage guild) /
-		// Уровень гильдии магов(0 = нет гильдии магов)
-		// offset: +0x14 = +20,  size = 0x1 = 1
-		int8_t mageLevel;
+        // Occupying hero ID /
+        // ID Героя-гостя(снизу)
+        // offset: +0x10 = +16,  size = 0x4 = 4
+          int32_t occupyingHero;
 
-		// Creature dwellings populations /
-		// Ненанятые войска в городе
-		// offset: +0x16 = +22,  size = 0x1C = 28
-  		std::array<std::array<int16_t, 7>, 2> population;
+        // Mage guild level (0 = no mage guild) /
+        // Уровень гильдии магов(0 = нет гильдии магов)
+        // offset: +0x14 = +20,  size = 0x1 = 1
+        int8_t mageLevel;
 
-		// Garrison formation is groupped /
-		// Гарнизон(существа сверху) города сгруппирован
-		// offset: +0x32 = +50,  size = 0x1 = 1
-		bool bIsGrouped;
+        // Creature dwellings populations /
+        // Ненанятые войска в городе
+        // offset: +0x16 = +22,  size = 0x1C = 28
+          std::array<std::array<int16_t, 7>, 2> population;
 
-		// Mana vortex(Dungeon) can be used /
-		// Можно ли использовать вихрь маны(Темница)
-		// offset: +0x33 = +51,  size = 0x1 = 1
-		bool ManaVortexFull;
+        // Garrison formation is groupped /
+        // Гарнизон(существа сверху) города сгруппирован
+        // offset: +0x32 = +50,  size = 0x1 = 1
+        bool bIsGrouped;
 
-		// Amount of magic pound(Rampart) resources generated this week /
-		// Количество ресурсов, которые сгенерировал магический пруд(Оплот) на этой неделе.
-		// offset: +0x34 = +52,  size = 0x1 = 1
-		uint8_t pond_amount;
+        // Mana vortex(Dungeon) can be used /
+        // Можно ли использовать вихрь маны(Темница)
+        // offset: +0x33 = +51,  size = 0x1 = 1
+        bool ManaVortexFull;
 
-		// Type of magic pound(Rampart) resource generated this week /
-		// Тип ресурса, который сгенерировал магический пруд(Оплот) на этой неделе.
-		// offset: +0x38 = +56,  size = 0x4 = 4
-		EGameResource pond_resource;
+        // Amount of magic pound(Rampart) resources generated this week /
+        // Количество ресурсов, которые сгенерировал магический пруд(Оплот) на этой неделе.
+        // offset: +0x34 = +52,  size = 0x1 = 1
+        uint8_t pond_amount;
 
-		// Type of creatures summoned by the Portal of summoning(Dungeon) /
-		// Тип существа, который появился в портале призыва(Темница)
-		// offset: +0x3C = +60,  size = 0x4 = 4
- 		TCreatureType summoningType;
+        // Type of magic pound(Rampart) resource generated this week /
+        // Тип ресурса, который сгенерировал магический пруд(Оплот) на этой неделе.
+        // offset: +0x38 = +56,  size = 0x4 = 4
+        EGameResource pond_resource;
 
-		// Amount of creatures summoned by the Portal of summoning(Dungeon) /
-		// Количество существа, который появился в портале призыва(Темница)
-		// offset: +0x40 = +64,  size = 0x2 = 2
-  		int16_t summoningPopulation;
+        // Type of creatures summoned by the Portal of summoning(Dungeon) /
+        // Тип существа, который появился в портале призыва(Темница)
+        // offset: +0x3C = +60,  size = 0x4 = 4
+         TCreatureType summoningType;
 
-		// Spells for each level of mage guild /
-		// Заклинания на каждом из 5 уровней гильдии магов.
-		// offset: +0x44 = +68,  size = 0x78 = 120
-		std::array<std::array<SpellID, 6>, MAX_SPELL_LEVELS> townSpells;
+        // Amount of creatures summoned by the Portal of summoning(Dungeon) /
+        // Количество существа, который появился в портале призыва(Темница)
+        // offset: +0x40 = +64,  size = 0x2 = 2
+          int16_t summoningPopulation;
 
-		// Maximum spells available for each level of mage guild /
-		// Максимальное для каждого уровня гильдии магов количество заклинаний.
-		// offset: +0xBC = +188,  size = 0x5 = 5
-  		std::array<int8_t, MAX_SPELL_LEVELS> maxTownSpellAvailable;
+        // Spells for each level of mage guild /
+        // Заклинания на каждом из 5 уровней гильдии магов.
+        // offset: +0x44 = +68,  size = 0x78 = 120
+        std::array<std::array<SpellID, 6>, MAX_SPELL_LEVELS> townSpells;
 
-		// Town name /
-		// Название города.
-		// offset: +0xC4 = +196,  size = 0x10 = 16
-		exe_string cName;
+        // Maximum spells available for each level of mage guild /
+        // Максимальное для каждого уровня гильдии магов количество заклинаний.
+        // offset: +0xBC = +188,  size = 0x5 = 5
+          std::array<int8_t, MAX_SPELL_LEVELS> maxTownSpellAvailable;
 
-		// Forbidden spells in town /
-		// Запрещённые в городе заклинания
-		// offset: +0xD4 = +212,  size = 0x9 = 9
-  		exe_bitset<MAX_BOOK_SPELLS> SpellDisabledMask;
+        // Town name /
+        // Название города.
+        // offset: +0xC4 = +196,  size = 0x10 = 16
+        exe_string cName;
 
-		// Town garrison army /
-		// Гарнизон города(сверху).
-		// offset: +0xE0 = +224,  size = 0x38 = 56
-  		armyGroup town_army;
+        // Forbidden spells in town /
+        // Запрещённые в городе заклинания
+        // offset: +0xD4 = +212,  size = 0x9 = 9
+          exe_bitset<MAX_BOOK_SPELLS> SpellDisabledMask;
 
-		// Creature dwellings bonuses /
-		// Бонусы к существам.
-		// offset: +0x118 = +280,  size = 0x38 = 56
+        // Town garrison army /
+        // Гарнизон города(сверху).
+        // offset: +0xE0 = +224,  size = 0x38 = 56
+          armyGroup town_army;
+
+        // Creature dwellings bonuses /
+        // Бонусы к существам.
+        // offset: +0x118 = +280,  size = 0x38 = 56
         std::array<std::array<int32_t, 7>, 2> generator_bonus;
 
-		// Visible buildings mask /
+        // Visible buildings mask /
         // Маска построек, которые видно на экране города.
         // offset: +0x150 = +336,  size = 0x8 = 8
         uint64_t populationMask;
@@ -517,7 +517,7 @@ struct TownExtra
     // offset: +0x58 = +88,  size = 0x10 = 16
     exe_string cName;
 
-    // Town fraction(type) / 
+    // Town fraction(type) /
     // Фракция (тип) города.
     // offset: +0x68 = +104,  size = 0x4 = 4
     TTownType townType;
@@ -528,7 +528,7 @@ struct TownExtra
     bool bIsGrouped;
 
 protected:
-	NH3API_MAYBE_UNUSED
+    NH3API_MAYBE_UNUSED
     byte_t gap_6D[3];
 
 public:

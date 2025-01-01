@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
-#include "campaign.hpp" 
+#include "campaign.hpp"
 
 #pragma pack(push, 4)
 // Saved game header /

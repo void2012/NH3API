@@ -18,8 +18,8 @@ const char* get_type_name(const std::type_info& info)
 {
     return info.name();
 }
-#else 
-struct get_type_name_t 
+#else
+struct get_type_name_t
 {
     const char* operator()(const std::type_info& info)
     {

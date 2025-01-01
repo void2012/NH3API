@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
 #include <windef.h> // windef.h is heavy... and only for the sake of RECT
 #include "nh3api_std/exe_vector.hpp"
@@ -87,7 +87,7 @@ struct pathCell : public type_point
 } NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
-enum type_search_type : uint32_t 
+enum type_search_type : uint32_t
 {
     const_normal_search       = 0, //
     const_AI_treasure_search  = 1, //
@@ -126,18 +126,18 @@ struct searchArray
         int32_t get_danger_value(type_point point) const
         { return THISCALL_2(int32_t, 0x42ED30, this, point); }
 
-        void SeedCombatPosition(const army* thisArmy, 
-                                int32_t current_group, 
-                                int32_t limit, 
-                                bool in_placement_phase, 
+        void SeedCombatPosition(const army* thisArmy,
+                                int32_t current_group,
+                                int32_t limit,
+                                bool in_placement_phase,
                                 int32_t base_speed)
         { THISCALL_6(void, 0x4B2B00, this, thisArmy, current_group, limit, in_placement_phase, base_speed); }
 
-        bool FindCombatPath(const army* current_army, 
-                            int32_t current_group, 
-                            int32_t destination, 
-                            int32_t in_placement_phase, 
-                            int32_t limit, 
+        bool FindCombatPath(const army* current_army,
+                            int32_t current_group,
+                            int32_t destination,
+                            int32_t in_placement_phase,
+                            int32_t limit,
                             int32_t base_speed)
         { return THISCALL_7(bool, 0x4B3160, this, current_army, current_group, destination, in_placement_phase, limit, base_speed); }
 
@@ -146,23 +146,23 @@ struct searchArray
 
         const pathCell* getCellData(size_t pos) const
         { return THISCALL_2(pathCell*, 0x4B38F0, this, pos); }
-    
+
         int32_t get_travel_time(const army* current_army, int32_t hex) const
         { return THISCALL_3(int32_t, 0x4B3C80, this, current_army, hex); }
-    
+
         int32_t BuildPath(const hero* current_hero, int32_t limit)
         { return THISCALL_3(int32_t, 0x56A3A0, this, current_hero, limit); }
 
-        void SeedPosition(hero* current_hero, 
-                          type_point start, 
-                          type_point target, 
-                          int32_t maxMobility, 
-                          bool is_boat, 
-                          type_search_type search_type, 
-                          int32_t iCurTempMobility, 
+        void SeedPosition(hero* current_hero,
+                          type_point start,
+                          type_point target,
+                          int32_t maxMobility,
+                          bool is_boat,
+                          type_search_type search_type,
+                          int32_t iCurTempMobility,
                           type_point next_cell)
         { THISCALL_9(void, 0x56B710, this, current_hero, start, target, maxMobility, is_boat, search_type, iCurTempMobility, next_cell); }
-    
+
     public:
         // offset: +0x0 = +0,  size = 0x4 = 4
         uint32_t maxQueueCount;
@@ -225,5 +225,5 @@ struct searchArray
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
-searchArray*& gpSearchArray 
+searchArray*& gpSearchArray
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992D4, searchArray*));

@@ -5,7 +5,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#pragma once 
+#pragma once
 
 #include "exe_streambuf.hpp"
 
@@ -18,5 +18,5 @@ get_type_vftable<Type>()\
 #endif
 
 NH3API_GENERATE_VFTABLE_INSTANCE(exe_streambuf,    0x6456B8)
-NH3API_GENERATE_VFTABLE_INSTANCE(exe_filebuf,      0x645820) 
+NH3API_GENERATE_VFTABLE_INSTANCE(exe_filebuf,      0x645820)
 NH3API_GENERATE_VFTABLE_INSTANCE(exe_strstreambuf, 0x645680)

@@ -17,7 +17,7 @@
 #include "type_traits/type_traits_cxx98.hpp"
 #include <utility>
 
-#if NH3API_CHECK_MSVC 
+#if NH3API_CHECK_MSVC
 #pragma component(mintypeinfo, on)
 #endif
 
@@ -31,9 +31,9 @@ namespace nh3api
 
 template<class T>
 typename add_rvalue_reference<T>::type declval() throw()
-{ static_assert(false, "declval not allowed in an evaluated context"); }  
+{ static_assert(false, "declval not allowed in an evaluated context"); }
 
-namespace tt 
+namespace tt
 {
 namespace details
 {
@@ -129,42 +129,42 @@ struct is_nothrow_move_constructible :
 } // namespace nh3api
 
 #elif NH3API_CHECK_CPP11 // NH3API_VS2010_ONLY
-namespace nh3api 
+namespace nh3api
 {
 using ::std::declval;
-} // namespace nh3api 
+} // namespace nh3api
 #endif
 
 #if NH3API_VS2012_2013 || NH3API_CHECK_CPP11
-namespace nh3api 
+namespace nh3api
 {
 namespace tt
 {
 using ::std::is_move_constructible;
 using ::std::is_trivially_move_constructible;
-using ::std::is_nothrow_move_constructible;   
-using ::std::is_copy_constructible; 
+using ::std::is_nothrow_move_constructible;
+using ::std::is_copy_constructible;
 using ::std::is_nothrow_constructible;
 } // namespace tt
-} // namespace nh3api 
+} // namespace nh3api
 #endif
 
 #if NH3API_CHECK_CPP11
-namespace nh3api 
+namespace nh3api
 {
 namespace tt
 {
 template<class...>
-using void_t = void;    
+using void_t = void;
 
 } // namespace tt
-} // namespace nh3api 
+} // namespace nh3api
 #endif // if NH3API_CHECK_CPP11
 
 
-namespace nh3api 
+namespace nh3api
 {
-namespace tt 
+namespace tt
 {
 #if !defined(__cpp_lib_bounded_array_traits)
 template<class T>
@@ -209,8 +209,8 @@ struct is_bounded_array<const volatile T[N]>
 #else
 using ::std::is_unbounded_array;
 using ::std::is_bounded_array;
-#endif     
-} // namespace tt 
+#endif
+} // namespace tt
 
 template<class T> NH3API_NODISCARD
 NH3API_CONSTEXPR NH3API_MSVC_INTRIN
@@ -235,14 +235,14 @@ namespace tt
 {
 #if NH3API_CHECK_CPP11
 template <class T, class = void>
-struct has_scalar_deleting_destructor 
+struct has_scalar_deleting_destructor
     : false_type {};
 
 template <class T>
-struct has_scalar_deleting_destructor<T, 
+struct has_scalar_deleting_destructor<T,
 decltype((void)declval<T>().scalar_deleting_destructor(declval<uint8_t>()))>
     : true_type {};
-#else 
+#else
 template <typename Type>
 class scalar_deleting_destructor_test
 {
@@ -349,7 +349,7 @@ public:
 static const bool value = details<scalar_deleting_destructor_test<type>::result,
 call_details>::value;
 
-}; 
+};
 
 template <class T, bool = is_class<T>::value>
 struct has_scalar_deleting_destructor_impl
@@ -371,6 +371,6 @@ struct has_scalar_deleting_destructor
 } // namespace tt
 } // namespace nh3api
 
-#if NH3API_CHECK_MSVC 
+#if NH3API_CHECK_MSVC
 #pragma component(mintypeinfo, off)
 #endif

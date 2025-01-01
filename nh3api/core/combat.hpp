@@ -40,7 +40,7 @@ enum type_combat_cursor : int32_t
     const_select_tower_info      = 22 //
 };
 
-enum ECombatAction : int32_t 
+enum ECombatAction : int32_t
 {
     COMBAT_ACTION_NONE = 0,
     COMBAT_ACTION_CAST_SPELL = 1,
@@ -290,7 +290,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             eArcherUpperTower   = 2, //
             kNumArchers         = 3 //
         };
-        
+
         enum
         {
             INVALID_HEX_INDEX            = -1, //
@@ -341,10 +341,10 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             EagleEyeSpellLearned{tag, tag},
             Armies
             {{
-            {tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag}, 
+            {tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag},
             {tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag}
             }},
-            #endif 
+            #endif
             Obstacles(tag)
         {}
 
@@ -352,7 +352,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         ~combatManager() NH3API_NOEXCEPT
         { THISCALL_1(void, 0x4F3FD0, this); }
 
-    public: 
+    public:
         // Hex is valid /
         // Принадлежит ли клетка полю боя?
         static bool ValidHex(int32_t iHex)
@@ -385,10 +385,10 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         { return THISCALL_2(char, 0x465490, this, this_side); }
 
         static TWallTargetId GetTargetWallIndex(int32_t grid_index)
-        { return FASTCALL_1(TWallTargetId, 0x465550, grid_index); } 
+        { return FASTCALL_1(TWallTargetId, 0x465550, grid_index); }
 
         void ResetHitByCreature()
-        { THISCALL_1(void, 0x465BC0, this); } 
+        { THISCALL_1(void, 0x465BC0, this); }
 
         void PlaceObstacle(const TObstacle& obstacle, int32_t id, int32_t hex, hexcell::TAttributes attributes)
         { THISCALL_5(void, 0x466590, this, &obstacle, id, hex, attributes); }
@@ -426,27 +426,27 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         bool InLineOfSight(int32_t sourceIndex, int32_t destIndex) const
         { return THISCALL_3(bool, 0x467420, this, sourceIndex, destIndex); }
 
-        void ShootBallisticMissile(int32_t startX, 
-                                   int32_t startY, 
-                                   int32_t destX, 
-                                   int32_t destY, 
+        void ShootBallisticMissile(int32_t startX,
+                                   int32_t startY,
+                                   int32_t destX,
+                                   int32_t destY,
                                    const CSprite* const missile)
         { THISCALL_6(void, 0x4675E0, this, startX, startY, destX, destY, missile); }
 
-        void ShootAnimatedMissile(int32_t startX, 
-                                  int32_t startY, 
-                                  int32_t destX, 
-                                  int32_t destY, 
-                                  int32_t nSprites, 
-                                  const float* const angles, 
+        void ShootAnimatedMissile(int32_t startX,
+                                  int32_t startY,
+                                  int32_t destX,
+                                  int32_t destY,
+                                  int32_t nSprites,
+                                  const float* const angles,
                                   const char* const* const file_names)
         { THISCALL_8(void, 0x467990, this, startX, startY, destX, destY, nSprites, angles, file_names); }
 
-        void ShootMissile(int32_t startX, 
-                          int32_t startY, 
-                          int32_t destX, 
-                          int32_t destY, 
-                          const float* const angles, 
+        void ShootMissile(int32_t startX,
+                          int32_t startY,
+                          int32_t destX,
+                          int32_t destY,
+                          const float* const angles,
                           const CSprite* const missile)
         { THISCALL_7(void, 0x467E00, this, startX, startY, destX, destY, angles, missile); }
 
@@ -501,19 +501,19 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         void UpdateMouseGrid(int32_t iNewMouseGridIndex, int32_t bAllowDuringAction)
         { THISCALL_3(void, 0x493F10, this, iNewMouseGridIndex, bAllowDuringAction); }
 
-        void DrawFrame(bool update, 
-                       bool bLimitCreatureEffect, 
-                       bool bLimitDraw, 
-                       int32_t iDelay, 
-                       bool bRefreshBackground, 
+        void DrawFrame(bool update,
+                       bool bLimitCreatureEffect,
+                       bool bLimitDraw,
+                       int32_t iDelay,
+                       bool bRefreshBackground,
                        bool bDoDelayTil)
-        { THISCALL_7(void, 0x493FC0, 
-                     this, 
-                     static_cast<bool32_t>(update), 
-                     static_cast<bool32_t>(bLimitCreatureEffect), 
-                     static_cast<bool32_t>(bLimitDraw), 
-                     iDelay, 
-                     static_cast<bool32_t>(bRefreshBackground), 
+        { THISCALL_7(void, 0x493FC0,
+                     this,
+                     static_cast<bool32_t>(update),
+                     static_cast<bool32_t>(bLimitCreatureEffect),
+                     static_cast<bool32_t>(bLimitDraw),
+                     iDelay,
+                     static_cast<bool32_t>(bRefreshBackground),
                      static_cast<bool32_t>(bDoDelayTil)); }
 
         void ComputeMaxExtent()
@@ -521,11 +521,11 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
         void CycleCombatScreen()
         { THISCALL_1(void, 0x495C50, this); }
-            
+
     public:
         NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(combatManager)
 
-    public:	
+    public:
         // offset: +0x38 = +56,  size = 0x4 = 4
         void* netMsgHandlerPause;
         //CNetMsgHandlerPause* netMsgHandlerPause;
@@ -892,7 +892,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
     protected:
         // offset: +0x14030 = +81968,  size = 0x1 = 1
         byte_t gap_14030;
-    
+
     public:
         // offset: +0x14031 = +81969,  size = 0xBB = 187
         std::array<bool, MAX_COMBAT_HEXES> creaturePath;
@@ -901,5 +901,5 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
-combatManager*& gpCombatManager 
+combatManager*& gpCombatManager
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699420, combatManager*));

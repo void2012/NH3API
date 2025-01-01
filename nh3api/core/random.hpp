@@ -69,18 +69,18 @@ struct TPickANumber
 
     public:
         // Lower limit /
-		// Нижний предел.
-		// offset: +0x0 = +0,  size = 0x4 = 4
+        // Нижний предел.
+        // offset: +0x0 = +0,  size = 0x4 = 4
         int32_t Low;
 
         // Available numbers left/
-		// Кол-во оставшихся чисел.
-		// offset: +0x4 = +4,  size = 0x4 = 4
+        // Кол-во оставшихся чисел.
+        // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t Numbersleft;
 
         // Available numbers
-		// Доступные числа.
-		// offset: +0x8 = +8,  size = 0x10 = 16
+        // Доступные числа.
+        // offset: +0x8 = +8,  size = 0x10 = 16
         exe_vector<bool> Available;
 };
 #pragma pack(pop)

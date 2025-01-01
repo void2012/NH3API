@@ -481,7 +481,7 @@ class CDPlay
         // vftable shift: +244
         virtual bool __thiscall AddConnectionEnum(const GUID* a1, void* a2, uint32_t a3, const void* a4, uint32_t a5)
         { return get_vftable(this)->AddConnectionEnum(this, a1, a2, a3, a4, a5); }
-            
+
     public:
         // DirectPlay object capabilites /
         // Информация о возможностях текущего сеанса.
@@ -629,33 +629,33 @@ class CDPlayHeroes : public CDPlayLobby
 
     public:
 
-    // 
-    // 
+    //
+    //
     // offset: +0x60 = +96,  size = 0x8 = 8
     CDPlayMsg dpMsg;
 
-    // 
-    // 
+    //
+    //
     // offset: +0x68 = +104,  size = 0x30 = 48
     exe_deque<CNetMsg*> msgQueue;
 
-    // 
-    // 
+    //
+    //
     // offset: +0x98 = +152,  size = 0x50 = 80
     std::array<char, 80> sLocalIPAddress;
 
-    // 
-    // 
+    //
+    //
     // offset: +0xE8 = +232,  size = 0x4 = 4
     uint32_t confirmId;
 
-    // 
-    // 
+    //
+    //
     // offset: +0xEC = +236,  size = 0x4 = 4
     uint32_t currMessageId;
 
-    // 
-    // 
+    //
+    //
     // offset: +0xF0 = +240,  size = 0x4 = 4
     CNetMsgHandler* m_pNetMsgHandler;
 };

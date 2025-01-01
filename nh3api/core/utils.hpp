@@ -105,12 +105,12 @@ struct padstruct_t
 
         // C++23's std::start_lifetime_as is ideal for such a task,
         // sadly it cannot be implemented in C++11..20 without compiler magic.
-        NH3API_CONSTEXPR NH3API_FORCEINLINE padstruct_t() 
+        NH3API_CONSTEXPR NH3API_FORCEINLINE padstruct_t()
         NH3API_NOEXCEPT_EXPR(nh3api::declval<constructor_type>().operator())
         { constructor_type()(buf); }
 
         NH3API_FORCEINLINE
-        ~padstruct_t() 
+        ~padstruct_t()
         NH3API_NOEXCEPT_EXPR(nh3api::declval<destructor_type>().operator())
         {
             #if NH3API_CHECK_CPP11

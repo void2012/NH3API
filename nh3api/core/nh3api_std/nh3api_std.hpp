@@ -14,7 +14,7 @@
 #include <cstring>
 #include <cstddef>
 
-#ifndef _WIN32 
+#ifndef _WIN32
     #error NH3API targets only windows
 #endif
 
@@ -37,8 +37,8 @@
 #endif
 
 #ifndef NH3API_JOIN_STRING
-	#define NH3API_JOIN_STRING_HELPER(X, Y) X##Y
-	#define NH3API_JOIN_STRING(X, Y) NH3API_JOIN_STRING_HELPER(X, Y)
+    #define NH3API_JOIN_STRING_HELPER(X, Y) X##Y
+    #define NH3API_JOIN_STRING(X, Y) NH3API_JOIN_STRING_HELPER(X, Y)
 #endif
 
 #define NH3API_WRAP_STRINGIFY(X) #X
@@ -57,7 +57,7 @@
 #if defined(_MSC_VER) && !defined(__clang__)
     #ifndef _CPPLIB_VER
         #error NH3API supports only MSVC STL with MSVC
-	#else 
+    #else
         #define NH3API_MSVC_STL (1)
     #endif
     #if defined(_MSC_FULL_VER)
@@ -156,7 +156,7 @@
 
 #if defined(_MSC_VER) && !defined(__clang__)
     #define NH3API_VS2012_2013 ((_MSC_VER == 1700) || (_MSC_VER == 1800))
-#else 
+#else
     #define NH3API_VS2012_2013 (0)
 #endif
 
@@ -168,7 +168,7 @@
 
 #ifndef NH3API_ARGS_DOTS
     #if NH3API_VS2010_ONLY
-        #define NH3API_ARGS_DOTS 
+        #define NH3API_ARGS_DOTS
     #else
         #define NH3API_ARGS_DOTS ...
     #endif
@@ -242,7 +242,7 @@
 #endif
 
 #ifndef NH3API_DEBUG
-    #ifndef NDEBUG 
+    #ifndef NDEBUG
         #define NH3API_DEBUG (1)
     #else
         #define NH3API_DEBUG (0)
@@ -255,25 +255,25 @@
     // to not mess with the linker, so we still need to keep the inline keyword
     // but forceinline is more aggressive and takes more compile time
     #define NH3API_FORCEINLINE inline
-    #define NH3API_FLATTEN 
+    #define NH3API_FLATTEN
     #define NH3API_INLINE_LARGE
 #endif
 
 #ifndef NH3API_DLLEXPORT
     #if NH3API_CHECK_MSVC
         #define NH3API_DLLEXPORT __declspec(dllexport)
-    #else 
+    #else
         #define NH3API_DLLEXPORT __attribute__((__dllexport__))
     #endif
-#endif 
+#endif
 
 #ifndef NH3API_DLLIMPORT
     #if NH3API_CHECK_MSVC
         #define NH3API_DLLIMPORT __declspec(dllimport)
-    #else 
+    #else
         #define NH3API_DLLIMPORT __attribute__((__dllimport__))
     #endif
-#endif 
+#endif
 
 // Compiler-specific pragma wrapper
 #if NH3API_CHECK_MSVC || NH3API_CHECK_CLANG_CL
@@ -300,24 +300,24 @@
 
     #ifndef NH3API_CONSTEXPR_CPP_20
         #ifdef _GLIBCXX20_CONSTEXPR
-            #define NH3API_CONSTEXPR_CPP_20 _GLIBCXX20_CONSTEXPR 
-        #else 
+            #define NH3API_CONSTEXPR_CPP_20 _GLIBCXX20_CONSTEXPR
+        #else
             #define NH3API_CONSTEXPR_CPP_20
         #endif
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_17
         #ifdef _GLIBCXX17_CONSTEXPR
-            #define NH3API_CONSTEXPR_CPP_17 _GLIBCXX17_CONSTEXPR 
-        #else 
+            #define NH3API_CONSTEXPR_CPP_17 _GLIBCXX17_CONSTEXPR
+        #else
             #define NH3API_CONSTEXPR_CPP_17
         #endif
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_14
         #ifdef _GLIBCXX14_CONSTEXPR
-            #define NH3API_CONSTEXPR_CPP_14 _GLIBCXX14_CONSTEXPR 
-        #else 
+            #define NH3API_CONSTEXPR_CPP_14 _GLIBCXX14_CONSTEXPR
+        #else
             #define NH3API_CONSTEXPR_CPP_14
         #endif
     #endif
@@ -334,24 +334,24 @@
     #ifndef NH3API_CONSTEXPR_CPP_20
         #ifdef _LIBCPP_CONSTEXPR_SINCE_CXX20
             #define NH3API_CONSTEXPR_CPP_20 _LIBCPP_CONSTEXPR_SINCE_CXX20
-        #else 
-            #define NH3API_CONSTEXPR_CPP_20 
+        #else
+            #define NH3API_CONSTEXPR_CPP_20
         #endif
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_17
         #ifdef _LIBCPP_CONSTEXPR_SINCE_CXX17
             #define NH3API_CONSTEXPR_CPP_17 _LIBCPP_CONSTEXPR_SINCE_CXX17
-        #else 
-            #define NH3API_CONSTEXPR_CPP_17 
+        #else
+            #define NH3API_CONSTEXPR_CPP_17
         #endif
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_14
         #ifdef _LIBCPP_CONSTEXPR_SINCE_CXX14
             #define NH3API_CONSTEXPR_CPP_14 _LIBCPP_CONSTEXPR_SINCE_CXX14
-        #else 
-            #define NH3API_CONSTEXPR_CPP_14 
+        #else
+            #define NH3API_CONSTEXPR_CPP_14
         #endif
     #endif
 
@@ -365,15 +365,15 @@
     #ifndef NH3API_CONSTEXPR_CPP_20
         #ifdef _CONSTEXPR20
             #define NH3API_CONSTEXPR_CPP_20 _CONSTEXPR20
-        #else 
+        #else
             #define NH3API_CONSTEXPR_CPP_20
         #endif
     #endif
-        
+
     #ifndef NH3API_CONSTEXPR_CPP_17
         #ifdef _CONSTEXPR17
             #define NH3API_CONSTEXPR_CPP_17 _CONSTEXPR17
-        #else 
+        #else
             #define NH3API_CONSTEXPR_CPP_17
         #endif
     #endif
@@ -381,13 +381,13 @@
     #ifndef NH3API_CONSTEXPR_CPP_14
         #ifdef _CONSTEXPR17
             #define NH3API_CONSTEXPR_CPP_14 constexpr
-        #else 
+        #else
             #define NH3API_CONSTEXPR_CPP_14
         #endif
     #endif
 
-#else 
-    #error Unknown STL vendor 
+#else
+    #error Unknown STL vendor
 #endif
 
 #ifndef NH3API_GCC_STL
@@ -422,23 +422,23 @@
     #ifndef NH3API_FORCEINLINE
         #define NH3API_FORCEINLINE __forceinline
     #endif // NH3API_FORCEINLINE
-    
+
     #ifndef NH3API_NOINLINE
         #define NH3API_NOINLINE __declspec(noinline)
     #endif // NH3API_NOINLINE
 
-    #ifndef NH3API_MALLOC 
+    #ifndef NH3API_MALLOC
         #ifdef _VCRT_ALLOCATOR
             #define NH3API_MALLOC(...) _VCRT_ALLOCATOR __declspec(restrict)
-        #else 
+        #else
             #define NH3API_MALLOC(...) __declspec(restrict)
         #endif
     #endif
 
-    #ifndef NH3API_NODISCARD 
+    #ifndef NH3API_NODISCARD
         #ifdef _NODISCARD
             #define NH3API_NODISCARD _NODISCARD
-        #else 
+        #else
             #define NH3API_NODISCARD
         #endif
     #endif
@@ -448,7 +448,7 @@
             #ifdef _HAS_MSVC_ATTRIBUTE
                 #if _HAS_MSVC_ATTRIBUTE(flatten)
                     #define NH3API_FLATTEN [[msvc::flatten]]
-                #else 
+                #else
                     #define NH3API_FLATTEN
                 #endif
             #else
@@ -471,22 +471,22 @@
 
     #ifndef NH3API_FORCEINLINE
         #define NH3API_FORCEINLINE __attribute__((__always_inline__))
-    #endif 
+    #endif
 
     #ifndef NH3API_NOINLINE
         #define NH3API_NOINLINE __attribute__((__noinline__))
     #endif
 
-    #ifndef NH3API_MALLOC 
-        #define NH3API_MALLOC(...) __attribute__((__returns_nonnull__, __malloc__, __alloc_size__(__VA_ARGS__))) 
+    #ifndef NH3API_MALLOC
+        #define NH3API_MALLOC(...) __attribute__((__returns_nonnull__, __malloc__, __alloc_size__(__VA_ARGS__)))
     #endif
 
-    #ifndef NH3API_NODISCARD 
-        #if defined(_LIBCPP_NODISCARD) 
+    #ifndef NH3API_NODISCARD
+        #if defined(_LIBCPP_NODISCARD)
             #define NH3API_NODISCARD _LIBCPP_NODISCARD
         #elif defined(_NODISCARD)
             #define NH3API_NODISCARD _NODISCARD
-        #else 
+        #else
             #define NH3API_NODISCARD
         #endif
     #endif
@@ -511,17 +511,17 @@
     #endif // NH3API_NO_OPT
     #ifndef NH3API_FORCEINLINE
         #define NH3API_FORCEINLINE __attribute__((__always_inline__))
-    #endif 
+    #endif
 
     #ifndef NH3API_NOINLINE
         #define NH3API_NOINLINE __attribute__((__noinline__))
     #endif
 
-    #ifndef NH3API_MALLOC 
-        #define NH3API_MALLOC(...) __attribute__((__returns_nonnull__, __malloc__, __alloc_size__(__VA_ARGS__))) 
+    #ifndef NH3API_MALLOC
+        #define NH3API_MALLOC(...) __attribute__((__returns_nonnull__, __malloc__, __alloc_size__(__VA_ARGS__)))
     #endif
 
-    #ifndef NH3API_NODISCARD 
+    #ifndef NH3API_NODISCARD
         #define NH3API_NODISCARD [[nodiscard]]
     #endif
 
@@ -538,11 +538,11 @@
 
 /*
 // force compiler to treat key warnings as errors
-#if NH3API_CHECK_MSVC 
+#if NH3API_CHECK_MSVC
     #pragma warning(error : 4716) // function must always return
 #elif NH3API_CHECK_MINGW
     #pragma GCC diagnostic error "-Wreturn-type"
-#elif NH3API_CHECK_CLANG || NH3API_CHECK_CLANG_CL 
+#elif NH3API_CHECK_CLANG || NH3API_CHECK_CLANG_CL
     #pragma clang diagnostic error "-Wreturn-type"
 #endif
 */
@@ -562,7 +562,7 @@
 #if NH3API_CHECK_MSVC && !NH3API_CHECK_CLANG_CL
     #if !defined(NH3API_DISABLE_WARNING)
         #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) NH3API_PRAGMA(warning(push)) \
-															  NH3API_PRAGMA(warning(disable : MSVC))
+                                                              NH3API_PRAGMA(warning(disable : MSVC))
 
         #define NH3API_DISABLE_WARNING_END   NH3API_PRAGMA(warning(pop))
         #define NH3API_DISABLE_WARNING
@@ -598,7 +598,7 @@
 #ifndef NH3API_MSVC_INTRIN
     #ifdef _MSVC_INTRINSIC
         #define NH3API_MSVC_INTRIN _MSVC_INTRINSIC
-    #else 
+    #else
         #define NH3API_MSVC_INTRIN
     #endif
 #endif
@@ -691,45 +691,45 @@ typedef uint32_t bool32_t;
 // optimize vftable assign:
 // we change the vftable anyway so for the sake of optimization,
 // we ignore the locally-generated vftable.
-#ifndef NH3API_NO_VFTABLE_ASSIGN 
-    #if NH3API_CHECK_MSVC 
+#ifndef NH3API_NO_VFTABLE_ASSIGN
+    #if NH3API_CHECK_MSVC
         #define NH3API_NO_VFTABLE_ASSIGN __declspec(novtable)
-    #else 
+    #else
         #define NH3API_NO_VFTABLE_ASSIGN
     #endif
 #endif
 
 // see NH3API_NO_VFTABLE_ASSIGN
-#ifndef NH3API_VIRTUAL_CLASS 
-    #if NH3API_CHECK_MSVC 
+#ifndef NH3API_VIRTUAL_CLASS
+    #if NH3API_CHECK_MSVC
         #define NH3API_VIRTUAL_CLASS class __declspec(novtable)
-    #else 
+    #else
         #if __has_attribute(novtable)
             #define NH3API_VIRTUAL_CLASS __attribute__((novtable))
-        #else 
-            #define NH3API_VIRTUAL_CLASS class 
+        #else
+            #define NH3API_VIRTUAL_CLASS class
         #endif
     #endif
 #endif
 
-#ifndef NH3API_CONST 
+#ifndef NH3API_CONST
     #if !NH3API_CHECK_MSVC
         #if __has_attribute(__const__)
             #define NH3API_CONST __attribute__((__const__))
-        #else 
-            #define NH3API_CONST 
+        #else
+            #define NH3API_CONST
         #endif
-    #else 
+    #else
         #define NH3API_CONST
     #endif
 #endif
 
 // see NH3API_NO_VFTABLE_ASSIGN
-#ifndef NH3API_VIRTUAL_STRUCT 
-    #if NH3API_CHECK_MSVC 
+#ifndef NH3API_VIRTUAL_STRUCT
+    #if NH3API_CHECK_MSVC
         #define NH3API_VIRTUAL_STRUCT struct __declspec(novtable)
-    #else 
-        #define NH3API_VIRTUAL_STRUCT struct 
+    #else
+        #define NH3API_VIRTUAL_STRUCT struct
     #endif
 #endif
 
@@ -786,7 +786,7 @@ typedef uint32_t bool32_t;
     #ifndef NH3API_IF_CONSTEXPR
         #if NH3API_CHECK_CPP17
             #define NH3API_IF_CONSTEXPR if constexpr
-        #else 
+        #else
             #define NH3API_IF_CONSTEXPR if
         #endif
     #endif
@@ -806,10 +806,10 @@ typedef uint32_t bool32_t;
             #ifdef __has_attribute
                 #if __has_attribute(unused)
                     #define NH3API_MAYBE_UNUSED __attribute__((unused))
-                #else 
+                #else
                     #define NH3API_MAYBE_UNUSED
-                #endif 
-            #else 
+                #endif
+            #else
                 #define NH3API_MAYBE_UNUSED
             #endif
         #endif
@@ -844,8 +844,8 @@ typedef uint32_t bool32_t;
         #define nullptr NULL
     #endif
 
-	template <bool condition> struct STATIC_ASSERTION_FAILURE;
-	template <> struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
+    template <bool condition> struct STATIC_ASSERTION_FAILURE;
+    template <> struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
 
     #if !defined(NH3API_STATIC_ASSERT)
         //#define NH3API_CONCAT_LINE_FILE "static assertion failed: " __FILE__ " at line: " NH3API_LINE_AS_STRING(__LINE__)
@@ -854,11 +854,11 @@ typedef uint32_t bool32_t;
             = sizeof(STATIC_ASSERTION_FAILURE< (bool)( __VA_ARGS__ ) >) }
     #endif // NH3API_STATIC_ASSERT
 
-    // use MSVC STL _NOEXCEPT 
+    // use MSVC STL _NOEXCEPT
     #if !defined(NH3API_NOEXCEPT)
         #if defined(_NOEXCEPT)
             #define NH3API_NOEXCEPT _NOEXCEPT
-        #else 
+        #else
             #define NH3API_NOEXCEPT throw()
         #endif
     #endif // NH3API_NOEXCEPT
@@ -889,7 +889,7 @@ typedef uint32_t bool32_t;
 #ifndef NH3API_STD_DELEGATING_CONSTRUCTORS
     #if NH3API_CHECK_CPP11
         #define NH3API_STD_DELEGATING_CONSTRUCTORS (1)
-    #else 
+    #else
         #define NH3API_STD_DELEGATING_CONSTRUCTORS (0)
     #endif
 #endif
@@ -911,21 +911,21 @@ typedef uint32_t bool32_t;
     #endif
 #endif
 
-#ifndef NH3API_STD_INLINE_VARIABLES 
+#ifndef NH3API_STD_INLINE_VARIABLES
     #ifdef __cpp_inline_variables
         #define NH3API_STD_INLINE_VARIABLES (1)
-    #else 
+    #else
         #define NH3API_STD_INLINE_VARIABLES (0)
     #endif
 #endif
 
-#ifndef NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT 
-    #if NH3API_CHECK_MSVC 
+#ifndef NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
+    #if NH3API_CHECK_MSVC
         #if _MSC_FULL_VER >= 170051025 // full support since MSVC 2012 November CTP
             #define NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT (1)
-        #else 
+        #else
             #define NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT (0)
-        #endif 
+        #endif
     #elif NH3API_CHECK_CPP11
         #define NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT (1)
     #else
@@ -955,8 +955,8 @@ typedef uint32_t bool32_t;
 
 namespace nh3api
 {
-struct dummy_tag_t 
-{} 
+struct dummy_tag_t
+{}
 // no-op constructor tag, used to optimize low-level manipulations for objects
 const dummy_tag;
 // example:
@@ -968,7 +968,7 @@ const dummy_tag;
 // which is useless because it is overriden in another function anyway
 // with dummy_tag, no default initialization occurs
 
-struct omit_base_vftable_tag_t 
+struct omit_base_vftable_tag_t
 {}
 // omit vftable pointer assign at base
 const omit_base_vftable_tag;
@@ -976,7 +976,7 @@ const omit_base_vftable_tag;
 // NH3API_VIRTUAL_CLASS derived : public base
 // {
 // derived() : base(nh3api::omit_base_vftable_tag)
-// { NH3API_SET_VFTABLE(); } 
+// { NH3API_SET_VFTABLE(); }
 // };
 // derived:
 // assign derived::vftable to this, omit assignment to base in base constructor
@@ -985,16 +985,16 @@ const omit_base_vftable_tag;
 #ifndef NH3API_DELEGATE_DUMMY
     #if NH3API_STD_DELEGATING_CONSTRUCTORS
         #define NH3API_DELEGATE_DUMMY(CLASS_NAME) : CLASS_NAME(nh3api::dummy_tag)
-    #else 
-        #define NH3API_DELEGATE_DUMMY(CLASS_NAME) 
+    #else
+        #define NH3API_DELEGATE_DUMMY(CLASS_NAME)
     #endif
 #endif
 
 #ifndef NH3API_DELEGATE_DUMMY_COMMA
     #if NH3API_STD_DELEGATING_CONSTRUCTORS
         #define NH3API_DELEGATE_DUMMY_COMMA(CLASS_NAME) ,CLASS_NAME(nh3api::dummy_tag)
-    #else 
-        #define NH3API_DELEGATE_DUMMY_COMMA(CLASS_NAME) 
+    #else
+        #define NH3API_DELEGATE_DUMMY_COMMA(CLASS_NAME)
     #endif
 #endif
 
@@ -1025,16 +1025,16 @@ const omit_base_vftable_tag;
     #endif
 #endif
 
-#ifndef NH3API_STD_STRING_VIEW 
+#ifndef NH3API_STD_STRING_VIEW
     #ifdef __cpp_lib_string_view
         #define NH3API_STD_STRING_VIEW (1)
-    #else 
+    #else
         #define NH3API_STD_STRING_VIEW (0)
     #endif
 #endif
 
 // ranges library support for containers
-#ifndef NH3API_STD_RANGES_CONTAINERS 
+#ifndef NH3API_STD_RANGES_CONTAINERS
     #if NH3API_CHECK_CPP20
         #if __has_include(<ranges>)
             #ifdef __cpp_lib_containers_ranges
@@ -1042,14 +1042,14 @@ const omit_base_vftable_tag;
             #endif
         #endif
     #endif
-#endif 
+#endif
 
 #ifndef NH3API_STD_RANGES_CONTAINERS
     #define NH3API_STD_RANGES_CONTAINERS (0)
 #endif
 
 // check if compiler has builtins (MSVC since 2015)
-#ifndef NH3API_HAS_BUILTINS 
+#ifndef NH3API_HAS_BUILTINS
     #ifdef __has_builtin
         #define NH3API_HAS_BUILTINS (1)
     #else
@@ -1065,7 +1065,7 @@ const omit_base_vftable_tag;
     #endif
 #endif
 
-#ifndef NH3API_HAS_BUILTIN_ADDRESSOF 
+#ifndef NH3API_HAS_BUILTIN_ADDRESSOF
     #if NH3API_HAS_BUILTINS
         #if __has_builtin(__builtin_addressof)
             #define NH3API_HAS_BUILTIN_ADDRESSOF (1)
@@ -1082,7 +1082,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_bit_cast)
             #define NH3API_HAS_BUILTIN_BIT_CAST (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_BIT_CAST
@@ -1094,7 +1094,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_strlen)
             #define NH3API_HAS_BUILTIN_STRLEN (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_STRLEN
@@ -1106,7 +1106,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_wcslen)
             #define NH3API_HAS_BUILTIN_WCSLEN (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_WCSLEN
@@ -1118,7 +1118,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_memcmp)
             #define NH3API_HAS_BUILTIN_MEMCMP (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_MEMCMP
@@ -1130,7 +1130,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_wmemcmp)
             #define NH3API_HAS_BUILTIN_WMEMCMP (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_WMEMCMP
@@ -1142,7 +1142,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_memchr)
             #define NH3API_HAS_BUILTIN_MEMCHR (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_MEMCHR
@@ -1154,7 +1154,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_char_memchr)
             #define NH3API_HAS_BUILTIN_CHAR_MEMCHR (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_CHAR_MEMCHR
@@ -1166,7 +1166,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_wmemchr)
             #define NH3API_HAS_BUILTIN_WMEMCHR (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_WMEMCHR
@@ -1178,7 +1178,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_memcpy)
             #define NH3API_HAS_BUILTIN_MEMCPY (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_MEMCPY
@@ -1190,7 +1190,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_memmove)
             #define NH3API_HAS_BUILTIN_MEMMOVE (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_MEMMOVE
@@ -1202,7 +1202,7 @@ const omit_base_vftable_tag;
         #if __has_builtin(__builtin_is_constant_evaluated)
             #define NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED (1)
         #endif
-    #endif  
+    #endif
 #endif
 
 #ifndef NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
@@ -1214,7 +1214,7 @@ const omit_base_vftable_tag;
         #define NH3API_HAS_IS_CONSTANT_EVALUATED (1)
     #elif NH3API_CHECK_MSVC && NH3API_STD_RELAXED_CONSTEXPR
         #define NH3API_HAS_IS_CONSTANT_EVALUATED (1) // hacky soultion for VS 2017
-    #else 
+    #else
         #define NH3API_HAS_IS_CONSTANT_EVALUATED (0)
     #endif
 #endif
@@ -1232,7 +1232,7 @@ const omit_base_vftable_tag;
 #ifndef NH3API_SFINAE_BEGIN
     #if NH3API_STD_MOVE_SEMANTICS
         #define NH3API_SFINAE_BEGIN(...) ,typename std::enable_if<__VA_ARGS__, bool>::type = false
-    #else 
+    #else
         #define NH3API_SFINAE_BEGIN(...)
     #endif
 #endif
@@ -1241,7 +1241,7 @@ const omit_base_vftable_tag;
 #ifndef NH3API_SFINAE_END
     #if !NH3API_STD_MOVE_SEMANTICS
         #define NH3API_SFINAE_END(...) ,typename nh3api::tt::enable_if<__VA_ARGS__, void>::type* = 0
-    #else 
+    #else
         #define NH3API_SFINAE_END(...)
     #endif
 #endif
@@ -1250,10 +1250,10 @@ const omit_base_vftable_tag;
     #if NH3API_STD_MOVE_SEMANTICS
         #ifdef __cpp_concepts
             #define NH3API_REQUIRES(...) > requires(__VA_ARGS__) // concept form is more readable
-        #else 
+        #else
             #define NH3API_REQUIRES(...) ,typename std::enable_if<__VA_ARGS__, bool>::type = false>
         #endif
-    #else 
+    #else
         #define NH3API_REQUIRES(...) >
     #endif
 #endif
@@ -1307,7 +1307,7 @@ const omit_base_vftable_tag;
 #ifndef NH3API_INLINE_OR_EXTERN
     #if NH3API_FLAG_INLINE_HEADERS
         #define NH3API_INLINE_OR_EXTERN inline
-    #else 
+    #else
         #define NH3API_INLINE_OR_EXTERN extern
     #endif
 #endif
@@ -1315,7 +1315,7 @@ const omit_base_vftable_tag;
 #ifndef NH3API_INLINE_OR_EXTERN_INIT
     #if NH3API_FLAG_INLINE_HEADERS
         #define NH3API_INLINE_OR_EXTERN_INIT(...) {__VA_ARGS__}
-    #else 
+    #else
         #define NH3API_INLINE_OR_EXTERN_INIT(...)
     #endif
 #endif
@@ -1326,7 +1326,7 @@ const omit_base_vftable_tag;
             #define NH3API_FLAG_NO_CPP_EXCEPTIONS
         #endif
     #endif
-    #if NH3API_CHECK_MSVC 
+    #if NH3API_CHECK_MSVC
         #if !_HAS_EXCEPTIONS
             #define NH3API_FLAG_NO_CPP_EXCEPTIONS
         #endif
@@ -1334,27 +1334,27 @@ const omit_base_vftable_tag;
 #endif
 
 #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    #ifndef NH3API_TRY 
+    #ifndef NH3API_TRY
         #define NH3API_TRY try
     #endif
 
-    #ifndef NH3API_CATCH 
+    #ifndef NH3API_CATCH
         #define NH3API_CATCH(...) catch(__VA_ARGS__)
     #endif
 
-    #ifndef NH3API_RETHROW 
+    #ifndef NH3API_RETHROW
         #define NH3API_RETHROW throw;
     #endif
-#else 
-    #ifndef NH3API_TRY 
+#else
+    #ifndef NH3API_TRY
         #define NH3API_TRY if (1)
     #endif
 
-    #ifndef NH3API_CATCH 
+    #ifndef NH3API_CATCH
         #define NH3API_CATCH(...) if (0)
     #endif
 
-    #ifndef NH3API_RETHROW 
+    #ifndef NH3API_RETHROW
         #define NH3API_RETHROW ((void)0);
     #endif
 #endif
@@ -1396,13 +1396,13 @@ enum : unsigned char
     #endif // NH3API_FLAG_NO_CPP_EXCEPTIONS
 #endif // NH3API_THROW
 
-#ifndef NH3API_UNREACHABLE 
+#ifndef NH3API_UNREACHABLE
     #ifdef __cpp_lib_unreachable
         #define NH3API_UNREACHABLE()
-    #else 
-        #if NH3API_CHECK_MSVC 
+    #else
+        #if NH3API_CHECK_MSVC
             #define NH3API_UNREACHABLE() __assume(false)
-        #else 
+        #else
             #define NH3API_UNREACHABLE() __builtin_unreachable()
         #endif
     #endif
@@ -1422,12 +1422,12 @@ NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 #if NH3API_HAS_CHECK_INCLUDE
     #if __has_include(<debugapi.h>)
         #include <debugapi.h>
-    #else 
+    #else
         #include <winbase.h>
-    #endif 
-#else 
+    #endif
+#else
     #include <winbase.h>
-#endif 
+#endif
 
 // https://en.cppreference.com/w/cpp/header/debugging
 
@@ -1456,12 +1456,12 @@ NH3API_DISABLE_WARNING_END
 
 
 #ifndef NH3API_IGNORE
-    #if NH3API_CHECK_MSVC 
+    #if NH3API_CHECK_MSVC
         #define NH3API_IGNORE(...) __noop(__VA_ARGS__)
-    #else 
+    #else
         //imlementation by https://ds.me/
 
-        namespace nh3api 
+        namespace nh3api
         {
         inline void ignore() { }
         template <typename T0, typename... T>
@@ -1483,7 +1483,7 @@ NH3API_DISABLE_WARNING_END
         #define NH3API_COMPILER_VERSION_STRING "MSVC v" NH3API_STRINGIFY(_MSC_FULL_VER)
     #elif NH3API_CHECK_MINGW
         #define NH3API_COMPILER_VERSION_STRING "GCC v" NH3API_STRINGIFY(__GNUC__) "." NH3API_STRINGIFY(__GNUC_MINOR__) "." NH3API_STRINGIFY(__GNUC_PATCHLEVEL__)
-    #elif NH3API_CHECK_CLANG 
+    #elif NH3API_CHECK_CLANG
         #define NH3API_COMPILER_VERSION_STRING "Clang v" NH3API_STRINGIFY(__clang_major__) "." NH3API_STRINGIFY(__clang_minor__) "." NH3API_STRINGIFY(__clang_patchlevel__)
     #elif NH3API_CHECK_CLANG_CL
         #define NH3API_COMPILER_VERSION_STRING "Clang-cl v" NH3API_STRINGIFY(__clang_major__) "." NH3API_STRINGIFY(__clang_minor__) "." NH3API_STRINGIFY(__clang_patchlevel__)

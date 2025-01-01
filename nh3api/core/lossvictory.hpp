@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
 #include "resources/resources_include.hpp"
 #include "hero_enums.hpp" // THeroID
@@ -41,7 +41,7 @@ enum ELossConditionType : int8_t
     LOSS_LOSE_HERO = 1, // потерять героя
     LOSS_TIME_EXPIRES = 2, // время вышло
 
-    MAX_LOSS_CONDITIONS = 3 
+    MAX_LOSS_CONDITIONS = 3
 };
 
 class town;
@@ -64,49 +64,49 @@ struct VictoryConditionStruct
 
     public:
         bool applies_to_player(int32_t player) const
-		{ return THISCALL_2(bool, 0x5F1940, this, player); }
+        { return THISCALL_2(bool, 0x5F1940, this, player); }
 
-		bool CheckForArtifactWin()
-		{ return THISCALL_1(bool, 0x5F19B0, this); }
+        bool CheckForArtifactWin()
+        { return THISCALL_1(bool, 0x5F19B0, this); }
 
-		bool CheckForTotalCreatures()
-		{ return THISCALL_1(bool, 0x5F1EB0, this); }
+        bool CheckForTotalCreatures()
+        { return THISCALL_1(bool, 0x5F1EB0, this); }
 
-		bool CheckForTotalResources()
-		{ return THISCALL_1(bool, 0x5F2020, this); }
+        bool CheckForTotalResources()
+        { return THISCALL_1(bool, 0x5F2020, this); }
 
-		bool CheckForUpgradedTown()
-		{ return THISCALL_1(bool, 0x5F20E0, this); }
+        bool CheckForUpgradedTown()
+        { return THISCALL_1(bool, 0x5F20E0, this); }
 
-		bool CheckForGrailBuildingWin()
-		{ return THISCALL_1(bool, 0x5F2290, this); }
+        bool CheckForGrailBuildingWin()
+        { return THISCALL_1(bool, 0x5F2290, this); }
 
-		bool CheckForHeroDefeatWin(int32_t winning_player, const hero* loser)
-		{ return THISCALL_3(bool, 0x5F24A0, this, winning_player, loser); }
+        bool CheckForHeroDefeatWin(int32_t winning_player, const hero* loser)
+        { return THISCALL_3(bool, 0x5F24A0, this, winning_player, loser); }
 
-		bool IsGrailTarget(town* thisTown)
-		{ return THISCALL_2(bool, 0x5F2500, this, thisTown); }
+        bool IsGrailTarget(town* thisTown)
+        { return THISCALL_2(bool, 0x5F2500, this, thisTown); }
 
-		bool IsTownCaptureTarget(town* thisTown)
-		{ return THISCALL_2(bool, 0x5F2600, this, thisTown); }
+        bool IsTownCaptureTarget(town* thisTown)
+        { return THISCALL_2(bool, 0x5F2600, this, thisTown); }
 
-		bool CheckForTownCaptureWin()
-		{ return THISCALL_1(bool, 0x5F2640, this); }
+        bool CheckForTownCaptureWin()
+        { return THISCALL_1(bool, 0x5F2640, this); }
 
-		bool CheckForDefeatedMonsterWin(const hero* thisHero, type_point monster_loc)
-		{ return THISCALL_3(bool, 0x5F2730, this, thisHero, monster_loc); }
+        bool CheckForDefeatedMonsterWin(const hero* thisHero, type_point monster_loc)
+        { return THISCALL_3(bool, 0x5F2730, this, thisHero, monster_loc); }
 
-		bool CheckForFlaggedGeneratorWin()
-		{ return THISCALL_1(bool, 0x5F29A0, this); }
+        bool CheckForFlaggedGeneratorWin()
+        { return THISCALL_1(bool, 0x5F29A0, this); }
 
-		bool CheckForFlaggedMineWin()
-		{ return THISCALL_1(bool, 0x5F2AC0, this); }
+        bool CheckForFlaggedMineWin()
+        { return THISCALL_1(bool, 0x5F2AC0, this); }
 
-		bool CheckForTimeSurvival()
-		{ return THISCALL_1(bool, 0x5F2BB0, this); }
+        bool CheckForTimeSurvival()
+        { return THISCALL_1(bool, 0x5F2BB0, this); }
 
-		bool CheckForArtifactTransportWin(const hero* thisHero, type_point town_loc)
-		{ return THISCALL_3(bool, 0x5F2C00, this, thisHero, town_loc); }
+        bool CheckForArtifactTransportWin(const hero* thisHero, type_point town_loc)
+        { return THISCALL_3(bool, 0x5F2C00, this, thisHero, town_loc); }
 
     public:
         // offset: +0x0 = +0,  size = 0x1 = 1
@@ -191,7 +191,7 @@ struct LossConditionStruct
         NH3API_FORCEINLINE
         LossConditionStruct() NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY(LossConditionStruct)
-		{ THISCALL_1(void, 0x45B7A0, this); }
+        { THISCALL_1(void, 0x45B7A0, this); }
 
         NH3API_FORCEINLINE
         LossConditionStruct(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
@@ -199,16 +199,16 @@ struct LossConditionStruct
 
     public:
         bool CheckForDefeatedHeroLoss(const hero* loser)
-		{ return THISCALL_2(bool, 0x5F2DE0, this, loser); }
+        { return THISCALL_2(bool, 0x5F2DE0, this, loser); }
 
-		bool HeroKilled(const hero* loser)
-		{ return THISCALL_2(bool, 0x5F31B0, this, loser); }
+        bool HeroKilled(const hero* loser)
+        { return THISCALL_2(bool, 0x5F31B0, this, loser); }
 
-		bool CheckForDefeatedTownLoss(int32_t old_owner, const town* lost_town)
-		{ return THISCALL_3(char, 0x5F31E0, this, old_owner, lost_town); }
+        bool CheckForDefeatedTownLoss(int32_t old_owner, const town* lost_town)
+        { return THISCALL_3(char, 0x5F31E0, this, old_owner, lost_town); }
 
-		bool CheckForTimeLimitExpired()
-		{ return THISCALL_1(bool, 0x5F32C0, this); }
+        bool CheckForTimeLimitExpired()
+        { return THISCALL_1(bool, 0x5F32C0, this); }
 
     public:
         // offset: +0x0 = +0,  size = 0x1 = 1

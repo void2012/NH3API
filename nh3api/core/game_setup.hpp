@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
 #include "player_enums.hpp" // EPlayerColor
 #include "hero_enums.hpp" // THero
@@ -12,7 +12,7 @@
 
 // Game difficulty /
 // Игровая сложность.
-enum EGameDifficulty : int8_t 
+enum EGameDifficulty : int8_t
 {
     DIFFICULTY_EASY = 0,
     DIFFICULTY_NORMAL = 1,

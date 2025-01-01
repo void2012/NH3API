@@ -17,7 +17,7 @@
 #include "remove_xyz.hpp"
 #include "add_xyz.hpp"
 
-#if NH3API_CHECK_MSVC 
+#if NH3API_CHECK_MSVC
 #pragma component(mintypeinfo, on)
 #endif
 
@@ -27,7 +27,7 @@
 
 namespace nh3api
 {
-namespace tt 
+namespace tt
 {
 template<class From, class To> struct copy_cv
 {
@@ -36,14 +36,14 @@ private:
 public:
     typedef typename conditional<is_volatile<From>::value, typename add_volatile<CT>::type, CT>::type type;
 };
-} // namespace tt 
+} // namespace tt
 } // namespace nh3api
 
 #if NH3API_TYPE_TRAITS_IMPL
 
 namespace nh3api
 {
-namespace tt 
+namespace tt
 {
 template <typename T> struct add_pointer
 { typedef T* type; };
@@ -151,8 +151,8 @@ template<typename EnumType>
 struct enum_underlying_impl<EnumType, true> // this is UGLY and certainly will slow down the compile time.
                                             // but this will make std::underlying_type work in VS2005...
 {
-    typedef typename 
-			conditional<NH3API_ENUM_ST(signed __int8), typename
+    typedef typename
+            conditional<NH3API_ENUM_ST(signed __int8), typename
             conditional<NH3API_ENUM_ST(unsigned __int8), typename
             conditional<NH3API_ENUM_ST(signed __int16), typename
             conditional<NH3API_ENUM_ST(unsigned __int16), typename
@@ -189,8 +189,8 @@ struct make_signed
     // 1) if T is enum, convert to signed underlying type.
     // 2) also copy cv qualifiers
     typedef typename copy_cv<typename conditional<is_enum<T>::value,
-									   typename enum_underlying_impl<no_cv_t, true>::type,
-									   typename corresp_signed_type<no_cv_t>::type>::type, T>::type type;
+                                       typename enum_underlying_impl<no_cv_t, true>::type,
+                                       typename corresp_signed_type<no_cv_t>::type>::type, T>::type type;
 };
 
 template<typename T>
@@ -200,8 +200,8 @@ struct make_unsigned
     // 1) if T is enum, convert to signed underlying type.
     // 2) also copy cv qualifiers
     typedef typename copy_cv<typename conditional<is_enum<T>::value,
-									   typename enum_underlying_impl<no_cv_t, true>::type,
-									   typename corresp_unsigned_type<no_cv_t>::type>::type, T>::type type;
+                                       typename enum_underlying_impl<no_cv_t, true>::type,
+                                       typename corresp_unsigned_type<no_cv_t>::type>::type, T>::type type;
 };
 
 #define NH3API_MAKE_SIGNED_SPEC(TYPE) template <> struct make_signed<TYPE> { typedef signed TYPE type; };
@@ -221,9 +221,9 @@ NH3API_MAKE_UNSIGNED_SPEC(const volatile char)
 #undef NH3API_MAKE_UNSIGNED_SPEC
 } // namespace details
 
-template <class T> struct is_signed 
+template <class T> struct is_signed
 : public integral_constant<bool, details::is_signed_impl<T>::value> {};
-template <class T> struct is_unsigned 
+template <class T> struct is_unsigned
 : public integral_constant<bool, details::is_unsigned_impl<T>::value> {};
 
 template <class T>
@@ -248,18 +248,18 @@ template<class T>
 struct underlying_type
 {
 private:
-	static const bool is_enum_value = is_enum<T>::value;
+    static const bool is_enum_value = is_enum<T>::value;
 public:
-	typedef typename copy_cv<typename details::enum_underlying_impl<T, is_enum_value>::type, T>::type type;
+    typedef typename copy_cv<typename details::enum_underlying_impl<T, is_enum_value>::type, T>::type type;
 };
 
 } // namespace tt
 } // namespace nh3api
 
-#else 
-namespace nh3api 
+#else
+namespace nh3api
 {
-namespace tt 
+namespace tt
 {
 using ::std::add_pointer;
 using ::std::is_signed;
@@ -268,9 +268,9 @@ using ::std::make_signed;
 using ::std::make_unsigned;
 using ::std::underlying_type;
 } // namespace tt
-} // namespace nh3api 
-#endif 
+} // namespace nh3api
+#endif
 
-#if NH3API_CHECK_MSVC 
+#if NH3API_CHECK_MSVC
 #pragma component(mintypeinfo, off)
 #endif

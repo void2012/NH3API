@@ -7,6 +7,6 @@
 #include "spells.hpp"
 
 #ifndef NH3API_FLAG_INLINE_HEADERS
-std::array<TSpellTraits, MAX_SPELLS>& akSpellTraits 
+std::array<TSpellTraits, MAX_SPELLS>& akSpellTraits
 = get_global_var_ref(0x6854A0, std::array<TSpellTraits, MAX_SPELLS>);
 #endif

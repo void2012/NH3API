@@ -5,13 +5,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
 #include "core/nh3api_std/exe_string.hpp"
 
 namespace
 {
-    
+
 NH3API_CONSTEXPR bool impl_isalpha(const char c) NH3API_NOEXCEPT
 {
     const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -46,14 +46,14 @@ struct TCheatCode
         char symbol = ' ';
         char curr = ' ';
         int i = 0;
-        
-        while( true ) 
+
+        while( true )
         {
             #if NH3API_CHECK_CPP14
-			codeLength = nh3api::strlen_constexpr<char>(_code); 
-			#else 
-			codeLength = nh3api::str_func_chooser<char>::_strlen(_code);
-			#endif
+            codeLength = nh3api::strlen_constexpr<char>(_code);
+            #else
+            codeLength = nh3api::str_func_chooser<char>::_strlen(_code);
+            #endif
             minLength = std::min<size_t>(codeLength, 199);
             if (minLength <= i)
                 break;
@@ -74,14 +74,14 @@ struct TCheatCode
     }
 
     NH3API_CONSTEXPR_CPP_14
-	int32_t compare(const char* arg) const
-    { 
+    int32_t compare(const char* arg) const
+    {
     #if NH3API_CHECK_CPP14
-        return nh3api::memcmp_constexpr<char>(code, arg, sizeof(code)); 
-    #else 
+        return nh3api::memcmp_constexpr<char>(code, arg, sizeof(code));
+    #else
         return nh3api::str_func_chooser<char>::_memcmp(left, right, count);
     #endif
-        
+
     }
 };
 

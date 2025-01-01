@@ -49,7 +49,7 @@ public:
             _Pbs->set(_Off, _X);
             return (*this);
         }
-        
+
         NH3API_CONSTEXPR reference& operator=(const reference& _Bs) NH3API_NOEXCEPT
         {
             _Pbs->set(_Off, bool(_Bs));
@@ -113,10 +113,10 @@ public:
     }
 
     template<typename _StringType>
-    exe_bitset(const _StringType& _S, 
+    exe_bitset(const _StringType& _S,
                size_t _P = 0,
-               size_t _L = _StringType::npos, 
-               typename _StringType::value_type _zero = typename _StringType::value_type('0'), 
+               size_t _L = _StringType::npos,
+               typename _StringType::value_type _zero = typename _StringType::value_type('0'),
                typename _StringType::value_type _one = typename _StringType::value_type('1') )
     {
         size_t _I;
@@ -281,13 +281,13 @@ public:
         return (_V);
     }
     */
-    
+
     NH3API_CONSTEXPR size_t count() const NH3API_NOEXCEPT
     {
         size_t _V = 0;
-        for (size_t _I = 0; _I < _Words + 1; ++_I) 
+        for (size_t _I = 0; _I < _Words + 1; ++_I)
             _V += bitpopcnt(_A[_I]);
-        
+
         return _V;
     }
 

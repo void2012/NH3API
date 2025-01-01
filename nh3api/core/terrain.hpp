@@ -10,9 +10,9 @@
 
 // Terrain type /
 // Тип почвы.
-enum TTerrainType : int32_t 
+enum TTerrainType : int32_t
 {
-    eTerrainNone         = -1, 
+    eTerrainNone         = -1,
     eTerrainDirt         = 0, // Грязь
     eTerrainSand         = 1, // Песок
     eTerrainGrass        = 2, // Трава
@@ -74,7 +74,7 @@ enum TAdventureObjectType : int32_t
     OBJECT_MONOLITH_ONE_WAY_ENTRANCE   = 43, // Монолит входа
     OBJECT_MONOLITH_ONE_WAY_EXIT       = 44, // Монолит выхода
     OBJECT_MONOLITH_TWO_WAY            = 45, // Двусторонний монолит
-    OBJECT_MAGIC_PLAINS1               = 46, // 
+    OBJECT_MAGIC_PLAINS1               = 46, //
     OBJECT_SCHOOL_OF_MAGIC             = 47, // Школа магии
     OBJECT_MAGIC_SPRING                = 48, // Магический пруд
     OBJECT_MAGIC_WELL                  = 49, // Колодец
@@ -88,15 +88,15 @@ enum TAdventureObjectType : int32_t
     OBJECT_OBELISK                     = 57, // Обелис
     OBJECT_REDWOOD_OBSERVATORY         = 58, // Обсерватория красного дерева
     OBJECT_OCEAN_BOTTLE                = 59, // Морская бутылка
-    OBJECT_PILLAR_OF_FIRE              = 60, // 
-    OBJECT_STAR_AXIS                   = 61, // 
+    OBJECT_PILLAR_OF_FIRE              = 60, //
+    OBJECT_STAR_AXIS                   = 61, //
     OBJECT_PRISON                      = 62, // Тюрьма
     OBJECT_PYRAMID                     = 63, // Пирамида
-    OBJECT_RALLY_FLAG                  = 64, // 
+    OBJECT_RALLY_FLAG                  = 64, //
     OBJECT_RANDOM_ART                  = 65, // Случайный артефакт
     OBJECT_RANDOM_TREASURE_ART         = 66, // Случайный артефакт-сокровище
     OBJECT_RANDOM_MINOR_ART            = 67, // Случайный малый артефакт
-    OBJECT_RANDOM_MAJOR_ART            = 68, // 
+    OBJECT_RANDOM_MAJOR_ART            = 68, //
     OBJECT_RANDOM_RELIC_ART            = 69, // Случайный артефакт-реликвия
     OBJECT_RANDOM_HERO                 = 70, // Случайный герой
     OBJECT_RANDOM_MONSTER              = 71, // Случайный монстр
@@ -104,23 +104,23 @@ enum TAdventureObjectType : int32_t
     OBJECT_RANDOM_MONSTER_L2           = 73, // Случайный монстр 2 уровня
     OBJECT_RANDOM_MONSTER_L3           = 74, // Случайный монстр 3 уровня
     OBJECT_RANDOM_MONSTER_L4           = 75, // Случайный монстр 4 уровня
-    OBJECT_RANDOM_RESOURCE             = 76, // 
-    OBJECT_RANDOM_TOWN                 = 77, // 
-    OBJECT_REFUGEE_CAMP                = 78, // 
-    OBJECT_RESOURCE                    = 79, // 
-    OBJECT_SANCTUARY                   = 80, // 
-    OBJECT_SCHOLAR                     = 81, // 
-    OBJECT_SEA_CHEST                   = 82, // 
-    OBJECT_SEER_HUT                    = 83, // 
-    OBJECT_CRYPT                       = 84, // 
-    OBJECT_SHIPWRECK                   = 85, // 
-    OBJECT_SHIPWRECK_SURVIVOR          = 86, // 
-    OBJECT_SHIPYARD                    = 87, // 
-    OBJECT_SHRINE_OF_MAGIC_INCANTATION = 88, // 
-    OBJECT_SHRINE_OF_MAGIC_GESTURE     = 89, // 
-    OBJECT_SHRINE_OF_MAGIC_THOUGHT     = 90, // 
-    OBJECT_SIGN                        = 91, // 
-    OBJECT_SIRENS                      = 92, // 
+    OBJECT_RANDOM_RESOURCE             = 76, //
+    OBJECT_RANDOM_TOWN                 = 77, //
+    OBJECT_REFUGEE_CAMP                = 78, //
+    OBJECT_RESOURCE                    = 79, //
+    OBJECT_SANCTUARY                   = 80, //
+    OBJECT_SCHOLAR                     = 81, //
+    OBJECT_SEA_CHEST                   = 82, //
+    OBJECT_SEER_HUT                    = 83, //
+    OBJECT_CRYPT                       = 84, //
+    OBJECT_SHIPWRECK                   = 85, //
+    OBJECT_SHIPWRECK_SURVIVOR          = 86, //
+    OBJECT_SHIPYARD                    = 87, //
+    OBJECT_SHRINE_OF_MAGIC_INCANTATION = 88, //
+    OBJECT_SHRINE_OF_MAGIC_GESTURE     = 89, //
+    OBJECT_SHRINE_OF_MAGIC_THOUGHT     = 90, //
+    OBJECT_SIGN                        = 91, //
+    OBJECT_SIRENS                      = 92, //
     OBJECT_SPELL_SCROLL                = 93,
     OBJECT_STABLES                     = 94,
     OBJECT_TAVERN                      = 95,
@@ -308,10 +308,10 @@ enum TTownType : int32_t
     eTownStronghold = 6,  // Цитадель
     eTownFortress   = 7,  // Крепость
     eTownConflux    = 8,  // Сопряжение
-	kNumTownsRoE    = 8,  // Количество городов в RoE
-	kNumTownsAB     = 9,  // Количество городов в AB
-	kNumTownsSoD    = kNumTownsAB, // Количество городов в SoD
-	kNumTowns       = kNumTownsSoD // Количество городов в SoD
+    kNumTownsRoE    = 8,  // Количество городов в RoE
+    kNumTownsAB     = 9,  // Количество городов в AB
+    kNumTownsSoD    = kNumTownsAB, // Количество городов в SoD
+    kNumTowns       = kNumTownsSoD // Количество городов в SoD
 };
 
 // Map point: X, Y, Z coordinates /
@@ -358,13 +358,13 @@ class type_point
 
         #if NH3API_HAS_BUILTIN_BIT_CAST
         NH3API_CONSTEXPR
-        #endif 
+        #endif
         type_point& set(uint32_t data)
         {
             *this = nh3api::bit_cast<type_point>(data);
             return *this;
         }
-        
+
         NH3API_CONSTEXPR
         type_point& setX(int8_t X)
         { x = X; return *this; }
@@ -382,7 +382,7 @@ class type_point
         NH3API_CONSTEXPR
         int16_t getX() const
         { return x; }
-        
+
         NH3API_CONSTEXPR
         int16_t getY() const
         { return y; }
@@ -393,7 +393,7 @@ class type_point
 
         #if NH3API_HAS_BUILTIN_BIT_CAST
         NH3API_CONSTEXPR
-        #endif 
+        #endif
         // return the underlying data
         uint32_t to_uint() const
         { return nh3api::bit_cast<uint32_t>(*this); }
@@ -466,7 +466,7 @@ struct TPoint
             left += right;
             return left;
         }
-        
+
         NH3API_FORCEINLINE NH3API_CONSTEXPR
         friend TPoint operator-(TPoint left, const TPoint& right)
         {
@@ -535,5 +535,5 @@ std::array<ObjectProps, MAX_OBJECTS>& object_properties
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6916E8, std::array<ObjectProps, MAX_OBJECTS>));
 
 NH3API_INLINE_OR_EXTERN
-const std::array<tilePoint, 8>& normalDirTable 
+const std::array<tilePoint, 8>& normalDirTable
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678150, const std::array<tilePoint, 8>));

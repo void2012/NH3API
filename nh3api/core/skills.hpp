@@ -93,7 +93,7 @@ struct TSSkillTraits
 NH3API_INLINE_OR_EXTERN
 // Secondary Skill traits table. Filled by game from "SSTRAITS.TXT" /
 // Таблица свойств вторичных навыков. Заполняется игрой из файла "SSTRAITS.TXT"
-std::array<TSSkillTraits, MAX_SECONDARY_SKILLS>& akSSkillTraits 
+std::array<TSSkillTraits, MAX_SECONDARY_SKILLS>& akSSkillTraits
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698D88, std::array<TSSkillTraits, MAX_SECONDARY_SKILLS>));
 
 NH3API_INLINE_OR_EXTERN

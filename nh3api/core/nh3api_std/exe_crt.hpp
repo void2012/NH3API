@@ -15,9 +15,9 @@ NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 typedef void (__cdecl* exe_PHNDLR)(int32_t);
 typedef void (__cdecl* exe_new_handler)();
 typedef void (__cdecl* exe_se_translator)(uint32_t, EXCEPTION_POINTERS*);
-typedef void(__cdecl* exe_atexit_func_t)(void);
-typedef void(__cdecl* exe_beginthread_func_t)(void);
-typedef uint32_t(__stdcall* exe_beginthreadex_func_t)(void);
+typedef void (__cdecl* exe_atexit_func_t)(void);
+typedef void (__cdecl* exe_beginthread_func_t)(void);
+typedef uint32_t (__stdcall* exe_beginthreadex_func_t)(void);
 
 NH3API_FORCEINLINE
 // address: 0x6193EA
@@ -199,7 +199,7 @@ public:
     // offset: +0x54 = +84,  size = 0x4 = 4
     void* _tpxcptinfoptrs;
 
-    // Floating point exception code 
+    // Floating point exception code
     // offset: +0x58 = +88,  size = 0x4 = 4
     int32_t _tfpecode;
 
@@ -208,23 +208,23 @@ protected:
     uint32_t _NLG_dwCode;
 public:
 
-    // Pointer to terminate() function 
+    // Pointer to terminate() function
     // offset: +0x60 = +96,  size = 0x4 = 4
     void (__cdecl *_terminate)();
 
-    // Pointer to unexpected() function 
+    // Pointer to unexpected() function
     // offset: +0x64 = +100,  size = 0x4 = 4
     void* _unexpected;
 
-    // Pointer to SE-translator function 
+    // Pointer to SE-translator function
     // offset: +0x68 = +104,  size = 0x4 = 4
     exe_se_translator _translator;
 
-    // Current exception object 
+    // Current exception object
     // offset: +0x6C = +108,  size = 0x4 = 4
     void* _curexception;
 
-    // Current exception context 
+    // Current exception context
     // offset: +0x70 = +112,  size = 0x4 = 4
     void* _curcontext;
 
@@ -246,7 +246,7 @@ exe_new_handler exe_set_new_handler(exe_new_handler handler)
     return old_handler;
 }
 
-NH3API_FORCEINLINE 
+NH3API_FORCEINLINE
 exe_se_translator exe_set_se_translator(exe_tiddata* curr, exe_se_translator translator)
 {
     exe_se_translator old_translator = curr->_translator;

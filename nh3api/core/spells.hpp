@@ -128,7 +128,7 @@ enum SpellID : int32_t
 
 };
 
-enum TSpellEffectID : int32_t 
+enum TSpellEffectID : int32_t
 {
     eSpellEffectNone                  = -1, //
     eSpellEffectPrayer                = 0, //

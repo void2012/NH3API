@@ -18,11 +18,11 @@
 // anything about the type except its size.
 
 // 8 bits
-typedef uint8_t  _BYTE; 
+typedef uint8_t  _BYTE;
 // 16 bits
-typedef uint16_t _WORD; 
+typedef uint16_t _WORD;
 // 32 bits
-typedef uint32_t _DWORD; 
+typedef uint32_t _DWORD;
 // 64 bits
 typedef uint64_t _QWORD;
 // 128 bits SSE2
@@ -146,7 +146,7 @@ bool is_mul_ok(T count, T elsize) NH3API_NOEXCEPT
 
 // multiplication that saturates (yields the biggest value) instead of overflowing
 // such a construct is useful in "operator new[]"
-template<class T> 
+template<class T>
 NH3API_IDA_INTRIN
 bool saturated_mul(T count, T elsize) NH3API_NOEXCEPT
 { return is_mul_ok(count, elsize) ? count * elsize : T(-1); }
@@ -200,7 +200,7 @@ NH3API_IDA_INTRIN int64_t __SPAIR64__(int32_t  high, int32_t  low) NH3API_NOEXCE
 #undef CHECK_T_CASSERT
 
 // rotate left
-template<class T> NH3API_IDA_INTRIN 
+template<class T> NH3API_IDA_INTRIN
 T __ROL__(T value, size_t count) NH3API_NOEXCEPT
 {
     CASSERT(nh3api::tt::is_integral<T>::value);
@@ -212,7 +212,7 @@ T __ROL__(T value, size_t count) NH3API_NOEXCEPT
         high &= ~((T(-1) << count));
     value <<= count;
     value |= high;
-    
+
     return value;
 }
 
@@ -251,9 +251,9 @@ int8_t __MKCSHL__(T value, uint32_t count) NH3API_NOEXCEPT
 // carry flag of right shift
 template<class T> NH3API_IDA_INTRIN
 int8_t __MKCSHR__(T value, uint32_t count) NH3API_NOEXCEPT
-{ 
+{
     CASSERT(nh3api::tt::is_integral<T>::value);
-    return (value >> (count-1)) & 1; 
+    return (value >> (count-1)) & 1;
 }
 
 // sign flag
@@ -278,7 +278,7 @@ int8_t __SETS__(T x) NH3API_NOEXCEPT
         default:
             return 0;
             break;
-    }      
+    }
 }
 
 // overflow flag of subtraction (x-y)
@@ -342,7 +342,7 @@ int8_t __CFSUB__(T x, U y) NH3API_NOEXCEPT
         default:
             return 0;
             break;
-    }      
+    }
 }
 
 // carry flag of addition (x+y)
@@ -368,7 +368,7 @@ int8_t __CFADD__(T x, U y) NH3API_NOEXCEPT
         default:
             return 0;
             break;
-    }   
+    }
 
 }
 

@@ -53,7 +53,7 @@ class advManager : public baseManager
         // Находится ли точка на экране (x, y) внутри части интерфейса карты?
         int32_t InMapArea(int32_t x, int32_t y) const
         { return THISCALL_3(int32_t, 0x407A20, this, x, y); }
-         
+
         // Get mouse adventure map cell coordinate /
         // Координата клетки карты, над которой наведена мышь.
         type_point get_mouse_map_point() const
@@ -70,10 +70,10 @@ class advManager : public baseManager
         // Обновить весь экран.
         void RedrawAdvScreen(bool bUpdate)
         { THISCALL_3(void, 0x417380, this, bUpdate, false); }
-        
+
         void UpdateScreen()
         { THISCALL_3(void, 0x40F1D0, this, false, false); }
-        
+
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
         NewmapCell* GetCell(type_point point)
@@ -91,21 +91,21 @@ class advManager : public baseManager
             else
                 return this->map->cellData;
             */
-            
+
         }
 
-        void UpdateRadar(type_point origin, 
-                         bool updateFlag, 
-                         bool bPartialUpdate, 
-                         bool view_mines, 
-                         bool view_heros, 
+        void UpdateRadar(type_point origin,
+                         bool updateFlag,
+                         bool bPartialUpdate,
+                         bool view_mines,
+                         bool view_heros,
                          bool view_towns)
         { THISCALL_7(void, 0x412BA0, this, origin, updateFlag, bPartialUpdate, view_mines, view_heros, view_towns); }
 
-        void UpdateRadar(bool updateFlag, 
-                         bool bPartialUpdate, 
-                         bool view_mines, 
-                         bool view_heroes, 
+        void UpdateRadar(bool updateFlag,
+                         bool bPartialUpdate,
+                         bool view_mines,
+                         bool view_heroes,
                          bool view_towns)
         { THISCALL_6(void, 0x4136F0, this, updateFlag, bPartialUpdate, view_mines, view_heroes, view_towns); }
 
@@ -114,7 +114,7 @@ class advManager : public baseManager
 
         void UpdBottomView(bool force_update, bool bDrawWindow, bool bUpdate)
         { THISCALL_4(void, 0x415D40, this, force_update, bDrawWindow, bUpdate); }
-        
+
         void BVResMsg(const char* cMsg, EGameResource iResType, int32_t iResQty)
         { THISCALL_4(void, 0x415FC0, this, cMsg, iResType, iResQty); }
 
@@ -157,8 +157,8 @@ class advManager : public baseManager
         void TrimLoopingSounds(int32_t iMaxSoundsAllowed)
         { THISCALL_2(void, 0x41A140, this, iMaxSoundsAllowed); }
 
-        bool FindAdjacentMonster(type_point point, 
-                                 type_point& result, 
+        bool FindAdjacentMonster(type_point point,
+                                 type_point& result,
                                  type_point excluded)
         { return THISCALL_4(bool, 0x41A3C0, this, point, &result, excluded); }
 

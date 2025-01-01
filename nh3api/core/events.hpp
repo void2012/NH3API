@@ -15,78 +15,78 @@ class heroWindow;
 // size = 0x20 = 32, align = 4
 struct message
 {
-	public:
-		enum ECommandType
-		{
-			COMMAND_INPUT_KEY_DOWN   = 1,
-			COMMAND_INPUT_KEY_UP     = 2,
-			COMMAND_MOUSE_ROLLOVER   = 4,
-			COMMAND_MOUSE_LEFT_DOWN  = 8,
-			COMMAND_MOUSE_LEFT_UP    = 16,
-			COMMAND_MOUSE_RIGHT_DOWN = 32,
-			COMMAND_MOUSE_RIGHT_UP   = 64,
-			COMMAND_WINDOW           = 512
-		};
-
-	public:
-		NH3API_FORCEINLINE NH3API_CONSTEXPR
-		message(ECommandType _command,
-		        int32_t _subType,
-				int32_t _itemId,
-				int32_t _qualifier,
-				int32_t _mouseX,
-				int32_t _mouseY,
-				int32_t _extra,
-				heroWindow* _window ) NH3API_NOEXCEPT
-		:
-			command(_command),
-			subType(_subType),
-			itemId(_itemId),
-			qualifier(_qualifier),
-			mouseX(_mouseX),
-			mouseY(_mouseY),
-			extra(_extra),
-			window(_window)
-		{}
-
-		NH3API_FORCEINLINE
-		message() NH3API_NOEXCEPT
-		{ memset_0(this, sizeof(*this)); }
-
-		NH3API_FORCEINLINE
-		message(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-		{}
+    public:
+        enum ECommandType
+        {
+            COMMAND_INPUT_KEY_DOWN   = 1,
+            COMMAND_INPUT_KEY_UP     = 2,
+            COMMAND_MOUSE_ROLLOVER   = 4,
+            COMMAND_MOUSE_LEFT_DOWN  = 8,
+            COMMAND_MOUSE_LEFT_UP    = 16,
+            COMMAND_MOUSE_RIGHT_DOWN = 32,
+            COMMAND_MOUSE_RIGHT_UP   = 64,
+            COMMAND_WINDOW           = 512
+        };
 
     public:
-		// offset: +0x0 = +0,  size = 0x4 = 4
-		ECommandType command;
+        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        message(ECommandType _command,
+                int32_t _subType,
+                int32_t _itemId,
+                int32_t _qualifier,
+                int32_t _mouseX,
+                int32_t _mouseY,
+                int32_t _extra,
+                heroWindow* _window ) NH3API_NOEXCEPT
+        :
+            command(_command),
+            subType(_subType),
+            itemId(_itemId),
+            qualifier(_qualifier),
+            mouseX(_mouseX),
+            mouseY(_mouseY),
+            extra(_extra),
+            window(_window)
+        {}
 
-		// offset: +0x4 = +4,  size = 0x4 = 4
-		int32_t subType;
+        NH3API_FORCEINLINE
+        message() NH3API_NOEXCEPT
+        { memset_0(this, sizeof(*this)); }
 
-		// offset: +0x8 = +8,  size = 0x4 = 4
-		int32_t itemId;
+        NH3API_FORCEINLINE
+        message(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
 
-		// offset: +0xC = +12,  size = 0x4 = 4
-		int32_t qualifier;
+    public:
+        // offset: +0x0 = +0,  size = 0x4 = 4
+        ECommandType command;
 
-		// Cursor X coordinate /
-		// X-Координата курсора.
-		// offset: +0x10 = +16,  size = 0x4 = 4
-		int32_t mouseX;
+        // offset: +0x4 = +4,  size = 0x4 = 4
+        int32_t subType;
 
-		// Cursor Y coordinate /
-		// Y-Координата курсора.
-		// offset: +0x14 = +20,  size = 0x4 = 4
-		int32_t mouseY;
+        // offset: +0x8 = +8,  size = 0x4 = 4
+        int32_t itemId;
 
-		// offset: +0x18 = +24,  size = 0x4 = 4
-		int32_t extra;
+        // offset: +0xC = +12,  size = 0x4 = 4
+        int32_t qualifier;
 
-		// A window where the event has occured /
-		// Окно, в котором появилось сообщение.
-		// offset: +0x1C = +28,  size = 0x4 = 4
-		heroWindow* window;
+        // Cursor X coordinate /
+        // X-Координата курсора.
+        // offset: +0x10 = +16,  size = 0x4 = 4
+        int32_t mouseX;
+
+        // Cursor Y coordinate /
+        // Y-Координата курсора.
+        // offset: +0x14 = +20,  size = 0x4 = 4
+        int32_t mouseY;
+
+        // offset: +0x18 = +24,  size = 0x4 = 4
+        int32_t extra;
+
+        // A window where the event has occured /
+        // Окно, в котором появилось сообщение.
+        // offset: +0x1C = +28,  size = 0x4 = 4
+        heroWindow* window;
 
 };
 #pragma pack(pop)
@@ -120,22 +120,22 @@ NH3API_FORCEINLINE void Delay(uint32_t time) NH3API_NOEXCEPT
 
 }
 
-NH3API_INLINE_OR_EXTERN 
-HMENU& gDefaultMenu 
+NH3API_INLINE_OR_EXTERN
+HMENU& gDefaultMenu
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A34, HMENU));
 
-NH3API_INLINE_OR_EXTERN 
-HMENU& gCombatMenu 
+NH3API_INLINE_OR_EXTERN
+HMENU& gCombatMenu
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A38, HMENU));
 
-NH3API_INLINE_OR_EXTERN 
-HMENU& hmnuRecruitSave 
+NH3API_INLINE_OR_EXTERN
+HMENU& hmnuRecruitSave
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69D644, HMENU));
 
-NH3API_INLINE_OR_EXTERN 
-bool& gbProcessingCombatAction 
+NH3API_INLINE_OR_EXTERN
+bool& gbProcessingCombatAction
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A38, bool));
 
-NH3API_INLINE_OR_EXTERN 
-bool& insideProcessMessage 
+NH3API_INLINE_OR_EXTERN
+bool& insideProcessMessage
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699608, bool));

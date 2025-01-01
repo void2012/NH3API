@@ -14,7 +14,7 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
 NH3API_INLINE_OR_EXTERN
 // Текущий игрок.
-int32_t& giCurPlayer 
+int32_t& giCurPlayer
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CCF4, int32_t));
 
 NH3API_INLINE_OR_EXTERN
@@ -65,7 +65,7 @@ class town;
 // size = 0x168 = 360, align = 1
 class playerData
 {
-    public: 
+    public:
         NH3API_FORCEINLINE
         playerData() NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY(playerData)
@@ -80,10 +80,10 @@ class playerData
               LeanToFlags(tag),
               assembledCombos(tag)
         {
-            NH3API_IGNORE(color, 
-                          numHeroes, 
-                          gap_2, 
-                          currHero, 
+            NH3API_IGNORE(color,
+                          numHeroes,
+                          gap_2,
+                          currHero,
                           heroes,
                           recruits,
                           startingNumHeroes,
@@ -118,7 +118,7 @@ class playerData
     public:
         // Does the player have capitol? /
         // Есть ли у игрока город с капитолием?
-        bool HasCapitol() const 
+        bool HasCapitol() const
         { return THISCALL_1(bool, 0x4B9C00, this); }
 
         // Move occupying hero to town's garrison /
@@ -131,7 +131,7 @@ class playerData
         // Change player name [20] /
         // Изменить имя игрока [20].
         /// @param cNewName Новое имя.
-        void SetName(char * cNewName) 
+        void SetName(char * cNewName)
         { THISCALL_2(void, 0x4B9DF0, this, cNewName); }
 
         void ClearNetInfo()
@@ -155,19 +155,19 @@ class playerData
         int32_t NextTown() const
         { return THISCALL_1(int32_t, 0x4BA800, this); }
 
-        bool HasMobileHero() const 
+        bool HasMobileHero() const
         { return THISCALL_1(bool, 0x4BA850, this); }
-        
+
         int32_t NumOfGivenArtifact(TArtifact iWhichArtifact) const
         { return THISCALL_2(int32_t, 0x4BA890, this, iWhichArtifact); }
-        
+
         bool hasGivenArtifact(TArtifact artifact) const
         { return THISCALL_2(char, 0x4BA970, this, artifact); }
 
         bool IsLocalHuman() const
         { return THISCALL_1(bool, 0x4BAA40, this); }
 
-        bool IsHuman() const 
+        bool IsHuman() const
         { return THISCALL_1(bool, 0x4BAA60, this); }
 
         const char* GetName() const
@@ -175,7 +175,7 @@ class playerData
 
         bool hasAssembledCombos() const
         { return assembledCombos.any(); }
-        
+
         uint32_t numAssembledCombos() const
         { return assembledCombos.count(); }
 
@@ -225,7 +225,7 @@ class playerData
         // offset: +0x34 = +52,  size = 0x4 = 4
         int32_t personality;
 
-        // Number of 
+        // Number of
         // Число открытых пазлов на карте-загадке.
         // offset: +0x38 = +56,  size = 0x1 = 1
         int8_t extraPuzzlePieces;

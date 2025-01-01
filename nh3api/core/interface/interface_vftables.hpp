@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
 #include "dialogs.hpp"
 #include "recruit_unit.hpp"

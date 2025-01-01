@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
 #include "nh3api_std/type_traits.hpp"
 
 // Player colors /
 // Цвета игроков.
-enum EPlayerColor
+enum EPlayerColor : int32_t
 {
     PLAYER_NONE   = -1, // Нейтральный
     PLAYER_RED    = 0, // Красный

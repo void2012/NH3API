@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
 #include "nh3api_std/nh3api_std.hpp"
 #include "resources/resources_include.hpp"

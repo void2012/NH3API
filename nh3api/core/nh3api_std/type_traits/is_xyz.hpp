@@ -19,7 +19,7 @@
 
 namespace nh3api
 {
-namespace tt 
+namespace tt
 {
 template <class T>
 struct is_const : public false_type {};
@@ -195,12 +195,12 @@ template<> struct is_floating_point<double> : public true_type{};
 template<> struct is_floating_point<long double> : public true_type{};
 
 template <class T>
-struct is_arithmetic : public integral_constant<bool, 
+struct is_arithmetic : public integral_constant<bool,
 is_integral<T>::value || is_floating_point<T>::value> {};
 
 template <class T>
-struct is_function 
-: public integral_constant<bool, details::is_function_impl<T>::value> 
+struct is_function
+: public integral_constant<bool, details::is_function_impl<T>::value>
 {};
 
 // Work in Progress
@@ -218,24 +218,24 @@ template<> struct is_member_function_pointer_impl<void> : public false_type{};
 
 template <class T>
 struct is_member_function_pointer
-	: public integral_constant<bool, nh3api::details::is_member_function_pointer_impl<T>::value>{};
+    : public integral_constant<bool, nh3api::details::is_member_function_pointer_impl<T>::value>{};
 
 template <class T> struct is_member_pointer : public integral_constant<bool, is_member_function_pointer<T>::value>{};
 template <class T, class U> struct is_member_pointer<U T::* > : public true_type{};
 
-template <class T> struct is_member_object_pointer 
-   : public integral_constant<bool, 
+template <class T> struct is_member_object_pointer
+   : public integral_constant<bool,
    is_member_pointer<T>::value && !is_member_function_pointer<T>::value>{};
 
 */
 
-    template <class T> struct is_fundamental 
+    template <class T> struct is_fundamental
     : public integral_constant<bool, is_arithmetic<T>::value || is_void<T>::value>
     {};
 
     template <class T> struct is_scalar
-    : public integral_constant<bool, 
-    is_arithmetic<T>::value 
+    : public integral_constant<bool,
+    is_arithmetic<T>::value
     || is_pointer<T>::value
     /*|| is_member_pointer<T>::value*/
     || is_enum<T>::value>
@@ -245,41 +245,41 @@ template <class T> struct is_member_object_pointer
     : public integral_constant<bool, !is_fundamental<T>::value>
     {};
 
-    template <class T> struct is_object : public integral_constant<bool, 
+    template <class T> struct is_object : public integral_constant<bool,
     !(is_void<T>::value || is_reference<T>::value || is_function<T>::value)>
     {};
 
     template<typename T>
-    struct is_trivially_copyable : public integral_constant<bool, 
-    is_union<T>::value || __has_trivial_copy(T) || is_scalar<T>::value || is_pod<T>::value > 
+    struct is_trivially_copyable : public integral_constant<bool,
+    is_union<T>::value || __has_trivial_copy(T) || is_scalar<T>::value || is_pod<T>::value >
     {};
 
     template<typename T>
-    struct is_trivially_copy_assignable : public integral_constant<bool, 
-    !is_const<T>::value && (__has_trivial_assign(T) || is_scalar<T>::value || is_pod<T>::value) > 
+    struct is_trivially_copy_assignable : public integral_constant<bool,
+    !is_const<T>::value && (__has_trivial_assign(T) || is_scalar<T>::value || is_pod<T>::value) >
     {};
 
     template<typename T>
-    struct is_trivially_default_constructible : public integral_constant<bool, 
+    struct is_trivially_default_constructible : public integral_constant<bool,
     is_scalar<T>::value || is_pod<T>::value ||
-    __has_trivial_constructor(T)> 
+    __has_trivial_constructor(T)>
     {};
 
     template<typename T>
-    struct is_trivially_destructible : public integral_constant<bool, 
+    struct is_trivially_destructible : public integral_constant<bool,
     is_scalar<T>::value || is_pod<T>::value ||
     __has_trivial_destructor(T)> {};
 
     template<typename T>
-    struct is_nothrow_assignable : public integral_constant<bool, 
+    struct is_nothrow_assignable : public integral_constant<bool,
     is_scalar<T>::value || is_pod<T>::value ||
-    __has_nothrow_assign(T)> 
+    __has_nothrow_assign(T)>
     {};
 
     template<typename T>
-    struct is_nothrow_default_constructible : public integral_constant<bool, 
+    struct is_nothrow_default_constructible : public integral_constant<bool,
     is_scalar<T>::value || is_pod<T>::value ||
-    __has_nothrow_constructor(T)> 
+    __has_nothrow_constructor(T)>
     {};
 
     template<typename T>
@@ -288,29 +288,29 @@ template <class T> struct is_member_object_pointer
     {};
 
     template<typename T>
-    struct is_nothrow_copy_constructible : public integral_constant<bool, 
+    struct is_nothrow_copy_constructible : public integral_constant<bool,
     is_scalar<T>::value || is_pod<T>::value ||
-    __has_nothrow_copy(T)> 
+    __has_nothrow_copy(T)>
     {};
 
     template<typename T>
-    struct is_trivial : public integral_constant<bool, 
+    struct is_trivial : public integral_constant<bool,
     is_scalar<T>::value || is_pod<T>::value ||
-    ((is_union<T>::value || __has_trivial_copy(T)) && __has_trivial_constructor(T))> 
+    ((is_union<T>::value || __has_trivial_copy(T)) && __has_trivial_constructor(T))>
     {};
 
     template<typename T>
-    struct is_trivially_copy_constructible : public integral_constant<bool, 
+    struct is_trivially_copy_constructible : public integral_constant<bool,
     is_scalar<T>::value || is_pod<T>::value ||
-    ((is_union<T>::value || __has_trivial_copy(T)))> 
+    ((is_union<T>::value || __has_trivial_copy(T)))>
     {};
 
     template<class T>
     struct is_array : false_type {};
-    
+
     template<class T>
     struct is_array<T[]> : true_type {};
-    
+
     template<class T, size_t N>
     struct is_array<T[N]> : true_type {};
 
@@ -318,11 +318,11 @@ template <class T> struct is_member_object_pointer
 } // namespace nh3api
 
 #pragma component(mintypeinfo, off)
-#else 
+#else
 #include <type_traits>
 namespace nh3api
 {
-namespace tt 
+namespace tt
 {
 using ::std::is_const;
 using ::std::is_volatile;
@@ -333,7 +333,7 @@ using ::std::is_pod;
 using ::std::is_empty;
 using ::std::is_polymorphic;
 using ::std::is_abstract;
-using ::std::has_virtual_destructor;    
+using ::std::has_virtual_destructor;
 using ::std::is_unsigned;
 using ::std::is_signed;
 using ::std::is_integral;
@@ -345,7 +345,7 @@ using ::std::is_scalar;
 using ::std::is_compound;
 using ::std::is_object;
 using ::std::is_trivially_copyable;
-using ::std::is_trivially_copy_assignable;   
+using ::std::is_trivially_copy_assignable;
 using ::std::is_trivially_default_constructible;
 using ::std::is_trivially_destructible;
 using ::std::is_nothrow_assignable;

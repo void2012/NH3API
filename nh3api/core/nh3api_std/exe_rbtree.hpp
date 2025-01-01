@@ -21,7 +21,7 @@
  * suitability of this software for any purpose. It is provided
  * "as is" without express or implied warranty.
  */
- 
+
 #pragma once
 
 #include "iterator.hpp"
@@ -79,8 +79,8 @@ class exe_rbtree
         return (_Kfn()(_Value(_P)));
     }
 
-    // get null node 
-    static _Nodepref _Getnil() 
+    // get null node
+    static _Nodepref _Getnil()
     {
         return *reinterpret_cast<volatile _Nodeptr*>(_Nil_Address);
     }
@@ -88,7 +88,7 @@ class exe_rbtree
     static volatile size_t* _Getnilrefs()
     {
         return reinterpret_cast<volatile size_t*>(_Nilrefs_Address);
-    } 
+    }
 
     // is node null?
     static bool _Isnil(const _Nodeptr _P)
@@ -145,10 +145,10 @@ class exe_rbtree
     friend class const_iterator;
 
   protected:
-        enum 
+        enum
         {
-            _bit_swappable = 
-            tt::is_empty<adaptor_type>::value 
+            _bit_swappable =
+            tt::is_empty<adaptor_type>::value
             && tt::is_empty<key_compare>::value
         };
 
@@ -176,7 +176,7 @@ class exe_rbtree
             : _Ptr(_X._Ptr)
         {}
 
-        // return designated value 
+        // return designated value
         const_reference operator*() const NH3API_NOEXCEPT
         {
             return (_Value(_Ptr));
@@ -249,7 +249,7 @@ class exe_rbtree
         NH3API_FORCEINLINE
         // move to node with next larger value
         void _Inc() NH3API_NOEXCEPT
-        { 
+        {
             if (_Isnil(_Ptr))
             {
                 ;	// end() shouldn't be incremented, don't move
@@ -331,7 +331,7 @@ class exe_rbtree
 
         typedef std::reverse_iterator<iterator>       reverse_iterator;
         typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-        
+
         explicit exe_rbtree(const key_compare &_Parg, bool _Marg = true, const allocator_type &allocator = allocator_type())
         NH3API_NOEXCEPT_ALLOC
             : adaptor(allocator), _KeyCompare(_Parg), _Multi(_Marg), _Head(nullptr)
@@ -409,7 +409,7 @@ class exe_rbtree
         exe_rbtree(exe_rbtree&& other, const allocator_type& _Al)
         NH3API_NOEXCEPT_EXPR(_bit_swappable)
             : adaptor(_Al)
-        {	
+        {
             _Assign_rv(::std::forward<exe_rbtree>(other));
         }
         #endif
@@ -485,7 +485,7 @@ class exe_rbtree
         {
             return _KeyCompare;
         }
-    
+
     // inserting
     public:
         ::std::pair<iterator, bool> insert(const value_type &value)
@@ -549,8 +549,8 @@ class exe_rbtree
             for (; first != last; ++first)
                 insert(*first);
         }
-    
-    // erasing 
+
+    // erasing
     public:
         iterator erase(iterator _P)
         {
@@ -764,7 +764,7 @@ class exe_rbtree
         {
             return ::std::make_pair(lower_bound(key), upper_bound(key));
         }
-    
+
     // misc
     public:
         void swap(this_type& other)
@@ -793,7 +793,7 @@ class exe_rbtree
                 ::std::swap(this->_Multi, other._Multi);
                 ::std::swap(this->_Size, other._Size);
             }
-            else 
+            else
             {
                 assert("map/set containers incompatible for swap"&&0);
                 ::std::terminate();
@@ -808,7 +808,7 @@ class exe_rbtree
     NH3API_NOEXCEPT_EXPR(_bit_swappable)
     {
         _Assign_rv(::std::forward<exe_rbtree>(other),
-			typename adaptor_type::propagate_on_container_move_assignment());
+            typename adaptor_type::propagate_on_container_move_assignment());
     }
 
     void _Assign_rv(exe_rbtree&& other, tt::true_type)
@@ -818,14 +818,14 @@ class exe_rbtree
         {
             move16(this, &other);
         }
-        else 
+        else
         {
             this->adaptor = std::move(other.adaptor);
             this->_KeyCompare = ::nh3api::exchange(other._KeyCompare, _KeyCompare());
             this->_Head = ::nh3api::exchange(other._Head, nullptr);
             this->_Multi = other._Multi;
-            this->_Size = ::nh3api::exchange(other._Size, size_type());        
-        }  
+            this->_Size = ::nh3api::exchange(other._Size, size_type());
+        }
     }
 
     void _Assign_rv(exe_rbtree&& other, tt::false_type)
@@ -833,18 +833,18 @@ class exe_rbtree
     {
         if (this->adaptor.alloc == other.adaptor.alloc)
         {
-			_Assign_rv(::std::forward<exe_rbtree>(other), tt::true_type());
+            _Assign_rv(::std::forward<exe_rbtree>(other), tt::true_type());
         }
-		else
+        else
         {
-			_Copy(other);
+            _Copy(other);
         }
     }
     #endif
 
     // copy entire tree from other
     void _Copy(const this_type &other)
-    { 
+    {
         _Root() = _Copy(other._Root(), _Head);
         _Size = other.size();
         if (!_Isnil(_Root()))
@@ -863,10 +863,10 @@ class exe_rbtree
 
     // copy entire subtree, recursively
     node_type* _Copy(node_type* _Rootnode, node_type* _Wherenode)
-    { 
+    {
         node_type* _Newroot = _Rootnode; // point at nil node
         for (; !_Isnil(_Rootnode); _Rootnode = _Left(_Rootnode))
-        { 
+        {
             // copy a node, then any subtrees
             node_type* _Pnode = _Buynode(_Wherenode, _Color(_Rootnode));
             if (_Newroot == _Rootnode)
@@ -931,7 +931,7 @@ class exe_rbtree
     { clear(); }
 
     iterator _Insert(node_type* _X, node_type* _Y, const value_type& value)
-    { 
+    {
         node_type* _Z = _Buynode(_Y, _Red);
         _Left(_Z) = _Getnil();
         _Right(_Z) = _Getnil();
@@ -1091,7 +1091,7 @@ class exe_rbtree
     }
     // find leftmost node greater than _Keyval
     node_type* _Ubound(const key_type &key) const NH3API_NOEXCEPT
-    { 
+    {
         node_type* _X = _Root();
         node_type* _Y = _Head;
         while (!_Isnil(_X))
@@ -1132,42 +1132,42 @@ class exe_rbtree
 
 template <class _K, class _Ty, class _Kfn, class _Pr, class _A, uintptr_t _Nil_Address, uintptr_t _Nilrefs_Address>
 inline bool operator==(
-    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X, 
+    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X,
     const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_Y)
 {
     return (_X.size() == _Y.size() && ::std::equal(_X.begin(), _X.end(), _Y.begin()));
 }
 template <class _K, class _Ty, class _Kfn, class _Pr, class _A, uintptr_t _Nil_Address, uintptr_t _Nilrefs_Address>
 inline bool operator!=(
-    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X, 
+    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X,
     const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_Y)
 {
     return (!(_X == _Y));
 }
 template <class _K, class _Ty, class _Kfn, class _Pr, class _A, uintptr_t _Nil_Address, uintptr_t _Nilrefs_Address>
 inline bool operator<(
-    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X, 
+    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X,
     const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_Y)
 {
     return (::std::lexicographical_compare(_X.begin(), _X.end(), _Y.begin(), _Y.end()));
 }
 template <class _K, class _Ty, class _Kfn, class _Pr, class _A, uintptr_t _Nil_Address, uintptr_t _Nilrefs_Address>
 inline bool operator>(
-    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X, 
+    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X,
     const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_Y)
 {
     return (_Y < _X);
 }
 template <class _K, class _Ty, class _Kfn, class _Pr, class _A, uintptr_t _Nil_Address, uintptr_t _Nilrefs_Address>
 inline bool operator<=(
-    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X, 
+    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X,
     const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_Y)
 {
     return (!(_Y < _X));
 }
 template <class _K, class _Ty, class _Kfn, class _Pr, class _A, uintptr_t _Nil_Address, uintptr_t _Nilrefs_Address>
 inline bool operator>=(
-    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X, 
+    const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_X,
     const nh3api::exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> &_Y)
 {
     return (!(_X < _Y));

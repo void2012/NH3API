@@ -25,7 +25,7 @@ NH3API_VIRTUAL_CLASS TResourceDisplay : public TSubWindow
         { THISCALL_3(void, 0x558DF0, this, parent, is_small); }
 
         TResourceDisplay(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-            : TSubWindow(tag) 
+            : TSubWindow(tag)
         { NH3API_IGNORE(IsSmall, ResourceWidgets, ResourceIconWidgets, BackgroundWidget, DayWidget); }
 
     public:
@@ -40,7 +40,7 @@ NH3API_VIRTUAL_CLASS TResourceDisplay : public TSubWindow
 
     public:
         // Small version of resource display /
-        // Уменьшенная версия 
+        // Уменьшенная версия
         // offset: +0x34 = +52,  size = 0x1 = 1
         bool IsSmall;
 
@@ -78,9 +78,9 @@ NH3API_VIRTUAL_CLASS type_bottom_view_window : public TSubWindow
         { THISCALL_2(void, 0x451EC0, this, parent_window); }
 
         type_bottom_view_window(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-            : TSubWindow(nh3api::dummy_tag) 
+            : TSubWindow(nh3api::dummy_tag)
         {}
-    
+
     public:
         NH3API_VIRTUAL_OVERRIDE_TSUBWINDOW(type_bottom_view_window)
 
@@ -107,11 +107,11 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
         { THISCALL_1(TAdventureMapWindow*, 0x401510, this); }
 
         TAdventureMapWindow(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-            : heroWindow(tag) 
+            : heroWindow(tag)
         {
-            NH3API_IGNORE(RadarWidget, 
-                          MapWidget, 
-                          ChatTextWidget, 
+            NH3API_IGNORE(RadarWidget,
+                          MapWidget,
+                          ChatTextWidget,
                           chatEdit,
                           ResourceDisplay,
                           topHero,
@@ -187,7 +187,7 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
 
         void DrawChatText(bool update)
         { THISCALL_2(void, 0x403F20, this, update); }
- 
+
         void UpdateButtons(bool draw, bool update)
         { THISCALL_3(void, 0x403F60, this, draw, update); }
 

@@ -162,14 +162,14 @@
     #if __has_include(<libloaderapi.h>)
         #include <libloaderapi.h>
         #include <windef.h>
-    #else 
+    #else
         #include <winbase.h>
         #include <windef.h>
-    #endif 
-#else 
+    #endif
+#else
     #include <winbase.h>
     #include <windef.h>
-#endif 
+#endif
 
 #include <utility>
 #include "intrin.hpp"
@@ -568,12 +568,12 @@ inline return_type invoke_stdcall_20(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3
 #define STDCALL_19(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19) invoke_stdcall_19<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19)
 #define STDCALL_20(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20) invoke_stdcall_20<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)
 
-#if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT 
+#if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
 template<typename return_type, typename ... Args>
 inline return_type invoke_thiscall(uintptr_t address, Args&& ... args)
-{ 
+{
     NH3API_STATIC_ASSERT("__thiscall function must take at least 1 argument", sizeof...(Args) > 1);
-    return (reinterpret_cast<return_type(__thiscall*)(Args...)>(address)(std::forward<Args>(args)...)); 
+    return (reinterpret_cast<return_type(__thiscall*)(Args...)>(address)(std::forward<Args>(args)...));
 }
 
 template<typename return_type, typename ... Args>
@@ -726,7 +726,7 @@ HookContext
     {
         uintptr_t esp;
         uint16_t  sp;
-    } NH3API_MSVC_LAYOUT; 
+    } NH3API_MSVC_LAYOUT;
 
     union
     {
@@ -738,7 +738,7 @@ HookContext
     {
         int32_t esi;
         int16_t si;
-    } NH3API_MSVC_LAYOUT; 
+    } NH3API_MSVC_LAYOUT;
 
     union
     {
@@ -757,10 +757,10 @@ HookContext
     FlagsRegister flags;
 
     // the Push function has a similar action to the PUSH processor command for the LoHook hook context
-	// when used with the hook context set with WriteLoHook or CreateLoHook
-	// the size of the memory that can be put on the stack with this function is limited to 128 bytes.
-	// when used with the hook context set with WriteLoHookEx or CreateLoHookEx
-	// this size is set arbitrarily by calling WriteLoHookEx or CreateLoHookEx.
+    // when used with the hook context set with WriteLoHook or CreateLoHook
+    // the size of the memory that can be put on the stack with this function is limited to 128 bytes.
+    // when used with the hook context set with WriteLoHookEx or CreateLoHookEx
+    // this size is set arbitrarily by calling WriteLoHookEx or CreateLoHookEx.
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // функция Push имеет аналогичное действие команде процессора PUSH для контекста LoHook хука
     // при использовании с контекстом хука установленного с помощью WriteLoHook или CreateLoHook
@@ -785,20 +785,20 @@ HookContext
     // These getters are for the compability with the RoseKavailer's H3API...
 
     int8_t& AL() { return al; }
-	int8_t& AH() { return ah; }
-	int16_t& AX() { return ax; }
-	int8_t& CL() { return cl; }
-	int8_t& CH() { return ch; }
-	int16_t& CX() { return cx; }
-	int8_t& DL() { return dl; }
-	int8_t& DH() { return dh; }
-	int16_t& DX() { return dx; }
-	int8_t& BL() { return bl; }
-	int8_t& BH() { return bh; }
-	int16_t& BX() { return bx; }
-	uint16_t& BP() { return bp; }
-	int16_t& SI() { return si; }
-	int16_t& DI() { return di; }
+    int8_t& AH() { return ah; }
+    int16_t& AX() { return ax; }
+    int8_t& CL() { return cl; }
+    int8_t& CH() { return ch; }
+    int16_t& CX() { return cx; }
+    int8_t& DL() { return dl; }
+    int8_t& DH() { return dh; }
+    int16_t& DX() { return dx; }
+    int8_t& BL() { return bl; }
+    int8_t& BH() { return bh; }
+    int16_t& BX() { return bx; }
+    uint16_t& BP() { return bp; }
+    int16_t& SI() { return si; }
+    int16_t& DI() { return di; }
 
 } NH3API_MSVC_LAYOUT;
 
@@ -916,13 +916,13 @@ typedef SafeLoHookContext SafeHookContext;
 enum ELoHookReturnPolicy : int32_t
 {
     EXEC_DEFAULT    = 1,
-    NO_EXEC_DEFAULT = 0, 
+    NO_EXEC_DEFAULT = 0,
     SKIP_DEFAULT    = NO_EXEC_DEFAULT // alias for NO_EXEC_DEFAULT
 };
- 
+
 // values returned by Patch::GetType () /
 // значения возвращаеемые Patch::GetType().
-enum EPatchType : int32_t 
+enum EPatchType : int32_t
 {
     PATCH_ = 0,
     LOHOOK_ = 1,
@@ -931,7 +931,7 @@ enum EPatchType : int32_t
 
 // values passed to PatcherInstance::Write () and PatcherInstance::CreatePatch () /
 // значения передаваемые PatcherInstance::Write() и PatcherInstance::CreatePatch().
-enum EPatcherInstanceWriteMode : int32_t 
+enum EPatcherInstanceWriteMode : int32_t
 {
     DATA_ = 0,
     CODE_ = 1
@@ -963,9 +963,9 @@ public:
     virtual const char* const __stdcall GetOwner() = 0;
 
     // Returns the type of the patch
-	// for not hook always PATCH_
-	// for LoHook always LOHOOK_
-	// for HiHook always HIHOOK_
+    // for not hook always PATCH_
+    // for LoHook always LOHOOK_
+    // for HiHook always HIHOOK_
     ////////////////////////////////
     // Возвращает тип патча
     // для не хука всегда PATCH_
@@ -978,12 +978,12 @@ public:
     virtual bool32_t __stdcall IsApplied() = 0;
 
     // Apply the patch
-	// returns> = 0 if the patch / hook is applied successfully
-	// (the return value is the sequence number of the patch in the sequence
-	// patches applied around the given address, the larger the number,
-	// the later the patch was applied)
-	// returns -2 if the patch is already applied
-	// The result of executing the method is commonly written to the log
+    // returns> = 0 if the patch / hook is applied successfully
+    // (the return value is the sequence number of the patch in the sequence
+    // patches applied around the given address, the larger the number,
+    // the later the patch was applied)
+    // returns -2 if the patch is already applied
+    // The result of executing the method is commonly written to the log
     ////////////////////////////////////////////////////////////////////////////////
     // Применяет патч
     // возвращает >= 0 , если патч/хук применился успешно
@@ -996,10 +996,10 @@ public:
 
 
     // ApplyInsert applies a patch specifying the sequence number in the
-	// sequences of patches applied to this address.
-	// the return values are the same as in Patch::Apply
-	// the ApplyInsert function, you can pass an argument to the value returned
-	// Undo function to apply the patch to the same place it was before the cancel.
+    // sequences of patches applied to this address.
+    // the return values are the same as in Patch::Apply
+    // the ApplyInsert function, you can pass an argument to the value returned
+    // Undo function to apply the patch to the same place it was before the cancel.
     //////////////////////////////////////////////////////////////////////////////////////
     // ApplyInsert применяет патч с указанием порядкового номера в
     // последовательности патчей, примененных по этому адресу.
@@ -1009,13 +1009,13 @@ public:
     virtual int32_t __stdcall ApplyInsert(int32_t zorder) = 0;
 
     // Undo method
-	// Undo the patch (hook) (in case the patch is applied last - restores the erased code)
-	// Returns the number> = 0 if the patch (hook) was canceled successfully
-	// (the return value is the patch number in the sequence
-	// patches applied to this address, the larger the number,
-	// the later the patch was applied)
-	// Returns -2 if the patch has already been canceled (not applied)
-	// The result of executing the method is commonly written to the log
+    // Undo the patch (hook) (in case the patch is applied last - restores the erased code)
+    // Returns the number> = 0 if the patch (hook) was canceled successfully
+    // (the return value is the patch number in the sequence
+    // patches applied to this address, the larger the number,
+    // the later the patch was applied)
+    // Returns -2 if the patch has already been canceled (not applied)
+    // The result of executing the method is commonly written to the log
     ////////////////////////////////////////////////////////////////////////////////////////////
     // Метод Undo
     // Отменяет патч(хук) (в случае если патч применен последним - восстанавливает затертый код)
@@ -1028,10 +1028,10 @@ public:
     virtual bool32_t __stdcall Undo() = 0;
 
     // Destroy method
-	// Destructor
-	// Cancels and permanently destroys the patch / hook
-	// returns always 1 (for compatibility with earlier versions of the library)
-	// The result of the destruction is commonly written to the log
+    // Destructor
+    // Cancels and permanently destroys the patch / hook
+    // returns always 1 (for compatibility with earlier versions of the library)
+    // The result of the destruction is commonly written to the log
     ////////////////////////////////////////////////////////////////////////////
     // Метод Destroy
     // Деструктор
@@ -1041,8 +1041,8 @@ public:
     virtual bool32_t __stdcall Destroy() = 0;
 
     // GetAppliedBefore method
-	// returns the patch applied before the data
-	// returns nullptr if this patch is applied first
+    // returns the patch applied before the data
+    // returns nullptr if this patch is applied first
     //////////////////////////////////////////////////////
     // Метод GetAppliedBefore
     // возвращает патч примененный перед данным
@@ -1050,8 +1050,8 @@ public:
     virtual Patch* __stdcall GetAppliedBefore() = 0;
 
     // GetAppliedAfter method
-	// returns the patch applied after the given
-	// returns NULL if this patch is applied last
+    // returns the patch applied after the given
+    // returns NULL if this patch is applied last
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     // Метод GetAppliedAfter
     // возвращает патч примененный после данного
@@ -1087,7 +1087,7 @@ enum EHiHookSetupPolicy : int32_t
 
 // values passed as the subtype argument in PatcherInstance::WriteHiHook and PatcherInstance::CreateHiHook /
 // значения передаваемые как аргумент subtype в PatcherInstance::WriteHiHook и PatcherInstance::CreateHiHook.
-enum EHiHookType : int32_t 
+enum EHiHookType : int32_t
 {
     DIRECT_ = 0,
     EXTENDED_ = 1,
@@ -1096,7 +1096,7 @@ enum EHiHookType : int32_t
 
 // values passed as a calltype argument to PatcherInstance::WriteHiHook and PatcherInstance::CreateHiHook
 // значения передаваемые как аргумент calltype в PatcherInstance::WriteHiHook и PatcherInstance::CreateHiHook.
-enum EHiHookCallingConvention : int32_t 
+enum EHiHookCallingConvention : int32_t
 {
     STDCALL_ = 0,
     ANY_ = STDCALL_,
@@ -1116,9 +1116,9 @@ public:
     HiHook() NH3API_DELETED_FUNCTION;
 
     // returns a pointer to the function (on the bridge to the function in the case of SPLICE_),
-	// replaced by a hook
-	// Attention! Calling a function for an unused hook, you can get
-	// irrelevant (but working) value.
+    // replaced by a hook
+    // Attention! Calling a function for an unused hook, you can get
+    // irrelevant (but working) value.
     ////////////////////////////////////////////////////////////////////////////////////////////
     // возвращает указатель на функцию (на мост к функции в случае SPLICE_),
     // замещенную хуком
@@ -1127,10 +1127,10 @@ public:
     virtual uintptr_t __stdcall GetDefaultFunc() = 0;
 
     // returns a pointer to the original function (on the bridge to the function in the case of SPLICE_),
-	// replaced by a hook (hooks) at this address
-	// (that is, it returns GetDefaultFunc () for the first hook applied to this address)
-	// Attention! Calling a function for an unused hook, you can get
-	// irrelevant (but working) value.
+    // replaced by a hook (hooks) at this address
+    // (that is, it returns GetDefaultFunc () for the first hook applied to this address)
+    // Attention! Calling a function for an unused hook, you can get
+    // irrelevant (but working) value.
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     // возвращает указатель на оригинальную функцию (на мост к функции в случае SPLICE_),
     // замещенную хуком(хуками) по данному адресу
@@ -1140,10 +1140,10 @@ public:
     virtual uintptr_t __stdcall GetOriginalFunc() = 0;
 
     // returns the return address to the original code
-	// can be used inside the hook function
-	// SPLICE_ EXTENDED_ or SAFE_ hook to find out where it came from
-	// for SPLICE_ DIRECT_ hook function always returns 0 (ie for DIRECT_ hook possibility to find the return address through it - no)
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // can be used inside the hook function
+    // SPLICE_ EXTENDED_ or SAFE_ hook to find out where it came from
+    // for SPLICE_ DIRECT_ hook function always returns 0 (ie for DIRECT_ hook possibility to find the return address through it - no)
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // возвращает адрес возврата в оригинальный код
     // можно использовать внутри хук-функции
     // SPLICE_ EXTENDED_ или SAFE_ хука, чтобы узнать откуда она была вызвана
@@ -1157,7 +1157,7 @@ public:
 
     // # ver 2.1
     // returns the value of the user hook data
-	// if not specified by the user, then 0 /
+    // if not specified by the user, then 0 /
     // возвращает значение пользовательских данных хука
     // если не задано пользователем, то равно 0
     virtual uint32_t __stdcall GetUserData() = 0;
@@ -1179,9 +1179,9 @@ public:
     PatcherInstance() NH3API_DELETED_FUNCTION;
 
     // WriteByte method
-	// write a one-byte number at address
-	// (creates and applies DATA_ patch)
-	// Returns the pointer to the patch
+    // write a one-byte number at address
+    // (creates and applies DATA_ patch)
+    // Returns the pointer to the patch
     ////////////////////////////////////////////
     // Метод WriteByte
     // пишет однбайтовое число по адресу address
@@ -1190,9 +1190,9 @@ public:
     virtual Patch* __stdcall WriteByte(uintptr_t address, int32_t value) = 0;
 
     // WriteWord method
-	// write a two-byte number at address
-	// (creates and applies DATA_ patch)
-	// Returns the pointer to the patch
+    // write a two-byte number at address
+    // (creates and applies DATA_ patch)
+    // Returns the pointer to the patch
     ////////////////////////////////////////////////////////////
     // Метод WriteWord
     // пишет двухбайтовое число по адресу address
@@ -1201,9 +1201,9 @@ public:
     virtual Patch* __stdcall WriteWord(uintptr_t address, int32_t value) = 0;
 
     // WriteDword method
-	// write a four-byte number at address
-	// (creates and applies DATA_ patch)
-	// Returns the pointer to the patch
+    // write a four-byte number at address
+    // (creates and applies DATA_ patch)
+    // Returns the pointer to the patch
     /////////////////////////////////////////////////
     // Метод WriteDword
     // пишет четырехбайтовое число по адресу address
@@ -1212,9 +1212,9 @@ public:
     virtual Patch* __stdcall WriteDword(uintptr_t address, uint32_t value) = 0;
 
     // WriteAddressOf template
-	// writes a pointer of data type (its address)
-	// to the specified location
-	// The data type can be anything
+    // writes a pointer of data type (its address)
+    // to the specified location
+    // The data type can be anything
     //////////////////////////////////////////////
     // WriteAddressOf шаблон
     // пишет указатель на данные (адрес)
@@ -1224,11 +1224,11 @@ public:
     { return WriteDword(address, *reinterpret_cast<uint32_t*>(nh3api::addressof(data))); }
 
     // WriteJmp method
-	// writes jmp to opcode at address
-	// (creates and applies a CODE_ patch)
-	// Returns the pointer to the patch
-	// the patch closes an integer number of opcodes,
-	// i.e. The size of the patch> = 5, the difference is filled with NOPs.
+    // writes jmp to opcode at address
+    // (creates and applies a CODE_ patch)
+    // Returns the pointer to the patch
+    // the patch closes an integer number of opcodes,
+    // i.e. The size of the patch> = 5, the difference is filled with NOPs.
     ////////////////////////////////////////////////////////////
     // Метод WriteJmp
     // пишет jmp to опкод по адресу address
@@ -1335,15 +1335,15 @@ public:
     #define WriteJmpHookInt(address, backaddress, hook) WriteJmpHookT<address,backaddress,true>(hook<backaddress>)
 
     // WriteHexPatch method
-	// writes to the address address the byte sequence,
-	// defined hex_str
-	// (creates and applies DATA_ patch)
-	// Returns the pointer to the patch
-	// hex_str - c-string can contain hexadecimal digits
-	// 0123456789ABCDEF (uppercase only!) Other characters
-	// when reading by the method hex_str ignored (skipped)
-	// convenient to use as an argument to this method
-	// copied using Binary copy in OllyDbg
+    // writes to the address address the byte sequence,
+    // defined hex_str
+    // (creates and applies DATA_ patch)
+    // Returns the pointer to the patch
+    // hex_str - c-string can contain hexadecimal digits
+    // 0123456789ABCDEF (uppercase only!) Other characters
+    // when reading by the method hex_str ignored (skipped)
+    // convenient to use as an argument to this method
+    // copied using Binary copy in OllyDbg
     ///////////////////////////////////////////////////////////////
     // Метод WriteHexPatch
     // пишет по адресу address позледовательность байт,
@@ -1360,8 +1360,8 @@ public:
     virtual Patch* __stdcall WriteHexPatch(uintptr_t address, const char* hex_str) = 0;
 
     // Method WriteCodePatchVA
-	// in the original form, the method is not supposed to be used,
-	// see (below) the description of the wrapper method WriteCodePatch
+    // in the original form, the method is not supposed to be used,
+    // see (below) the description of the wrapper method WriteCodePatch
     ////////////////////////////////////////////////////////////
     // Метод WriteCodePatchVA
     // в оригинальном виде применение метода не предполагается,
@@ -1372,22 +1372,22 @@ public:
     NH3API_DEPRECATED("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")
     #endif
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Method WriteLoHook
+    // Method WriteLoHook
     // (upd. v5.0: It is not recommended to use WriteLoHook anymore. Use WriteSafeLoHook instead.)
-	// creates an address low-level hook (CODE_ patch) and applies it
-	// returns pointer to the hook
-	// func - function called when the hook triggers
-	// must have the form int __stdcall func (LoHook * h, HookContext * c);
-	// in HookContext * c are passed for reading / changing
-	// processor registers and return address
-	// if func returns EXEC_DEFAULT, then
-	// after the func is completed, the code is truncated.
-	// if - SKIP_DEFAULT - the erased code is not executed
-	//
-	// ATTENTION!
-	// the size of the memory that can be placed on the context stack
-	// using c-> esp and c-> Push, is limited to 128 bytes.
-	// if you need another restriction, use the WriteLoHookEx or CreateLoHookEx method.
+    // creates an address low-level hook (CODE_ patch) and applies it
+    // returns pointer to the hook
+    // func - function called when the hook triggers
+    // must have the form int __stdcall func (LoHook * h, HookContext * c);
+    // in HookContext * c are passed for reading / changing
+    // processor registers and return address
+    // if func returns EXEC_DEFAULT, then
+    // after the func is completed, the code is truncated.
+    // if - SKIP_DEFAULT - the erased code is not executed
+    //
+    // ATTENTION!
+    // the size of the memory that can be placed on the context stack
+    // using c-> esp and c-> Push, is limited to 128 bytes.
+    // if you need another restriction, use the WriteLoHookEx or CreateLoHookEx method.
     ////////////////////////////////////////////////////////////
     // Метод WriteLoHook
     // (upd. v5.0: Использование WriteLoHook больше не рекоммендуется. Используйте WriteSafeLoHook.)
@@ -1442,17 +1442,17 @@ protected:
 
     template<typename F> static
     void hihook_function_condition(F* func)
-    { 
-        static_assert(nh3api::tt::is_function<F>::value, "HiHook must be a function.");  
-        hihook_function_condition_stdcall(func); 
+    {
+        static_assert(nh3api::tt::is_function<F>::value, "HiHook must be a function.");
+        hihook_function_condition_stdcall(func);
     }
 
-    #else 
+    #else
     #pragma warning(push)
     #pragma warning(error: 4440)
-    template<typename F> static void hihook_function_condition(F*) 
+    template<typename F> static void hihook_function_condition(F*)
     { typedef F __stdcall* T; }
-    #pragma warning(pop)    
+    #pragma warning(pop)
     #endif // C++11
 
     // protected
@@ -1460,52 +1460,52 @@ protected:
 
 public:
     // Method WriteHiHook
-	// creates a high-level hook at address and applies it
-	// returns pointer to the hook
-	//
-	// new_func - function replacing the original
-	//
-	// hooktype - hook type:
-	// CALL_ - hook to the function call at address
-	// the E8 and FF 15 opcodes are supported, otherwise the hook is not installed
-	// and the information about this error is written to the log
-	// SPLICE_ - hook directly to the FUNCTION itself at address
-	// FUNCPTR_ - hook to the function in the pointer (rarely used, mostly for hooks in import tables)
-	//
-	// subtype - the subtype of the hook:
-	// DIRECT_ - new_func has the same form as
-	// original replaceable function
-	// note: instead of __thiscall f (this)
-	// you can use __fastcal f (this_)
-	// instead of __thiscall f (this, ...) you can use
-	// __fastcall f (this_, no_used_edx, ...)
-	// EXTENDED_ - new_func function is passed the first stack argument
-	// pointer to the HiHook instance and, in the case
-	// conventions of the original __thiscall and __fastcall
-	// register arguments are passed by stack second
-	// So the function new_func should look like
-	//? __stdcall new_func (HiHook * hook,?) For? ? Orig (?)
-	//
-	// ATTENTION! EXTENDED_ FASTCALL_ supports only functions with 2 or more arguments
-	// for __fastcall with 1 argument, use EXTENDED_ FASTCALL_1 / EXTENDED_ THISCALL_
-	//
-	// SAFE_ is the same as EXTENDED_, but before calling (at the time of the call) GetDefaultFunc () is restored
-	// The register values of the EAX, ECX(if not FASTCALL_ and not THISCALL_)
-	// EDX (if not FASTCALL_), EBX, ESI, EDI, which were at the time of the call of the replaced function
-	//
-	//  In the vast majority of cases it is more convenient to use EXTENDED
-	//  But DIRECT_ is executed faster because there is no bridge to the new replacement function
-	//
-	// Calltype - an agreement to call the original replacement f-tion:
-	//  STDCALL_
-	//  THISCALL_
-	//  FASTCALL_
-	//  CDECL_
-	// need to specify the agreement correctly in order to EXTENDED_ hook correctly
-	// built a bridge to a new replacement function
-	//
-	// CALL_, SPLICE_ hook is the CODE_ patch
-	// FUNCPTR_ hook is a DATA_ patch
+    // creates a high-level hook at address and applies it
+    // returns pointer to the hook
+    //
+    // new_func - function replacing the original
+    //
+    // hooktype - hook type:
+    // CALL_ - hook to the function call at address
+    // the E8 and FF 15 opcodes are supported, otherwise the hook is not installed
+    // and the information about this error is written to the log
+    // SPLICE_ - hook directly to the FUNCTION itself at address
+    // FUNCPTR_ - hook to the function in the pointer (rarely used, mostly for hooks in import tables)
+    //
+    // subtype - the subtype of the hook:
+    // DIRECT_ - new_func has the same form as
+    // original replaceable function
+    // note: instead of __thiscall f (this)
+    // you can use __fastcal f (this_)
+    // instead of __thiscall f (this, ...) you can use
+    // __fastcall f (this_, no_used_edx, ...)
+    // EXTENDED_ - new_func function is passed the first stack argument
+    // pointer to the HiHook instance and, in the case
+    // conventions of the original __thiscall and __fastcall
+    // register arguments are passed by stack second
+    // So the function new_func should look like
+    //? __stdcall new_func (HiHook * hook,?) For? ? Orig (?)
+    //
+    // ATTENTION! EXTENDED_ FASTCALL_ supports only functions with 2 or more arguments
+    // for __fastcall with 1 argument, use EXTENDED_ FASTCALL_1 / EXTENDED_ THISCALL_
+    //
+    // SAFE_ is the same as EXTENDED_, but before calling (at the time of the call) GetDefaultFunc () is restored
+    // The register values of the EAX, ECX(if not FASTCALL_ and not THISCALL_)
+    // EDX (if not FASTCALL_), EBX, ESI, EDI, which were at the time of the call of the replaced function
+    //
+    //  In the vast majority of cases it is more convenient to use EXTENDED
+    //  But DIRECT_ is executed faster because there is no bridge to the new replacement function
+    //
+    // Calltype - an agreement to call the original replacement f-tion:
+    //  STDCALL_
+    //  THISCALL_
+    //  FASTCALL_
+    //  CDECL_
+    // need to specify the agreement correctly in order to EXTENDED_ hook correctly
+    // built a bridge to a new replacement function
+    //
+    // CALL_, SPLICE_ hook is the CODE_ patch
+    // FUNCPTR_ hook is a DATA_ patch
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     // Метод WriteHiHook
     // создает по адресу address высокоуровневый хук и применяет его
@@ -1556,21 +1556,21 @@ public:
     // FUNCPTR_ хук является DATA_ патчем
     //
     template<typename F>
-    HiHook* WriteHiHook(uintptr_t address, 
-                        EHiHookSetupPolicy hooktype, 
-                        EHiHookType subtype, 
-                        EHiHookCallingConvention calltype, 
+    HiHook* WriteHiHook(uintptr_t address,
+                        EHiHookSetupPolicy hooktype,
+                        EHiHookType subtype,
+                        EHiHookCallingConvention calltype,
                         F* new_func)
     {
         hihook_function_condition(new_func);
         return xWriteHiHook(address, hooktype, subtype, calltype, static_cast<void*>(new_func));
     }
-    
+
 
     // Create Methods ...
-	// create a patch / hook as well as the corresponding Write ... methods,
-	// but do not use it
-	// return pointer to patch / hook
+    // create a patch / hook as well as the corresponding Write ... methods,
+    // but do not use it
+    // return pointer to patch / hook
     ///////////////////////////////////////////////////////////////////
     // Методы Create...
     // создают патч/хук так же как и соответствующие методы Write...,
@@ -1587,16 +1587,16 @@ public:
     NH3API_DEPRECATED("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")
     #endif
     virtual LoHook* __stdcall CreateLoHook(uintptr_t address, lhfunc_t func) = 0;
-    
+
 protected:
     virtual HiHook* __stdcall xCreateHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, void* new_func) = 0;
 
 public:
     template<typename F>
-    HiHook* __stdcall CreateHiHook(uintptr_t address, 
-                                   EHiHookSetupPolicy hooktype, 
-                                   EHiHookType subtype, 
-                                   EHiHookCallingConvention calltype, 
+    HiHook* __stdcall CreateHiHook(uintptr_t address,
+                                   EHiHookSetupPolicy hooktype,
+                                   EHiHookType subtype,
+                                   EHiHookCallingConvention calltype,
                                    F* new_func)
     {
         hihook_function_condition(new_func);
@@ -1604,9 +1604,9 @@ public:
     }
 
     // ApplyAll method
-	// applies all patches / hooks created by this instance of PatcherInstance
-	// always returns 1 (for compatibility with earlier versions of the library)
-	// (see Patch::Apply)
+    // applies all patches / hooks created by this instance of PatcherInstance
+    // always returns 1 (for compatibility with earlier versions of the library)
+    // (see Patch::Apply)
     //////////////////////////////////////////////////////////////////////////////
     // Метод ApplyAll
     // применяет все патчи/хуки, созданные этим экземпляром PatcherInstance
@@ -1615,10 +1615,10 @@ public:
     virtual bool32_t __stdcall ApplyAll() = 0;
 
     // UndoAll Method
-	// cancels all patches / hooks created by this instance of PatcherInstance
-	// i.e. For each of the patches / hooks calls the Undo method
-	// always returns 1 (for compatibility with earlier versions of the library)
-	// (see Patch::Undo)
+    // cancels all patches / hooks created by this instance of PatcherInstance
+    // i.e. For each of the patches / hooks calls the Undo method
+    // always returns 1 (for compatibility with earlier versions of the library)
+    // (see Patch::Undo)
     ////////////////////////////////////////////////////////////
     // Метод UndoAll
     // отменяет все патчи/хуки, созданные этим экземпляром PatcherInstance
@@ -1628,10 +1628,10 @@ public:
     virtual bool32_t __stdcall UndoAll() = 0;
 
     // DestroyAll Method
-	// cancels and permanently destroys all patches / hooks created by this instance of PatcherInstance
-	// i.e. For each of the patches / hooks calls the Destroy method
-	// always returns 1 (for compatibility with earlier versions of the library)
-	// (see Patch::Destroy)
+    // cancels and permanently destroys all patches / hooks created by this instance of PatcherInstance
+    // i.e. For each of the patches / hooks calls the Destroy method
+    // always returns 1 (for compatibility with earlier versions of the library)
+    // (see Patch::Destroy)
     ////////////////////////////////////////////////////////////
     // Метод DestroyAll
     // отменяет и безвозвратно уничтожает все патчи/хуки, созданные этим экземпляром PatcherInstance
@@ -1641,22 +1641,22 @@ public:
     virtual bool32_t __stdcall DestroyAll() = 0;
 
     // in the original form, the method is not supposed to be used,
-	// see (below) the description of the wrapper method WriteDataPatch /
+    // see (below) the description of the wrapper method WriteDataPatch /
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки WriteDataPatch
     virtual Patch* __stdcall WriteDataPatchVA(uintptr_t address, const char* format, uint32_t* va_args) = 0;
 
     // in the original form, the method is not supposed to be used,
-	// see (below) the description of the wrapper method WriteDataPatch /
+    // see (below) the description of the wrapper method WriteDataPatch /
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки WriteDataPatch
     virtual Patch* __stdcall CreateDataPatchVA(uintptr_t address, const char* format, uint32_t* va_args) = 0;
 
     // GetLastPatchAt method
-	// returns nullptr if no patch / hook has been applied in the vicinity of the address address,
-	// created by this instance of PatcherInstance
-	// otherwise returns the last applied patch / hook in the neighborhood of the address address,
-	// created by this instance of PatcherInstance
+    // returns nullptr if no patch / hook has been applied in the vicinity of the address address,
+    // created by this instance of PatcherInstance
+    // otherwise returns the last applied patch / hook in the neighborhood of the address address,
+    // created by this instance of PatcherInstance
     //////////////////////////////////////////////////////////////////////////////////////////
     // Метод GetLastPatchAt
     // возвращает nullptr, если в окрестности адреса address не был применен ни один патч/хук,
@@ -1666,10 +1666,10 @@ public:
     virtual Patch* __stdcall GetLastPatchAt(uintptr_t address) = 0;
 
     // UndoAllAt Method
-	// cancels the patches applied by this instance of PatcherInstance
-	// in the neighborhood of address
-	// always returns 1 (for compatibility with earlier versions of the library)
-	// (see Patch::Undo)
+    // cancels the patches applied by this instance of PatcherInstance
+    // in the neighborhood of address
+    // always returns 1 (for compatibility with earlier versions of the library)
+    // (see Patch::Undo)
     // Метод UndoAllAt
     // отменяет патчи примененные данным экземпляром PatcherInstance
     // в окрестности адреса address
@@ -1678,10 +1678,10 @@ public:
     virtual bool32_t __stdcall UndoAllAt(uintptr_t address) = 0;
 
     // GetFirstPatchAt method
-	// returns NULL if no patch / hook has been applied in the vicinity of the address address,
-	// created by this instance of PatcherInstance
-	// otherwise returns the first applied patch / hook in the neighborhood of the address address,
-	// created by this instance of PatcherInstance
+    // returns NULL if no patch / hook has been applied in the vicinity of the address address,
+    // created by this instance of PatcherInstance
+    // otherwise returns the first applied patch / hook in the neighborhood of the address address,
+    // created by this instance of PatcherInstance
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Метод GetFirstPatchAt
     // возвращает nullptr, если в окрестности адреса address не был применен ни один патч/хук,
@@ -1691,9 +1691,9 @@ public:
     virtual Patch* __stdcall GetFirstPatchAt(uintptr_t address) = 0;
 
     // Write Method
-	// writes address data / code from memory to address data size size bytes
-	// if is_code == 1, then a CODE_ patch is created and written, if 0 is a DATA patch.
-	// Returns the pointer to the patch
+    // writes address data / code from memory to address data size size bytes
+    // if is_code == 1, then a CODE_ patch is created and written, if 0 is a DATA patch.
+    // Returns the pointer to the patch
     ////////////////////////////////////////////////////////////
     // Метод Write
     // пишет по адресу address данные/код из памяти по адресу data размером size байт
@@ -1702,9 +1702,9 @@ public:
     virtual Patch* __stdcall Write(uintptr_t address, uintptr_t data, size_t size, EPatcherInstanceWriteMode mode = DATA_) = 0;
 
     // CreatePatch method
-	// creates a patch as well as the Write method,
-	// but does not apply it
-	// return pointer to patch
+    // creates a patch as well as the Write method,
+    // but does not apply it
+    // return pointer to patch
     ///////////////////////////////////////////////////////////////////
     // Метод CreatePatch
     // создаёт патч так же как и метод Write,
@@ -1717,10 +1717,10 @@ public:
     #endif
     // # ver 2.1
     // Method WriteLoHookEx
-	// is similar to the WriteLoHook method, but has an additional argument
-	// stack_delta - the size of the memory that can be placed in the context stack
-	// using HookContext::esp and HookContext::Push inside func.
-	// Return a pointer to the LoHook hook
+    // is similar to the WriteLoHook method, but has an additional argument
+    // stack_delta - the size of the memory that can be placed in the context stack
+    // using HookContext::esp and HookContext::Push inside func.
+    // Return a pointer to the LoHook hook
     ////////////////////////////////////////////////////////////
     // Метод WriteLoHookEx
     // аналогичен методу WriteLoHook, но имеет дополнительный аргумент
@@ -1735,9 +1735,9 @@ public:
 
     // # ver 2.1
     // The CreateLoHookEx Method
-	// creates a hook just like WriteLoHookEx,
-	// but DO NOT apply it.
-	// Return a pointer to the LoHook hook
+    // creates a hook just like WriteLoHookEx,
+    // but DO NOT apply it.
+    // Return a pointer to the LoHook hook
     //////////////////////////////////////////
     // Метод CreateLoHookEx
     // создает хук так же как и WriteLoHookEx,
@@ -1746,21 +1746,21 @@ public:
     virtual LoHook* __stdcall CreateLoHookEx(uintptr_t address, void* func, uint32_t stack_delta) = 0;
 
     // In the original form, the method is not supposed to be used,
-	// see (below) the description of the WriteHexHook shell method /
+    // see (below) the description of the WriteHexHook shell method /
     // В оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки WriteHexHook.
     virtual LoHook* __stdcall WriteHexHookVA(uintptr_t address, bool32_t exec_default, const char* hex_str, uint32_t* va_args) = 0;
 
     // In the original form, the method is not supposed to be used,
-	// see (below) the description of the CreateHexHook shell method /
+    // see (below) the description of the CreateHexHook shell method /
     // В оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки CreateHexHook.
     virtual LoHook* __stdcall CreateHexHookVA(uintptr_t address, bool32_t exec_default, const char* hex_str, uint32_t* va_args) = 0;
 
     // The BlockAt method sets the block to a specific address (to the specific address and not to the vicinity)
-	// for this instance of PatcherInstance
-	// after which this instance of PatcherInstance can not apply
-	// patches at this address
+    // for this instance of PatcherInstance
+    // after which this instance of PatcherInstance can not apply
+    // patches at this address
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Метод BlockAt устанавливает блок на определенный адрес (именно на конкретный адрес а не на окрестность)
     // для данного экземпляра PatcherInstance
@@ -1770,11 +1770,11 @@ public:
 
     // # ver 2.6
     // the BlockAllExceptVA method sets the block to all addresses except those specified in va_args
-	// as well as the BlockAt method operates with specific addresses and not neighborhoods
-	// for this instance of PatcherInstance
-	// after which this instance of PatcherInstance can not apply
-	// patches for all addresses except those specified.
-	// the list of addresses in va_args should end with 0 (zero)
+    // as well as the BlockAt method operates with specific addresses and not neighborhoods
+    // for this instance of PatcherInstance
+    // after which this instance of PatcherInstance can not apply
+    // patches for all addresses except those specified.
+    // the list of addresses in va_args should end with 0 (zero)
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // метод BlockAllExceptVA устанавливает блок на все адреса кроме указанных в va_args
     // так же как и метод BlockAt оперирует конкретными адресами а не окрестностями
@@ -1792,20 +1792,20 @@ public:
 
     // # ver 4.0
     // in the original form, the method is not supposed to be used,
-	// see (below) the description of the wrapper method WriteAsmPatch /
+    // see (below) the description of the wrapper method WriteAsmPatch /
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки CreateAsmPatch.
     virtual Patch* __stdcall CreateAsmPatchVA(uintptr_t address, uint32_t* va_args) = 0;
 
     // # ver 4.0
     // in the original form, the method is not supposed to be used,
-	// see (below) the description of the CreateAsmPatch shell method /
+    // see (below) the description of the CreateAsmPatch shell method /
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки WriteAsmHook.
     virtual LoHook* __stdcall WriteAsmHookVA(uintptr_t address, uint32_t* va_args) = 0;
 
     // in the original form, the method is not supposed to be used,
-	// see (below) the description of the wrapper method WriteAsmHook /
+    // see (below) the description of the wrapper method WriteAsmHook /
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки CreateAsmHook
     virtual LoHook* __stdcall CreateAsmHookVA(uintptr_t address, uint32_t* va_args) = 0;
@@ -1813,7 +1813,7 @@ public:
     // # ver 5.0
     // Applies thread-safe lohook, see CreateSafeLoHook() /
     // Применяет потокобезопасный лоухук, см. CreateSafeLoHook().
-	virtual SafeLoHook* __stdcall WriteSafeLoHook(uintptr_t address, slhfunc_t func, uint32_t = 0) = 0;
+    virtual SafeLoHook* __stdcall WriteSafeLoHook(uintptr_t address, slhfunc_t func, uint32_t = 0) = 0;
 
     // # ver 5.0
     // Creates thread-safe lohook. The interface difference is:
@@ -1831,24 +1831,24 @@ public:
     virtual SafeLoHook* __stdcall CreateSafeLoHook(uintptr_t address, slhfunc_t func, uint32_t = 0) = 0;
 
     // WriteAsmPatch writes a patch to the address address
-	// returns pointer to patch
-	// arguments ... are strings containing code in assembler
-	// all the instructions recognized by OllyDbg 1.04 (up to and including MMX and amd 3DNow!) Are recognized
-	// ATTENTION! Unlike OllyDbg, integers that do not have the prefix 0x or postfix h are read as decimal!
-	// so do not forget to write the hex numbers explicitly
-	// In one line there can be several instructions separated by a ';'
-	// The assembler code can contain labels;
-	// declaration of the label - label_name: (label name, colon),
-	// use label_name (a name without a colon);
-	// the maximum length of the label name is 39 characters, the name can contain letters, numbers, symbols '_' and '.';
-	// the code can contain the pseudoinstruction times (writes the specified number of times the next instruction)
-	// for example, the result "times 3 nop" will be the code 90 90 90
-	// code can contain a pseudo-instruction _ExecCopy <address>, <size> (writes code from memory to <address> size <size>)
-	// the code can contain pseudoinstructions db <number>, dw <number>, dd <number or label>.
-	// The string can contain the character format% d. In this case, the line should be followed by the corresponding number of four-byte numbers (signed / unsigned / addresses / ...)
-	// ATTENTION! The last argument (string) must be '\0'!
-	// abstract example: WriteAsmPatch (0x112233, "begin: call% d", MyFunc, "jmp begin", "jne dword [% d]", 0xAABBCC, 0);
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // returns pointer to patch
+    // arguments ... are strings containing code in assembler
+    // all the instructions recognized by OllyDbg 1.04 (up to and including MMX and amd 3DNow!) Are recognized
+    // ATTENTION! Unlike OllyDbg, integers that do not have the prefix 0x or postfix h are read as decimal!
+    // so do not forget to write the hex numbers explicitly
+    // In one line there can be several instructions separated by a ';'
+    // The assembler code can contain labels;
+    // declaration of the label - label_name: (label name, colon),
+    // use label_name (a name without a colon);
+    // the maximum length of the label name is 39 characters, the name can contain letters, numbers, symbols '_' and '.';
+    // the code can contain the pseudoinstruction times (writes the specified number of times the next instruction)
+    // for example, the result "times 3 nop" will be the code 90 90 90
+    // code can contain a pseudo-instruction _ExecCopy <address>, <size> (writes code from memory to <address> size <size>)
+    // the code can contain pseudoinstructions db <number>, dw <number>, dd <number or label>.
+    // The string can contain the character format% d. In this case, the line should be followed by the corresponding number of four-byte numbers (signed / unsigned / addresses / ...)
+    // ATTENTION! The last argument (string) must be '\0'!
+    // abstract example: WriteAsmPatch (0x112233, "begin: call% d", MyFunc, "jmp begin", "jne dword [% d]", 0xAABBCC, 0);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // WriteAsmPatch пишет патч по адресу address
     // возвращаeт указатель на патч
     // аргументы ... - это строки, содержащие код на ассемблере
@@ -1871,9 +1871,9 @@ public:
     { return WriteAsmPatchVA(address, (uint32_t*)((uintptr_t)&address + 4)); }
 
     // CreateAsmPatch method
-	// creates a patch as well as the WriteCodePatch method,
-	// but does not apply it
-	// returns pointer to patch
+    // creates a patch as well as the WriteCodePatch method,
+    // but does not apply it
+    // returns pointer to patch
     //////////////////////////////////////////////////
     // Метод CreateAsmPatch
     // создает патч так же как и метод WriteCodePatch,
@@ -1886,16 +1886,16 @@ public:
 
 
     // WriteAsmHook writes to address address primitive hook
-	// namely LoHook without calling a high-level function.
-	// the body of the hook is written directly in the call to CreateHexHook or WriteHexHook
-	// in the same way as the patch is written using WriteAsmPatch (see WriteAsmPatch)
-	// Unlike the WriteAsmPatch method, the code here may or may not contain the _ExecDefault pseudo-command,
-	// the code executes the code
-	// ATTENTION! In the code there can not be more than one pseudo-command _ExecDefault
-	// returns pointer to LoHook hook
-	// ATTENTION! The last argument (string) must be '\0'!
-	// abstract example: WriteAsmHook (0x112233, "cmp eax, 0; jne SkipDefault; _ExecDefault; jmp End; SkipDefault: mov ecx, 2; End: retn", '\0');
-	////////////////////////////////////////////////////////////
+    // namely LoHook without calling a high-level function.
+    // the body of the hook is written directly in the call to CreateHexHook or WriteHexHook
+    // in the same way as the patch is written using WriteAsmPatch (see WriteAsmPatch)
+    // Unlike the WriteAsmPatch method, the code here may or may not contain the _ExecDefault pseudo-command,
+    // the code executes the code
+    // ATTENTION! In the code there can not be more than one pseudo-command _ExecDefault
+    // returns pointer to LoHook hook
+    // ATTENTION! The last argument (string) must be '\0'!
+    // abstract example: WriteAsmHook (0x112233, "cmp eax, 0; jne SkipDefault; _ExecDefault; jmp End; SkipDefault: mov ecx, 2; End: retn", '\0');
+    ////////////////////////////////////////////////////////////
     // WriteAsmHook пишет по адресу address примитивный хук
     // а именно LoHook без вызова высокоуровневой функции.
     // тело хука пишется прямо в вызове CreateHexHook или WriteHexHook
@@ -1910,9 +1910,9 @@ public:
     { return WriteAsmHookVA(address, (uint32_t*)((uintptr_t)&address + 4)); }
 
     // Method CreateAsmHook
-	// creates a hook just like WriteAsmHook,
-	// but DO NOT apply it.
-	// Return a pointer to the LoHook hook
+    // creates a hook just like WriteAsmHook,
+    // but DO NOT apply it.
+    // Return a pointer to the LoHook hook
     ////////////////////////////////////////////////////////////
     // Метод CreateAsmHook
     // создает хук так же как и WriteAsmHook,
@@ -1922,11 +1922,11 @@ public:
     { return CreateAsmHookVA(address, (uint32_t*)((uintptr_t)&address + 4)); }
 
     // WriteHexHook writes at address the most primitive hook
-	// namely LoHook without calling a high-level function.
-	// the body of the hook is written directly in the call to CreateHexHook or WriteHexHook
-	// in the same way as the patch is written using WriteCodePatch (see WriteCodePatch)
-	// exec_default - whether to execute the hooked code after executing the hook body
-	// returns the pointer to the LoHook hook
+    // namely LoHook without calling a high-level function.
+    // the body of the hook is written directly in the call to CreateHexHook or WriteHexHook
+    // in the same way as the patch is written using WriteCodePatch (see WriteCodePatch)
+    // exec_default - whether to execute the hooked code after executing the hook body
+    // returns the pointer to the LoHook hook
     ////////////////////////////////////////////////////////////////////////////////////////
     // WriteHexHook пишет по адресу address самый примитивный хук
     // а именно LoHook без вызова высокоуровневой функции.
@@ -1940,9 +1940,9 @@ public:
     }
 
     // CreateHexHook method
-	// creates a hook as well as WriteHexHook,
-	// but DO NOT apply it.
-	// Return a pointer to the LoHook hook
+    // creates a hook as well as WriteHexHook,
+    // but DO NOT apply it.
+    // Return a pointer to the LoHook hook
     //////////////////////////////////////////
     // Метод CreateHexHook
     // создает хук так же как и WriteHexHook,
@@ -1952,45 +1952,45 @@ public:
     { return CreateHexHookVA(address, exec_default, format, (uint32_t*)((uintptr_t)&format + 4)); }
 
     // Method WriteCodePatch
-	// writes to the address address the byte sequence,
-	// defined format and ...
-	// (creates and applies a CODE_ patch)
-	// Returns the pointer to the patch
-	// format - c-string can contain hexadecimal digits
-	// 0123456789ABCDEF (uppercase only!),
-	// as well as special format-characters (lower case!):
-	// %b - (byte) writes a single-byte number from ...
-	// %w - (word) writes a two-byte number from ...
-	// %d - (dword) writes a four-byte number from ...
-	// %j - writes jmp to the address from ...
-	// %c - writes сall ...
-	// %m - copies the code to the address ... the size ... (ie reads 2 arguments from ...)
-	// copying occurs via MemCopyCodeEx (see description)
-	// %% - writes a string with format characters from ...
-	// %o - (offset) places the address offset in the argument from the argument
-	// Complex code, relative to the beginning of the Complex code.
-	// %n - write nop opcode, number equal to ...
-	// #0: - #9: - set the label (from 0 to 9) to which you can go with # 0 - # 9
-	// #0 - #9 - write the address after the opcodes EB, 70 - 7F, E8, E9, 0F80 - 0F8F
-	// corresponding label; After other opcodes nothing writes
-	// ~b - takes from ... the absolute address and writes the relative offset before it
-	// 1 byte in size (used for EB, 70 - 7F opcodes)
-	// ~d - takes from ... the absolute address and writes the relative offset before it
-	// 4 bytes in size (used for the E8, E9, 0F 80 - 0F 8F opcodes)
-	// %. - does nothing (like any other character not declared above after%)
-	// abstract example:
-	// Patch * p = pi-> WriteCodePatch (address,
-	// "#0: %%",
-	// "B9 %d %%", this, // mov ecx, this //
-	// "BA %d %%", this-> context, // mov edx, context //
-	// "%c %%", func, // call func //
-	// "83 F8 01 %%", // cmp eax, 1
-	// "0F 85 #7 %%", // jne long to label 7 (if func returns 0)
-	// "83 F8 02 %%", // cmp eax, 2
-	// "0F 85 ~d %%", 0x445544, // jne long to 0x445544 (if func returns 0)
-	// "EB #0 %%", // jmp short to label 0
-	// "%m %%", address2, size, // exec code copy from address2
-	// "#7: FF 25 %d %.", & Return_address); // jmp [& return_address]
+    // writes to the address address the byte sequence,
+    // defined format and ...
+    // (creates and applies a CODE_ patch)
+    // Returns the pointer to the patch
+    // format - c-string can contain hexadecimal digits
+    // 0123456789ABCDEF (uppercase only!),
+    // as well as special format-characters (lower case!):
+    // %b - (byte) writes a single-byte number from ...
+    // %w - (word) writes a two-byte number from ...
+    // %d - (dword) writes a four-byte number from ...
+    // %j - writes jmp to the address from ...
+    // %c - writes сall ...
+    // %m - copies the code to the address ... the size ... (ie reads 2 arguments from ...)
+    // copying occurs via MemCopyCodeEx (see description)
+    // %% - writes a string with format characters from ...
+    // %o - (offset) places the address offset in the argument from the argument
+    // Complex code, relative to the beginning of the Complex code.
+    // %n - write nop opcode, number equal to ...
+    // #0: - #9: - set the label (from 0 to 9) to which you can go with # 0 - # 9
+    // #0 - #9 - write the address after the opcodes EB, 70 - 7F, E8, E9, 0F80 - 0F8F
+    // corresponding label; After other opcodes nothing writes
+    // ~b - takes from ... the absolute address and writes the relative offset before it
+    // 1 byte in size (used for EB, 70 - 7F opcodes)
+    // ~d - takes from ... the absolute address and writes the relative offset before it
+    // 4 bytes in size (used for the E8, E9, 0F 80 - 0F 8F opcodes)
+    // %. - does nothing (like any other character not declared above after%)
+    // abstract example:
+    // Patch * p = pi-> WriteCodePatch (address,
+    // "#0: %%",
+    // "B9 %d %%", this, // mov ecx, this //
+    // "BA %d %%", this-> context, // mov edx, context //
+    // "%c %%", func, // call func //
+    // "83 F8 01 %%", // cmp eax, 1
+    // "0F 85 #7 %%", // jne long to label 7 (if func returns 0)
+    // "83 F8 02 %%", // cmp eax, 2
+    // "0F 85 ~d %%", 0x445544, // jne long to 0x445544 (if func returns 0)
+    // "EB #0 %%", // jmp short to label 0
+    // "%m %%", address2, size, // exec code copy from address2
+    // "#7: FF 25 %d %.", & Return_address); // jmp [& return_address]
     ////////////////////////////////////////////////////////////
     // Метод WriteCodePatch
     // пишет по адресу address позледовательность байт,
@@ -2036,9 +2036,9 @@ public:
     { return WriteCodePatchVA(address, format, (uint32_t*)((uintptr_t)&format + 4)); }
 
     // The CreateCodePatch method
-	// creates a patch as well as the WriteCodePatch method,
-	// but does not apply it
-	// returns pointer to patch
+    // creates a patch as well as the WriteCodePatch method,
+    // but does not apply it
+    // returns pointer to patch
     //////////////////////////////////////////////////
     // Метод CreateCodePatch
     // создает патч так же как и метод WriteCodePatch,
@@ -2048,26 +2048,26 @@ public:
     { return CreateCodePatchVA(address, format, (uint32_t*)((uintptr_t)&format + 4)); }
 
     // WriteDataPatch Method
-	// writes to the address address the byte sequence,
-	// defined format and ...
-	// (creates and applies DATA_ patch)
-	// Returns the pointer to the patch
-	// format - a c-string can contain hexadecimal digits
-	// 0123456789ABCDEF (uppercase only!),
-	// as well as special format-characters (lower case!):
-	// %b - (byte) writes a single-byte number from ...
-	// %w - (word) writes a two-byte number from ...
-	// %d - (dword) writes a four-byte number from ...
-	// %m - copies data to an address ... size ... (ie reads 2 arguments from ...)
-	// %% - writes a string with format characters from ...
-	// %o - (offset) places the address offset in the argument from the argument
-	// Complex code, relative to the beginning of the Complex code.
-	// %. - does nothing (like any other character not declared above after%)
-	// abstract example:
-	// Patch * p = pi-> WriteDataPatch (address,
-	// "FF FF FF %d %%", var,
-	// "%m %%", address2, size,
-	// "AE %.");
+    // writes to the address address the byte sequence,
+    // defined format and ...
+    // (creates and applies DATA_ patch)
+    // Returns the pointer to the patch
+    // format - a c-string can contain hexadecimal digits
+    // 0123456789ABCDEF (uppercase only!),
+    // as well as special format-characters (lower case!):
+    // %b - (byte) writes a single-byte number from ...
+    // %w - (word) writes a two-byte number from ...
+    // %d - (dword) writes a four-byte number from ...
+    // %m - copies data to an address ... size ... (ie reads 2 arguments from ...)
+    // %% - writes a string with format characters from ...
+    // %o - (offset) places the address offset in the argument from the argument
+    // Complex code, relative to the beginning of the Complex code.
+    // %. - does nothing (like any other character not declared above after%)
+    // abstract example:
+    // Patch * p = pi-> WriteDataPatch (address,
+    // "FF FF FF %d %%", var,
+    // "%m %%", address2, size,
+    // "AE %.");
     ////////////////////////////////////////////////////////////
     // Метод WriteDataPatch
     // пишет по адресу address позледовательность байт,
@@ -2094,9 +2094,9 @@ public:
     { return WriteDataPatchVA(address, format, (uint32_t*)((uintptr_t)&format + 4)); }
 
     // CreateDataPatch method
-	// creates the patch as well as the WriteDataPatch method,
-	// but does not apply it
-	// returns pointer to patch
+    // creates the patch as well as the WriteDataPatch method,
+    // but does not apply it
+    // returns pointer to patch
     //////////////////////////////////////////////////////////
     // Метод CreateDataPatch
     // создает патч так же как и метод WriteDataPatch,
@@ -2118,14 +2118,14 @@ public:
     Patcher() NH3API_DELETED_FUNCTION;
 
     // CreateInstance method
-	// Creates an instance of the PatcherInstance class, which
-	// directly allows you to create patches and hooks and
-	// returns a pointer to this instance.
-	// owner - the unique name of the PatcherInstance instance
-	// the method returns nullptr if an instance with the name owner is already created
-	// if owner == nullptr or owner == "" then
-	// the PatcherInstance instance nullptr be created with the module name from
-	// the function was called.
+    // Creates an instance of the PatcherInstance class, which
+    // directly allows you to create patches and hooks and
+    // returns a pointer to this instance.
+    // owner - the unique name of the PatcherInstance instance
+    // the method returns nullptr if an instance with the name owner is already created
+    // if owner == nullptr or owner == "" then
+    // the PatcherInstance instance nullptr be created with the module name from
+    // the function was called.
     ///////////////////////////////////////////////////////////////////////////////////
     // Метод CreateInstance
     // создает экземпляр класса PatcherInstance, который
@@ -2139,15 +2139,15 @@ public:
     virtual PatcherInstance* __stdcall CreateInstance(const char* owner) = 0;
 
     // GetInstance method
-	// Returns a pointer to an instance of PatcherInstance
-	// with the name owner.
-	// the method returns NULL if
-	// the instance named owner does not exist (was not created)
-	// the module name can be passed as an argument.
-	// Is used for :
-	// - check if some mod is active, using patcher_x86.dll
-	// - get access to all patches and hooks of some mod,
-	// using patcher_x86.dll
+    // Returns a pointer to an instance of PatcherInstance
+    // with the name owner.
+    // the method returns NULL if
+    // the instance named owner does not exist (was not created)
+    // the module name can be passed as an argument.
+    // Is used for :
+    // - check if some mod is active, using patcher_x86.dll
+    // - get access to all patches and hooks of some mod,
+    // using patcher_x86.dll
     ///////////////////////////////////////////////////
     // Метод GetInstance
     // Возвращает указатель на экземпляр PatcherInstance
@@ -2162,10 +2162,10 @@ public:
     virtual PatcherInstance*  __stdcall GetInstance(const char* owner) = 0;
 
     // GetLastPatchAt method
-	// returns nullptr if no patch / hook is applied in the vicinity of the address address
-	// otherwise returns the last applied patch / hook in the neighborhood of address
-	// consistently walk through all the patches in a given neighborhood
-	// using this method and Patch::GetAppliedBefore
+    // returns nullptr if no patch / hook is applied in the vicinity of the address address
+    // otherwise returns the last applied patch / hook in the neighborhood of address
+    // consistently walk through all the patches in a given neighborhood
+    // using this method and Patch::GetAppliedBefore
     ///////////////////////////////////////////////////
     // Метод GetLastPatchAt
     // возвращает nullptr, если в окрестности адреса address не был применен ни один патч/хук
@@ -2175,8 +2175,8 @@ public:
     virtual Patch* __stdcall GetLastPatchAt(uintptr_t address) = 0;
 
     // UndoAllAt Method
-	// cancels all patches / hooks in the neighborhood of address
-	// always returns 1 (for compatibility with earlier versions of the library)
+    // cancels all patches / hooks in the neighborhood of address
+    // always returns 1 (for compatibility with earlier versions of the library)
     ///////////////////////////////////////////////////
     // Метод UndoAllAt
     // отменяет все патчи/хуки в окрестности адреса address
@@ -2184,10 +2184,10 @@ public:
     virtual Patch* __stdcall UndoAllAt(uintptr_t address) = 0;
 
     // SaveDump Method
-	// saves to file named file_name
-	// - number and names of all instances of PatcherInstance
-	// - the number of all applied patches / hooks
-	// - list of all applied patches and hooks
+    // saves to file named file_name
+    // - number and names of all instances of PatcherInstance
+    // - the number of all applied patches / hooks
+    // - list of all applied patches and hooks
     // with their installation addresses, sizes, global order of use, proprietors (PatcherInstance names)
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Метод SaveDump
@@ -2199,10 +2199,10 @@ public:
     virtual void __stdcall SaveDump(const char* file_name) = 0;
 
     // SaveLog method
-	// saves to the file named file_name a log
-	// if logging is disabled in the log, there will be 0 entries.
-	// enable logging by creating in the library directory
-	// the text file patcher_x86.ini with the contents: Logging = 1
+    // saves to the file named file_name a log
+    // if logging is disabled in the log, there will be 0 entries.
+    // enable logging by creating in the library directory
+    // the text file patcher_x86.ini with the contents: Logging = 1
     ///////////////////////////////////////////////////////////////
     // Метод SaveLog
     // сохраняет в файл с именем file_name лог
@@ -2212,10 +2212,10 @@ public:
     virtual void __stdcall SaveLog(const char* file_name) = 0;
 
     // GetMaxPatchSize Method
-	// The patcher_x86.dll library imposes some restrictions
-	// to the maximum size of the patch,
-	// which one can be recognized using the GetMaxPatchSize method
-	// (at the moment this is 262144 bytes, which is enough)
+    // The patcher_x86.dll library imposes some restrictions
+    // to the maximum size of the patch,
+    // which one can be recognized using the GetMaxPatchSize method
+    // (at the moment this is 262144 bytes, which is enough)
     ///////////////////////////////////////////////////////////////
     // Метод GetMaxPatchSize
     // Библиотека patcher_x86.dll накладывает некоторые ограничения
@@ -2225,8 +2225,8 @@ public:
     virtual int32_t __stdcall GetMaxPatchSize() = 0;
 
     // Method WriteComplexDataVA
-	// in the original form, the method is not supposed to be used,
-	// see (below) the description of the wrapper method WriteComplexString
+    // in the original form, the method is not supposed to be used,
+    // see (below) the description of the wrapper method WriteComplexString
     ///////////////////////////////////////////////////////////////////////
     // Метод WriteComplexDataVA
     // в оригинальном виде применение метода не предполагается,
@@ -2234,9 +2234,9 @@ public:
     virtual int32_t __stdcall WriteComplexDataVA(uintptr_t address, const char* format, uint32_t* args) = 0;
 
     // GetOpcodeLength method
-	// A so-called Disassembler of the lengths of the opcodes
-	// returns the length in bytes of the opcode at p_opcode
-	// returns 0 if opcode is unknown
+    // A so-called Disassembler of the lengths of the opcodes
+    // returns the length in bytes of the opcode at p_opcode
+    // returns 0 if opcode is unknown
     ///////////////////////////////////////////////////
     // GetOpcodeLength метод
     // т.н. дизассемблер длин опкодов
@@ -2245,13 +2245,13 @@ public:
     virtual int32_t __stdcall GetOpcodeLength(uintptr_t p_opcode) = 0;
 
     // Method MemCopyCode
-	// copies the code from memory to src address in memory at dst
-	// MemCopyCode always copies an integer number of opcodes with the size> = size. Be careful!
-	// returns the size of the copied code.
-	// differs by the action from a simple copy of the memory,
-	// that correctly copies the ops E8 (call), E9 (jmp long), 0F80 - 0F8F (j ** long)
-	// c relative addressing without knocking down addresses in them, if instructions
-	// Forward outside the copied blocking
+    // copies the code from memory to src address in memory at dst
+    // MemCopyCode always copies an integer number of opcodes with the size> = size. Be careful!
+    // returns the size of the copied code.
+    // differs by the action from a simple copy of the memory,
+    // that correctly copies the ops E8 (call), E9 (jmp long), 0F80 - 0F8F (j ** long)
+    // c relative addressing without knocking down addresses in them, if instructions
+    // Forward outside the copied blocking
     ///////////////////////////////////////////////////
     // Метод MemCopyCode
     // копирует код из памяти по адресу src в память по адресу dst
@@ -2264,10 +2264,10 @@ public:
     virtual int32_t __stdcall MemCopyCode(uintptr_t dst, uintptr_t src, size_t size) = 0;
 
     // GetFirstPatchAt method
-	// returns nullptr if no patch / hook is applied in the vicinity of the <address>
-	// otherwise returns the first applied patch / hook in the vicinity of <address>
-	// consistently walk through all the patches in a given vicinity
-	// using this method and Patch::GetAppliedAfter
+    // returns nullptr if no patch / hook is applied in the vicinity of the <address>
+    // otherwise returns the first applied patch / hook in the vicinity of <address>
+    // consistently walk through all the patches in a given vicinity
+    // using this method and Patch::GetAppliedAfter
     /////////////////////////////////////////////////////////////////////////////////////////
     // Метод GetFirstPatchAt
     // возвращает nullptr, если в окрестности адреса address не был применен ни один патч/хук
@@ -2277,15 +2277,15 @@ public:
     virtual Patch* __stdcall GetFirstPatchAt(uintptr_t address) = 0;
 
     // MemCopyCodeEx method
-	// copies the code from memory to src address in memory at dst
-	// returns the size of the copied code.
-	// differs from MemCopyCode in that,
-	// that correctly copies the opcodes EB (jmp short), 70 - 7F (j ** short)
-	// c relative addressing without knocking down addresses in them, if instructions
-	// send outside the copied block (in this case they are replaced by
-	// corresponding to E9 (jmp long), 0F80 - 0F8F (j ** long) opcodes.
-	// Attention! Because of this, the size of the copied code can be significantly
-	// more than copied.
+    // copies the code from memory to src address in memory at dst
+    // returns the size of the copied code.
+    // differs from MemCopyCode in that,
+    // that correctly copies the opcodes EB (jmp short), 70 - 7F (j ** short)
+    // c relative addressing without knocking down addresses in them, if instructions
+    // send outside the copied block (in this case they are replaced by
+    // corresponding to E9 (jmp long), 0F80 - 0F8F (j ** long) opcodes.
+    // Attention! Because of this, the size of the copied code can be significantly
+    // more than copied.
     /////////////////////////////////////////////////////////////////////////////////
     // Метод MemCopyCodeEx
     // копирует код из памяти по адресу src в память по адресу dst
@@ -2301,9 +2301,9 @@ public:
 
     // # ver 2.3
     // VarInit Method
-	// initializes a "variable" named name and sets the value of "variable" to value
-	// if a "variable" with this name already exists, then simply sets its value to value
-	// returns a pointer to the "variable" if successful and nullptr otherwise /
+    // initializes a "variable" named name and sets the value of "variable" to value
+    // if a "variable" with this name already exists, then simply sets its value to value
+    // returns a pointer to the "variable" if successful and nullptr otherwise /
     // Метод VarInit
     // инициализирует "переменную" c именем name и устанавливает значение "переменной" равным value
     // если "переменная" с таким именем уже существует, то просто устанавливает ее значение равным value
@@ -2312,8 +2312,8 @@ public:
 
     // # ver 2.3
     // VarFind method
-	// returns a pointer to a "variable" named name, if such was initialized
-	// if not, it returns nullptr
+    // returns a pointer to a "variable" named name, if such was initialized
+    // if not, it returns nullptr
     ////////////////////////////////////////////////////////////////////////////////////////
     // Метод VarFind
     // возвращает указатель на "переменную" с именем name, если такая была инициализированна
@@ -2322,10 +2322,10 @@ public:
 
     // # ver 2.6
     // Method PreCreateInstance
-	// Creates a defective PatcherInstance with the specified name.
-	// PatcherInstance created in this way can not create patches.
-	// This incomplete instance is used to apply the PatcherInstance::BlockAt and PatcherInstance::BlockAllExceptVA methods
-	// so that you can block addresses before this PatcherInstance is fully created using CreateInstance
+    // Creates a defective PatcherInstance with the specified name.
+    // PatcherInstance created in this way can not create patches.
+    // This incomplete instance is used to apply the PatcherInstance::BlockAt and PatcherInstance::BlockAllExceptVA methods
+    // so that you can block addresses before this PatcherInstance is fully created using CreateInstance
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Метод PreCreateInstance
     // Создает неполноценный экземпляр PatcherInstance с указанным именем.
@@ -2341,7 +2341,7 @@ public:
     virtual uintptr_t __stdcall CreateCodeBlockVA(uint32_t* args) = 0;
 
     // The VarGetValue method returns the value of a "variable" named name
-	// if the "variable" with this name was not initialized, it returns default_value /
+    // if the "variable" with this name was not initialized, it returns default_value /
     // Метод VarGetValue возвращает значение "переменной" c именем name
     // если "переменная" с таким именем не была инициализированна, возвращает default_value.
     template<typename ValueType>
@@ -2356,8 +2356,8 @@ public:
     }
 
     // The VarValue method returns a reference to the value of the "variable" named name
-	// if the "variable" with this name was not initialized, initializes it and sets the value to 0
-	// attention, accessing the value of a variable by reference is not thread-safe /
+    // if the "variable" with this name was not initialized, initializes it and sets the value to 0
+    // attention, accessing the value of a variable by reference is not thread-safe /
     // Метод VarValue возвращает ссылку на значение "переменной" c именем name
     // если "переменная" с таким именем не была инициализированна, инициализирует ее и устанавливает значение равным 0
     // внимание, обращение к значению переменной по ссылке непотокобезопасно.
@@ -2375,20 +2375,20 @@ public:
     }
 
     // method WriteComplexData
-	// is a more convenient interface
-	// method WriteComplexDataVA
-	// this method is defined here and not in the library, because Its appearance
-	// differs in C and Delphi
-	// The method's functionality is almost the same as that of PatcherInstance::WriteCodePatch
-	// (see the description of this method)
-	// that is, the method writes to the address address, the sequence of bytes,
-	// defined by the arguments format and ...,
-	// BUT! DOES NOT create an instance of the Patch class, with all that is implied (i.e., not allowing to undo, access to edit from another mode, etc.)
-	// ATTENTION!
-	// Use this method only for dynamically creating blocks
-	// code, i.e. Write this method only in your memory,
-	// a in the code of the program to be modified only with the help of
-	// PatcherInstance::WriteCodePatch
+    // is a more convenient interface
+    // method WriteComplexDataVA
+    // this method is defined here and not in the library, because Its appearance
+    // differs in C and Delphi
+    // The method's functionality is almost the same as that of PatcherInstance::WriteCodePatch
+    // (see the description of this method)
+    // that is, the method writes to the address address, the sequence of bytes,
+    // defined by the arguments format and ...,
+    // BUT! DOES NOT create an instance of the Patch class, with all that is implied (i.e., not allowing to undo, access to edit from another mode, etc.)
+    // ATTENTION!
+    // Use this method only for dynamically creating blocks
+    // code, i.e. Write this method only in your memory,
+    // a in the code of the program to be modified only with the help of
+    // PatcherInstance::WriteCodePatch
     ///////////////////////////////////////////////////////////////////////////////////////
     // метод WriteComplexData
     // является более удобным интерфейсом

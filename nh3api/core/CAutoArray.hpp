@@ -29,7 +29,7 @@ class CAutoArray
   {
     if (deleteData) 
     {
-      for (uint32_t i = 0; i < size; i++) 
+      for (size_t i = 0; i < size; i++) 
       {
         T* pElement = Get(i);
         exe_invoke_delete(pElement);
@@ -67,32 +67,31 @@ class CAutoArray
   {
     if (allocSize <= size) 
     {
-      // time to realloc
       Allocate(allocSize + step);
     }
     size++;
     return Put(size - 1, element);
   }
 
-  virtual T* Get(uint32_t elementNbr) 
+  virtual T* Get(size_t elementNbr) 
   {
     if (elementNbr >= size) 
       return nullptr;
     return reinterpret_cast<T*>(pArray[elementNbr]);
   }
 
-  virtual bool Put(uint32_t elementNbr, T* element) 
+  virtual bool Put(size_t elementNbr, T* element) 
   {
     if (elementNbr >= size) return false;
-    pArray[elementNbr] = reinterpret_cast<uint32_t>(element);
+    pArray[elementNbr] = reinterpret_cast<size_t>(element);
     return true;
   }
 
-  virtual bool Delete(uint32_t elementNbr) 
+  virtual bool Delete(size_t elementNbr) 
   {
     if (elementNbr >= size) return false;
 
-    for (uint32_t index = elementNbr; index < size - 1; index++) {
+    for (size_t index = elementNbr; index < size - 1; index++) {
       pArray[index] = pArray[index + 1];
     }
     size--;
@@ -100,14 +99,14 @@ class CAutoArray
     return true;
   }
 
-  virtual bool Insert(uint32_t nextElementNbr, T* element) 
+  virtual bool Insert(size_t nextElementNbr, T* element) 
   {
     if (nextElementNbr >= size) 
       return false;
 
     T* save = Get(size - 1);
 
-    for (uint32_t index = size - 1; index > nextElementNbr; index--) 
+    for (size_t index = size - 1; index > nextElementNbr; index--) 
     {
       pArray[index] = pArray[index - 1];
     }
@@ -118,15 +117,15 @@ class CAutoArray
     return true;
   }
 
-  virtual uint32_t GetCount() 
+  virtual size_t GetCount() 
   { return size; }
 
-  T* operator[](uint32_t index) 
+  T* operator[](size_t index) 
   { return Get(index); }
 
  protected:
   uint32_t step;
   uint32_t* pArray;
-  uint32_t allocSize;
-  uint32_t size;
+  size_t allocSize;
+  size_t size;
 };

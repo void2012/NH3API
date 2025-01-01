@@ -18,33 +18,33 @@ class recruitUnit : public baseManager
         recruitUnit() NH3API_DELETED_FUNCTION
 
     public:
-        recruitUnit(armyGroup* newGroup, 
-                    bool bGroupIsTownGarrison, 
-                    TCreatureType MonType1, 
-                    int16_t* numMon1, 
-                    TCreatureType MonType2, 
-                    int16_t* numMon2, 
-                    TCreatureType MonType3, 
-                    int16_t* numMon3, 
-                    TCreatureType MonType4, 
+        recruitUnit(armyGroup* newGroup,
+                    bool bGroupIsTownGarrison,
+                    TCreatureType MonType1,
+                    int16_t* numMon1,
+                    TCreatureType MonType2,
+                    int16_t* numMon2,
+                    TCreatureType MonType3,
+                    int16_t* numMon3,
+                    TCreatureType MonType4,
                     int16_t* numMon4) NH3API_NOEXCEPT
             : recruitUnit(nh3api::dummy_tag)
         { THISCALL_11(void, 0x551750, this, newGroup, bGroupIsTownGarrison, MonType1, numMon1, MonType2, numMon2, MonType3, numMon3, MonType4, numMon4); }
 
-        recruitUnit(hero* _thisHero, 
-                    TCreatureType _MonType1, 
-                    int16_t* numMon1, 
-                    TCreatureType _MonType2, 
-                    int16_t* numMon2, 
-                    TCreatureType _MonType3, 
-                    int16_t* numMon3, 
-                    TCreatureType _MonType4, 
+        recruitUnit(hero* _thisHero,
+                    TCreatureType _MonType1,
+                    int16_t* numMon1,
+                    TCreatureType _MonType2,
+                    int16_t* numMon2,
+                    TCreatureType _MonType3,
+                    int16_t* numMon3,
+                    TCreatureType _MonType4,
                     int16_t* numMon4) NH3API_NOEXCEPT
             : recruitUnit(nh3api::dummy_tag)
         { THISCALL_10(void, 0x551860, this, _thisHero, _MonType1, numMon1, _MonType2, numMon2, _MonType3, numMon3, _MonType4, numMon4); }
 
-        recruitUnit(town* newTown, 
-                    int32_t newDwellingIndex, 
+        recruitUnit(town* newTown,
+                    int32_t newDwellingIndex,
                     int32_t bInInTownMainScreen) NH3API_NOEXCEPT
             : recruitUnit(nh3api::dummy_tag)
         { THISCALL_4(void, 0x551960, this, newTown, newDwellingIndex, bInInTownMainScreen); }
@@ -152,7 +152,7 @@ class recruitUnit : public baseManager
         int32_t updateNeeded;
 
         // offset: +0xA8 = +168,  size = 0x4 = 4
-        int32_t errorExit; 
+        int32_t errorExit;
 
         // offset: +0xAC = +172,  size = 0x4 = 4
         int32_t maxAvail;

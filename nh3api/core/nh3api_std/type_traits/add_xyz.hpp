@@ -21,7 +21,7 @@
 
 namespace nh3api
 {
-namespace tt 
+namespace tt
 {
 namespace details
 {
@@ -65,13 +65,13 @@ template <> struct add_lvalue_reference<volatile void> { typedef volatile void t
 #include <type_traits>
 namespace nh3api
 {
-namespace tt 
+namespace tt
 {
 using ::std::add_volatile;
 using ::std::add_const;
 using ::std::add_cv;
-using ::std::add_lvalue_reference;  
+using ::std::add_lvalue_reference;
 
-} // namespace tt 
+} // namespace tt
 } // namespace nh3api
 #endif // NH3API_TYPE_TRAITS_IMPL

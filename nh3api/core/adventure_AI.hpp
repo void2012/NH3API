@@ -18,27 +18,27 @@
 class type_AI_player
 {
     public:
-		// Player team /
-		// Команда игрока.
-		// offset: +0x0 = +0,  size = 0x2 = 2
-		int16_t team;
+        // Player team /
+        // Команда игрока.
+        // offset: +0x0 = +0,  size = 0x2 = 2
+        int16_t team;
 
-		// Seer hut value /
-		// Ценность хижины провидца.
-		// offset: +0x4 = +4,  size = 0x4 = 4
-		int32_t magus_hut_value;
+        // Seer hut value /
+        // Ценность хижины провидца.
+        // offset: +0x4 = +4,  size = 0x4 = 4
+        int32_t magus_hut_value;
 
-		// offset: +0x8 = +8,  size = 0x1C = 28
-		std::array<int32_t, 7> reserved_funds;
+        // offset: +0x8 = +8,  size = 0x1C = 28
+        std::array<int32_t, 7> reserved_funds;
 
-		// offset: +0x24 = +36,  size = 0x1C = 28
-		std::array<int32_t, 7> resource_supply;
+        // offset: +0x24 = +36,  size = 0x1C = 28
+        std::array<int32_t, 7> resource_supply;
 
-		// offset: +0x40 = +64,  size = 0x1C = 28
-		std::array<int32_t, 7> resource_demand;
+        // offset: +0x40 = +64,  size = 0x1C = 28
+        std::array<int32_t, 7> resource_demand;
 
-		// offset: +0x5C = +92,  size = 0x38 = 56
-		std::array<double, 7> resource_value;
+        // offset: +0x5C = +92,  size = 0x38 = 56
+        std::array<double, 7> resource_value;
 
 };
 #pragma pack(pop)
@@ -93,7 +93,7 @@ virtual int32_t __thiscall get_value(const hero* owner, bool equipped, bool exac
 NH3API_FORCEINLINE \
 CLASS() NH3API_NOEXCEPT \
 NH3API_DELEGATE_DUMMY(CLASS) \
-{ NH3API_SET_VFTABLE(); }   
+{ NH3API_SET_VFTABLE(); }
 #endif
 
 #ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1
@@ -105,7 +105,7 @@ CLASS(TYPE1 _##ARG1) NH3API_NOEXCEPT \
 NH3API_FORCEINLINE \
 CLASS() NH3API_NOEXCEPT \
     : CLASS(VALUE1) \
-{} 
+{}
 #endif
 
 #ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT2
@@ -165,7 +165,7 @@ NH3API_VIRTUAL_CLASS type_tome_artifact : public type_combat_artifact
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_tome_artifact, type_combat_artifact, school)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(type_tome_artifact, type_combat_artifact, TSpellSchool, school, const_invalid_school)
-    
+
     public:
         // offset: +0x8 = +8,  size = 0x4 = 4
         TSpellSchool school;
@@ -207,7 +207,7 @@ NH3API_VIRTUAL_CLASS type_income_artifact : public type_artifact_effect
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_income_artifact, type_artifact_effect, amount, resource)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT2(type_income_artifact, type_artifact_effect, int32_t, amount, EGameResource, resource, 0, const_no_resource)
-    
+
     public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t amount;
@@ -239,7 +239,7 @@ NH3API_VIRTUAL_CLASS type_spell_artifact : public type_artifact_effect
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_spell_artifact, type_artifact_effect, spell)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(type_spell_artifact, type_artifact_effect, SpellID, spell, SPELL_NONE)
-     
+
     public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         SpellID spell;
@@ -319,7 +319,7 @@ NH3API_VIRTUAL_CLASS type_luck_artifact : public type_combat_artifact
 // size = 0x8 = 8, align = 4, baseclass: type_combat_artifact
 NH3API_VIRTUAL_CLASS type_base_necromancy_artifact : public type_combat_artifact
 {
-    public: 
+    public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_base_necromancy_artifact, type_combat_artifact)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_base_necromancy_artifact)
 
@@ -328,7 +328,7 @@ NH3API_VIRTUAL_CLASS type_base_necromancy_artifact : public type_combat_artifact
 // size = 0x8 = 8, align = 4, baseclass: type_base_necromancy_artifact
 NH3API_VIRTUAL_CLASS type_necromancy_artifact : public type_base_necromancy_artifact
 {
-    public: 
+    public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_necromancy_artifact, type_base_necromancy_artifact)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_necromancy_artifact)
 
@@ -337,7 +337,7 @@ NH3API_VIRTUAL_CLASS type_necromancy_artifact : public type_base_necromancy_arti
 // size = 0x8 = 8, align = 4, baseclass: type_power_artifact
 NH3API_VIRTUAL_CLASS type_duration_artifact : public type_power_artifact
 {
-    public: 
+    public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_duration_artifact, type_power_artifact)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_duration_artifact)
 
@@ -346,7 +346,7 @@ NH3API_VIRTUAL_CLASS type_duration_artifact : public type_power_artifact
 // size = 0xC = 12, align = 4, baseclass: type_power_artifact
 NH3API_VIRTUAL_CLASS type_school_artifact : public type_power_artifact
 {
-    public: 
+    public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_school_artifact, type_power_artifact, school)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(type_school_artifact, type_power_artifact, TSpellSchool, school, const_invalid_school)
 
@@ -359,7 +359,7 @@ NH3API_VIRTUAL_CLASS type_school_artifact : public type_power_artifact
 // size = 0x8 = 8, align = 4, baseclass: type_might_artifact
 NH3API_VIRTUAL_CLASS type_angelic_alliance_artifact : public type_might_artifact
 {
-    public: 
+    public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_angelic_alliance_artifact, type_might_artifact)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_angelic_alliance_artifact)
 };
@@ -367,7 +367,7 @@ NH3API_VIRTUAL_CLASS type_angelic_alliance_artifact : public type_might_artifact
 // size = 0x8 = 8, align = 4, baseclass: type_base_necromancy_artifact
 NH3API_VIRTUAL_CLASS type_undead_king_cloak_artifact : public type_base_necromancy_artifact
 {
-    public: 
+    public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_undead_king_cloak_artifact, type_base_necromancy_artifact)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_undead_king_cloak_artifact)
 
@@ -414,7 +414,7 @@ struct type_spellvalue
 {
     public:
         NH3API_FORCEINLINE
-        type_spellvalue(const hero* new_hero) NH3API_NOEXCEPT   
+        type_spellvalue(const hero* new_hero) NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY(type_spellvalue)
         { THISCALL_2(void, 0x527220, this, new_hero); }
 

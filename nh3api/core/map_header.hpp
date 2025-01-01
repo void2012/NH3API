@@ -12,7 +12,7 @@
 
 #pragma pack(push, 4)
 // Map header /
-// Заголовок карты. 
+// Заголовок карты.
 // size = 0x2C0 = 704, align = 4
 struct CMapHeaderData
 {
@@ -36,7 +36,7 @@ public:
             NH3API_FORCEINLINE
             ~TPlayerSlotAttributes() NH3API_NOEXCEPT
             { THISCALL_1(void, 0x45A860, this); }
-            
+
         public:
             // Can be human /
             // Может быть человеком.
@@ -49,7 +49,7 @@ public:
             bool CanBeComputer;
 
             // AI strategy type /
-            // Тип ИИ игрока. 
+            // Тип ИИ игрока.
             // offset: +0x4 = +4,  size = 0x4 = 4
             int32_t AIStrategy;
 
@@ -58,7 +58,7 @@ public:
             // offset: +0x8 = +8,  size = 0x2 = 2
             int16_t legal_alignments;
 
-            // Player has random fraction(alignment) / 
+            // Player has random fraction(alignment) /
             // Игрок имеет случайную фракцию.
             // offset: +0xA = +10,  size = 0x1 = 1
             bool HasRandomAlignment;
@@ -175,7 +175,7 @@ public:
     // offset: +0x1C = +28,  size = 0x1 = 1
     bool HasTwoLayers;
 
-    // Hero placeholders / 
+    // Hero placeholders /
     // Герои, переходящие в следующий сценарий кампании.
     // offset: +0x20 = +32,  size = 0x10 = 16
     exe_vector<int32_t> placeholders;
@@ -204,7 +204,7 @@ public:
 // size = 0x304 = 772, align = 4, baseclass: CMapHeaderData
 struct NewSMapHeader : CMapHeaderData
 {
-    public: 
+    public:
         NH3API_FORCEINLINE
         NewSMapHeader() NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY(NewSMapHeader)
@@ -212,7 +212,7 @@ struct NewSMapHeader : CMapHeaderData
 
         NH3API_FORCEINLINE
         NewSMapHeader(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-            : heroPlayerSetups(tag), 
+            : heroPlayerSetups(tag),
               mapName(tag),
               mapDescription(tag),
               availableHeroes(tag)
@@ -225,7 +225,7 @@ struct NewSMapHeader : CMapHeaderData
         NH3API_FORCEINLINE
         NewSMapHeader& operator=(const NewSMapHeader& other) NH3API_NOEXCEPT
         { return *THISCALL_2(NewSMapHeader*, 0x457990, this, &other); }
-    
+
     public:
         // Hero global setups /
         // Глобальные настройки героев.

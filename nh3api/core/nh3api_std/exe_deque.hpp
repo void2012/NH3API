@@ -49,8 +49,8 @@ protected:
     typedef nh3api::allocator_adaptor<allocator_type> adaptor_type;
     typedef exe_deque<_Ty, _A>    this_type;
     typedef typename adaptor_type::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
-	typedef typename adaptor_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
-	typedef typename adaptor_type::propagate_on_container_swap propagate_on_container_swap;
+    typedef typename adaptor_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
+    typedef typename adaptor_type::propagate_on_container_swap propagate_on_container_swap;
 
 public:
     typedef typename adaptor_type::size_type       size_type;
@@ -65,13 +65,13 @@ protected:
     typedef pointer* _Mapptr;
 
 protected:
-    enum deque_properties : unsigned 
+    enum deque_properties : unsigned
     { DEQUE_MAP_SIZE = 2, DEQUE_SIZE = (4096 < (difference_type)(sizeof(value_type)) ? 1 : 4096 / (difference_type)(sizeof(value_type))) };
 
 public:
     class iterator;
 
-protected:    
+protected:
     template<typename _ValueType = typename std::add_const<exe_deque<_Ty,_A>::value_type>::type>
     class _const_iterator :
     public nh3api::container_iterator<_ValueType, exe_deque<_Ty,_A>::difference_type, std::random_access_iterator_tag>
@@ -378,25 +378,25 @@ protected:
     // initialize from [_First, _Last), input iterators
     template<class IterT>
     void _Construct(IterT _Begin, IterT _End)
-    {	
-        NH3API_IF_CONSTEXPR ( !nh3api::tt::allocator_may_throw<allocator_type>::value ) 
+    {
+        NH3API_IF_CONSTEXPR ( !nh3api::tt::allocator_may_throw<allocator_type>::value )
         {
             #if NH3API_STD_MOVE_SEMANTICS
             for (; _Begin != _End; ++_Begin)
-			    emplace_back(*_Begin);
-            #else 
+                emplace_back(*_Begin);
+            #else
             for (; _Begin != _End; ++_Begin)
-			    push_back(*_Begin);
+                push_back(*_Begin);
             #endif
         }
-        else 
+        else
         {
-            NH3API_TRY 
+            NH3API_TRY
             {
                 #if NH3API_STD_MOVE_SEMANTICS
                 for (; _Begin != _End; ++_Begin)
                     emplace_back(*_Begin);
-                #else 
+                #else
                 for (; _Begin != _End; ++_Begin)
                     push_back(*_Begin);
                 #endif
@@ -417,21 +417,21 @@ protected:
                                   || !nh3api::tt::allocator_may_throw<allocator_type>::value )
             {
                 for (; 0 < _Count; --_Count)
-			        push_back(_Val);
+                    push_back(_Val);
             }
-            else 
+            else
             {
-                NH3API_TRY 
+                NH3API_TRY
                 {
                     for (; 0 < _Count; --_Count)
-			            push_back(_Val);
-                } 
+                        push_back(_Val);
+                }
                 NH3API_CATCH(...)
                 {
                     _Tidy();
                     NH3API_RETHROW
                 }
-            }				
+            }
         }
     }
 
@@ -440,7 +440,7 @@ public:
         NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_default_constructible<allocator_type>::value)
         : adaptor(), _First(), _Last(), _Map(nullptr), _Mapsize(nullptr), _Size(0)
     {}
-            
+
     explicit exe_deque(const allocator_type& a)
         NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<allocator_type>::value)
         : adaptor(a), _First(), _Last(), _Map(nullptr), _Mapsize(nullptr), _Size(0)
@@ -459,8 +459,8 @@ public:
         : adaptor(other.adaptor.select_on_container_copy_construction())
     { _Construct(other.begin(), other.end()); }
 
-    template<class IterT 
-	NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+    template<class IterT
+    NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
     exe_deque(IterT _F, IterT _L, const _A& _Al = _A()
     NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
         : adaptor( _Al ),
@@ -470,8 +470,8 @@ public:
         //std::copy( _F, _L, std::back_inserter( *this ) );
     }
 
-    template<class IterT 
-	NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+    template<class IterT
+    NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
     exe_deque(IterT _F, IterT _L
     NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
         : adaptor(),
@@ -910,7 +910,7 @@ public:
         }
         else
         {
-            this_type _Ts = *this; 
+            this_type _Ts = *this;
             *this = other;
             other = _Ts;
         }
@@ -919,32 +919,32 @@ public:
 protected:
     template<class _Iter>
     pointer _Umove(_Iter _Begin, _Iter _End, pointer _Ptr)
-    {	
+    {
         #if !NH3API_STD_MOVE_SEMANTICS
             return std::copy(_Begin, _End, _Ptr);
-        #else 
+        #else
         if ( nh3api::tt::is_move_assignable<value_type>::value )
             return std::move(_Begin, _End, _Ptr);
-                                    
+
         else if ( nh3api::tt::is_copy_assignable<value_type>::value )
-            return std::copy(_Begin, _End, _Ptr);                          
-        else 
+            return std::copy(_Begin, _End, _Ptr);
+        else
             assert("deque::value_type must be either copy or move assignable"&&0);
         #endif
     }
 
     template<class _Iter>
     pointer _UmoveBackward(_Iter _Begin, _Iter _End, pointer _Ptr)
-    {	
+    {
         #if !NH3API_STD_MOVE_SEMANTICS
             return std::copy_backward(_Begin, _End, _Ptr);
-        #else 
+        #else
         if ( nh3api::tt::is_move_assignable<value_type>::value )
             return std::move_backward(_Begin, _End, _Ptr);
-                                    
+
         else if ( nh3api::tt::is_copy_assignable<value_type>::value )
-            return std::copy_backward(_Begin, _End, _Ptr);                          
-        else 
+            return std::copy_backward(_Begin, _End, _Ptr);
+        else
             assert("deque::value_type must be either copy or move assignable" && false);
         #endif
     }

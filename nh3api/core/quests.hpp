@@ -16,7 +16,7 @@
 #include "skills.hpp" // TSkillMastery, TSecondarySkill
 #include "player_enums.hpp" // EPlayerColor
 
-enum EQuestType : int32_t 
+enum EQuestType : int32_t
 {
     QUEST_NONE             = 0,
     QUEST_EXPERIENCE       = 1,
@@ -176,8 +176,8 @@ NH3API_VIRTUAL_CLASS type_quest
         { get_type_vftable(this)->init(this); }
 
         NH3API_FORCEINLINE
-        exe_string get_completion_text() const 
-        { 
+        exe_string get_completion_text() const
+        {
             exe_string result(nh3api::dummy_tag);
             (void) THISCALL_2(exe_string*, 0x572FF0, this, &result);
             return result;
@@ -324,7 +324,7 @@ NH3API_VIRTUAL_CLASS type_resource_quest : public type_quest
         {}
 
     public:
-        NH3API_VIRTUAL_OVERRIDE_TYPE_QUEST(type_resource_quest) 
+        NH3API_VIRTUAL_OVERRIDE_TYPE_QUEST(type_resource_quest)
 
     public:
         // Resource requirement /
@@ -447,7 +447,7 @@ NH3API_VIRTUAL_CLASS type_monster_quest : public type_quest
 // size = 0x4C = 76, align = 4, baseclass: type_quest
 NH3API_VIRTUAL_CLASS type_defeat_hero_quest : public type_quest
 {
-    public: 
+    public:
         NH3API_FORCEINLINE
         type_defeat_hero_quest(bool _seer_hut) NH3API_NOEXCEPT
             : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
@@ -570,7 +570,7 @@ class TQuestGuard
         }
 
         NH3API_FORCEINLINE
-        exe_string getRolloverText(int32_t player) const 
+        exe_string getRolloverText(int32_t player) const
         {
             exe_string result(nh3api::dummy_tag);
             (void) THISCALL_3(exe_string*, 0x573410, this, &result, player);
@@ -603,21 +603,21 @@ class TQuestGuard
 // Тип вознаграждения хижины провидца.
 enum TSeerRewardType : uint32_t
 {
-	eRewardNone           = 0,
-	eRewardExperience     = 1,  // Очки опыта
-	eRewardMana           = 2,  // Мана
-	eRewardMorale         = 3,  // Бонус боевого духа
-	eRewardLuck           = 4,  // Бонус удачи
-	eRewardResource       = 5,  // Ресурсы
-	eRewardPrimarySkill   = 6,  // Первичный навык
-	eRewardSecondarySkill = 7,  // Вторичный навык
-	eRewardArtifact       = 8,  // Артефакт
-	eRewardSpell          = 9,  // Заклинание
+    eRewardNone           = 0,
+    eRewardExperience     = 1,  // Очки опыта
+    eRewardMana           = 2,  // Мана
+    eRewardMorale         = 3,  // Бонус боевого духа
+    eRewardLuck           = 4,  // Бонус удачи
+    eRewardResource       = 5,  // Ресурсы
+    eRewardPrimarySkill   = 6,  // Первичный навык
+    eRewardSecondarySkill = 7,  // Вторичный навык
+    eRewardArtifact       = 8,  // Артефакт
+    eRewardSpell          = 9,  // Заклинание
     eRewardCreature       = 10, // Существо
 };
 
 #pragma pack(push, 4)
-// Seerhut reward / 
+// Seerhut reward /
 // Информация о вознаграждении хижины провидца.
 // size = 0xC = 12, align = 4
 struct TSeerReward
@@ -627,7 +627,7 @@ struct TSeerReward
         TSeerReward(TSeerRewardType reward_type,
                     int32_t reward_value1,
                     int32_t reward_value2) NH3API_NOEXCEPT
-            : rewardType(reward_type), 
+            : rewardType(reward_type),
               rewardValue1(reward_value1),
               rewardValue2(reward_value2)
         {}
@@ -637,11 +637,11 @@ struct TSeerReward
             : rewardType(eRewardNone), rewardValue1(0), rewardValue2(0)
         {}
 
-        NH3API_FORCEINLINE 
+        NH3API_FORCEINLINE
         TSeerReward(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
         { NH3API_IGNORE(rewardType, rewardValue1, rewardValue2); }
 
-    public: 
+    public:
         int32_t getValue(hero* current_hero)
         { return THISCALL_2(int32_t, 0x573E40, this, current_hero); }
 
@@ -650,7 +650,7 @@ struct TSeerReward
 
         void giveReward(hero* current_hero, bool human_player)
         { THISCALL_3(void, 0x574050, this, current_hero, human_player); }
-    
+
     public:
         // Reward type /
         // Тип вознаграждения хижины провидца.

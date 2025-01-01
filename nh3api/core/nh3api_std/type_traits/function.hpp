@@ -17,7 +17,7 @@
 
 #ifndef NH3API_MACRO_COMMA
 #define NH3API_MACRO_COMMA ,
-#endif 
+#endif
 
 #if NH3API_TYPE_TRAITS_IMPL
 
@@ -765,7 +765,7 @@ yes_type is_function_ptr_tester(R (__cdecl*)( T0 , T1 , T2 , T3 , T4 , T5 , T6 ,
 template <bool>
 struct is_mem_fun_pointer_select
 {
-	template <class T> struct result_ 
+    template <class T> struct result_
         : public false_type{};
 };
 
@@ -774,8 +774,8 @@ struct is_mem_fun_pointer_select<false>
 {
     template <typename T> struct result_
     {
-	#pragma warning(push)
-	#pragma warning(disable:6334)
+    #pragma warning(push)
+    #pragma warning(disable:6334)
         static T* make_t;
         typedef result_<T> self_type;
 

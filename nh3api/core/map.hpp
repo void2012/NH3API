@@ -12,11 +12,11 @@
 #include "terrain.hpp" // TTerrainType, type_point
 
 // Размер карты по горизонтали
-NH3API_INLINE_OR_EXTERN int32_t& MAP_WIDTH 
+NH3API_INLINE_OR_EXTERN int32_t& MAP_WIDTH
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783C8, int32_t));
 
 // Размер карты по вертикали
-NH3API_INLINE_OR_EXTERN int32_t& MAP_HEIGHT 
+NH3API_INLINE_OR_EXTERN int32_t& MAP_HEIGHT
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783CC, int32_t));
 
 #pragma pack(push, 4)
@@ -28,21 +28,21 @@ class TTimedEvent
     public:
         NH3API_FORCEINLINE
         TTimedEvent() NH3API_NOEXCEPT
-            : PlayerFlags(0), 
-              ApplyToHuman(false), 
+            : PlayerFlags(0),
+              ApplyToHuman(false),
               ApplyToComputer(false),
               FirstTime(0),
               Interval(0)
-        { 
+        {
             ResQty.fill(0);
         }
 
         NH3API_FORCEINLINE
         TTimedEvent(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : Message(tag)
-        { NH3API_IGNORE(ResQty, 
-                        PlayerFlags, 
-                        ApplyToHuman, 
+        { NH3API_IGNORE(ResQty,
+                        PlayerFlags,
+                        ApplyToHuman,
                         ApplyToComputer,
                         FirstTime,
                         Interval); }
@@ -100,8 +100,8 @@ class TTownEvent : TTimedEvent
         NH3API_FORCEINLINE
         TTownEvent(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : TTimedEvent(tag)
-        { NH3API_IGNORE(TownNum, 
-                        BuildBuildings, 
+        { NH3API_IGNORE(TownNum,
+                        BuildBuildings,
                         generatorBonuses); }
     public:
         // Town ID /
@@ -151,22 +151,22 @@ class NewfullMap
               RandomDwellingList(tag)
             #if NH3API_STD_INITIALIZER_LIST
             , // I HATE THIS!
-            ObjectTypeTables{tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, 
+            ObjectTypeTables{tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
                         tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
                         tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag} 
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                        tag, tag, tag, tag, tag, tag, tag}
             #endif
         { NH3API_IGNORE(cellData, Size, HasTwoLevels); }
 
@@ -179,7 +179,7 @@ class NewfullMap
 
         int32_t PlaceObject(int32_t ObjectIndex, bool setExtraInfo)
         { return THISCALL_3(int32_t, 0x506170, this, ObjectIndex, setExtraInfo); }
-    
+
     public:
         // Map object types /
         // Список данных о типах объектов на карте.
@@ -192,78 +192,78 @@ class NewfullMap
         exe_vector<CObject> Objects;
 
         // Map objects sprites /
-		// Список спрайтов объектов.
-		// offset: +0x20 = +32,  size = 0x10 = 16
+        // Список спрайтов объектов.
+        // offset: +0x20 = +32,  size = 0x10 = 16
         exe_vector<CSprite*> Sprites;
 
- 		// Customized resources or artifacts /
-		// Список настроенных артефактов/ресурсов
-		// offset: +0x30 = +48,  size = 0x10 = 16
+         // Customized resources or artifacts /
+        // Список настроенных артефактов/ресурсов
+        // offset: +0x30 = +48,  size = 0x10 = 16
         exe_vector<TreasureData> CustomTreasureList;
 
         // Customized monsters /
-		// Список монстров.
-		// offset: +0x40 = +64,  size = 0x10 = 16
+        // Список монстров.
+        // offset: +0x40 = +64,  size = 0x10 = 16
         exe_vector<MonsterData> CustomMonsterList;
 
         // Pandora's Boxes /
-		// Список шкатулок пандоры.
-		// offset: +0x50 = +80,  size = 0x10 = 16
+        // Список шкатулок пандоры.
+        // offset: +0x50 = +80,  size = 0x10 = 16
         exe_vector<BlackBoxData> BlackBoxList;
 
         // Seer Huts /
-		// Список хижин провидца.
-		// offset: +0x60 = +96,  size = 0x10 = 16
+        // Список хижин провидца.
+        // offset: +0x60 = +96,  size = 0x10 = 16
         exe_vector<TSeerHut> SeerHutList;
 
         // Quest guards /
-		// Список стражей границей квеста.
-		// offset: +0x70 = +112,  size = 0x10 = 16
+        // Список стражей границей квеста.
+        // offset: +0x70 = +112,  size = 0x10 = 16
         exe_vector<TQuestGuard> QuestGuardList;
 
         // Timed global map events list /
-		// Список глобальных событий карты.
-		// offset: +0x80 = +128,  size = 0x10 = 16
+        // Список глобальных событий карты.
+        // offset: +0x80 = +128,  size = 0x10 = 16
         exe_vector<TTimedEvent> TimedEventList;
 
         // Timed town events list /
-		// Список событий города.
-		// offset: +0x90 = +144,  size = 0x10 = 16
+        // Список событий города.
+        // offset: +0x90 = +144,  size = 0x10 = 16
         exe_vector<TTownEvent> TownEventList;
 
         // Hero placeholders(used for campaigns only) /
-		// Лагеря героев(используются только для кампаний).
-		// offset: +0xA0 = +160,  size = 0x10 = 16
+        // Лагеря героев(используются только для кампаний).
+        // offset: +0xA0 = +160,  size = 0x10 = 16
         exe_vector<HeroPlaceholder> PlaceHolderList;
 
         // Quests /
-		// Квесты.
-		// offset: +0xB0 = +176,  size = 0x10 = 16
+        // Квесты.
+        // offset: +0xB0 = +176,  size = 0x10 = 16
         exe_vector<type_quest*> QuestList;
 
         // Random dwellings. Randomized at every restart. /
-		// Случайные жилища. Рандомизируются при каждом рестарте.
-		// offset: +0xC0 = +192,  size = 0x10 = 16
+        // Случайные жилища. Рандомизируются при каждом рестарте.
+        // offset: +0xC0 = +192,  size = 0x10 = 16
         exe_vector<TRandomDwelling> RandomDwellingList;
 
         // Map cells /
-		// Клетки карты.
-		// offset: +0xD0 = +208,  size = 0x4 = 4
+        // Клетки карты.
+        // offset: +0xD0 = +208,  size = 0x4 = 4
         NewmapCell* cellData;
 
         // Map size(both length and width) /
-		// Размер карты(длина и ширина, совпадают).
-		// offset: +0xD4 = +212,  size = 0x4 = 4
+        // Размер карты(длина и ширина, совпадают).
+        // offset: +0xD4 = +212,  size = 0x4 = 4
         int32_t Size;
 
         // Has dungeon?
-		// Карта двухуровневая?
-		// offset: +0xD8 = +216,  size = 0x1 = 1
+        // Карта двухуровневая?
+        // offset: +0xD8 = +216,  size = 0x1 = 1
         bool HasTwoLevels;
 
         // Map editor objects. Used by the Random Map Generator /
-		// Объекты редактора карт. Используются генератором случайных карт.
-		// offset: +0xDC = +220,  size = 0xE80 = 3712
+        // Объекты редактора карт. Используются генератором случайных карт.
+        // offset: +0xDC = +220,  size = 0xE80 = 3712
         std::array<exe_vector<CObjectType>, MAX_OBJECTS> ObjectTypeTables;
 };
 #pragma pack(pop)

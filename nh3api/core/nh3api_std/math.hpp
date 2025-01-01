@@ -16,7 +16,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace nh3api 
+namespace nh3api
 {
 
 // integer math
@@ -47,7 +47,7 @@ int32_t count_digits(uint32_t x)
     int32_t result = (9 * ilog2(x)) >> 5;
     result += x > count_digits_table[result];
     return result + 1;
-}    
+}
 
 // floating-point math
 
@@ -68,33 +68,33 @@ union fval_t
     float _Val;
 };
 
-union dval_t 
+union dval_t
 { // pun floating type as integer array
     uint16_t _Sh[8];
     double _Val;
 };
 
 // categorize *px
-inline short fdtest(const float* const px) 
-{ 
+inline short fdtest(const float* const px)
+{
     const fval_t* ps = reinterpret_cast<const fval_t*>(px);
-    if ((ps->_Sh[1] & 32640u) == 255u << 7) 
+    if ((ps->_Sh[1] & 32640u) == 255u << 7)
         return (ps->_Sh[1] & 127u) != 0 || ps->_Sh[0] != 0 ? FP_NAN : FP_INFINITE;
-    else if ((ps->_Sh[1] & ~0x8000u) != 0 || ps->_Sh[0] != 0) 
+    else if ((ps->_Sh[1] & ~0x8000u) != 0 || ps->_Sh[0] != 0)
         return (ps->_Sh[1] & 32640u) == 0 ? FP_SUBNORMAL : FP_NORMAL;
-    else 
+    else
         return 0;
 }
 
 // categorize *px
-inline short ddtest(const double* const px) 
-{ 
+inline short ddtest(const double* const px)
+{
     const dval_t* ps = reinterpret_cast<const dval_t*>(px);
-    if ((ps->_Sh[3] & 32752u) == 2047u << 4)  
+    if ((ps->_Sh[3] & 32752u) == 2047u << 4)
         return (ps->_Sh[3] & 15u) != 0 || ps->_Sh[2] != 0 || ps->_Sh[1] != 0 || ps->_Sh[0] != 0 ? FP_NAN : FP_INFINITE;
-    else if ((ps->_Sh[3] & ~0x8000) != 0 || ps->_Sh[2] != 0 || ps->_Sh[1] != 0 || ps->_Sh[0] != 0) 
+    else if ((ps->_Sh[3] & ~0x8000) != 0 || ps->_Sh[2] != 0 || ps->_Sh[1] != 0 || ps->_Sh[0] != 0)
         return (ps->_Sh[3] & 32752u) == 0 ? FP_SUBNORMAL : FP_NORMAL;
-    else 
+    else
         return 0;
 }
 
@@ -104,7 +104,7 @@ inline short ddtest(const double* const px)
 
 // older versions of MSVC STL
 #if !NH3API_CHECK_CPP11
-namespace nh3api 
+namespace nh3api
 {
 
 inline int fpclassify(float num) NH3API_NOEXCEPT
@@ -138,17 +138,17 @@ inline bool isnormal(double num) NH3API_NOEXCEPT
 { return ddtest(&num) == (-1); }
 
 inline double trunc(double num)
-{ return (num > 0) ? floor(num) : ceil(num); }	
+{ return (num > 0) ? floor(num) : ceil(num); }
 inline float trunc(float num)
 { return (num > 0) ? floorf(num) : ceilf(num); }
 
-inline bool signbit(double num) NH3API_NOEXCEPT 
+inline bool signbit(double num) NH3API_NOEXCEPT
 { return !!(*reinterpret_cast<const uint64_t*>(&num) & (1ull << 63ull)); }
-inline bool signbit(float num) NH3API_NOEXCEPT 
+inline bool signbit(float num) NH3API_NOEXCEPT
 { return !!(*reinterpret_cast<const uint32_t*>(&num) & (1ul << 31ul)); }
 
 } // namespace nh3api
-#else 
+#else
 namespace nh3api
 {
 

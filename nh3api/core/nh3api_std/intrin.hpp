@@ -8,7 +8,7 @@
 
 #include "ida.hpp"
 
-// this is a hack designed to enable global variables addresses to be backed into binaries 
+// this is a hack designed to enable global variables addresses to be backed into binaries
 // rather that using global variables which is double indirection
 // whole program optimization doesn't always fix this issue though.
 #if NH3API_CHECK_MINGW_CLANG || NH3API_CHECK_CLANG_CL
@@ -62,23 +62,23 @@ T* get_ptr(uint32_t address) NH3API_NOEXCEPT
     #define NH3API_INTRIN_FUNCTION NH3API_IDA_INTRIN
 #endif
 
-namespace nh3api 
+namespace nh3api
 {
 
 #if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
-inline constexpr bool is_constant_evaluated() noexcept 
+inline constexpr bool is_constant_evaluated() noexcept
 { return __builtin_is_constant_evaluated(); }
 #elif NH3API_CHECK_MSVC && NH3API_STD_RELAXED_CONSTEXPR
 struct msvc_is_constant_evaluated_helper_base {};
 struct msvc_is_constant_evaluated_helper1 : msvc_is_constant_evaluated_helper_base { int test; };
 struct msvc_is_constant_evaluated_helper2 : msvc_is_constant_evaluated_helper_base { int test; };
-inline constexpr bool is_constant_evaluated() noexcept 
+inline constexpr bool is_constant_evaluated() noexcept
 {
-    return &msvc_is_constant_evaluated_helper1::test != 
+    return &msvc_is_constant_evaluated_helper1::test !=
         static_cast<int msvc_is_constant_evaluated_helper_base::*>(&msvc_is_constant_evaluated_helper2::test);
     return false;
 }
-#else 
+#else
 #endif
 
 #if !NH3API_HAS_BUILTIN_ADDRESSOF
@@ -87,9 +87,9 @@ template<typename T> NH3API_FORCEINLINE
 T* addressof(T& arg) NH3API_NOEXCEPT
 { return reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(arg))); }
 
-#else 
+#else
 
-template<typename T>  
+template<typename T>
 NH3API_MSVC_INTRIN NH3API_CONSTEXPR NH3API_FORCEINLINE
 T* addressof(T& arg) NH3API_NOEXCEPT
 { return __builtin_addressof(arg); }
@@ -113,15 +113,15 @@ template<class To, class From>
 NH3API_FORCEINLINE
 #if NH3API_HAS_BUILTIN_BIT_CAST
 NH3API_CONSTEXPR
-#endif 
+#endif
 To bit_cast( const From& from ) NH3API_NOEXCEPT
 {
-    NH3API_STATIC_ASSERT("nh3api::bit_cast: types must have the same size and trivially copyable.", 
+    NH3API_STATIC_ASSERT("nh3api::bit_cast: types must have the same size and trivially copyable.",
     (sizeof(To) == sizeof(From)) && tt::is_trivially_copyable<To>::value && tt::is_trivially_copyable<From>::value);
-    
+
     #if NH3API_HAS_BUILTIN_BIT_CAST
     return __builtin_bit_cast(To, from);
-    #else 
+    #else
     To result;
     memcpy(addressof(result), addressof(from), sizeof(To));
     return result;
@@ -131,38 +131,38 @@ To bit_cast( const From& from ) NH3API_NOEXCEPT
 #endif // __cpp_lib_bit_cast
 
 /*
-template <class T1, class T2 
+template <class T1, class T2
 NH3API_SFINAE_BEGIN(::std::is_assignable<T1&, T2 const&>::value)>
-constexpr T1& assign_trivially_copyable(T1& dst, T2 const& src) 
+constexpr T1& assign_trivially_copyable(T1& dst, T2 const& src)
 {
     dst = src;
     return dst;
 }
 
 // clang-format off
-template <class T1, class T2 
+template <class T1, class T2
 NH3API_SFINAE_BEGIN(!::std::is_assignable<T1&, T2 const&>::value &&
                     ::std::is_assignable<T1&, T2&&>::value)>
 // clang-format on
-constexpr T1& assign_trivially_copyable(T1& dst, T2& src) 
+constexpr T1& assign_trivially_copyable(T1& dst, T2& src)
 {
   dst = static_cast<T2&&>(src); // this is safe, we're not actually moving anything since the assignment is trivial
   return dst;
 }
 
 template <class T, class... Args, class = decltype(::new(std::declval<void*>()) T(std::declval<_Args>()...))>
-NH3API_CONSTEXPR_CPP_20 T* construct_at(T* ptr, Args&&... args) 
+NH3API_CONSTEXPR_CPP_20 T* construct_at(T* ptr, Args&&... args)
 {
   return ::new (static_cast<void*>(ptr)) T(std::forward<Args>(args)...);
 }
 
 // clang-format off
-template <class T1, class T2 
+template <class T1, class T2
 NH3API_SFINAE_BEGIN(!::std::is_assignable<T1&, T2 const&>::value &&
                     !::std::is_assignable<T1&, T2&&>::value &&
                     ::std::is_constructible<T1, T2 const&>::value)>
 // clang-format on
-NH3API_CONSTEXPR_CPP_20 T1& assign_trivially_copyable(T1& dst, T2 const& src) 
+NH3API_CONSTEXPR_CPP_20 T1& assign_trivially_copyable(T1& dst, T2 const& src)
 {
   // T1 is trivially destructible, so we don't need to call its destructor to end the lifetime of the object
   // that was there previously
@@ -171,13 +171,13 @@ NH3API_CONSTEXPR_CPP_20 T1& assign_trivially_copyable(T1& dst, T2 const& src)
 }
 
 // clang-format off
-template <class T1, class T2 
+template <class T1, class T2
 NH3API_SFINAE_BEGIN(!::std::is_assignable<T1&, T2 const&>::value &&
                     !::std::is_assignable<T1&, T2&&>::value &&
                     !::std::is_constructible<T1, T2 const&>::value &&
                     ::std::is_constructible<T1, T2&&>::value)>
 // clang-format on
-NH3API_CONSTEXPR_CPP_20 T1& assign_trivially_copyable(T1& dst, T2& src) 
+NH3API_CONSTEXPR_CPP_20 T1& assign_trivially_copyable(T1& dst, T2& src)
 {
   // T1 is trivially destructible, so we don't need to call its destructor to end the lifetime of the object
   // that was there previously
@@ -186,7 +186,7 @@ NH3API_CONSTEXPR_CPP_20 T1& assign_trivially_copyable(T1& dst, T2& src)
 }
 
 template <class From, class To>
-struct is_always_bitcastable 
+struct is_always_bitcastable
 {
   typedef typename std::remove_cv<From>::type UnqualFrom;
   typedef typename std::remove_cv<To>::type   UnqualTo;
@@ -204,13 +204,13 @@ struct is_always_bitcastable
 };
 
 template <class T1, class T2, class = void>
-struct is_less_than_comparable 
-    : false_type 
+struct is_less_than_comparable
+    : false_type
 {};
 
 template <class T1, class T2>
-struct is_less_than_comparable<T1, T2, void_t<decltype(std::declval<T1>() < std::declval<T2>())> > 
-    : true_type 
+struct is_less_than_comparable<T1, T2, void_t<decltype(std::declval<T1>() < std::declval<T2>())> >
+    : true_type
 {};
 
 // The definition is required because __less is part of the ABI, but it's empty
@@ -219,19 +219,19 @@ template <class T1 = void, class T2 = T1>
 struct less_cpp14 {};
 
 template <>
-struct less_cpp14<void, void> 
+struct less_cpp14<void, void>
 {
     template <class T1, class T2>
-    constexpr bool operator()(const T1& left, const T2& right) const 
+    constexpr bool operator()(const T1& left, const T2& right) const
     { return left < right; }
 };
 
 template <class T1, class T2
 NH3API_SFINAE_BEGIN(is_less_than_comparable<const T1*, const T2*>::value)>
-constexpr bool is_pointer_in_range(const T1* begin, const T1* end, const T2* ptr) 
+constexpr bool is_pointer_in_range(const T1* begin, const T1* end, const T2* ptr)
 {
   #if !NH3API_CHECK_MSVC && NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
-  if (__builtin_is_constant_evaluated()) 
+  if (__builtin_is_constant_evaluated())
   {
     // If this is not a constant during constant evaluation we know that ptr is not part of the allocation where
     // [begin, end) is.
@@ -246,7 +246,7 @@ constexpr bool is_pointer_in_range(const T1* begin, const T1* end, const T2* ptr
 
 template <class T1, class T2
 NH3API_SFINAE_BEGIN(!is_less_than_comparable<const T1*, const T2*>::value)>
-constexpr bool is_pointer_in_range(const T1* begin, const T1* end, const T2* ptr) 
+constexpr bool is_pointer_in_range(const T1* begin, const T1* end, const T2* ptr)
 {
 #if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
   if (__builtin_is_constant_evaluated())
@@ -258,7 +258,7 @@ constexpr bool is_pointer_in_range(const T1* begin, const T1* end, const T2* ptr
 
 template <class T1, class T2
 NH3API_SFINAE_BEGIN(is_always_bitcastable<T2, T1>::value)>
-constexpr T1* memmove_constexpr_impl(T1* dst, T2* src, uint32_t count) 
+constexpr T1* memmove_constexpr_impl(T1* dst, T2* src, uint32_t count)
 {
     if (dst == src)
     {
@@ -279,9 +279,9 @@ constexpr T1* memmove_constexpr_impl(T1* dst, T2* src, uint32_t count)
 
 template <class T1, class T2
 NH3API_SFINAE_BEGIN(is_always_bitcastable<T2, T1>::value)>
-constexpr T1* memmove_constexpr(T1* dst, T2* src, uint32_t count) 
+constexpr T1* memmove_constexpr(T1* dst, T2* src, uint32_t count)
 {
-#if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED    
+#if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
     if (__builtin_is_constant_evaluated())
     {
         #if NH3API_HAS_BUILTIN_MEMMOVE
@@ -297,11 +297,11 @@ constexpr T1* memmove_constexpr(T1* dst, T2* src, uint32_t count)
     {
         #if NH3API_HAS_BUILTIN_MEMMOVE
         return __builtin_memmove(dst, src, (count) * sizeof(T1));
-        #else 
+        #else
         return memmove(dst, src, (count) * sizeof(T1));
         #endif
     }
-#else 
+#else
     return memmove_constexpr_impl(dst, src, count);
 #endif
 }
@@ -311,13 +311,13 @@ constexpr T1* memmove_constexpr(T1* dst, T2* src, uint32_t count)
 template <class T1, class T2>
 constexpr T1* memmove_constexpr(T1* dst, T2* src, uint32_t count);
 
-template <> constexpr 
+template <> constexpr
 char* memmove_constexpr<char, const char>(char* dst, const char* src, uint32_t count)
 {
 #if NH3API_HAS_BUILTIN_MEMMOVE
     __builtin_memmove(dst, src, count);
     return dst;
-#else 
+#else
     if ( dst == src )
         return dst;
     bool loop_forward = true;
@@ -348,13 +348,13 @@ char* memmove_constexpr<char, const char>(char* dst, const char* src, uint32_t c
 #endif
 }
 
-template <> constexpr 
+template <> constexpr
 wchar_t* memmove_constexpr<wchar_t, const wchar_t>(wchar_t* dst, const wchar_t* src, uint32_t count)
-{   
+{
 #if NH3API_HAS_BUILTIN_MEMMOVE
     __builtin_memmove(dst, src, count * sizeof(wchar_t));
     return dst;
-#else 
+#else
     if ( dst == src )
         return dst;
     bool loop_forward = true;
@@ -396,7 +396,7 @@ struct str_func_chooser<char>
     #if NH3API_HAS_BUILTIN_STRLEN && NH3API_CHECK_CPP11
     static constexpr size_t _strlen(const char* str) NH3API_NOEXCEPT
     {  return __builtin_strlen(str); }
-    #else 
+    #else
     static size_t _strlen(const char* str) NH3API_NOEXCEPT
     { return ::strlen(str); }
     #endif
@@ -404,33 +404,33 @@ struct str_func_chooser<char>
     #if NH3API_HAS_BUILTIN_MEMCMP && NH3API_CHECK_CPP11
     static constexpr int32_t _memcmp(const char* s1, const char* s2, size_t count) NH3API_NOEXCEPT
     { return __builtin_memcmp(s1, s2, count); }
-    
-    #else 
+
+    #else
     static int32_t _memcmp(const char* s1, const char* s2, size_t count) NH3API_NOEXCEPT
     { return ::memcmp(s1, s2, count); }
     #endif
 
     #if NH3API_HAS_BUILTIN_CHAR_MEMCHR && NH3API_CHECK_CPP11
-    static constexpr 
+    static constexpr
     char* _memchr(const char* haystack, char needle, size_t count)
     {
         return __builtin_char_memchr(haystack, needle, count);
     }
-    #else 
-    static 
+    #else
+    static
     char* _memchr(const char* haystack, char needle, size_t count)
     { return ::memchr(haystack, needle, count); }
     #endif
 
     #if NH3API_HAS_BUILTIN_MEMMOVE && NH3API_CHECK_CPP11
-    static constexpr 
+    static constexpr
     char* _memmove(char* dst, const char* src, size_t count)
     {
         __builtin_memmove(dst, src, count);
         return dst;
     }
-    #else 
-    static  
+    #else
+    static
     char* _memmove(char* dst, const char* src, size_t count)
     {
         ::memmove(dst, src, count);
@@ -445,7 +445,7 @@ struct str_func_chooser<wchar_t>
     #if NH3API_HAS_BUILTIN_WCSLEN
     static constexpr size_t _strlen(const wchar_t* str) NH3API_NOEXCEPT
     {  return __builtin_wcslen(str); }
-    #else 
+    #else
     static size_t _strlen(const wchar_t* str) NH3API_NOEXCEPT
     { return ::wcslen(str); }
     #endif
@@ -453,31 +453,31 @@ struct str_func_chooser<wchar_t>
     #if NH3API_HAS_BUILTIN_WMEMCMP
     static constexpr int32_t _memcmp(const wchar_t* s1, const wchar_t* s2, size_t count) NH3API_NOEXCEPT
     { return __builtin_wmemcmp(s1, s2, count); }
-    
-    #else 
+
+    #else
     static int32_t _memcmp(const wchar_t* s1, const wchar_t* s2, size_t count) NH3API_NOEXCEPT
     { return ::wmemcmp(s1, s2, count); }
     #endif
 
     #if NH3API_HAS_BUILTIN_WMEMCHR
-    template<typename T> static constexpr 
+    template<typename T> static constexpr
     T* _memchr(T* haystack, char needle, size_t count)
     { return __builtin_wmemchr(haystack, needle, count); }
-    #else 
-    template<typename T> static 
+    #else
+    template<typename T> static
     T* _memchr(T* haystack, char needle, size_t count)
     { return ::wmemchr(haystack, needle, count); }
     #endif
 
     #if NH3API_HAS_BUILTIN_MEMMOVE && NH3API_CHECK_CPP11
-    static constexpr 
+    static constexpr
     wchar_t* _memmove(wchar_t* dst, const wchar_t* src, size_t count)
     {
         __builtin_memmove(dst, src, count * sizeof(wchar_t));
         return dst;
     }
-    #else 
-    static  
+    #else
+    static
     wchar_t* _memmove(wchar_t* dst, const wchar_t* src, size_t count)
     {
         ::memmove(dst, src, count * sizeof(wchar_t));
@@ -496,7 +496,7 @@ size_t strlen_constexpr_impl(const CharT* str) NH3API_NOEXCEPT
             ++ptr;
         return ptr - str;
     }
-    else 
+    else
     {
         return 0;
     }
@@ -508,7 +508,7 @@ size_t strlen_constexpr(const CharT* str) NH3API_NOEXCEPT
     #if NH3API_HAS_IS_CONSTANT_EVALUATED
     if ( is_constant_evaluated() )
         return strlen_constexpr_impl(str);
-    else 
+    else
         return str_func_chooser<CharT>::_strlen(str);
     #else
     return strlen_constexpr_impl(str);
@@ -520,11 +520,11 @@ int32_t memcmp_constexpr_impl(const CharT* s1, const CharT* s2, size_t count)
 {
     while ( count-- != 0 )
     {
-        if ( *s1 < *s2 ) 
+        if ( *s1 < *s2 )
             return -1;
-        if ( *s1 > *s2 ) 
+        if ( *s1 > *s2 )
             return +1;
-        ++s1; 
+        ++s1;
         ++s2;
     }
     return 0;
@@ -537,9 +537,9 @@ int32_t memcmp_constexpr(const CharT* s1, const CharT* s2, size_t count)
 #if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
     if ( is_constant_evaluated() )
         return memcmp_constexpr_impl(s1, s2, count);
-    else 
+    else
         return str_func_chooser<CharT>::_memcmp(s1, s2, count);
-#else 
+#else
     return memcmp_constexpr_impl(s1, s2, count);
 #endif
 }
@@ -569,15 +569,15 @@ T* memchr_constexpr(T* haystack, CharT needle, size_t count)
     {
         return memchr_constexpr_impl(haystack, needle, count);
     }
-    else 
+    else
     {
         char_type value_buffer = bit_cast<char_type>(needle);
         if ( is_char_char || is_char_wchar )
             return str_func_chooser<CharT>::_memchr(haystack, value_buffer, count);
-        else 
+        else
             return memchr_constexpr_impl(haystack, value_buffer, count);
     }
-    #else 
+    #else
     return memchr_constexpr_impl(haystack, needle, count);
     #endif
 }
@@ -610,7 +610,7 @@ NH3API_INTRIN_FUNCTION
 uint32_t bitclz64(uint64_t) NH3API_NOEXCEPT;
 
 NH3API_INTRIN_FUNCTION
-// Count trailing zeros / 
+// Count trailing zeros /
 // Посчитать количество нулей до первого бита = 1 начиная с самого младшего бита.
 uint32_t bitctz(uint32_t) NH3API_NOEXCEPT;
 
@@ -692,7 +692,7 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
     uint32_t bitctz(uint32_t x) NH3API_NOEXCEPT
     { unsigned long result; _BitScanForward(&result, x); return result; }
 
-    NH3API_INTRIN_FUNCTION 
+    NH3API_INTRIN_FUNCTION
     uint32_t bitctz64(uint64_t x) NH3API_NOEXCEPT
     {
         unsigned long result = 0;
@@ -771,7 +771,7 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
     uint64_t bitrotl64(uint64_t n, uint32_t c) NH3API_NOEXCEPT
     { return _rotl64(n, c); }
 
-    NH3API_INTRIN_FUNCTION 
+    NH3API_INTRIN_FUNCTION
     uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT
     { return _rotr64(n, c); }
 
@@ -870,14 +870,14 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
 
 #endif
 
-namespace nh3api 
+namespace nh3api
 {
 
 template<typename T> NH3API_FORCEINLINE
 void zero16(T* ptr) NH3API_NOEXCEPT
 {
     _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr), _mm_setzero_si128());
-}    
+}
 
 template<typename T> NH3API_FORCEINLINE
 void swap16(T* ptr1, T* ptr2) NH3API_NOEXCEPT
@@ -892,7 +892,7 @@ void swap16(T* ptr1, T* ptr2) NH3API_NOEXCEPT
 // memset(ptr2, 0, 16);
 template<typename T> NH3API_FORCEINLINE
 void move16(T* ptr1, T* ptr2) NH3API_NOEXCEPT
-{ 
+{
     _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr1), _mm_loadu_si128(reinterpret_cast<const __m128i*>(ptr2)));
     _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr2), _mm_setzero_si128());
 }

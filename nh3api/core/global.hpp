@@ -13,7 +13,7 @@
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
-enum type_action_type : int32_t 
+enum type_action_type : int32_t
 {
     const_initialization_action = 0, //
     const_normal_action         = 1, //
@@ -40,7 +40,7 @@ struct game
     public:
         NH3API_FORCEINLINE
         game() NH3API_NOEXCEPT
-		{ THISCALL_1(void, 0x4CDBE0, this); }
+        { THISCALL_1(void, 0x4CDBE0, this); }
 
         NH3API_FORCEINLINE
         game(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
@@ -62,136 +62,136 @@ struct game
               underground_gate_exits(tag),
               recorded_events(tag),
               quest_monsters(tag)
-		{ THISCALL_1(void, 0x4CDBE0, this); }
+        { THISCALL_1(void, 0x4CDBE0, this); }
 
         NH3API_FORCEINLINE
         ~game() NH3API_NOEXCEPT
-		{ THISCALL_1(void, 0x4CE270, this); }
+        { THISCALL_1(void, 0x4CE270, this); }
 
     public:
         bool IsMultiplayer() const
-		{ return THISCALL_1(bool, 0x4CE950, this); }
+        { return THISCALL_1(bool, 0x4CE950, this); }
 
         bool OnSameTeam(int32_t player1, int32_t player2) const
-		{ return THISCALL_3(bool, 0x529BB0, this, player1, player2); }
+        { return THISCALL_3(bool, 0x529BB0, this, player1, player2); }
 
         bool IsHuman(int32_t gamePos) const
-		{ return THISCALL_2(bool, 0x4CE600, this, gamePos); }
+        { return THISCALL_2(bool, 0x4CE600, this, gamePos); }
 
-		bool IsLocalHuman(int32_t cur_player) const
-		{ return THISCALL_2(bool, 0x4CE630, this, cur_player); }
+        bool IsLocalHuman(int32_t cur_player) const
+        { return THISCALL_2(bool, 0x4CE630, this, cur_player); }
 
-		playerData* GetLocalPlayer()
-		{ return THISCALL_1(playerData*, 0x4CE670, this); }
+        playerData* GetLocalPlayer()
+        { return THISCALL_1(playerData*, 0x4CE670, this); }
 
         const playerData* GetLocalPlayer() const
-		{ return THISCALL_1(playerData*, 0x4CE670, this); }
+        { return THISCALL_1(playerData*, 0x4CE670, this); }
 
-		int32_t GetLocalPlayerGamePos() const
-		{ return THISCALL_1(int32_t, 0x4CE6E0, this); }
+        int32_t GetLocalPlayerGamePos() const
+        { return THISCALL_1(int32_t, 0x4CE6E0, this); }
 
         bool is_human_ally(int32_t player_number) const
-		{ return THISCALL_2(bool, 0x42B9E0, this, player_number); }
+        { return THISCALL_2(bool, 0x42B9E0, this, player_number); }
 
         const char* GetPlayerName(int32_t player)
-		{ return THISCALL_2(char*, 0x4CE820, this, player); }
+        { return THISCALL_2(char*, 0x4CE820, this, player); }
 
         int32_t GetTeam(int32_t player) const
-		{ return THISCALL_2(int32_t, 0x4A55D0, this, player); }
+        { return THISCALL_2(int32_t, 0x4A55D0, this, player); }
 
         town* GetTown(int32_t whichTown)
-		{ return THISCALL_2(town*, 0x42BA30, this, whichTown); }
+        { return THISCALL_2(town*, 0x42BA30, this, whichTown); }
 
         const town* GetTown(int32_t whichTown) const
-		{ return THISCALL_2(town*, 0x42BA30, this, whichTown); }
+        { return THISCALL_2(town*, 0x42BA30, this, whichTown); }
 
         NewmapCell* get_cell(type_point point)
-		{ return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
+        { return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
 
-        const NewmapCell* get_cell(type_point point) const 
-		{ return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
+        const NewmapCell* get_cell(type_point point) const
+        { return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
 
         hero* GetHero(int32_t which)
-		{ return THISCALL_2(hero*, 0x4317D0, this, which); }
+        { return THISCALL_2(hero*, 0x4317D0, this, which); }
 
         const hero* GetHero(int32_t which) const
-		{ return THISCALL_2(hero*, 0x4317D0, this, which); }
+        { return THISCALL_2(hero*, 0x4317D0, this, which); }
 
         int32_t get_new_boat_id()
-		{ return THISCALL_1(int32_t, 0x4BAE30, this); }
+        { return THISCALL_1(int32_t, 0x4BAE30, this); }
 
-		int32_t CreateBoat(int32_t x, int32_t y, int32_t z, int32_t owner, bool bIsRemoteMove, int8_t type)
-		{ return THISCALL_7(int32_t, 0x4BAF10, this, x, y, z, owner, bIsRemoteMove, type); }
+        int32_t CreateBoat(int32_t x, int32_t y, int32_t z, int32_t owner, bool bIsRemoteMove, int8_t type)
+        { return THISCALL_7(int32_t, 0x4BAF10, this, x, y, z, owner, bIsRemoteMove, type); }
 
         boat* GetHeroBoat(int32_t id, bool occupied)
-		{ return THISCALL_3(boat*, 0x4CE5C0, this, id, occupied); }
+        { return THISCALL_3(boat*, 0x4CE5C0, this, id, occupied); }
 
-		THeroID GetStartingHeroId(TTownType alignment, int32_t playerPos, type_point mapPosition)
-		{ return THISCALL_4(THeroID, 0x4BB0C0, this, alignment, playerPos, mapPosition); }
+        THeroID GetStartingHeroId(TTownType alignment, int32_t playerPos, type_point mapPosition)
+        { return THISCALL_4(THeroID, 0x4BB0C0, this, alignment, playerPos, mapPosition); }
 
-		THeroID GetNewHeroId(TTownType alignment, THeroClass excluded, bool prefer_alignment, THeroClass target)
-		{ return THISCALL_5(THeroID, 0x4BB2A0, this, alignment, excluded, prefer_alignment, target); }
+        THeroID GetNewHeroId(TTownType alignment, THeroClass excluded, bool prefer_alignment, THeroClass target)
+        { return THISCALL_5(THeroID, 0x4BB2A0, this, alignment, excluded, prefer_alignment, target); }
 
-		int32_t GetTownId(int32_t x, int32_t y, int32_t z)
-		{ return THISCALL_4(int32_t, 0x4BB530, this, x, y, z); }
+        int32_t GetTownId(int32_t x, int32_t y, int32_t z)
+        { return THISCALL_4(int32_t, 0x4BB530, this, x, y, z); }
 
-		int32_t GetGeneratorId(int32_t x, int32_t y, int32_t z)
-		{ return THISCALL_4(int32_t, 0x4BB5C0, this, x, y, z); }
+        int32_t GetGeneratorId(int32_t x, int32_t y, int32_t z)
+        { return THISCALL_4(int32_t, 0x4BB5C0, this, x, y, z); }
 
         void SetVisibility(int32_t startX, int32_t startY, int32_t z, int32_t whichPlayer, int32_t range, int32_t remote_move)
-		{ THISCALL_7(void, 0x49CDD0, this, startX, startY, z, whichPlayer, range, remote_move); }
+        { THISCALL_7(void, 0x49CDD0, this, startX, startY, z, whichPlayer, range, remote_move); }
 
-		void ResetVisibility(int32_t start_x, int32_t start_y, int32_t z, int32_t whichPlayer, int32_t range)
-		{ THISCALL_6(void, 0x49D040, this, start_x, start_y, z, whichPlayer, range); }
+        void ResetVisibility(int32_t start_x, int32_t start_y, int32_t z, int32_t whichPlayer, int32_t range)
+        { THISCALL_6(void, 0x49D040, this, start_x, start_y, z, whichPlayer, range); }
 
         TCreatureType GetRandomMonster(int32_t minLevel, int32_t maxLevel)
-		{ return THISCALL_3(TCreatureType, 0x4C8F80, this, minLevel, maxLevel); }
+        { return THISCALL_3(TCreatureType, 0x4C8F80, this, minLevel, maxLevel); }
 
-		TArtifact GetRandomArtifactId(int32_t ArtifactClass)
-		{ return THISCALL_2(TArtifact, 0x4C9190, this, ArtifactClass); }
+        TArtifact GetRandomArtifactId(int32_t ArtifactClass)
+        { return THISCALL_2(TArtifact, 0x4C9190, this, ArtifactClass); }
 
-		SpellID GetRandomSpell(const exe_bitset<5>& spell_level)
-		{ return THISCALL_2(SpellID, 0x4C9260, this, &spell_level); }
+        SpellID GetRandomSpell(const exe_bitset<5>& spell_level)
+        { return THISCALL_2(SpellID, 0x4C9260, this, &spell_level); }
 
         void InsertObject(int32_t x, int32_t y, int32_t z, TAdventureObjectType objType, int32_t objectIndex, int32_t extraInfo)
-		{ THISCALL_7(void, 0x4C9550, this, x, y, z, objType, objectIndex, extraInfo); }
+        { THISCALL_7(void, 0x4C9550, this, x, y, z, objType, objectIndex, extraInfo); }
 
         void MakeTerrainVisible(int32_t whichPlayer, uint16_t visMask)
-		{ THISCALL_3(void, 0x4C9F00, this, whichPlayer, visMask); }
+        { THISCALL_3(void, 0x4C9F00, this, whichPlayer, visMask); }
 
         void ConvertObject(NewmapCell* tempCell)
-		{ THISCALL_2(void, 0x4C9650, this, tempCell); }
+        { THISCALL_2(void, 0x4C9650, this, tempCell); }
 
         void ClaimTown(int32_t townId, int32_t newPlayerOwner, bool bIsRemoteMove, bool check_end_game)
-		{ THISCALL_5(void, 0x4C5EA0, this, townId, newPlayerOwner, bIsRemoteMove, check_end_game); }
+        { THISCALL_5(void, 0x4C5EA0, this, townId, newPlayerOwner, bIsRemoteMove, check_end_game); }
 
         void ClaimMine(int32_t mineId, int32_t newPlayerOwner, type_action_type action_type)
-		{ THISCALL_4(void, 0x4C63A0, this, mineId, newPlayerOwner, action_type); }
+        { THISCALL_4(void, 0x4C63A0, this, mineId, newPlayerOwner, action_type); }
 
-		void ClaimGenerator(int32_t generatorId, int32_t newPlayerOwner)
-		{ THISCALL_3(void, 0x4C6470, this, generatorId, newPlayerOwner); }
+        void ClaimGenerator(int32_t generatorId, int32_t newPlayerOwner)
+        { THISCALL_3(void, 0x4C6470, this, generatorId, newPlayerOwner); }
 
-		void ClaimGarrison(int32_t garrisonId, int32_t newPlayerOwner)
-		{ THISCALL_3(void, 0x4C6620, this, garrisonId, newPlayerOwner); }
+        void ClaimGarrison(int32_t garrisonId, int32_t newPlayerOwner)
+        { THISCALL_3(void, 0x4C6620, this, garrisonId, newPlayerOwner); }
 
-		void ClaimShipyard(type_point point, int32_t newPlayerOwner)
-		{ THISCALL_3(void, 0x4C66F0, this, point, newPlayerOwner); }
+        void ClaimShipyard(type_point point, int32_t newPlayerOwner)
+        { THISCALL_3(void, 0x4C66F0, this, point, newPlayerOwner); }
 
         bool get_random_lith(const exe_vector<type_point>& points, type_point& result, int32_t cell_type, int32_t excluded) const
-		{ return THISCALL_5(bool, 0x4CD840, this, &points, &result, cell_type, excluded); }
+        { return THISCALL_5(bool, 0x4CD840, this, &points, &result, cell_type, excluded); }
 
-		bool get_random_lith_exit(int32_t color, type_point* result) const
-		{ return THISCALL_3(bool, 0x4CDA80, this, color, result); }
+        bool get_random_lith_exit(int32_t color, type_point* result) const
+        { return THISCALL_3(bool, 0x4CDA80, this, color, result); }
 
-		bool get_random_lith(int32_t color, int32_t excluded, type_point& result) const
-		{ return THISCALL_4(bool, 0x4CDAB0, this, color, excluded, &result); }
+        bool get_random_lith(int32_t color, int32_t excluded, type_point& result) const
+        { return THISCALL_4(bool, 0x4CDAB0, this, color, excluded, &result); }
 
-		bool get_random_whirlpool(int32_t excluded, type_point& result) const
-		{ return THISCALL_3(bool, 0x4CDAE0, this, excluded, &result); }
+        bool get_random_whirlpool(int32_t excluded, type_point& result) const
+        { return THISCALL_3(bool, 0x4CDAE0, this, excluded, &result); }
 
-		type_point get_underground_gate_exit(const NewmapCell* cell) const
-		{ return THISCALL_2(type_point, 0x4CDB00, this, cell); }
-    
+        type_point get_underground_gate_exit(const NewmapCell* cell) const
+        { return THISCALL_2(type_point, 0x4CDB00, this, cell); }
+
     public:
         // offset: +0x0 = +0,  size = 0x4 = 4
         heroWindow* newGameWin;

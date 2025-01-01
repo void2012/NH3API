@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
 #include "nh3api_std.hpp"
 
@@ -254,7 +254,7 @@ typename T::const_iterator end(const T& container)
 #else // !(NH3API_STD_ARRAY)
 #include <array>
 
-namespace nh3api 
+namespace nh3api
 {
 using ::std::size;
 using ::std::begin;

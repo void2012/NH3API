@@ -212,7 +212,7 @@ enum TCreatureType : int32_t
     CREATURE_ROE_BALLISTA       = 119, // ID Баллисты на поле боя в RoE
     CREATURE_ROE_FIRST_AID_TENT = 120, // ID Палатки первой помощи на поле боя в RoE
     CREATURE_ROE_AMMO_CART      = 121, // ID Тележки с боеприпасами на поле боя в RoE
-    
+
     MAX_CREATURES_ROE  = 118, // Количество существ в RoE
     MAX_CREATURES_AB   = 145, // Количество существ в AB
     MAX_CREATURES_SOD  = MAX_CREATURES_AB, // Количество существ в SoD
@@ -222,7 +222,7 @@ enum TCreatureType : int32_t
 
 // Creature sprite sequences ID during combat /
 // Последовательности кадров анимации существ на поле боя.
-enum creature_seqid : int32_t 
+enum creature_seqid : int32_t
 {
     cs_walk       = 0, //
     cs_fidget     = 1, //
@@ -250,7 +250,7 @@ enum creature_seqid : int32_t
 };
 
 // Creature flags /
-// Флаги существа. 
+// Флаги существа.
 enum creature_flags : uint32_t
 {
     // Const flag: Occupies two hexes. /
@@ -533,9 +533,9 @@ public:
     // Default constructor /
     // Конструктор по умолчанию
     armyGroup() NH3API_NOEXCEPT
-    { 
-        type.fill(CREATURE_NONE); 
-        amount.fill(-1); 
+    {
+        type.fill(CREATURE_NONE);
+        amount.fill(-1);
     }
 
     NH3API_FORCEINLINE
@@ -609,7 +609,7 @@ public:
     NH3API_CONSTEXPR
     // Sum amount of creatures of type <monType> /
     // Посчитать количество существ типа <monType> в армии.
-    int32_t get_creature_total(TCreatureType monType) const 
+    int32_t get_creature_total(TCreatureType monType) const
     {
         int32_t result = 0;
         for (size_t i = 0; i < 7; ++i)
@@ -624,7 +624,7 @@ public:
     /// @param iNameSet 0 or 2 is upper limit, 1 is interval / 0 или 2 это верхнее ограничение, 1 это интервал
     static char const * GetArmySizeName(int32_t howMany, int32_t iNameSet)
     { return FASTCALL_2(const char*, 0x44AAB0, howMany, iNameSet); }
-    
+
     // Get army morale /
     // Боевой дух всей армии.
     /// @param ownerHero обладатель этой армии
@@ -634,12 +634,12 @@ public:
     /// @param on_cursed_ground на проклятой земле
     /// @param apply_limits применить лимит [-3;3]
     /// @param angelic_alliance ангельский союз
-    int32_t GetMorale(const hero* ownerHero, 
-                      const town* ownerTown, 
-                      const hero* otherHero, 
-                      const armyGroup* otherGroup, 
-                      bool on_cursed_ground, 
-                      bool angelic_alliance, 
+    int32_t GetMorale(const hero* ownerHero,
+                      const town* ownerTown,
+                      const hero* otherHero,
+                      const armyGroup* otherGroup,
+                      bool on_cursed_ground,
+                      bool angelic_alliance,
                       bool apply_limits = true) const
     { THISCALL_8(int32_t, 0x44AB30, this, ownerHero, ownerTown, otherHero, otherGroup, on_cursed_ground, angelic_alliance, apply_limits); }
 
@@ -651,11 +651,11 @@ public:
     /// @param ground_type тип накладной земли
     /// @param apply_limit применить лимит [-3;3]
     /// @param apply_under_limit true
-    int32_t GetArmyMorale(int32_t index, 
-                          const hero* ownerHero, 
-                          const town* ownerTown, 
-                          int32_t ground_type, 
-                          bool angelic_alliance, 
+    int32_t GetArmyMorale(int32_t index,
+                          const hero* ownerHero,
+                          const town* ownerTown,
+                          int32_t ground_type,
+                          bool angelic_alliance,
                           bool apply_limits = true) const
     { return THISCALL_7(int32_t, 0x44ADD0, this, index, ownerHero, ownerTown, ground_type, angelic_alliance, apply_limits); }
 
@@ -667,11 +667,11 @@ public:
     /// @param otherGroup unused / не используется
     /// @param on_cursed_ground на проклятой земле
     /// @param apply_limits применить лимит [-3;3]
-    int32_t GetLuck(const hero* ownerHero, 
-                    const town* ownerTown, 
-                    const hero* otherHero, 
-                    const armyGroup* otherGroup, 
-                    bool on_cursed_ground = false, 
+    int32_t GetLuck(const hero* ownerHero,
+                    const town* ownerTown,
+                    const hero* otherHero,
+                    const armyGroup* otherGroup,
+                    bool on_cursed_ground = false,
                     bool apply_limits = false)const
     { return THISCALL_7(int32_t, 0x44AFA0, this, ownerHero, ownerTown, otherHero, otherGroup, on_cursed_ground, apply_limits); }
 
@@ -682,10 +682,10 @@ public:
     /// @param ownerTown город героя-обладателя
     /// @param ground_type тип накладной земли
     /// @param apply_limit применить лимит [-3;3]
-    int32_t GetArmyLuck(int32_t index, 
-                        const hero* ownerHero, 
-                        const town* ownerTown, 
-                        EMagicTerrain ground_type, 
+    int32_t GetArmyLuck(int32_t index,
+                        const hero* ownerHero,
+                        const town* ownerTown,
+                        EMagicTerrain ground_type,
                         bool apply_limits = true)const
     { return THISCALL_6(int32_t, 0x44B090, this, index, ownerHero, ownerTown, ground_type, apply_limits); }
 
@@ -696,13 +696,13 @@ public:
     { THISCALL_2(void, 0x44B4F0, this, &source); }
 
     NH3API_FORCEINLINE
-    exe_string get_morale_description(TCreatureType 
-                                      creature, 
-                                      int32_t morale, 
-                                      const hero* ownerHero, 
-                                      const town* ownerTown, 
-                                      const hero* other_hero, 
-                                      const armyGroup* other_group, 
+    exe_string get_morale_description(TCreatureType
+                                      creature,
+                                      int32_t morale,
+                                      const hero* ownerHero,
+                                      const town* ownerTown,
+                                      const hero* other_hero,
+                                      const armyGroup* other_group,
                                       EMagicTerrain ground_type)const
     {
         exe_string result(nh3api::dummy_tag);
@@ -711,12 +711,12 @@ public:
     }
 
     NH3API_FORCEINLINE
-    exe_string get_luck_description(TCreatureType army_type, 
-                                    int32_t luck, 
-                                    hero* our_hero, 
-                                    town* our_town, 
-                                    hero* enemy_hero, 
-                                    bool on_cursed_ground, 
+    exe_string get_luck_description(TCreatureType army_type,
+                                    int32_t luck,
+                                    hero* our_hero,
+                                    town* our_town,
+                                    hero* enemy_hero,
+                                    bool on_cursed_ground,
                                     EMagicTerrain magic_terrain)const
     {
         exe_string result(nh3api::dummy_tag);

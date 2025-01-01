@@ -35,14 +35,14 @@ HANDLE getHDModHandle()
 
 NH3API_FORCEINLINE
 bool isHDModPresent(Patcher* patcher)
-{ 
+{
     if ( patcher )
-        return static_cast<bool>(getHDModHandle()) && static_cast<bool>(patcher->GetInstance("HD")); 
-    else 
+        return static_cast<bool>(getHDModHandle()) && static_cast<bool>(patcher->GetInstance("HD"));
+    else
         return false;
 }
 
-// moved to struct and marked noinline to reduce the code bloat 
+// moved to struct and marked noinline to reduce the code bloat
 struct get_hd_mod_varable_impl
 {
     template<typename T, T DefaultValue>
@@ -63,11 +63,11 @@ struct get_hd_mod_varable_impl
                 return DefaultValue;
             }
         }
-        else 
+        else
         {
             return DefaultValue;
         }
-    }   
+    }
 };
 
 template<typename T, T DefaultValue>
@@ -129,7 +129,7 @@ POINT getScreenResolution(Patcher* patcher)
     {
         return getHDModResolution(patcher);
     }
-    else 
+    else
     {
         POINT result = { .x = 800, .y = 600 };
         return result;
@@ -142,10 +142,10 @@ NH3API_FORCEINLINE // this will not inline actually, just for the linker
 exe_vector<exe_string> getHDModPlugins(Patcher* patcher)
 {
     exe_vector<exe_string> result(0);
-    const char* const* const packDirs = 
+    const char* const* const packDirs =
     getHDModVariable<const char* const* const, nullptr>(patcher, "HD.PackDirs");
 
-    const size_t packDirsCount = 
+    const size_t packDirsCount =
     getHDModVariable<const size_t, 0>(patcher, "HD.PackDirs.Count");
 
     if ( packDirs && packDirsCount )
@@ -158,10 +158,10 @@ exe_vector<exe_string> getHDModPlugins(Patcher* patcher)
 
 // static variables will be thread-safe according to the C++11 standard
 // so we need to reduce the code bloat:
-// move implementation to structure and mark noinline 
-struct is_wine_present_impl 
+// move implementation to structure and mark noinline
+struct is_wine_present_impl
 {
-    NH3API_NOINLINE 
+    NH3API_NOINLINE
     static bool get()
     {
         static std::pair<bool, HMODULE> status = std::make_pair(false, nullptr);
@@ -180,7 +180,7 @@ struct is_wine_present_impl
         else
         {
             return false; // So you really run without the ntdll.dll.........
-        } 
+        }
     }
 };
 

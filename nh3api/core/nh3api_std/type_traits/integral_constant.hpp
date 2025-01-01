@@ -20,7 +20,7 @@
 namespace nh3api
 {
 
-namespace tt 
+namespace tt
 {
 namespace details
 {
@@ -49,7 +49,7 @@ struct integral_constant
     typedef integral_constant<T, val> type;
     static const value_type value;
 protected:
-	typedef const details::integral_c<T, val>& impl_integral_c_type_ref;
+    typedef const details::integral_c<T, val>& impl_integral_c_type_ref;
     typedef const details::integral_c<T, val>* impl_integral_c_type_ptr;
 public:
 
@@ -90,15 +90,15 @@ typedef integral_constant<bool, false> false_type;
 
 #pragma component(mintypeinfo, off)
 
-#else 
+#else
 #include <type_traits>
-namespace nh3api 
+namespace nh3api
 {
-namespace tt 
+namespace tt
 {
 using ::std::integral_constant;
 using ::std::true_type;
-using ::std::false_type;    
-} // namespace tt 
-} // namespace nh3api 
+using ::std::false_type;
+} // namespace tt
+} // namespace nh3api
 #endif // NH3API_TYPE_TRAITS_IMPL

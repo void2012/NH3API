@@ -11,7 +11,7 @@
 #include "type_traits.hpp"
 #include "iterator.hpp"
 
-#if NH3API_CHECK_MSVC 
+#if NH3API_CHECK_MSVC
 #pragma component(mintypeinfo, on)
 #endif
 
@@ -43,7 +43,7 @@ namespace nh3api
 
 // ::std::fill_n fix
 
-template <class OutputIt, class Size, class T> 
+template <class OutputIt, class Size, class T>
 inline OutputIt fill_n_impl(OutputIt first, Size count, const T &value)
 {
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
@@ -299,7 +299,7 @@ template <typename Size, typename T> inline T **copy_n_impl(const T **first, Siz
 
 // ::std::copy optimizations
 
-template <class InputIt, class OutputIt> 
+template <class InputIt, class OutputIt>
 OutputIt copy_impl(InputIt first, InputIt last, OutputIt d_first)
 {
     return ::std::copy(first, last, d_first);
@@ -383,7 +383,7 @@ inline unsigned long *copy_impl(const unsigned long *first, const unsigned long 
 }
 
 // optimize for pointers
-template <typename T> 
+template <typename T>
 inline T **copy_impl(const T **first, const T **last, T **d_first)
 {
     const size_t diff = static_cast<size_t>(last - first);
@@ -418,7 +418,7 @@ template <> struct fill_n_enum_helper<true>
         typedef typename nh3api::tt::underlying_type<OutputType>::type OutputUnderlying;
         typedef typename nh3api::tt::underlying_type<T>::type UnderlyingType;
         return reinterpret_cast<OutputType *>(nh3api::fill_n_impl(reinterpret_cast<OutputUnderlying *>(first), count,
-											  static_cast<const UnderlyingType &>(value)));
+                                              static_cast<const UnderlyingType &>(value)));
     }
 };
 
@@ -436,9 +436,9 @@ OutputIt fill_n_ptr(OutputIt first, Size count, const T &value)
 {
     if (IsPtr)
     {
-		typedef typename tt::remove_pointer<OutputIt>::type OutputType;
-        return nh3api::fill_n_enum < tt::is_enum<T>::value 
-                                       && tt::is_enum<OutputType>::value, 
+        typedef typename tt::remove_pointer<OutputIt>::type OutputType;
+        return nh3api::fill_n_enum < tt::is_enum<T>::value
+                                       && tt::is_enum<OutputType>::value,
                                        OutputType, Size, T> (first, count, value);
     }
     else
@@ -450,11 +450,11 @@ OutputIt fill_n_ptr(OutputIt first, Size count, const T &value)
 #endif
 
 // optimized and fixed ::std::fill_n
-template <class OutputIt, class Size, class T> 
+template <class OutputIt, class Size, class T>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 OutputIt fill_n(OutputIt first, Size count, const T& value)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range_n(first, count);
     #endif
 // broken ::std::fill_n on visual studio 2005..2008
@@ -503,7 +503,7 @@ template <bool IsPtr, class ForwardIt, class T> void fill_ptr(ForwardIt first, F
 {
     if (IsPtr)
     {
-		typedef typename nh3api::tt::remove_pointer<ForwardIt>::type ForwardType;
+        typedef typename nh3api::tt::remove_pointer<ForwardIt>::type ForwardType;
         nh3api::fill_enum<nh3api::tt::is_enum<T>::value && nh3api::tt::is_enum<ForwardType>::value,
                             ForwardType, T>(first, last, value);
     }
@@ -516,17 +516,17 @@ template <bool IsPtr, class ForwardIt, class T> void fill_ptr(ForwardIt first, F
 #endif
 
 // optimized fill
-template <class ForwardIt, class T> 
+template <class ForwardIt, class T>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 void fill(ForwardIt first, ForwardIt last, const T &value)
 {
-#if NH3API_DEBUG 
+#if NH3API_DEBUG
     verify_range(first, last);
 #endif
 
 // optimized ::std::fill for visual studio 2005..2008
 #if NH3API_ALGORITHMS_INLINED
-    fill_ptr<tt::is_pointer<ForwardIt>::value>(unfancy(first), 
+    fill_ptr<tt::is_pointer<ForwardIt>::value>(unfancy(first),
                                                unfancy(last),
                                                value);
 #else
@@ -540,7 +540,7 @@ void fill(ForwardIt first, ForwardIt last, const T &value)
 namespace details
 {
 
-template <bool IsEnum> 
+template <bool IsEnum>
 struct copy_n_enum_helper
 {
     template <class InputType, class Size, class OutputType>
@@ -550,7 +550,7 @@ struct copy_n_enum_helper
     }
 };
 
-template <> 
+template <>
 struct copy_n_enum_helper<true>
 {
     template <class InputType, class Size, class OutputType>
@@ -559,7 +559,7 @@ struct copy_n_enum_helper<true>
         typedef typename nh3api::tt::underlying_type<InputType>::type InputUnderlying;
         typedef typename nh3api::tt::underlying_type<OutputType>::type OutputUnderlying;
         return reinterpret_cast<OutputType *>(nh3api::copy_n_impl(reinterpret_cast<const InputUnderlying *>(first), count,
-											  reinterpret_cast<OutputUnderlying *>(result)));
+                                              reinterpret_cast<OutputUnderlying *>(result)));
     }
 };
 
@@ -576,8 +576,8 @@ OutputIt copy_n_ptr(InputIt first, Size count, OutputIt result)
 {
     if ( IsPtr )
     {
-		typedef typename nh3api::tt::remove_pointer<InputIt>::type  InputType;
-		typedef typename nh3api::tt::remove_pointer<OutputIt>::type OutputType;
+        typedef typename nh3api::tt::remove_pointer<InputIt>::type  InputType;
+        typedef typename nh3api::tt::remove_pointer<OutputIt>::type OutputType;
         return nh3api::copy_n_enum<nh3api::tt::is_enum<InputType>::value
                                      && nh3api::tt::is_enum<OutputType>::value,
                                      InputType, Size, OutputType>(first, count, result);
@@ -595,13 +595,13 @@ template<class InputIt, class Size, class OutputIt>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 OutputIt copy_n(InputIt first, Size count, OutputIt result)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range_n(first, count);
     #endif
 
     // optimized ::std::fill for visual studio 2005..2008
     #if NH3API_ALGORITHMS_INLINED
-        return copy_n_ptr<tt::is_pointer<InputIt>::value 
+        return copy_n_ptr<tt::is_pointer<InputIt>::value
                           && tt::is_pointer<OutputIt>::value>(first, count, result);
     #else
         return ::std::copy_n(first, count, result);
@@ -613,7 +613,7 @@ OutputIt copy_n(InputIt first, Size count, OutputIt result)
 namespace details
 {
 
-template <bool IsEnum> 
+template <bool IsEnum>
 struct copy_enum_helper
 {
     template <class InputType, class OutputType>
@@ -623,7 +623,7 @@ struct copy_enum_helper
     }
 };
 
-template <> 
+template <>
 struct copy_enum_helper<true>
 {
     template <class InputType, class OutputType>
@@ -632,8 +632,8 @@ struct copy_enum_helper<true>
         typedef typename nh3api::tt::underlying_type<InputType>::type  InputUnderlying;
         typedef typename nh3api::tt::underlying_type<OutputType>::type OutputUnderlying;
         return reinterpret_cast<OutputType *>(nh3api::copy_impl(reinterpret_cast<const InputUnderlying *>(first),
-											  reinterpret_cast<const InputUnderlying *>(last),
-											  reinterpret_cast<OutputUnderlying *>(d_first)));
+                                              reinterpret_cast<const InputUnderlying *>(last),
+                                              reinterpret_cast<OutputUnderlying *>(d_first)));
     }
 };
 
@@ -650,10 +650,10 @@ OutputIt copy_ptr(InputIt first, InputIt last, OutputIt d_first)
 {
     if ( IsPtr )
     {
-		typedef typename nh3api::tt::remove_pointer<InputIt>::type  InputType;
-		typedef typename nh3api::tt::remove_pointer<OutputIt>::type OutputType;
+        typedef typename nh3api::tt::remove_pointer<InputIt>::type  InputType;
+        typedef typename nh3api::tt::remove_pointer<OutputIt>::type OutputType;
         return nh3api::copy_enum<nh3api::tt::is_enum<InputType>::value
-								   && nh3api::tt::is_enum<OutputType>::value,
+                                   && nh3api::tt::is_enum<OutputType>::value,
                                    InputType, OutputType>(first, last, d_first);
     }
     else
@@ -664,7 +664,7 @@ OutputIt copy_ptr(InputIt first, InputIt last, OutputIt d_first)
 
 #endif
 
-#if NH3API_CHECK_MSVC 
+#if NH3API_CHECK_MSVC
 #pragma component(mintypeinfo, off)
 #endif
 
@@ -672,24 +672,24 @@ template<class InputIt, class OutputIt>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 OutputIt copy(InputIt first, InputIt last, OutputIt d_first)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range(first, last);
     #endif
-    
+
     #if NH3API_ALGORITHMS_INLINED
-		return copy_ptr<tt::is_pointer<InputIt>::value 
-						&& tt::is_pointer<OutputIt>::value>(first, last, d_first);
+        return copy_ptr<tt::is_pointer<InputIt>::value
+                        && tt::is_pointer<OutputIt>::value>(first, last, d_first);
     #else
         return ::std::copy(first, last, d_first);
     #endif
 }
 
-template<class Allocator> 
-struct allocator_size_type 
+template<class Allocator>
+struct allocator_size_type
 {
-    #if NH3API_CHECK_CPP11 
+    #if NH3API_CHECK_CPP11
     typedef typename std::allocator_traits<Allocator>::size_type type;
-    #else 
+    #else
     typedef typename Allocator::size_type type;
     #endif
 };
@@ -704,18 +704,18 @@ void destroy(ForwardIt first,
              Allocator& alloc)
     NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<typename Allocator::value_type>::value)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range(first, last);
     #endif
 
-    #if NH3API_CHECK_CPP11 
+    #if NH3API_CHECK_CPP11
     for (; first != last; ++first)
         std::allocator_traits<Allocator>::destroy(alloc, addressof(*first));
-    #else 
+    #else
     for (; first != last; ++first)
         alloc.destroy(addressof(*first));
-    #endif 
-    
+    #endif
+
 }
 
 template<class ForwardIt, class Allocator>
@@ -725,14 +725,14 @@ ForwardIt destroy_n(ForwardIt first,
                     Allocator& alloc)
     NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<typename Allocator::value_type>::value)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range_n(first, n);
     #endif
 
-    #if NH3API_CHECK_CPP11 
+    #if NH3API_CHECK_CPP11
     for (; n > 0; (void) ++first, --n)
         std::allocator_traits<Allocator>::destroy(alloc, addressof(*first));
-    #else 
+    #else
     for (; n > 0; (void) ++first, --n)
         alloc.destroy(addressof(*first));
     #endif
@@ -746,7 +746,7 @@ void destroy(ForwardIt first,
              exe_allocator<T> alloc)
     NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<T>::value)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range(first, last);
     #endif
 
@@ -762,7 +762,7 @@ ForwardIt destroy_n(ForwardIt first,
                     exe_allocator<T> alloc)
     NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<T>::value)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range_n(first, n);
     #endif
 
@@ -779,9 +779,9 @@ void uninitialized_fill(ForwardIt first,
                         const T& value,
                         Allocator& alloc)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range(first, last);
-    #endif 
+    #endif
 
     #if NH3API_MSVC_STL
     ::std::_Uninitialized_fill_n(first, ::std::distance(first, last), value, alloc);
@@ -789,7 +789,7 @@ void uninitialized_fill(ForwardIt first,
     ::std::__uninitialized_fill_a(first, last, value, alloc);
     #elif NH3API_CLANG_STL
     ::std::__uninitialized_allocator_fill_n_multidimensional(alloc, first, std::distance(first, last), value);
-    #else 
+    #else
     #endif
 }
 
@@ -800,9 +800,9 @@ ForwardIt uninitialized_fill_n(ForwardIt first,
                                const T& value,
                                Allocator& alloc)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range_n(first, count);
-    #endif 
+    #endif
 
     #if NH3API_MSVC_STL
     return ::std::_Uninitialized_fill_n(first, count, value, alloc);
@@ -810,7 +810,7 @@ ForwardIt uninitialized_fill_n(ForwardIt first,
     return ::std::__uninitialized_fill_n_a(first, count, value, alloc);
     #elif NH3API_CLANG_STL
     return ::std::__uninitialized_allocator_fill_n_multidimensional(alloc, first, count, value);
-    #else 
+    #else
     #endif
 }
 
@@ -818,23 +818,23 @@ template<class ForwardIt, class Allocator>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 ForwardIt uninitialized_default_construct_n(ForwardIt first,
                                             typename allocator_size_type<Allocator>::type count,
-                                            Allocator& alloc)     
+                                            Allocator& alloc)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range_n(first, count);
-    #endif 
+    #endif
 
     #if NH3API_MSVC_STL
         #ifdef _MSVC_STL_UPDATE
             return ::std::_Uninitialized_value_construct_n(first, count, alloc);
-        #else 
+        #else
             return uninitialized_default_construct_n_impl(first, count, alloc);
         #endif
     #elif NH3API_GCC_STL
     return ::std::__uninitialized_default_n_a(first, count, alloc);
     #elif NH3API_CLANG_STL
     return ::std::__uninitialized_allocator_value_construct_n_multidimensional(alloc, first, count);
-    #else 
+    #else
     #endif
 }
 
@@ -843,7 +843,7 @@ template<class ForwardIt, class Allocator>
 NH3API_FORCEINLINE
 ForwardIt uninitialized_default_construct_n_impl(ForwardIt first,
                                                  typename allocator_size_type<Allocator>::type count,
-                                                 Allocator& alloc)                        
+                                                 Allocator& alloc)
 {
     typedef typename ::std::iterator_traits<ForwardIt>::value_type V;
     ForwardIt current = first;
@@ -852,7 +852,7 @@ ForwardIt uninitialized_default_construct_n_impl(ForwardIt first,
         for (; count > 0; ++current, (void) --count)
             copy_construct(static_cast<void*>(addressof(*current)), V(), alloc);
     }
-    else 
+    else
     {
         NH3API_TRY
         {
@@ -863,9 +863,9 @@ ForwardIt uninitialized_default_construct_n_impl(ForwardIt first,
         {
             destroy(first, current, alloc);
             NH3API_RETHROW
-        }    
+        }
     }
-    
+
     return current;
 }
 #endif
@@ -877,10 +877,10 @@ NoThrowForwardIt uninitialized_copy(InputIt first,
                                     NoThrowForwardIt d_first,
                                     Allocator& alloc)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range(first, last);
     verify_iterator(d_first);
-    #endif 
+    #endif
 
     #if NH3API_MSVC_STL
     return ::std::_Uninitialized_copy(first, last, d_first, alloc);
@@ -888,7 +888,7 @@ NoThrowForwardIt uninitialized_copy(InputIt first,
     return ::std::__uninitialized_copy_a(first, last, d_first, alloc);
     #elif NH3API_CLANG_STL
     return ::std::__uninitialized_allocator_copy(alloc, first, last, d_first);
-    #else 
+    #else
     #endif
 }
 
@@ -899,10 +899,10 @@ NoThrowForwardIt uninitialized_copy_n(InputIt first,
                                       NoThrowForwardIt d_first,
                                       Allocator& alloc)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range_n(first, count);
     verify_iterator(d_first);
-    #endif 
+    #endif
 
     #if NH3API_MSVC_STL
     return ::std::_Uninitialized_copy_n(first, count, d_first, alloc);
@@ -910,7 +910,7 @@ NoThrowForwardIt uninitialized_copy_n(InputIt first,
     return ::std::__uninitialized_copy_a(first, ::std::next(first, count), d_first, alloc);
     #elif NH3API_CLANG_STL
     return ::std::__uninitialized_allocator_copy(alloc, first, ::std::next(first, count), d_first);
-    #else 
+    #else
     #endif
 }
 
@@ -924,10 +924,10 @@ NoThrowForwardIt uninitialized_move(InputIt first,
                                     NoThrowForwardIt d_first,
                                     Allocator& alloc)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range(first, last);
     verify_iterator(d_first);
-    #endif 
+    #endif
 
     #if NH3API_MSVC_STL
     return ::std::_Uninitialized_move(first, last, d_first, alloc);
@@ -936,7 +936,7 @@ NoThrowForwardIt uninitialized_move(InputIt first,
     #elif NH3API_CLANG_STL
     return ::std::__uninitialized_allocator_relocate(alloc, first, last, d_first);
     // return ::std::__uninitialized_allocator_move_if_noexcept(alloc, first, last, d_first);
-    #else 
+    #else
     #endif
 }
 // #endif
@@ -944,13 +944,13 @@ NoThrowForwardIt uninitialized_move(InputIt first,
 template<class T, class Size> NH3API_CONSTEXPR_CPP_20
 void init_array(T* first, Size n)
 {
-    #if NH3API_DEBUG 
+    #if NH3API_DEBUG
     verify_range_n(first, n);
-    #endif 
+    #endif
     init_array_impl(first, n, tt::is_nothrow_default_constructible<T>());
 }
 
-template<class T, class Size> 
+template<class T, class Size>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 void init_array_impl(T* first, Size n, tt::false_type)
 {
@@ -968,7 +968,7 @@ void init_array_impl(T* first, Size n, tt::false_type)
     }
 }
 
-template<class T, class Size> 
+template<class T, class Size>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 void init_array_impl(T* first, Size n, tt::true_type)
 {
@@ -979,7 +979,7 @@ void init_array_impl(T* first, Size n, tt::true_type)
 }
 
 template <typename InputIterator, typename OutputIterator>
-NH3API_CONSTEXPR OutputIterator 
+NH3API_CONSTEXPR OutputIterator
 copy_constexpr(InputIterator first, InputIterator last, OutputIterator d_first)
 {
 #if NH3API_CHECK_CPP14
@@ -995,11 +995,11 @@ copy_constexpr(InputIterator first, InputIterator last, OutputIterator d_first)
                 }
                 return d_first;
             }
-            else 
+            else
             {
                 return std::copy(first, last, d_first);
             }
-        #else 
+        #else
             while (first != last)
             {
                 *d_first++ = *first++;
@@ -1007,13 +1007,13 @@ copy_constexpr(InputIterator first, InputIterator last, OutputIterator d_first)
             return d_first;
         #endif
     #endif
-#else 
+#else
     return copy(first, last, d_first);
 #endif
 }
 
 template<class InputIt, class Size, class OutputIt>
-NH3API_CONSTEXPR OutputIt 
+NH3API_CONSTEXPR OutputIt
 copy_n_constexpr(InputIt first, Size count, OutputIt result)
 {
 #if NH3API_CHECK_CPP14
@@ -1032,11 +1032,11 @@ copy_n_constexpr(InputIt first, Size count, OutputIt result)
                 }
                 return result;
             }
-            else 
+            else
             {
                 return std::copy_n(first, count, result);
             }
-        #else 
+        #else
             if (count > 0)
             {
                 *result = *first;
@@ -1047,19 +1047,19 @@ copy_n_constexpr(InputIt first, Size count, OutputIt result)
             return result;
         #endif
     #endif
-#else 
+#else
     return copy_n(first, count, result);
 #endif
 }
 
 NH3API_CONSTEXPR void
-swap_chars_range_constexpr(char* __restrict first1, 
-                           char* __restrict last1, 
+swap_chars_range_constexpr(char* __restrict first1,
+                           char* __restrict last1,
                            char* __restrict first2) NH3API_NOEXCEPT
 {
     #ifdef __cpp_lib_constexpr_algorithms
     std::swap_ranges(first1, last1, first2);
-    #else 
+    #else
     while ( first1 != last1 )
     {
         char temp = *first1;
@@ -1070,7 +1070,7 @@ swap_chars_range_constexpr(char* __restrict first1,
 }
 
 template <typename ForwardIterator, typename T>
-NH3API_CONSTEXPR void 
+NH3API_CONSTEXPR void
 fill_constexpr(ForwardIterator first, ForwardIterator last, const T& value)
 {
 #if NH3API_CHECK_CPP14
@@ -1085,18 +1085,18 @@ fill_constexpr(ForwardIterator first, ForwardIterator last, const T& value)
                     *first = value;
                 }
             }
-            else 
+            else
             {
                 std::fill(first, last, value);
             }
-        #else 
+        #else
             for (; first != last; ++first)
             {
                 *first = value;
             }
         #endif
     #endif
-#else 
+#else
     fill(first, last, value);
 #endif
 }
@@ -1115,17 +1115,17 @@ OutputIt fill_n_constexpr(OutputIt first, Size count, const T& value)
                     *first++ = value;
                 return first;
             }
-            else 
+            else
             {
                 return std::fill_n(first, count, value);
             }
-        #else 
+        #else
             for (Size i = 0; i < count; i++)
                 *first++ = value;
             return first;
         #endif
     #endif
-#else 
+#else
     return fill_n(first, count, value);
 #endif
 }

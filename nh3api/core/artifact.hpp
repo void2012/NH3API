@@ -236,7 +236,7 @@ struct type_artifact
         type_artifact(int32_t _type, int32_t _spell) NH3API_NOEXCEPT
             : type(static_cast<TArtifact>(_type)), spell(static_cast<SpellID>(_spell))
         {}
-        
+
         NH3API_FORCEINLINE
         type_artifact(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         { NH3API_IGNORE(type, spell); }
@@ -247,19 +247,19 @@ struct type_artifact
 
         NH3API_FORCEINLINE
         exe_string get_description() const
-        { 
+        {
             exe_string result(nh3api::dummy_tag);
-            THISCALL_2(exe_string*, 0x4DB650, this, &result); 
+            THISCALL_2(exe_string*, 0x4DB650, this, &result);
             return result;
         }
 
     public:
         NH3API_CONSTEXPR
-        bool operator==(const type_artifact& other) const 
+        bool operator==(const type_artifact& other) const
         { return (this->type == other.type) && (this->spell == other.spell); }
 
         NH3API_CONSTEXPR
-        bool operator!=(const type_artifact& other) const 
+        bool operator!=(const type_artifact& other) const
         { return !(*this == other); }
 
     public:

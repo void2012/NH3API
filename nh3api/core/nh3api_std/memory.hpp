@@ -195,7 +195,7 @@ ForwardIt destroy_n(ForwardIt first, Size n)
 // we can't obtain the pointer to the default constructor of type directly
 // we also need to pass the __thiscall constructor to exe_vector_constructor_iterator call
 // MSVC can't use __thiscall outside of class, use __fastcall + unused 2nd parameter trick
-template <typename T> 
+template <typename T>
 void __fastcall construct_indirect(T* ptr, uint32_t unused = 0)
 {
     (void) unused;
@@ -206,7 +206,7 @@ void __fastcall construct_indirect(T* ptr, uint32_t unused = 0)
 // we can't obtain the pointer to the destructor of type directly
 // we also need to pass the __thiscall destructor to exe_vector_destructor_iterator call
 // MSVC can't use __thiscall outside of class, use __fastcall + unused 2nd parameter trick
-template <typename T> 
+template <typename T>
 void __fastcall destroy_indirect(T* ptr, uint32_t unused = 0)
 {
     (void) unused;
@@ -253,12 +253,12 @@ namespace details
 template<typename T, bool has_deleting_destructor>
 struct exe_invoke_delete_helper
 {
-    NH3API_STATIC_ASSERT("exe_invoke_delete: can't invoke destructor on void*", 
+    NH3API_STATIC_ASSERT("exe_invoke_delete: can't invoke destructor on void*",
                          !nh3api::tt::is_void<T>::value);
 
     NH3API_FORCEINLINE
     void operator()(T* ptr) const NH3API_NOEXCEPT
-    { 
+    {
         nh3api::destroy_at(ptr);
         exe_delete(ptr);
     }
@@ -280,9 +280,9 @@ struct exe_invoke_delete_helper<T, true>
 // invoke delete and destroy (use this instead of plain exe_delete)
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_delete(T* ptr) NH3API_NOEXCEPT
-{ 
+{
     nh3api::details::exe_invoke_delete_helper
-    <T, nh3api::tt::has_scalar_deleting_destructor<T>::value>()(ptr); 
+    <T, nh3api::tt::has_scalar_deleting_destructor<T>::value>()(ptr);
 }
 
 // overload for void*
@@ -297,7 +297,7 @@ namespace details
 template<typename T, bool has_deleting_destructor>
 struct exe_invoke_destructor_helper
 {
-    NH3API_STATIC_ASSERT("exe_invoke_destructor: can't invoke destructor on void*", 
+    NH3API_STATIC_ASSERT("exe_invoke_destructor: can't invoke destructor on void*",
                          !nh3api::tt::is_void<T>::value);
 
     NH3API_FORCEINLINE
@@ -320,9 +320,9 @@ struct exe_invoke_destructor_helper<T, true>
 // invoke destructor(plain or scalar_deleting_destructor)
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_destructor(T* ptr) NH3API_NOEXCEPT
-{ 
+{
     nh3api::details::exe_invoke_destructor_helper
-    <T, nh3api::tt::has_scalar_deleting_destructor<T>::value>()(ptr); 
+    <T, nh3api::tt::has_scalar_deleting_destructor<T>::value>()(ptr);
 }
 
 namespace nh3api
@@ -334,12 +334,12 @@ struct exe_invoke_array_delete_helper
 {
     NH3API_FORCEINLINE
     void operator()(T* ptr) const NH3API_NOEXCEPT
-    { 
+    {
         int32_t* pre_ptr = (reinterpret_cast<int32_t*>(ptr)) - 1;
         const int32_t array_size = *pre_ptr;
         for ( int32_t i = 0; i < array_size; ++i )
             exe_invoke_destructor(&ptr[i]);
-        
+
         exe_delete(pre_ptr);
     }
 };
@@ -349,7 +349,7 @@ struct exe_invoke_array_delete_helper<T, true>
 {
     NH3API_FORCEINLINE
     void operator()(T* ptr) const NH3API_NOEXCEPT
-    { 
+    {
         int32_t* pre_ptr = (reinterpret_cast<int32_t*>(ptr)) - 1;
         exe_delete(pre_ptr);
     }
@@ -361,17 +361,17 @@ struct exe_invoke_array_delete_helper<T, true>
 // invoke array form of delete. Use it instead of plain exe_delete
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_array_delete(T* ptr) NH3API_NOEXCEPT
-{ 
+{
     nh3api::details::exe_invoke_array_delete_helper
-    <T, nh3api::tt::is_trivially_destructible<T>::value>()(ptr); 
+    <T, nh3api::tt::is_trivially_destructible<T>::value>()(ptr);
 }
 
 // overload for void*
 template<> NH3API_FORCEINLINE
 void exe_invoke_array_delete<void>(void* ptr) NH3API_NOEXCEPT
-{  
+{
     int32_t* pre_ptr = (reinterpret_cast<int32_t*>(ptr)) - 1;
-    exe_delete(pre_ptr); 
+    exe_delete(pre_ptr);
 }
 
 namespace nh3api
@@ -394,12 +394,12 @@ void scalar_deleting_destructor(T* ptr, uint8_t flag)
 
 // MSVC ABI implementation of virtual destructor
 // called via operator delete[] array form
-// MSVC operator new[] stores the size of the array 
+// MSVC operator new[] stores the size of the array
 // right before the allocated block.
 template<typename T>
 void vector_deleting_destructor(T* ptr, uint32_t flag)
 {
-    NH3API_STATIC_ASSERT("vector_deleting_destructor<T>: T must be a class", 
+    NH3API_STATIC_ASSERT("vector_deleting_destructor<T>: T must be a class",
                          nh3api::tt::is_class<T>::value);
 
     // operator delete[]
@@ -443,7 +443,7 @@ const typename T::vftable_t* get_type_vftable(); // template specializations pro
 
 // syntactic sugar: use argument just to obtain the template type
 template<typename T>
-NH3API_CONSTEXPR 
+NH3API_CONSTEXPR
 const typename T::vftable_t* get_type_vftable(const T*)
 { return get_type_vftable<T>(); }
 
@@ -460,13 +460,13 @@ void set_vftable(T* ptr)
     NH3API_MEMSHIELD_END
 }
 
-#ifndef NH3API_SET_VFTABLE 
+#ifndef NH3API_SET_VFTABLE
     #define NH3API_SET_VFTABLE() NH3API_MEMSHIELD_BEGIN set_vftable(this); NH3API_MEMSHIELD_END
 #endif
 
-#if NH3API_CHECK_CPP11 
+#if NH3API_CHECK_CPP11
 // low-level virtual call with only shift in vftable
-template<typename Result, typename T, typename ... Args> inline 
+template<typename Result, typename T, typename ... Args> inline
 Result virtual_call(T* thisPtr, size_t shift, Args&& ... args)
 {
     return THISCALL_N(Result, reinterpret_cast<uintptr_t>(get_vftable(thisPtr)) + shift, std::forward<Args>(args)...);
@@ -488,8 +488,8 @@ Result virtual_call(T* thisPtr, size_t shift, Args&& ... args)
     }
 
     }
-    #else 
-    namespace nh3api 
+    #else
+    namespace nh3api
     {
     template<class T, class U> NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
     T exchange(T& obj, U&& new_value)
@@ -500,7 +500,7 @@ Result virtual_call(T* thisPtr, size_t shift, Args&& ... args)
     #endif
 #endif
 
-namespace nh3api 
+namespace nh3api
 {
 
 template<class T>
@@ -522,11 +522,11 @@ namespace nh3api
 
 template<class T, class Allocator>
 NH3API_FORCEINLINE void copy_construct(void* ptr, const T& value, Allocator alloc)
-{ 
-    #if NH3API_CHECK_CPP11 
+{
+    #if NH3API_CHECK_CPP11
     std::allocator_traits<Allocator>::construct(alloc, ptr, value);
-    #else 
-    alloc.construct(ptr, value); 
+    #else
+    alloc.construct(ptr, value);
     #endif
 }
 
@@ -569,7 +569,7 @@ public:
 
 protected:
     template<class U>
-    static NH3API_FORCEINLINE U* impl_allocate( ptrdiff_t _N ) 
+    static NH3API_FORCEINLINE U* impl_allocate( ptrdiff_t _N )
     NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
     {
         if ( _N < 0 )
@@ -673,7 +673,7 @@ public:
 
 protected:
     template<class U>
-    static NH3API_FORCEINLINE U* impl_allocate( ptrdiff_t _N ) 
+    static NH3API_FORCEINLINE U* impl_allocate( ptrdiff_t _N )
     NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
     {
         if ( _N < 0 )
@@ -735,15 +735,15 @@ public:
     { return *this; }
 };
 
-template<class T, class U> NH3API_CONSTEXPR 
+template<class T, class U> NH3API_CONSTEXPR
 bool operator==(const exe_allocator<T>&, const exe_allocator<U>&)
-{ return true; } 
+{ return true; }
 
 template<class T, class U> NH3API_CONSTEXPR
 bool operator!=(const exe_allocator<T>&, const exe_allocator<U>&)
 { return false; }
 
-namespace nh3api 
+namespace nh3api
 {
 // wrapper around allocators
 // to make NH3API work on any compiler
@@ -919,11 +919,11 @@ struct allocator_adaptor
         NH3API_FORCEINLINE
         void construct(U* ptr, const value_type& value)
         { ::new (static_cast<void*>(ptr)) value_type(value); }
-        
+
         #endif
 
         template <class U> NH3API_CONSTEXPR_CPP_20
-        void destroy(U* ptr) 
+        void destroy(U* ptr)
         NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
         {
             #if NH3API_CHECK_CPP11
@@ -1036,7 +1036,7 @@ struct allocator_adaptor<exe_allocator<T> >
         NH3API_FORCEINLINE NH3API_CONSTEXPR
         static pointer address(reference x) NH3API_NOEXCEPT
         { return nh3api::addressof(x); }
-    
+
         NH3API_FORCEINLINE NH3API_CONSTEXPR
         static const_pointer address(const_reference x) NH3API_NOEXCEPT
         { return nh3api::addressof(x); }
@@ -1044,14 +1044,14 @@ struct allocator_adaptor<exe_allocator<T> >
         NH3API_FORCEINLINE
         static pointer allocate(size_type n)
         NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
-        { 
+        {
             #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-				return ((T*)::operator new(
-				(size_t)n * sizeof(T), exe_heap));
-			#else
-				return ((T*)::operator new(
-				(size_t)n * sizeof(T), exe_heap, std::nothrow));
-			#endif
+                return ((T*)::operator new(
+                (size_t)n * sizeof(T), exe_heap));
+            #else
+                return ((T*)::operator new(
+                (size_t)n * sizeof(T), exe_heap, std::nothrow));
+            #endif
         }
 
         NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
@@ -1059,12 +1059,12 @@ struct allocator_adaptor<exe_allocator<T> >
         NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
         {
             #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-				return ((T*)::operator new(
-				(size_t)n * sizeof(T), exe_heap));
-			#else
-				return ((T*)::operator new(
-				(size_t)n * sizeof(T), exe_heap, std::nothrow));
-			#endif
+                return ((T*)::operator new(
+                (size_t)n * sizeof(T), exe_heap));
+            #else
+                return ((T*)::operator new(
+                (size_t)n * sizeof(T), exe_heap, std::nothrow));
+            #endif
         }
 
         template<typename U>
@@ -1083,7 +1083,7 @@ struct allocator_adaptor<exe_allocator<T> >
 
         NH3API_FORCEINLINE
         static void deallocate(pointer ptr, size_type) NH3API_NOEXCEPT
-		{ exe_delete(ptr); }
+        { exe_delete(ptr); }
 
         template <class U>
         static void copy_construct(U* ptr, const value_type& value)
@@ -1091,27 +1091,27 @@ struct allocator_adaptor<exe_allocator<T> >
         { ::new (static_cast<void*>(ptr)) value_type(value); }
 
         #if NH3API_STD_MOVE_SEMANTICS
-		template <class U, typename NH3API_ARGS_DOTS Args> NH3API_FORCEINLINE
-		static void construct(U* ptr, Args&& NH3API_ARGS_DOTS args)
-		{ ::new (static_cast<void*>(ptr)) value_type(std::forward<Args>(args) NH3API_ARGS_DOTS ); }
-		#else
-		NH3API_FORCEINLINE
+        template <class U, typename NH3API_ARGS_DOTS Args> NH3API_FORCEINLINE
+        static void construct(U* ptr, Args&& NH3API_ARGS_DOTS args)
+        { ::new (static_cast<void*>(ptr)) value_type(std::forward<Args>(args) NH3API_ARGS_DOTS ); }
+        #else
+        NH3API_FORCEINLINE
         template <class U> NH3API_FORCEINLINE
-		static void construct(U* ptr, const_reference value)
-		{ ::new (static_cast<void*>(ptr)) value_type(value); }
-		#endif
+        static void construct(U* ptr, const_reference value)
+        { ::new (static_cast<void*>(ptr)) value_type(value); }
+        #endif
 
         template <class U> NH3API_CONSTEXPR_CPP_20
-        static void destroy(U* ptr) 
+        static void destroy(U* ptr)
         NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
         { nh3api::destroy_at(ptr); }
 
         NH3API_FORCEINLINE NH3API_CONSTEXPR
-		static size_t max_size() NH3API_NOEXCEPT
-		{
-			const size_t _N = (size_t)(-1) / sizeof(value_type);
-			return (0 < _N ? _N : 1);
-		}
+        static size_t max_size() NH3API_NOEXCEPT
+        {
+            const size_t _N = (size_t)(-1) / sizeof(value_type);
+            return (0 < _N ? _N : 1);
+        }
 
         NH3API_FORCEINLINE NH3API_CONSTEXPR
         const allocator_type& select_on_container_copy_construction() const
@@ -1127,13 +1127,13 @@ namespace tt
 {
 #if NH3API_CHECK_CPP11
 template<typename AllocatorT>
-struct allocator_may_throw 
-    : public integral_constant<bool, 
+struct allocator_may_throw
+    : public integral_constant<bool,
     !noexcept(nh3api::declval<AllocatorT>().allocate( nh3api::declval<typename AllocatorT::size_type>() ))>
 {};
-#else 
+#else
 template<typename AllocatorT>
-struct allocator_may_throw 
+struct allocator_may_throw
     : public integral_constant<bool, true>
 {};
 #endif
@@ -1143,12 +1143,12 @@ template<typename T>
 struct allocator_may_throw<exe_allocator<T> >
     : public true_type
 {};
-#else 
+#else
 template<typename T>
 struct allocator_may_throw<exe_allocator<T> >
     : public false_type
 {};
-#endif  
+#endif
 
 #if NH3API_STD_MOVE_SEMANTICS
 template<typename AllocT>
@@ -1161,9 +1161,9 @@ struct allocator_always_equal_after_move
 
 template<typename T>
 struct allocator_always_equal_after_move<exe_allocator<T> >
-    : true_type 
+    : true_type
 {};
-#else 
+#else
 
 #endif
 
@@ -1173,16 +1173,16 @@ struct allocator_always_equal_after_move<exe_allocator<T> >
 // used only in map editor and campaign editor
 // remains in NH3API for binary compability with the .exe-s
 // dangerous in C++98 mode!
-template <class T> 
+template <class T>
 class exe_auto_ptr
 {
   public:
     typedef T element_type;
-    explicit exe_auto_ptr(T *_P = 0) NH3API_NOEXCEPT 
+    explicit exe_auto_ptr(T *_P = 0) NH3API_NOEXCEPT
         : _Owns(_P != 0), _Ptr(_P)
     {
     }
-    exe_auto_ptr(const exe_auto_ptr<T> &_Y) NH3API_NOEXCEPT : 
+    exe_auto_ptr(const exe_auto_ptr<T> &_Y) NH3API_NOEXCEPT :
         _Owns(_Y._Owns), _Ptr(_Y.release())
     {
     }
@@ -1205,7 +1205,7 @@ class exe_auto_ptr
         return *this;
     }
     #if NH3API_STD_MOVE_SEMANTICS
-    exe_auto_ptr(exe_auto_ptr<T>&& _Y) NH3API_NOEXCEPT : 
+    exe_auto_ptr(exe_auto_ptr<T>&& _Y) NH3API_NOEXCEPT :
         _Owns(nh3api::exchange(_Y._Owns, false)), _Ptr(nh3api::exchange(_Y._Ptr, nullptr))
     {}
 
@@ -1226,7 +1226,7 @@ class exe_auto_ptr
             this->_Ptr = _Y.release();
             this->_Owns = true;
         }
-    
+
         return *this;
     }
     #endif
@@ -1393,23 +1393,23 @@ NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t operator>>(byte_t lhs, _Integer shift
     return static_cast<byte_t>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) >> shift));
 }
 
-namespace nh3api 
+namespace nh3api
 {
 template <class _Integer>
 NH3API_CONSTEXPR NH3API_FORCEINLINE _Integer to_integer(byte_t value) NH3API_NOEXCEPT
 {
     NH3API_STATIC_ASSERT("operand must be an integral type", nh3api::tt::is_integral<_Integer>::value);
     return static_cast<_Integer>(value);
-}   
+}
 }
 
 #else
 using byte_t = std::byte;
-namespace nh3api 
+namespace nh3api
 {
 template <class _Integer>
 NH3API_CONSTEXPR NH3API_FORCEINLINE _Integer to_integer(byte_t value) NH3API_NOEXCEPT
-{ return ::std::to_integer<_Integer>(value); }   
+{ return ::std::to_integer<_Integer>(value); }
 }
 #endif
 

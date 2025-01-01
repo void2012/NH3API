@@ -78,9 +78,9 @@ class hero : public type_obscuring_object
         hero(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : TownSpecialGrantedMask(tag)
         {
-            NH3API_IGNORE(SSLevel, 
-                          SSOrder, 
-                          equipped, 
+            NH3API_IGNORE(SSLevel,
+                          SSOrder,
+                          equipped,
                           blockedSlots,
                           backpack,
                           in_spellbook,
@@ -157,9 +157,9 @@ class hero : public type_obscuring_object
 
         NH3API_FORCEINLINE
         exe_string get_morale_description() const
-        { 
+        {
             exe_string result(nh3api::dummy_tag);
-            (void) THISCALL_2(exe_string*, 0x4DC590, this, &result); 
+            (void) THISCALL_2(exe_string*, 0x4DC590, this, &result);
             return result;
         }
 
@@ -167,7 +167,7 @@ class hero : public type_obscuring_object
         exe_string get_luck_description() const
         {
             exe_string result(nh3api::dummy_tag);
-            (void) THISCALL_2(exe_string*, 0x4DCD30, this, &result); 
+            (void) THISCALL_2(exe_string*, 0x4DCD30, this, &result);
             return result;
         }
 
@@ -211,7 +211,7 @@ class hero : public type_obscuring_object
         exe_string get_backpack_error() const
         {
             exe_string result(nh3api::dummy_tag);
-            (void) THISCALL_2(exe_string*, 0x4E3140, this, &result); 
+            (void) THISCALL_2(exe_string*, 0x4E3140, this, &result);
             return result;
         }
 
@@ -268,7 +268,7 @@ class hero : public type_obscuring_object
 
         float GetExperienceBonusFactor() const
         { return THISCALL_1(double, 0x4E4AB0, this); }
-    
+
         float GetManaModifier() const
         { return THISCALL_1(double, 0x4E4B20, this); }
 
@@ -307,7 +307,7 @@ class hero : public type_obscuring_object
 
         bool can_summon_boat() const
         { return THISCALL_1(bool, 0x4E57C0, this); }
-        
+
         playerData* get_player() const
         { return ( this->playerOwner >= 0 ) ? &hero_hpp_gpGame_get(0x20AD0, std::array<playerData, 8>)[this->playerOwner] : nullptr; }
 
@@ -425,7 +425,7 @@ class hero : public type_obscuring_object
         {
             GroupedFormation   = 1,
             PlacementFormation = 2,
-        }       
+        }
         // Hero army formation /
         // Расстановка в армии героя.
         // offset: +0x48 = +72,  size = 0x1 = 1
@@ -722,7 +722,7 @@ struct HeroExtra
         // ID Героя.
         // offset: +0x4 = +4,  size = 0x4 = 4
         THeroID id;
-        
+
         // offset: +0x8 = +8,  size = 0x4 = 4
         int32_t objRef;
 
@@ -766,7 +766,7 @@ struct HeroExtra
         NH3API_MAYBE_UNUSED
         // offset: +0x23 = +35,  size = 0x1 = 1
         byte_t gap_23[1];
-        
+
     public:
         // Number of hero secondary skills /
         // Кол-во вторичных навыков героя.
@@ -900,18 +900,18 @@ class boat : public type_obscuring_object
 {
     public:
         boat() NH3API_NOEXCEPT
-            : type_obscuring_object(), 
+            : type_obscuring_object(),
               allocated(false)
         {}
 
         NH3API_FORCEINLINE
         boat(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-        { NH3API_IGNORE(allocated, 
-                        id, 
-                        type, 
-                        facing, 
-                        playerOwner, 
-                        occupying_hero, 
+        { NH3API_IGNORE(allocated,
+                        id,
+                        type,
+                        facing,
+                        playerOwner,
+                        occupying_hero,
                         occupied); }
 
         void obscure_cell()
@@ -1013,7 +1013,7 @@ struct THeroSpecificAbility
         // Speciality subtype /
         // Подтип специализации.
         // offset: +0x4 = +4,  size = 0x4 = 4
-        union 
+        union
         {
             TSecondarySkill skill;    // вторичный навык
             TCreatureType   creature; // существо
@@ -1032,7 +1032,7 @@ struct THeroSpecificAbility
 
         // offset: +0x14 = +20,  size = 0x4 = 4
         TCreatureType creature_grade;
-    
+
     protected:
         // offset: +0x18 = +24,  size = 0x4 = 4
         int32_t unknown;
@@ -1245,19 +1245,19 @@ struct THeroTraits
 NH3API_INLINE_OR_EXTERN
 // Heroes traits /
 // Свойства героев.
-std::array<THeroTraits, MAX_HEROES_SOD>& akHeroTraits 
+std::array<THeroTraits, MAX_HEROES_SOD>& akHeroTraits
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x679DD0, std::array<THeroTraits, MAX_HEROES_SOD>));
 
 NH3API_INLINE_OR_EXTERN
 // Heroes classes traits /
 // Свойства классов героев.
-std::array<THeroClassTraits, kNumHeroClasses>& akHeroClassTraits 
+std::array<THeroClassTraits, kNumHeroClasses>& akHeroClassTraits
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x67D868, std::array<THeroClassTraits, kNumHeroClasses>));
 
 NH3API_INLINE_OR_EXTERN
 // Heroes specific abilities /
 // Специализации героев.
-std::array<THeroSpecificAbility, MAX_HEROES_SOD>& akHeroSpecificAbilities 
+std::array<THeroSpecificAbility, MAX_HEROES_SOD>& akHeroSpecificAbilities
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678420, std::array<THeroSpecificAbility, MAX_HEROES_SOD>));
 
 NH3API_DISABLE_WARNING_END

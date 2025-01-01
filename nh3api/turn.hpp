@@ -25,10 +25,10 @@ struct CTurnDuration
         NH3API_FORCEINLINE
         CTurnDuration(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         {
-            NH3API_IGNORE(m_lastWarned, 
+            NH3API_IGNORE(m_lastWarned,
                           m_turnStartTime,
-                          m_currDuration, 
-                          m_nextWarning, 
+                          m_currDuration,
+                          m_nextWarning,
                           m_pauseTime);
         }
 
@@ -79,7 +79,7 @@ struct CTurnDuration
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
-CTurnDuration& g_turnDuration 
+CTurnDuration& g_turnDuration
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69D680, CTurnDuration));
 
 NH3API_DISABLE_WARNING_END

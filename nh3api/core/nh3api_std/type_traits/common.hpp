@@ -111,41 +111,41 @@ template <class T> struct is_pointer<T const volatile> : public is_pointer<T>{};
 template <class T> struct is_pointer<T volatile> : public is_pointer<T>{};
 
 template<class B>
-struct negation : integral_constant<bool, !bool(B::value)> 
+struct negation : integral_constant<bool, !bool(B::value)>
 {};
 
 template <typename T1, typename T2>
-struct conjunction_2 
+struct conjunction_2
     : false_type
 {};
 
 template <>
-struct conjunction_2<true_type, true_type> 
+struct conjunction_2<true_type, true_type>
     : true_type
 {};
 
 template <typename T, typename U>
-struct disjunction_2 
+struct disjunction_2
     : true_type
 {};
 
 template <>
-struct disjunction_2<false_type, false_type> 
+struct disjunction_2<false_type, false_type>
     : false_type
 {};
 
-} // namespace tt 
+} // namespace tt
 } // namespace nh3api
 
 #pragma warning(pop)
 
 #pragma component(mintypeinfo, off)
 
-#else 
+#else
 #include <type_traits>
 namespace nh3api
 {
-namespace tt 
+namespace tt
 {
 using ::std::enable_if;
 using ::std::is_base_of;
@@ -154,10 +154,10 @@ using ::std::alignment_of;
 
 #ifdef __cpp_lib_type_identity
 using ::std::type_identity;
-#else 
+#else
 template<class T> struct type_identity
 { typedef T type; };
-#endif 
+#endif
 using ::std::conditional;
 using ::std::is_convertible;
 using ::std::is_void;
@@ -168,41 +168,41 @@ using ::std::is_reference;
 #ifdef __cpp_lib_logical_traits
 using ::std::negation;
 
-template<typename T1, typename T2> 
+template<typename T1, typename T2>
 struct conjunction_2
-    : ::std::conjunction<T1, T2> 
+    : ::std::conjunction<T1, T2>
 {};
 
-template<typename T1, typename T2> 
+template<typename T1, typename T2>
 struct disjunction_2
-    : ::std::disjunction<T1, T2> 
+    : ::std::disjunction<T1, T2>
 {};
-#else 
+#else
 template<class B>
-struct negation : integral_constant<bool, !bool(B::value)> 
+struct negation : integral_constant<bool, !bool(B::value)>
 {};
 
 template <typename T1, typename T2>
-struct conjunction_2 
+struct conjunction_2
     : conditional<T1::value, T2, false_type>::type
 {};
 
 template <>
-struct conjunction_2<true_type, true_type> 
+struct conjunction_2<true_type, true_type>
     : true_type
 {};
 
 template <typename T1, typename T2>
-struct disjunction_2 
+struct disjunction_2
     : conditional<T1::value, true_type, T2>::type
 {};
 
 template <>
-struct disjunction_2<false_type, false_type> 
+struct disjunction_2<false_type, false_type>
     : false_type
 {};
 #endif
-using ::std::is_pointer;    
-} // namespace tt 
+using ::std::is_pointer;
+} // namespace tt
 } // namespace nh3api
 #endif

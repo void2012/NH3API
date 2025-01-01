@@ -10,7 +10,7 @@
 std::array<TSSkillTraits, MAX_SECONDARY_SKILLS>& akSSkillTraits =
 get_global_var_ref(0x698D88, std::array<TSSkillTraits, MAX_SECONDARY_SKILLS>);
 
-const std::array<int32_t, kNumMasteries>& luck_bonus = 
+const std::array<int32_t, kNumMasteries>& luck_bonus =
 (get_global_var_ref(0x63E998, const std::array<int32_t, kNumMasteries>));
 
 const std::array<int32_t, kNumMasteries>& leadership_bonus =

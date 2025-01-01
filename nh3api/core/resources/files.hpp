@@ -34,8 +34,8 @@ NH3API_VIRTUAL_CLASS TAbstractFile
             int32_t (__thiscall *write)(TAbstractFile*, const void*, size_t);
         };
 
-	public:
-		TAbstractFile() 
+    public:
+        TAbstractFile()
         { NH3API_SET_VFTABLE(); }
 
         TAbstractFile(const nh3api::omit_base_vftable_tag_t& tag) NH3API_NOEXCEPT
@@ -94,11 +94,11 @@ NH3API_VIRTUAL_CLASS TGzFile : public TAbstractFile
         NH3API_VIRTUAL_OVERRIDE_TABSTRACTFILE(TGzFile)
 
     // member variables
-	public:
+    public:
         // zlib file handle /
-		// указатель на zlib файл.
-		// offset: +0x4 = +4,  size = 0x4 = 4
-		void* file;
+        // указатель на zlib файл.
+        // offset: +0x4 = +4,  size = 0x4 = 4
+        void* file;
 
 };
 #pragma pack(pop)
@@ -120,13 +120,13 @@ NH3API_VIRTUAL_CLASS TStreamBufFile : public TAbstractFile
 
         ~TStreamBufFile()
         {}
-        
+
     // virtual functions
     public:
         NH3API_VIRTUAL_OVERRIDE_TABSTRACTFILE(TStreamBufFile)
 
     // member variables
-	public:
+    public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         exe_streambuf* stream;
 
@@ -139,9 +139,9 @@ NH3API_VIRTUAL_CLASS TStreamBufFile : public TAbstractFile
 // size = 0x84 = 132, align = 4, baseclass: std::streambuf
 NH3API_VIRTUAL_CLASS TGzInflateBuf : public exe_streambuf
 {
-	public:
+    public:
         NH3API_FORCEINLINE
-		TGzInflateBuf(exe_streambuf& src) NH3API_NOEXCEPT
+        TGzInflateBuf(exe_streambuf& src) NH3API_NOEXCEPT
             : exe_streambuf(nh3api::dummy_tag)
         { THISCALL_2(void, 0x4D6260, this, &src); }
 
@@ -163,8 +163,8 @@ NH3API_VIRTUAL_CLASS TGzInflateBuf : public exe_streambuf
     public:
         NH3API_VIRTUAL_OVERRIDE_STREAMBUF(TGzInflateBuf)
 
-	protected:
-		// Parent streambuf /
+    protected:
+        // Parent streambuf /
         // Родительский streambuf.
         // offset: +0x38 = +56,  size = 0x4 = 4
         exe_streambuf* m_source;
@@ -284,8 +284,8 @@ protected:
 // size = 0x18C = 396, align = 4
 class LODFile
 {
-	public:
-		LODFile()
+    public:
+        LODFile()
         :
         fileptr(nullptr),
         opened(0),
@@ -294,29 +294,29 @@ class LODFile
         subindex()
         {}
 
-		~LODFile()
+        ~LODFile()
         { THISCALL_1(void, 0x4FAE90, this); }
-		
-	public:
-		LODEntry* getItemIndex(char const* item_name)
+
+    public:
+        LODEntry* getItemIndex(char const* item_name)
         { return THISCALL_2(LODEntry*, 0x4FACA0, this, item_name); }
 
-		bool      exist(char const* item_name)
-        { 
+        bool      exist(char const* item_name)
+        {
             Find( 0, numEntries, item_name );
             return matchindex >= 0;
         }
 
-		void      Find(uint32_t begin, uint32_t end, const char* item_name)
+        void      Find(uint32_t begin, uint32_t end, const char* item_name)
         { THISCALL_4(void, 0x4FACF0, this, begin, end, item_name); }
 
-		int32_t   open(char const* filename, uint32_t flags)
+        int32_t   open(char const* filename, uint32_t flags)
         { return THISCALL_3(int32_t, 0x4FAF30, this, filename, flags); }
 
-		bool      pointAt(char const* itemName)
+        bool      pointAt(char const* itemName)
         { return THISCALL_2(bool, 0x4FB100, this, itemName); }
 
-		int32_t   read(void* dest, int32_t numBytes)
+        int32_t   read(void* dest, int32_t numBytes)
         { return THISCALL_3(int32_t, 0x4FB1B0, this, dest, numBytes); }
 
     public:
@@ -384,10 +384,10 @@ struct t_lod_file_adapter : TAbstractFile
         void set_lod(LODFile* newfile)
         { lod_file = newfile; }
 
-        const LODFile* get_lod() const 
+        const LODFile* get_lod() const
         { return lod_file; }
 
-        LODFile* get_lod() 
+        LODFile* get_lod()
         { return lod_file; }
 
         // read LOD File entry
@@ -395,7 +395,7 @@ struct t_lod_file_adapter : TAbstractFile
         {
             if (lod_file->pointAt(name))
                 return read(buf, lod_file->subindex[lod_file->dataItemIndex].size);
-            else 
+            else
                 return -1;
         }
 
@@ -404,20 +404,20 @@ struct t_lod_file_adapter : TAbstractFile
 
     // virtual functions
     public:
-        virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override 
+        virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override
         { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }
-        
-        virtual int32_t __thiscall read(void *buf, size_t len) override 
+
+        virtual int32_t __thiscall read(void *buf, size_t len) override
         { return get_type_vftable(this)->read(this, buf, len); }
-    
+
     protected:
         virtual int32_t __thiscall write(const void *buf, size_t len) override = 0;
 
     // member variables
-	public:
+    public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         LODFile* lod_file;
-        
+
 };
 #pragma pack(pop)
 
@@ -451,6 +451,6 @@ struct t_stdio_file_adapter : TAbstractFile
     public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         exe_FILE* file;
-        
+
 };
 #pragma pack(pop)

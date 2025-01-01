@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
 #include "resources/resources_include.hpp" // EGameResource
 #include "artifact.hpp" // TArtifact, type_artifact
@@ -318,26 +318,26 @@ struct BlackBoxData : TreasureData
               ManaBonus(0),
               MoraleBonus(0),
               LuckBonus(0)
-        { 
-            ResQty.fill(0); 
+        {
+            ResQty.fill(0);
             PrimarySkillBonus.fill(0);
         }
 
         NH3API_FORCEINLINE
         BlackBoxData(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-            : TreasureData(tag), 
-              SecondarySkills(tag), 
-              Artifacts(tag), 
+            : TreasureData(tag),
+              SecondarySkills(tag),
+              Artifacts(tag),
               Spells(tag),
               Creatures(tag)
-        { NH3API_IGNORE(HasCustomTreasure, 
-                        ExperienceBonus, 
-                        ManaBonus, 
-                        MoraleBonus, 
+        { NH3API_IGNORE(HasCustomTreasure,
+                        ExperienceBonus,
+                        ManaBonus,
+                        MoraleBonus,
                         LuckBonus,
                         ResQty,
                         PrimarySkillBonus); }
-    
+
     public:
         // Has custom treasure? /
         // Имеет настроенные ресурсы?
@@ -495,9 +495,9 @@ class generator
         generator(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : guards(tag)
         { NH3API_IGNORE(genClass, genType, type, population, mapX, mapY, mapZ, playerOwner, town_id); }
-    
+
     public:
-        int32_t get_owner() const 
+        int32_t get_owner() const
         { return playerOwner; }
 
         // Read from game save file /
@@ -507,7 +507,7 @@ class generator
 
         // Write to game save file /
         // Записать в сохранение игры.
-        bool save(TAbstractFile* outfile) const 
+        bool save(TAbstractFile* outfile) const
         { return THISCALL_2(bool, 0x4B83E0, this, outfile); }
 
         void update_bonus()
@@ -583,7 +583,7 @@ class mine
     public:
         NH3API_CONSTEXPR_CPP_20 NH3API_FORCEINLINE
         mine() NH3API_NOEXCEPT
-            : playerOwner(PLAYER_NONE), 
+            : playerOwner(PLAYER_NONE),
               type(const_no_resource),
               is_abandoned(false),
               guards(),
@@ -639,10 +639,10 @@ class mine
 // size = 0x40 = 64, align = 4
 class garrison
 {
-    public: 
+    public:
         NH3API_FORCEINLINE
         garrison() NH3API_NOEXCEPT
-            : playerOwner(PLAYER_NONE), 
+            : playerOwner(PLAYER_NONE),
               garrisonArmy()
         {}
 
@@ -784,15 +784,15 @@ class Sign
 {
     public:
         NH3API_FORCEINLINE
-        Sign() NH3API_NOEXCEPT 
+        Sign() NH3API_NOEXCEPT
             : hasText(false), signText()
         {}
 
         NH3API_FORCEINLINE
-        Sign(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT 
+        Sign(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : signText(tag)
         { NH3API_IGNORE(hasText); }
-    
+
     public:
         // Has customized text /
         // Есть настроенный текст.
@@ -820,13 +820,13 @@ struct mapCellArtifact
 
 struct mapCellDefaultObject
 {
-    
+
     unsigned ID;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellCampfire
 {
-    
+
         unsigned              resType      : 4;
         unsigned              resValue     : 16;
         unsigned                     : 12;
@@ -834,7 +834,7 @@ struct mapCellCampfire
 
 struct mapCellCorpse
 {
-    
+
         unsigned              ID           : 5;
         unsigned                     : 1;
         unsigned              artifactID   : 10;
@@ -844,7 +844,7 @@ struct mapCellCorpse
 
 struct mapCellCreatureBank
 {
-    
+
         unsigned                     : 5;
         unsigned              visited      : 8;
         unsigned              ID           : 12;
@@ -854,7 +854,7 @@ struct mapCellCreatureBank
 
 struct mapCellEvent
 {
-    
+
         unsigned              index        : 10;
         unsigned              allow_player : 8;
         unsigned              allow_computer     : 1;
@@ -864,19 +864,19 @@ struct mapCellEvent
 
 struct mapCellFlotsam
 {
-    
-	enum
-	{
-		FLOTSAM_EMPTY          = 0,
-		FLOTSAM_WOOD5          = 1,
-		FLOTSAM_WOOD5_GOLD200  = 2,
-		FLOTSAM_WOOD10_GOLD500 = 3,
-	} type;
+
+    enum
+    {
+        FLOTSAM_EMPTY          = 0,
+        FLOTSAM_WOOD5          = 1,
+        FLOTSAM_WOOD5_GOLD200  = 2,
+        FLOTSAM_WOOD10_GOLD500 = 3,
+    } type;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellFountainFortune
 {
-    
+
         unsigned                     : 5;
         unsigned             visited      : 8;
         signed               bonusLuck    : 4;
@@ -885,7 +885,7 @@ struct mapCellFountainFortune
 
 struct mapCellLeanTo
 {
-    
+
         unsigned              ID           : 5;
         unsigned                     : 1;
         unsigned              resValue     : 4;
@@ -895,7 +895,7 @@ struct mapCellLeanTo
 
 struct mapCellMagicShrine
 {
-    
+
         unsigned                     : 13;
         unsigned              spell        : 10;
         unsigned                     : 9;
@@ -903,7 +903,7 @@ struct mapCellMagicShrine
 
 struct mapCellMagicSpring
 {
-    
+
         unsigned     ID           : 5;
         unsigned            : 1;
         unsigned     used         : 1;
@@ -912,7 +912,7 @@ struct mapCellMagicSpring
 
 struct mapCellMonster
 {
-    
+
         unsigned     amount          : 12;
         unsigned     aggression      : 5;
         unsigned     noRun           : 1;
@@ -924,7 +924,7 @@ struct mapCellMonster
 
 struct mapCellMysticGarden
 {
-    
+
         unsigned     ID           : 5;
 unsigned            : 1;
         unsigned     resType      : 4;
@@ -934,14 +934,14 @@ unsigned            : 21;
 
 struct mapCellPandorasBox
 {
-    
+
         unsigned     ID           : 10;
 unsigned            : 22;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellPyramid
 {
-    
+
         unsigned     available    : 1;
         unsigned     ID           : 4;
         unsigned     visited      : 8;
@@ -951,13 +951,13 @@ unsigned            : 11;
 
 struct mapCellRefugeeCamp
 {
-    
+
     int32_t ID;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellResource
 {
-    
+
         unsigned     value        : 19;
         unsigned     setupIndex   : 12;
         unsigned     hasSetup     : 1;
@@ -972,7 +972,7 @@ enum ScholarAwards : unsigned
 
 struct mapCellScholar
 {
-    
+
         ScholarAwards type         : 3;
         unsigned      PSkill       : 3;
         unsigned      SSkill       : 7;
@@ -982,7 +982,7 @@ struct mapCellScholar
 
 struct mapCellScroll
 {
-    
+
         unsigned     type         : 8;
         unsigned            : 11;
         unsigned     ID           : 12;
@@ -991,7 +991,7 @@ struct mapCellScroll
 
 struct mapCellSeaChest
 {
-    
+
         unsigned     level        : 2;
         unsigned            : 1;
         unsigned     artifactID   : 10;
@@ -1005,7 +1005,7 @@ struct mapCellShipwreckSurvivor
 
 struct mapCellShipyard
 {
-    
+
         unsigned owner : 8;
         unsigned X     : 8;
         unsigned Y     : 8;
@@ -1014,7 +1014,7 @@ struct mapCellShipyard
 
 struct mapCellTreasureChest
 {
-    
+
         unsigned     artifactID   : 10;
         unsigned     hasArtifact  : 1;
         unsigned     bonus        : 4;
@@ -1023,7 +1023,7 @@ struct mapCellTreasureChest
 
 struct mapCellTreeOfKnowledge
 {
-    
+
         unsigned     ID      : 5;
         unsigned     visited : 8;
         unsigned     type    : 2;
@@ -1032,7 +1032,7 @@ struct mapCellTreeOfKnowledge
 
 struct mapCellUniversity
 {
-    
+
         unsigned             : 5;
         unsigned     visited : 8;
         unsigned     ID      : 12;
@@ -1041,7 +1041,7 @@ struct mapCellUniversity
 
 struct mapCellWagon
 {
-    
+
         unsigned     resValue     : 5;
         unsigned     visited      : 8;
         unsigned     hasBonus     : 1;
@@ -1053,17 +1053,17 @@ struct mapCellWagon
 
 struct mapCellWarriorsTomb
 {
-    
+
         unsigned     hasArt     : 1; // есть артефакт
-        unsigned                : 4; 
+        unsigned                : 4;
         unsigned     visited    : 8; // посещение каждым из игроков
-        unsigned     artifactID : 10; 
+        unsigned     artifactID : 10;
         unsigned                : 9;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellWaterMill
 {
-    
+
         unsigned     goldBonus : 5;
         unsigned     visited   : 8;
         unsigned               : 19;
@@ -1071,7 +1071,7 @@ struct mapCellWaterMill
 
 struct mapCellWindMill
 {
-    
+
         unsigned     resType  : 4; // тип ресурса
         unsigned              : 9;
         unsigned     resValue : 4; // кол-во ресурса
@@ -1080,7 +1080,7 @@ struct mapCellWindMill
 
 struct mapCellWitchHut
 {
-    
+
         unsigned              : 5;
         unsigned      visited : 8; // посещено(на каждый ID героев)
         unsigned      SSkill  : 7; // тип вторичного навыка
@@ -1201,7 +1201,7 @@ class type_obscuring_object
         //{ return ( !is_on_map() || get_obscured_type() != OBJECT_MINE || extra_info.Mine.ID == -1 ) ? nullptr : &gpGame->minePool[extra_info]; }
         //town* get_obscured_town() const
         //{ return ( !is_on_map() || get_obscured_type() != OBJECT_TOWN || extra_info.Town.ID == -1 ) ? nullptr : &gpGame->townPool[extra_info]; }
-        
+
         //
         void obscure_cell(TAdventureObjectType new_type, int32_t id)
         { THISCALL_3(void, 0x4D7840, this, new_type, id); }
@@ -1237,7 +1237,7 @@ class type_obscuring_object
     protected:
         NH3API_MAYBE_UNUSED
         byte_t gap_B;
-        
+
     public:
 
         // type as adventure object /
@@ -1414,7 +1414,7 @@ struct NewmapCell : public ExtraInfoUnion
         // Неиспользуемый бит
         // occupy: +0xD{00000100}
         bool unused_bit              : 1;
-    
+
     public:
         // На клетке можно построить корабль?
         // occupy: +0xD{00001000}
