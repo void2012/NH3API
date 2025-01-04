@@ -860,11 +860,6 @@ struct exe_vector_helper<exe_allocator<T> >
             emplace_back(value);
         }
 
-        void emplace_back(value_type&& value)
-        {
-            emplace_back(std::forward<value_type&&>(value));
-        }
-
         template<class NH3API_ARGS_DOTS Args>
         #if NH3API_CHECK_CPP17
         reference
