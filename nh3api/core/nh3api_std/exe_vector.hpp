@@ -428,7 +428,7 @@ struct exe_vector_helper<exe_allocator<T> >
         #if !defined(NH3API_FLAG_NO_CPP_EXCEPTIONS)
         nh3api::tt::is_nothrow_copy_constructible<_Ty>
         #else
-        std::false_type;
+        std::false_type
         #endif
         noexcept_copy;
 
@@ -436,7 +436,7 @@ struct exe_vector_helper<exe_allocator<T> >
         #if NH3API_STD_MOVE_SEMANTICS && !defined(NH3API_FLAG_NO_CPP_EXCEPTIONS)
         nh3api::tt::is_nothrow_move_constructible<_Ty>
         #else
-        std::false_type;
+        std::false_type
         #endif
         noexcept_move;
 
@@ -476,7 +476,7 @@ struct exe_vector_helper<exe_allocator<T> >
                     }\
                 }
             #else
-                NH3API_VECTOR_TRY_CATCH_TIDY(NO_UNWIND_CONDITION, ...) __VA_ARGS__
+                #define NH3API_VECTOR_TRY_CATCH_TIDY(NO_UNWIND_CONDITION, ...) __VA_ARGS__
             #endif
         #endif
 
@@ -501,7 +501,7 @@ struct exe_vector_helper<exe_allocator<T> >
                     }\
                 }
             #else
-                NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE(NO_UNWIND_CONDITION, DESTROY_FIRST, DESTROY_LAST, DEALLOC_AT, DEALLOC_SIZE, ...) __VA_ARGS__
+                #define NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE(NO_UNWIND_CONDITION, DESTROY_FIRST, DESTROY_LAST, DEALLOC_AT, DEALLOC_SIZE, ...) __VA_ARGS__
             #endif
         #endif
 
