@@ -111,7 +111,7 @@ NH3API_VIRTUAL_CLASS TStreamBufFile : public TAbstractFile
 {
     public:
         TStreamBufFile(exe_streambuf* src_stream)
-            : stream(src_stream), TAbstractFile(nh3api::omit_base_vftable_tag)
+            : TAbstractFile(nh3api::omit_base_vftable_tag), stream(src_stream)
         { NH3API_SET_VFTABLE(); }
 
         TStreamBufFile(const nh3api::dummy_tag_t& tag)

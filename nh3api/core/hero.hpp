@@ -236,7 +236,7 @@ class hero : public type_obscuring_object
         TCreatureType getNecromancyCreature() const
         { return THISCALL_1(TCreatureType, 0x4E3ED0, this); }
 
-        float GetNecromancyFactor(bool apply_limit) const
+        double GetNecromancyFactor(bool apply_limit) const
         { return THISCALL_2(double, 0x4E3F40, this, apply_limit); }
 
         int32_t GetMysticismBonus() const
@@ -245,34 +245,34 @@ class hero : public type_obscuring_object
         int32_t GetVisibility() const
         { return THISCALL_1(int32_t, 0x4E42E0, this); }
 
-        float GetArcheryFactor() const
+        double GetArcheryFactor() const
         { return THISCALL_1(float, 0x4E43D0, this); }
 
-        float GetOffenseFactor() const
+        double GetOffenseFactor() const
         { return THISCALL_1(double, 0x4E4520, this); }
 
-        float GetDefenseFactor() const
+        double GetDefenseFactor() const
         { return THISCALL_1(float, 0x4E4580, this); }
 
         int32_t GetEstatesBonus() const
         { return THISCALL_1(int32_t, 0x4E4600, this); }
 
-        float GetEagleEyeChance() const
+        double GetEagleEyeChance() const
         { return THISCALL_1(double, 0x4E4690, this); }
 
-        float GetSurrenderCostFactor() const
+        double GetSurrenderCostFactor() const
         { return THISCALL_1(double, 0x4E47F0, this); }
 
-        float GetMagicResistanceFactor() const
+        double GetMagicResistanceFactor() const
         { return THISCALL_1(double, 0x4E4950, this); }
 
-        float GetExperienceBonusFactor() const
+        double GetExperienceBonusFactor() const
         { return THISCALL_1(double, 0x4E4AB0, this); }
 
-        float GetManaModifier() const
+        double GetManaModifier() const
         { return THISCALL_1(double, 0x4E4B20, this); }
 
-        float GetFirstAidFactor() const
+        double GetFirstAidFactor() const
         { return THISCALL_1(double, 0x4E4B90, this); }
 
         int32_t GetMobility(bool sea_movement) const

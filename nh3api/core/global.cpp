@@ -4,9 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#include "sound.hpp"
+#include "global.hpp"
 
 #ifndef NH3API_FLAG_INLINE_HEADERS
-soundManager*& gpSoundManager = get_global_var_ref(0x699414, soundManager*);
-const uint8_t* giTerrainToMusicTrack = get_global_var_ref(0x678330, const uint8_t*);
+game*& gpGame = get_global_var_ref(0x699538, game*);
 #endif

@@ -203,7 +203,7 @@ protected:
         bool operator<( const _const_iterator& other ) const NH3API_NOEXCEPT
         {
             return (_Map < other._Map
-                        || _Map == other._Map && _Next < other._Next);
+                || (_Map == other._Map && _Next < other._Next));
         }
         NH3API_FORCEINLINE
         bool operator<=( const _const_iterator& other ) const NH3API_NOEXCEPT
@@ -251,12 +251,20 @@ public:
         typedef _const_iterator<exe_deque<_Ty,_A>::value_type> base_type;
     public:
         NH3API_FORCEINLINE
-        iterator()
+        iterator() NH3API_NOEXCEPT
         {}
+
         NH3API_FORCEINLINE
-        iterator( pointer _P, _Mapptr _M )
+        iterator( pointer _P, _Mapptr _M ) NH3API_NOEXCEPT
             : base_type(_P, _M)
         {}
+           
+        NH3API_FORCEINLINE
+        iterator(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            : base_type(tag)
+        {}
+
+    public:
         NH3API_FORCEINLINE
         reference operator*() const
         {
@@ -353,7 +361,7 @@ public:
         bool operator<( const iterator& other ) const
         {
             return (this->_Map < other._Map
-                        || this->_Map == other._Map && this->_Next < other._Next);
+                || (this->_Map == other._Map && this->_Next < other._Next));
         }
         NH3API_FORCEINLINE
         bool operator<=( const iterator& other ) const
@@ -1045,7 +1053,8 @@ protected:
     }
     void _Freemap()
     {
-        adaptor.deallocate( _Map, _Mapsize );
+        adaptor.template deallocate_rebind<unsigned char>
+            (reinterpret_cast<unsigned char*>(_Map), _Mapsize * sizeof(pointer));
     }
     void _Freeptr( _Mapptr _M )
     {

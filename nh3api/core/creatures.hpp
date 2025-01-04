@@ -511,14 +511,14 @@ struct SMonFrameInfo
 NH3API_INLINE_OR_EXTERN
 // All creature traits /
 // Свойства всех существ.
-std::array<TCreatureTypeTraits, MAX_CREATURES_SOD>& akCreatureTypeTraits;
+std::array<TCreatureTypeTraits, MAX_CREATURES_SOD>& akCreatureTypeTraits
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6703B8, std::array<TCreatureTypeTraits, MAX_CREATURES_SOD>));
 
 NH3API_INLINE_OR_EXTERN
 // Creature types in each town dwelling gDwellingType[towntype][levels][upgraded] /
 // Существа в жилищах каждого типа городов gDwellingType[город][уровни][улучшенное]
-std::array<std::array<std::array<TCreatureType, 7>, 2>, kNumTowns>& gDwellingType;
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6747B4, std::array<std::array<std::array<TCreatureType, 7>, 2>, kNumTowns>,kNumTowns>));
+std::array<std::array<std::array<TCreatureType, 7>, 2>, kNumTowns>& gDwellingType
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6747B4, std::array<std::array<std::array<TCreatureType, 7>, 2>, kNumTowns>));
 
 class town;
 class hero;
@@ -558,7 +558,7 @@ public:
     // Has all armies undead /
     // Все существа армии - нежить.
     bool HasAllUndead() const
-    { THISCALL_1(bool, 0x44A7F0, this ); }
+    { return THISCALL_1(bool, 0x44A7F0, this ); }
 
     // Dismiss creature at <whichIndex> /
     // Удалить существо на позиции <whichIndex>
@@ -641,7 +641,14 @@ public:
                       bool on_cursed_ground,
                       bool angelic_alliance,
                       bool apply_limits = true) const
-    { THISCALL_8(int32_t, 0x44AB30, this, ownerHero, ownerTown, otherHero, otherGroup, on_cursed_ground, angelic_alliance, apply_limits); }
+    { return THISCALL_8(int32_t, 0x44AB30, this, 
+                                           ownerHero, 
+                                           ownerTown, 
+                                           otherHero, 
+                                           otherGroup, 
+                                           on_cursed_ground, 
+                                           angelic_alliance, 
+                                           apply_limits); }
 
     // Get <index> morale /
     // Боевой дух ячейки <index> в армии

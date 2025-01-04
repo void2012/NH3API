@@ -24,7 +24,6 @@ NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 
 // maximum allocated size per call: 520177 bytes
 
-NH3API_NODISCARD
 NH3API_FORCEINLINE
 NH3API_MALLOC(1)
 // address: 0x617492
@@ -40,7 +39,6 @@ NH3API_FORCEINLINE
 void __cdecl exe_delete(void* ptr) NH3API_NOEXCEPT
 { CDECL_1(void, 0x60B0F0, ptr); }
 
-NH3API_NODISCARD
 NH3API_FORCEINLINE
 NH3API_MALLOC(1)
 // address: 0x61A9D5
@@ -437,26 +435,31 @@ template<class T>
 const typename T::vftable_t* get_vftable(const T* ptr)
 { return *reinterpret_cast<const typename T::vftable_t* const*>(ptr); }
 
-template<typename T>
-NH3API_CONSTEXPR
-const typename T::vftable_t* get_type_vftable(); // template specializations provided in vftables.hpp
+// template specializations provided in vftables.hpp
+template<class T>
+struct vftable_address
+{
+    static const uintptr_t address = 0;
+};
 
-// syntactic sugar: use argument just to obtain the template type
-template<typename T>
-NH3API_CONSTEXPR
+template<typename T> NH3API_FORCEINLINE
+const typename T::vftable_t* get_type_vftable()
+{ return reinterpret_cast<const typename T::vftable_t*>(vftable_address<T>::address); }
+
+template<typename T> NH3API_FORCEINLINE
 const typename T::vftable_t* get_type_vftable(const T*)
-{ return get_type_vftable<T>(); }
+{ return reinterpret_cast<const typename T::vftable_t*>(vftable_address<T>::address); }
 
 // for constructors
 template<typename T>
 void set_vftable(T* ptr)
 {
     NH3API_MEMSHIELD_BEGIN
-    #ifdef __cpp_lib_launder
-    *reinterpret_cast<void**>(std::launder(ptr)) = get_type_vftable<T>();
-    #else
-    *reinterpret_cast<void**>(ptr) = get_type_vftable<T>();
-    #endif
+    //#ifdef __cpp_lib_launder
+    //*reinterpret_cast<void**>(std::launder(ptr)) = get_type_vftable(ptr);
+    //#else
+    *reinterpret_cast<const void**>(ptr) = get_type_vftable(ptr);
+    //#endif
     NH3API_MEMSHIELD_END
 }
 
@@ -464,7 +467,7 @@ void set_vftable(T* ptr)
     #define NH3API_SET_VFTABLE() NH3API_MEMSHIELD_BEGIN set_vftable(this); NH3API_MEMSHIELD_END
 #endif
 
-#if NH3API_CHECK_CPP11
+#if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
 // low-level virtual call with only shift in vftable
 template<typename Result, typename T, typename ... Args> inline
 Result virtual_call(T* thisPtr, size_t shift, Args&& ... args)
@@ -575,10 +578,10 @@ protected:
         if ( _N < 0 )
             _N = 0;
         #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-            return (U*)::operator new(
+        return (U*)::operator new(
             (size_t)_N * sizeof(U));
         #else
-            return (U*)::operator new(
+        return (U*)::operator new(
             (size_t)_N * sizeof(U), std::nothrow);
         #endif
     }
@@ -679,10 +682,10 @@ protected:
         if ( _N < 0 )
             _N = 0;
         #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-            return (U*)::operator new(
+        return (U*)::operator new(
             (size_t)_N * sizeof(U), exe_heap);
         #else
-            return (U*)::operator new(
+        return (U*)::operator new(
             (size_t)_N * sizeof(U), exe_heap, std::nothrow);
         #endif
     }
@@ -879,14 +882,14 @@ struct allocator_adaptor
         { return alloc.allocate(n, hint); }
 
         template<typename U> NH3API_NODISCARD NH3API_CONSTEXPR_CPP_20
-        pointer allocate_rebind(size_type n)
+        typename rebind_alloc<U>::other::pointer allocate_rebind(size_type n)
         {
             typename rebind_alloc<U>::other rebound_allocator;
             return rebound_allocator.allocate(n);
         }
 
         template<typename U> NH3API_NODISCARD NH3API_CONSTEXPR_CPP_20
-        pointer allocate_rebind(size_type n, const_void_pointer hint)
+        typename rebind_alloc<U>::other::pointer allocate_rebind(size_type n, const_void_pointer hint)
         {
             typename rebind_alloc<U>::other rebound_allocator;
             return rebound_allocator.allocate(n, hint);
@@ -895,6 +898,13 @@ struct allocator_adaptor
         NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
         void deallocate(pointer ptr, size_type n) NH3API_NOEXCEPT
         { alloc.deallocate(ptr, n); }
+
+        template<typename U> NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
+        void deallocate_rebind(U* ptr, size_type n) NH3API_NOEXCEPT
+        { 
+            typename rebind_alloc<U>::other rebound_allocator;
+            rebound_allocator.deallocate(ptr, n); 
+        }
 
         template <class U> NH3API_NODISCARD NH3API_CONSTEXPR_CPP_20
         void copy_construct(U* ptr, const value_type& value)
@@ -1068,22 +1078,29 @@ struct allocator_adaptor<exe_allocator<T> >
         }
 
         template<typename U>
-        static pointer allocate_rebind(size_type n)
+        static U* allocate_rebind(size_type n)
         {
             typename rebind_alloc<U>::other rebound_allocator;
-            return rebound_allocator.allocate(n);
+            return rebound_allocator.allocate(n, nullptr);
         }
 
         template<typename U>
-        static pointer allocate_rebind(size_type n, const_void_pointer)
+        static U* allocate_rebind(size_type n, const_void_pointer)
         {
             typename rebind_alloc<U>::other rebound_allocator;
-            return rebound_allocator.allocate(n);
+            return rebound_allocator.allocate(n, nullptr);
         }
 
         NH3API_FORCEINLINE
         static void deallocate(pointer ptr, size_type) NH3API_NOEXCEPT
         { exe_delete(ptr); }
+
+        template<typename U> NH3API_FORCEINLINE
+        static void deallocate_rebind(U* ptr, size_type n) NH3API_NOEXCEPT
+        { 
+            typename rebind_alloc<U>::other rebound_allocator;
+            rebound_allocator.deallocate(ptr, n); 
+        }
 
         template <class U>
         static void copy_construct(U* ptr, const value_type& value)

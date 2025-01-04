@@ -26,6 +26,7 @@
 
 #include "intrin.hpp"
 #include "memory.hpp"
+#include "nh3api_std.hpp"
 #include "patcher_x86.hpp"
 #include "exe_string.hpp"
 
@@ -249,6 +250,15 @@ struct exe_ios
     enum seekdir : uint32_t
     { beg = 0, cur = 1, end = 2 };
 };
+
+NH3API_CONSTEXPR NH3API_FORCEINLINE exe_ios::iostate operator|(exe_ios::iostate lhs, exe_ios::iostate rhs) NH3API_NOEXCEPT
+{ return static_cast<exe_ios::iostate>(static_cast<uint32_t>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs))); }
+
+NH3API_CONSTEXPR NH3API_FORCEINLINE exe_ios::openmode operator|(exe_ios::openmode lhs, exe_ios::openmode rhs) NH3API_NOEXCEPT
+{ return static_cast<exe_ios::openmode>(static_cast<uint32_t>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs))); }
+
+NH3API_CONSTEXPR NH3API_FORCEINLINE exe_ios::seekdir operator|(exe_ios::seekdir lhs, exe_ios::seekdir rhs) NH3API_NOEXCEPT
+{ return static_cast<exe_ios::seekdir>(static_cast<uint32_t>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs))); }
 
 template<class _St>
 class exe_fpos
@@ -670,11 +680,12 @@ typedef exe_basic_streambuf<char, std::char_traits<char> > exe_streambuf;
 //
 // size = 0x54 = 84, align = 4, baseclass: std::streambuf
 template<class _E, class _Tr = std::char_traits<_E> >
-struct exe_basic_filebuf : public exe_basic_streambuf<_E, _Tr>
+NH3API_VIRTUAL_CLASS exe_basic_filebuf : public exe_basic_streambuf<_E, _Tr>
 {
     protected:
         typedef exe_basic_filebuf<_E, _Tr> this_type;
         typedef exe_basic_streambuf<_E, _Tr> base_type;
+
     public:
         typedef HANDLE native_handle_type;
         typedef typename base_type::char_type char_type;
@@ -682,13 +693,24 @@ struct exe_basic_filebuf : public exe_basic_streambuf<_E, _Tr>
         typedef typename base_type::pos_type  pos_type;
         typedef typename base_type::off_type  off_type;
         typedef typename base_type::traits_type traits_type;
-
-    public:
         enum _Initfl { _Newfl, _Openfl, _Closefl }; // init flag
 
+    public:
+        NH3API_FORCEINLINE
         exe_basic_filebuf(exe_FILE* _F = nullptr) NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY(exe_basic_filebuf)
         { THISCALL_2(void, 0x60D3CF, this, _F); }
 
+        NH3API_FORCEINLINE
+        exe_basic_filebuf(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            : base_type(tag)
+        {}
+        
+        NH3API_FORCEINLINE
+        ~exe_basic_filebuf() NH3API_NOEXCEPT
+        { get_type_vftable(this)->scalar_deleting_destructor(this, 0); }
+
+    public:
         bool is_open() const NH3API_NOEXCEPT
         { return static_cast<bool>(_File); }
 
@@ -748,12 +770,8 @@ struct exe_basic_filebuf : public exe_basic_streambuf<_E, _Tr>
 
 #pragma pack(push, 4)
 // size = 0x50 = 80, align = 4, baseclass: std::streambuf
-struct exe_strstreambuf : public exe_streambuf
+NH3API_VIRTUAL_CLASS exe_strstreambuf : public exe_streambuf
 {
-    public:
-        struct vftable_t : exe_streambuf::vftable_t
-        {};
-
     protected:
         typedef exe_strstreambuf this_type;
         typedef exe_streambuf    base_type;
@@ -766,11 +784,24 @@ struct exe_strstreambuf : public exe_streambuf
         typedef typename base_type::traits_type traits_type;
 
     public:
-        explicit exe_strstreambuf(exe_streamsize _N = 0)
+        NH3API_FORCEINLINE
+        explicit exe_strstreambuf(exe_streamsize _N = 0) NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY(exe_strstreambuf)
         { THISCALL_2(void, 0x4512D0, this, _N); }
 
-        exe_strstreambuf(const char *_G, exe_streamsize _N)
+        NH3API_FORCEINLINE
+        exe_strstreambuf(const char *_G, exe_streamsize _N) NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY(exe_strstreambuf)
         { THISCALL_3(void, 0x5167C0, this, _G, _N); }
+
+        NH3API_FORCEINLINE
+        exe_strstreambuf(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            : base_type(tag)
+        {}
+           
+        NH3API_FORCEINLINE
+        ~exe_strstreambuf() NH3API_NOEXCEPT
+        { get_type_vftable(this)->scalar_deleting_destructor(this, 0); }
 
     // virtual functions
     public:
@@ -800,7 +831,6 @@ struct exe_strstreambuf : public exe_streambuf
 #pragma pack(pop)
 
 typedef exe_basic_filebuf<char, std::char_traits<char> > exe_filebuf;
-
 NH3API_FORCEINLINE
 exe_streamsize read(exe_streambuf& stream, void* buf, size_t len)
 { return stream.sgetn(static_cast<char*>(buf), len); }

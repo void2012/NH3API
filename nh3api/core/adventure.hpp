@@ -81,7 +81,7 @@ class advManager : public baseManager
 
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
-        NewmapCell* GetCell(int16_t x, int16_t y, int16_t z)
+        NewmapCell* GetCell(int8_t x, int8_t y, int8_t z)
         {
             return GetCell(type_point(x, y, z));
             // removed for avoiding dependency on map.hpp

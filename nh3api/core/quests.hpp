@@ -60,22 +60,22 @@ NH3API_VIRTUAL_CLASS type_quest
     public:
         NH3API_FORCEINLINE
         type_quest() NH3API_NOEXCEPT
-            : limit(-1), text_variant(exe_rand() % 3)
+            : text_variant(exe_rand() % 3), limit(-1)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
         type_quest(bool _seer_hut) NH3API_NOEXCEPT
-            : limit(-1), text_variant(exe_rand() % 3), seer_hut(_seer_hut)
+            : seer_hut(_seer_hut), text_variant(exe_rand() % 3), limit(-1)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
         type_quest(const nh3api::omit_base_vftable_tag_t&) NH3API_NOEXCEPT
-            : limit(-1), text_variant(exe_rand() % 3)
+            : text_variant(exe_rand() % 3), limit(-1)
         {}
 
         NH3API_FORCEINLINE
         type_quest(const nh3api::omit_base_vftable_tag_t&, bool _seer_hut) NH3API_NOEXCEPT
-            : limit(-1), text_variant(exe_rand() % 3), seer_hut(_seer_hut)
+            : seer_hut(_seer_hut), text_variant(exe_rand() % 3), limit(-1)
         {}
 
         NH3API_FORCEINLINE

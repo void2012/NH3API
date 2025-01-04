@@ -12,6 +12,7 @@
 #include "player_enums.hpp" // EPlayerColor
 #include "skills.hpp" // TSkillMastery, TSecondarySkill
 #include "terrain.hpp" // type_point
+#include "random.hpp" // Random(int, int)
 
 #pragma pack(push, 4)
 // Map object info. Width(1 byte), Height(1 byte), PlacementMask(6 bytes), ShadowMask(6 bytes) are gathered from the corresponding <ImageName>.msk file,
@@ -810,157 +811,156 @@ class Sign
 #pragma pack(push, 4)
 struct mapCellArtifact
 {
-        unsigned              price          : 4;
-        unsigned              guard          : 8;
-        unsigned              resource_price : 4;
-        unsigned               : 2;
-        unsigned              guard_qty      : 12;
-        unsigned              custom         : 1;
+    unsigned price : 4;
+    unsigned guard : 8;
+    unsigned resource_price : 4;
+    unsigned : 2;
+    unsigned guard_qty : 12;
+    unsigned custom : 1;
+
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellDefaultObject
 {
-
     unsigned ID;
+
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellCampfire
 {
+    unsigned resType : 4;
+    unsigned resValue : 16;
+    unsigned : 12;
 
-        unsigned              resType      : 4;
-        unsigned              resValue     : 16;
-        unsigned                     : 12;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellCorpse
 {
+    unsigned ID : 5;
+    unsigned : 1;
+    unsigned artifactID : 10;
+    unsigned hasArtifact : 1;
+    unsigned : 15;
 
-        unsigned              ID           : 5;
-        unsigned                     : 1;
-        unsigned              artifactID   : 10;
-        unsigned              hasArtifact  : 1;
-        unsigned                     : 15;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellCreatureBank
 {
+    unsigned : 5;
+    unsigned visited : 8;
+    unsigned ID : 12;
+    unsigned taken : 1;
+    unsigned : 6;
 
-        unsigned                     : 5;
-        unsigned              visited      : 8;
-        unsigned              ID           : 12;
-        unsigned              taken        : 1;
-        unsigned                     : 6;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellEvent
 {
+    unsigned index : 10;
+    unsigned allow_player : 8;
+    unsigned allow_computer : 1;
+    unsigned cancel_after_visit : 1;
+    unsigned : 12;
 
-        unsigned              index        : 10;
-        unsigned              allow_player : 8;
-        unsigned              allow_computer     : 1;
-        unsigned              cancel_after_visit : 1;
-        unsigned                     : 12;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellFlotsam
 {
-
-    enum
-    {
-        FLOTSAM_EMPTY          = 0,
-        FLOTSAM_WOOD5          = 1,
-        FLOTSAM_WOOD5_GOLD200  = 2,
-        FLOTSAM_WOOD10_GOLD500 = 3,
+    enum {
+        FLOTSAM_EMPTY = 0,
+        FLOTSAM_WOOD5 = 1,
+        FLOTSAM_WOOD5_GOLD200 = 2,
+        FLOTSAM_WOOD10_GOLD500 = 3
     } type;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellFountainFortune
 {
+    unsigned : 5;
+    unsigned visited : 8;
+    signed bonusLuck : 4;
+    unsigned : 15;
 
-        unsigned                     : 5;
-        unsigned             visited      : 8;
-        signed               bonusLuck    : 4;
-        unsigned                     : 15;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellLeanTo
 {
+    unsigned ID : 5;
+    unsigned : 1;
+    unsigned resValue : 4;
+    unsigned resType : 4;
+    unsigned : 18;
 
-        unsigned              ID           : 5;
-        unsigned                     : 1;
-        unsigned              resValue     : 4;
-        unsigned              resType      : 4;
-        unsigned                     : 18;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellMagicShrine
 {
+    unsigned : 13;
+    unsigned spell : 10;
+    unsigned : 9;
 
-        unsigned                     : 13;
-        unsigned              spell        : 10;
-        unsigned                     : 9;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellMagicSpring
 {
+    unsigned ID : 5;
+    unsigned : 1;
+    unsigned used : 1;
+    unsigned : 25;
 
-        unsigned     ID           : 5;
-        unsigned            : 1;
-        unsigned     used         : 1;
-        unsigned            : 25;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellMonster
 {
+    unsigned amount : 12;
+    unsigned aggression : 5;
+    unsigned noRun : 1;
+    unsigned noGrowth : 1;
+    unsigned setupIndex : 8;
+    unsigned growthRemainder : 4;
+    unsigned hasSetup : 1;
 
-        unsigned     amount          : 12;
-        unsigned     aggression      : 5;
-        unsigned     noRun           : 1;
-        unsigned     noGrowth        : 1;
-        unsigned     setupIndex      : 8;
-        unsigned     growthRemainder : 4;
-        unsigned     hasSetup        : 1;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellMysticGarden
 {
+    unsigned ID : 5;
+    unsigned : 1;
+    unsigned resType : 4;
+    unsigned hasRes : 1;
+    unsigned : 21;
 
-        unsigned     ID           : 5;
-unsigned            : 1;
-        unsigned     resType      : 4;
-        unsigned     hasRes       : 1;
-unsigned            : 21;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellPandorasBox
 {
+    unsigned ID : 10;
+    unsigned : 22;
 
-        unsigned     ID           : 10;
-unsigned            : 22;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellPyramid
 {
+    unsigned available : 1;
+    unsigned ID : 4;
+    unsigned visited : 8;
+    unsigned spell : 8;
+    unsigned : 11;
 
-        unsigned     available    : 1;
-        unsigned     ID           : 4;
-        unsigned     visited      : 8;
-        unsigned     spell        : 8;
-unsigned            : 11;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellRefugeeCamp
 {
-
     int32_t ID;
+
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellResource
 {
+    unsigned value : 19;
+    unsigned setupIndex : 12;
+    unsigned hasSetup : 1;
 
-        unsigned     value        : 19;
-        unsigned     setupIndex   : 12;
-        unsigned     hasSetup     : 1;
 } NH3API_MSVC_LAYOUT;
 
 enum ScholarAwards : unsigned
@@ -972,119 +972,120 @@ enum ScholarAwards : unsigned
 
 struct mapCellScholar
 {
+    ScholarAwards type : 3;
+    unsigned PSkill : 3;
+    unsigned SSkill : 7;
+    unsigned spell : 10;
+    unsigned : 9;
 
-        ScholarAwards type         : 3;
-        unsigned      PSkill       : 3;
-        unsigned      SSkill       : 7;
-        unsigned      spell        : 10;
-        unsigned            : 9;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellScroll
 {
+    unsigned type : 8;
+    unsigned : 11;
+    unsigned ID : 12;
+    unsigned hasSetup : 1;
 
-        unsigned     type         : 8;
-        unsigned            : 11;
-        unsigned     ID           : 12;
-        unsigned     hasSetup     : 1;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellSeaChest
 {
+    unsigned level : 2;
+    unsigned : 1;
+    unsigned artifactID : 10;
+    unsigned : 19;
 
-        unsigned     level        : 2;
-        unsigned            : 1;
-        unsigned     artifactID   : 10;
-        unsigned            : 19;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellShipwreckSurvivor
 {
     TArtifact artifactID;
+
 };
 
 struct mapCellShipyard
 {
+    unsigned owner : 8;
+    unsigned X : 8;
+    unsigned Y : 8;
+    unsigned : 8;
 
-        unsigned owner : 8;
-        unsigned X     : 8;
-        unsigned Y     : 8;
-        unsigned       : 8;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellTreasureChest
 {
+    unsigned artifactID : 10;
+    unsigned hasArtifact : 1;
+    unsigned bonus : 4;
+    unsigned : 17;
 
-        unsigned     artifactID   : 10;
-        unsigned     hasArtifact  : 1;
-        unsigned     bonus        : 4;
-        unsigned                  : 17;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellTreeOfKnowledge
 {
+    unsigned ID : 5;
+    unsigned visited : 8;
+    unsigned type : 2;
+    unsigned : 17;
 
-        unsigned     ID      : 5;
-        unsigned     visited : 8;
-        unsigned     type    : 2;
-        unsigned             : 17;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellUniversity
 {
+    unsigned : 5;
+    unsigned visited : 8;
+    unsigned ID : 12;
+    unsigned : 7;
 
-        unsigned             : 5;
-        unsigned     visited : 8;
-        unsigned     ID      : 12;
-        unsigned             : 7;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellWagon
 {
+    unsigned resValue : 5;
+    unsigned visited : 8;
+    unsigned hasBonus : 1;
+    unsigned hasArtifact : 1;
+    unsigned artifactID : 10;
+    unsigned resType : 4;
+    unsigned : 3;
 
-        unsigned     resValue     : 5;
-        unsigned     visited      : 8;
-        unsigned     hasBonus     : 1;
-        unsigned     hasArtifact  : 1;
-        unsigned     artifactID   : 10;
-        unsigned     resType      : 4;
-        unsigned                  : 3;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellWarriorsTomb
 {
+    unsigned hasArt : 1; // есть артефакт
+    unsigned : 4;
+    unsigned visited : 8; // посещение каждым из игроков
+    unsigned artifactID : 10;
+    unsigned : 9;
 
-        unsigned     hasArt     : 1; // есть артефакт
-        unsigned                : 4;
-        unsigned     visited    : 8; // посещение каждым из игроков
-        unsigned     artifactID : 10;
-        unsigned                : 9;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellWaterMill
 {
+    unsigned goldBonus : 5;
+    unsigned visited : 8;
+    unsigned : 19;
 
-        unsigned     goldBonus : 5;
-        unsigned     visited   : 8;
-        unsigned               : 19;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellWindMill
 {
+    unsigned resType : 4; // тип ресурса
+    unsigned : 9;
+    unsigned resValue : 4; // кол-во ресурса
+    unsigned : 15;
 
-        unsigned     resType  : 4; // тип ресурса
-        unsigned              : 9;
-        unsigned     resValue : 4; // кол-во ресурса
-        unsigned              : 15;
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellWitchHut
 {
+    unsigned : 5;
+    unsigned visited : 8; // посещено(на каждый ID героев)
+    unsigned SSkill : 7;  // тип вторичного навыка
+    unsigned : 12;
 
-        unsigned              : 5;
-        unsigned      visited : 8; // посещено(на каждый ID героев)
-        unsigned      SSkill  : 7; // тип вторичного навыка
-        unsigned              : 12;
 } NH3API_MSVC_LAYOUT;
 
 // Map object extra info /
@@ -1146,17 +1147,48 @@ struct ExtraInfoUnion
         struct mapCellWindMill          Windmill;          // Ветряная мельница
         struct mapCellWitchHut          WitchHut;          // Хижина ведьмы
     } NH3API_MSVC_LAYOUT;
-} NH3API_MSVC_LAYOUT;
+};
 #pragma pack(pop) // 4
 
 #pragma pack(push, 2)
 // Map object /
 // Объект на карте.
 // size = 0xC = 12, align = 2, baseclass: ExtraInfoUnion
-struct CObject : ExtraInfoUnion
+class CObject : ExtraInfoUnion
 {
     public:
+        NH3API_FORCEINLINE
+        CObject(uint8_t _x,
+                uint8_t _y,
+                uint8_t _z,
+                uint16_t _type,
+                uint32_t _extraInfo) NH3API_NOEXCEPT
+            : x(_x), y(_y), z(_z),
+              TypeID(_type), frameOffset(Random(0, 255))
+        {
+            this->setup = _extraInfo;
+        }
 
+        NH3API_FORCEINLINE
+        CObject() NH3API_NOEXCEPT
+            : x(255), y(255), z(255),
+              TypeID(OBJECT_NONE), frameOffset(Random(0, 255))
+        {
+            this->setup = 0;
+        }
+
+    public:
+        type_point get_trigger() const
+        {
+            int32_t result_x;
+            int32_t result_y;
+
+            FindTrigger(result_x, result_y);
+            return type_point(result_x, result_y, z);
+        }
+
+        void FindTrigger(int32_t& result_x, int32_t& result_y) const
+        { THISCALL_3(void, 0x4FF280, this, &result_x, &result_y); }
 
     public:
         // offset: +0x4 = +4,  size = 0x1 = 1
@@ -1184,19 +1216,35 @@ struct CObject : ExtraInfoUnion
 class type_obscuring_object
 {
     public:
-        inline void initialize();
-        type_obscuring_object()
-        { initialize(); }
-        inline TAdventureObjectType get_obscured_type() const
+        NH3API_FORCEINLINE
+        type_obscuring_object() NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY(type_obscuring_object)
+        { THISCALL_1(void, 0x4D76E0, this); }
+
+        NH3API_FORCEINLINE
+        type_obscuring_object(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            : obscured_location(tag)
+        {}
+
+    public:
+        void initialize() NH3API_NOEXCEPT
+        { THISCALL_1(void, 0x4D7740, this); }
+
+        TAdventureObjectType get_obscured_type() const
         { return type; }
-        inline ExtraInfoUnion get_obscured_extra_info()const
+
+        ExtraInfoUnion get_obscured_extra_info()const
         { return extra_info; }
-        inline bool is_on_map() const
+
+        bool is_on_map() const
         { return valid; }
-        inline type_point get_location() const
-        { return type_point(mapX, mapY, mapZ); }
+
+        type_point get_location() const
+        { return type_point(mapX & 0xFF, mapY & 0xFF, mapZ & 0xFF); }
+
         bool obscured_is_trigger() const
         { return was_trigger; }
+
         //mine* get_obscured_mine() const
         //{ return ( !is_on_map() || get_obscured_type() != OBJECT_MINE || extra_info.Mine.ID == -1 ) ? nullptr : &gpGame->minePool[extra_info]; }
         //town* get_obscured_town() const
@@ -1205,12 +1253,20 @@ class type_obscuring_object
         //
         void obscure_cell(TAdventureObjectType new_type, int32_t id)
         { THISCALL_3(void, 0x4D7840, this, new_type, id); }
+
         void restore_cell()
         { THISCALL_1(void, 0x4D7950, this); }
+
         bool obscures_town() const
         { return ( is_on_map() ) ? was_trigger && (get_obscured_type( ) == OBJECT_TOWN) : false; }
+
         TAdventureObjectType get_obscured_object() const
-        { if(is_on_map()) return get_obscured_type(); }
+        { 
+            if(is_on_map()) 
+                return get_obscured_type(); 
+            else 
+                return OBJECT_NONE;
+        }
 
     public:
         // X coordinate /
@@ -1258,7 +1314,7 @@ class type_obscuring_object
 // Map cell information /
 // Информация о клетке карты
 // size = 0x26 = 38, align = 2, baseclass: ExtraInfoUnion
-struct NewmapCell : public ExtraInfoUnion
+class NewmapCell : public ExtraInfoUnion
 {
     public:
         NH3API_FORCEINLINE

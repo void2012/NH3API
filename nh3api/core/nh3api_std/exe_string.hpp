@@ -328,9 +328,9 @@ struct exe_string_helper<char, std::char_traits<char>, exe_allocator<char> >
             if ( count == 0 )
                 return nullptr;
             #if NH3API_CHECK_CPP14
-                return nh3api::memchr_constexpr(ptr, ch, count);
+            return nh3api::memchr_constexpr(ptr, ch, count);
             #else
-                return nh3api::str_func_chooser<char>::_memchr(ptr, ch, count);
+            return nh3api::str_func_chooser<char>::_memchr(ptr, ch, count);
             #endif
         }
 
@@ -494,9 +494,9 @@ struct exe_string_helper<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
             if ( count == 0 )
                 return nullptr;
             #if NH3API_CHECK_CPP14
-                return nh3api::memchr_constexpr(ptr, ch, count);
+            return nh3api::memchr_constexpr(ptr, ch, count);
             #else
-                return nh3api::str_func_chooser<wchar_t>::_memchr(ptr, ch, count);
+            return nh3api::str_func_chooser<wchar_t>::_memchr(ptr, ch, count);
             #endif
         }
 
@@ -1754,18 +1754,14 @@ private:
     }
 
 
-    #if !NH3API_CHECK_MSVC
-    __attribute__((hot))
-    #endif
+    NH3API_HOT
     // set new length and null terminator
     void _Eos( size_type _N )
     {
         helper_type::assign( _Ptr[_Len = _N], value_type(0) );
     }
 
-    #if !NH3API_CHECK_MSVC
-    __attribute__((hot))
-    #endif
+    NH3API_HOT
     void _Freeze()
     {
         if ( _Ptr != nullptr
@@ -1776,9 +1772,7 @@ private:
     }
 
     NH3API_INLINE_LARGE
-    #if !NH3API_CHECK_MSVC
-    __attribute__((hot))
-    #endif
+    NH3API_HOT
     // ensure buffer is big enough, trim to size if _Trim is true
     bool _Grow( size_type _N, bool _Trim = false )
     {
@@ -1854,9 +1848,7 @@ private:
         }
     }
 
-    #if !NH3API_CHECK_MSVC
-    __attribute__((hot))
-    #endif
+    NH3API_HOT
     NH3API_FLATTEN
     // initialize buffer, deallocating any storage
     void _Tidy( bool _Built = false)
@@ -2302,7 +2294,6 @@ template<class StringT>
 static StringT print_double(double x, size_t precision)
 {
     typedef typename StringT::value_type     CharT;
-    typedef typename StringT::const_pointer  CharPtr;
     switch (nh3api::fpclassify(x))
     {
         case FP_INFINITE:

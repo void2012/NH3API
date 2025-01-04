@@ -6,17 +6,18 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#ifndef NH3API_INTERFACE_VFTABLES_HPP
+#define NH3API_INTERFACE_VFTABLES_HPP
+
 #include "dialogs.hpp"
 #include "recruit_unit.hpp"
 #include "widgets.hpp"
 #include "window_manager.hpp"
 
 #ifndef NH3API_GENERATE_VFTABLE_INSTANCE
-#define NH3API_GENERATE_VFTABLE_INSTANCE(Type, Address)\
-template<>\
-inline const typename Type::vftable_t*\
-get_type_vftable<Type>()\
-{ return get_global_var_ptr(Address, const typename Type::vftable_t); }
+#define NH3API_GENERATE_VFTABLE_INSTANCE(TYPE, ADDRESS) \
+template<> struct vftable_address<TYPE> \
+{ static const uintptr_t address = ADDRESS; };
 #endif
 
 NH3API_GENERATE_VFTABLE_INSTANCE(widget, 0x643CA0)
@@ -45,3 +46,5 @@ NH3API_GENERATE_VFTABLE_INSTANCE(slider, 0x641D60)
 NH3API_GENERATE_VFTABLE_INSTANCE(type_text_scroller, 0x642D1C)
 NH3API_GENERATE_VFTABLE_INSTANCE(type_text_slider, 0x642CD8)
 NH3API_GENERATE_VFTABLE_INSTANCE(CChatEdit, 0x640E40)
+
+#endif // NH3API_INTERFACE_VFTABLES_HPP

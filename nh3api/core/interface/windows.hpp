@@ -225,7 +225,8 @@ NH3API_VIRTUAL_CLASS widget
 
     // static variables
     public:
-        static widget*& last_hover_widget;
+        static NH3API_INLINE widget*& last_hover_widget 
+        NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6AACD0, widget*));
 
     // member variables
     public:
@@ -335,7 +336,6 @@ virtual void __thiscall sleep(bool arg)  override\
 { get_type_vftable(this)->sleep(this, arg); }
 #endif
 
-widget*& widget::last_hover_widget = get_global_var_ref(0x6AACD0, widget*);
 typedef exe_vector<widget*> TWidgetVector;
 
 #pragma pack(push, 4)

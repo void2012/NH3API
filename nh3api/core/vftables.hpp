@@ -6,8 +6,9 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std/nh3api_std.hpp"
-#include "resources/resources_include.hpp"
+#ifndef NH3API_VFTABLES_HPP
+#define NH3API_VFTABLES_HPP
+
 #include "adventure.hpp"
 #include "base_manager.hpp"
 #include "combat.hpp"
@@ -15,11 +16,9 @@
 #include "quests.hpp"
 
 #ifndef NH3API_GENERATE_VFTABLE_INSTANCE
-#define NH3API_GENERATE_VFTABLE_INSTANCE(Type, Address)\
-template<>\
-inline const typename Type::vftable_t*\
-get_type_vftable<Type>()\
-{ return get_global_var_ptr(Address, const typename Type::vftable_t); }
+#define NH3API_GENERATE_VFTABLE_INSTANCE(TYPE, ADDRESS) \
+template<> struct vftable_address<TYPE> \
+{ static const uintptr_t address = ADDRESS; };
 #endif
 
 // managers
@@ -47,3 +46,5 @@ NH3API_GENERATE_VFTABLE_INSTANCE(type_be_hero_quest,          0x64193C)
 NH3API_GENERATE_VFTABLE_INSTANCE(type_belong_to_player_quest, 0x641978)
 
 #undef NH3API_GENERATE_VFTABLE_INSTANCE
+
+#endif // NH3API_VFTABLES_HPP

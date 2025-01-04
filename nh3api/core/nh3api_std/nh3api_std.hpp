@@ -19,7 +19,7 @@
 #endif
 
 #pragma once
-#if (defined(_WIN64) || defined(__x86_64__)) || (!defined(_M_IX86) || !defined(__i386__))
+#if (defined(_WIN64) || defined(__x86_64__)) || (!defined(_M_IX86) && !defined(__i386__))
     #error Heroes III is a 32-bit game. Please switch your compiler to x86 mode.
 #endif
 
@@ -179,26 +179,6 @@
     #endif
 #endif
 
-// Just in case...
-// for GCC and CLANG
-#if (NH3API_CHECK_MSVC) == defined(__MINGW32__)
-    #ifndef __thiscall
-        #define __thiscall __attribute__((__thiscall__))
-    #endif // __thiscall
-
-    #ifndef __fastcall
-        #define __fastcall __attribute__((__fastcall__))
-    #endif // __fastcall
-
-    #ifndef __cdecl
-        #define __cdecl    __attribute__((__cdecl__))
-    #endif // __cdecl
-
-    #ifndef __stdcall
-        #define __stdcall  __attribute__((__stdcall__))
-    #endif // __stdcall
-#endif //(NH3API_CHECK_MSVC) == defined(__GNUC__)
-
 #if defined (__clang__) && !defined(_MSC_VER)
     #define NH3API_CHECK_CLANG (1)
 #else
@@ -256,7 +236,7 @@
 #endif
 
 #ifndef NH3API_DLLEXPORT
-    #if NH3API_CHECK_MSVC
+    #if NH3API_CHECK_MSVC || NH3API_CHECK_CLANG_CL
         #define NH3API_DLLEXPORT __declspec(dllexport)
     #else
         #define NH3API_DLLEXPORT __attribute__((__dllexport__))
@@ -264,7 +244,7 @@
 #endif
 
 #ifndef NH3API_DLLIMPORT
-    #if NH3API_CHECK_MSVC
+    #if NH3API_CHECK_MSVC || NH3API_CHECK_CLANG_CL
         #define NH3API_DLLIMPORT __declspec(dllimport)
     #else
         #define NH3API_DLLIMPORT __attribute__((__dllimport__))
@@ -416,7 +396,7 @@
 // 2) NH3API_FORCEINLINE forces function to be inline
 // 3) NH3API_NOINLINE forces function to not to be inlined in any scenario
 
-#if NH3API_CHECK_MSVC
+#if NH3API_CHECK_MSVC || NH3API_CHECK_CLANG_CL
     #ifndef NH3API_NO_OPT
         #define NH3API_NO_OPT_BEGIN NH3API_PRAGMA(optimize("",off))
         #define NH3API_NO_OPT_END   NH3API_PRAGMA(optimize("",on))
@@ -466,7 +446,7 @@
     #endif
 #endif // NH3API_CHECK_MSVC
 
-#if NH3API_CHECK_CLANG || NH3API_CHECK_CLANG_CL
+#if NH3API_CHECK_CLANG
     #ifndef NH3API_NO_OPT
         #define NH3API_NO_OPT_BEGIN NH3API_PRAGMA(clang optimize off)
         #define NH3API_NO_OPT_END   NH3API_PRAGMA(clang optimize on)
@@ -550,6 +530,18 @@
     #pragma clang diagnostic error "-Wreturn-type"
 #endif
 */
+
+#ifndef NH3API_HOT
+    #ifdef __has_attribute
+        #if __has_attribute(__hot__)
+            #define NH3API_HOT __attribute__((__hot__))
+        #endif
+    #endif
+#endif
+
+#ifndef NH3API_HOT
+    #define NH3API_HOT
+#endif
 
 #ifndef NH3API_INLINE_LARGE
     #if defined(NH3API_FLAG_OPTIMIZE_FOR_SPEED) && !defined(NH3API_FLAG_OPTIMIZE_FOR_SIZE)
@@ -685,10 +677,14 @@ typedef uint32_t bool32_t;
 
 // make POSIX compiler follow the MSVC struct layout
 #ifndef NH3API_MSVC_LAYOUT
-    #if NH3API_CHECK_MSVC
+    #if NH3API_CHECK_MSVC || NH3API_CHECK_CLANG_CL
         #define NH3API_MSVC_LAYOUT
     #else
-        #define NH3API_MSVC_LAYOUT __attribute__((__ms_struct__))
+        #if __has_attribute(__ms_struct__)
+            #define NH3API_MSVC_LAYOUT __attribute__((__ms_struct__))
+        #else   
+            #define NH3API_MSVC_LAYOUT
+        #endif
     #endif
 #endif
 
@@ -1081,6 +1077,18 @@ const omit_base_vftable_tag;
     #define NH3API_HAS_BUILTIN_ADDRESSOF (0)
 #endif
 
+#ifndef NH3API_HAS_BUILTIN_CONSTANT_P
+    #if NH3API_HAS_BUILTINS
+        #if __has_builtin(__builtin_constant_p)
+            #define NH3API_HAS_BUILTIN_CONSTANT_P (1)
+        #endif
+    #endif
+#endif
+
+#ifndef NH3API_HAS_BUILTIN_CONSTANT_P
+    #define NH3API_HAS_BUILTIN_CONSTANT_P (0)
+#endif
+
 #ifndef NH3API_HAS_BUILTIN_BIT_CAST
     #if NH3API_HAS_BUILTINS
         #if __has_builtin(__builtin_bit_cast)
@@ -1309,7 +1317,7 @@ const omit_base_vftable_tag;
 #endif
 
 #ifndef NH3API_INLINE_OR_EXTERN
-    #if NH3API_FLAG_INLINE_HEADERS
+    #ifdef NH3API_FLAG_INLINE_HEADERS
         #define NH3API_INLINE_OR_EXTERN inline
     #else
         #define NH3API_INLINE_OR_EXTERN extern
@@ -1317,8 +1325,8 @@ const omit_base_vftable_tag;
 #endif
 
 #ifndef NH3API_INLINE_OR_EXTERN_INIT
-    #if NH3API_FLAG_INLINE_HEADERS
-        #define NH3API_INLINE_OR_EXTERN_INIT(...) {__VA_ARGS__}
+    #ifdef NH3API_FLAG_INLINE_HEADERS
+        #define NH3API_INLINE_OR_EXTERN_INIT(...) = __VA_ARGS__
     #else
         #define NH3API_INLINE_OR_EXTERN_INIT(...)
     #endif
@@ -1438,7 +1446,7 @@ NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 // int 3 breakpoint
 inline void breakpoint() NH3API_NOEXCEPT
 {
-#if NH3API_CHECK_MSVC
+#if NH3API_CHECK_MSVC || NH3API_CHECK_CLANG_CL
     __debugbreak();
 #else
     __asm__ __volatile__("int {$}3" ::: "memory");
@@ -1493,9 +1501,3 @@ NH3API_DISABLE_WARNING_END
         #define NH3API_COMPILER_VERSION_STRING "Clang-cl v" NH3API_STRINGIFY(__clang_major__) "." NH3API_STRINGIFY(__clang_minor__) "." NH3API_STRINGIFY(__clang_patchlevel__)
     #endif
 #endif
-
-extern "C"
-{
-    NH3API_DLLEXPORT extern const char nh3api_lib_version[] = NH3API_VERSION_STRING;
-    NH3API_DLLEXPORT extern const char nh3api_compiler_version[] = NH3API_COMPILER_VERSION_STRING;
-}

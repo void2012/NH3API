@@ -1571,7 +1571,7 @@ NH3API_VIRTUAL_STRUCT TSpreadsheetResource : public resource
 #pragma pack(pop)
 
 struct sample;
-struct LODFile;
+class LODFile;
 namespace ResourceManager
 {
 

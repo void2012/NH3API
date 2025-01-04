@@ -53,22 +53,22 @@ template<class _K, // key type
          typename _Pr = std::less<_K>, // compare predicate
          typename _A = exe_allocator<_Ty> > // allocator
 class exe_map : public nh3api::exe_rbtree<_K,
-                                            std::pair<const _K, _Ty>,
-                                            nh3api::map_key_access<_K, _Ty>,
-                                            _Pr,
-                                            _A,
-                                            _Nil_Address,
-                                            _Nilrefs_Address>
+                                          std::pair<const _K, _Ty>,
+                                          nh3api::map_key_access<_K, _Ty>,
+                                          _Pr,
+                                          _A,
+                                          _Nil_Address,
+                                          _Nilrefs_Address>
 {
 public:
     typedef std::pair<const _K, _Ty> value_type;
     typedef nh3api::exe_rbtree<_K,
-                                 std::pair<const _K, _Ty>,
-                                 nh3api::map_key_access<_K, _Ty>,
-                                 _Pr,
-                                 _A,
-                                 _Nil_Address,
-                                 _Nilrefs_Address> base_type;
+                               std::pair<const _K, _Ty>,
+                               nh3api::map_key_access<_K, _Ty>,
+                               _Pr,
+                               _A,
+                               _Nil_Address,
+                               _Nilrefs_Address> base_type;
 protected:
     class value_compare
     {
@@ -123,12 +123,12 @@ public:
 
     #if NH3API_STD_MOVE_SEMANTICS
     exe_map(exe_map&& other)
-    NH3API_NOEXCEPT_EXPR(base_type::_bit_copyable)
+    NH3API_NOEXCEPT_EXPR(base_type::_bit_swappable)
         : base_type(std::forward<exe_map>(other))
     {}
 
     exe_map(exe_map&& other, const allocator_type& allocator)
-    NH3API_NOEXCEPT_EXPR(base_type::_bit_copyable)
+    NH3API_NOEXCEPT_EXPR(base_type::_bit_swappable)
         : base_type(std::forward<exe_map>(other), allocator)
     {}
     #endif

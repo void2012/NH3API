@@ -80,9 +80,9 @@ class exe_rbtree
     }
 
     // get null node
-    static _Nodepref _Getnil()
+    static volatile _Node*& _Getnil()
     {
-        return *reinterpret_cast<volatile _Nodeptr*>(_Nil_Address);
+        return *reinterpret_cast<volatile _Node**>(_Nil_Address);
     }
 
     static volatile size_t* _Getnilrefs()
@@ -334,13 +334,13 @@ class exe_rbtree
 
         explicit exe_rbtree(const key_compare &_Parg, bool _Marg = true, const allocator_type &allocator = allocator_type())
         NH3API_NOEXCEPT_ALLOC
-            : adaptor(allocator), _KeyCompare(_Parg), _Multi(_Marg), _Head(nullptr)
+            : adaptor(allocator), _KeyCompare(_Parg), _Head(nullptr), _Multi(_Marg)
         {
             _Init();
         }
 
         exe_rbtree(const_pointer first, const_pointer last, const key_compare &_Parg, bool _Marg = true, const allocator_type &allocator = allocator_type())
-            : adaptor(allocator), _KeyCompare(_Parg), _Multi(_Marg), _Head(nullptr)
+            : adaptor(allocator), _KeyCompare(_Parg), _Head(nullptr), _Multi(_Marg)
         {
             _Init();
             insert(first, last);
@@ -683,7 +683,7 @@ class exe_rbtree
                     }
                 _Color(_X) = _Black;
             }
-            adaptor.destroy(addressof(_Value(_Y)));
+            adaptor.destroy(nh3api::addressof(_Value(_Y)));
             _Freenode(_Y);
             --_Size;
             return (_P);
@@ -699,7 +699,7 @@ class exe_rbtree
             else
             {
                 _Erase(_Root());
-                _Root() = _Getnil();
+                _Root() = const_cast<node_type*>(_Getnil());
                 _Size = 0;
                 _Lmost() = _Head;
                 _Rmost() = _Head;
@@ -885,7 +885,7 @@ class exe_rbtree
         {
             _Erase(_Right(_Pnode));
             _Pnode = _Left(_Pnode);
-            adaptor.destroy(addressof(_Value(_Rootnode)));
+            adaptor.destroy(nh3api::addressof(_Value(_Rootnode)));
             _Freenode(_Rootnode);
         }
     }
@@ -894,7 +894,7 @@ class exe_rbtree
     {
         exe_scoped_lock lock;
         _InitRefCount();
-        _Head = _Buynode(_Getnil(), _Red);
+        _Head = _Buynode(const_cast<node_type*>(_Getnil()), _Red);
         _Size = size_type(0);
         _Lmost() = _Head;
         _Rmost() = _Head;
@@ -905,8 +905,8 @@ class exe_rbtree
         if (_Getnil() == nullptr)
         {
             _Getnil() = _Buynode(nullptr, _Black);
-            _Left(_Getnil())  = nullptr;
-            _Right(_Getnil()) = nullptr;
+            _Left(const_cast<node_type*>(_Getnil()))  = nullptr;
+            _Right(const_cast<node_type*>(_Getnil())) = nullptr;
         }
         // increment the global _Nilrefs counter
         _InterlockedIncrement(reinterpret_cast<volatile long*>(_Getnilrefs()));
@@ -921,7 +921,7 @@ class exe_rbtree
         {
             if ( _InterlockedDecrement(reinterpret_cast<volatile long*>(_Getnilrefs())) == 0)
             {
-                _Freenode(_Getnil());
+                _Freenode(const_cast<node_type*>(_Getnil()));
                 _Getnil() = nullptr;
             }
         }
@@ -1111,14 +1111,14 @@ class exe_rbtree
     // allocate a non-value node
     node_type* _Buynode(node_type* _Parg, _Redbl _Carg) NH3API_NOEXCEPT_ALLOC
     {
-        node_type* _S = adaptor.template allocate_rebind<_Node>(1);
+        node_type* _S = adaptor.template allocate_rebind<node_type>(1);
         _Parent(_S) = _Parg;
         _Color(_S) = _Carg;
         return _S;
     }
 
     void _Freenode(node_type* _S) NH3API_NOEXCEPT
-    { adaptor.deallocate(_S, 1); }
+    { adaptor.template deallocate_rebind<node_type>(_S, 1); }
 
     adaptor_type adaptor;
     key_compare  _KeyCompare;

@@ -269,7 +269,7 @@ enum TAdventureObjectType : int32_t
     OBJECT_MAGIC_PLAINS2               = 230, // Магические равнины
     OBJECT_ROCKLANDS                   = 231, // Скалистая земля
 
-    OBJECT_INVALID                = -1,
+    OBJECT_NONE                   = -1,
     MAX_OBJECTS_ROE               = 165, // Кол-во объектов в RoE
     MAX_OBJECTS_AB                = 222, // Кол-во объектов в AB
     MAX_OBJECTS_SOD               = 232, // Кол-во объектов в SoD

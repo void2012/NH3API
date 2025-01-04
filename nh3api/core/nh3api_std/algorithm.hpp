@@ -790,6 +790,8 @@ void uninitialized_fill(ForwardIt first,
     #elif NH3API_CLANG_STL
     ::std::__uninitialized_allocator_fill_n_multidimensional(alloc, first, std::distance(first, last), value);
     #else
+    NH3API_STATIC_ASSERT("Unsupported STL vendor", false);
+    return first;
     #endif
 }
 
@@ -811,6 +813,8 @@ ForwardIt uninitialized_fill_n(ForwardIt first,
     #elif NH3API_CLANG_STL
     return ::std::__uninitialized_allocator_fill_n_multidimensional(alloc, first, count, value);
     #else
+    NH3API_STATIC_ASSERT("Unsupported STL vendor", false);
+    return first;
     #endif
 }
 
@@ -835,6 +839,8 @@ ForwardIt uninitialized_default_construct_n(ForwardIt first,
     #elif NH3API_CLANG_STL
     return ::std::__uninitialized_allocator_value_construct_n_multidimensional(alloc, first, count);
     #else
+    NH3API_STATIC_ASSERT("Unsupported STL vendor", false);
+    return first;
     #endif
 }
 
@@ -888,6 +894,8 @@ NoThrowForwardIt uninitialized_copy(InputIt first,
     #elif NH3API_CLANG_STL
     return ::std::__uninitialized_allocator_copy(alloc, first, last, d_first);
     #else
+    NH3API_STATIC_ASSERT("Unsupported STL vendor", false);
+    return first;
     #endif
 }
 
@@ -903,12 +911,14 @@ NoThrowForwardIt uninitialized_copy_n(InputIt first,
     #endif
 
     #if NH3API_MSVC_STL
-    return ::std::_Uninitialized_copy_n(first, count, d_first, alloc);
+    return ::std::_Uninitialized_copy(first, ::std::next(first, count), d_first, alloc);
     #elif NH3API_GCC_STL
     return ::std::__uninitialized_copy_a(first, ::std::next(first, count), d_first, alloc);
     #elif NH3API_CLANG_STL
     return ::std::__uninitialized_allocator_copy(alloc, first, ::std::next(first, count), d_first);
     #else
+    NH3API_STATIC_ASSERT("Unsupported STL vendor", false);
+    return first;
     #endif
 }
 
@@ -934,6 +944,8 @@ NoThrowForwardIt uninitialized_move(InputIt first,
     return ::std::__uninitialized_allocator_relocate(alloc, first, last, d_first);
     // return ::std::__uninitialized_allocator_move_if_noexcept(alloc, first, last, d_first);
     #else
+    NH3API_STATIC_ASSERT("Unsupported STL vendor", false);
+    return first;
     #endif
 }
 // #endif

@@ -51,13 +51,13 @@ template<class _K,
          uintptr_t _Nilrefs_Address = 0, // constructor-destructor reference counter address inside .exe
          typename _Pr = std::less<_K>,
          typename _A = exe_allocator<_K> >
-class exe_set : nh3api::exe_rbtree<_K,
-                                     _K,
-                                     nh3api::set_key_access<_K>,
-                                     _Pr,
-                                     _A,
-                                     _Nil_Address,
-                                     _Nilrefs_Address>
+class exe_set : public nh3api::exe_rbtree<_K,
+                                          _K,
+                                          nh3api::set_key_access<_K>,
+                                          _Pr,
+                                          _A,
+                                          _Nil_Address,
+                                          _Nilrefs_Address>
 {
 public:
     typedef _K  value_type;
@@ -66,12 +66,12 @@ public:
     typedef _Pr key_compare;
     typedef _A  allocator_type;
     typedef nh3api::exe_rbtree<_K,
-                                 _K,
-                                 nh3api::set_key_access<_K>,
-                                 _Pr,
-                                 _A,
-                                 _Nil_Address,
-                                 _Nilrefs_Address> base_type;
+                               _K,
+                               nh3api::set_key_access<_K>,
+                               _Pr,
+                               _A,
+                               _Nil_Address,
+                               _Nilrefs_Address> base_type;
     typedef typename base_type::size_type              size_type;
     typedef typename base_type::difference_type        difference_type;
     typedef typename base_type::reference              reference;
@@ -106,12 +106,12 @@ public:
 
     #if NH3API_STD_MOVE_SEMANTICS
     exe_set(exe_set&& other)
-    NH3API_NOEXCEPT_EXPR(base_type::_bit_copyable)
+    NH3API_NOEXCEPT_EXPR(base_type::_bit_swappable)
         : base_type(std::forward<exe_set>(other))
     {}
 
     exe_set(exe_set&& other, const allocator_type& allocator)
-    NH3API_NOEXCEPT_EXPR(base_type::_bit_copyable)
+    NH3API_NOEXCEPT_EXPR(base_type::_bit_swappable)
         : base_type(std::forward<exe_set>(other), allocator)
     {}
     #endif

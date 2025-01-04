@@ -11,7 +11,7 @@
 // this is a hack designed to enable global variables addresses to be backed into binaries
 // rather that using global variables which is double indirection
 // whole program optimization doesn't always fix this issue though.
-#if NH3API_CHECK_MINGW_CLANG || NH3API_CHECK_CLANG_CL
+#if NH3API_HAS_BUILTIN_CONSTANT_P
     #define constexpr_rcast_ptr(x, ...) (__builtin_constant_p(reinterpret_cast<__VA_ARGS__*>(x)) ? reinterpret_cast<__VA_ARGS__*>(x) : reinterpret_cast<__VA_ARGS__*>(x))
     #define constexpr_rcast(x, ...) (__builtin_constant_p(reinterpret_cast<__VA_ARGS__>(x)) ? reinterpret_cast<__VA_ARGS__>(x) : reinterpret_cast<__VA_ARGS__>(x))
 #endif
@@ -20,9 +20,8 @@ template<typename T>
 T* get_ptr(uint32_t address) NH3API_NOEXCEPT
 { return reinterpret_cast<T*>(address); }
 
-#if NH3API_CHECK_MSVC
-    #include <stdlib.h>
-#endif
+#include <stdlib.h>
+#include <string.h>
 
 // Memory shield does not let the optimizing compiler discard statements
 // It is recommended to use it inside your init() function
@@ -34,7 +33,7 @@ T* get_ptr(uint32_t address) NH3API_NOEXCEPT
 // NH3API_MEMSHIELD_END
 // }
 
-#if NH3API_CHECK_MSVC
+#ifdef _ReadWriteBarrier
     #ifndef NH3API_MEMSHIELD_BEGIN
         #define NH3API_MEMSHIELD_BEGIN _ReadWriteBarrier();
         #define NH3API_MEMSHIELD_END   _ReadWriteBarrier();
@@ -48,7 +47,7 @@ T* get_ptr(uint32_t address) NH3API_NOEXCEPT
     #endif // NH3API_MEMSHIELD_BEGIN
 #endif
 
-#if NH3API_CHECK_MINGW_CLANG || NH3API_CHECK_CLANG_CL
+#if NH3API_HAS_BUILTIN_CONSTANT_P
     #define get_global_var_ptr(address,...) constexpr_rcast_ptr(address, __VA_ARGS__)  // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
     #define get_global_var_ref(address,...) *constexpr_rcast_ptr(address, __VA_ARGS__) // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
 #else
@@ -419,7 +418,7 @@ struct str_func_chooser<char>
     #else
     static
     char* _memchr(const char* haystack, char needle, size_t count)
-    { return ::memchr(haystack, needle, count); }
+    { return reinterpret_cast<char*>(const_cast<void*>(::memchr(haystack, needle, count))); }
     #endif
 
     #if NH3API_HAS_BUILTIN_MEMMOVE && NH3API_CHECK_CPP11
@@ -669,13 +668,26 @@ NH3API_INTRIN_FUNCTION
 // Побитовый поворот вправо.
 uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
 
-#if NH3API_CHECK_MSVC
 
+#ifndef retaddr
+    #if NH3API_HAS_BUILTINS
+        #if __has_builtin(__builtin_return_address)
+            // Get the address of the instruction in the calling function that will be executed after control returns to the caller /
+            // Возвращает адрес инструкции в вызывающей функции,
+            // которая будет выполняться после возврата элемента управления вызывающей функции.
+            #define retaddr() (__builtin_return_address(0))
+        #endif
+    #endif
+#endif
+
+#ifndef retaddr
     // Get the address of the instruction in the calling function that will be executed after control returns to the caller /
     // Возвращает адрес инструкции в вызывающей функции,
     // которая будет выполняться после возврата элемента управления вызывающей функции.
-    #define retaddr() _ReturnAddress()
+    #define retaddr() (_ReturnAddress())
+#endif
 
+#if NH3API_CHECK_MSVC
     NH3API_INTRIN_FUNCTION
     uint16_t byteswap16(uint16_t x) NH3API_NOEXCEPT
     { return _byteswap_ushort(x); }
@@ -776,23 +788,42 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
     { return _rotr64(n, c); }
 
 #else
-
-    // Get the address of the instruction in the calling function that will be executed after control returns to the caller /
-    // Возвращает адрес инструкции в вызывающей функции,
-    // которая будет выполняться после возврата элемента управления вызывающей функции.
-    #define retaddr() reinterpret_cast<uintptr_t>(__builtin_return_address(0))
-
     NH3API_INTRIN_FUNCTION
     uint16_t byteswap16(uint16_t x) NH3API_NOEXCEPT
-    { return __builtin_bswap16(x); }
+    { 
+    #if __has_builtin(__builtin_bswap16)
+        return __builtin_bswap16(x); 
+    #else 
+        return (x >> 8) | (x << 8);
+    #endif
+    }
 
     NH3API_INTRIN_FUNCTION
     uint32_t byteswap32(uint32_t x) NH3API_NOEXCEPT
-    { return __builtin_bswap32(x); }
+    { 
+    #if __has_builtin(__builtin_bswap32)
+        return __builtin_bswap32(x); 
+    #else 
+        return (x >> 24) | ((x & 0x00FF0000) >> 8) | ((x & 0x0000FF00) << 8) | (x << 24);
+    #endif
+    }
 
     NH3API_INTRIN_FUNCTION
     uint64_t byteswap64(uint64_t x) NH3API_NOEXCEPT
-    { return __builtin_bswap64(x); }
+    {
+    #if __has_builtin(__builtin_bswap32)
+        return __builtin_bswap64(x); 
+    #else 
+        return (x >> 56) |
+           ((x & 0x00FF000000000000) >> 40) |
+           ((x & 0x0000FF0000000000) >> 24) |
+           ((x & 0x000000FF00000000) >> 8) |
+           ((x & 0x00000000FF000000) << 8) |
+           ((x & 0x0000000000FF0000) << 24) |
+           ((x & 0x000000000000FF00) << 40) |
+           (x << 56);
+    #endif
+    }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitclz(uint32_t x) NH3API_NOEXCEPT
@@ -812,11 +843,23 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitffs(uint32_t x) NH3API_NOEXCEPT
-    { return __builtin_ffs(x); }
+    { 
+    #if __has_builtin(__builtin_ffsll)
+        return __builtin_ffs(x); 
+    #else 
+        return bitctz(x) + 1;
+    #endif
+    }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitffs64(uint64_t x) NH3API_NOEXCEPT
-    { return __builtin_ffsll(x); }
+    { 
+    #if __has_builtin(__builtin_ffsll)
+        return __builtin_ffsll(x); 
+    #else 
+        return bitctz64(x) + 1;
+    #endif
+    }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitfhs(uint32_t x) NH3API_NOEXCEPT
@@ -837,7 +880,7 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
     NH3API_INTRIN_FUNCTION
     uint32_t bitrotl(uint32_t n, uint32_t c) NH3API_NOEXCEPT
     {
-        const uint32_t mask = (8*sizeof(n) - 1);
+        const uint32_t mask = (8 * sizeof(n) - 1);
         c &= mask;
         return (n << c) | (n >> ((-c) & mask));
     }
@@ -845,7 +888,7 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
     NH3API_INTRIN_FUNCTION
     uint32_t bitrotr(uint32_t n, uint32_t c) NH3API_NOEXCEPT
     {
-        const uint32_t mask = (8*sizeof(n) - 1);
+        const uint32_t mask = (8 * sizeof(n) - 1);
         c &= mask;
         return (n >> c) | (n << ((-c) & mask));
     }

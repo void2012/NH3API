@@ -204,8 +204,8 @@ class town
 
         NH3API_FORCEINLINE
         town(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-            : SpellDisabledMask(tag),
-              cName(tag),
+            : cName(tag),
+              SpellDisabledMask(tag),
               town_army(tag)
         {}
 

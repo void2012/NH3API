@@ -6,15 +6,16 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#ifndef NH3API_RESOURCES_VFTABLES_HPP
+#define NH3API_RESOURCES_VFTABLES_HPP
+
 #include "resources.hpp"
 #include "sound.hpp"
 
 #ifndef NH3API_GENERATE_VFTABLE_INSTANCE
-#define NH3API_GENERATE_VFTABLE_INSTANCE(Type, Address) \
-template<>\
-inline const typename Type::vftable_t*\
-get_type_vftable<Type>()\
-{ return get_global_var_ptr(Address, const typename Type::vftable_t); }
+#define NH3API_GENERATE_VFTABLE_INSTANCE(TYPE, ADDRESS) \
+template<> struct vftable_address<TYPE> \
+{ static const uintptr_t address = ADDRESS; };
 #endif
 
 NH3API_GENERATE_VFTABLE_INSTANCE(resource, 0x64100C)
@@ -31,3 +32,5 @@ NH3API_GENERATE_VFTABLE_INSTANCE(CTextEntrySave, 0x642D9C)
 NH3API_GENERATE_VFTABLE_INSTANCE(TTextResource, 0x642DA8)
 NH3API_GENERATE_VFTABLE_INSTANCE(TSpreadsheetResource, 0x642DB4)
 NH3API_GENERATE_VFTABLE_INSTANCE(soundManager, 0x63FE68)
+
+#endif // NH3API_RESOURCES_VFTABLES_HPP

@@ -226,7 +226,7 @@ inline void launch_sample(const char* sample_name, int32_t max_time = -1, int32_
 
 NH3API_INLINE_OR_EXTERN
 const uint8_t* giTerrainToMusicTrack
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678330, const uint8_t));
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678330, const uint8_t*));
 
 enum TTerrainType : int32_t;
 #pragma pack(push, 4)

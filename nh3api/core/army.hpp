@@ -604,8 +604,8 @@ public:
         // Применить урон яда Виверн
         void       adjust_hitpoints()
         {
-            sMonInfo.hitPoints = ( spellInfluence[SPELL_AGE] ? origHitPoints * poison_penalty * 0.5 : origHitPoints * poison_penalty ) + 0.95;
-            residualDamage = std::min<int32_t>(residualDamage, sMonInfo.hitPoints - 1);
+            sMonInfo.hitPoints = static_cast<int32_t>((spellInfluence[SPELL_AGE] ? origHitPoints * poison_penalty * 0.5 : origHitPoints * poison_penalty) + 0.95);
+            residualDamage     = std::min<int32_t>(residualDamage, sMonInfo.hitPoints - 1);
         }
 
         // Cancel spell <spell> /
@@ -617,7 +617,7 @@ public:
         // Отменить все заклинания, наложенные на текущий отряд
         void       CancelAllSpells()
         {
-            for ( size_t i = MAX_ADVENTURE_SPELLS; i < MAX_SPELLS; ++i )
+            for ( size_t i = FIRST_COMBAT_SPELL; i < MAX_SPELLS; ++i )
             {
                 if ( spellInfluence[i] > 0 )
                     CancelIndividualSpell(static_cast<SpellID>(i));
@@ -714,9 +714,9 @@ public:
         void       Cure(int32_t level, int32_t iSpellPower, hero const * casting_hero);
 
         int32_t    MidY() const
-        { return TopY() - this->image_height / 2; }
+        { return BottomY() - this->image_height / 2; }
         int32_t    TopY() const
-        { return TopY() - this->image_height; }
+        { return BottomY() - this->image_height; }
         int32_t    BottomY() const
         { return army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[this->gridIndex].refY; }
         int32_t    MidX() const
