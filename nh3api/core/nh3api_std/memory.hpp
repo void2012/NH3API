@@ -1288,8 +1288,7 @@ struct exe_default_delete
 
     void operator()(T* ptr) const noexcept
     {
-        nh3api::destroy_at(ptr);
-        ::operator delete(ptr, exe_heap);
+        exe_invoke_delete(ptr);
     }
 };
 
@@ -1303,8 +1302,7 @@ struct exe_default_delete<T[]>
 
     void operator()(T* ptr) const noexcept
     {
-        nh3api::destroy_at(ptr);
-        ::operator delete[](ptr, exe_heap);
+        exe_invoke_array_delete(ptr);
     }
 };
 
