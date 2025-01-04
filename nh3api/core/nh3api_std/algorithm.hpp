@@ -879,7 +879,6 @@ NoThrowForwardIt uninitialized_copy(InputIt first,
 {
     #if NH3API_DEBUG
     verify_range(first, last);
-    verify_iterator(d_first);
     #endif
 
     #if NH3API_MSVC_STL
@@ -901,7 +900,6 @@ NoThrowForwardIt uninitialized_copy_n(InputIt first,
 {
     #if NH3API_DEBUG
     verify_range_n(first, count);
-    verify_iterator(d_first);
     #endif
 
     #if NH3API_MSVC_STL
@@ -926,7 +924,6 @@ NoThrowForwardIt uninitialized_move(InputIt first,
 {
     #if NH3API_DEBUG
     verify_range(first, last);
-    verify_iterator(d_first);
     #endif
 
     #if NH3API_MSVC_STL

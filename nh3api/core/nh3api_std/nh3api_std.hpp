@@ -19,14 +19,14 @@
 #endif
 
 #pragma once
-#if defined(_WIN64) || defined(__x86_64__)
+#if (defined(_WIN64) || defined(__x86_64__)) || (!defined(_M_IX86) || !defined(__i386__))
     #error Heroes III is a 32-bit game. Please switch your compiler to x86 mode.
 #endif
 
 #if (defined(_MSC_VER)) || (defined(__MINGW32__)) || (defined(__clang__))
     // pass
 #else
-    #error Unsupported compiler
+    #error Unsupported compiler. NH3API supports MSVC, GCC and Clang only
 #endif
 
 #define NH3API_MIN(x,y) ((x) < (y) ? (x) : (y))
@@ -55,11 +55,16 @@
 // Visual Studio didn't update __cplusplus up until Visual Studio 2017 version 15.7
 // And ever since it is required to have the '/Zc:__cplusplus' flag to update it
 #if defined(_MSC_VER) && !defined(__clang__)
+    #if (_MSC_VER < 1400)
+        #error NH3API requires at least Visual Studio 2005 to work.
+    #endif
+
     #ifndef _CPPLIB_VER
         #error NH3API supports only MSVC STL with MSVC
     #else
         #define NH3API_MSVC_STL (1)
     #endif
+
     #if defined(_MSC_FULL_VER)
         #if _MSC_FULL_VER >= 191426428L // Visual Studio 2017 version 15.7
             #if __cplusplus < 201103L
@@ -141,7 +146,7 @@
         #define NH3API_DEPRECATED(msg) __declspec(deprecated(msg))
     #endif
 #else
-    #if NH3API_CHECK_CPP14
+    #if __has_attribute(deprecated)
         #define NH3API_DEPRECATED(msg) [[deprecated(msg)]]
     #else
         #define NH3API_DEPRECATED(msg) // __attrubute__((deprecated)) // can not apply to pure virtual function...
@@ -214,16 +219,7 @@
     #error Unsupported compiler
 #endif
 
-#if defined(_MSC_VER)
-    #if (_MSC_VER < 1400)
-        #error NH3API requires at least Visual Studio 2005 to work.
-    #endif
-#endif
-
 #if NH3API_CHECK_MINGW
-    #ifndef __GLIBCXX__
-        #error NH3API supports only libstdc++ with GCC
-    #endif
     #if (__GNUC__ < 5)
         #error NH3API requires at least GCC 5 to work.
     #endif
@@ -388,6 +384,14 @@
 
 #else
     #error Unknown STL vendor
+#endif
+
+#ifndef NH3API_MSVC_STL_VERSION 
+    #ifdef _CPPLIB_VER
+        #define NH3API_MSVC_STL_VERSION (_CPPLIB_VER)
+    #else 
+        #define NH3API_MSVC_STL_VERSION (0)
+    #endif
 #endif
 
 #ifndef NH3API_GCC_STL
