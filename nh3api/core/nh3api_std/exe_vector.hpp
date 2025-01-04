@@ -827,8 +827,8 @@ struct exe_vector_helper<exe_allocator<T> >
         template<class NH3API_ARGS_DOTS Args>
         iterator emplace( const_iterator _Where, Args&& NH3API_ARGS_DOTS args )
         {
-            const pointer _Whereptr = _Where;
-            const pointer _Oldlast = this->_Last;
+            const pointer _Whereptr = const_cast<const pointer>(_Where);
+            const pointer _Oldlast  = this->_Last;
         #if NH3API_DEBUG
             if (_Whereptr >= this->_First && _Oldlast >= _Whereptr)
                 NH3API_THROW(std::out_of_range("vector::emplace iterator outside range"));
