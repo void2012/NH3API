@@ -416,13 +416,10 @@ class type_point
 
     public:
         signed x : 10; // +00, bytes 0..1
-    private:
-        signed gap_10bit : 6; // +10
-    public:
+        signed   : 6; // +10
         signed y : 10; // +16
         signed z : 4;  // +26
-    private:
-        signed gap_30bit : 2; // +30
+        signed   : 2; // +30
 } NH3API_MSVC_LAYOUT;
 
 #pragma pack(push, 1)
