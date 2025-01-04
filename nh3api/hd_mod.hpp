@@ -9,8 +9,6 @@
 // source: https://forum.df2.ru/index.php?showtopic=10421&st=2480&p=593378&#entry593378
 #pragma once
 
-#include <utility>
-
 #include "core/nh3api_std/patcher_x86.hpp"
 #include "core/nh3api_std/exe_vector.hpp"
 #include "core/nh3api_std/exe_string.hpp"
@@ -164,16 +162,17 @@ struct is_wine_present_impl
     NH3API_NOINLINE
     static bool get()
     {
-        static std::pair<bool, HMODULE> status = std::make_pair(false, nullptr);
+        static bool initialized = false;
+        static HMODULE library = nullptr;
         static FARPROC func = nullptr;
-        if ( !status.first )
+        if ( !initialized )
         {
-            status.second = GetModuleHandleA("ntdll.dll");
-            if ( status.second ) // I *really* hope you're running it with windows or WINE
+            library = GetModuleHandleA("ntdll.dll");
+            if ( library ) // I *really* hope you're running it with windows or WINE
                 func = GetProcAddress(status.second, "wine_get_version");
-            status.first = true;
+            initialized = true;
         }
-        if ( status.second )
+        if ( library )
         {
             return static_cast<bool>(func);
         }
