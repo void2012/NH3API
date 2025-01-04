@@ -79,7 +79,7 @@ struct TCheatCode
     #if NH3API_CHECK_CPP14
         return nh3api::memcmp_constexpr<char>(code, arg, sizeof(code));
     #else
-        return nh3api::str_func_chooser<char>::_memcmp(left, right, count);
+        return nh3api::str_func_chooser<char>::_memcmp(code, arg, sizeof(code));
     #endif
 
     }

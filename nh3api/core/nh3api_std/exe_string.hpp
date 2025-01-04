@@ -276,7 +276,7 @@ struct exe_string_helper<char, std::char_traits<char>, exe_allocator<char> >
         bool lt(char c1, char c2) NH3API_NOEXCEPT
         { return (unsigned char)c1 < (unsigned char)c2; }
 
-        static NH3API_CONSTEXPR_CPP_14
+        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         size_t length(const char* str)
         {
             #if NH3API_CHECK_CPP14
@@ -286,7 +286,7 @@ struct exe_string_helper<char, std::char_traits<char>, exe_allocator<char> >
             #endif
         }
 
-        static NH3API_CONSTEXPR_CPP_14
+        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         int compare(const char* left, const char* right, size_t count) NH3API_NOEXCEPT
         {
             #if NH3API_CHECK_CPP14
@@ -296,7 +296,7 @@ struct exe_string_helper<char, std::char_traits<char>, exe_allocator<char> >
             #endif
         }
 
-        static NH3API_CONSTEXPR_CPP_14
+        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         char* move(char* dst, const char* src, size_t n) NH3API_NOEXCEPT
         {
             #if NH3API_CHECK_CPP14
@@ -306,7 +306,7 @@ struct exe_string_helper<char, std::char_traits<char>, exe_allocator<char> >
             #endif
         }
 
-        static NH3API_CONSTEXPR_CPP_14
+        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         char* copy(char* dst, const char* src, size_t n) NH3API_NOEXCEPT
         {
             #if NH3API_CHECK_CPP14
@@ -322,7 +322,7 @@ struct exe_string_helper<char, std::char_traits<char>, exe_allocator<char> >
             return nh3api::fill_n_constexpr(str, n, value);
         }
 
-        static NH3API_CONSTEXPR_CPP_14
+        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         const char* find(const char* ptr, size_t count, const char& ch)
         {
             if ( count == 0 )
@@ -442,7 +442,7 @@ struct exe_string_helper<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
         bool lt(wchar_t c1, wchar_t c2) NH3API_NOEXCEPT
         { return (wint_t)c1 < (wint_t)c2; }
 
-        static NH3API_CONSTEXPR_CPP_14
+        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         size_t length(const wchar_t* str)
         {
             #if NH3API_CHECK_CPP14
@@ -452,7 +452,7 @@ struct exe_string_helper<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
             #endif
         }
 
-        static NH3API_CONSTEXPR_CPP_14
+        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         int compare(const wchar_t* left, const wchar_t* right, size_t count) NH3API_NOEXCEPT
         {
             #if NH3API_CHECK_CPP14
@@ -462,7 +462,7 @@ struct exe_string_helper<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
             #endif
         }
 
-        static NH3API_CONSTEXPR_CPP_14
+        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         wchar_t* move(wchar_t* dst, const wchar_t* src, size_t n) NH3API_NOEXCEPT
         {
             #if NH3API_CHECK_CPP14
@@ -472,7 +472,7 @@ struct exe_string_helper<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
             #endif
         }
 
-        static NH3API_CONSTEXPR_CPP_14
+        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         wchar_t* copy(wchar_t* dst, const wchar_t* src, size_t n) NH3API_NOEXCEPT
         {
             #if NH3API_CHECK_CPP14
@@ -488,7 +488,7 @@ struct exe_string_helper<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
             return nh3api::fill_n_constexpr(str, n, value);
         }
 
-        static NH3API_CONSTEXPR_CPP_14
+        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         const wchar_t* find(const wchar_t* ptr, size_t count, const wchar_t& ch)
         {
             if ( count == 0 )

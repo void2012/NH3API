@@ -366,6 +366,7 @@
     #error Unknown STL vendor
 #endif
 
+
 #ifndef NH3API_MSVC_STL_VERSION 
     #ifdef _CPPLIB_VER
         #define NH3API_MSVC_STL_VERSION (_CPPLIB_VER)
@@ -1219,6 +1220,14 @@ const omit_base_vftable_tag;
 
 #ifndef NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
     #define NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED (0)
+#endif
+
+#ifndef NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
+    #if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
+        #define NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED constexpr
+    #else 
+        #define NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
+    #endif
 #endif
 
 #ifndef NH3API_HAS_IS_CONSTANT_EVALUATED

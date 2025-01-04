@@ -371,7 +371,7 @@ class town
         // Occupying hero ID /
         // ID Героя-гостя(снизу)
         // offset: +0x10 = +16,  size = 0x4 = 4
-          int32_t occupyingHero;
+        int32_t occupyingHero;
 
         // Mage guild level (0 = no mage guild) /
         // Уровень гильдии магов(0 = нет гильдии магов)
@@ -381,7 +381,7 @@ class town
         // Creature dwellings populations /
         // Ненанятые войска в городе
         // offset: +0x16 = +22,  size = 0x1C = 28
-          std::array<std::array<int16_t, 7>, 2> population;
+        std::array<std::array<int16_t, 7>, 2> population;
 
         // Garrison formation is groupped /
         // Гарнизон(существа сверху) города сгруппирован
@@ -406,12 +406,12 @@ class town
         // Type of creatures summoned by the Portal of summoning(Dungeon) /
         // Тип существа, который появился в портале призыва(Темница)
         // offset: +0x3C = +60,  size = 0x4 = 4
-         TCreatureType summoningType;
+        TCreatureType summoningType;
 
         // Amount of creatures summoned by the Portal of summoning(Dungeon) /
         // Количество существа, который появился в портале призыва(Темница)
         // offset: +0x40 = +64,  size = 0x2 = 2
-          int16_t summoningPopulation;
+        int16_t summoningPopulation;
 
         // Spells for each level of mage guild /
         // Заклинания на каждом из 5 уровней гильдии магов.
@@ -421,7 +421,7 @@ class town
         // Maximum spells available for each level of mage guild /
         // Максимальное для каждого уровня гильдии магов количество заклинаний.
         // offset: +0xBC = +188,  size = 0x5 = 5
-          std::array<int8_t, MAX_SPELL_LEVELS> maxTownSpellAvailable;
+        std::array<int8_t, MAX_SPELL_LEVELS> maxTownSpellAvailable;
 
         // Town name /
         // Название города.
@@ -431,12 +431,12 @@ class town
         // Forbidden spells in town /
         // Запрещённые в городе заклинания
         // offset: +0xD4 = +212,  size = 0x9 = 9
-          exe_bitset<MAX_BOOK_SPELLS> SpellDisabledMask;
+        exe_bitset<MAX_BOOK_SPELLS> SpellDisabledMask;
 
         // Town garrison army /
         // Гарнизон города(сверху).
         // offset: +0xE0 = +224,  size = 0x38 = 56
-          armyGroup town_army;
+        armyGroup town_army;
 
         // Creature dwellings bonuses /
         // Бонусы к существам.

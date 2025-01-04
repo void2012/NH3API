@@ -33,7 +33,7 @@ T* get_ptr(uint32_t address) NH3API_NOEXCEPT
 // NH3API_MEMSHIELD_END
 // }
 
-#ifdef _ReadWriteBarrier
+#ifdef _MSC_VER
     #ifndef NH3API_MEMSHIELD_BEGIN
         #define NH3API_MEMSHIELD_BEGIN _ReadWriteBarrier();
         #define NH3API_MEMSHIELD_END   _ReadWriteBarrier();
@@ -308,10 +308,10 @@ constexpr T1* memmove_constexpr(T1* dst, T2* src, uint32_t count)
 
 #if NH3API_CHECK_CPP14
 template <class T1, class T2>
-constexpr T1* memmove_constexpr(T1* dst, T2* src, uint32_t count);
+constexpr T1* memmove_constexpr_impl(T1* dst, T2* src, uint32_t count);
 
 template <> constexpr
-char* memmove_constexpr<char, const char>(char* dst, const char* src, uint32_t count)
+char* memmove_constexpr_impl<char, const char>(char* dst, const char* src, uint32_t count)
 {
 #if NH3API_HAS_BUILTIN_MEMMOVE
     __builtin_memmove(dst, src, count);
@@ -348,7 +348,7 @@ char* memmove_constexpr<char, const char>(char* dst, const char* src, uint32_t c
 }
 
 template <> constexpr
-wchar_t* memmove_constexpr<wchar_t, const wchar_t>(wchar_t* dst, const wchar_t* src, uint32_t count)
+wchar_t* memmove_constexpr_impl<wchar_t, const wchar_t>(wchar_t* dst, const wchar_t* src, uint32_t count)
 {
 #if NH3API_HAS_BUILTIN_MEMMOVE
     __builtin_memmove(dst, src, count * sizeof(wchar_t));
@@ -501,7 +501,7 @@ size_t strlen_constexpr_impl(const CharT* str) NH3API_NOEXCEPT
     }
 }
 
-template<typename CharT> constexpr
+template<typename CharT> NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
 size_t strlen_constexpr(const CharT* str) NH3API_NOEXCEPT
 {
     #if NH3API_HAS_IS_CONSTANT_EVALUATED
@@ -510,7 +510,20 @@ size_t strlen_constexpr(const CharT* str) NH3API_NOEXCEPT
     else
         return str_func_chooser<CharT>::_strlen(str);
     #else
-    return strlen_constexpr_impl(str);
+    return str_func_chooser<CharT>::_strlen(str);
+    #endif
+}
+
+template <class T1, class T2> NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
+T1* memmove_constexpr(T1* dst, T2* src, uint32_t count)
+{
+    #if NH3API_HAS_IS_CONSTANT_EVALUATED
+    if ( is_constant_evaluated() )
+        return memmove_constexpr_impl(dst, src, count);
+    else
+        return str_func_chooser<T1>::_memmove(dst, src, count);
+    #else
+    return str_func_chooser<T1>::_memmove(dst, src, count);
     #endif
 }
 
@@ -530,7 +543,7 @@ int32_t memcmp_constexpr_impl(const CharT* s1, const CharT* s2, size_t count)
 }
 
 //memcmp_constexpr_impl(s1, s2, count);
-template<typename CharT> constexpr
+template<typename CharT> NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
 int32_t memcmp_constexpr(const CharT* s1, const CharT* s2, size_t count)
 {
 #if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
@@ -539,7 +552,7 @@ int32_t memcmp_constexpr(const CharT* s1, const CharT* s2, size_t count)
     else
         return str_func_chooser<CharT>::_memcmp(s1, s2, count);
 #else
-    return memcmp_constexpr_impl(s1, s2, count);
+    return str_func_chooser<CharT>::_memcmp(s1, s2, count);
 #endif
 }
 
@@ -557,13 +570,13 @@ T* memchr_constexpr_impl(T* haystack, CharT needle, size_t count)
     return nullptr;
 }
 
-template<typename T, typename CharT> constexpr
+template<typename T, typename CharT> NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
 T* memchr_constexpr(T* haystack, CharT needle, size_t count)
 {
+    typedef typename tt::remove_cv<CharT>::type char_type;
+    NH3API_CONSTEXPR_VAR bool is_char_char = tt::is_same<typename tt::remove_cv<T>::type, char>::value && tt::is_same<char_type, char>::value;
+    NH3API_CONSTEXPR_VAR bool is_char_wchar = tt::is_same<typename tt::remove_cv<T>::type, wchar_t>::value && tt::is_same<char_type, wchar_t>::value;
     #if NH3API_HAS_BUILTIN_MEMCHR && NH3API_HAS_IS_CONSTANT_EVALUATED
-    using char_type = typename tt::remove_cv<CharT>::type;
-    const bool is_char_char = tt::is_same<typename tt::remove_cv<T>::type, char>::value && tt::is_same<char_type, char>::value;
-    const bool is_char_wchar = tt::is_same<typename tt::remove_cv<T>::type, wchar_t>::value && tt::is_same<char_type, wchar_t>::value;
     if ( is_constant_evaluated() )
     {
         return memchr_constexpr_impl(haystack, needle, count);
@@ -577,7 +590,11 @@ T* memchr_constexpr(T* haystack, CharT needle, size_t count)
             return memchr_constexpr_impl(haystack, value_buffer, count);
     }
     #else
-    return memchr_constexpr_impl(haystack, needle, count);
+    char_type value_buffer = bit_cast<char_type>(needle);
+    if ( is_char_char || is_char_wchar )
+        return str_func_chooser<CharT>::_memchr(haystack, value_buffer, count);
+    else
+        return memchr_constexpr_impl(haystack, value_buffer, count);
     #endif
 }
 
