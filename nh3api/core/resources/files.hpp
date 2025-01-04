@@ -13,6 +13,8 @@
 #include "../nh3api_std/exe_vector.hpp"    // exe_vector<T>
 #include "../nh3api_std/exe_streambuf_vftables.hpp" // exe_streambuf<C>
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 #ifndef NH3API_VIRTUAL_OVERRIDE_TABSTRACTFILE
 #define NH3API_VIRTUAL_OVERRIDE_TABSTRACTFILE(CLASS_NAME)\
 virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override\
@@ -454,3 +456,5 @@ struct t_stdio_file_adapter : TAbstractFile
 
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

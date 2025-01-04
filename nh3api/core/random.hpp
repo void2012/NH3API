@@ -8,6 +8,8 @@
 
 #include "nh3api_std/exe_vector.hpp"
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 NH3API_FORCEINLINE
 // Heroes3.exe internal srand /
 // Внутренний srand Heroes3.exe.
@@ -84,3 +86,5 @@ struct TPickANumber
         exe_vector<bool> Available;
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

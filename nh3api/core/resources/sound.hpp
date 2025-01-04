@@ -9,6 +9,8 @@
 #include "resources.hpp"
 #include "../base_manager.hpp"
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 // Adventure map object sounds /
 // Звуки объектов карты приключений.
 enum e_looping_sound_id : int32_t
@@ -225,8 +227,8 @@ inline void launch_sample(const char* sample_name, int32_t max_time = -1, int32_
 { FASTCALL_3(void, 0x59A890, sample_name, max_time, channel); }
 
 NH3API_INLINE_OR_EXTERN
-const uint8_t* giTerrainToMusicTrack
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678330, const uint8_t*));
+const std::array<uint8_t, 10>& giTerrainToMusicTrack
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678330, const std::array<uint8_t, 10>));
 
 enum TTerrainType : int32_t;
 #pragma pack(push, 4)
@@ -352,3 +354,5 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
 NH3API_INLINE_OR_EXTERN
 soundManager*& gpSoundManager
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699414, soundManager*));
+
+NH3API_DISABLE_WARNING_END

@@ -10,6 +10,8 @@
 #include "../nh3api_std/exe_string.hpp"
 #include "../nh3api_std/exe_map.hpp"
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 // Game resource(file) type /
 // Тип игрового ресурса(файла).
 enum EResourceType : int32_t
@@ -1697,3 +1699,5 @@ NH3API_FORCEINLINE exe_string& GetDataPath()
 { return get_global_var_ref(0x69E528, exe_string); }
 
 } // namespace ResourceManager
+
+NH3API_DISABLE_WARNING_END

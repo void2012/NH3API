@@ -9,6 +9,8 @@
 #include "../input_manager.hpp"
 #include "windows.hpp"
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 #pragma pack(push, 4)
 // Icon widget(sprite) /
 // Виджет-иконка(спрайт).
@@ -947,3 +949,5 @@ NH3API_VIRTUAL_CLASS CChatEdit : public textEntryWidget
 
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

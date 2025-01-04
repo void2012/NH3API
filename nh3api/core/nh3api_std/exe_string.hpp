@@ -30,12 +30,14 @@
 #include "math.hpp"      // nh3api::fpclassify, float classification macros
 #include "memory.hpp"    // allocators
 #include "iterator.hpp"  // std::reverse_iterator
+#include "nh3api_std.hpp"
 
 #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
 #include <stdexcept>     // std::length_error, std::out_of_range
 #endif
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
 template
 <
@@ -173,7 +175,7 @@ struct exe_string_helper
         { return traits_type::find(ptr, count, ch); }
 
     public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
         size_type max_size() const NH3API_NOEXCEPT
         {
             #if NH3API_CHECK_CPP11
@@ -248,7 +250,7 @@ struct exe_string_helper<char, std::char_traits<char>, exe_allocator<char> >
             : alloc(std::move(other.alloc))
         {}
 
-        exe_string_helper& operator=(exe_string_helper&& other)
+        exe_string_helper& operator=(exe_string_helper&& other) NH3API_NOEXCEPT
         {
             return *this;
         }
@@ -328,7 +330,7 @@ struct exe_string_helper<char, std::char_traits<char>, exe_allocator<char> >
             if ( count == 0 )
                 return nullptr;
             #if NH3API_CHECK_CPP14
-            return nh3api::memchr_constexpr(ptr, ch, count);
+            return nh3api::memchr_constexpr<char>(ptr, ch, count);
             #else
             return nh3api::str_func_chooser<char>::_memchr(ptr, ch, count);
             #endif
@@ -414,7 +416,7 @@ struct exe_string_helper<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
             : alloc(std::move(other.alloc))
         {}
 
-        exe_string_helper& operator=(exe_string_helper&& other)
+        exe_string_helper& operator=(exe_string_helper&& other) NH3API_NOEXCEPT
         {
             return *this;
         }
@@ -494,7 +496,7 @@ struct exe_string_helper<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
             if ( count == 0 )
                 return nullptr;
             #if NH3API_CHECK_CPP14
-            return nh3api::memchr_constexpr(ptr, ch, count);
+            return nh3api::memchr_constexpr<wchar_t>(ptr, ch, count);
             #else
             return nh3api::str_func_chooser<wchar_t>::_memchr(ptr, ch, count);
             #endif
@@ -1435,7 +1437,7 @@ public:
     }
     size_type max_size() const
     {
-        size_type _N = helper.max_size();
+        const size_type _N = helper.max_size();
         return (_N <= 2 ? 1 : _N - 2);
     }
 

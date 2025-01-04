@@ -30,6 +30,8 @@
 #include "patcher_x86.hpp"
 #include "exe_string.hpp"
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 typedef int32_t exe_streamoff;
 typedef int32_t exe_streamsize;
 typedef int64_t exe_fpos_t;
@@ -838,3 +840,5 @@ exe_streamsize read(exe_streambuf& stream, void* buf, size_t len)
 NH3API_FORCEINLINE
 exe_streamsize write(exe_streambuf& stream, const void* buf, size_t len)
 { return stream.sputn(static_cast<const char*>(buf), len); }
+
+NH3API_DISABLE_WARNING_END

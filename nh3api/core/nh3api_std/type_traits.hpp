@@ -212,17 +212,15 @@ using ::std::is_bounded_array;
 #endif
 } // namespace tt
 
-template<class T> NH3API_NODISCARD
-NH3API_CONSTEXPR NH3API_MSVC_INTRIN
+template<class T> NH3API_NODISCARD NH3API_MSVC_INTRIN NH3API_CONSTEXPR
 typename tt::add_const<T>::type& as_const(T& t) NH3API_NOEXCEPT
 { return t; }
 
-template<typename T> NH3API_CONSTEXPR NH3API_MSVC_INTRIN
+template<typename T> NH3API_NODISCARD NH3API_MSVC_INTRIN NH3API_CONSTEXPR
 typename tt::make_unsigned<T>::type to_unsigned(T arg)
 { return static_cast<typename tt::make_unsigned<T>::type>(arg); }
 
-template<class Enum>
-NH3API_CONSTEXPR NH3API_FORCEINLINE
+template<class Enum> NH3API_NODISCARD NH3API_MSVC_INTRIN NH3API_CONSTEXPR
 typename tt::underlying_type<Enum>::type to_underlying(Enum arg) NH3API_NOEXCEPT
 { return static_cast<typename tt::underlying_type<Enum>::type>(arg); }
 

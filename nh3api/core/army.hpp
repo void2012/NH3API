@@ -14,6 +14,8 @@
 #include "spells.hpp" // SpellID
 #include "utils.hpp" // bstruct_t, get_bstruct
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 class army;
 #define army_hpp_gpCombatManager reinterpret_cast<void*>(0x699420)
 #define army_hpp_gpCombatManager_get(OFFSET, ...) get_bstruct(army_hpp_gpCombatManager).get<__VA_ARGS__>(OFFSET)
@@ -182,7 +184,7 @@ public:
         bool       IsIncapacitated() const
         {
             return (spellInfluence[SPELL_BLIND] != 0)
-                || (spellInfluence[SPELL_PARALYZE] != 0)
+                || (spellInfluence[SPELL_STONE] != 0)
                 || (spellInfluence[SPELL_PARALYZE] != 0);
         }
 
@@ -1330,3 +1332,5 @@ public:
 
 #undef army_hpp_gpCombatManager
 #undef army_hpp_gpCombatManager_get
+
+NH3API_DISABLE_WARNING_END

@@ -8,6 +8,8 @@
 
 #include "widgets.hpp"
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 #pragma pack(push, 4)
 //
 // size = 0x78 = 120, align = 4, baseclass: TSubWindow
@@ -237,3 +239,5 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
 
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

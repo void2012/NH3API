@@ -12,6 +12,8 @@
 #include "hero_enums.hpp" // hero_seqid
 #include "base_manager.hpp" // baseManager
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 class NewmapCell;
 class NewfullMap;
 class hero;
@@ -522,3 +524,5 @@ class advManager : public baseManager
 
 NH3API_INLINE_OR_EXTERN
 advManager*& gpAdvManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992B8, advManager*));
+
+NH3API_DISABLE_WARNING_END

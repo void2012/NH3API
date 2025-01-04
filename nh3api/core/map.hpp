@@ -11,6 +11,8 @@
 #include "quests.hpp" // quests
 #include "terrain.hpp" // TTerrainType, type_point
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 // Размер карты по горизонтали
 NH3API_INLINE_OR_EXTERN int32_t& MAP_WIDTH
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783C8, int32_t));
@@ -267,3 +269,5 @@ class NewfullMap
         std::array<exe_vector<CObjectType>, MAX_OBJECTS> ObjectTypeTables;
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

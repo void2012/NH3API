@@ -8,6 +8,8 @@
 
 #include "nh3api_std/memory.hpp" // std::array<T, N>, THISCALL_ macros
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 #pragma pack(push, 4)
 // size = 0x10 = 16, align = 4
 struct SLimitData
@@ -124,3 +126,5 @@ struct hexcell
 
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

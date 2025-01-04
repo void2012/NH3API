@@ -8,6 +8,8 @@
 
 #include "nh3api_std/memory.hpp"
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 // Terrain type /
 // Тип почвы.
 enum TTerrainType : int32_t
@@ -348,7 +350,7 @@ class type_point
     // setters
     public:
         NH3API_CONSTEXPR
-        type_point& set(int8_t X, int8_t Y, int8_t Z)
+        type_point& set(int8_t X, int8_t Y, int8_t Z) NH3API_NOEXCEPT
         {
             x = X;
             y = Y;
@@ -359,56 +361,68 @@ class type_point
         #if NH3API_HAS_BUILTIN_BIT_CAST
         NH3API_CONSTEXPR
         #endif
-        type_point& set(uint32_t data)
+        type_point& set(uint32_t data) NH3API_NOEXCEPT
         {
             *this = nh3api::bit_cast<type_point>(data);
             return *this;
         }
 
         NH3API_CONSTEXPR
-        type_point& setX(int8_t X)
+        type_point& setX(int8_t X) NH3API_NOEXCEPT
         { x = X; return *this; }
 
         NH3API_CONSTEXPR
-        type_point& setY(int8_t Y)
+        type_point& setY(int8_t Y) NH3API_NOEXCEPT
         { y = Y; return *this; }
 
         NH3API_CONSTEXPR
-        type_point& setZ(int8_t Z)
+        type_point& setZ(int8_t Z) NH3API_NOEXCEPT
         { z = Z; return *this; }
 
     // getters
     public:
         NH3API_CONSTEXPR
-        int16_t getX() const
+        int16_t getX() const NH3API_NOEXCEPT
         { return x; }
 
         NH3API_CONSTEXPR
-        int16_t getY() const
+        int16_t getY() const NH3API_NOEXCEPT
         { return y; }
 
         NH3API_CONSTEXPR
-        int8_t getZ() const
+        int8_t getZ() const NH3API_NOEXCEPT
         { return z; }
 
         #if NH3API_HAS_BUILTIN_BIT_CAST
         NH3API_CONSTEXPR
         #endif
         // return the underlying data
-        uint32_t to_uint() const
-        { return nh3api::bit_cast<uint32_t>(*this); }
+        uint32_t to_uint() const NH3API_NOEXCEPT
+        { 
+            //return nh3api::bit_cast<uint32_t>(*this);
+            #if NH3API_HAS_BUILTIN_BIT_CAST
+            return __builtin_bit_cast(uint32_t, *this);
+            #else
+            uint32_t result;
+            memcpy(&result, this, sizeof(*this));
+            return result;
+            #endif
+        }
 
         // This point is on map
         // Точка находится на карте
-        bool is_valid() const;
-        //{ return x < gpGame->NewfullMap.Size && y < gpGame->NewfullMap.Size && z == HasTwoLevels;}
+        bool is_valid() const NH3API_NOEXCEPT
+        { return THISCALL_1(bool, 0x4B1090, this); }
 
     public:
         signed x : 10; // +00, bytes 0..1
-        signed : 6; // +10
+    private:
+        signed gap_10bit : 6; // +10
+    public:
         signed y : 10; // +16
         signed z : 4;  // +26
-        signed : 2; // +30
+    private:
+        signed gap_30bit : 2; // +30
 } NH3API_MSVC_LAYOUT;
 
 #pragma pack(push, 1)
@@ -537,3 +551,5 @@ NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6916E8, std::array<ObjectProps
 NH3API_INLINE_OR_EXTERN
 const std::array<tilePoint, 8>& normalDirTable
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678150, const std::array<tilePoint, 8>));
+
+NH3API_DISABLE_WARNING_END

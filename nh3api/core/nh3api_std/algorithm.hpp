@@ -688,7 +688,7 @@ template<class Allocator>
 struct allocator_size_type
 {
     #if NH3API_CHECK_CPP11
-    typedef typename std::allocator_traits<Allocator>::size_type type;
+    typedef typename ::std::allocator_traits<Allocator>::size_type type;
     #else
     typedef typename Allocator::size_type type;
     #endif
@@ -710,7 +710,7 @@ void destroy(ForwardIt first,
 
     #if NH3API_CHECK_CPP11
     for (; first != last; ++first)
-        std::allocator_traits<Allocator>::destroy(alloc, addressof(*first));
+        ::std::allocator_traits<Allocator>::destroy(alloc, addressof(*first));
     #else
     for (; first != last; ++first)
         alloc.destroy(addressof(*first));
@@ -731,7 +731,7 @@ ForwardIt destroy_n(ForwardIt first,
 
     #if NH3API_CHECK_CPP11
     for (; n > 0; (void) ++first, --n)
-        std::allocator_traits<Allocator>::destroy(alloc, addressof(*first));
+        ::std::allocator_traits<Allocator>::destroy(alloc, addressof(*first));
     #else
     for (; n > 0; (void) ++first, --n)
         alloc.destroy(addressof(*first));

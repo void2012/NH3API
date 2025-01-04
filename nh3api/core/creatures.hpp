@@ -9,6 +9,8 @@
 #include "nh3api_std/exe_string.hpp"
 #include "terrain.hpp" // EMagicTerrain, TTerrainType
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 // Creature type /
 // Тип существа.
 enum TCreatureType : int32_t
@@ -749,3 +751,5 @@ public:
 
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

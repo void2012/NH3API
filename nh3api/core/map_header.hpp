@@ -10,6 +10,8 @@
 #include "lossvictory.hpp" // VictoryConditionStruct, LossConditionStruct
 #include "hero.hpp" // HeroIdentity, HeroPlayerInfo
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 #pragma pack(push, 4)
 // Map header /
 // Заголовок карты.
@@ -249,3 +251,5 @@ struct NewSMapHeader : CMapHeaderData
 
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

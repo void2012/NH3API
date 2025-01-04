@@ -8,6 +8,8 @@
 
 #include "interface/windows.hpp"
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 #pragma pack(push, 4)
 // size = 0x38 = 56, align = 4
 NH3API_VIRTUAL_CLASS baseManager
@@ -131,3 +133,5 @@ struct executive
 NH3API_INLINE_OR_EXTERN
 executive*& gpExec
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699550, executive*));
+
+NH3API_DISABLE_WARNING_END

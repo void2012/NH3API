@@ -12,6 +12,8 @@
 #include "army.hpp" // army, TCreatureType
 #include "hexcell.hpp" // hexcell
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 enum type_combat_cursor : int32_t
 {
     SELECT_NULL                  = 0, //
@@ -903,3 +905,5 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 NH3API_INLINE_OR_EXTERN
 combatManager*& gpCombatManager
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699420, combatManager*));
+
+NH3API_DISABLE_WARNING_END

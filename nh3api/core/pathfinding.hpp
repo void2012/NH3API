@@ -8,9 +8,10 @@
 
 #include <windef.h> // windef.h is heavy... and only for the sake of RECT
 #include "nh3api_std/exe_vector.hpp"
-
 #include "skills.hpp"
 #include "terrain.hpp"
+
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
 #pragma pack(push, 1)
 // Path finding engine cell /
@@ -227,3 +228,5 @@ struct searchArray
 NH3API_INLINE_OR_EXTERN
 searchArray*& gpSearchArray
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992D4, searchArray*));
+
+NH3API_DISABLE_WARNING_END

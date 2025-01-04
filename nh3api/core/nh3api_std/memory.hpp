@@ -19,11 +19,11 @@
 #include <stdexcept>    // std::bad_alloc, std::bad_array_new_length
 #endif
 
-
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 
 // maximum allocated size per call: 520177 bytes
 
+NH3API_NODISCARD
 NH3API_FORCEINLINE
 NH3API_MALLOC(1)
 // address: 0x617492
@@ -39,6 +39,7 @@ NH3API_FORCEINLINE
 void __cdecl exe_delete(void* ptr) NH3API_NOEXCEPT
 { CDECL_1(void, 0x60B0F0, ptr); }
 
+NH3API_NODISCARD
 NH3API_FORCEINLINE
 NH3API_MALLOC(1)
 // address: 0x61A9D5
@@ -176,17 +177,17 @@ ForwardIt destroy_n(ForwardIt first, Size n)
 template<class T>
 NH3API_FORCEINLINE constexpr
 void destroy_at(T* p)
-{ std::destroy_at(p); }
+{ ::std::destroy_at(p); }
 
 template<class ForwardIt>
 NH3API_FORCEINLINE constexpr
 void destroy(ForwardIt first, ForwardIt last)
-{ std::destroy(first, last); }
+{ ::std::destroy(first, last); }
 
 template<class ForwardIt, class Size>
 NH3API_FORCEINLINE constexpr
 ForwardIt destroy_n(ForwardIt first, Size n)
-{ return std::destroy_n(first, n); }
+{ return ::std::destroy_n(first, n); }
 
 #endif // constexpr destruction algorithms
 
@@ -472,7 +473,7 @@ void set_vftable(T* ptr)
 template<typename Result, typename T, typename ... Args> inline
 Result virtual_call(T* thisPtr, size_t shift, Args&& ... args)
 {
-    return THISCALL_N(Result, reinterpret_cast<uintptr_t>(get_vftable(thisPtr)) + shift, std::forward<Args>(args)...);
+    return THISCALL_N(Result, reinterpret_cast<uintptr_t>(get_vftable(thisPtr)) + shift, ::std::forward<Args>(args)...);
 }
 #endif
 
@@ -506,6 +507,7 @@ Result virtual_call(T* thisPtr, size_t shift, Args&& ... args)
 namespace nh3api
 {
 
+#ifndef __cpp_lib_clamp
 template<class T>
 NH3API_CONSTEXPR_CPP_17 const T& clamp(const T& v, const T& lo, const T& hi)
 {
@@ -517,6 +519,9 @@ NH3API_CONSTEXPR_CPP_17 const T& clamp(const T& v, const T& lo, const T& hi, Com
 {
     return comp(v, lo) ? lo : comp(hi, v) ? hi : v;
 }
+#else 
+using ::std::clamp;
+#endif
 
 }
 
@@ -527,7 +532,7 @@ template<class T, class Allocator>
 NH3API_FORCEINLINE void copy_construct(void* ptr, const T& value, Allocator alloc)
 {
     #if NH3API_CHECK_CPP11
-    std::allocator_traits<Allocator>::construct(alloc, ptr, value);
+    ::std::allocator_traits<Allocator>::construct(alloc, ptr, value);
     #else
     alloc.construct(ptr, value);
     #endif
@@ -582,7 +587,7 @@ protected:
             (size_t)_N * sizeof(U));
         #else
         return (U*)::operator new(
-            (size_t)_N * sizeof(U), std::nothrow);
+            (size_t)_N * sizeof(U), ::std::nothrow);
         #endif
     }
 
@@ -611,7 +616,7 @@ public:
     #if NH3API_STD_MOVE_SEMANTICS
     template <typename U, typename NH3API_ARGS_DOTS Args > NH3API_FORCEINLINE
     void construct(U* ptr, Args&& NH3API_ARGS_DOTS args)
-    { ::new ((void*)ptr) U(std::forward<Args>(args) NH3API_ARGS_DOTS ); }
+    { ::new ((void*)ptr) U(::std::forward<Args>(args) NH3API_ARGS_DOTS ); }
     #else
     template <typename U> NH3API_FORCEINLINE
     void construct(U* ptr, const_reference val)
@@ -622,10 +627,10 @@ public:
     void destroy(pointer ptr)
     { nh3api::destroy_at(ptr); }
 
-    NH3API_NODISCARD NH3API_FORCEINLINE
+    NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
     size_t max_size() const
     {
-        size_t _N = (size_t)(-1) / sizeof(value_type);
+        const size_t _N = (size_t)(-1) / sizeof(value_type);
         return (0 < _N ? _N : 1);
     }
 
@@ -686,7 +691,7 @@ protected:
             (size_t)_N * sizeof(U), exe_heap);
         #else
         return (U*)::operator new(
-            (size_t)_N * sizeof(U), exe_heap, std::nothrow);
+            (size_t)_N * sizeof(U), exe_heap, ::std::nothrow);
         #endif
     }
 
@@ -715,7 +720,7 @@ public:
     #if NH3API_STD_MOVE_SEMANTICS
     template <typename U, typename NH3API_ARGS_DOTS Args > NH3API_FORCEINLINE
     void construct(U* ptr, Args&& NH3API_ARGS_DOTS args)
-    { ::new ((void*)ptr) U(std::forward<Args>(args) NH3API_ARGS_DOTS ); }
+    { ::new ((void*)ptr) U(::std::forward<Args>(args) NH3API_ARGS_DOTS ); }
     #else
     template <typename U> NH3API_FORCEINLINE
     void construct(U* ptr, const_reference val)
@@ -726,10 +731,10 @@ public:
     void destroy(pointer ptr)
     { nh3api::destroy_at(ptr); }
 
-    NH3API_NODISCARD NH3API_FORCEINLINE
+    NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
     size_t max_size() const
     {
-        size_t _N = (size_t)(-1) / sizeof(value_type);
+        const size_t _N = (size_t)(-1) / sizeof(value_type);
         return (0 < _N ? _N : 1);
     }
 
@@ -762,7 +767,7 @@ struct allocator_adaptor
         typedef typename allocator_type::value_type value_type;
 
     #if NH3API_CHECK_CPP11
-        typedef std::allocator_traits<AllocatorT> traits;
+        typedef ::std::allocator_traits<AllocatorT> traits;
 
         template<typename U>
         struct rebind_alloc
@@ -826,12 +831,12 @@ struct allocator_adaptor
         #if NH3API_STD_MOVE_SEMANTICS
         NH3API_CONSTEXPR_CPP_20
         allocator_adaptor(allocator_type&& other)
-            : alloc(std::move(other))
+            : alloc(::std::move(other))
         {}
 
         NH3API_CONSTEXPR_CPP_20
         allocator_adaptor(allocator_adaptor&& other)
-            : alloc(std::move(other.alloc))
+            : alloc(::std::move(other.alloc))
         {}
         #endif
 
@@ -922,7 +927,7 @@ struct allocator_adaptor
         NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
         void construct(U* ptr, Args&&... args)
         {
-            traits::construct(alloc, reinterpret_cast<value_type*>(ptr), std::forward<Args>(args)...);
+            traits::construct(alloc, reinterpret_cast<value_type*>(ptr), ::std::forward<Args>(args)...);
         }
         #else
         template <class U>
@@ -943,7 +948,7 @@ struct allocator_adaptor
             #endif
         }
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
         size_type max_size() const NH3API_NOEXCEPT
         {
             #if NH3API_CHECK_CPP11
@@ -1016,12 +1021,12 @@ struct allocator_adaptor<exe_allocator<T> >
         #if NH3API_STD_MOVE_SEMANTICS
         NH3API_CONSTEXPR
         allocator_adaptor(allocator_type&& other) NH3API_NOEXCEPT
-            : alloc(std::move(other))
+            : alloc(::std::move(other))
         {}
 
         NH3API_CONSTEXPR
         allocator_adaptor(allocator_adaptor&& other) NH3API_NOEXCEPT
-            : alloc(std::move(other.alloc))
+            : alloc(::std::move(other.alloc))
         {}
         #endif
 
@@ -1060,7 +1065,7 @@ struct allocator_adaptor<exe_allocator<T> >
                 (size_t)n * sizeof(T), exe_heap));
             #else
                 return ((T*)::operator new(
-                (size_t)n * sizeof(T), exe_heap, std::nothrow));
+                (size_t)n * sizeof(T), exe_heap, ::std::nothrow));
             #endif
         }
 
@@ -1073,7 +1078,7 @@ struct allocator_adaptor<exe_allocator<T> >
                 (size_t)n * sizeof(T), exe_heap));
             #else
                 return ((T*)::operator new(
-                (size_t)n * sizeof(T), exe_heap, std::nothrow));
+                (size_t)n * sizeof(T), exe_heap, ::std::nothrow));
             #endif
         }
 
@@ -1110,7 +1115,7 @@ struct allocator_adaptor<exe_allocator<T> >
         #if NH3API_STD_MOVE_SEMANTICS
         template <class U, typename NH3API_ARGS_DOTS Args> NH3API_FORCEINLINE
         static void construct(U* ptr, Args&& NH3API_ARGS_DOTS args)
-        { ::new (static_cast<void*>(ptr)) value_type(std::forward<Args>(args) NH3API_ARGS_DOTS ); }
+        { ::new (static_cast<void*>(ptr)) value_type(::std::forward<Args>(args) NH3API_ARGS_DOTS ); }
         #else
         NH3API_FORCEINLINE
         template <class U> NH3API_FORCEINLINE
@@ -1345,7 +1350,7 @@ void exe_make_unique(Args&&...) = delete;
 #endif
 
 #ifdef __cpp_lib_smart_ptr_for_overwrite
-template <class T, class... Args, typename nh3api::tt::enable_if<nh3api::is_bounded_array<T>::value != 0, int>::type = 0>
+template <class T, class... Args, typename nh3api::tt::enable_if<nh3api::tt::is_bounded_array<T>::value != 0, int>::type = 0>
 void exe_make_unique_for_overwrite(Args&&...) = delete;
 #endif
 

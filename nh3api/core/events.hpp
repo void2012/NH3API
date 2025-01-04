@@ -8,6 +8,8 @@
 
 #include "nh3api_std/patcher_x86.hpp"
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 class heroWindow;
 #pragma pack(push, 4)
 // Dialog or Input systems event(message) /
@@ -139,3 +141,5 @@ NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A38, bool));
 NH3API_INLINE_OR_EXTERN
 bool& insideProcessMessage
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699608, bool));
+
+NH3API_DISABLE_WARNING_END

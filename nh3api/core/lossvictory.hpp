@@ -6,9 +6,11 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "resources/resources_include.hpp"
+#include "resources/resources_include.hpp" // EGameResource
 #include "hero_enums.hpp" // THeroID
 #include "terrain.hpp" // type_point
+
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
 // Victory condition type /
 // Тип условия победы.
@@ -246,3 +248,5 @@ struct LossConditionStruct
 
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

@@ -11,6 +11,8 @@
 #include "creatures.hpp" // TCreatureType
 #include "map_header.hpp" // NewSMapHeader
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 // Campaign type /
 // Тип кампании.
 enum ECampaignType : int32_t
@@ -422,3 +424,5 @@ struct SCampaign
 
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

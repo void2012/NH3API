@@ -36,17 +36,15 @@ _BitScanReverse(&result, x);
 return result;
 }
 #endif
-
-static const uint32_t count_digits_table[] =
-{9, 99, 999, 9999, 99999, 999999, 9999999, 99999999, 999999999};
-
 // count the amount of digits in an integer
 NH3API_FORCEINLINE
 int32_t count_digits(uint32_t x)
 {
-    int32_t result = (9 * ilog2(x)) >> 5;
-    result += x > count_digits_table[result];
-    return result + 1;
+    static uint32_t digits_table[] = {9, 99, 999, 9999, 99999,
+    999999, 9999999, 99999999, 999999999};
+    int32_t y = (9 * ilog2(x)) >> 5;
+    y += x > digits_table[y];
+    return y + 1;
 }
 
 // floating-point math

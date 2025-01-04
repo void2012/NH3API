@@ -24,6 +24,7 @@
 #include <utility>
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
 //namespace
 //{

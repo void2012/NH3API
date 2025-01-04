@@ -9,6 +9,8 @@
 #include "base_manager.hpp" // baseManager
 #include "events.hpp" // message
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 // inputManager keycodes /
 // Коды клавиш клавиатуры.
 enum EKeyCodes : uint32_t
@@ -199,3 +201,5 @@ NH3API_VIRTUAL_CLASS inputManager : public baseManager
 
 };
 #pragma pack(pop)
+
+NH3API_DISABLE_WARNING_END

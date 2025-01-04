@@ -16,6 +16,8 @@
 #include "skills.hpp" // TSkillMastery, TSecondarySkill
 #include "player_enums.hpp" // EPlayerColor
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 enum EQuestType : int32_t
 {
     QUEST_NONE             = 0,
@@ -717,3 +719,5 @@ struct QuestMonster
 NH3API_FORCEINLINE
 type_quest* create_quest(EQuestType quest_type, bool hut) NH3API_NOEXCEPT
 { return FASTCALL_2(type_quest*, 0x573610, quest_type, static_cast<bool32_t>(hut)); }
+
+NH3API_DISABLE_WARNING_END

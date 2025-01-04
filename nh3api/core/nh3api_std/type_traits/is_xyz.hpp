@@ -329,7 +329,7 @@ using ::std::is_volatile;
 using ::std::is_enum;
 using ::std::is_class;
 using ::std::is_union;
-using ::std::is_pod;
+// using ::std::is_pod; // we're not using is_pod currently
 using ::std::is_empty;
 using ::std::is_polymorphic;
 using ::std::is_abstract;

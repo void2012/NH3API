@@ -20,8 +20,12 @@ template<typename T>
 T* get_ptr(uint32_t address) NH3API_NOEXCEPT
 { return reinterpret_cast<T*>(address); }
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
+#include <cwchar>
+#ifdef __cpp_lib_bit_cast
+#include <bit>
+#endif
 
 // Memory shield does not let the optimizing compiler discard statements
 // It is recommended to use it inside your init() function
@@ -97,10 +101,8 @@ T* addressof(T& arg) NH3API_NOEXCEPT
 
 #ifdef __cpp_lib_bit_cast
 
-#include <bit>
-
 template<class To, class From>
-NH3API_FORCEINLINE NH3API_MSVC_INTRIN
+NH3API_MSVC_INTRIN NH3API_FORCEINLINE 
 constexpr To bit_cast( const From& from ) noexcept
 {
     return std::bit_cast<To>(from);
@@ -397,7 +399,7 @@ struct str_func_chooser<char>
     {  return __builtin_strlen(str); }
     #else
     static size_t _strlen(const char* str) NH3API_NOEXCEPT
-    { return ::strlen(str); }
+    { return ::std::strlen(str); }
     #endif
 
     #if NH3API_HAS_BUILTIN_MEMCMP && NH3API_CHECK_CPP11
@@ -406,33 +408,29 @@ struct str_func_chooser<char>
 
     #else
     static int32_t _memcmp(const char* s1, const char* s2, size_t count) NH3API_NOEXCEPT
-    { return ::memcmp(s1, s2, count); }
+    { return ::std::memcmp(s1, s2, count); }
     #endif
 
     #if NH3API_HAS_BUILTIN_CHAR_MEMCHR && NH3API_CHECK_CPP11
-    static constexpr
-    char* _memchr(const char* haystack, char needle, size_t count)
+    static constexpr char* _memchr(const char* haystack, char needle, size_t count)
     {
         return __builtin_char_memchr(haystack, needle, count);
     }
     #else
-    static
-    char* _memchr(const char* haystack, char needle, size_t count)
-    { return reinterpret_cast<char*>(const_cast<void*>(::memchr(haystack, needle, count))); }
+    static char* _memchr(const char* haystack, char needle, size_t count)
+    { return reinterpret_cast<char*>(const_cast<void*>(::std::memchr(haystack, needle, count))); }
     #endif
 
     #if NH3API_HAS_BUILTIN_MEMMOVE && NH3API_CHECK_CPP11
-    static constexpr
-    char* _memmove(char* dst, const char* src, size_t count)
+    static constexpr char* _memmove(char* dst, const char* src, size_t count)
     {
         __builtin_memmove(dst, src, count);
         return dst;
     }
     #else
-    static
-    char* _memmove(char* dst, const char* src, size_t count)
+    static char* _memmove(char* dst, const char* src, size_t count)
     {
-        ::memmove(dst, src, count);
+        ::std::memmove(dst, src, count);
         return dst;
     }
     #endif
@@ -446,7 +444,7 @@ struct str_func_chooser<wchar_t>
     {  return __builtin_wcslen(str); }
     #else
     static size_t _strlen(const wchar_t* str) NH3API_NOEXCEPT
-    { return ::wcslen(str); }
+    { return ::std::wcslen(str); }
     #endif
 
     #if NH3API_HAS_BUILTIN_WMEMCMP
@@ -455,31 +453,27 @@ struct str_func_chooser<wchar_t>
 
     #else
     static int32_t _memcmp(const wchar_t* s1, const wchar_t* s2, size_t count) NH3API_NOEXCEPT
-    { return ::wmemcmp(s1, s2, count); }
+    { return ::std::wmemcmp(s1, s2, count); }
     #endif
 
     #if NH3API_HAS_BUILTIN_WMEMCHR
-    template<typename T> static constexpr
-    T* _memchr(T* haystack, char needle, size_t count)
+    static constexpr const wchar_t* _memchr(const wchar_t* haystack, wchar_t needle, size_t count)
     { return __builtin_wmemchr(haystack, needle, count); }
     #else
-    template<typename T> static
-    T* _memchr(T* haystack, char needle, size_t count)
-    { return ::wmemchr(haystack, needle, count); }
+    static const wchar_t* _memchr(const wchar_t* haystack, wchar_t needle, size_t count)
+    { return ::std::wmemchr(haystack, needle, count); }
     #endif
 
     #if NH3API_HAS_BUILTIN_MEMMOVE && NH3API_CHECK_CPP11
-    static constexpr
-    wchar_t* _memmove(wchar_t* dst, const wchar_t* src, size_t count)
+    static constexpr wchar_t* _memmove(wchar_t* dst, const wchar_t* src, size_t count)
     {
         __builtin_memmove(dst, src, count * sizeof(wchar_t));
         return dst;
     }
     #else
-    static
-    wchar_t* _memmove(wchar_t* dst, const wchar_t* src, size_t count)
+    static wchar_t* _memmove(wchar_t* dst, const wchar_t* src, size_t count)
     {
-        ::memmove(dst, src, count * sizeof(wchar_t));
+        ::std::wmemmove(dst, src, count);
         return dst;
     }
     #endif
@@ -570,12 +564,11 @@ T* memchr_constexpr_impl(T* haystack, CharT needle, size_t count)
     return nullptr;
 }
 
-template<typename T, typename CharT> NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
-T* memchr_constexpr(T* haystack, CharT needle, size_t count)
+template<typename CharT> NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
+const CharT* memchr_constexpr(const CharT* haystack, CharT needle, size_t count)
 {
-    typedef typename tt::remove_cv<CharT>::type char_type;
-    NH3API_CONSTEXPR_VAR bool is_char_char = tt::is_same<typename tt::remove_cv<T>::type, char>::value && tt::is_same<char_type, char>::value;
-    NH3API_CONSTEXPR_VAR bool is_char_wchar = tt::is_same<typename tt::remove_cv<T>::type, wchar_t>::value && tt::is_same<char_type, wchar_t>::value;
+    NH3API_CONSTEXPR_VAR bool is_char_char  = tt::is_same<CharT, char>::value;
+    NH3API_CONSTEXPR_VAR bool is_char_wchar = tt::is_same<CharT, wchar_t>::value;
     #if NH3API_HAS_BUILTIN_MEMCHR && NH3API_HAS_IS_CONSTANT_EVALUATED
     if ( is_constant_evaluated() )
     {
@@ -583,18 +576,16 @@ T* memchr_constexpr(T* haystack, CharT needle, size_t count)
     }
     else
     {
-        char_type value_buffer = bit_cast<char_type>(needle);
-        if ( is_char_char || is_char_wchar )
-            return str_func_chooser<CharT>::_memchr(haystack, value_buffer, count);
+        NH3API_IF_CONSTEXPR ( is_char_char || is_char_wchar )
+            return str_func_chooser<CharT>::_memchr(haystack, needle, count);
         else
-            return memchr_constexpr_impl(haystack, value_buffer, count);
+            return memchr_constexpr_impl(haystack, needle, count);
     }
     #else
-    char_type value_buffer = bit_cast<char_type>(needle);
     if ( is_char_char || is_char_wchar )
-        return str_func_chooser<CharT>::_memchr(haystack, value_buffer, count);
+        return str_func_chooser<CharT>::_memchr(haystack, needle, count);
     else
-        return memchr_constexpr_impl(haystack, value_buffer, count);
+        return memchr_constexpr_impl(haystack, needle, count);
     #endif
 }
 

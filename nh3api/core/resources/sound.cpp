@@ -8,5 +8,5 @@
 
 #ifndef NH3API_FLAG_INLINE_HEADERS
 soundManager*& gpSoundManager = get_global_var_ref(0x699414, soundManager*);
-const uint8_t* giTerrainToMusicTrack = get_global_var_ref(0x678330, const uint8_t*);
+const std::array<uint8_t, 10>& giTerrainToMusicTrack = get_global_var_ref(0x678330, const std::array<uint8_t, 10>);
 #endif

@@ -14,6 +14,8 @@
 #include "terrain.hpp" // type_point
 #include "random.hpp" // Random(int, int)
 
+NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+
 #pragma pack(push, 4)
 // Map object info. Width(1 byte), Height(1 byte), PlacementMask(6 bytes), ShadowMask(6 bytes) are gathered from the corresponding <ImageName>.msk file,
 // while PassableMask, TriggerMask, Type, Subtype, IsUnderlay are loaded from the map(see NewfullMap::readObjectType) /
@@ -210,7 +212,7 @@ uint32_t getBitPos(uint32_t x, uint32_t y)
 struct TreasureData
 {
     public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
+        NH3API_FORCEINLINE
         TreasureData() NH3API_NOEXCEPT
             : Message(), HasCustomGuardians(false), Guardians()
         {}
@@ -1509,3 +1511,5 @@ bool hasFlag(TAdventureObjectType objType) NH3API_NOEXCEPT
 NH3API_FORCEINLINE
 int32_t GetFlaggedObjectOwner(NewmapCell* thisCell) NH3API_NOEXCEPT
 { return FASTCALL_1(int32_t, 0x40FC80, thisCell); }
+
+NH3API_DISABLE_WARNING_END
