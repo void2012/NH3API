@@ -76,7 +76,7 @@
                 #endif // NH3API_CHECK_CPP11
 
                 #ifndef NH3API_CHECK_CPP14
-                    #define NH3API_CHECK_CPP14 (__cplusplus>=201403L)
+                    #define NH3API_CHECK_CPP14 (__cplusplus>=201402L)
                 #endif // NH3API_CHECK_CPP14
 
                 #ifndef NH3API_CHECK_CPP17
