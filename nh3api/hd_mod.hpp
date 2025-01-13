@@ -97,8 +97,9 @@ bool isHDPlusPresent(Patcher* patcher)
 NH3API_FORCEINLINE
 POINT getHDModResolution(Patcher* patcher)
 {
-    POINT result = { .x = getHDModVariable<int32_t, 0>(patcher, "HD.Option.RezX"),
-                     .y = getHDModVariable<int32_t, 0>(patcher, "HD.Option.RezY") };
+    POINT result;
+    result.x = getHDModVariable<int32_t, 0>(patcher, "HD.Option.RezX");
+    result.y = getHDModVariable<int32_t, 0>(patcher, "HD.Option.RezY");
     return result;
 }
 
@@ -129,7 +130,9 @@ POINT getScreenResolution(Patcher* patcher)
     }
     else
     {
-        POINT result = { .x = 800, .y = 600 };
+        POINT result;
+        result.x = 800;
+        result.y = 600;
         return result;
     }
 }
@@ -169,7 +172,7 @@ struct is_wine_present_impl
         {
             library = GetModuleHandleA("ntdll.dll");
             if ( library ) // I *really* hope you're running it with windows or WINE
-                func = GetProcAddress(status.second, "wine_get_version");
+                func = GetProcAddress(library, "wine_get_version");
             initialized = true;
         }
         if ( library )

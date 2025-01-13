@@ -214,9 +214,9 @@ struct exe_vector_helper
         }
 
         NH3API_CONSTEXPR_CPP_20
-        void default_fill(pointer first, size_type count)
+        pointer default_fill(pointer first, size_type count)
         {
-            nh3api::uninitialized_default_construct_n(first, count, alloc);
+            return nh3api::uninitialized_default_construct_n(first, count, alloc);
         }
 
     public:
@@ -385,10 +385,10 @@ struct exe_vector_helper<exe_allocator<T> >
         }
 
         NH3API_FORCEINLINE
-        void default_fill(pointer first, size_type count)
+        pointer default_fill(pointer first, size_type count)
         NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_default_constructible<value_type>::value)
         {
-            nh3api::init_array(first, count);
+            return nh3api::init_array(first, count);
         }
 
     public:

@@ -950,18 +950,9 @@ NoThrowForwardIt uninitialized_move(InputIt first,
 }
 // #endif
 
-template<class T, class Size> NH3API_CONSTEXPR_CPP_20
-void init_array(T* first, Size n)
-{
-    #if NH3API_DEBUG
-    verify_range_n(first, n);
-    #endif
-    init_array_impl(first, n, tt::is_nothrow_default_constructible<T>());
-}
-
 template<class T, class Size>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-void init_array_impl(T* first, Size n, tt::false_type)
+T* init_array_impl(T* first, Size n, tt::false_type)
 {
     T* current = first;
     NH3API_TRY
@@ -975,16 +966,27 @@ void init_array_impl(T* first, Size n, tt::false_type)
         destroy(first, current);
         NH3API_RETHROW
     }
+    return current;
 }
 
 template<class T, class Size>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-void init_array_impl(T* first, Size n, tt::true_type)
+T* init_array_impl(T* first, Size n, tt::true_type)
 {
     T* current = first;
     for (; n > 0; (void) ++current, --n)
         ::new (const_cast<void*>(static_cast<const volatile void*>(
-            addressof(*current)))) T;
+            nh3api::addressof(*current)))) T;
+    return current;
+}
+
+template<class T, class Size> NH3API_CONSTEXPR_CPP_20
+T* init_array(T* first, Size n)
+{
+    #if NH3API_DEBUG
+    verify_range_n(first, n);
+    #endif
+    return init_array_impl(first, n, tt::is_nothrow_default_constructible<T>());
 }
 
 template <typename InputIterator, typename OutputIterator>

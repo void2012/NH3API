@@ -339,25 +339,29 @@
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_20
-        #ifdef _CONSTEXPR20
-            #define NH3API_CONSTEXPR_CPP_20 _CONSTEXPR20
+        #ifdef _CONSTEXPR20 // avoid stupid MSVC double inline warning
+            #define NH3API_CONSTEXPR_CPP_20 constexpr
         #else
             #define NH3API_CONSTEXPR_CPP_20
         #endif
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_17
-        #ifdef _CONSTEXPR17
-            #define NH3API_CONSTEXPR_CPP_17 _CONSTEXPR17
+        #ifdef _CONSTEXPR17 // avoid stupid MSVC double inline warning
+            #define NH3API_CONSTEXPR_CPP_17 constexpr
         #else
             #define NH3API_CONSTEXPR_CPP_17
         #endif
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_14
-        #ifdef _CONSTEXPR17
-            #define NH3API_CONSTEXPR_CPP_14 constexpr
-        #else
+        #ifdef __cpp_constexpr
+            #if __cpp_constexpr >= 201304L
+                #define NH3API_CONSTEXPR_CPP_14 constexpr
+            #else 
+                #define NH3API_CONSTEXPR_CPP_14
+            #endif
+        #else 
             #define NH3API_CONSTEXPR_CPP_14
         #endif
     #endif
