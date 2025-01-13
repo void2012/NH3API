@@ -160,7 +160,7 @@ NH3API_FORCEINLINE NH3API_CONSTEXPR
 void destroy(ForwardIt first, ForwardIt last)
 {
     for (; first != last; ++first)
-        destroy_at(addressof(*first));
+        destroy_at(nh3api::addressof(*first));
 }
 
 template<class ForwardIt, class Size>
@@ -168,7 +168,7 @@ NH3API_FORCEINLINE NH3API_CONSTEXPR
 ForwardIt destroy_n(ForwardIt first, Size n)
 {
     for (; n > 0; (void) ++first, --n)
-        destroy_at(addressof(*first));
+        destroy_at(nh3api::addressof(*first));
     return first;
 }
 
