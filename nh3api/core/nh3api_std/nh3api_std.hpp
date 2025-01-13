@@ -339,7 +339,7 @@
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_20
-        #ifdef _CONSTEXPR20 // avoid stupid MSVC double inline warning
+        #if NH3API_CHECK_CPP20 && defined(_CONSTEXPR20)
             #define NH3API_CONSTEXPR_CPP_20 constexpr
         #else
             #define NH3API_CONSTEXPR_CPP_20
@@ -347,7 +347,7 @@
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_17
-        #ifdef _CONSTEXPR17 // avoid stupid MSVC double inline warning
+        #if NH3API_CHECK_CPP17 && defined(_CONSTEXPR17)
             #define NH3API_CONSTEXPR_CPP_17 constexpr
         #else
             #define NH3API_CONSTEXPR_CPP_17
