@@ -460,7 +460,7 @@ struct exe_vector_helper<exe_allocator<T> >
         #ifndef NH3API_VECTOR_TRY_CATCH_TIDY
             #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
                 #define NH3API_VECTOR_TRY_CATCH_TIDY(NO_UNWIND_CONDITION, ...) \
-                NH3API_IF_CONSTEXPR (NO_UNWIND_CONDITION)\
+                if (NO_UNWIND_CONDITION)\
                 {\
                     __VA_ARGS__\
                 }\
@@ -484,7 +484,7 @@ struct exe_vector_helper<exe_allocator<T> >
         #ifndef NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE
             #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
                 #define NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE(NO_UNWIND_CONDITION, DESTROY_FIRST, DESTROY_LAST, DEALLOC_AT, DEALLOC_SIZE, ...) \
-                NH3API_IF_CONSTEXPR (NO_UNWIND_CONDITION)\
+                if (NO_UNWIND_CONDITION)\
                 {\
                     __VA_ARGS__\
                 }\

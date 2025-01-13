@@ -49,7 +49,7 @@ struct get_hd_mod_varable_impl
     {
         if ( patcher )
         {
-            Variable* var = patcher->VarFind("HD.Version.Dword");
+            Variable* var = patcher->VarFind(name);
             if ( var )
             {
                 // static_cast for integrals, reinterpret_cast for pointers...
