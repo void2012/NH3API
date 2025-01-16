@@ -1563,7 +1563,7 @@ public:
                         F* new_func)
     {
         hihook_function_condition(new_func);
-        return xWriteHiHook(address, hooktype, subtype, calltype, static_cast<void*>(new_func));
+        return xWriteHiHook(address, hooktype, subtype, calltype, reinterpret_cast<void*>(new_func));
     }
 
 
