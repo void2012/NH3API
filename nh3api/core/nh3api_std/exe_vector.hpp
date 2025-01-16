@@ -631,6 +631,7 @@ struct exe_vector_helper<exe_allocator<T> >
             propagate_on_container_move_assignment());
         }
 
+        NH3API_FORCEINLINE
         void _Move_from(exe_vector&& _Right, nh3api::tt::true_type) NH3API_NOEXCEPT
         {
             _Tidy_deallocate();
@@ -1620,6 +1621,7 @@ struct exe_vector_helper<exe_allocator<T> >
             }
         }
 
+        NH3API_FORCEINLINE
         void _Nullify() NH3API_NOEXCEPT
         {
             if ( nh3api::tt::is_empty<allocator_type>::value )
@@ -1635,6 +1637,7 @@ struct exe_vector_helper<exe_allocator<T> >
         }
 
         #if NH3API_STD_MOVE_SEMANTICS
+        NH3API_FORCEINLINE
         void _Move_nullify(exe_vector* other) NH3API_NOEXCEPT
         {
             // clang is the only compiler that can optimize 4 std::exchange-s to a single SSE2 swap

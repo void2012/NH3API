@@ -689,6 +689,7 @@ public:
     }
 
     protected:
+    NH3API_FORCEINLINE
     void _Nullify(bool _destroy = false) NH3API_NOEXCEPT
     {
         if ( nh3api::tt::is_empty<allocator_type>::value && _destroy)
@@ -704,6 +705,7 @@ public:
     }
 
     #if NH3API_STD_MOVE_SEMANTICS
+    NH3API_FORCEINLINE
     void _Move_nullify(exe_basic_string* other) NH3API_NOEXCEPT
     {
         if ( nh3api::tt::is_empty<allocator_type>::value )
@@ -757,7 +759,6 @@ public:
 
     public:
     #if NH3API_STD_MOVE_SEMANTICS
-    NH3API_FLATTEN
       exe_basic_string(exe_basic_string&& other)
         NH3API_NOEXCEPT_EXPR(helper_type::is_always_equal::value)
         : helper(std::move(other.helper))
