@@ -372,10 +372,10 @@ int8_t __CFADD__(T x, U y) NH3API_NOEXCEPT
 
 }
 
-NH3API_IDA_INTRIN uint8_t  abs8 (int8_t  x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
-NH3API_IDA_INTRIN uint16_t abs16(int16_t x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
-NH3API_IDA_INTRIN uint32_t abs32(int32_t x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
-NH3API_IDA_INTRIN uint64_t abs64(int64_t x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
+NH3API_IDA_INTRIN int8_t  abs8 (int8_t  x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
+NH3API_IDA_INTRIN int16_t abs16(int16_t x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
+NH3API_IDA_INTRIN int32_t abs32(int32_t x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
+NH3API_IDA_INTRIN int64_t abs64(int64_t x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
 
 template <typename T, typename F>
 NH3API_FORCEINLINE typename nh3api::tt::enable_if<sizeof(T) <= sizeof(F), T>::type __coerce(F f)

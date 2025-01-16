@@ -253,14 +253,55 @@
 
 // Compiler-specific pragma wrapper
 #if NH3API_CHECK_MSVC || NH3API_CHECK_CLANG_CL
-    #if !defined(NH3API_PRAGMA)
+    #ifndef NH3API_PRAGMA
         #define NH3API_PRAGMA(S) __pragma(S)
     #endif
 #else
-    #if !defined(NH3API_PRAGMA)
+    #ifndef NH3API_PRAGMA
         #define NH3API_PRAGMA(S) _Pragma(#S)
     #endif
 #endif // NH3API_PRAGMA
+
+#if NH3API_CHECK_MSVC && !NH3API_CHECK_CLANG_CL
+    #ifndef NH3API_DISABLE_WARNING
+        #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) NH3API_PRAGMA(warning(push)) \
+                                                              NH3API_PRAGMA(warning(disable : MSVC))
+
+        #define NH3API_DISABLE_WARNING_END   NH3API_PRAGMA(warning(pop))
+        #define NH3API_DISABLE_WARNING(WARNING) NH3API_PRAGMA(warning(disable : WARNING))
+    #endif // NH3API_DISABLE_WARNING
+#endif // NH3API_CHECK_MSVC
+
+#if NH3API_CHECK_CLANG || NH3API_CHECK_CLANG_CL
+    #ifndef NH3API_DISABLE_WARNING
+        #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) NH3API_PRAGMA(clang diagnostic push) \
+                                                              NH3API_PRAGMA(clang diagnostic ignored GCC_CLANG)
+        #define NH3API_DISABLE_WARNING_END   NH3API_PRAGMA(clang diagnostic pop)
+        #define NH3API_DISABLE_WARNING(WARNING) NH3API_PRAGMA(clang diagnostic ignored WARNING)
+    #endif // NH3API_DISABLE_WARNING
+#endif // __clang__
+
+#if defined(__GNUC__)
+    #ifndef NH3API_DISABLE_WARNING
+        #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) NH3API_PRAGMA(GCC diagnostic push) \
+                                                              NH3API_PRAGMA(GCC diagnostic ignored GCC_CLANG)
+        #define NH3API_DISABLE_WARNING_END   NH3API_PRAGMA(GCC diagnostic pop)
+        #define NH3API_DISABLE_WARNING(WARNING) NH3API_PRAGMA(clang diagnostic ignored WARNING)
+    #endif // NH3API_DISABLE_WARNING
+#endif // __GNUC__
+
+// disable useless C++ warnings
+#if NH3API_CHECK_MSVC
+// MSVC warnings
+#else
+// GCC/Clang warnings
+NH3API_DISABLE_WARNING("-Wc++98-compat") // C++98 compatibility
+NH3API_DISABLE_WARNING("-Wc++98-compat-pedantic") // C++98 compatibility
+NH3API_DISABLE_WARNING("-Wold-style-cast") // C-style cast
+NH3API_DISABLE_WARNING("-Wreserved-identifier") // name that starts with '_'
+NH3API_DISABLE_WARNING("-Wpadded") // padded types
+NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API uses scalar_deleting_destructor)
+#endif
 
 // STL vendor check
 
@@ -559,34 +600,6 @@
         #error pick only one size optimization flag
     #endif
 #endif
-
-#if NH3API_CHECK_MSVC && !NH3API_CHECK_CLANG_CL
-    #if !defined(NH3API_DISABLE_WARNING)
-        #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) NH3API_PRAGMA(warning(push)) \
-                                                              NH3API_PRAGMA(warning(disable : MSVC))
-
-        #define NH3API_DISABLE_WARNING_END   NH3API_PRAGMA(warning(pop))
-        #define NH3API_DISABLE_WARNING
-    #endif // NH3API_DISABLE_WARNING
-#endif // NH3API_CHECK_MSVC
-
-#if NH3API_CHECK_CLANG || NH3API_CHECK_CLANG_CL
-    #if !defined(NH3API_DISABLE_WARNING)
-        #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) NH3API_PRAGMA(clang diagnostic push) \
-                                                              NH3API_PRAGMA(clang diagnostic ignored GCC_CLANG )
-        #define NH3API_DISABLE_WARNING_END   NH3API_PRAGMA(clang diagnostic pop)
-        #define NH3API_DISABLE_WARNING
-    #endif // NH3API_DISABLE_WARNING
-#endif // __clang__
-
-#if defined(__GNUC__)
-    #if !defined(NH3API_DISABLE_WARNING)
-        #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) NH3API_PRAGMA(GCC diagnostic push) \
-                                                              NH3API_PRAGMA(GCC diagnostic ignored GCC_CLANG )
-        #define NH3API_DISABLE_WARNING_END   NH3API_PRAGMA(GCC diagnostic pop)
-        #define NH3API_DISABLE_WARNING
-    #endif // NH3API_DISABLE_WARNING
-#endif // __GNUC__
 
 #ifndef NH3API_WEAK
     #if NH3API_CHECK_MSVC || NH3API_CHECK_CLANG_CL
@@ -1412,15 +1425,6 @@ enum : unsigned char
 
 }
 
-#ifndef NH3API_THROW
-    #ifdef NH3API_FLAG_NO_CPP_EXCEPTIONS
-        // Raise C++ exception via the WinAPI, no compiler specific exception handling
-        #define NH3API_THROW(EXCEPTION) RaiseException(0xE06D7363u, EXCEPTION_NONCONTINUABLE, 0, nullptr)
-    #else
-        #define NH3API_THROW(EXCEPTION) throw EXCEPTION
-    #endif // NH3API_FLAG_NO_CPP_EXCEPTIONS
-#endif // NH3API_THROW
-
 #ifndef NH3API_UNREACHABLE
     #if NH3API_CHECK_MSVC
         #define NH3API_UNREACHABLE() __assume(false)
@@ -1455,19 +1459,28 @@ enum : unsigned char
     #define NH3API_DEBUG_SWITCH(debug_expr, release_expr) (debug_expr)
 #endif // NH3API_DEBUG
 
-
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 
 // include as less windows stuff as possible to improve compilation time
 #if NH3API_HAS_CHECK_INCLUDE
-    #if __has_include(<debugapi.h>)
+    #if __has_include(<debugapi.h>) && __has_include(<errhandlingapi.h>)
         #include <debugapi.h>
+        #include <errhandlingapi.h>
     #else
         #include <winbase.h>
     #endif
 #else
     #include <winbase.h>
 #endif
+
+#ifndef NH3API_THROW
+    #ifdef NH3API_FLAG_NO_CPP_EXCEPTIONS
+        // Raise C++ exception via the WinAPI, no compiler specific exception handling
+        #define NH3API_THROW(EXCEPTION) RaiseException(0xE06D7363u, EXCEPTION_NONCONTINUABLE, 0, nullptr)
+    #else
+        #define NH3API_THROW(EXCEPTION) throw EXCEPTION
+    #endif // NH3API_FLAG_NO_CPP_EXCEPTIONS
+#endif // NH3API_THROW
 
 // https://en.cppreference.com/w/cpp/header/debugging
 
