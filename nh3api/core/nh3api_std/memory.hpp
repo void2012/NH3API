@@ -507,21 +507,21 @@ Result virtual_call(T* thisPtr, size_t shift, Args&& ... args)
 namespace nh3api
 {
 
-#ifndef __cpp_lib_clamp
-template<class T>
-NH3API_CONSTEXPR_CPP_17 const T& clamp(const T& v, const T& lo, const T& hi)
-{
-    return clamp(v, lo, hi, ::std::less<T>{});
-}
+template<class T = void>
+struct less
+{	
+    NH3API_CONSTEXPR bool operator()(const T& left, const T& right) const 
+    { return left < right; }
 
-template<class T, class Compare>
-NH3API_CONSTEXPR_CPP_17 const T& clamp(const T& v, const T& lo, const T& hi, Compare comp)
-{
-    return comp(v, lo) ? lo : comp(hi, v) ? hi : v;
-}
-#else 
-using ::std::clamp;
-#endif
+};
+
+template<class T, class Compare> NH3API_CONSTEXPR
+const T& clamp(const T& v, const T& lo, const T& hi, Compare comp)
+{ return comp(v, lo) ? lo : comp(hi, v) ? hi : v; }
+
+template<class T> NH3API_CONSTEXPR
+const T& clamp(const T& v, const T& lo, const T& hi)
+{ return clamp(v, lo, hi, nh3api::less<T>{}); }
 
 }
 
@@ -537,6 +537,18 @@ NH3API_FORCEINLINE void copy_construct(void* ptr, const T& value, Allocator allo
     alloc.construct(ptr, value);
     #endif
 }
+
+#if NH3API_STD_MOVE_SEMANTICS
+template<class T, class Allocator>
+NH3API_FORCEINLINE void move_construct(void* ptr, T&& value, Allocator alloc)
+{
+    #if NH3API_CHECK_CPP11
+    ::std::allocator_traits<Allocator>::construct(alloc, ptr, value);
+    #else
+    alloc.construct(ptr, value);
+    #endif
+}
+#endif
 
 } // namespace nh3api
 

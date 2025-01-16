@@ -922,33 +922,165 @@ NoThrowForwardIt uninitialized_copy_n(InputIt first,
     #endif
 }
 
-// MSVC 2008 STL has _Uninitialized_move, although without move semantics support
-// weird but ok
-// #if NH3API_STD_MOVE_SEMANTICS
-template<class InputIt, class NoThrowForwardIt, class Allocator>
-NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
+#if NH3API_STD_MOVE_SEMANTICS
+template<class InputIt, class NoThrowForwardIt, class Allocator> NH3API_FORCEINLINE
+NoThrowForwardIt uninitialized_move_impl(InputIt first,
+                                         InputIt last,
+                                         NoThrowForwardIt d_first,
+                                         Allocator& alloc,
+                                         tt::false_type)
+{
+    NoThrowForwardIt current = d_first;
+    NH3API_TRY
+    {
+        for (; first != last; ++first, (void) ++current)
+        {
+            void* addr = static_cast<void*>(nh3api::addressof(*current));
+            NH3API_IF_CONSTEXPR(tt::is_lvalue_reference<decltype(*first)>::value)
+                move_construct(addr, ::std::move(*first), alloc);
+            else
+                copy_construct(addr, *first, alloc);
+        }
+        return current;
+    }
+    NH3API_CATCH(...)
+    {
+        destroy(d_first, current, alloc);
+        NH3API_RETHROW
+    }
+}
+
+template<class InputIt, class NoThrowForwardIt, class Allocator> NH3API_FORCEINLINE
+NoThrowForwardIt uninitialized_move_impl(InputIt first,
+                                         InputIt last,
+                                         NoThrowForwardIt d_first,
+                                         Allocator& alloc,
+                                         tt::true_type) NH3API_NOEXCEPT
+{
+    NoThrowForwardIt current = d_first;
+    for (; first != last; ++first, (void) ++current)
+    {
+        void* addr = static_cast<void*>(nh3api::addressof(*current));
+        NH3API_IF_CONSTEXPR(tt::is_lvalue_reference<decltype(*first)>::value)
+            move_construct(addr, ::std::move(*first), alloc);
+        else
+            copy_construct(addr, *first, alloc);
+    }
+    return current;
+}
+
+template<class InputIt, class NoThrowForwardIt, class Allocator> NH3API_FORCEINLINE
 NoThrowForwardIt uninitialized_move(InputIt first,
                                     InputIt last,
                                     NoThrowForwardIt d_first,
                                     Allocator& alloc)
 {
     #if NH3API_DEBUG
-    verify_range(first, last);
+        verify_range(first, last);
     #endif
 
-    #if NH3API_MSVC_STL
-    return ::std::_Uninitialized_move(first, last, d_first, alloc);
-    #elif NH3API_GCC_STL
-    return ::std::__uninitialized_move_a(first, last, d_first, alloc);
-    #elif NH3API_CLANG_STL
-    return ::std::__uninitialized_allocator_relocate(alloc, first, last, d_first);
-    // return ::std::__uninitialized_allocator_move_if_noexcept(alloc, first, last, d_first);
-    #else
-    NH3API_STATIC_ASSERT("Unsupported STL vendor", false);
-    return first;
-    #endif
+    typedef typename ::std::iterator_traits<NoThrowForwardIt>::value_type V;
+
+    NH3API_IF_CONSTEXPR 
+    ( tt::is_trivially_move_assignable<V>::value
+      && tt::is_trivially_move_constructible<V>::value )
+    {
+        return ::std::move(first, last, d_first);
+    }
+    else if ( tt::is_trivially_copy_constructible<V>::value
+              && tt::is_trivially_copy_assignable<V>::value )
+    {
+        return ::std::copy(first, last, d_first);
+    }
+    else
+    {
+        return uninitialized_move_impl(first, last, d_first, alloc,
+            std::integral_constant<bool,
+            (tt::is_nothrow_move_constructible<V>::value &&
+                tt::is_nothrow_copy_constructible<V>::value)
+            || nh3api::flags::no_exceptions>());
+    }
 }
-// #endif
+
+template<class InputIt, class NoThrowForwardIt> NH3API_FORCEINLINE
+NoThrowForwardIt uninitialized_move_impl(InputIt first,
+                                         InputIt last,
+                                         NoThrowForwardIt d_first,
+                                         tt::false_type)
+{
+    typedef typename ::std::iterator_traits<NoThrowForwardIt>::value_type V;
+    NoThrowForwardIt current = d_first;
+    NH3API_TRY
+    {
+        for (; first != last; ++first, (void) ++current)
+        {
+            void* addr = static_cast<void*>(nh3api::addressof(*current));
+            NH3API_IF_CONSTEXPR (tt::is_lvalue_reference<decltype(*first)>::value)
+                ::new (addr) V(::std::move(*first));
+            else
+                ::new (addr) V(*first);
+        }
+        return current;
+    }
+    NH3API_CATCH (...)
+    {
+        destroy(d_first, current);
+        NH3API_RETHROW
+    }
+}
+
+template<class InputIt, class NoThrowForwardIt> NH3API_FORCEINLINE
+NoThrowForwardIt uninitialized_move_impl(InputIt first,
+                                         InputIt last,
+                                         NoThrowForwardIt d_first,
+                                         tt::true_type) NH3API_NOEXCEPT
+{
+    typedef typename ::std::iterator_traits<NoThrowForwardIt>::value_type V;
+    NoThrowForwardIt current = d_first;
+    for (; first != last; ++first, (void) ++current)
+    {
+        void* addr = static_cast<void*>(nh3api::addressof(*current));
+        NH3API_IF_CONSTEXPR (tt::is_lvalue_reference<decltype(*first)>::value)
+            ::new (addr) V(::std::move(*first));
+        else
+            ::new (addr) V(*first);
+    }
+    return current;
+}
+
+template<class InputIt, class NoThrowForwardIt> NH3API_FORCEINLINE
+NoThrowForwardIt uninitialized_move(InputIt first,
+                                    InputIt last,
+                                    NoThrowForwardIt d_first)
+{
+    #if NH3API_DEBUG
+        verify_range(first, last);
+    #endif
+
+    typedef typename ::std::iterator_traits<NoThrowForwardIt>::value_type V;
+
+    NH3API_IF_CONSTEXPR
+    ( tt::is_trivially_move_assignable<V>::value
+      && tt::is_trivially_move_constructible<V>::value )
+    {
+        return ::std::move(first, last, d_first);
+    }
+    else if ( tt::is_trivially_copy_constructible<V>::value
+               && tt::is_trivially_copy_assignable<V>::value)
+    {
+        return ::std::copy(first, last, d_first);
+    }
+    else
+    {
+        return uninitialized_move_impl(first, last, d_first,
+            std::integral_constant<bool,
+            (tt::is_nothrow_move_constructible<V>::value &&
+                tt::is_nothrow_copy_constructible<V>::value)
+            || nh3api::flags::no_exceptions>());
+    }
+}
+
+#endif
 
 template<class T, class Size>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20

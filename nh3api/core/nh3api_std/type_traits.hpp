@@ -142,6 +142,7 @@ namespace tt
 {
 using ::std::is_move_constructible;
 using ::std::is_trivially_move_constructible;
+using ::std::is_trivially_move_assignable;
 using ::std::is_nothrow_move_constructible;
 using ::std::is_copy_constructible;
 using ::std::is_nothrow_constructible;

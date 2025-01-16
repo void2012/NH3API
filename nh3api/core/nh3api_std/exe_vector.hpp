@@ -180,11 +180,7 @@ struct exe_vector_helper
             #else
                 NH3API_STATIC_ASSERT("value_type must be either copy or move constructible",
                 nh3api::tt::is_move_constructible<value_type>::value || nh3api::tt::is_copy_constructible<value_type>::value);
-                NH3API_IF_CONSTEXPR ( nh3api::tt::is_nothrow_move_constructible<value_type>::value
-                                      || !nh3api::tt::is_copy_constructible<value_type>::value )
-                    return nh3api::uninitialized_move(first, last, ptr, alloc);
-                else if ( nh3api::tt::is_copy_constructible<value_type>::value )
-                    return nh3api::uninitialized_copy(first, last, ptr, alloc);
+                return nh3api::uninitialized_move(first, last, ptr, alloc);
             #endif
         }
 
@@ -351,11 +347,7 @@ struct exe_vector_helper<exe_allocator<T> >
             #else
                 NH3API_STATIC_ASSERT("value_type must be either copy or move constructible",
                 nh3api::tt::is_move_constructible<value_type>::value || nh3api::tt::is_copy_constructible<value_type>::value);
-                NH3API_IF_CONSTEXPR ( nh3api::tt::is_nothrow_move_constructible<value_type>::value
-                                        || !nh3api::tt::is_copy_constructible<value_type>::value )
-                    return std::uninitialized_move<pointer, pointer>(first, last, ptr);
-                else if ( nh3api::tt::is_copy_constructible<value_type>::value )
-                    return std::uninitialized_copy<pointer, pointer>(first, last, ptr);
+                return nh3api::uninitialized_move<pointer, pointer>(first, last, ptr);
             #endif
         }
 
@@ -1656,13 +1648,6 @@ struct exe_vector_helper<exe_allocator<T> >
         NH3API_FORCEINLINE
         void _Move_nullify(exe_vector* other) NH3API_NOEXCEPT
         {
-            // clang is the only compiler that can optimize 4 std::exchange-s to a single SSE2 swap
-            #ifdef __clang__
-            this->helper = std::move(other->helper);
-            this->_First = nh3api::exchange(other->_First, nullptr);
-            this->_Last  = nh3api::exchange(other->_Last, nullptr);
-            this->_End   = nh3api::exchange(other->_End, nullptr);
-            #else
             if ( nh3api::tt::is_empty<allocator_type>::value )
             {
                 __m128i* _this_m128i = reinterpret_cast<__m128i*>(this);
@@ -1677,7 +1662,6 @@ struct exe_vector_helper<exe_allocator<T> >
                 this->_Last  = nh3api::exchange(other->_Last, nullptr);
                 this->_End   = nh3api::exchange(other->_End, nullptr);
             }
-            #endif
         }
         #endif
 

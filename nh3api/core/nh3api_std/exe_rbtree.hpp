@@ -818,15 +818,18 @@ class exe_rbtree
     {
         if ( _bit_swappable )
         {
-            move16(this, &other);
+            __m128i* _this_m128i = reinterpret_cast<__m128i*>(this);
+            __m128i* _other_m128i = reinterpret_cast<__m128i*>(&other);
+            *_this_m128i = *_other_m128i;
+            *_other_m128i = _mm_setzero_si128();
         }
         else
         {
-            this->adaptor = std::move(other.adaptor);
-            this->_KeyCompare = ::nh3api::exchange(other._KeyCompare, _KeyCompare());
-            this->_Head = ::nh3api::exchange(other._Head, nullptr);
+            this->adaptor.alloc = ::std::move(other.adaptor.alloc);
+            this->_KeyCompare = ::std::move(other._KeyCompare);
+            this->_Head = nh3api::exchange(other._Head, nullptr);
             this->_Multi = other._Multi;
-            this->_Size = ::nh3api::exchange(other._Size, size_type());
+            this->_Size = nh3api::exchange(other._Size, size_type());
         }
     }
 
@@ -874,7 +877,7 @@ class exe_rbtree
             if (_Newroot == _Rootnode)
                 _Newroot = _Pnode; // memorize new root
             _Right(_Pnode) = _Copy(_Right(_Rootnode), _Pnode);
-            adaptor.copy_construct(addressof(_Value(_Pnode)), _Value(_Rootnode));
+            adaptor.copy_construct(nh3api::addressof(_Value(_Pnode)), _Value(_Rootnode));
             _Left(_Wherenode) = _Pnode;
             _Wherenode = _Pnode;
         }
@@ -937,7 +940,7 @@ class exe_rbtree
         node_type* _Z = _Buynode(_Y, _Red);
         _Left(_Z) = _Getnil();
         _Right(_Z) = _Getnil();
-        adaptor.copy_construct(addressof(_Value(_Z)), value);
+        adaptor.copy_construct(nh3api::addressof(_Value(_Z)), value);
         ++_Size;
         if (_Y == _Head || !_Isnil(_X) || _KeyCompare(_Kfn()(value), _Key(_Y)))
         {
