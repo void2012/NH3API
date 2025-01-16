@@ -30,6 +30,8 @@
 #include <cstddef>
 #include <utility>
 
+NH3API_DISABLE_WARNING_BEGIN("-Wnull-dereference", 6011)
+
 namespace nh3api
 {
 #pragma pack(push, 8)
@@ -1173,3 +1175,4 @@ inline bool operator>=(
     return (!(_X < _Y));
 }
 
+NH3API_DISABLE_WARNING_END

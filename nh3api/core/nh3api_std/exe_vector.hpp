@@ -760,6 +760,8 @@ struct exe_vector_helper<exe_allocator<T> >
                 }
             )
 
+            (void) nothrow_constructible;
+
             _Change_array(_Newvec, _Newsize, _Newcapacity);
             return (this->_First + _Whereoff);
         }

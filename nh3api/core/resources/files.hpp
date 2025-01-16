@@ -368,21 +368,22 @@ class LODFile
 // LOD File stream /
 // Поток чтения из LOD.
 // size = 0x8 = 8, align = 4, baseclass: TAbstractFile
-struct t_lod_file_adapter : TAbstractFile
+NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
 {
     public:
         t_lod_file_adapter(LODFile* src)
-            : lod_file(src)
+            : TAbstractFile(nh3api::dummy_tag), lod_file(src)
         {
             NH3API_SET_VFTABLE();
         }
 
         t_lod_file_adapter(LODFile& src)
-            : lod_file(&src)
+            : TAbstractFile(nh3api::dummy_tag), lod_file(&src)
         {
             NH3API_SET_VFTABLE();
         }
 
+    public:
         void set_lod(LODFile* newfile)
         { lod_file = newfile; }
 
@@ -413,7 +414,8 @@ struct t_lod_file_adapter : TAbstractFile
         { return get_type_vftable(this)->read(this, buf, len); }
 
     protected:
-        virtual int32_t __thiscall write(const void *buf, size_t len) override = 0;
+        virtual int32_t __thiscall write(const void *buf, size_t len) override 
+        { return 0; }
 
     // member variables
     public:
@@ -425,7 +427,7 @@ struct t_lod_file_adapter : TAbstractFile
 
 #pragma pack(push, 4)
 // size = 0x8 = 8, align = 4, baseclass: TAbstractFile
-struct t_stdio_file_adapter : TAbstractFile
+NH3API_VIRTUAL_CLASS t_stdio_file_adapter NH3API_FINAL : public TAbstractFile
 {
     public:
         t_stdio_file_adapter(const char* filename, const char* mode) NH3API_NOEXCEPT
@@ -442,7 +444,7 @@ struct t_stdio_file_adapter : TAbstractFile
 
     public:
         virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override
-        { nh3api::scalar_deleting_destructor(this, flag); }
+        { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }
 
         virtual int32_t __thiscall read(void* buf, size_t len) override
         { return exe_fread(buf, len, 1, file); }
