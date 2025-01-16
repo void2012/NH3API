@@ -2165,14 +2165,17 @@ static StringT print_int(int32_t x)
     int32_t minusSymbol = (x < 0);
     x = ::std::abs(x);
     const size_t numSymbols = minusSymbol + nh3api::count_digits(x);
+    // hint the compiler for small string optimization for std::basic_string
+    NH3API_ASSUME(numSymbols <= 10);
     StringT str(numSymbols, CharT('\0'));
     if ( minusSymbol )
         str[0] = '-';
     CharT* ptr = const_cast<CharT*>(str.c_str()) + str.size()-1;
-    for ( ; x; x /= 10)
+    while (x > 0)
     {
-        *ptr = digit_to_char(x % 10, CharT());
-        --ptr;
+        int32_t digit = x % 10;
+        *ptr-- = digit_to_char(digit, CharT());
+        x /= 10;
     }
     return str;
 }
@@ -2185,12 +2188,15 @@ static StringT print_uint(uint32_t x)
     if ( x == 0 )
         return StringT(1, CharT('0'));
     const size_t numSymbols = nh3api::count_digits(x);
+    // hint the compiler for small string optimization for std::basic_string
+    NH3API_ASSUME(numSymbols <= 11);
     StringT str(numSymbols, CharT('\0'));
     CharT* ptr = const_cast<CharT*>(str.c_str()) + str.size()-1;
-    for ( ; x; x /= 10)
+    while (x > 0)
     {
-        *ptr = digit_to_char(x % 10, CharT());
-        --ptr;
+        uint32_t digit = x % 10;
+        *ptr-- = digit_to_char(digit, CharT());
+        x /= 10;
     }
     return str;
 }

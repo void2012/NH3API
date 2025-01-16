@@ -1422,15 +1422,30 @@ enum : unsigned char
 #endif // NH3API_THROW
 
 #ifndef NH3API_UNREACHABLE
-    #ifdef __cpp_lib_unreachable
-        #define NH3API_UNREACHABLE()
+    #if NH3API_CHECK_MSVC
+        #define NH3API_UNREACHABLE() __assume(false)
     #else
-        #if NH3API_CHECK_MSVC
-            #define NH3API_UNREACHABLE() __assume(false)
-        #else
-            #define NH3API_UNREACHABLE() __builtin_unreachable()
+        #define NH3API_UNREACHABLE() __builtin_unreachable()
+    #endif
+#endif
+
+#ifndef NH3API_ASSUME
+    #if NH3API_CHECK_MSVC
+        #define NH3API_ASSUME(...) do { __assume(__VA_ARGS__); } while(0)
+    #else
+        #if __has_builtin(__builtin_assume)
+            #define NH3API_ASSUME(...) do { __builtin_assume(__VA_ARGS__); } while(0)
+        #elif __has_attribute(__assume__)
+            #define NH3API_ASSUME(...) __attribute__((__assume__(__VA_ARGS__)))
+        #elif __has_builtin(__builtin_unreachable)
+            #define NH3API_ASSUME(...) do { if (!bool(__VA_ARGS__)) __builtin_unreachable(); } while(0)
         #endif
     #endif
+#endif
+
+// no appropriate implementation
+#ifndef NH3API_ASSUME
+    #define NH3API_ASSUME(...) 
 #endif
 
 // Debug expression macro
