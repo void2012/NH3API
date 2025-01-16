@@ -1600,7 +1600,7 @@ struct TCacheMapKey
 
 typedef exe_map<TCacheMapKey, resource*, 0x69E604, 0x69E608> TResourceMap;
 NH3API_FORCEINLINE TResourceMap& GetResourceMap() NH3API_NOEXCEPT
-{ return get_global_var_ref(0x6783C8, TResourceMap);}
+{ return get_global_var_ref(0x69E560, TResourceMap);}
 
 NH3API_FORCEINLINE Bitmap816* GetBitmap816(const char* name) NH3API_NOEXCEPT
 { return FASTCALL_1(Bitmap816*, 0x55AA10, name); }

@@ -51,7 +51,7 @@ template<class _K, // key type
          uintptr_t _Nil_Address = 0, // null node address inside .exe
          uintptr_t _Nilrefs_Address = 0, // constructor-destructor reference counter address inside .exe
          typename _Pr = std::less<_K>, // compare predicate
-         typename _A = exe_allocator<_Ty> > // allocator
+         typename _A = exe_allocator<std::pair<const _K, _Ty> > > // allocator
 class exe_map : public nh3api::exe_rbtree<_K,
                                           std::pair<const _K, _Ty>,
                                           nh3api::map_key_access<_K, _Ty>,
