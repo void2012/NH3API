@@ -1626,7 +1626,7 @@ struct exe_vector_helper<exe_allocator<T> >
         {
             if ( nh3api::tt::is_empty<allocator_type>::value )
             {
-                nh3api::zero16(this);
+                *reinterpret_cast<__m128i*>(this) = _mm_setzero_si128();
             }
             else
             {
@@ -1649,7 +1649,10 @@ struct exe_vector_helper<exe_allocator<T> >
             #else
             if ( nh3api::tt::is_empty<allocator_type>::value )
             {
-                nh3api::move16(this, other);
+                __m128i* _this_m128i = reinterpret_cast<__m128i*>(this);
+                __m128i* _other_m128i = reinterpret_cast<__m128i*>(other);
+                *_this_m128i = *_other_m128i;
+                *_other_m128i = _mm_setzero_si128();
             }
             else
             {
