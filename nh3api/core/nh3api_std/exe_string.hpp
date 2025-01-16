@@ -690,11 +690,25 @@ public:
 
     protected:
     NH3API_FORCEINLINE
-    void _Nullify(bool _destroy = false) NH3API_NOEXCEPT
+    void _Nullify() NH3API_NOEXCEPT
     {
-        if ( nh3api::tt::is_empty<allocator_type>::value && _destroy)
+        if ( nh3api::tt::is_empty<allocator_type>::value)
         {
+            #if NH3API_CHECK_MSVC
+            // GCC and Clang optimizers cause segfault on this
             *reinterpret_cast<__m128i*>(this) = _mm_setzero_si128();
+            #elif __has_builtin(__builtin_memset_inline)
+                __builtin_memset_inline(this, 0, sizeof(*this));
+            #elif __has_builtin(__builtin_memset_chk)
+                __builtin_memset_chk(this, 0, sizeof(*this));
+            #elif __has_builtin(__builtin_memset)
+                __builtin_memset(this, 0, sizeof(*this));
+            #else 
+                *reinterpret_cast<uint32_t*>(&helper) = 0;
+                _Ptr = nullptr;
+                _Len = 0;
+                _Res = 0;
+            #endif
         }
         else
         {
@@ -1854,8 +1868,7 @@ private:
         }
     }
 
-    NH3API_HOT
-    NH3API_FLATTEN
+    NH3API_HOT NH3API_FLATTEN
     // initialize buffer, deallocating any storage
     void _Tidy( bool _Built = false)
     {
@@ -1865,7 +1878,7 @@ private:
             helper.deallocate( _Ptr - 1, _Res + 2 );
         else
             --_Refcnt( _Ptr );
-        _Nullify(true);
+        _Nullify();
     }
 
     NH3API_FORCEINLINE

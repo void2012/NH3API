@@ -1628,7 +1628,21 @@ struct exe_vector_helper<exe_allocator<T> >
         {
             if ( nh3api::tt::is_empty<allocator_type>::value )
             {
+                #if NH3API_CHECK_MSVC
+                // GCC and Clang optimizers cause segfault on this
                 *reinterpret_cast<__m128i*>(this) = _mm_setzero_si128();
+                #elif __has_builtin(__builtin_memset_inline)
+                    __builtin_memset_inline(this, 0, sizeof(*this));
+                #elif __has_builtin(__builtin_memset_chk)
+                    __builtin_memset_chk(this, 0, sizeof(*this));
+                #elif __has_builtin(__builtin_memset)
+                    __builtin_memset(this, 0, sizeof(*this));
+                #else 
+                    *reinterpret_cast<uint32_t*>(&helper) = 0;
+                    _First = nullptr;
+                    _Last  = nullptr;
+                    _End   = nullptr;
+                #endif
             }
             else
             {

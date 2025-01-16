@@ -434,8 +434,8 @@
 
     #if !defined(NH3API_FLAG_OPTIMIZE_FOR_SIZE)
         #ifndef NH3API_FLATTEN
-            #ifdef _HAS_MSVC_ATTRIBUTE
-                #if _HAS_MSVC_ATTRIBUTE(flatten)
+            #ifdef __has_cpp_attribute
+                #if __has_cpp_attribute(msvc::flatten)
                     #define NH3API_FLATTEN [[msvc::flatten]]
                 #else
                     #define NH3API_FLATTEN
