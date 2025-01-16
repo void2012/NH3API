@@ -2423,4 +2423,24 @@ NH3API_FORCEINLINE
 std::wstring to_std_wstring(float x, size_t precision = 4)
 { return nh3api::print_float<std::wstring>(x, precision); }
 
+// hash support for exe_string
+#if NH3API_VS2012_2013 || NH3API_CHECK_CPP11
+#include "hash.hpp"
+
+namespace std 
+{
+    template<typename CharT, typename TraitsT, typename AllocatorT>
+    class hash< exe_basic_string<CharT, TraitsT, AllocatorT> >
+    {
+        public:
+            size_t operator()(const exe_basic_string<CharT, TraitsT, AllocatorT>& str) NH3API_NOEXCEPT
+            {
+                ::nh3api::default_hash hasher;
+                hasher.update(str.data(), str.size());
+                return hasher.digest();
+            }
+    };
+}
+#endif
+
 NH3API_DISABLE_WARNING_END
