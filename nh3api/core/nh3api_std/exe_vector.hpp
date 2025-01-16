@@ -1622,7 +1622,7 @@ struct exe_vector_helper<exe_allocator<T> >
 
         void _Nullify() NH3API_NOEXCEPT
         {
-            if ( nh3api::tt::is_empty<helper_type>::value )
+            if ( nh3api::tt::is_empty<allocator_type>::value )
             {
                 nh3api::zero16(this);
             }
@@ -1637,14 +1637,14 @@ struct exe_vector_helper<exe_allocator<T> >
         #if NH3API_STD_MOVE_SEMANTICS
         void _Move_nullify(exe_vector* other) NH3API_NOEXCEPT
         {
-            // clang is the only compiler that can optimize std::exchange to SSE2
+            // clang is the only compiler that can optimize 4 std::exchange-s to a single SSE2 swap
             #ifdef __clang__
             this->helper = std::move(other->helper);
             this->_First = nh3api::exchange(other->_First, nullptr);
             this->_Last  = nh3api::exchange(other->_Last, nullptr);
             this->_End   = nh3api::exchange(other->_End, nullptr);
             #else
-            if ( nh3api::tt::is_empty<helper_type>::value )
+            if ( nh3api::tt::is_empty<allocator_type>::value )
             {
                 nh3api::move16(this, other);
             }

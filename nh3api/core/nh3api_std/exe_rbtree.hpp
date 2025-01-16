@@ -148,7 +148,7 @@ class exe_rbtree
         enum
         {
             _bit_swappable =
-            tt::is_empty<adaptor_type>::value
+            tt::is_empty<allocator_type>::value
             && tt::is_empty<key_compare>::value
         };
 

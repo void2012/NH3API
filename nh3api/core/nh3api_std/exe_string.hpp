@@ -691,7 +691,7 @@ public:
     protected:
     void _Nullify(bool _destroy = false) NH3API_NOEXCEPT
     {
-        if ( nh3api::tt::is_empty<helper_type>::value && _destroy)
+        if ( nh3api::tt::is_empty<allocator_type>::value && _destroy)
         {
             nh3api::zero16(this);
         }
@@ -706,7 +706,7 @@ public:
     #if NH3API_STD_MOVE_SEMANTICS
     void _Move_nullify(exe_basic_string* other) NH3API_NOEXCEPT
     {
-        if ( nh3api::tt::is_empty<helper_type>::value )
+        if ( nh3api::tt::is_empty<allocator_type>::value )
         {
             nh3api::move16(this, other);
         }
