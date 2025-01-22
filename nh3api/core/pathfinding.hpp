@@ -6,7 +6,10 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#ifndef _WINDEF_
 #include <windef.h> // windef.h is heavy... and only for the sake of RECT
+#endif
+
 #include "nh3api_std/exe_vector.hpp"
 #include "skills.hpp"
 #include "terrain.hpp"

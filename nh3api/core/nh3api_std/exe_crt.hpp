@@ -8,7 +8,10 @@
 
 #include "nh3api_std.hpp"
 #include "patcher_x86.hpp"
+
+#ifndef _WINBASE_
 #include <winbase.h>
+#endif
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 

@@ -14,7 +14,9 @@
 
 #include "nh3api_std.hpp"
 #include <cmath>
+#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
 #include <stdexcept>
+#endif
 
 namespace nh3api
 {

@@ -29,7 +29,9 @@
 #include "iterator.hpp"
 
 #include <algorithm>
+#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
 #include <stdexcept>
+#endif
 #include <utility>
 
 #pragma pack(push, 4)

@@ -10,10 +10,6 @@
 // See README
 #pragma once
 
-#include <cassert>
-#include <cstring>
-#include <cstddef>
-
 #ifndef _WIN32
     #error NH3API targets only windows
 #endif
@@ -36,6 +32,28 @@
 #define NOMINMAX
 #endif
 
+#ifdef __clang__ 
+    #include <windows.h>
+#else
+    // include as less windows stuff as possible to improve compilation time
+    #ifdef __has_include
+        #if __has_include(<debugapi.h>) && __has_include(<errhandlingapi.h>)
+            #if !defined(_APISETDEBUG_) && !defined(_ERRHANDLING_H_)
+            #include <debugapi.h>
+            #include <errhandlingapi.h>
+            #endif
+        #else
+            #ifndef _WINBASE_
+            #include <winbase.h>
+            #endif
+        #endif
+    #else
+        #ifndef _WINBASE_
+        #include <winbase.h>
+        #endif
+    #endif
+#endif
+
 #ifndef NH3API_JOIN_STRING
     #define NH3API_JOIN_STRING_HELPER(X, Y) X##Y
     #define NH3API_JOIN_STRING(X, Y) NH3API_JOIN_STRING_HELPER(X, Y)
@@ -55,6 +73,7 @@
 // Visual Studio didn't update __cplusplus up until Visual Studio 2017 version 15.7
 // And ever since it is required to have the '/Zc:__cplusplus' flag to update it
 #if defined(_MSC_VER) && !defined(__clang__)
+    #include <yvals.h>
     #if (_MSC_VER < 1400)
         #error NH3API requires at least Visual Studio 2005 to work.
     #endif
@@ -304,6 +323,10 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
 #endif
 
 // STL vendor check
+
+#include <cassert>
+#include <cstring>
+#include <cstddef>
 
 #if defined(__GLIBCXX__) // GNU GCC libstdc++
     #ifndef NDEBUG
@@ -845,7 +868,6 @@ typedef uint32_t bool32_t;
         #define NH3API_DELETED_FUNCTION =delete;
     #endif // NH3API_DELETED_FUNCTION
 #else //NH3API_CHECK_CPP11
-    #include <yvals.h>
     #if !defined(NH3API_CONSTEXPR)
         #define NH3API_CONSTEXPR // the "closest" pre-C++11 alternative is either 'const' or 'inline'...
     #endif // NH3API_CONSTEXPR
@@ -1460,18 +1482,6 @@ enum : unsigned char
 #endif // NH3API_DEBUG
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
-
-// include as less windows stuff as possible to improve compilation time
-#if NH3API_HAS_CHECK_INCLUDE
-    #if __has_include(<debugapi.h>) && __has_include(<errhandlingapi.h>)
-        #include <debugapi.h>
-        #include <errhandlingapi.h>
-    #else
-        #include <winbase.h>
-    #endif
-#else
-    #include <winbase.h>
-#endif
 
 #ifndef NH3API_THROW
     #ifdef NH3API_FLAG_NO_CPP_EXCEPTIONS

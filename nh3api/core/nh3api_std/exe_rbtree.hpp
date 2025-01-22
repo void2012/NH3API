@@ -798,7 +798,7 @@ class exe_rbtree
             else
             {
                 assert("map/set containers incompatible for swap"&&0);
-                ::std::terminate();
+                abort();
             }
         }
 
