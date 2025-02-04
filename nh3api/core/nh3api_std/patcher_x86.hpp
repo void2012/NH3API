@@ -2452,8 +2452,7 @@ public:
 #pragma pack(pop)
 
 //////////////////////////////////////////////////////////////////
-
-HMODULE GetPatcherHandle()
+NH3API_FORCEINLINE HMODULE GetPatcherHandle() NH3API_NOEXCEPT
 { return LoadLibraryW(L"patcher_x86.dll"); }
 
 // Function GetPatcher
@@ -2469,7 +2468,7 @@ HMODULE GetPatcherHandle()
 // посредством которого доступен весь функционал библиотеки patcher_x86.dll
 // возвращает nullptr при неудаче
 // функцию вызывать 1 раз, что очевидно из ее определения
-inline Patcher* GetPatcher()
+NH3API_FORCEINLINE Patcher* GetPatcher() NH3API_NOEXCEPT
 {
     typedef Patcher* (__stdcall* func_t)();
     HMODULE patcherHandle = GetPatcherHandle();
@@ -2489,7 +2488,7 @@ inline Patcher* GetPatcher()
 
 // Функция GetPatcherVersion возвращает версию патчера /
 // GetPatcherVersion function returns the version of patcher_x86.
-inline uint32_t GetPatcherVersion()
+NH3API_FORCEINLINE uint32_t GetPatcherVersion() NH3API_NOEXCEPT
 {
     typedef uint32_t (__stdcall* func_t)();
     HMODULE patcherHandle = GetPatcherHandle();
