@@ -157,27 +157,23 @@
 
 #include "nh3api_std.hpp"
 
-#ifdef __clang__ 
-    #include <windows.h>
-#else
-    // include as less windows stuff as possible to improve compilation time
-    #if NH3API_HAS_CHECK_INCLUDE
-        #if __has_include(<libloaderapi.h>)
-            #if !defined(_APISETLIBLOADER_) && !defined(_WINDEF_)
-            #include <libloaderapi.h>
-            #include <windef.h>
-            #endif
-        #else
-            #if !defined(_WINBASE_) && !defined(_WINDEF_)
-            #include <winbase.h>
-            #include <windef.h>
-            #endif
+// include as less windows stuff as possible to improve compilation time
+#if NH3API_HAS_CHECK_INCLUDE
+    #if __has_include(<libloaderapi.h>)
+        #if !defined(_APISETLIBLOADER_) && !defined(_WINDEF_)
+        #include <libloaderapi.h>
+        #include <windef.h>
         #endif
     #else
         #if !defined(_WINBASE_) && !defined(_WINDEF_)
         #include <winbase.h>
         #include <windef.h>
         #endif
+    #endif
+#else
+    #if !defined(_WINBASE_) && !defined(_WINDEF_)
+    #include <winbase.h>
+    #include <windef.h>
     #endif
 #endif
 

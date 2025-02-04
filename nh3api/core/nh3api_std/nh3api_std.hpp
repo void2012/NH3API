@@ -32,25 +32,21 @@
 #define NOMINMAX
 #endif
 
-#ifdef __clang__
-    #include <windows.h>
-#else
-    // include as less windows stuff as possible to improve compilation time
-    #ifdef __has_include
-        #if __has_include(<debugapi.h>) && __has_include(<errhandlingapi.h>)
-            #if !defined(_APISETDEBUG_) && !defined(_ERRHANDLING_H_)
-            #include <debugapi.h>
-            #include <errhandlingapi.h>
-            #endif
-        #else
-            #ifndef _WINBASE_
-            #include <winbase.h>
-            #endif
+// include as less windows stuff as possible to improve compilation time
+#ifdef __has_include
+    #if __has_include(<debugapi.h>) && __has_include(<errhandlingapi.h>)
+        #if !defined(_APISETDEBUG_) && !defined(_ERRHANDLING_H_)
+        #include <debugapi.h>
+        #include <errhandlingapi.h>
         #endif
     #else
         #ifndef _WINBASE_
         #include <winbase.h>
         #endif
+    #endif
+#else
+    #ifndef _WINBASE_
+    #include <winbase.h>
     #endif
 #endif
 
