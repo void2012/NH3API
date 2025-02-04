@@ -68,22 +68,6 @@ T* get_ptr(uint32_t address) NH3API_NOEXCEPT
 namespace nh3api
 {
 
-#if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
-inline constexpr bool is_constant_evaluated() noexcept
-{ return __builtin_is_constant_evaluated(); }
-#elif NH3API_CHECK_MSVC && NH3API_STD_RELAXED_CONSTEXPR
-struct msvc_is_constant_evaluated_helper_base {};
-struct msvc_is_constant_evaluated_helper1 : msvc_is_constant_evaluated_helper_base { int test; };
-struct msvc_is_constant_evaluated_helper2 : msvc_is_constant_evaluated_helper_base { int test; };
-inline constexpr bool is_constant_evaluated() noexcept
-{
-    return &msvc_is_constant_evaluated_helper1::test !=
-        static_cast<int msvc_is_constant_evaluated_helper_base::*>(&msvc_is_constant_evaluated_helper2::test);
-    return false;
-}
-#else
-#endif
-
 #if !NH3API_HAS_BUILTIN_ADDRESSOF
 
 template<typename T> NH3API_FORCEINLINE

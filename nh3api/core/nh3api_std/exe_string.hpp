@@ -1773,15 +1773,12 @@ private:
         _Eos( _Olen > _Ns ? _Ns : _Olen );
     }
 
-
-    NH3API_HOT
     // set new length and null terminator
     void _Eos( size_type _N )
     {
         helper_type::assign( _Ptr[_Len = _N], value_type(0) );
     }
 
-    NH3API_HOT
     void _Freeze()
     {
         if ( _Ptr != nullptr
@@ -1792,7 +1789,6 @@ private:
     }
 
     NH3API_INLINE_LARGE
-    NH3API_HOT
     // ensure buffer is big enough, trim to size if _Trim is true
     bool _Grow( size_type _N, bool _Trim = false )
     {
@@ -1868,7 +1864,7 @@ private:
         }
     }
 
-    NH3API_HOT NH3API_FLATTEN
+    NH3API_FLATTEN
     // initialize buffer, deallocating any storage
     void _Tidy( bool _Built = false)
     {
