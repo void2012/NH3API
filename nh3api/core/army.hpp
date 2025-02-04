@@ -61,9 +61,6 @@ struct type_ballistics_traits
 };
 #pragma pack(pop)
 
-static const uint8_t dir_array_1[] = { 0, 1, 2, 7, 3, 4, 5, 6 };
-static const uint8_t dir_array_2[] = { 0, 1, 2, 4, 5, 6, 7, 3 };
-
 #pragma pack(push, 4)
 // army class: stores information for every troop in a combat. /
 // класс army: содержит информацию о каждом существе на поле боя.
@@ -348,6 +345,8 @@ public:
 
         int32_t    get_clockwise(int32_t direction) const
         {
+            static const uint8_t dir_array_1[] = { 0, 1, 2, 7, 3, 4, 5, 6 };
+            static const uint8_t dir_array_2[] = { 0, 1, 2, 4, 5, 6, 7, 3 };
             if ( Is(CF_DOUBLE_WIDE) )
                 return dir_array_1[(dir_array_2[direction] + 1) % 8];
             else
@@ -356,6 +355,8 @@ public:
 
         int32_t    get_counter_clockwise(int32_t direction) const
         {
+            static const uint8_t dir_array_1[] = { 0, 1, 2, 7, 3, 4, 5, 6 };
+            static const uint8_t dir_array_2[] = { 0, 1, 2, 4, 5, 6, 7, 3 };
             if ( Is(CF_DOUBLE_WIDE) )
                 return dir_array_1[(dir_array_2[direction] + 7) % 8];
             else

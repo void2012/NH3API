@@ -2453,7 +2453,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 
-static HMODULE GetPatcherHandle()
+HMODULE GetPatcherHandle()
 { return LoadLibraryW(L"patcher_x86.dll"); }
 
 // Function GetPatcher
