@@ -218,8 +218,11 @@ enum TCreatureType : int32_t
     MAX_CREATURES_ROE  = 118, // Количество существ в RoE
     MAX_CREATURES_AB   = 145, // Количество существ в AB
     MAX_CREATURES_SOD  = MAX_CREATURES_AB, // Количество существ в SoD
-    MAX_CREATURES      = MAX_CREATURES_SOD // Количество существ
-
+    MAX_CREATURES      = MAX_CREATURES_SOD, // Количество существ
+    MAX_COMBAT_CREATURES_ROE = 122, // Количество существ на поле боя в RoE
+    MAX_COMBAT_CREATURES_AB  = 150, // Количество существ на поле боя в AB
+    MAX_COMBAT_CREATURES_SOD = MAX_COMBAT_CREATURES_AB, // Количество существ на поле боя в SoD
+    MAX_COMBAT_CREATURES     = MAX_COMBAT_CREATURES_SOD // Количество существ на поле боя
 };
 
 // Creature sprite sequences ID during combat /
@@ -513,8 +516,8 @@ struct SMonFrameInfo
 NH3API_INLINE_OR_EXTERN
 // All creature traits /
 // Свойства всех существ.
-std::array<TCreatureTypeTraits, MAX_CREATURES_SOD>& akCreatureTypeTraits
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6703B8, std::array<TCreatureTypeTraits, MAX_CREATURES_SOD>));
+std::array<TCreatureTypeTraits, MAX_COMBAT_CREATURES>& akCreatureTypeTraits
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6703B8, std::array<TCreatureTypeTraits, MAX_COMBAT_CREATURES>));
 
 NH3API_INLINE_OR_EXTERN
 // Creature types in each town dwelling gDwellingType[towntype][levels][upgraded] /
