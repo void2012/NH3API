@@ -550,6 +550,15 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
     #endif
 #endif
 
+// indicates that the pointer returned by that function must be freed by deallocator function
+#ifndef NH3API_DEALLOCATOR
+    #if NH3API_CHECK_MINGW
+        #define NH3API_DEALLOCATOR(FUNCTION, ARG) __attribute__ ((__malloc__, __malloc__(FUNCTION, ARG)))
+    #else
+        #define NH3API_DEALLOCATOR(FUNCTION, ARG)
+    #endif
+#endif
+
 // <cstdint> header for the pre-C++0x compiler
 #if NH3API_CHECK_CPP11 || NH3API_VS2010
     #include <cstdint>

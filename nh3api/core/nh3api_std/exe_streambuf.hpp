@@ -26,7 +26,6 @@
 
 #include "intrin.hpp"
 #include "memory.hpp"
-#include "nh3api_std.hpp"
 #include "patcher_x86.hpp"
 #include "exe_string.hpp"
 
@@ -35,15 +34,6 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 typedef int32_t exe_streamoff;
 typedef int32_t exe_streamsize;
 typedef int64_t exe_fpos_t;
-
-// indicates that the pointer returned by that function must be freed by deallocator function
-#ifndef NH3API_DEALLOCATOR
-    #if NH3API_CHECK_MINGW
-        #define NH3API_DEALLOCATOR(FUNCTION, ARG) __attribute__ ((__malloc__, __malloc__(FUNCTION, ARG)))
-    #else
-        #define NH3API_DEALLOCATOR(FUNCTION, ARG)
-    #endif
-#endif
 
 #pragma pack(push, 4)
 //

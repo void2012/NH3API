@@ -30,7 +30,6 @@
 #include "math.hpp"      // nh3api::fpclassify, float classification macros
 #include "memory.hpp"    // allocators
 #include "iterator.hpp"  // std::reverse_iterator
-#include "nh3api_std.hpp"
 
 #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
 #include <stdexcept>     // std::length_error, std::out_of_range

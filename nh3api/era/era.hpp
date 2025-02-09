@@ -21,7 +21,7 @@
 #endif
 
 // Means that returned pointer memory was allocated in era.dll and must be freed via MemFree after using
-#define ERA_MEM(var) var
+#define ERA_MEM(var) var NH3API_DEALLOCATOR(MemFree, 1)
 
 // Means that variable is stored in persisted memory, which will neber be allocated and MUST NOT be modified
 #define ERA_STATIC(var) var
