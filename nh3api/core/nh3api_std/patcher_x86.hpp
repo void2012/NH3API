@@ -157,20 +157,6 @@
 
 #include "nh3api_std.hpp"
 
-// include as less windows stuff as possible to improve compilation time
-#if NH3API_HAS_CHECK_INCLUDE
-    #if __has_include(<libloaderapi.h>)
-        #if !defined(_APISETLIBLOADER_) && !defined(_WINDEF_)
-        #include <libloaderapi.h>
-        #include <windef.h>
-        #endif
-    #else
-        #include <windows.h>
-    #endif
-#else
-    #include <windows.h>
-#endif
-
 #include <utility>
 #include "intrin.hpp"
 #include "array.hpp"
