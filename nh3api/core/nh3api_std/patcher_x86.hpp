@@ -165,16 +165,10 @@
         #include <windef.h>
         #endif
     #else
-        #if !defined(_WINBASE_) && !defined(_WINDEF_)
-        #include <winbase.h>
-        #include <windef.h>
-        #endif
+        #include <windows.h>
     #endif
 #else
-    #if !defined(_WINBASE_) && !defined(_WINDEF_)
-    #include <winbase.h>
-    #include <windef.h>
-    #endif
+    #include <windows.h>
 #endif
 
 #include <utility>
