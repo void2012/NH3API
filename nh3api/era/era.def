@@ -1,10 +1,10 @@
-LIBRARY era
+LIBRARY era.dll
 EXPORTS
     RegisterHandler
     FireEvent
     SetLanguage
     ReloadLanguageData
-    _tr
+    tr
     trTemp
     trStatic
     AllocErmFunc
