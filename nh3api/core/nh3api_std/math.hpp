@@ -42,7 +42,7 @@ return result;
 NH3API_FORCEINLINE
 int32_t count_digits(uint32_t x)
 {
-    static uint32_t digits_table[] = {9, 99, 999, 9999, 99999,
+    static NH3API_CONSTEXPR_VAR uint32_t digits_table[] = {9, 99, 999, 9999, 99999,
     999999, 9999999, 99999999, 999999999};
     int32_t y = (9 * ilog2(x)) >> 5;
     y += x > digits_table[y];
