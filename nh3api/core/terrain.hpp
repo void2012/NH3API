@@ -316,6 +316,14 @@ enum TTownType : int32_t
     kNumTowns       = kNumTownsSoD // Количество городов в SoD
 };
 
+enum : uint32_t 
+{
+    kAlignmentsMaskRoE = 0xFF,
+    kAlignmentsMaskAB  = 0x1FF, 
+    kAlignmentsMaskSoD = kAlignmentsMaskAB,
+    kAlignmentsMask    = kAlignmentsMaskSoD
+};
+
 // Map point: X, Y, Z coordinates /
 // Точка на карте: координаты X, Y, Z.
 class type_point
