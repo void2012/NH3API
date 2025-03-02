@@ -8,6 +8,7 @@
 
 #include "nh3api_std/exe_set.hpp" // exe_set<T>
 #include "interface/widgets.hpp" // widgets
+#include "nh3api_std/memory.hpp"
 #include "objects.hpp" // hero, town, etc.
 #include "army.hpp" // army, TCreatureType
 #include "hexcell.hpp" // hexcell
@@ -74,6 +75,11 @@ enum TFortificationLevel : int32_t
 NH3API_VIRTUAL_CLASS combatManager : public baseManager
 {
     public:
+        struct vftable_t : baseManager::vftable_t
+        {
+            void (__thiscall *scalar_deleting_destructor)(combatManager*, uint8_t);
+        };
+
         #pragma pack(push, 2)
         // size = 0xC = 12, align = 2
         struct adjacency_array
@@ -526,6 +532,8 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
     public:
         NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(combatManager)
+
+        NH3API_SCALAR_DELETING_DESTRUCTOR
 
     public:
         // offset: +0x38 = +56,  size = 0x4 = 4

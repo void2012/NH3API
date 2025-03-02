@@ -12,6 +12,7 @@
 #include "adventure.hpp"
 #include "base_manager.hpp"
 #include "combat.hpp"
+#include "mouse.hpp"
 #include "multiplayer.hpp"
 #include "quests.hpp"
 
@@ -26,6 +27,7 @@ NH3API_GENERATE_VFTABLE_INSTANCE(advManager, 0x63A678)
 NH3API_GENERATE_VFTABLE_INSTANCE(baseManager, 0x63B9BC)
 NH3API_GENERATE_VFTABLE_INSTANCE(combatManager, 0x63D3E8)
 NH3API_GENERATE_VFTABLE_INSTANCE(inputManager, 0x63FE10)
+NH3API_GENERATE_VFTABLE_INSTANCE(mouseManager, 0x640038)
 // managers
 
 // multiplayer.hpp //

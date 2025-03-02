@@ -238,8 +238,20 @@ enum TTerrainType : int32_t;
 NH3API_VIRTUAL_CLASS soundManager : public baseManager
 {
     public:
+        struct vftable_t : baseManager::vftable_t
+        {
+            void (__thiscall *scalar_deleting_destructor)(soundManager*, uint8_t);
+        };
+
+    public:
         soundManager() NH3API_NOEXCEPT
+            : baseManager(nh3api::dummy_tag)
         { THISCALL_1(void, 0x599A60, this); }
+
+        NH3API_FORCEINLINE
+        soundManager(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            : baseManager(tag)
+        {}
 
     public:
         // Stop all samples /
@@ -306,6 +318,11 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
 
         void StopMP3()
         { THISCALL_1(void, 0x59B310, this); }
+    
+    public:
+        NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(soundManager)
+
+        NH3API_SCALAR_DELETING_DESTRUCTOR
 
     public:
         // offset: +0x38 = +56,  size = 0x4 = 4
@@ -329,15 +346,15 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
         int32_t currentTerrainMusic;
 
         // offset: +0x84 = +132,  size = 0x4 = 4
-        bool playSounds;
+        bool32_t playSounds;
 
         // offset: +0x88 = +136,  size = 0x4 = 4
-        bool bChangeSounds;
+        bool32_t bChangeSounds;
 
         // MP3 music is playing /
         // Проигрывается MP3 музыка?
         // offset: +0x8C = +140,  size = 0x4 = 4
-        bool MP3Playing;
+        bool32_t MP3Playing;
 
         // offset: +0x90 = +144,  size = 0x18 = 24
         CRITICAL_SECTION section_sound_call;

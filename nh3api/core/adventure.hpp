@@ -6,6 +6,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include "nh3api_std/memory.hpp"
 #include "resources/resources_include.hpp" // e_looping_sound_id, soundNode, sample
 #include "interface/dialogs.hpp" // TAdventureMapWindow
 #include "creatures.hpp" // armyGroup, TCreatureType, also includes "terrain.hpp": TTerrainType
@@ -24,7 +25,14 @@ struct CNetMsgHandler;
 // size = 0x3B8 = 952, align = 4, baseclass: baseManager
 class advManager : public baseManager
 {
-    // public types
+    // structures
+    public: 
+        struct vftable_t : baseManager::vftable_t
+        {
+            void (__thiscall *scalar_deleting_destructor)(advManager*, uint8_t);
+        };
+
+    // enums
     public:
         enum EBottomViewType
         {
@@ -49,6 +57,8 @@ class advManager : public baseManager
 
     public:
         NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(advManager)
+
+        NH3API_SCALAR_DELETING_DESTRUCTOR
 
     public:
         // Is screen point (x, y) within the map area /
