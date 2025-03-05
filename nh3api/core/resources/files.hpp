@@ -410,12 +410,15 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
         void set_lod(LODFile* newfile) NH3API_NOEXCEPT
         { lod_file = newfile; }
 
+        NH3API_NODISCARD
         const LODFile* get_lod() const NH3API_NOEXCEPT
         { return lod_file; }
 
+        NH3API_NODISCARD
         LODFile* get_lod() NH3API_NOEXCEPT
         { return lod_file; }
 
+        NH3API_NODISCARD
         bool is_open() const  NH3API_NOEXCEPT
         { 
             if (lod_file == nullptr)
@@ -433,6 +436,7 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
                 return nullptr;
         }
 
+        NH3API_NODISCARD
         // read LOD File entry into buffer
         exe_vector<uint8_t> read_entry(const char* name)
         {
