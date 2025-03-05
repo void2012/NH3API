@@ -287,7 +287,7 @@ protected:
 class LODFile
 {
     public:
-        LODFile()
+        LODFile() NH3API_NOEXCEPT
         :
         fileptr(nullptr),
         opened(0),
@@ -296,29 +296,29 @@ class LODFile
         subindex()
         {}
 
-        ~LODFile()
+        ~LODFile() NH3API_NOEXCEPT
         { THISCALL_1(void, 0x4FAE90, this); }
 
     public:
-        LODEntry* getItemIndex(char const* item_name)
+        LODEntry* getItemIndex(char const* item_name) NH3API_NOEXCEPT
         { return THISCALL_2(LODEntry*, 0x4FACA0, this, item_name); }
 
-        bool      exist(char const* item_name)
+        bool      exist(char const* item_name) NH3API_NOEXCEPT
         {
             Find( 0, numEntries, item_name );
             return matchindex >= 0;
         }
 
-        void      Find(uint32_t begin, uint32_t end, const char* item_name)
+        void      Find(uint32_t begin, uint32_t end, const char* item_name) NH3API_NOEXCEPT
         { THISCALL_4(void, 0x4FACF0, this, begin, end, item_name); }
 
-        int32_t   open(char const* filename, uint32_t flags)
+        int32_t   open(char const* filename, uint32_t flags) NH3API_NOEXCEPT
         { return THISCALL_3(int32_t, 0x4FAF30, this, filename, flags); }
 
-        bool      pointAt(char const* itemName)
+        bool      pointAt(char const* itemName) NH3API_NOEXCEPT
         { return THISCALL_2(bool, 0x4FB100, this, itemName); }
 
-        int32_t   read(void* dest, int32_t numBytes)
+        int32_t   read(void* dest, int32_t numBytes) NH3API_NOEXCEPT
         { return THISCALL_3(int32_t, 0x4FB1B0, this, dest, numBytes); }
 
     public:
@@ -364,6 +364,29 @@ class LODFile
 };
 #pragma pack(pop)
 
+NH3API_FORCEINLINE
+LODFile* GetLODFile(const char* name) NH3API_NOEXCEPT
+{
+    if ( !name )
+        return nullptr;
+    const size_t name_size = strlen(name);
+    if ( name_size == 0 )
+        return nullptr;
+
+    typedef std::array<std::pair<const char*, LODFile>, 8> lod_files_array_t;
+    lod_files_array_t& lodfiles = get_global_var_ref(0x69D8A8, lod_files_array_t);
+    
+    for (lod_files_array_t::iterator it = lodfiles.begin();
+         it != lodfiles.end();
+         ++it) 
+    {
+        if (std::memcmp(name, it->first, name_size) == 0)
+            return &it->second;
+    }
+
+    return nullptr;
+}
+
 #pragma pack(push, 4)
 // LOD File stream /
 // Поток чтения из LOD.
@@ -371,30 +394,38 @@ class LODFile
 NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
 {
     public:
-        t_lod_file_adapter(LODFile* src)
+        t_lod_file_adapter(LODFile* src) NH3API_NOEXCEPT
             : TAbstractFile(nh3api::dummy_tag), lod_file(src)
-        {
-            NH3API_SET_VFTABLE();
-        }
+        { NH3API_SET_VFTABLE(); }
 
-        t_lod_file_adapter(LODFile& src)
+        t_lod_file_adapter(LODFile& src) NH3API_NOEXCEPT
             : TAbstractFile(nh3api::dummy_tag), lod_file(&src)
-        {
-            NH3API_SET_VFTABLE();
-        }
+        { NH3API_SET_VFTABLE(); }
+
+        t_lod_file_adapter(const char* name) NH3API_NOEXCEPT
+            : TAbstractFile(nh3api::dummy_tag), lod_file(GetLODFile(name))
+        { NH3API_SET_VFTABLE(); }
 
     public:
-        void set_lod(LODFile* newfile)
+        void set_lod(LODFile* newfile) NH3API_NOEXCEPT
         { lod_file = newfile; }
 
-        const LODFile* get_lod() const
+        const LODFile* get_lod() const NH3API_NOEXCEPT
         { return lod_file; }
 
-        LODFile* get_lod()
+        LODFile* get_lod() NH3API_NOEXCEPT
         { return lod_file; }
+
+        bool is_open() const  NH3API_NOEXCEPT
+        { 
+            if (lod_file == nullptr)
+                return false;
+            else 
+                return lod_file->opened;
+        }
 
         // get entry by name
-        LODEntry* get_entry(const char* name)
+        LODEntry* get_entry(const char* name) NH3API_NOEXCEPT
         {
             if (lod_file->pointAt(name))
                 return &lod_file->subindex[lod_file->dataItemIndex];
@@ -415,7 +446,7 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
             return buffer;
         }
 
-        void seek(int32_t offset)
+        void seek(int32_t offset) NH3API_NOEXCEPT
         { exe_fseek(lod_file->fileptr, offset, EXE_SEEK_SET); }
 
     // virtual functions
