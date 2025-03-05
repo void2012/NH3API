@@ -393,13 +393,26 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
         LODFile* get_lod()
         { return lod_file; }
 
-        // read LOD File entry
-        int32_t read_entry(void* buf, const char* name)
+        // get entry by name
+        LODEntry* get_entry(const char* name)
         {
             if (lod_file->pointAt(name))
-                return read(buf, lod_file->subindex[lod_file->dataItemIndex].size);
-            else
-                return -1;
+                return &lod_file->subindex[lod_file->dataItemIndex];
+            else 
+                return nullptr;
+        }
+
+        // read LOD File entry into buffer
+        exe_vector<uint8_t> read_entry(const char* name)
+        {
+            if (!lod_file->pointAt(name))
+                return exe_vector<uint8_t>(); // not found, empty buffer
+
+            LODEntry* entry = &lod_file->subindex[lod_file->dataItemIndex];
+            const size_t entry_size = entry->size;
+            exe_vector<uint8_t> buffer(entry_size, 0);
+            read(buffer.data(), entry_size);
+            return buffer;
         }
 
         void seek(int32_t offset)
