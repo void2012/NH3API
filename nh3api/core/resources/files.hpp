@@ -380,7 +380,7 @@ LODFile* GetLODFile(const char* name) NH3API_NOEXCEPT
          it != lodfiles.end();
          ++it) 
     {
-        if (std::memcmp(name, it->first, name_size) == 0)
+        if (_stricmp(name, it->first) == 0)
             return &it->second;
     }
 
