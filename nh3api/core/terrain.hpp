@@ -28,6 +28,29 @@ enum TTerrainType : int32_t
     kNumTerrainTypes     = 10, // Кол-во видов почв
 };
 
+// Road type /
+// Тип дороги.
+enum TRoadType : uint32_t 
+{
+    eRoadNone        = 0, //
+    eRoadDirt        = 1, // Дорога по грязи
+    eRoadGravel      = 2, // Гравийная дорога
+    eRoadCobblestone = 3, // Мощеная дорога
+    kNumRoadTypes    = 4, // Кол-во видов дороги
+};
+
+// River type /
+// Тип реки.
+enum TRiverType : uint32_t 
+{
+    eRiverNone     = 0, 
+    eRiverClear    = 1, // Чистая река
+    eRiverIcy      = 2, // Ледяная река
+    eRiverMuddy    = 3, // Грязная река
+    eRiverLava     = 4, // Лавовая река
+    kNumRiverTypes = 5, // Кол-во видов рек
+};
+
 // Map object types /
 // Объекты на карте.
 enum TAdventureObjectType : int32_t
