@@ -934,11 +934,11 @@ void move16(T* ptr1, T* ptr2) NH3API_NOEXCEPT
 
 template <size_t N, typename T>
 NH3API_FORCEINLINE
-NH3API_NODISCARD NH3API_CONSTEXPR 
+NH3API_CONSTEXPR
 T* assume_aligned(T* ptr) NH3API_NOEXCEPT 
 {
     #if NH3API_HAS_BUILTINS
-        #if __has_builtin(__builtin_assume_aligned)
+        #if __has_builtin(__builtin_assume_aligned) || NH3API_CHECK_CLANG_CL
         return reinterpret_cast<T *>(__builtin_assume_aligned(ptr, N));
         #else 
         __assume(reinterpret_cast<uintptr_t>(ptr) % N == 0);
