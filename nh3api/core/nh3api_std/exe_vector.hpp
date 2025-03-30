@@ -939,23 +939,31 @@ struct exe_vector_helper<exe_allocator<T> >
             }
         }
 
+    protected:
+        iterator _Add_alignment_assumption(pointer ptr) NH3API_NOEXCEPT
+        { return nh3api::assume_aligned<nh3api::tt::alignment_of<value_type>::value>(ptr); }
+
+        const_iterator _Add_alignment_assumption(const_pointer ptr) const NH3API_NOEXCEPT
+        { return nh3api::assume_aligned<nh3api::tt::alignment_of<value_type>::value>(ptr); }
+
+    public:
         iterator begin() NH3API_NOEXCEPT
-        { return _First; }
+        { return _Add_alignment_assumption(_First); }
 
         const_iterator begin() const NH3API_NOEXCEPT
-        { return (const_iterator)_First; }
+        { return (const_iterator)_Add_alignment_assumption(_First); }
 
         const_iterator cbegin() const NH3API_NOEXCEPT
-        { return (const_iterator)_First; }
+        { return (const_iterator)_Add_alignment_assumption(_First); }
 
         iterator end() NH3API_NOEXCEPT
-        { return _Last; }
+        { return _Add_alignment_assumption(_Last); }
 
         const_iterator end() const NH3API_NOEXCEPT
-        { return (const_iterator)_Last; }
+        { return (const_iterator)_Add_alignment_assumption(_Last); }
 
         const_iterator cend() const NH3API_NOEXCEPT
-        { return (const_iterator)_Last; }
+        { return (const_iterator)_Add_alignment_assumption(_Last); }
 
         reverse_iterator rbegin() NH3API_NOEXCEPT
         { return reverse_iterator(end()); }

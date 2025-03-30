@@ -932,4 +932,22 @@ void move16(T* ptr1, T* ptr2) NH3API_NOEXCEPT
     _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr2), _mm_setzero_si128());
 }
 
+template <size_t N, typename T>
+NH3API_FORCEINLINE
+NH3API_NODISCARD NH3API_CONSTEXPR 
+T* assume_aligned(T* ptr) NH3API_NOEXCEPT 
+{
+    #if NH3API_HAS_BUILTINS
+        #if __has_builtin(__builtin_assume_aligned)
+        return reinterpret_cast<T *>(__builtin_assume_aligned(ptr, N));
+        #else 
+        __assume(reinterpret_cast<uintptr_t>(ptr) % N == 0);
+        return ptr;
+        #endif
+    #else
+        __assume(reinterpret_cast<uintptr_t>(ptr) % N == 0);
+        return ptr;
+    #endif
 }
+
+} // namespace nh3api
