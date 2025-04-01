@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std.hpp"
+#include "nh3api_exceptions.hpp"
 
 #if !(NH3API_STD_ARRAY)
 #include "algorithm.hpp"
@@ -154,7 +154,7 @@ namespace std // C++98 <array> implementation
             reference at(size_type pos) throw(std::out_of_range)
             {
                 return  ( size() < pos ) ? _data[pos] :
-                (NH3API_THROW(std::out_of_range("std::array::at pos out of range.")), _data[pos]);
+                (NH3API_THROW(std::out_of_range, "std::array::at pos out of range."), _data[pos]);
             }
 
             /// @brief
@@ -163,7 +163,7 @@ namespace std // C++98 <array> implementation
             const_reference at(size_type pos) const throw(std::out_of_range)
             {
                 return  ( size() < pos ) ? _data[pos] :
-                (NH3API_THROW(std::out_of_range("std::array::at pos out of range.")), _data[pos]);
+                (NH3API_THROW(std::out_of_range, "std::array::at pos out of range."), _data[pos]);
             }
 
             /// @brief access the beginning of the array

@@ -1263,7 +1263,7 @@ enum : unsigned char
 
 }
 
-}
+} // namespace nh3api
 
 #ifndef NH3API_UNREACHABLE
     #if NH3API_CHECK_MSVC
@@ -1322,15 +1322,6 @@ enum : unsigned char
 #endif // NH3API_DEBUG
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
-
-#ifndef NH3API_THROW
-    #ifdef NH3API_FLAG_NO_CPP_EXCEPTIONS
-        // Raise C++ exception via the WinAPI, no compiler specific exception handling
-        #define NH3API_THROW(EXCEPTION) RaiseException(0xE06D7363u, EXCEPTION_NONCONTINUABLE, 0, nullptr)
-    #else
-        #define NH3API_THROW(EXCEPTION) throw EXCEPTION
-    #endif // NH3API_FLAG_NO_CPP_EXCEPTIONS
-#endif // NH3API_THROW
 
 // https://en.cppreference.com/w/cpp/header/debugging
 

@@ -23,11 +23,10 @@
  */
 #pragma once
 
-#include "intrin.hpp"
-#include "nh3api_std.hpp"
-#include "exe_string.hpp"
+#include "intrin.hpp" // bitpopcnt
+#include "exe_string.hpp" // exe_string, exceptions
 
-#pragma pack(push, 1)
+#pragma pack(push, 8)
 /// @brief Visual C++ 6.0 std::bitset implementation used by heroes3.exe
 /// @tparam _N number of bits to store
 template<size_t _N>
@@ -368,12 +367,12 @@ protected:
         if (_N % _Bitsperword != 0)
             _A[_Words] &= ((_Ty)1 << _N % _Bitsperword) - 1;
     }
-    NH3API_FORCEINLINE void _Xinv() const
-    { NH3API_THROW(std::invalid_argument("invalid bitset char")); }
-    NH3API_FORCEINLINE void _Xoflo() const
-    { NH3API_THROW(std::overflow_error("bitset conversion overflow")); }
-    NH3API_FORCEINLINE void _Xran() const
-    { NH3API_THROW(std::out_of_range("invalid bitset position")); }
+    NH3API_FORCEINLINE static void _Xinv() 
+    { NH3API_THROW(std::invalid_argument, "invalid bitset char"); }
+    NH3API_FORCEINLINE static void _Xoflo()
+    { NH3API_THROW(std::overflow_error, "bitset conversion overflow"); }
+    NH3API_FORCEINLINE static void _Xran()
+    { NH3API_THROW(std::out_of_range, "invalid bitset position"); }
 
     // bit array
     _Ty _A[_Words + 1];

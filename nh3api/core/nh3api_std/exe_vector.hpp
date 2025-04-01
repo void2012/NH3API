@@ -17,11 +17,7 @@
 #include "algorithm.hpp"
 #include "iterator.hpp"
 #include "type_traits/is_xyz.hpp"
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-#include <stdexcept>  // std::length_error, std::out_of_range, std::runtime_error
-#endif
-#include "type_traits.hpp"
-#include <utility>
+#include "nh3api_exceptions.hpp" // std::length_error, std::out_of_range, std::runtime_error
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
@@ -664,7 +660,7 @@ struct exe_vector_helper<exe_allocator<T> >
             { // reallocate
                 if (_Newsize > max_size())
                 {
-                    NH3API_THROW(std::length_error("vector::assign: too much size requested"));
+                    NH3API_THROW(std::length_error, "vector::assign: too much size requested");
                 }
 
                 const size_type _Newcapacity = _Calculate_growth(_Newsize);
@@ -720,7 +716,7 @@ struct exe_vector_helper<exe_allocator<T> >
 
             if (_Oldsize == max_size())
             {
-                NH3API_THROW(std::length_error("vector::emplace: size exceeded max_size"));
+                NH3API_THROW(std::length_error, "vector::emplace: size exceeded max_size");
             }
 
             const size_type _Newsize = _Oldsize + 1;
@@ -827,7 +823,7 @@ struct exe_vector_helper<exe_allocator<T> >
             const pointer _Oldlast  = this->_Last;
         #if NH3API_DEBUG
             if (_Whereptr >= this->_First && _Oldlast >= _Whereptr)
-                NH3API_THROW(std::out_of_range("vector::emplace iterator outside range"));
+                NH3API_THROW(std::out_of_range, "vector::emplace iterator outside range");
         #endif
             if (_Has_unused_capacity())
             {
@@ -915,7 +911,7 @@ struct exe_vector_helper<exe_allocator<T> >
             if (_Newcapacity > capacity())
             { // something to do (reserve() never shrinks)
                 if (_Newcapacity > max_size())
-                    NH3API_THROW(std::length_error("vector::reserve: requested size too large."));
+                    NH3API_THROW(std::length_error, "vector::reserve: requested size too large.");
 
                 _Reallocate_exactly(_Newcapacity);
             }
@@ -993,7 +989,7 @@ struct exe_vector_helper<exe_allocator<T> >
             { // reallocate
                 if (_Newsize > max_size())
                 {
-                    NH3API_THROW(std::length_error("vector::resize: requested too much size."));
+                    NH3API_THROW(std::length_error, "vector::resize: requested too much size.");
                 }
 
                 const size_type _Newcapacity = _Calculate_growth(_Newsize);
@@ -1041,7 +1037,7 @@ struct exe_vector_helper<exe_allocator<T> >
             { // reallocate
                 if (_Newsize > max_size())
                 {
-                    NH3API_THROW(std::length_error("vector::resize: requested too much size."));
+                    NH3API_THROW(std::length_error, "vector::resize: requested too much size.");
                 }
 
                 const size_type _Newcapacity = _Calculate_growth(_Newsize);
@@ -1104,13 +1100,13 @@ struct exe_vector_helper<exe_allocator<T> >
         const_reference at( size_type _P ) const
         {
             if ( size() <= _P )
-                NH3API_THROW(std::out_of_range("vector::at(pos): invalid pos"));
+                NH3API_THROW(std::out_of_range, "vector::at(pos): invalid pos");
             return *(_First + _P);
         }
         reference at( size_type _P )
         {
             if ( size() <= _P )
-                NH3API_THROW(std::out_of_range("vector::at(pos): invalid pos"));
+                NH3API_THROW(std::out_of_range, "vector::at(pos): invalid pos");
             return *(_First + _P);
         }
         NH3API_FORCEINLINE
@@ -1189,7 +1185,7 @@ struct exe_vector_helper<exe_allocator<T> >
             { // reallocate
                 if (_Newsize > max_size())
                 {
-                    NH3API_THROW(std::length_error("vector::assign: size exceeded max_size"));
+                    NH3API_THROW(std::length_error, "vector::assign: size exceeded max_size");
                 }
 
                 const size_type _Newcapacity = _Calculate_growth(_Newsize);
@@ -1265,7 +1261,7 @@ struct exe_vector_helper<exe_allocator<T> >
             { // reallocate
                 if (_Newsize > max_size())
                 {
-                    NH3API_THROW(std::length_error("vector::assign: size exceeded max_size"));
+                    NH3API_THROW(std::length_error, "vector::assign: size exceeded max_size");
                 }
 
                 const size_type _Newcapacity = _Calculate_growth(_Newsize);
@@ -1319,7 +1315,7 @@ struct exe_vector_helper<exe_allocator<T> >
 
                 if (_Count > max_size() - _Oldsize)
                 {
-                    NH3API_THROW(std::length_error("vector::insert: size exceeded max_size"));
+                    NH3API_THROW(std::length_error, "vector::insert: size exceeded max_size");
                 }
 
                 const size_type _Newsize = _Oldsize + _Count;
@@ -1400,7 +1396,7 @@ struct exe_vector_helper<exe_allocator<T> >
         void pop_back()
         {	// erase element at end
             if (empty())
-                NH3API_THROW(std::logic_error("vector::pop_back(): vector was empty"));
+                NH3API_THROW(std::logic_error, "vector::pop_back(): vector was empty");
             else
             {	// erase last element
                 helper.destroy(this->_Last - 1);
@@ -1423,7 +1419,7 @@ struct exe_vector_helper<exe_allocator<T> >
         {
         #if NH3API_DEBUG
             if (!(_P < this->_Last && this->_First <= _P))
-                NH3API_THROW(std::out_of_range("vector::erase: iterator outside bounds"));
+                NH3API_THROW(std::out_of_range, "vector::erase: iterator outside bounds");
         #endif // NH3API_DEBUG
 
         #if NH3API_STD_MOVE_SEMANTICS
@@ -1443,7 +1439,7 @@ struct exe_vector_helper<exe_allocator<T> >
         {
             #if NH3API_DEBUG
             if (_F < _First || _L > _Last)
-                NH3API_THROW(std::out_of_range("vector::erase: iterator outside bounds"));
+                NH3API_THROW(std::out_of_range, "vector::erase: iterator outside bounds");
             #endif // NH3API_DEBUG
 
             iterator _It1 = const_cast<iterator>(_F);
@@ -1574,7 +1570,7 @@ struct exe_vector_helper<exe_allocator<T> >
             if (_Capacity == 0)
                 return false;
             else if (max_size() < _Capacity)
-                NH3API_THROW(std::invalid_argument("vector::reserve: invalid requested size."));
+                NH3API_THROW(std::invalid_argument, "vector::reserve: invalid requested size.");
             else
             {	// nonempty array, allocate storage
                 this->_First = helper.allocate(_Capacity);
@@ -1637,7 +1633,7 @@ struct exe_vector_helper<exe_allocator<T> >
                     __builtin_memset_chk(this, 0, sizeof(*this));
                 #elif __has_builtin(__builtin_memset)
                     __builtin_memset(this, 0, sizeof(*this));
-                #else 
+                #else
                     *reinterpret_cast<uint32_t*>(&helper) = 0;
                     _First = nullptr;
                     _Last  = nullptr;
@@ -1712,7 +1708,7 @@ struct exe_vector_helper<exe_allocator<T> >
 
                 if (_Count > max_size() - _Oldsize)
                 {
-                    NH3API_THROW(std::length_error("vector::insert: size exceeded max_size"));
+                    NH3API_THROW(std::length_error, "vector::insert: size exceeded max_size");
                 }
 
                 const size_type _Newsize = _Oldsize + _Count;

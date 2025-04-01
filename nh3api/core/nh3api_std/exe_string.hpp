@@ -30,10 +30,8 @@
 #include "math.hpp"      // nh3api::fpclassify, float classification macros
 #include "memory.hpp"    // allocators
 #include "iterator.hpp"  // std::reverse_iterator
-
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-#include <stdexcept>     // std::length_error, std::out_of_range
-#endif
+#include "nh3api_exceptions.hpp" // exceptions
+#include "nh3api_std.hpp"
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
@@ -587,41 +585,35 @@ protected:
 protected:
     #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
     NH3API_FORCEINLINE
-    static std::length_error _length_exception()
+    static void _throw_length_exception()
     {
         NH3API_IF_CONSTEXPR ( nh3api::tt::is_same<value_type, wchar_t>::value )
-            return std::length_error("wstring too long");
+            NH3API_THROW(std::length_error, "wstring too long");
         else
-            return std::length_error("string too long");
-    }
-    static void _throw_length_exception()
-    {
-        NH3API_THROW(_length_exception());
+            NH3API_THROW(std::length_error, "string too long");
     }
     #else
+    NH3API_FORCEINLINE
     static void _throw_length_exception()
     {
-        NH3API_THROW(0);
+        NH3API_THROW(0, 0);
     }
     #endif
 
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS 
     NH3API_FORCEINLINE
-    static std::out_of_range _out_of_range_exception()
+    static void _throw_out_of_range_exception()
     {
         NH3API_IF_CONSTEXPR ( nh3api::tt::is_same<value_type, wchar_t>::value )
-            return std::out_of_range("invalid wstring position");
+            NH3API_THROW(std::out_of_range, "invalid wstring position");
         else
-            return std::out_of_range("invalid string position");
-    }
-    static void _throw_out_of_range_exception()
-    {
-        NH3API_THROW(_out_of_range_exception());
+            NH3API_THROW(std::out_of_range, "invalid string position");
     }
     #else
+    NH3API_FORCEINLINE
     static void _throw_out_of_range_exception()
     {
-        NH3API_THROW(0);
+        NH3API_THROW(0, 0);
     }
     #endif
 
@@ -702,7 +694,7 @@ public:
                 __builtin_memset_chk(this, 0, sizeof(*this));
             #elif __has_builtin(__builtin_memset)
                 __builtin_memset(this, 0, sizeof(*this));
-            #else 
+            #else
                 *reinterpret_cast<uint32_t*>(&helper) = 0;
                 _Ptr = nullptr;
                 _Len = 0;
@@ -2422,7 +2414,7 @@ std::wstring to_std_wstring(float x, size_t precision = 4)
 #if NH3API_VS2012_2013 || NH3API_CHECK_CPP11
 #include "hash.hpp"
 
-namespace std 
+namespace std
 {
     template<typename CharT, typename TraitsT, typename AllocatorT>
     class hash< exe_basic_string<CharT, TraitsT, AllocatorT> >

@@ -24,15 +24,9 @@
 
 #pragma once
 
-#include "nh3api_std.hpp"
-#include "memory.hpp"
-#include "iterator.hpp"
-
-#include <algorithm>
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-#include <stdexcept>
-#endif
-#include <utility>
+#include "memory.hpp"            // exe_allocator
+#include "iterator.hpp"          // container_iterator
+#include "nh3api_exceptions.hpp" // exceptions
 
 #pragma pack(push, 4)
 //namespace nh3api
@@ -260,7 +254,7 @@ public:
         iterator( pointer _P, _Mapptr _M ) NH3API_NOEXCEPT
             : base_type(_P, _M)
         {}
-           
+
         NH3API_FORCEINLINE
         iterator(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : base_type(tag)
@@ -1051,7 +1045,7 @@ protected:
     }
     static void _Xran()
     {
-        NH3API_THROW(std::out_of_range("invalid deque position"));
+        NH3API_THROW(std::out_of_range, "invalid deque position");
     }
     void _Freemap()
     {

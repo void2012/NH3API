@@ -7,6 +7,7 @@
 #pragma once
 
 #include "ida.hpp"
+#include "nh3api_std.hpp"
 
 // this is a hack designed to enable global variables addresses to be backed into binaries
 // rather that using global variables which is double indirection
@@ -931,14 +932,6 @@ void move16(T* ptr1, T* ptr2) NH3API_NOEXCEPT
     _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr1), _mm_loadu_si128(reinterpret_cast<const __m128i*>(ptr2)));
     _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr2), _mm_setzero_si128());
 }
-
-#ifndef NH3API_HAS_BUILTIN_ASS
-    #if NH3API_HAS_BUILTINS
-
-    #else 
-
-    #endif
-#endif
 
 template <size_t N, typename T>
 NH3API_FORCEINLINE
