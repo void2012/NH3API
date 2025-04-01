@@ -932,21 +932,42 @@ void move16(T* ptr1, T* ptr2) NH3API_NOEXCEPT
     _mm_storeu_si128(reinterpret_cast<__m128i*>(ptr2), _mm_setzero_si128());
 }
 
+#ifndef NH3API_HAS_BUILTIN_ASS
+    #if NH3API_HAS_BUILTINS
+
+    #else 
+
+    #endif
+#endif
+
 template <size_t N, typename T>
 NH3API_FORCEINLINE
-NH3API_CONSTEXPR
+#if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
+constexpr
+#endif
 T* assume_aligned(T* ptr) NH3API_NOEXCEPT 
 {
     #if NH3API_HAS_BUILTINS
         #if __has_builtin(__builtin_assume_aligned) || NH3API_CHECK_CLANG_CL
-        return reinterpret_cast<T *>(__builtin_assume_aligned(ptr, N));
-        #else 
-        __assume(reinterpret_cast<uintptr_t>(ptr) % N == 0);
-        return ptr;
+            #if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
+            if (__builtin_is_constant_evaluated())
+                return ptr;
+            else
+                return reinterpret_cast<T *>(__builtin_assume_aligned(ptr, N));
+            #else 
+            return reinterpret_cast<T *>(__builtin_assume_aligned(ptr, N));
+            #endif
+        #else // Assume pre-C++20 MSVC
+        if ((reinterpret_cast<uintptr_t>(ptr) & ((1 << N) - 1)) == 0)
+            return ptr;
+        else
+            __assume(0);
         #endif
-    #else
-        __assume(reinterpret_cast<uintptr_t>(ptr) % N == 0);
-        return ptr;
+    #else // Assume old MSVC
+        if ((reinterpret_cast<uintptr_t>(ptr) & ((1 << N) - 1)) == 0)
+            return ptr;
+        else
+            __assume(0);
     #endif
 }
 
