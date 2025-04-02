@@ -8,8 +8,8 @@
 
 #include "nh3api_std.hpp"
 
+#include <exception>
 #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-#include <exception> // std::exception
 #include <stdexcept> // std::length_error, std::out_of_range
 #endif
 
@@ -26,7 +26,6 @@ void throw_exception<MyException>(const char what[])
 
 namespace nh3api 
 {
-
 #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
 template<typename T>
 NH3API_NORETURN
@@ -38,10 +37,12 @@ void throw_exception(const char what[])
 #else 
 
 template<typename>
+NH3API_NORETURN
 NH3API_NOINLINE
 void throw_exception(const char[])
 {
     RaiseException(0xE06D7363u, EXCEPTION_NONCONTINUABLE, 0, nullptr);
+    ::std::terminate();
 }
 #endif
 

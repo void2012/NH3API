@@ -230,11 +230,11 @@
     #if NH3API_CHECK_MSVC_DRIVER
         #define NH3API_DLLEXPORT __declspec(dllexport)
         #define NH3API_DLLIMPORT __declspec(dllimport)
-        #define NH3API_WEAK      __declspec(selectany)
+        #define NH3API_SELECTANY __declspec(selectany)
     #else
         #define NH3API_DLLEXPORT __attribute__((__dllexport__))
         #define NH3API_DLLIMPORT __attribute__((__dllimport__))
-        #define NH3API_WEAK      __attribute__((__weak__))
+        #define NH3API_SELECTANY __attribute__((__selectany__))
     #endif
 #endif
 
@@ -1099,10 +1099,10 @@ const omit_base_vftable_tag;
 
 // noreturn attribute
 #ifndef NH3API_NORETURN
-    #if NH3API_CHECK_MSVC
+    #if NH3API_CHECK_MSVC_DRIVER
         #define NH3API_NORETURN __declspec(noreturn)
     #else // old MSVC
-        #define NH3API_NORETURN [[noreturn]]
+        #define NH3API_NORETURN __attribute__((noreturn))
     #endif
 #endif
 
