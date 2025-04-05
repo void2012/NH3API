@@ -1095,60 +1095,62 @@ struct mapCellWitchHut
 // size = 0x4 = 4, align = 4.
 struct ExtraInfoUnion
 {
-    // Set object visited by <player> /
-    // Пометить объект клетки посещенным игроком <player>.
-    void SetCellVisited(int16_t player)
-    { THISCALL_2(void, 0x4FC620, this, player); }
+    public:
+        // Set object visited by <player> /
+        // Пометить объект клетки посещенным игроком <player>.
+        void SetCellVisited(int16_t player)
+        { THISCALL_2(void, 0x4FC620, this, player); }
 
-    union
-    {
-        uint32_t setup;
-        struct mapCellArtifact          Artifact;          // Артефакт
-        struct mapCellDefaultObject     BlackMarket;       // Чёрный рынок
-        struct mapCellDefaultObject     Boat;              // Лодка
-        struct mapCellCampfire          Campfire;          // Костёр
-        struct mapCellCorpse            Corpse;            // Скелет
-        struct mapCellCreatureBank      CreatureBank;      // Банк существ
-        struct mapCellEvent             Event;             // Событие
-        struct mapCellFlotsam           Flotsam;           // Обломки(вода)
-        struct mapCellFountainFortune   FountainFortune;   // Фонтан удачи
-        struct mapCellDefaultObject     Garrison;          // Гарнизон
-        struct mapCellDefaultObject     Generator;         // Генератор существ('нычка')
-        struct mapCellDefaultObject     Hero;              // Герой
-        struct mapCellLeanTo            LeanTo;            // Навес(снег)
-        struct mapCellDefaultObject     LearningStone;     // Камень обучения
-        struct mapCellDefaultObject     Lighthouse;        // Маяк
-        struct mapCellMagicShrine       MagicShrine;       // Святыня заклинаний
-        struct mapCellMagicSpring       MagicSpring;       // Магический сад
-        struct mapCellDefaultObject     Mine;              // Шахта
-        struct mapCellDefaultObject     Monolith;          // Монолит
-        struct mapCellMonster           WanderingCreature; // Нейтрал
-        struct mapCellMysticGarden      MysticGarden;      // Мистический сад
-        struct mapCellDefaultObject     Obelisk;           // Обелиск
-        struct mapCellDefaultObject     OceanBottle;       // Бутылка(вода)
-        struct mapCellPandorasBox       PandorasBox;       // Ящик пандоры
-        struct mapCellDefaultObject     Prison;            // Тюрьма
-        struct mapCellPyramid           Pyramid;           // Пирамида
-        struct mapCellDefaultObject     QuestGuard;        // Страж квеста
-        struct mapCellRefugeeCamp       RefugeeCamp;       // Лагерь беженцев
-        struct mapCellResource          Resource;          // Ресурс
-        struct mapCellScholar           Scholar;           // Учёный
-        struct mapCellScroll            SpellScroll;       // Свиток с заклинаниями
-        struct mapCellSeaChest          SeaChest;          // Морской сундук с сокровищами
-        struct mapCellDefaultObject     SeerHut;           // Хижина провидца
-        struct mapCellShipwreckSurvivor ShipwreckSurvivor; // Потерпевший кораблекрушение
-        struct mapCellShipyard          Shipyard;          // Верфь
-        struct mapCellDefaultObject     SignPost;          // Указатель('табличка')
-        struct mapCellDefaultObject     Town;              // Город
-        struct mapCellTreasureChest     TreasureChest;     // Сундук с сокровищами
-        struct mapCellTreeOfKnowledge   TreeKnowledge;     // Дерево мудрости
-        struct mapCellUniversity        University;        // Университет
-        struct mapCellWagon             Wagon;             // Тележка(степь)
-        struct mapCellWarriorsTomb      WarriorsTomb;      // Гробница воина
-        struct mapCellWaterMill         Watermill;         // Водяная мельница
-        struct mapCellWindMill          Windmill;          // Ветряная мельница
-        struct mapCellWitchHut          WitchHut;          // Хижина ведьмы
-    } NH3API_MSVC_LAYOUT;
+    public:
+        union
+        {
+            uint32_t setup;
+            struct mapCellArtifact          Artifact;          // Артефакт
+            struct mapCellDefaultObject     BlackMarket;       // Чёрный рынок
+            struct mapCellDefaultObject     Boat;              // Лодка
+            struct mapCellCampfire          Campfire;          // Костёр
+            struct mapCellCorpse            Corpse;            // Скелет
+            struct mapCellCreatureBank      CreatureBank;      // Банк существ
+            struct mapCellEvent             Event;             // Событие
+            struct mapCellFlotsam           Flotsam;           // Обломки(вода)
+            struct mapCellFountainFortune   FountainFortune;   // Фонтан удачи
+            struct mapCellDefaultObject     Garrison;          // Гарнизон
+            struct mapCellDefaultObject     Generator;         // Генератор существ('нычка')
+            struct mapCellDefaultObject     Hero;              // Герой
+            struct mapCellLeanTo            LeanTo;            // Навес(снег)
+            struct mapCellDefaultObject     LearningStone;     // Камень обучения
+            struct mapCellDefaultObject     Lighthouse;        // Маяк
+            struct mapCellMagicShrine       MagicShrine;       // Святыня заклинаний
+            struct mapCellMagicSpring       MagicSpring;       // Магический сад
+            struct mapCellDefaultObject     Mine;              // Шахта
+            struct mapCellDefaultObject     Monolith;          // Монолит
+            struct mapCellMonster           WanderingCreature; // Нейтрал
+            struct mapCellMysticGarden      MysticGarden;      // Мистический сад
+            struct mapCellDefaultObject     Obelisk;           // Обелиск
+            struct mapCellDefaultObject     OceanBottle;       // Бутылка(вода)
+            struct mapCellPandorasBox       PandorasBox;       // Ящик пандоры
+            struct mapCellDefaultObject     Prison;            // Тюрьма
+            struct mapCellPyramid           Pyramid;           // Пирамида
+            struct mapCellDefaultObject     QuestGuard;        // Страж квеста
+            struct mapCellRefugeeCamp       RefugeeCamp;       // Лагерь беженцев
+            struct mapCellResource          Resource;          // Ресурс
+            struct mapCellScholar           Scholar;           // Учёный
+            struct mapCellScroll            SpellScroll;       // Свиток с заклинаниями
+            struct mapCellSeaChest          SeaChest;          // Морской сундук с сокровищами
+            struct mapCellDefaultObject     SeerHut;           // Хижина провидца
+            struct mapCellShipwreckSurvivor ShipwreckSurvivor; // Потерпевший кораблекрушение
+            struct mapCellShipyard          Shipyard;          // Верфь
+            struct mapCellDefaultObject     SignPost;          // Указатель('табличка')
+            struct mapCellDefaultObject     Town;              // Город
+            struct mapCellTreasureChest     TreasureChest;     // Сундук с сокровищами
+            struct mapCellTreeOfKnowledge   TreeKnowledge;     // Дерево мудрости
+            struct mapCellUniversity        University;        // Университет
+            struct mapCellWagon             Wagon;             // Тележка(степь)
+            struct mapCellWarriorsTomb      WarriorsTomb;      // Гробница воина
+            struct mapCellWaterMill         Watermill;         // Водяная мельница
+            struct mapCellWindMill          Windmill;          // Ветряная мельница
+            struct mapCellWitchHut          WitchHut;          // Хижина ведьмы
+        } NH3API_MSVC_LAYOUT;
 };
 #pragma pack(pop) // 4
 
@@ -1156,7 +1158,7 @@ struct ExtraInfoUnion
 // Map object /
 // Объект на карте.
 // size = 0xC = 12, align = 2, baseclass: ExtraInfoUnion
-class CObject : ExtraInfoUnion
+class CObject : public ExtraInfoUnion
 {
     public:
         NH3API_FORCEINLINE
