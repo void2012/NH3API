@@ -113,6 +113,8 @@ NH3API_NODISCARD
 NH3API_FORCEINLINE
 NH3API_MALLOC(1)
 // usage: new (exe_heap) new-initializer...
+// NOTE: It appears that both Itanium ABI and MSVC ABI implicitly allocate size + 4,
+// and return exe_new(size) + 4 pointer, so we don't do manual handling
 void* __cdecl operator new[](size_t size, const exe_heap_t&)
 { return exe_new(size); }
 
@@ -120,8 +122,20 @@ NH3API_NODISCARD
 NH3API_FORCEINLINE
 NH3API_MALLOC(1)
 // usage: new (exe_heap, std::nothrow) new-initializer...
+// NOTE: It appears that both Itanium ABI and MSVC ABI implicitly allocate size + 4,
+// and return exe_new(size) + 4 pointer, so we don't do manual handling
 void* __cdecl operator new[](size_t size, const exe_heap_t&, const std::nothrow_t&) NH3API_NOEXCEPT
 { return exe_new(size); }
+
+/*
+// what I mean is that if both ABIs didn't do that, we would have to manually handle that:
+void* __cdecl operator new[](size_t size, const exe_heap_t&)
+{ 
+    int32_t* ptr = reinterpret_cast<int32_t*>(exe_new(size + sizeof(int32_t))); 
+    *ptr = size;
+    return reinterpret_cast<void*>(ptr + 4);
+}
+*/
 
 NH3API_FORCEINLINE
 // added for the parity
