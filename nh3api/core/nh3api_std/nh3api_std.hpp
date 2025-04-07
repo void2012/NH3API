@@ -1321,29 +1321,6 @@ enum : unsigned char
     #define NH3API_DEBUG_SWITCH(debug_expr, release_expr) (debug_expr)
 #endif // NH3API_DEBUG
 
-NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
-
-// https://en.cppreference.com/w/cpp/header/debugging
-
-// int 3 breakpoint
-inline void breakpoint() NH3API_NOEXCEPT
-{
-#if NH3API_CHECK_MSVC_DRIVER
-    __debugbreak();
-#else
-    __asm__ __volatile__("int {$}3" ::: "memory");
-#endif
-}
-inline bool is_debugger_present() NH3API_NOEXCEPT
-{ return IsDebuggerPresent() != 0; }
-inline void breakpoint_if_debugging() NH3API_NOEXCEPT
-{
-    if ( is_debugger_present() )
-        breakpoint();
-}
-
-NH3API_DISABLE_WARNING_END
-
 #ifndef NH3API_SIZE_TEST
     #define NH3API_SIZE_TEST(EXPECTED_SIZE, ...) NH3API_STATIC_ASSERT("size mismatch", sizeof(__VA_ARGS__) == EXPECTED_SIZE)
 #endif

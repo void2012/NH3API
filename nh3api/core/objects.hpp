@@ -404,14 +404,14 @@ struct BlackBoxData : TreasureData
 // TRandomlyAlignedGenerator.
 
 class CObject;
-#pragma pack(push, 4)
+#pragma pack(push, 1)
 // Random dwelling /
 // Случайное жилище.
 // size = 0x10 = 16, align = 4
 class TRandomDwelling
 {
     public:
-        NH3API_CONSTEXPR NH3API_FORCEINLINE
+        NH3API_FORCEINLINE
         TRandomDwelling() NH3API_NOEXCEPT
             : townId(-1),
               towns(0),
@@ -423,7 +423,6 @@ class TRandomDwelling
 
         NH3API_FORCEINLINE
         TRandomDwelling(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-            : towns(tag)
         { NH3API_IGNORE(townId, playerOwner, minLVL, maxLVL, object); }
 
     public:
@@ -435,23 +434,27 @@ class TRandomDwelling
         // Allowed town types /
         // Указанные фракции жилища. Выбирается случайная из выбранных фракций.
         // offset: +0x4 = +4,  size = 0x4 = 4
-        exe_bitset<9> towns;
+        uint16_t towns;
 
         // Player owning this dwelling /
         // Игрок, владеющий этим жилищем.
-        // offset: +0x8 = +8,  size = 0x1 = 1
+        // offset: +0x6 = +6,  size = 0x1 = 1
         uint8_t playerOwner;
 
         // Creature lowest level /
         // Наименьший уровень существа.
-        // offset: +0x9 = +9,  size = 0x1 = 1
+        // offset: +0x7 = +7,  size = 0x1 = 1
         uint8_t minLVL;
 
         // Creature largest level /
         // Наибольший уровень существа.
-        // offset: +0xA = +10,  size = 0x1 = 1
+        // offset: +0x8 = +8,  size = 0x1 = 1
         uint8_t maxLVL;
+    
+    protected:
+        byte_t gap_9[3];
 
+    public:
         // Object /
         // Объект.
         // offset: +0xC = +12,  size = 0x4 = 4
