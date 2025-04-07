@@ -452,6 +452,7 @@ class TRandomDwelling
         uint8_t maxLVL;
     
     protected:
+        NH3API_MAYBE_UNUSED
         byte_t gap_9[3];
 
     public:
@@ -528,8 +529,8 @@ class generator
         { THISCALL_1(void, 0x4B8760, this); }
 
     public:
-        // Dwelling type(17 = single creature, 20 = several creatures) /
-        // Тип жилища(17 = одно существо, 20 = несколько существ).
+        // Dwelling type(TAdventureObjectType) /
+        // Тип жилища(TAdventureObjectType).
         // offset: +0x0 = +0,  size = 0x1 = 1
         int8_t genClass;
 
@@ -702,8 +703,10 @@ class type_university
         type_university() NH3API_NOEXCEPT
         #if NH3API_STD_INITIALIZER_LIST
             : skills{SKILL_NONE, SKILL_NONE, SKILL_NONE, SKILL_NONE}
-        #endif
         {}
+        #else
+        { skills.fill(SKILL_NONE); }
+        #endif
 
         NH3API_FORCEINLINE
         type_university(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
@@ -968,7 +971,7 @@ struct mapCellResource
 
 } NH3API_MSVC_LAYOUT;
 
-enum ScholarAwards : unsigned
+enum ScholarAwards : uint32_t
 {
     const_scholar_primary_skill   = 0,
     const_scholar_secondary_skill = 1,
@@ -1200,14 +1203,18 @@ class CObject : public ExtraInfoUnion
     public:
         // offset: +0x4 = +4,  size = 0x1 = 1
         uint8_t x;
+
         // offset: +0x5 = +5,  size = 0x1 = 1
         uint8_t y;
+
         // offset: +0x6 = +6,  size = 0x1 = 1
         uint8_t z;
+
         // Object type /
         // Тип объекта.
         // offset: +0x8 = +8,  size = 0x2 = 2
         uint16_t TypeID;
+
         // Sprite frame offset. Game sets this value randomly during the loading of a map /
         // Смещение номера кадра анимации объекта. Выставляется случайно при загрузке карты.
         // Наглядный пример: если поставить несколько анимированных объектов, они не будут "двигаться" синхронно.
@@ -1390,14 +1397,17 @@ class NewmapCell : public ExtraInfoUnion
                 // Тип объекта.
                 // offset: +0x0 = +0,  size = 0x2 = 2
                 int16_t ObjectIndex;
+
                 // X offset from the beginning(0,0) of an object /
                 // X Смещение клетки относительно начала(0,0) самого объекта
                 // occupy: +0x2{00001111}
                 int8_t  CellX : 4;
+
                 // Y offset from the beginning(0,0) of an object /
                 // Y Смещение клетки относительно начала(0,0) самого объекта
                 // occupy: +0x2{11110000}
                 int8_t  CellY : 4;
+
                 // Relative "height" of an object(an object with the largest height is drawn above others)
                 // Относительная "высота" объекта(объект с самой "высотой" рисуется поверх других)
                 // offset: +0x3 = +3,  size = 0x1 = 1
@@ -1437,7 +1447,7 @@ class NewmapCell : public ExtraInfoUnion
         // offset: +0x9 = +9,  size = 0x1 = 1
         int8_t RoadIndex;
 
-        protected:
+    protected:
         NH3API_MAYBE_UNUSED
         byte_t gap_A[2];
 
@@ -1482,6 +1492,7 @@ class NewmapCell : public ExtraInfoUnion
         // На клетке можно построить корабль?
         // occupy: +0xD{00001000}
         bool can_build_ship          : 1;
+        
         // Клетка является триггером?
         // occupy: +0xD{00010000}
         bool is_trigger              : 1;
