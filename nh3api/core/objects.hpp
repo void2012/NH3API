@@ -1200,6 +1200,12 @@ class CObject : public ExtraInfoUnion
         void FindTrigger(int32_t& result_x, int32_t& result_y) const
         { THISCALL_3(void, 0x4FF280, this, &result_x, &result_y); }
 
+        CObjectType* get_object_type_ptr()
+        { return THISCALL_1(CObjectType*, 0x4FF260, this); }
+
+        const CObjectType* get_object_type_ptr() const
+        { return THISCALL_1(CObjectType*, 0x4FF260, this); }
+
     public:
         // offset: +0x4 = +4,  size = 0x1 = 1
         uint8_t x;

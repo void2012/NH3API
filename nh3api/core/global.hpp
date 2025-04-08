@@ -111,6 +111,12 @@ struct game
         const NewmapCell* get_cell(type_point point) const
         { return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
 
+        NewmapCell* get_cell(int32_t x, int32_t y, int8_t z)
+        { return &this->worldMap.cellData[x + this->worldMap.Size * (y + z * this->worldMap.Size)]; }
+
+        const NewmapCell* get_cell(int32_t x, int32_t y, int8_t z) const
+        { return &this->worldMap.cellData[x + this->worldMap.Size * (y + z * this->worldMap.Size)]; }
+
         hero* GetHero(int32_t which)
         { return THISCALL_2(hero*, 0x4317D0, this, which); }
 
@@ -125,6 +131,12 @@ struct game
 
         boat* GetHeroBoat(int32_t id, bool occupied)
         { return THISCALL_3(boat*, 0x4CE5C0, this, id, occupied); }
+
+        boat* GetBoat(int32_t id)
+        { return &boatPool[id]; }
+
+        const boat* GetBoat(int32_t id) const
+        { return &boatPool[id]; }
 
         THeroID GetStartingHeroId(TTownType alignment, int32_t playerPos, type_point mapPosition)
         { return THISCALL_4(THeroID, 0x4BB0C0, this, alignment, playerPos, mapPosition); }

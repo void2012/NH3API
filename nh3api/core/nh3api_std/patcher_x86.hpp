@@ -2355,7 +2355,7 @@ public:
             v = VarInit(name, 0);
 
         if (v == nullptr)
-            breakpoint();
+            __debugbreak();
 
         return (ValueType&)*v->GetPValue();
     }
