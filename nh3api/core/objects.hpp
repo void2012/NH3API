@@ -1148,7 +1148,7 @@ struct mapCellWarriorsTomb_RoE
     unsigned  full : 1; // есть артефакт
     unsigned  : 4;
     unsigned  visited_bits : 8; // посещение каждым из игроков
-    TArtifact artifact : 8;
+    signed    artifact : 8;
     unsigned  : 11;
 
 } NH3API_MSVC_LAYOUT;
