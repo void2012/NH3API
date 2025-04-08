@@ -170,6 +170,8 @@ inline void* qmemcpy(void* dst, const void* src, size_t count) NH3API_NOEXCEPT
 #pragma intrinsic(__stosd)
 #endif
 
+NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
+
 NH3API_FORCEINLINE void memset32(unsigned long* dst, const unsigned long value, size_t count) NH3API_NOEXCEPT
 { __stosd(dst, value, count); }
 
@@ -179,6 +181,8 @@ NH3API_FORCEINLINE void memset_0(void* ptr, size_t size) NH3API_NOEXCEPT
 template<typename T>
 NH3API_FORCEINLINE void memset_0(T* ptr) NH3API_NOEXCEPT
 { std::memset(ptr, 0, sizeof(T)); }
+
+NH3API_DISABLE_WARNING_END
 
 #define CHECK_T_CASSERT CASSERT(nh3api::tt::is_integral<T>::value)
 

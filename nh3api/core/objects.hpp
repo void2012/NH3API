@@ -870,7 +870,7 @@ struct mapCellCorpse_RoE
 {
     unsigned id : 5;
     unsigned : 1;
-    TArtifact artifact : 7;
+    signed   artifact : 7;
     unsigned has_treasure : 1;
     unsigned : 15;
 
@@ -1047,7 +1047,7 @@ enum SeaChestRewardTypes : uint32_t
 struct mapCellSeaChest_RoE
 {
     SeaChestRewardTypes reward : 3;
-    TArtifact artifact : 8;
+    signed artifact : 8;
     unsigned : 19;
 
 } NH3API_MSVC_LAYOUT;
@@ -1077,7 +1077,7 @@ struct mapCellShipyard
 
 struct mapCellTreasureChest_RoE
 {
-    TArtifact   artifact : 8;
+    signed   artifact : 8;
     unsigned is_artifact : 1;
     unsigned gold_amount : 4;
     unsigned : 19;
@@ -1125,7 +1125,7 @@ struct mapCellWagon_RoE
     unsigned  visited_bits : 8;
     unsigned  full : 1;
     unsigned  has_artifact : 1;
-    TArtifact artifact : 8;
+    signed    artifact : 8;
     unsigned  resource : 4;
     unsigned  : 5;
 
