@@ -13,11 +13,13 @@
 #include <string_view> // std::string_view
 #endif
 
+namespace nh3api 
+{
 // FNV-1a hash simple implementation
 template <typename ResultT, ResultT OffsetBasis, ResultT Prime>
 class basic_fnv1a NH3API_FINAL 
 {
-    NH3API_STATIC_ASSERT("need unsigned integer", nh3api::tt::is_unsigned<ResultT>::value);
+    NH3API_STATIC_ASSERT("need unsigned integer", tt::is_unsigned<ResultT>::value);
 public:
     typedef ResultT result_type;
 
@@ -43,8 +45,6 @@ public:
     { return this->state_; }
 };
 
-namespace nh3api 
-{
 typedef basic_fnv1a<size_t, 2166136261u, 16777619u> default_hash;
 
 NH3API_CONSTEXPR_CPP_14 size_t hash_string(const char* const str, size_t size) NH3API_NOEXCEPT 
