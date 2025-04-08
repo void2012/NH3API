@@ -13,6 +13,7 @@
 #include "skills.hpp" // TSkillMastery, TSecondarySkill
 #include "terrain.hpp" // type_point
 #include "random.hpp" // Random(int, int)
+#include <cstdint>
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -816,10 +817,33 @@ class Sign
 };
 #pragma pack(pop)
 
+// RoE Artifact pickup requirements /
+// Типы требований для поднятия артефактов из RoE.
+enum ArtifactPrices : uint32_t
+{
+    const_free_artifact = 0,
+    const_artifact_costs_2000 = 1,
+    const_artifact_requires_wisdom = 2,
+    const_artifact_requires_leadership = 3,
+    const_artifact_costs_2500 = 4,
+    const_artifact_costs_3000 = 5,
+    const_artifact_defended = 6
+};
+
 #pragma pack(push, 4)
+struct mapCellArtifact_RoE
+{
+    ArtifactPrices price : 4;
+    unsigned guard : 9;
+    unsigned resource_price : 4;
+    unsigned guard_qty : 14;
+    unsigned custom : 1;
+
+} NH3API_MSVC_LAYOUT;
+
 struct mapCellArtifact
 {
-    unsigned price : 4;
+    ArtifactPrices price : 4;
     unsigned guard : 8;
     unsigned resource_price : 4;
     unsigned : 2;
@@ -830,24 +854,34 @@ struct mapCellArtifact
 
 struct mapCellDefaultObject
 {
-    unsigned ID;
+    unsigned id;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellCampfire
 {
-    unsigned resType : 4;
-    unsigned resValue : 16;
+    unsigned amount : 4;
+    unsigned resource : 16;
     unsigned : 12;
+
+} NH3API_MSVC_LAYOUT;
+
+struct mapCellCorpse_RoE
+{
+    unsigned id : 5;
+    unsigned : 1;
+    TArtifact artifact : 7;
+    unsigned has_treasure : 1;
+    unsigned : 15;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellCorpse
 {
-    unsigned ID : 5;
+    unsigned id : 5;
     unsigned : 1;
-    unsigned artifactID : 10;
-    unsigned hasArtifact : 1;
+    TArtifact artifact : 10;
+    unsigned has_treasure : 1;
     unsigned : 15;
 
 } NH3API_MSVC_LAYOUT;
@@ -855,9 +889,9 @@ struct mapCellCorpse
 struct mapCellCreatureBank
 {
     unsigned : 5;
-    unsigned visited : 8;
-    unsigned ID : 12;
-    unsigned taken : 1;
+    unsigned visited_bits : 8;
+    unsigned index : 12;
+    unsigned empty : 1;
     unsigned : 6;
 
 } NH3API_MSVC_LAYOUT;
@@ -874,7 +908,7 @@ struct mapCellEvent
 
 struct mapCellFlotsam
 {
-    enum {
+    enum : uint32_t {
         FLOTSAM_EMPTY = 0,
         FLOTSAM_WOOD5 = 1,
         FLOTSAM_WOOD5_GOLD200 = 2,
@@ -885,25 +919,26 @@ struct mapCellFlotsam
 struct mapCellFountainFortune
 {
     unsigned : 5;
-    unsigned visited : 8;
-    signed bonusLuck : 4;
+    unsigned visited_bits : 8;
+    signed luck_bonus : 4;
     unsigned : 15;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellLeanTo
 {
-    unsigned ID : 5;
+    unsigned id : 5;
     unsigned : 1;
-    unsigned resValue : 4;
-    unsigned resType : 4;
+    unsigned amount : 4;
+    unsigned resource : 4;
     unsigned : 18;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellMagicShrine
 {
-    unsigned : 13;
+    unsigned : 5;
+    unsigned visited_bits : 8;
     unsigned spell : 10;
     unsigned : 9;
 
@@ -911,55 +946,60 @@ struct mapCellMagicShrine
 
 struct mapCellMagicSpring
 {
-    unsigned ID : 5;
+    unsigned id : 5;
     unsigned : 1;
-    unsigned used : 1;
+    unsigned full : 1;
     unsigned : 25;
+
+} NH3API_MSVC_LAYOUT;
+
+struct mapCellMonster_RoE
+{
+    unsigned qty : 12;
+    unsigned disposition : 5;
+    unsigned never_flee : 1;
+    unsigned dont_grow : 1;
+    unsigned index : 12;
+    unsigned custom : 1;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellMonster
 {
-    unsigned amount : 12;
-    unsigned aggression : 5;
-    unsigned noRun : 1;
-    unsigned noGrowth : 1;
-    unsigned setupIndex : 8;
-    unsigned growthRemainder : 4;
-    unsigned hasSetup : 1;
+    unsigned qty : 12;
+    unsigned disposition : 5;
+    unsigned never_flee : 1;
+    unsigned dont_grow : 1;
+    unsigned index : 8;
+    unsigned growth_remainder : 4;
+    unsigned custom : 1;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellMysticGarden
 {
-    unsigned ID : 5;
+    unsigned id : 5;
     unsigned : 1;
-    unsigned resType : 4;
-    unsigned hasRes : 1;
+    unsigned resource : 4;
+    unsigned full : 1;
     unsigned : 21;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellPandorasBox
 {
-    unsigned ID : 10;
+    unsigned index : 10;
     unsigned : 22;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellPyramid
 {
-    unsigned available : 1;
-    unsigned ID : 4;
-    unsigned visited : 8;
+    unsigned guarded : 1;
+    unsigned : 4;
+    unsigned visited_bits : 8;
     unsigned spell : 8;
     unsigned : 11;
-
-} NH3API_MSVC_LAYOUT;
-
-struct mapCellRefugeeCamp
-{
-    int32_t ID;
 
 } NH3API_MSVC_LAYOUT;
 
@@ -990,51 +1030,82 @@ struct mapCellScholar
 
 struct mapCellScroll
 {
-    unsigned type : 8;
+    unsigned spell : 8;
     unsigned : 11;
-    unsigned ID : 12;
-    unsigned hasSetup : 1;
+    unsigned index : 12;
+    unsigned custom : 1;
+
+} NH3API_MSVC_LAYOUT;
+
+enum SeaChestRewardTypes : uint32_t
+{
+    const_sea_chest_nothing = 0,
+    const_sea_chest_gold = 1,
+    const_sea_chest_artifact = 2
+};
+
+struct mapCellSeaChest_RoE
+{
+    SeaChestRewardTypes reward : 3;
+    TArtifact artifact : 8;
+    unsigned : 19;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellSeaChest
 {
-    unsigned level : 2;
-    unsigned : 1;
-    unsigned artifactID : 10;
+    SeaChestRewardTypes reward : 3;
+    TArtifact artifact : 10;
     unsigned : 19;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellShipwreckSurvivor
 {
-    TArtifact artifactID;
+    TArtifact artifact;
 
 };
 
 struct mapCellShipyard
 {
     unsigned owner : 8;
-    unsigned X : 8;
-    unsigned Y : 8;
+    unsigned boatX : 8;
+    unsigned boatY : 8;
     unsigned : 8;
+
+} NH3API_MSVC_LAYOUT;
+
+struct mapCellTreasureChest_RoE
+{
+    TArtifact   artifact : 8;
+    unsigned is_artifact : 1;
+    unsigned gold_amount : 4;
+    unsigned : 19;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellTreasureChest
 {
-    unsigned artifactID : 10;
-    unsigned hasArtifact : 1;
-    unsigned bonus : 4;
+    TArtifact   artifact : 10;
+    unsigned is_artifact : 1;
+    unsigned gold_amount : 4;
     unsigned : 17;
 
 } NH3API_MSVC_LAYOUT;
 
+enum WiseTreePrices : uint32_t 
+{
+    const_tree_wants_nothing = 0,
+    const_tree_wants_gold    = 1,
+    const_tree_wants_gems    = 2,
+    const_tree_price_count   = 3
+};
+
 struct mapCellTreeOfKnowledge
 {
-    unsigned ID : 5;
-    unsigned visited : 8;
-    unsigned type : 2;
+    unsigned id : 5;
+    unsigned visited_bits : 8;
+    WiseTreePrices price  : 2;
     unsigned : 17;
 
 } NH3API_MSVC_LAYOUT;
@@ -1042,47 +1113,70 @@ struct mapCellTreeOfKnowledge
 struct mapCellUniversity
 {
     unsigned : 5;
-    unsigned visited : 8;
-    unsigned ID : 12;
+    unsigned visited_bits : 8;
+    unsigned index : 12;
     unsigned : 7;
+
+} NH3API_MSVC_LAYOUT;
+
+struct mapCellWagon_RoE
+{
+    unsigned  resource_amount : 5;
+    unsigned  visited_bits : 8;
+    unsigned  full : 1;
+    unsigned  has_artifact : 1;
+    TArtifact artifact : 8;
+    unsigned  resource : 4;
+    unsigned  : 5;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellWagon
 {
-    unsigned resValue : 5;
-    unsigned visited : 8;
-    unsigned hasBonus : 1;
-    unsigned hasArtifact : 1;
-    unsigned artifactID : 10;
-    unsigned resType : 4;
-    unsigned : 3;
+    unsigned  resource_amount : 5;
+    unsigned  visited_bits : 8;
+    unsigned  full : 1;
+    unsigned  has_artifact : 1;
+    TArtifact artifact : 10;
+    unsigned  resource : 4;
+    unsigned  : 3;
+
+} NH3API_MSVC_LAYOUT;
+
+struct mapCellWarriorsTomb_RoE
+{
+    unsigned  full : 1; // есть артефакт
+    unsigned  : 4;
+    unsigned  visited_bits : 8; // посещение каждым из игроков
+    TArtifact artifact : 8;
+    unsigned  : 11;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellWarriorsTomb
 {
-    unsigned hasArt : 1; // есть артефакт
-    unsigned : 4;
-    unsigned visited : 8; // посещение каждым из игроков
-    unsigned artifactID : 10;
-    unsigned : 9;
+    unsigned  full : 1; // есть артефакт
+    unsigned  : 4;
+    unsigned  visited_bits : 8; // посещение каждым из игроков
+    TArtifact artifact : 10;
+    unsigned  : 9;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellWaterMill
 {
-    unsigned goldBonus : 5;
-    unsigned visited : 8;
+    unsigned amount : 5;
+    unsigned visited_bits : 8;
     unsigned : 19;
 
 } NH3API_MSVC_LAYOUT;
 
 struct mapCellWindMill
 {
-    unsigned resType : 4; // тип ресурса
-    unsigned : 9;
-    unsigned resValue : 4; // кол-во ресурса
+    unsigned resource : 4; // тип ресурса
+    unsigned : 1;
+    unsigned visited_bits : 8;
+    unsigned amount : 4; // кол-во ресурса
     unsigned : 15;
 
 } NH3API_MSVC_LAYOUT;
@@ -1090,8 +1184,8 @@ struct mapCellWindMill
 struct mapCellWitchHut
 {
     unsigned : 5;
-    unsigned visited : 8; // посещено(на каждый ID героев)
-    unsigned SSkill : 7;  // тип вторичного навыка
+    unsigned visited_bits : 8;
+    TSecondarySkill skill : 7;  // тип вторичного навыка
     unsigned : 12;
 
 } NH3API_MSVC_LAYOUT;
@@ -1110,52 +1204,59 @@ struct ExtraInfoUnion
     public:
         union
         {
-            uint32_t setup;
-            struct mapCellArtifact          Artifact;          // Артефакт
-            struct mapCellDefaultObject     BlackMarket;       // Чёрный рынок
-            struct mapCellDefaultObject     Boat;              // Лодка
-            struct mapCellCampfire          Campfire;          // Костёр
-            struct mapCellCorpse            Corpse;            // Скелет
-            struct mapCellCreatureBank      CreatureBank;      // Банк существ
-            struct mapCellEvent             Event;             // Событие
-            struct mapCellFlotsam           Flotsam;           // Обломки(вода)
-            struct mapCellFountainFortune   FountainFortune;   // Фонтан удачи
-            struct mapCellDefaultObject     Garrison;          // Гарнизон
-            struct mapCellDefaultObject     Generator;         // Генератор существ('нычка')
-            struct mapCellDefaultObject     Hero;              // Герой
-            struct mapCellLeanTo            LeanTo;            // Навес(снег)
-            struct mapCellDefaultObject     LearningStone;     // Камень обучения
-            struct mapCellDefaultObject     Lighthouse;        // Маяк
-            struct mapCellMagicShrine       MagicShrine;       // Святыня заклинаний
-            struct mapCellMagicSpring       MagicSpring;       // Магический сад
-            struct mapCellDefaultObject     Mine;              // Шахта
-            struct mapCellDefaultObject     Monolith;          // Монолит
-            struct mapCellMonster           WanderingCreature; // Нейтрал
-            struct mapCellMysticGarden      MysticGarden;      // Мистический сад
-            struct mapCellDefaultObject     Obelisk;           // Обелиск
-            struct mapCellDefaultObject     OceanBottle;       // Бутылка(вода)
-            struct mapCellPandorasBox       PandorasBox;       // Ящик пандоры
-            struct mapCellDefaultObject     Prison;            // Тюрьма
-            struct mapCellPyramid           Pyramid;           // Пирамида
-            struct mapCellDefaultObject     QuestGuard;        // Страж квеста
-            struct mapCellRefugeeCamp       RefugeeCamp;       // Лагерь беженцев
-            struct mapCellResource          Resource;          // Ресурс
-            struct mapCellScholar           Scholar;           // Учёный
-            struct mapCellScroll            SpellScroll;       // Свиток с заклинаниями
-            struct mapCellSeaChest          SeaChest;          // Морской сундук с сокровищами
-            struct mapCellDefaultObject     SeerHut;           // Хижина провидца
-            struct mapCellShipwreckSurvivor ShipwreckSurvivor; // Потерпевший кораблекрушение
-            struct mapCellShipyard          Shipyard;          // Верфь
-            struct mapCellDefaultObject     SignPost;          // Указатель('табличка')
-            struct mapCellDefaultObject     Town;              // Город
-            struct mapCellTreasureChest     TreasureChest;     // Сундук с сокровищами
-            struct mapCellTreeOfKnowledge   TreeKnowledge;     // Дерево мудрости
-            struct mapCellUniversity        University;        // Университет
-            struct mapCellWagon             Wagon;             // Тележка(степь)
-            struct mapCellWarriorsTomb      WarriorsTomb;      // Гробница воина
-            struct mapCellWaterMill         Watermill;         // Водяная мельница
-            struct mapCellWindMill          Windmill;          // Ветряная мельница
-            struct mapCellWitchHut          WitchHut;          // Хижина ведьмы
+            uint32_t extraInfo;
+            mapCellArtifact          Artifact;          // Артефакт
+            mapCellDefaultObject     BlackMarket;       // Чёрный рынок
+            mapCellDefaultObject     Boat;              // Лодка
+            mapCellCampfire          Campfire;          // Костёр
+            mapCellCorpse            Corpse;            // Скелет
+            mapCellCreatureBank      CreatureBank;      // Банк существ
+            mapCellEvent             Event;             // Событие
+            mapCellFlotsam           Flotsam;           // Обломки(вода)
+            mapCellFountainFortune   FountainFortune;   // Фонтан удачи
+            mapCellDefaultObject     Garrison;          // Гарнизон
+            mapCellDefaultObject     Generator;         // Генератор существ('нычка')
+            mapCellDefaultObject     Hero;              // Герой
+            mapCellLeanTo            LeanTo;            // Навес(снег)
+            mapCellDefaultObject     LearningStone;     // Камень обучения
+            mapCellDefaultObject     Lighthouse;        // Маяк
+            mapCellMagicShrine       MagicShrine;       // Святыня заклинаний
+            mapCellMagicSpring       MagicSpring;       // Магический сад
+            mapCellDefaultObject     Mine;              // Шахта
+            mapCellDefaultObject     Monolith;          // Монолит
+            mapCellMonster           Monster;           // Нейтрал
+            mapCellMysticGarden      MysticGarden;      // Мистический сад
+            mapCellDefaultObject     Obelisk;           // Обелиск
+            mapCellDefaultObject     OceanBottle;       // Бутылка(вода)
+            mapCellPandorasBox       PandorasBox;       // Ящик пандоры
+            mapCellDefaultObject     Prison;            // Тюрьма
+            mapCellPyramid           Pyramid;           // Пирамида
+            mapCellDefaultObject     QuestGuard;        // Страж квеста
+            mapCellDefaultObject     RefugeeCamp;       // Лагерь беженцев
+            mapCellResource          Resource;          // Ресурс
+            mapCellScholar           Scholar;           // Учёный
+            mapCellScroll            SpellScroll;       // Свиток с заклинаниями
+            mapCellSeaChest          SeaChest;          // Морской сундук с сокровищами
+            mapCellDefaultObject     SeerHut;           // Хижина провидца
+            mapCellShipwreckSurvivor ShipwreckSurvivor; // Потерпевший кораблекрушение
+            mapCellShipyard          Shipyard;          // Верфь
+            mapCellDefaultObject     SignPost;          // Указатель('табличка')
+            mapCellDefaultObject     Town;              // Город
+            mapCellTreasureChest     TreasureChest;     // Сундук с сокровищами
+            mapCellTreeOfKnowledge   TreeKnowledge;     // Дерево мудрости
+            mapCellUniversity        University;        // Университет
+            mapCellWagon             Wagon;             // Тележка(степь)
+            mapCellWarriorsTomb      WarriorsTomb;      // Гробница воина
+            mapCellWaterMill         Watermill;         // Водяная мельница
+            mapCellWindMill          Windmill;          // Ветряная мельница
+            mapCellWitchHut          WitchHut;          // Хижина ведьмы
+
+            mapCellArtifact_RoE      Artifact_RoE;      // Артефакт (RoE)
+            mapCellCorpse_RoE        Corpse_RoE;        // Скелет(RoE)
+            mapCellMonster_RoE       Monster_RoE;       // Нейтрал(RoE)
+            mapCellSeaChest_RoE      SeaChest_RoE;      // Морской сундук(RoE)
+            mapCellTreasureChest_RoE TreasureChest_RoE; // Сундук с сокровищами(RoE)
+            mapCellWarriorsTomb_RoE  WarriorsTomb_RoE;  // Гробница воина(RoE)
         } NH3API_MSVC_LAYOUT;
 };
 #pragma pack(pop) // 4
@@ -1176,7 +1277,7 @@ class CObject : public ExtraInfoUnion
             : x(_x), y(_y), z(_z),
               TypeID(_type), frameOffset(Random(0, 255))
         {
-            this->setup = _extraInfo;
+            this->extraInfo = _extraInfo;
         }
 
         NH3API_FORCEINLINE
@@ -1184,7 +1285,7 @@ class CObject : public ExtraInfoUnion
             : x(255), y(255), z(255),
               TypeID(OBJECT_NONE), frameOffset(Random(0, 255))
         {
-            this->setup = 0;
+            this->extraInfo = 0;
         }
 
     public:
