@@ -1207,7 +1207,7 @@ public:
     #if NH3API_HAS_BUILTIN_ADDRESSOF
     { return WriteDword(address, *reinterpret_cast<uint32_t*>(__builtin_addressof(data))); }
     #else 
-    { return WriteDword(address, *reinterpret_cast<uint32_t*>(reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(data)))); }
+    { return WriteDword(address, *reinterpret_cast<uint32_t*>(reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(data))))); }
     #endif
     
     // WriteJmp method

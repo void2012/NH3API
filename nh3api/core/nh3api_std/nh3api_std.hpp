@@ -80,7 +80,7 @@
                 #error NH3API requires at least clang 10 to work.
             #endif
             #if (__cplusplus < 201103L)
-                #error NH3API doesn't work on clang with -std=c++98
+                #error NH3API doesnt work on clang with -std=c++98
             #endif
         #else
             #define NH3API_CHECK_CLANG (0)
@@ -89,7 +89,7 @@
                 #error NH3API requires at least GCC 5 to work.
             #endif
             #if (__cplusplus < 201103L)
-                #error NH3API doesn't work on GCC with -std=c++98
+                #error NH3API doesnt work on GCC with -std=c++98
             #endif
         #endif
     #endif
