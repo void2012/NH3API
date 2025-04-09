@@ -39,10 +39,9 @@ EXPORTS
     ReadStrFromIni
     WriteStrToIni
     SaveIni
-    HookCode
-    Splice
+    _Hook
+    _Splice
     WriteAtCode
-    CalcHookPatchSize
     RollbackAppliedPatch
     FreeAppliedPatch
     FatalError
@@ -74,3 +73,10 @@ EXPORTS
     FastQuitToGameMenu
     FormatQuantity
     DecorateInt
+    LogMemoryState
+    RegisterMemoryConsumer
+    _ClientMemAlloc
+    _ClientMemFree
+    _ClientMemRealloc
+    WriteLog
+    CreatePlugin

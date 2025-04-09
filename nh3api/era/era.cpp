@@ -9,11 +9,18 @@
 namespace Era 
 {
 
-volatile int32_t*  const v = get_global_var_ptr(0x887664, volatile int32_t); 
-volatile TErmZVar* const z = get_global_var_ptr(0x9271E8, volatile TErmZVar); 
-volatile int32_t*  const y = get_global_var_ptr(0xA48D7C, volatile int32_t); 
-volatile int32_t*  const x = get_global_var_ptr(0x91DA34, volatile int32_t); 
-volatile bool*     const f = get_global_var_ptr(0x91F2DF, volatile bool); 
-volatile float*    const e = get_global_var_ptr(0xA48F14, volatile float); 
+int32_t*  const v = get_global_var_ptr(0x887664, int32_t); 
+TErmZVar* const z = get_global_var_ptr(0x9271E8, TErmZVar); 
+int32_t*  const y = get_global_var_ptr(0xA48D7C, int32_t); 
+int32_t*  const x = get_global_var_ptr(0x91DA34, int32_t); 
+bool*     const f = get_global_var_ptr(0x91F2DF, bool); 
+float*    const e = get_global_var_ptr(0xA48F14, float); 
+HINSTANCE hPlugin = nullptr;
+TPlugin   plugin  = nullptr;
 
 } // namespace Era
+
+namespace EraMemory
+{
+volatile size_t* allocatedMemorySize = nullptr;
+} // namespace EraMemory

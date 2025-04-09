@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 /*
-* The API was updated for ERA 3.9.15.
+* The API was updated for ERA 3.9.16.
 */
 
 #include <windows.h>
@@ -71,10 +71,10 @@ namespace Era_imports
     ERA_IMPORT_DUMMY(ReadStrFromIni);
     ERA_IMPORT_DUMMY(WriteStrToIni);
     ERA_IMPORT_DUMMY(SaveIni);
-    ERA_IMPORT_DUMMY(HookCode);
-    ERA_IMPORT_DUMMY(Splice);
+    ERA_IMPORT_DUMMY(_Hook); // renamed since v3.9.16
+    ERA_IMPORT_DUMMY(_Splice); // renamed since v3.9.16
     ERA_IMPORT_DUMMY(WriteAtCode);
-    ERA_IMPORT_DUMMY(CalcHookPatchSize);
+    // ERA_IMPORT_DUMMY(CalcHookPatchSize); // removed since v3.9.16
     ERA_IMPORT_DUMMY(RollbackAppliedPatch);
     ERA_IMPORT_DUMMY(FreeAppliedPatch);
     ERA_IMPORT_DUMMY(FatalError);
@@ -105,6 +105,14 @@ namespace Era_imports
     ERA_IMPORT_DUMMY(FastQuitToGameMenu);
     ERA_IMPORT_DUMMY(FormatQuantity);
     ERA_IMPORT_DUMMY(DecorateInt);
+    ERA_IMPORT_DUMMY(LogMemoryState); // since v3.9.16
+    ERA_IMPORT_DUMMY(RegisterMemoryConsumer); // since v3.9.16
+    ERA_IMPORT_DUMMY(_ClientMemAlloc); // since v3.9.16
+    ERA_IMPORT_DUMMY(_ClientMemFree); // since v3.9.16
+    ERA_IMPORT_DUMMY(_ClientMemRealloc); // since v3.9.16
+    ERA_IMPORT_DUMMY(WriteLog); // since v3.9.16
+    ERA_IMPORT_DUMMY(CreatePlugin); // since v3.9.16
+    
 }
 
 namespace Era
@@ -118,39 +126,44 @@ typedef int32_t TXVars[16];
 const bool32_t EXEC_DEF_CODE = true;
 
 NH3API_INLINE_OR_EXTERN
-volatile int32_t*  const v NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x887664, volatile int32_t)); // 1..10000
+int32_t*  const v NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x887664, int32_t)); // 1..10000
 NH3API_INLINE_OR_EXTERN
-volatile TErmZVar* const z NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x9271E8, volatile TErmZVar)); // 1..1000
+TErmZVar* const z NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x9271E8, TErmZVar)); // 1..1000
 NH3API_INLINE_OR_EXTERN
-volatile int32_t*  const  y NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0xA48D7C, volatile int32_t)); // 1..100
+int32_t*  const y NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0xA48D7C, int32_t)); // 1..100
 NH3API_INLINE_OR_EXTERN
-volatile int32_t*  const x NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x91DA34, volatile int32_t)); // 1..16
+int32_t*  const x NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x91DA34, int32_t)); // 1..16
 NH3API_INLINE_OR_EXTERN
-volatile bool*     const f NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x91F2DF, volatile bool)); // 1..1000
+bool*     const f NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x91F2DF, bool)); // 1..1000
 NH3API_INLINE_OR_EXTERN
-volatile float*    const e NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0xA48F14, volatile float)); // 1..100
+float*    const e NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0xA48F14, float)); // 1..100
+
+NH3API_INLINE_OR_EXTERN
+HINSTANCE hPlugin NH3API_INLINE_OR_EXTERN_INIT(nullptr);
+typedef void* TPlugin;
+NH3API_INLINE_OR_EXTERN
+TPlugin plugin NH3API_INLINE_OR_EXTERN_INIT(nullptr);
 
 enum ECallingConvention : int32_t
 {
-    CONV_LAST = -101,
-
-    // Left-to-right
-    CONV_PASCAL = CONV_LAST,
-
-    // Left-to-right, first three arguments in EAX, EDX, ECX
-    CONV_REGISTER = -102,
-
     // Right-to-left, caller clean-up
-    CONV_CDECL = -103,
+    CONV_CDECL = 0,
 
     // Right-to-left
-    CONV_STDCALL = -104,
+    CONV_STDCALL = 1,
 
     // Right-to-left, first argument in ECX
-    CONV_THISCALL = -105,
+    CONV_THISCALL = 2,
 
     // Right-to-left, first two arguments in ECX, EDX
-    CONV_FASTCALL = -106
+    CONV_FASTCALL = 3,
+
+    // Left-to-right, first three arguments in EAX, EDX, ECX
+    CONV_REGISTER = 4,
+
+    // Left-to-right
+    CONV_PASCAL = 5
+
 };
 
 enum EGameMenuTarget : int32_t
@@ -180,6 +193,13 @@ enum EImageResizeAlg : int32_t
     RESIZE_ALG_UPSCALE   = 4, // Only upscale small images proportionally, leave big images as is
     RESIZE_ALG_COVER     = 5, // NOT IMPLEMENTED
     RESIZE_ALG_FILL      = 6, // Use image as a tile to fill the whole box
+};
+
+enum THookType : int32_t
+{
+    HOOKTYPE_BRIDGE = 0,
+    HOOKTYPE_CALL   = 1,
+    HOOKTYPE_JUMP   = 2
 };
 
 struct THookContext
@@ -213,10 +233,21 @@ struct TGameState
 };
 
 NH3API_FORCEINLINE
-/** Loads Era library and imports necessary functions. Must be called as soon as possible. */
-// NH3API notice: does nothing. Left for backward compatibility.
-void ConnectEra() NH3API_NOEXCEPT
-{}
+::exe_std_string era_GetModuleFileName (HINSTANCE hInstance)
+{
+    char buf[256];
+    ::memset(buf, 0, sizeof(buf));
+    DWORD filePathLen = GetModuleFileNameA(hInstance, buf, sizeof(buf));
+    if (filePathLen == 0) 
+        return "";
+    
+    ::exe_std_string filePath(buf, ::std::min<DWORD>((DWORD)sizeof(buf) - 1, filePathLen));
+    size_t lastSlashPos = filePath.find_last_of('\\');
+    if (lastSlashPos != ::exe_std_string::npos) 
+        return filePath.substr(lastSlashPos + 1);
+
+    return filePath;
+}
 
 NH3API_FORCEINLINE
 // ======================= EVENTS ======================= //
@@ -430,14 +461,11 @@ NH3API_FORCEINLINE bool32_t __stdcall SaveIni(const char* const FilePath) NH3API
 
 // ======================= HOOKS AND PATCHES ======================= //
 
-/**
- * Calls handler function, when execution reaches specified address. Handler receives THookContext pointer.
- * If it returns true, overwritten commands are executed. Otherwise overwritten commands are skipped.
- * Change Context.RetAddr field to return to specific address after handler finishes execution with FALSE result.
- * The hook bridge code is always thread safe.
- */
-NH3API_FORCEINLINE void* __stdcall HookCode(void* Addr, THookHandler HandlerFunc, void** AppliedPatch) NH3API_NOEXCEPT
-{ return STDCALL_3(void*, reinterpret_cast<uintptr_t>(&::Era_imports::HookCode), Addr, HandlerFunc, AppliedPatch); }
+// Removed since v3.9.16, see Hook
+NH3API_FORCEINLINE void* __stdcall HookCode(void* Addr, THookHandler HandlerFunc, void** AppliedPatch) NH3API_DELETED_FUNCTION;
+
+NH3API_FORCEINLINE void* __stdcall Hook(void* Addr, THookHandler HandlerFunc, void** AppliedPatch, int32_t MinCodeSize, THookType HookType) NH3API_NOEXCEPT
+{ return STDCALL_5(void*, reinterpret_cast<uintptr_t>(&::Era_imports::_Hook), Addr, HandlerFunc, AppliedPatch, MinCodeSize, HookType); }
 
 /**
  * Replaces original function with the new one with the same prototype and 1-2 extra arguments.
@@ -455,15 +483,14 @@ NH3API_FORCEINLINE void* __stdcall HookCode(void* Addr, THookHandler HandlerFunc
  *   int32_t __stdcall (void* orig_func, int32_t custom_param, int32_t arg1, int32_t arg2) MainProc {...}
  */
 NH3API_FORCEINLINE void* __stdcall Splice(void* OrigFunc, void* HandlerFunc, ECallingConvention CallingConv, int32_t NumArgs, int32_t* CustomParam, void** AppliedPatch) NH3API_NOEXCEPT
-{ return STDCALL_6(void*, reinterpret_cast<uintptr_t>(&::Era_imports::Splice), OrigFunc, HandlerFunc, CallingConv, NumArgs, CustomParam, AppliedPatch); }
+{ return STDCALL_6(void*, reinterpret_cast<uintptr_t>(&::Era_imports::_Splice), OrigFunc, HandlerFunc, CallingConv, NumArgs, CustomParam, AppliedPatch); }
 
 /** Writes Count bytes from Src buffer to Dst code block */
 NH3API_FORCEINLINE void __stdcall WriteAtCode(int32_t Count, void* Src, void* Dst) NH3API_NOEXCEPT
 { STDCALL_3(void, reinterpret_cast<uintptr_t>(&::Era_imports::WriteAtCode), Count, Src, Dst); }
 
-/** Calculates number of bytes to be overwritten during hook placement */
-NH3API_FORCEINLINE int32_t __stdcall CalcHookPatchSize(void* pointer) NH3API_NOEXCEPT
-{ return STDCALL_1(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::CalcHookPatchSize), pointer); }
+// Removed since v3.9.16
+NH3API_FORCEINLINE int32_t __stdcall CalcHookPatchSize(void* pointer) NH3API_DELETED_FUNCTION;
 
 /** Rollback patch and free its memory. Do not use it afterwards */
 NH3API_FORCEINLINE void __stdcall RollbackAppliedPatch(void* pointer) NH3API_NOEXCEPT
@@ -509,6 +536,15 @@ NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall GetProcessGuid() NH3API_NOEXCEPT
 /** Returns IDs of game root dialog and current dialog. The first item in dialog class VMT tables is used as ID */
 NH3API_FORCEINLINE void __stdcall GetGameState(TGameState* GameState) NH3API_NOEXCEPT
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::GetGameState), GameState); }
+
+/**
+ * Appends entry to "log.txt" file in the following form: >> [EventSource]: [Operation] #13#10 [Description].
+ * Example: WriteLog("SaveGame", "Save monsters section", "Failed to detect monster array size")
+ * Available since v3.9.16
+ */
+NH3API_FORCEINLINE bool32_t __stdcall WriteLog(const char* EventSource, const char* Operation, const char* Description) NH3API_NOEXCEPT
+{ return STDCALL_3(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::WriteLog), EventSource, Operation, Description); }
+
 // ===================== END DEBUG AND INFO ===================== //
 
 
@@ -601,6 +637,20 @@ void SetPcharValue(char *Buf, const char *NewValue, int32_t BufSize)  NH3API_NOE
         Buf[NumBytesToCopy] = '\0';
     }
 }
+
+/* Writes memory consumption info to main log file */
+/* Available since v3.9.16 */
+NH3API_FORCEINLINE void __stdcall LogMemoryState() NH3API_NOEXCEPT
+{ STDCALL_0(void, reinterpret_cast<uintptr_t>(&::Era_imports::LogMemoryState)); }
+
+/**
+ * Registers memory consumer (plugin with own memory manager) and returns address of allocated memory counter, which
+ * consumer should atomically increase and decrease in malloc/calloc/realloc/free operations.
+ * Available since v3.9.16
+ */
+NH3API_FORCEINLINE size_t* __stdcall RegisterMemoryConsumer(const char* ConsumerName) NH3API_NOEXCEPT
+{ return STDCALL_1(size_t*, reinterpret_cast<uintptr_t>(&::Era_imports::LogMemoryState), ConsumerName); }
+
 // ===================== END MEMORY ===================== //
 
 
@@ -670,5 +720,71 @@ NH3API_FORCEINLINE int32_t __stdcall DecorateInt(int32_t value, char* buffer, in
 
 // ===================== END UTILITIES ===================== //
 
+/** Creates new plugin API instance for particular DLL plugin. Pass real dll name with extension. Returns plugin instance or NULL is plugin is already created */
+NH3API_FORCEINLINE TPlugin __stdcall CreatePlugin(const char* Name) NH3API_NOEXCEPT
+{ return STDCALL_1(TPlugin, reinterpret_cast<uintptr_t>(&::Era_imports::CreatePlugin), Name); }
+
+NH3API_FORCEINLINE
+/** Loads Era library and imports necessary functions. Must be called as soon as possible. */
+void ConnectEra(HINSTANCE PluginDllHandle, const char* PluginName)
+{
+    ::exe_std_string finalPluginName = era_GetModuleFileName(PluginDllHandle);
+
+    if (PluginName && *PluginName)
+        finalPluginName = PluginName;
+
+    plugin = CreatePlugin(finalPluginName.c_str());
+
+    if (!plugin) 
+        FatalError((::exe_std_string("Duplicate registered plugin: ") + era_GetModuleFileName(PluginDllHandle)).c_str());
+}
+
 #pragma pack(pop)
 } // namespace Era
+
+namespace EraMemory
+{
+    NH3API_INLINE_OR_EXTERN
+    volatile size_t* allocatedMemorySize NH3API_INLINE_OR_EXTERN_INIT(nullptr);
+
+    using ::Era::RegisterMemoryConsumer;
+
+    NH3API_FORCEINLINE void* __stdcall _ClientMemAlloc(volatile size_t* allocatedSize, size_t Size) NH3API_NOEXCEPT
+    { return STDCALL_2(void*, reinterpret_cast<uintptr_t>(&::Era_imports::_ClientMemAlloc), allocatedSize, Size); }
+
+    NH3API_FORCEINLINE void __stdcall _ClientMemFree(volatile size_t* allocatedSize, const void* Buf) NH3API_NOEXCEPT
+    { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::_ClientMemFree), allocatedSize, Buf); }
+
+    NH3API_FORCEINLINE void* __stdcall _ClientMemRealloc(volatile size_t* allocatedSize, const void* Buf, size_t NewSize) NH3API_NOEXCEPT
+    { return STDCALL_3(void*, reinterpret_cast<uintptr_t>(&::Era_imports::_ClientMemRealloc), allocatedSize, Buf, NewSize); }
+
+    struct CurrentModuleHandleGetter
+    {
+        static NH3API_NOINLINE HMODULE Get() NH3API_NOEXCEPT
+        {
+            HMODULE result = nullptr;
+            ::GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast<LPCSTR>(&CurrentModuleHandleGetter::Get), &result);
+            return result;
+        }
+    };
+
+    static bool _MemoryManagerInitialized = false;
+
+    NH3API_FORCEINLINE
+    void InitMemoryManager() 
+    {
+        if (!_MemoryManagerInitialized) 
+        {
+            char pluginLibraryPath[MAX_PATH];
+            const size_t filePathLen = ::GetModuleFileNameA(CurrentModuleHandleGetter::Get(), pluginLibraryPath, sizeof(pluginLibraryPath));
+
+            if (filePathLen > 0) 
+            {
+                const char* pluginLibraryName = ::strrchr(pluginLibraryPath, '\\');
+                pluginLibraryName = (pluginLibraryName) ? pluginLibraryName + 1 : pluginLibraryPath;
+                allocatedMemorySize = RegisterMemoryConsumer(pluginLibraryName);
+            }
+            _MemoryManagerInitialized = true;
+        }
+    }
+}
