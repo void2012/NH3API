@@ -545,6 +545,10 @@ public:
     { return ::nh3api::addressof(x); }
 
     NH3API_NODISCARD NH3API_FORCEINLINE
+    pointer allocate(size_type n) NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
+    { return impl_allocate<value_type>(static_cast<difference_type>(n)); }
+
+    NH3API_NODISCARD NH3API_FORCEINLINE
     pointer allocate(size_type n, const void*) NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
     { return impl_allocate<value_type>(static_cast<difference_type>(n)); }
 
@@ -647,6 +651,10 @@ public:
     NH3API_NODISCARD NH3API_CONSTEXPR NH3API_FORCEINLINE
     const_pointer address(const_reference x) const NH3API_NOEXCEPT
     { return ::nh3api::addressof(x); }
+
+    NH3API_NODISCARD NH3API_FORCEINLINE
+    pointer allocate(size_type n) NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
+    { return impl_allocate<value_type>(static_cast<difference_type>(n)); }
 
     NH3API_NODISCARD NH3API_FORCEINLINE
     pointer allocate(size_type n, const void*) NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)

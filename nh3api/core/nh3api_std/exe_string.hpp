@@ -2420,4 +2420,9 @@ class std::hash< exe_basic_string<CharT, TraitsT, AllocatorT> >
 };
 #endif
 
+// std::string which uses exe_allocator<char>
+typedef std::basic_string<char, std::char_traits<char>, exe_allocator<char> > exe_std_string;
+// std::wstring which uses exe_allocator<wchar_t>
+typedef std::basic_string<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar_t> > exe_std_wstring;
+
 NH3API_DISABLE_WARNING_END
