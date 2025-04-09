@@ -1105,12 +1105,40 @@ enum EMBType : int32_t
     NORMAL_DIALOG_CHOOSE_OPTIONAL = 10,
 };
 
+// code size optimization
+struct _NormalDialog
+{
+    NH3API_NOINLINE __fastcall
+    static void show(const char* cText) NH3API_NOEXCEPT
+    { FASTCALL_12(void, 
+                  0x4F6C00, 
+                  cText, 
+                  NORMAL_DIALOG_DEFAULT, 
+                  -1, 
+                  -1, 
+                  const_no_resource, 
+                  0, 
+                  const_no_resource, 
+                  0, 
+                  -1, 
+                  0, 
+                  const_no_resource, 
+                  0); }
+};
+
+NH3API_FORCEINLINE
+// address: 0x4F6C00
+// Do default dialog /
+// Стандартный диалог.
+void NormalDialog(const char* cText) NH3API_NOEXCEPT
+{ (_NormalDialog::show(cText)); }
+
 NH3API_FORCEINLINE
 // address: 0x4F6C00
 // Do default dialog /
 // Стандартный диалог.
 void NormalDialog(const char* cText,
-                  EMBType iMBType = NORMAL_DIALOG_DEFAULT,
+                  EMBType iMBType,
                   int32_t x = -1,
                   int32_t y = -1,
                   EGameResource iResType1 = const_no_resource,
