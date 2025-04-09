@@ -7,7 +7,7 @@
 #pragma once 
 
 #ifdef __has_include 
-    #if __has_include(<yvals_core.h>) && defined(_MSC_VER) && defined(__MINGW32__)
+    #if __has_include(<yvals_core.h>) && defined(_MSC_VER) && !defined(__MINGW32__)
         #include <yvals_core.h>
     #elif __has_include(<string_view>)
         #include <string_view>
