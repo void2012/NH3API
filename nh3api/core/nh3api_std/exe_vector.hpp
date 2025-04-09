@@ -24,7 +24,7 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 //namespace
 //{
 template<typename AllocatorT>
-struct exe_vector_helper
+struct NH3API_NODEBUG exe_vector_helper
 {
     public:
         typedef AllocatorT allocator_type;
@@ -406,8 +406,8 @@ struct exe_vector_helper<exe_allocator<T> >
 
     // internal typedefs
     protected:
-        typedef exe_vector_helper<allocator_type> helper_type;
-        typedef exe_vector<_Ty, _A> this_type;
+        typedef exe_vector_helper<allocator_type> helper_type NH3API_NODEBUG;
+        typedef exe_vector<_Ty, _A> this_type NH3API_NODEBUG;
         typedef typename helper_type::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
         typedef typename helper_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
         typedef typename helper_type::propagate_on_container_swap propagate_on_container_swap;

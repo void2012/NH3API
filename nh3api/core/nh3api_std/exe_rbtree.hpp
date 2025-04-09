@@ -129,7 +129,7 @@ class exe_rbtree
     typedef typename adaptor_type::propagate_on_container_swap propagate_on_container_swap;
 
   public:
-    typedef exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> this_type;
+    typedef exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> this_type NH3API_NODEBUG;
     typedef _K  key_type;
     typedef _Ty value_type;
     typedef _Pr key_compare;
@@ -279,7 +279,7 @@ class exe_rbtree
         class iterator : public _const_iterator<exe_rbtree::value_type>
         {
         protected:
-            typedef _const_iterator<exe_rbtree::value_type> base_type;
+            typedef _const_iterator<exe_rbtree::value_type> base_type NH3API_NODEBUG;
 
         public:
             iterator() NH3API_NOEXCEPT

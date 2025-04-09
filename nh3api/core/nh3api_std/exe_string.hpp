@@ -44,7 +44,7 @@ typename _E,
 typename _Tr = std::char_traits<_E>,
 typename _A = exe_allocator<_E>
 >
-struct exe_string_helper
+struct NH3API_NODEBUG exe_string_helper
 {
     public:
         typedef _A allocator_type;
@@ -561,7 +561,7 @@ protected:
         {};
 
     protected:
-    typedef exe_string_helper<_E, _Tr, _A> helper_type;
+    typedef exe_string_helper<_E, _Tr, _A> helper_type NH3API_NODEBUG;
     typedef typename helper_type::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
     typedef typename helper_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
     typedef typename helper_type::propagate_on_container_swap propagate_on_container_swap;

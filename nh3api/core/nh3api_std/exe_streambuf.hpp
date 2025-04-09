@@ -356,7 +356,7 @@ template<class _E, class _Tr = std::char_traits<_E> >
 NH3API_VIRTUAL_CLASS exe_basic_streambuf
 {
 private:
-    typedef exe_basic_streambuf<_E, _Tr> this_type;
+    typedef exe_basic_streambuf<_E, _Tr> this_type NH3API_NODEBUG;
 
 public:
     typedef _E                    char_type;
@@ -673,8 +673,8 @@ template<class _E, class _Tr = std::char_traits<_E> >
 NH3API_VIRTUAL_CLASS exe_basic_filebuf : public exe_basic_streambuf<_E, _Tr>
 {
     protected:
-        typedef exe_basic_filebuf<_E, _Tr> this_type;
-        typedef exe_basic_streambuf<_E, _Tr> base_type;
+        typedef exe_basic_filebuf<_E, _Tr> this_type NH3API_NODEBUG;
+        typedef exe_basic_streambuf<_E, _Tr> base_type NH3API_NODEBUG;
 
     public:
         typedef HANDLE native_handle_type;
@@ -763,8 +763,8 @@ NH3API_VIRTUAL_CLASS exe_basic_filebuf : public exe_basic_streambuf<_E, _Tr>
 NH3API_VIRTUAL_CLASS exe_strstreambuf : public exe_streambuf
 {
     protected:
-        typedef exe_strstreambuf this_type;
-        typedef exe_streambuf    base_type;
+        typedef exe_strstreambuf this_type NH3API_NODEBUG;
+        typedef exe_streambuf    base_type NH3API_NODEBUG;
 
     public:
         typedef typename base_type::char_type char_type;

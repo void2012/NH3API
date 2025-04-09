@@ -71,7 +71,7 @@ public:
                                _Pr,
                                _A,
                                _Nil_Address,
-                               _Nilrefs_Address> base_type;
+                               _Nilrefs_Address> base_type NH3API_NODEBUG;
     typedef typename base_type::size_type              size_type;
     typedef typename base_type::difference_type        difference_type;
     typedef typename base_type::reference              reference;

@@ -220,7 +220,7 @@ namespace nh3api
 namespace details
 {
 template<typename T, bool has_deleting_destructor>
-struct exe_invoke_delete_helper
+struct NH3API_NODEBUG exe_invoke_delete_helper
 {
     NH3API_STATIC_ASSERT("exe_invoke_delete: can't invoke destructor on void*",
                          !::nh3api::tt::is_void<T>::value);
@@ -234,7 +234,7 @@ struct exe_invoke_delete_helper
 };
 
 template<typename T>
-struct exe_invoke_delete_helper<T, true>
+struct NH3API_NODEBUG exe_invoke_delete_helper<T, true>
 {
     NH3API_FORCEINLINE
     // invoke virtual destructor on polymorphic objects
@@ -264,7 +264,7 @@ namespace nh3api
 namespace details
 {
 template<typename T, bool has_deleting_destructor>
-struct exe_invoke_destructor_helper
+struct NH3API_NODEBUG exe_invoke_destructor_helper
 {
     NH3API_STATIC_ASSERT("exe_invoke_destructor: can't invoke destructor on void*",
                          !::nh3api::tt::is_void<T>::value);
@@ -275,7 +275,7 @@ struct exe_invoke_destructor_helper
 };
 
 template<typename T>
-struct exe_invoke_destructor_helper<T, true>
+struct NH3API_NODEBUG exe_invoke_destructor_helper<T, true>
 {
     NH3API_FORCEINLINE
     // invoke virtual destructor on polymorphic objects
@@ -299,7 +299,7 @@ namespace nh3api
 namespace details
 {
 template<typename T, bool trivially_destructible>
-struct exe_invoke_array_delete_helper
+struct NH3API_NODEBUG exe_invoke_array_delete_helper
 {
     NH3API_FORCEINLINE
     void operator()(T* ptr) const NH3API_NOEXCEPT
@@ -314,7 +314,7 @@ struct exe_invoke_array_delete_helper
 };
 
 template<typename T>
-struct exe_invoke_array_delete_helper<T, true>
+struct NH3API_NODEBUG exe_invoke_array_delete_helper<T, true>
 {
     NH3API_FORCEINLINE
     void operator()(T* ptr) const NH3API_NOEXCEPT
@@ -491,7 +491,7 @@ NH3API_FORCEINLINE void default_construct(void* ptr, Allocator alloc)
 // default allocator - uses .dll operator new and operator delete /
 // allocator, использующий функции выделения памяти этого .dll
 template<class T>
-class local_allocator
+class NH3API_NODEBUG local_allocator
 {
 protected:
     NH3API_STATIC_ASSERT("The C++ Standard forbids containers of const elements because allocator<const T> is ill-formed."
@@ -502,7 +502,7 @@ protected:
                          "because of [allocator.requirements].", !nh3api::tt::is_reference<T>::value);
 
 public:
-    typedef size_t       size_type;
+    typedef size_t            size_type;
     typedef ptrdiff_t         difference_type;
     typedef T                 value_type;
     typedef value_type*       pointer;
@@ -599,7 +599,7 @@ bool operator!=(const local_allocator<T>&, const local_allocator<U>&)
 // allocator which uses internal .exe operator new and operator delete /
 // allocator, использующий внутренние операторы new и delete .exe для управления памятью.
 template<class T>
-class exe_allocator
+class NH3API_NODEBUG exe_allocator
 {
 protected:
     NH3API_STATIC_ASSERT("The C++ Standard forbids containers of const elements because allocator<const T> is ill-formed."
@@ -610,7 +610,7 @@ protected:
                          "because of [allocator.requirements].", !nh3api::tt::is_reference<T>::value);
 
 public:
-    typedef size_t       size_type;
+    typedef size_t            size_type;
     typedef ptrdiff_t         difference_type;
     typedef T                 value_type;
     typedef value_type*       pointer;
@@ -712,7 +712,7 @@ namespace nh3api
 // to reduce compile times
 // you may want to write your own allocator
 template<typename AllocatorT>
-struct allocator_adaptor
+struct NH3API_NODEBUG allocator_adaptor
 {
     public:
         typedef AllocatorT allocator_type;
@@ -927,7 +927,7 @@ struct allocator_adaptor
 };
 
 template<typename T>
-struct allocator_adaptor<exe_allocator<T> >
+struct NH3API_NODEBUG allocator_adaptor<exe_allocator<T> >
 {
     public:
         typedef exe_allocator<T> allocator_type;
@@ -1101,32 +1101,32 @@ namespace tt
 {
 #if NH3API_CHECK_CPP11
 template<typename AllocatorT>
-struct allocator_may_throw
+struct NH3API_NODEBUG allocator_may_throw
     : public integral_constant<bool,
     !noexcept(declval<AllocatorT>().allocate( declval<typename AllocatorT::size_type>() ))>
 {};
 #else
 template<typename AllocatorT>
-struct allocator_may_throw
+struct NH3API_NODEBUG allocator_may_throw
     : public integral_constant<bool, true>
 {};
 #endif
 
 #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
 template<typename T>
-struct allocator_may_throw<exe_allocator<T> >
+struct NH3API_NODEBUG allocator_may_throw<exe_allocator<T> >
     : public true_type
 {};
 #else
 template<typename T>
-struct allocator_may_throw<exe_allocator<T> >
+struct NH3API_NODEBUG allocator_may_throw<exe_allocator<T> >
     : public false_type
 {};
 #endif
 
 #if NH3API_STD_MOVE_SEMANTICS
 template<typename AllocT>
-struct allocator_always_equal_after_move
+struct NH3API_NODEBUG allocator_always_equal_after_move
     : conjunction_2<
     typename ::std::allocator_traits<AllocT>::is_always_equal,
     typename ::std::allocator_traits<AllocT>::propagate_on_container_move_assignment
@@ -1134,7 +1134,7 @@ struct allocator_always_equal_after_move
 {};
 
 template<typename T>
-struct allocator_always_equal_after_move<exe_allocator<T> >
+struct NH3API_NODEBUG allocator_always_equal_after_move<exe_allocator<T> >
     : true_type
 {};
 #else

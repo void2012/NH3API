@@ -1125,6 +1125,15 @@ const omit_base_vftable_tag;
     #endif
 #endif
 
+// nodebug attribute which makes the type/variable/function not include in the debug information
+#ifndef NH3API_NODEBUG
+    #if NH3API_CHECK_GNU_DRIVER || NH3API_CHECK_CLANG_CL 
+        #define NH3API_NODEBUG [[__gnu__::__nodebug__]]
+    #else 
+        #define NH3API_NODEBUG
+    #endif
+#endif
+
 // noreturn attribute
 #ifndef NH3API_NORETURN
     #if NH3API_CHECK_MSVC_DRIVER

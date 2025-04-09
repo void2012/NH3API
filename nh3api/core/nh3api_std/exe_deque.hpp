@@ -42,8 +42,8 @@ public:
     typedef _A allocator_type;
 
 protected:
-    typedef nh3api::allocator_adaptor<allocator_type> adaptor_type;
-    typedef exe_deque<_Ty, _A>    this_type;
+    typedef nh3api::allocator_adaptor<allocator_type> adaptor_type NH3API_NODEBUG;
+    typedef exe_deque<_Ty, _A>    this_type NH3API_NODEBUG;
     typedef typename adaptor_type::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
     typedef typename adaptor_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
     typedef typename adaptor_type::propagate_on_container_swap propagate_on_container_swap;
@@ -244,7 +244,7 @@ public:
     class iterator : public _const_iterator<exe_deque<_Ty,_A>::value_type>
     {
     private:
-        typedef _const_iterator<exe_deque<_Ty,_A>::value_type> base_type;
+        typedef _const_iterator<exe_deque<_Ty,_A>::value_type> base_type NH3API_NODEBUG;
     public:
         NH3API_FORCEINLINE
         iterator() NH3API_NOEXCEPT

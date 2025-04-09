@@ -163,7 +163,7 @@ exe_vector<exe_string> getHDModPlugins(Patcher* patcher)
 struct is_wine_present_impl
 {
     NH3API_NOINLINE
-    static bool get()
+    static bool get() 
     {
         static bool initialized = false;
         static HMODULE library = nullptr;

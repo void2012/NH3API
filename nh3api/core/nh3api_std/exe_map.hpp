@@ -68,7 +68,7 @@ public:
                                _Pr,
                                _A,
                                _Nil_Address,
-                               _Nilrefs_Address> base_type;
+                               _Nilrefs_Address> base_type NH3API_NODEBUG;
 protected:
     class value_compare
     {

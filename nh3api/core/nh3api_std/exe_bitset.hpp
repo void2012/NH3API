@@ -34,7 +34,7 @@ class exe_bitset
 {
 protected:
     typedef uint32_t _Ty;
-    typedef exe_bitset<_N> this_type;
+    typedef exe_bitset<_N> this_type NH3API_NODEBUG;
 
 public:
     typedef bool element_type;
