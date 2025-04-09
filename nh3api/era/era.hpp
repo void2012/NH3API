@@ -464,7 +464,16 @@ NH3API_FORCEINLINE bool32_t __stdcall SaveIni(const char* const FilePath) NH3API
 // Removed since v3.9.16, see Hook
 NH3API_FORCEINLINE void* __stdcall HookCode(void* Addr, THookHandler HandlerFunc, void** AppliedPatch) NH3API_DELETED_FUNCTION;
 
-NH3API_FORCEINLINE void* __stdcall Hook(void* Addr, THookHandler HandlerFunc, void** AppliedPatch, int32_t MinCodeSize, THookType HookType) NH3API_NOEXCEPT
+/**
+ * Installs new hook at specified address. Returns pointer to bridge with original code if any. Optionally specify address of a pointer to write applied patch structure
+ * pointer to. It will allow to rollback the patch later. MinCodeSize specifies original code size to be erased (nopped). Use 0 in most cases.
+ *
+ * In case of bridge hook type calls handler function, when execution reaches specified address. Handler receives THookContext pointer.
+ * If it returns true, overwritten commands are executed. Otherwise overwritten commands are skipped.
+ * Change Context.RetAddr field to return to specific address after handler finishes execution with FALSE result.
+ * The hook bridge code is always thread safe.
+ */
+NH3API_FORCEINLINE void* __stdcall Hook(void* Addr, THookHandler HandlerFunc, void** AppliedPatch = nullptr, int32_t MinCodeSize = 0, THookType HookType = HOOKTYPE_BRIDGE) NH3API_NOEXCEPT
 { return STDCALL_5(void*, reinterpret_cast<uintptr_t>(&::Era_imports::_Hook), Addr, HandlerFunc, AppliedPatch, MinCodeSize, HookType); }
 
 /**
@@ -482,7 +491,7 @@ NH3API_FORCEINLINE void* __stdcall Hook(void* Addr, THookHandler HandlerFunc, vo
  *   Splice((void*) 0x401000, (void*) MainProc, CONV_STDCALL, 2, &custom_param);
  *   int32_t __stdcall (void* orig_func, int32_t custom_param, int32_t arg1, int32_t arg2) MainProc {...}
  */
-NH3API_FORCEINLINE void* __stdcall Splice(void* OrigFunc, void* HandlerFunc, ECallingConvention CallingConv, int32_t NumArgs, int32_t* CustomParam, void** AppliedPatch) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void* __stdcall Splice(void* OrigFunc, void* HandlerFunc, ECallingConvention CallingConv, int32_t NumArgs, int32_t* CustomParam = nullptr, void** AppliedPatch = nullptr) NH3API_NOEXCEPT
 { return STDCALL_6(void*, reinterpret_cast<uintptr_t>(&::Era_imports::_Splice), OrigFunc, HandlerFunc, CallingConv, NumArgs, CustomParam, AppliedPatch); }
 
 /** Writes Count bytes from Src buffer to Dst code block */
