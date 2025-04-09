@@ -150,33 +150,6 @@ public:
 
 };
 
-namespace std
-{
-
-#ifdef __cpp_lib_erase_if
-template<class _K,
-         class _Ty,
-         uintptr_t _Nil_Address,
-         uintptr_t _Nilrefs_Address,
-         typename _Pr,
-         typename _A,
-         class Pred>
-exe_map<_K, _Ty, _Nil_Address, _Nilrefs_Address, _Pr, _A>::size_type
-erase_if( exe_map<_K, _Ty, _Nil_Address, _Nilrefs_Address, _Pr, _A>& c, Pred pred )
-{
-    auto old_size = c.size();
-    for (auto first = c.begin(), last = c.end(); first != last;)
-    {
-        if (pred(*first))
-            first = c.erase(first);
-        else
-            ++first;
-    }
-    return old_size - c.size();
-}
-#endif
-}
-
 #pragma pack(pop)
 
 // clang-format on

@@ -664,21 +664,21 @@ public:
     }
 
 #if NH3API_STD_MOVE_SEMANTICS
-    template<class NH3API_ARGS_DOTS Args>
-    reference emplace_back(Args&& NH3API_ARGS_DOTS args)
+    template<class ...Args>
+    reference emplace_back(Args&& ...args)
     {
         if ( empty() || (_Last._Next == _Last._Last) )
         {
             _Buyback();
-            adaptor.construct( _Last._Next++, std::forward<Args>(args) NH3API_ARGS_DOTS);
+            adaptor.construct( _Last._Next++, std::forward<Args>(args)...);
         }
         else if ( _Last._Next + 1 == _Last._Last )
         {
-            adaptor.construct( _Last._Next++, std::forward<Args>(args) NH3API_ARGS_DOTS);
+            adaptor.construct( _Last._Next++, std::forward<Args>(args)...);
             _Buyback();
         }
         else
-            adaptor.construct( _Last._Next++, std::forward<Args>(args) NH3API_ARGS_DOTS);
+            adaptor.construct( _Last._Next++, std::forward<Args>(args)...);
         ++_Size;
         return back();
     }
@@ -686,12 +686,12 @@ public:
     void push_back( value_type&& value )
     { emplace_back(std::forward(value)); }
 
-    template<class NH3API_ARGS_DOTS Args>
-    reference emplace_front(Args&& NH3API_ARGS_DOTS args)
+    template<class ... Args>
+    reference emplace_front(Args&& ... args)
     {
         if ( empty() || _First._Next == _First._First )
             _Buyfront();
-        adaptor.construct( --_First._Next, std::forward<Args>(args) NH3API_ARGS_DOTS);
+        adaptor.construct( --_First._Next, std::forward<Args>(args) ...);
         ++_Size;
         return front();
     }
@@ -699,17 +699,17 @@ public:
     void push_front( value_type&& value )
     { emplace_front(std::move(value)); }
 
-    template<class NH3API_ARGS_DOTS Args>
-    iterator emplace( iterator _P, Args&& NH3API_ARGS_DOTS args )
+    template<class ... Args>
+    iterator emplace( iterator _P, Args&& ... args )
     {
         if ( _P == begin() )
         {
-            emplace_front(std::forward<Args>(args) NH3API_ARGS_DOTS);
+            emplace_front(std::forward<Args>(args) ...);
             return (begin());
         }
         else if ( _P == end() )
         {
-            emplace_back(std::forward<Args>(args) NH3API_ARGS_DOTS);
+            emplace_back(std::forward<Args>(args) ...);
             return (end() - 1);
         }
         else
@@ -728,7 +728,7 @@ public:
                 _S = begin() + _Off;
                 std::copy_backward( _S, end() - 2, end() - 1 );
             }
-            adaptor.construct(_S._Next, std::forward<Args>(args) NH3API_ARGS_DOTS);
+            adaptor.construct(_S._Next, std::forward<Args>(args) ...);
             return (_S);
         }
     }

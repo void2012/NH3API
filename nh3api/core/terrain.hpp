@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std/memory.hpp"
+#include "nh3api_std/memory.hpp" // bit_cast, byte_t, others
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 

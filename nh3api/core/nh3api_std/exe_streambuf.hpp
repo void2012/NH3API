@@ -24,10 +24,8 @@
 
 #pragma once
 
-#include "intrin.hpp"
-#include "memory.hpp"
-#include "patcher_x86.hpp"
-#include "exe_string.hpp"
+#include "memory.hpp"     // get_type_vftable 
+#include "exe_string.hpp" // exe_string
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 

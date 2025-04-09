@@ -24,11 +24,9 @@
 
 #pragma once
 
-#include "iterator.hpp"
-#include "memory.hpp"
-#include "nh3api_std.hpp"
-#include <cstddef>
-#include <utility>
+#include <utility>      // std::pair, std::swap
+#include "iterator.hpp" // nh3api::container_iterator
+#include "memory.hpp"   // nh3api::allocator_adaptor, exe_scoped_lock
 
 NH3API_DISABLE_WARNING_BEGIN("-Wnull-dereference", 6011)
 
@@ -125,7 +123,7 @@ class exe_rbtree
 
     // internal typedefs
   protected:
-    typedef nh3api::allocator_adaptor<allocator_type> adaptor_type;
+    typedef ::nh3api::allocator_adaptor<allocator_type> adaptor_type;
     typedef typename adaptor_type::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
     typedef typename adaptor_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
     typedef typename adaptor_type::propagate_on_container_swap propagate_on_container_swap;
@@ -157,7 +155,7 @@ class exe_rbtree
     // iterator for nonmutable exe_tree
     template <typename _ValueType = typename std::add_const<exe_rbtree::value_type>::type>
     class _const_iterator
-        : public nh3api::container_iterator<_ValueType, exe_rbtree::difference_type, ::std::bidirectional_iterator_tag>
+        : public ::nh3api::container_iterator<_ValueType, exe_rbtree::difference_type, ::std::bidirectional_iterator_tag>
     {
 
       protected:
@@ -394,7 +392,7 @@ class exe_rbtree
                 if (adaptor_type::propagate_on_container_move_assignment::value
                     && this->adaptor != other.adaptor)
                 {
-                    this->adaptor = nh3api::exchange(other.adaptor, adaptor_type());
+                    this->adaptor = ::nh3api::exchange(other.adaptor, adaptor_type());
                 }
                 _Assign_rv(::std::forward<exe_rbtree>(other));
             }
@@ -416,7 +414,7 @@ class exe_rbtree
         }
         #endif
 
-        exe_rbtree(const nh3api::dummy_tag_t& tag)
+        exe_rbtree(const dummy_tag_t& tag)
         NH3API_NOEXCEPT
             : adaptor(tag)
         { NH3API_IGNORE(_KeyCompare, _Multi, _Head, _Size); }
@@ -685,7 +683,7 @@ class exe_rbtree
                     }
                 _Color(_X) = _Black;
             }
-            adaptor.destroy(nh3api::addressof(_Value(_Y)));
+            adaptor.destroy(::nh3api::addressof(_Value(_Y)));
             _Freenode(_Y);
             --_Size;
             return (_P);
@@ -778,7 +776,10 @@ class exe_rbtree
             }
             if ( _bit_swappable )
             {
-                swap16(this, &other);
+                const __m128i val1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(this));
+                const __m128i val2 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(::nh3api::addressof(other)));
+                _mm_storeu_si128(reinterpret_cast<__m128i*>(this), val2);
+                _mm_storeu_si128(reinterpret_cast<__m128i*>(::nh3api::addressof(other)), val1);
             }
             else NH3API_IF_CONSTEXPR (adaptor == other.adaptor)
             {
@@ -827,9 +828,9 @@ class exe_rbtree
         {
             this->adaptor.alloc = ::std::move(other.adaptor.alloc);
             this->_KeyCompare = ::std::move(other._KeyCompare);
-            this->_Head = nh3api::exchange(other._Head, nullptr);
+            this->_Head = ::nh3api::exchange(other._Head, nullptr);
             this->_Multi = other._Multi;
-            this->_Size = nh3api::exchange(other._Size, size_type());
+            this->_Size = ::nh3api::exchange(other._Size, size_type());
         }
     }
 
@@ -877,7 +878,7 @@ class exe_rbtree
             if (_Newroot == _Rootnode)
                 _Newroot = _Pnode; // memorize new root
             _Right(_Pnode) = _Copy(_Right(_Rootnode), _Pnode);
-            adaptor.copy_construct(nh3api::addressof(_Value(_Pnode)), _Value(_Rootnode));
+            adaptor.copy_construct(::nh3api::addressof(_Value(_Pnode)), _Value(_Rootnode));
             _Left(_Wherenode) = _Pnode;
             _Wherenode = _Pnode;
         }
@@ -890,7 +891,7 @@ class exe_rbtree
         {
             _Erase(_Right(_Pnode));
             _Pnode = _Left(_Pnode);
-            adaptor.destroy(nh3api::addressof(_Value(_Rootnode)));
+            adaptor.destroy(::nh3api::addressof(_Value(_Rootnode)));
             _Freenode(_Rootnode);
         }
     }
@@ -940,7 +941,7 @@ class exe_rbtree
         node_type* _Z = _Buynode(_Y, _Red);
         _Left(_Z) = _Getnil();
         _Right(_Z) = _Getnil();
-        adaptor.copy_construct(nh3api::addressof(_Value(_Z)), value);
+        adaptor.copy_construct(::nh3api::addressof(_Value(_Z)), value);
         ++_Size;
         if (_Y == _Head || !_Isnil(_X) || _KeyCompare(_Kfn()(value), _Key(_Y)))
         {

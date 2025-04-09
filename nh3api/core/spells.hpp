@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "creatures.hpp"
+#include "creatures.hpp" // TCreatureType, others
 
 // Spell school mask /
 // Маска школы магии.

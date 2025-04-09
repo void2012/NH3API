@@ -164,6 +164,7 @@ using ::std::is_void;
 using ::std::is_lvalue_reference;
 using ::std::is_rvalue_reference;
 using ::std::is_reference;
+using ::std::is_pointer;
 
 #ifdef __cpp_lib_logical_traits
 using ::std::negation;
@@ -202,7 +203,7 @@ struct disjunction_2<false_type, false_type>
     : false_type
 {};
 #endif
-using ::std::is_pointer;
+
 } // namespace tt
 } // namespace nh3api
 #endif

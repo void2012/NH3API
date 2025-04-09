@@ -6,8 +6,8 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "resources.hpp"
-#include "../base_manager.hpp"
+#include "resources.hpp" // resource, sample
+#include "../base_manager.hpp" // baseManager
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 

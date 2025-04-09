@@ -6,9 +6,8 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "base_manager.hpp"
-#include "nh3api_std/memory.hpp"
-#include "nh3api_std/nh3api_std.hpp"
+#include "base_manager.hpp" // baseManager
+#include "nh3api_std/memory.hpp" // NH3API_SCALAR_DELETING_DESTRUCTOR
 
 #pragma pack(push, 4)
 // Mouse manager /

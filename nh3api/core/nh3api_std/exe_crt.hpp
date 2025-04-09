@@ -6,12 +6,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std.hpp"
 #include "patcher_x86.hpp"
-
-#ifndef _WINBASE_
-#include <winbase.h>
-#endif
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 
@@ -106,9 +101,7 @@ struct exe_XCPT_ACTION
     } XcptAction;
 
 } NH3API_MSVC_LAYOUT;
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Structure for each thread's data
 // size = 0x74 = 116, align = 4
 struct exe_tiddata

@@ -373,7 +373,7 @@ LODFile* GetLODFile(const char* name) NH3API_NOEXCEPT
     if ( name_size == 0 )
         return nullptr;
 
-    typedef std::array<std::pair<const char*, LODFile>, 8> lod_files_array_t;
+    typedef std::array<std::pair<const char*, LODFile>, 5> lod_files_array_t;
     lod_files_array_t& lodfiles = get_global_var_ref(0x69D8A8, lod_files_array_t);
     
     for (lod_files_array_t::iterator it = lodfiles.begin();

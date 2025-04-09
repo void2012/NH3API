@@ -12,6 +12,12 @@
 //  is_underlying<T> implementation by void_17
 #pragma once
 
+#include "check.hpp"
+
+#if !NH3API_TYPE_TRAITS_IMPL
+#include <type_traits>
+#endif
+
 #include "integral_constant.hpp"
 #include "is_xyz.hpp"
 #include "remove_xyz.hpp"
@@ -19,10 +25,6 @@
 
 #if NH3API_CHECK_MSVC
 #pragma component(mintypeinfo, on)
-#endif
-
-#if !NH3API_TYPE_TRAITS_IMPL
-#include <type_traits>
 #endif
 
 namespace nh3api

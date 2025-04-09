@@ -155,9 +155,6 @@
 
 #pragma once
 
-#include "nh3api_std.hpp"
-
-#include <utility>
 #include "intrin.hpp"
 #include "array.hpp"
 
@@ -1207,8 +1204,12 @@ public:
     // по определенному адресу программы
     // Тип может быть любым, даже функция.
     template<typename T> Patch* __stdcall WriteAddressOf(uintptr_t address, const T& data)
-    { return WriteDword(address, *reinterpret_cast<uint32_t*>(nh3api::addressof(data))); }
-
+    #if NH3API_HAS_BUILTIN_ADDRESSOF
+    { return WriteDword(address, *reinterpret_cast<uint32_t*>(__builtin_addressof(data))); }
+    #else 
+    { return WriteDword(address, *reinterpret_cast<uint32_t*>(reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(data)))); }
+    #endif
+    
     // WriteJmp method
     // writes jmp to opcode at address
     // (creates and applies a CODE_ patch)

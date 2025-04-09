@@ -8,6 +8,9 @@
 
 #include "nh3api_exceptions.hpp"
 
+// NH3API normally implement STL things in its own namespace or use 'using ::std::xyz'
+// std::array is an exception
+
 #if !(NH3API_STD_ARRAY)
 #include "algorithm.hpp"
 namespace std // C++98 <array> implementation

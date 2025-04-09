@@ -10,11 +10,14 @@
 // See README
 #pragma once
 
+#ifndef __cplusplus
+    #error NH3API is a C++ only library
+#endif
+
 #ifndef _WIN32
     #error NH3API targets only windows
 #endif
 
-#pragma once
 #if (defined(_WIN64) || defined(__x86_64__)) || (!defined(_M_IX86) && !defined(__i386__))
     #error Heroes III is a 32-bit game. Please switch your compiler to x86 mode.
 #endif
@@ -22,7 +25,7 @@
 #if (defined(_MSC_VER)) || (defined(__MINGW32__)) || (defined(__clang__))
     // pass
 #else
-    #error Unsupported compiler. NH3API supports MSVC, GCC and Clang only
+    #error Unsupported compiler. NH3API supports MSVC, GCC, Clang-CL and Clang only
 #endif
 
 #define NH3API_MIN(x,y) ((x) < (y) ? (x) : (y))
@@ -32,6 +35,10 @@
 #define NOMINMAX
 #endif
 
+#include <cassert>
+#include <cstring>
+#include <cstddef>
+#include <cwchar>
 #include <windows.h>
 
 #ifndef NH3API_JOIN_STRING
@@ -56,9 +63,6 @@
         #if defined(__clang__)
             #define NH3API_CHECK_CLANG_CL (1)
             #define NH3API_CHECK_MSVC     (0)
-            #if __cplusplus < 201103L
-                #error missing flag '/Zc:__cplusplus'
-            #endif
         #else
             #define NH3API_CHECK_CLANG_CL (0)
             #define NH3API_CHECK_MSVC     (1)
@@ -76,7 +80,7 @@
                 #error NH3API requires at least clang 10 to work.
             #endif
             #if (__cplusplus < 201103L)
-                #error NH3API doesnt work on clang with -std=c++98
+                #error NH3API doesn't work on clang with -std=c++98
             #endif
         #else
             #define NH3API_CHECK_CLANG (0)
@@ -85,7 +89,7 @@
                 #error NH3API requires at least GCC 5 to work.
             #endif
             #if (__cplusplus < 201103L)
-                #error NH3API doesnt work on GCC with -std=c++98
+                #error NH3API doesn't work on GCC with -std=c++98
             #endif
         #endif
     #endif
@@ -109,46 +113,42 @@
         #define NH3API_MSVC_STL (1)
     #endif
 
-    #if defined(_MSC_FULL_VER)
-        #if _MSC_FULL_VER >= 191426428L // Visual Studio 2017 version 15.7
-            #if __cplusplus < 201103L
-            #error missing flag '/Zc:__cplusplus'
-            #else
-                // C++ versions macros check
-                #ifndef NH3API_CHECK_CPP11
-                    #define NH3API_CHECK_CPP11 (__cplusplus>=201103L)
-                #endif // NH3API_CHECK_CPP11
+        // Visual Studio 2015 Update 3 introduces an _MSVC_LANG constant
+        // as a substitute for __cplusplus
+        #if _MSC_FULL_VER >= 190024210L 
+            // C++ versions macros check
+            #ifndef NH3API_CHECK_CPP11
+                #define NH3API_CHECK_CPP11 (_MSVC_LANG>=201103L)
+            #endif // NH3API_CHECK_CPP11
 
-                #ifndef NH3API_CHECK_CPP14
-                    #define NH3API_CHECK_CPP14 (__cplusplus>=201402L)
-                #endif // NH3API_CHECK_CPP14
+            #ifndef NH3API_CHECK_CPP14
+                #define NH3API_CHECK_CPP14 (_MSVC_LANG>=201402L)
+            #endif // NH3API_CHECK_CPP14
 
-                #ifndef NH3API_CHECK_CPP17
-                    #define NH3API_CHECK_CPP17 (__cplusplus>=201703L)
-                #endif // NH3API_CHECK_CPP17
+            #ifndef NH3API_CHECK_CPP17
+                #define NH3API_CHECK_CPP17 (_MSVC_LANG>=201703L)
+            #endif // NH3API_CHECK_CPP17
 
-                #ifndef NH3API_CHECK_CPP20
-                    #define NH3API_CHECK_CPP20 (__cplusplus>=202002L)
-                #endif // NH3API_CHECK_CPP20
+            #ifndef NH3API_CHECK_CPP20
+                #define NH3API_CHECK_CPP20 (_MSVC_LANG>=202002L)
+            #endif // NH3API_CHECK_CPP20
 
-                #ifndef NH3API_CHECK_CPP23
-                    #define NH3API_CHECK_CPP23 (__cplusplus>=202302L)
-                #endif // NH3API_CHECK_CPP23
-            #endif
-        #elif (_MSC_FULL_VER >= 190023506L) // Visual Studio 2015 supports all C++11 features since update 1
+            #ifndef NH3API_CHECK_CPP23
+                #define NH3API_CHECK_CPP23 (_MSVC_LANG>=202302L)
+            #endif // NH3API_CHECK_CPP23
+        #elif (_MSC_FULL_VER >= 190023506L && _MSC_FULL_VER < 190024210L) // Visual Studio 2015 supports all C++11 features since update 1
             #define NH3API_CHECK_CPP11 (1)
             #define NH3API_CHECK_CPP14 (0)
             #define NH3API_CHECK_CPP17 (0)
             #define NH3API_CHECK_CPP20 (0)
             #define NH3API_CHECK_CPP23 (0)
+        #else
+            #define NH3API_CHECK_CPP11 (0)
+            #define NH3API_CHECK_CPP14 (0)
+            #define NH3API_CHECK_CPP17 (0)
+            #define NH3API_CHECK_CPP20 (0)
+            #define NH3API_CHECK_CPP23 (0)
         #endif
-    #else
-        #define NH3API_CHECK_CPP11 (0)
-        #define NH3API_CHECK_CPP14 (0)
-        #define NH3API_CHECK_CPP17 (0)
-        #define NH3API_CHECK_CPP20 (0)
-        #define NH3API_CHECK_CPP23 (0)
-    #endif
 #else
 
 // C++ versions macros check
@@ -170,9 +170,9 @@
 
 #ifndef NH3API_CHECK_CPP23
     #define NH3API_CHECK_CPP23 (__cplusplus>=202302L)
-#endif // NH3API_CHECK_CPP20
+#endif // NH3API_CHECK_CPP23
 
-#endif // defined(_MSC_VER)
+#endif // NH3API_CHECK_MSVC
 
 #ifndef NH3API_DEPRECATED
     #if NH3API_CHECK_MSVC_DRIVER
@@ -190,21 +190,30 @@
     #endif
 #endif
 
+#ifndef NH3API_MSVC_STL_VERSION
+    #ifdef _CPPLIB_VER
+        #define NH3API_MSVC_STL_VERSION (_CPPLIB_VER)
+    #else
+        #define NH3API_MSVC_STL_VERSION (0)
+    #endif
+    #define NH3API_MSVC_STL_VERSION_2005 405
+    #define NH3API_MSVC_STL_VERSION_2008 503
+    #define NH3API_MSVC_STL_VERSION_2008_SP1 505
+    #define NH3API_MSVC_STL_VERSION_2010 520
+    #define NH3API_MSVC_STL_VERSION_2012 540
+    #define NH3API_MSVC_STL_VERSION_2013 610
+    #define NH3API_MSVC_STL_VERSION_2015_2022 650
+#endif
+
 #ifndef NH3API_VS2010
     #if NH3API_CHECK_MSVC
         #define NH3API_VS2010 (_MSC_VER >= 1600 && _MSC_FULL_VER < 190023506L) // Visual Studio 2010 has partial C++11 support.
         #define NH3API_VS2010_ONLY (_MSC_VER >= 1600 && _MSC_VER < 1700)
         #define NH3API_VS2012_2013 ((_MSC_VER == 1700) || (_MSC_VER == 1800))
-        #if NH3API_VS2010_ONLY
-            #define NH3API_ARGS_DOTS
-        #else
-            #define NH3API_ARGS_DOTS ...
-        #endif
     #else
         #define NH3API_VS2010 (0)
         #define NH3API_VS2010_ONLY (0)
         #define NH3API_VS2012_2013 (0)
-        #define NH3API_ARGS_DOTS ...
     #endif
 #endif
 
@@ -281,18 +290,17 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
 
 // STL vendor check
 
-#include <cassert>
-#include <cstring>
-#include <cstddef>
-
 #if defined(__GLIBCXX__) // GNU GCC libstdc++
-    #ifndef NDEBUG
-        #define _GLIBCXX_DEBUG 1
-    #include <debug/debug.h>
-    #endif
-
     #ifndef NH3API_GCC_STL
         #define NH3API_GCC_STL (1)
+    #endif
+
+    #ifndef NH3API_CONSTEXPR_CPP_23
+        #ifdef _GLIBCXX23_CONSTEXPR
+            #define NH3API_CONSTEXPR_CPP_23 _GLIBCXX23_CONSTEXPR
+        #else
+            #define NH3API_CONSTEXPR_CPP_23
+        #endif
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_20
@@ -327,12 +335,16 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
         #endif
     #endif
 #elif defined(_LIBCPP_VERSION) // Clang libc++
-    #ifndef NDEBUG
-        #define _LIBCPP_DEBUG 1
-    #endif
-
     #ifndef NH3API_CLANG_STL
         #define NH3API_CLANG_STL (1)
+    #endif
+
+    #ifndef NH3API_CONSTEXPR_CPP_23
+        #ifdef _LIBCPP_CONSTEXPR_SINCE_CXX23
+            #define NH3API_CONSTEXPR_CPP_23 _LIBCPP_CONSTEXPR_SINCE_CXX23
+        #else
+            #define NH3API_CONSTEXPR_CPP_23
+        #endif
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_20
@@ -370,6 +382,14 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
 // MSVC defines macros for release and debug version automatically
     #ifndef NH3API_MSVC_STL
         #define NH3API_MSVC_STL (1)
+    #endif
+
+    #ifndef NH3API_CONSTEXPR_CPP_23
+        #if NH3API_CHECK_CPP23 && defined(_CONSTEXPR23)
+            #define NH3API_CONSTEXPR_CPP_23 constexpr
+        #else
+            #define NH3API_CONSTEXPR_CPP_23
+        #endif
     #endif
 
     #ifndef NH3API_CONSTEXPR_CPP_20
@@ -410,21 +430,13 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
 
     #ifndef NH3API_MALLOC
         #ifdef _VCRT_ALLOCATOR
-            #define NH3API_MALLOC(...) _VCRT_ALLOCATOR __declspec(restrict)
+            #define NH3API_MALLOC(...) _VCRT_ALLOCATOR __declspec(restrict) __declspec(noalias)
         #else
-            #define NH3API_MALLOC(...) __declspec(restrict)
+            #define NH3API_MALLOC(...) __declspec(restrict) __declspec(noalias)
         #endif
     #endif
 #else
     #error Unknown STL vendor
-#endif
-
-#ifndef NH3API_MSVC_STL_VERSION
-    #ifdef _CPPLIB_VER
-        #define NH3API_MSVC_STL_VERSION (_CPPLIB_VER)
-    #else
-        #define NH3API_MSVC_STL_VERSION (0)
-    #endif
 #endif
 
 #ifndef NH3API_GCC_STL
@@ -437,6 +449,22 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
 
 #ifndef NH3API_MSVC_STL
     #define NH3API_MSVC_STL (0)
+#endif
+
+#ifndef NH3API_CONSTEXPR_CPP_14 
+    #define NH3API_CONSTEXPR_CPP_14
+#endif
+
+#ifndef NH3API_CONSTEXPR_CPP_17 
+    #define NH3API_CONSTEXPR_CPP_17
+#endif
+
+#ifndef NH3API_CONSTEXPR_CPP_20
+    #define NH3API_CONSTEXPR_CPP_20
+#endif
+
+#ifndef NH3API_CONSTEXPR_CPP_23
+    #define NH3API_CONSTEXPR_CPP_23
 #endif
 
 // 1) use
@@ -879,7 +907,7 @@ typedef uint32_t bool32_t;
 #endif
 
 #ifndef NH3API_STD_MOVE_SEMANTICS
-    #define NH3API_STD_MOVE_SEMANTICS (NH3API_VS2010 || NH3API_CHECK_CPP11)
+    #define NH3API_STD_MOVE_SEMANTICS (NH3API_VS2012_2013 || NH3API_CHECK_CPP11)
 #endif // NH3API_STD_MOVE_SEMANTICS
 
 namespace nh3api
@@ -1238,11 +1266,11 @@ const omit_base_vftable_tag;
 #endif
 
 #ifndef NH3API_NOEXCEPT_ALLOC
-    #define NH3API_NOEXCEPT_ALLOC NH3API_NOEXCEPT_EXPR(nh3api::tt::allocator_may_throw<allocator_type>::value)
+    #define NH3API_NOEXCEPT_ALLOC NH3API_NOEXCEPT_EXPR(::nh3api::tt::allocator_may_throw<allocator_type>::value)
 #endif
 
 #ifndef NH3API_NOEXCEPT_DESTRUCT
-    #define NH3API_NOEXCEPT_DESTRUCT NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
+    #define NH3API_NOEXCEPT_DESTRUCT NH3API_NOEXCEPT_EXPR(::nh3api::tt::is_nothrow_destructible<value_type>::value)
 #endif
 
 namespace nh3api
@@ -1257,6 +1285,13 @@ enum : unsigned char
         true,
     #else
         false,
+    #endif
+
+    use_era = 
+    #ifdef NH3API_FLAG_USE_ERA
+        true 
+    #else 
+        false
     #endif
 
 };
@@ -1338,7 +1373,7 @@ enum : unsigned char
         void ignore(const T0& args, const T&... further_args) { (void)args; ignore(further_args...); }
         }
 
-        #define NH3API_IGNORE(...) (void)([&](){nh3api::ignore(__VA_ARGS__);})
+        #define NH3API_IGNORE(...) (void)([&](){::nh3api::ignore(__VA_ARGS__);})
     #endif
 #endif
 

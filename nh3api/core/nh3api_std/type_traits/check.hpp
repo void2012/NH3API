@@ -7,11 +7,12 @@
 #pragma once
 
 #if defined(_MSC_VER)
-    #if (_MSC_VER < 1700)
+    #include <yvals.h>
+    #if (_CPPLIB_VER < 520) // pre-vs2010 MSVC STL
         #define NH3API_TYPE_TRAITS_IMPL (1)
     #else
         #define NH3API_TYPE_TRAITS_IMPL (0)
     #endif
-#else
+#else 
     #define NH3API_TYPE_TRAITS_IMPL (0)
 #endif

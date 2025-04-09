@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std/memory.hpp"
+#include "nh3api_std/memory.hpp" // NH3API_SCALAR_DELETING_DESTRUCTOR
 #include "resources/resources_include.hpp" // e_looping_sound_id, soundNode, sample
 #include "interface/dialogs.hpp" // TAdventureMapWindow
 #include "creatures.hpp" // armyGroup, TCreatureType, also includes "terrain.hpp": TTerrainType

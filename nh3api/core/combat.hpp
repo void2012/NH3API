@@ -8,7 +8,7 @@
 
 #include "nh3api_std/exe_set.hpp" // exe_set<T>
 #include "interface/widgets.hpp" // widgets
-#include "nh3api_std/memory.hpp"
+#include "nh3api_std/memory.hpp" // byte_t
 #include "objects.hpp" // hero, town, etc.
 #include "army.hpp" // army, TCreatureType
 #include "hexcell.hpp" // hexcell

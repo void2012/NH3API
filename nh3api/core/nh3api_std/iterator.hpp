@@ -6,34 +6,8 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <utility>
-#include <iterator>
-#include "intrin.hpp"
-
-#if !NH3API_STD_MOVE_SEMANTICS
-namespace nh3api
-{
-    template<class InputIt>
-    InputIt next(InputIt it, typename ::std::iterator_traits<InputIt>::difference_type n = 1)
-    {
-        ::std::advance(it, n);
-        return it;
-    }
-
-    template<class BidirIt>
-    BidirIt prev(BidirIt it, typename ::std::iterator_traits<BidirIt>::difference_type n = 1)
-    {
-        ::std::advance(it, -n);
-        return it;
-    }
-}
-#else
-namespace nh3api
-{
-using ::std::next;
-using ::std::prev;
-}
-#endif
+#include <iterator> // std::iterator_traits, std::random_access_iterator_tag
+#include "type_traits.hpp"
 
 namespace nh3api
 {
@@ -87,7 +61,7 @@ struct is_iterator_class_test
 {};
 
 template <typename T>
-struct is_iterator_class_test<T, decltype((void)nh3api::declval<T>().operator->(), void())>
+struct is_iterator_class_test<T, decltype((void)::nh3api::declval<T>().operator->(), void())>
     : true_type
 {};
 
@@ -291,7 +265,7 @@ constexpr void verify_range_n(const _Iter& _First, const _Size_type _N)
 // different versions have different ways to do this, fine...
 
 // vs 2005..2008 checked iterators
-#if defined(_MSC_VER) && (NH3API_MSVC_STL_VERSION > 300 && NH3API_MSVC_STL_VERSION < 520) && defined(_CHECKED_BASE)
+#if NH3API_MSVC_STL && (NH3API_MSVC_STL_VERSION > 300 && NH3API_MSVC_STL_VERSION < NH3API_MSVC_STL_VERSION_2010) && defined(_CHECKED_BASE)
 
 template<typename _Iter_type> inline
 typename _STD _Checked_iterator_base_helper<_Iter_type>::_Checked_iterator_base_type
@@ -299,7 +273,7 @@ unfancy(const _Iter_type& iter) NH3API_NOEXCEPT
 { return _CHECKED_BASE(iter); }
 
 // vs 2010..2015 checked iterators
-#elif defined(_MSC_VER) && (NH3API_MSVC_STL_VERSION >= 520) && !defined(_MSVC_STL_UPDATE)
+#elif NH3API_MSVC_STL && (NH3API_MSVC_STL_VERSION >= NH3API_MSVC_STL_VERSION_2010) && !defined(_MSVC_STL_UPDATE)
 
 template<typename _Iter> inline
 typename _Iter::_Unchecked_type unfancy(const _Iter& iter) NH3API_NOEXCEPT
@@ -332,9 +306,7 @@ template <class _Iter,
           ::std::__enable_if_t<::std::is_copy_constructible<_Iter>::value, int> = 0>
 inline _LIBCPP_CONSTEXPR_SINCE_CXX14 decltype(_Impl::__unwrap(::std::declval<_Iter>()))
 unfancy(_Iter __i) _NOEXCEPT
-{
-  return _Impl::__unwrap(__i);
-}
+{ return _Impl::__unwrap(__i); }
 
 #elif NH3API_GCC_STL
 
@@ -364,5 +336,21 @@ struct container_iterator
         typedef value_type* pointer;
         typedef value_type& reference;
 };
+
+namespace tt 
+{
+template<typename IterT, bool IsIterator = is_iterator<IterT>::value>
+struct is_random_access_iterator
+    : integral_constant<bool, 
+    is_same<
+    typename ::std::iterator_traits<IterT>::category, 
+    ::std::random_access_iterator_tag>::value>
+{};
+
+template<typename IterT>
+struct is_random_access_iterator<IterT, false>
+    : false_type
+{};    
+}
 
 }

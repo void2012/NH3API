@@ -13,7 +13,6 @@
 #include "skills.hpp" // TSkillMastery, TSecondarySkill
 #include "terrain.hpp" // type_point
 #include "random.hpp" // Random(int, int)
-#include <cstdint>
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 

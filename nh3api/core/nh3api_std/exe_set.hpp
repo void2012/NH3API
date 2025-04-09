@@ -123,31 +123,16 @@ public:
 
 };
 
-namespace std
-{
-
-#ifdef __cpp_lib_erase_if
+#if !NH3API_STD_MOVE_SEMANTICS
 template<class _K,
-         uintptr_t _Nil_Address,
-         uintptr_t _Nilrefs_Address,
+         uintptr_t _Nil_Address, // null node address inside .exe
+         uintptr_t _Nilrefs_Address, // constructor-destructor reference counter address inside .exe
          typename _Pr,
-         typename _A,
-         class Pred>
-exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr, _A>::size_type
-erase_if( exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr, _A>& c, Pred pred )
-{
-    auto old_size = c.size();
-    for (auto first = c.begin(), last = c.end(); first != last;)
-    {
-        if (pred(*first))
-            first = c.erase(first);
-        else
-            ++first;
-    }
-    return old_size - c.size();
-}
+         typename _A> NH3API_FORCEINLINE
+void std::swap(exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr, _A>& lhs,
+               exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr, _A>& rhs)
+{ lhs.swap(rhs); }
 #endif
-}
 
 #pragma pack(pop)
 // clang-format on

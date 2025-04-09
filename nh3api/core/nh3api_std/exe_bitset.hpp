@@ -23,8 +23,8 @@
  */
 #pragma once
 
-#include "intrin.hpp" // bitpopcnt
 #include "exe_string.hpp" // exe_string, exceptions
+#include "intrin.hpp" // bitpopcnt
 
 #pragma pack(push, 8)
 /// @brief Visual C++ 6.0 std::bitset implementation used by heroes3.exe
@@ -34,6 +34,7 @@ class exe_bitset
 {
 protected:
     typedef uint32_t _Ty;
+    typedef exe_bitset<_N> this_type;
 
 public:
     typedef bool element_type;
@@ -355,6 +356,7 @@ protected:
         _Bitsperword = CHAR_BIT * sizeof (_Ty),
         _Words = _N == 0 ? 0 : (_N - 1) / _Bitsperword
     };
+
     NH3API_CONSTEXPR void _Tidy(_Ty _X = 0) NH3API_NOEXCEPT
     {
         for (int _I = _Words; 0 <= _I; --_I)
@@ -362,19 +364,44 @@ protected:
         if (_X != 0)
             _Trim();
     }
+
     NH3API_CONSTEXPR void _Trim() NH3API_NOEXCEPT
     {
         if (_N % _Bitsperword != 0)
             _A[_Words] &= ((_Ty)1 << _N % _Bitsperword) - 1;
     }
+
     NH3API_FORCEINLINE static void _Xinv() 
     { NH3API_THROW(std::invalid_argument, "invalid bitset char"); }
+
     NH3API_FORCEINLINE static void _Xoflo()
     { NH3API_THROW(std::overflow_error, "bitset conversion overflow"); }
+
     NH3API_FORCEINLINE static void _Xran()
     { NH3API_THROW(std::out_of_range, "invalid bitset position"); }
+
+    size_t _Hash_code() NH3API_NOEXCEPT 
+    { 
+        nh3api::default_hash hasher;
+        hasher.update(_A, _Words + 1);
+        return hasher.digest();
+    }
+
+    // allow access to _Hash_code() for std::hash
+    friend std::hash<this_type>;
 
     // bit array
     _Ty _A[_Words + 1];
 };
 #pragma pack(pop)
+
+// std::hash support for exe_bitset
+template<size_t N>
+class std::hash< exe_bitset<N> >
+{
+    public:
+        size_t operator()(const exe_bitset<N>& arg) NH3API_NOEXCEPT
+        {
+            return arg._Hash_code();
+        }
+};

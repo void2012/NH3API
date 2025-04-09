@@ -31,7 +31,9 @@
 #include "memory.hpp"    // allocators
 #include "iterator.hpp"  // std::reverse_iterator
 #include "nh3api_exceptions.hpp" // exceptions
-#include "nh3api_std.hpp"
+#if NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010 || NH3API_CHECK_CPP11
+#include "hash.hpp" // nh3api::default_hash
+#endif
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
@@ -1903,19 +1905,12 @@ template<class _Elem,
 
 //} // namespace nh3api
 
-namespace std
-{
-
 #if !NH3API_STD_MOVE_SEMANTICS
 template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-void swap(const exe_basic_string<_E, _Tr, _A>& _L,
-          const exe_basic_string<_E, _Tr, _A>& _R)
-{
-    _L.swap(_R);
-}
+void std::swap(const exe_basic_string<_E, _Tr, _A>& lhs,
+               const exe_basic_string<_E, _Tr, _A>& rhs)
+{ lhs.swap(rhs); }
 #endif
-
-}
 
 typedef exe_basic_string<char, std::char_traits<char>, exe_allocator<char> > exe_string;
 typedef exe_basic_string<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar_t> > exe_wstring;
@@ -2296,7 +2291,7 @@ static StringT print_float(float x, size_t precision)
         case FP_ZERO:
         {
             return fp_finite_printer<StringT>::print(x, precision);
-         }
+        }
         default:
             return StringT(get_error_fp_string(CharT()), 5);
     }
@@ -2410,24 +2405,19 @@ NH3API_FORCEINLINE
 std::wstring to_std_wstring(float x, size_t precision = 4)
 { return nh3api::print_float<std::wstring>(x, precision); }
 
-// hash support for exe_string
-#if NH3API_VS2012_2013 || NH3API_CHECK_CPP11
-#include "hash.hpp"
-
-namespace std
+#if NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010 || NH3API_CHECK_CPP11
+// std::hash support for exe_basic_string
+template<typename CharT, typename TraitsT, typename AllocatorT>
+class std::hash< exe_basic_string<CharT, TraitsT, AllocatorT> >
 {
-    template<typename CharT, typename TraitsT, typename AllocatorT>
-    class hash< exe_basic_string<CharT, TraitsT, AllocatorT> >
-    {
-        public:
-            size_t operator()(const exe_basic_string<CharT, TraitsT, AllocatorT>& str) NH3API_NOEXCEPT
-            {
-                ::nh3api::default_hash hasher;
-                hasher.update(str.data(), str.size());
-                return hasher.digest();
-            }
-    };
-}
+    public:
+        size_t operator()(const exe_basic_string<CharT, TraitsT, AllocatorT>& str) NH3API_NOEXCEPT
+        {
+            nh3api::default_hash hasher;
+            hasher.update(str.data(), str.size());
+            return hasher.digest();
+        }
+};
 #endif
 
 NH3API_DISABLE_WARNING_END

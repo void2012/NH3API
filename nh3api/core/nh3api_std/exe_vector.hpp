@@ -11,11 +11,10 @@
 
 #pragma once
 
-#include "intrin.hpp"
 #include "nh3api_std.hpp"
 #include "memory.hpp"
 #include "algorithm.hpp"
-#include "iterator.hpp"
+#include "iterator.hpp" // nh3api::is_iterator
 #include "type_traits/is_xyz.hpp"
 #include "nh3api_exceptions.hpp" // std::length_error, std::out_of_range, std::runtime_error
 
@@ -141,10 +140,10 @@ struct exe_vector_helper
         }
 
         #if NH3API_STD_MOVE_SEMANTICS
-        template<typename OtherType, typename NH3API_ARGS_DOTS Args >
+        template<typename OtherType, typename ...Args >
         NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-        void construct(OtherType* ptr, Args&& NH3API_ARGS_DOTS args)
-        { alloc.construct(ptr, std::forward<Args>(args) NH3API_ARGS_DOTS ); }
+        void construct(OtherType* ptr, Args&& ...args)
+        { alloc.construct(ptr, std::forward<Args>(args)...); }
         #else
         template<typename OtherType> NH3API_FORCEINLINE
         void construct(OtherType* ptr, const_reference value)
@@ -311,9 +310,9 @@ struct exe_vector_helper<exe_allocator<T> >
         { exe_delete(ptr); }
 
         #if NH3API_STD_MOVE_SEMANTICS
-        template <typename NH3API_ARGS_DOTS Args > NH3API_FORCEINLINE
-        static void construct(void* ptr, Args&& NH3API_ARGS_DOTS args)
-        { ::new (ptr) value_type(std::forward<Args>(args) NH3API_ARGS_DOTS ); }
+        template <typename ...Args> NH3API_FORCEINLINE
+        static void construct(void* ptr, Args&& ...args)
+        { ::new (ptr) value_type(std::forward<Args>(args)...); }
         #else
         NH3API_FORCEINLINE
         static void construct(void* ptr, const_reference value)
@@ -689,15 +688,15 @@ struct exe_vector_helper<exe_allocator<T> >
             }
         }
 
-        template<class NH3API_ARGS_DOTS Args>
+        template<class ... Args>
         #if NH3API_CHECK_CPP17
         reference
         #else
         void
         #endif
-        _Emplace_back_with_unused_capacity(Args&& NH3API_ARGS_DOTS args)
+        _Emplace_back_with_unused_capacity(Args&& ... args)
         {
-            helper.construct(_Last, std::forward<Args>(args) NH3API_ARGS_DOTS);
+            helper.construct(_Last, std::forward<Args>(args) ...);
             #if NH3API_CHECK_CPP17
             reference result = *_Last;
             ++_Last;
@@ -707,8 +706,8 @@ struct exe_vector_helper<exe_allocator<T> >
             #endif
         }
 
-        template<class NH3API_ARGS_DOTS Args>
-        pointer _Emplace_reallocate(const pointer _Whereptr, Args&& NH3API_ARGS_DOTS _Val)
+        template<class ... Args>
+        pointer _Emplace_reallocate(const pointer _Whereptr, Args&& ... _Val)
         { // reallocate and insert by perfectly forwarding _Val at _Whereptr
           // pre: !_Has_unused_capacity()
             const size_type _Whereoff = static_cast<size_type>(_Whereptr - this->_First);
@@ -727,7 +726,7 @@ struct exe_vector_helper<exe_allocator<T> >
             pointer _Constructed_first = _Constructed_last;
 
             NH3API_CONSTEXPR_VAR bool nothrow_constructible =
-            nh3api::tt::is_nothrow_constructible<value_type, Args NH3API_ARGS_DOTS>::value;
+            nh3api::tt::is_nothrow_constructible<value_type, Args ...>::value;
 
             NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE
             (
@@ -816,8 +815,8 @@ struct exe_vector_helper<exe_allocator<T> >
             return *this;
         }
 
-        template<class NH3API_ARGS_DOTS Args>
-        iterator emplace( const_iterator _Where, Args&& NH3API_ARGS_DOTS args )
+        template<class ... Args>
+        iterator emplace( const_iterator _Where, Args&& ... args )
         {
             const pointer _Whereptr = const_cast<const pointer>(_Where);
             const pointer _Oldlast  = this->_Last;
@@ -829,11 +828,11 @@ struct exe_vector_helper<exe_allocator<T> >
             {
                 if (_Whereptr == _Oldlast)
                 { // at back, provide strong guarantee
-                    _Emplace_back_with_unused_capacity(std::forward<Args>(args) NH3API_ARGS_DOTS);
+                    _Emplace_back_with_unused_capacity(std::forward<Args>(args) ...);
                 }
                 else
                 {
-                    value_type _Obj(std::forward<Args>(args) NH3API_ARGS_DOTS); // handle aliasing
+                    value_type _Obj(std::forward<Args>(args) ...); // handle aliasing
                     // after constructing _Obj, provide basic guarantee
                     helper.construct(_Oldlast, std::move(_Oldlast[-1]));
                     ++this->_Last;
@@ -844,7 +843,7 @@ struct exe_vector_helper<exe_allocator<T> >
                 return _Whereptr;
             }
 
-            return _Emplace_reallocate(_Whereptr, std::forward<Args>(args) NH3API_ARGS_DOTS);
+            return _Emplace_reallocate(_Whereptr, std::forward<Args>(args) ...);
         }
 
         void push_back(value_type&& value)
@@ -852,20 +851,20 @@ struct exe_vector_helper<exe_allocator<T> >
             emplace_back(value);
         }
 
-        template<class NH3API_ARGS_DOTS Args>
+        template<class ... Args>
         #if NH3API_CHECK_CPP17
         reference
         #else
         void
         #endif
-        emplace_back( Args&& NH3API_ARGS_DOTS args )
+        emplace_back( Args&& ... args )
         {
             if (_Has_unused_capacity())
             {
-                return (_Emplace_back_with_unused_capacity(std::forward<Args>(args) NH3API_ARGS_DOTS));
+                return (_Emplace_back_with_unused_capacity(std::forward<Args>(args) ...));
             }
 
-            reference _Result = *_Emplace_reallocate(this->_Last, std::forward<Args>(args) NH3API_ARGS_DOTS);
+            reference _Result = *_Emplace_reallocate(this->_Last, std::forward<Args>(args) ...);
         #if NH3API_CHECK_CPP17
             return _Result;
         #else
@@ -1829,45 +1828,13 @@ struct exe_vector_helper<exe_allocator<T> >
 
 //}; // namespace nh3api
 
-namespace std
-{
-
 #if !NH3API_STD_MOVE_SEMANTICS
 template< class T, class Alloc >
 NH3API_FORCEINLINE
-void swap( exe_vector<T, Alloc>& lhs,
-           exe_vector<T, Alloc>& rhs )
-         NH3API_NOEXCEPT_EXPR(lhs.swap(rhs))
-{
-    lhs.swap(rhs);
-}
+void std::swap( exe_vector<T, Alloc>& lhs,
+                exe_vector<T, Alloc>& rhs )
+{ lhs.swap(rhs); }
 #endif
-
-#ifdef __cpp_lib_erase_if
-template<class T, class Alloc, class U>
-NH3API_INLINE_LARGE
-typename exe_vector<T, Alloc>::size_type
-erase(exe_vector<T, Alloc>& vec, const U& value)
-{
-    typename exe_vector<T, Alloc>::iterator it = std::remove(vec.begin(), vec.end(), value);
-    typename exe_vector<T, Alloc>::size_type r = vec.end() - it;
-    vec.erase(it, vec.end());
-    return r;
-}
-
-template<class T, class Alloc, class Pred>
-NH3API_INLINE_LARGE
-typename exe_vector<T, Alloc>::size_type
-erase_if( exe_vector<T, Alloc>& vec, Pred pred )
-{
-    typename exe_vector<T, Alloc>::iterator it = std::remove_if(vec.begin(), vec.end(), pred);
-    typename exe_vector<T, Alloc>::size_type r = vec.end() - it;
-    vec.erase(it, vec.end());
-    return r;
-}
-#endif
-
-} // namespace std
 
 template<class T,
     class _Alloc> NH3API_FORCEINLINE

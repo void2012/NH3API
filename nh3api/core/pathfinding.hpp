@@ -7,12 +7,12 @@
 #pragma once
 
 #ifndef _WINDEF_
-#include <windef.h> // windef.h is heavy... and only for the sake of RECT
+#include <windef.h> // windef.h is heavy... and only for the sake of RECT!!!
 #endif
 
 #include "nh3api_std/exe_vector.hpp"
-#include "skills.hpp"
-#include "terrain.hpp"
+#include "skills.hpp" // TSkillMastery
+#include "terrain.hpp" // type_point
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 

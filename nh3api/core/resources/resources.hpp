@@ -6,9 +6,9 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "../nh3api_std/exe_vector.hpp"
-#include "../nh3api_std/exe_string.hpp"
-#include "../nh3api_std/exe_map.hpp"
+#include "../nh3api_std/exe_vector.hpp" // exe_vector
+#include "../nh3api_std/exe_string.hpp" // exe_string, nh3api::default_hash
+#include "../nh3api_std/exe_map.hpp"    // exe_map
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -1700,23 +1700,17 @@ NH3API_FORCEINLINE exe_string& GetDataPath()
 
 } // namespace ResourceManager
 
-#if NH3API_VS2012_2013 || NH3API_CHECK_CPP11
-#include "../nh3api_std/hash.hpp"
-
-// hash support for ResourceManager::TCacheMapKey
-namespace std 
+#if NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010 || NH3API_CHECK_CPP11
+// std::hash support for ResourceManager::TCacheMapKey
+template<>
+class std::hash< ResourceManager::TCacheMapKey >
 {
-    template<>
-    class hash< ResourceManager::TCacheMapKey >
-    {
-        public:
-            size_t operator()(const ResourceManager::TCacheMapKey& key) NH3API_NOEXCEPT
-            {
-                return ::nh3api::hash_string(key.name.data(), strnlen_s(key.name.data(), key.name.size()));
-            }
-    };
-}
-
+    public:
+        size_t operator()(const ResourceManager::TCacheMapKey& key) NH3API_NOEXCEPT
+        {
+            return ::nh3api::hash_string(key.name.data(), strnlen_s(key.name.data(), key.name.size()));
+        }
+};
 #endif
 
 NH3API_DISABLE_WARNING_END

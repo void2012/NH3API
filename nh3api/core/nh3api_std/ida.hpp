@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "type_traits.hpp"
 #include <intrin.h>
+#include "type_traits.hpp"
 
 // Partially defined types. They are used when the decompiler does not know
 // anything about the type except its size.

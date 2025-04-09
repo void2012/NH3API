@@ -7,8 +7,6 @@
 #pragma once
 
 #include "nh3api_std/memory.hpp"
-#include <cstring>
-#include <utility>
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 

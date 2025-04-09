@@ -21,11 +21,11 @@
 #pragma component(mintypeinfo, on)
 #endif
 
-#if NH3API_CHECK_CPP11 || NH3API_VS2010
+#if NH3API_CHECK_CPP11 || NH3API_MSVC_STL_VERSION >= NH3API_MSVC_STL_VERSION_2010
 #include <type_traits> // something works since vs2010
 #endif
 
-#if NH3API_VS2010_ONLY
+#if NH3API_MSVC_STL_VERSION == NH3API_MSVC_STL_VERSION_2010
 namespace nh3api
 {
 
@@ -128,16 +128,11 @@ struct is_nothrow_move_constructible :
 } // namespace tt
 } // namespace nh3api
 
-#elif NH3API_CHECK_CPP11 // NH3API_VS2010_ONLY
+#elif NH3API_CHECK_CPP11 || NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010
 namespace nh3api
 {
 using ::std::declval;
-} // namespace nh3api
-#endif
 
-#if NH3API_VS2012_2013 || NH3API_CHECK_CPP11
-namespace nh3api
-{
 namespace tt
 {
 using ::std::is_move_constructible;
@@ -161,7 +156,6 @@ using void_t = void;
 } // namespace tt
 } // namespace nh3api
 #endif // if NH3API_CHECK_CPP11
-
 
 namespace nh3api
 {
@@ -213,17 +207,21 @@ using ::std::is_bounded_array;
 #endif
 } // namespace tt
 
+#ifdef __cpp_lib_as_const
+using ::std::as_const;
+#else
 template<class T> NH3API_NODISCARD NH3API_MSVC_INTRIN NH3API_CONSTEXPR
 typename tt::add_const<T>::type& as_const(T& t) NH3API_NOEXCEPT
 { return t; }
+#endif
 
-template<typename T> NH3API_NODISCARD NH3API_MSVC_INTRIN NH3API_CONSTEXPR
-typename tt::make_unsigned<T>::type to_unsigned(T arg)
-{ return static_cast<typename tt::make_unsigned<T>::type>(arg); }
-
+#ifdef __cpp_lib_to_underlying
+using ::std::to_underlying;
+#else
 template<class Enum> NH3API_NODISCARD NH3API_MSVC_INTRIN NH3API_CONSTEXPR
 typename tt::underlying_type<Enum>::type to_underlying(Enum arg) NH3API_NOEXCEPT
 { return static_cast<typename tt::underlying_type<Enum>::type>(arg); }
+#endif
 
 } // namespace nh3api
 

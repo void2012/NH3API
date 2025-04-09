@@ -6,12 +6,16 @@
 //===----------------------------------------------------------------------===//
 #pragma once 
 
+#ifdef __has_include 
+    #if __has_include(<yvals_core.h>) && defined(_MSC_VER) && defined(__MINGW32__)
+        #include <yvals_core.h>
+    #elif __has_include(<string_view>)
+        #include <string_view>
+    #endif
+#endif
+
 #include "type_traits.hpp" // is_unsigned
 #include "intrin.hpp" // strlen_constexpr
-
-#ifdef __cpp_lib_string_view
-#include <string_view> // std::string_view
-#endif
 
 namespace nh3api 
 {
