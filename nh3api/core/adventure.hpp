@@ -228,7 +228,6 @@ class advManager : public baseManager
 
     // public variables
     public:
-
         // Multiplayer message handler /
         // Обработчик онлайн-сообщений.
         // offset: +0x38 = +56,  size = 0x4 = 4
@@ -379,8 +378,8 @@ class advManager : public baseManager
         // Не используется, = 0.
         // offset: +0x108 = +264,  size = 0x4 = 4
         int32_t flagFrame;
-    public:
 
+    public:
         // Cursor sprites /
         // Спрайты курсоров.
         // offset: +0x10C = +268,  size = 0x48 = 72
@@ -428,7 +427,6 @@ class advManager : public baseManager
         int32_t heroBaseFrame;
 
     public:
-
         // Current hero sprite sequence /
         // Текущая группа спрайта героя.
         // offset: +0x1FC = +508,  size = 0x4 = 4
