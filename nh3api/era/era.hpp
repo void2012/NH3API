@@ -316,7 +316,7 @@ std::string tr(const char* key, const std::vector<std::string>& params) NH3API_N
 
 /** Translates given key, using pairs of (key, value) params for translation */
 NH3API_FORCEINLINE ERA_MEM(char*) __stdcall tr(const char* const key, const char* const * const params, int32_t LastParamsIndex) NH3API_NOEXCEPT
-{ return STDCALL_3(ERA_MEM(char*), reinterpret_cast<uintptr_t>(&::Era_imports::tr), key, params, LastParamsIndex); }
+{ return STDCALL_3(char*, reinterpret_cast<uintptr_t>(&::Era_imports::tr), key, params, LastParamsIndex); }
 
 /** Translates given key and returns persistent pointer to translation */
 NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall trStatic(const char* const key) NH3API_NOEXCEPT
@@ -364,13 +364,13 @@ NH3API_FORCEINLINE TXVars* __stdcall GetRetXVars() NH3API_NOEXCEPT
 
 /** Returns human readable string for ERM event ID. Usually it's ERM trigger human readable name or ERM function name. */
 NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetTriggerReadableName(int32_t TriggerId) NH3API_NOEXCEPT
-{ return STDCALL_1(ERA_MEM(char*), reinterpret_cast<uintptr_t>(&::Era_imports::GetTriggerReadableName), TriggerId); }
+{ return STDCALL_1(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetTriggerReadableName), TriggerId); }
 
 NH3API_FORCEINLINE int32_t __stdcall GetAssocVarIntValue(const char* const VarName) NH3API_NOEXCEPT
 { return STDCALL_1(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::GetAssocVarIntValue), VarName); }
 
 NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetAssocVarStrValue(const char* const VarName) NH3API_NOEXCEPT
-{ return STDCALL_1(ERA_MEM(char*), reinterpret_cast<uintptr_t>(&::Era_imports::GetAssocVarStrValue), VarName); }
+{ return STDCALL_1(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetAssocVarStrValue), VarName); }
 
 NH3API_FORCEINLINE void __stdcall SetAssocVarIntValue(const char* const VarName, int32_t NewValue) NH3API_NOEXCEPT
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::SetAssocVarIntValue), VarName, NewValue); }
@@ -386,7 +386,7 @@ NH3API_FORCEINLINE int32_t __stdcall GetEraRegistryIntValue(const char* const Va
 { return STDCALL_1(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::GetEraRegistryIntValue), VarName); }
 
 NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetEraRegistryStrValue(const char* const VarName) NH3API_NOEXCEPT
-{ return STDCALL_1(ERA_MEM(char*), reinterpret_cast<uintptr_t>(&::Era_imports::GetEraRegistryStrValue), VarName); }
+{ return STDCALL_1(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetEraRegistryStrValue), VarName); }
 
 NH3API_FORCEINLINE void __stdcall SetEraRegistryIntValue(const char* const VarName, int32_t NewValue) NH3API_NOEXCEPT
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::SetEraRegistryIntValue), VarName, NewValue); }
@@ -421,10 +421,10 @@ NH3API_FORCEINLINE bool32_t __stdcall IsCampaign() NH3API_NOEXCEPT
 { return STDCALL_0(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::IsCampaign)); }
 
 NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetCampaignFileName() NH3API_NOEXCEPT
-{ return STDCALL_0(ERA_MEM(char*), reinterpret_cast<uintptr_t>(&::Era_imports::GetCampaignFileName)); }
+{ return STDCALL_0(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetCampaignFileName)); }
 
 NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetMapFileName() NH3API_NOEXCEPT
-{ return STDCALL_0(ERA_MEM(char*), reinterpret_cast<uintptr_t>(&::Era_imports::GetMapFileName)); }
+{ return STDCALL_0(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetMapFileName)); }
 
 NH3API_FORCEINLINE int32_t __stdcall GetCampaignMapInd() NH3API_NOEXCEPT
 { return STDCALL_0(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::GetCampaignMapInd)); }
