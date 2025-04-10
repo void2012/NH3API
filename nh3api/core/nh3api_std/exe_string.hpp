@@ -303,7 +303,7 @@ struct exe_string_helper<char, std::char_traits<char>, exe_allocator<char> >
             #if NH3API_CHECK_CPP14
             return nh3api::memmove_constexpr<char, const char>(dst, src, n);
             #else
-            nh3api::str_func_chooser<char>::_memmove(dst, src, n);
+            return nh3api::str_func_chooser<char>::_memmove(dst, src, n);
             #endif
         }
 
@@ -469,7 +469,7 @@ struct exe_string_helper<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
             #if NH3API_CHECK_CPP14
             return nh3api::memmove_constexpr<wchar_t, const wchar_t>(dst, src, n);
             #else
-            nh3api::str_func_chooser<wchar_t>::_memmove(dst, src, n);
+            return nh3api::str_func_chooser<wchar_t>::_memmove(dst, src, n);
             #endif
         }
 
