@@ -343,7 +343,7 @@ template<typename IterT, bool IsIterator = is_iterator<IterT>::value>
 struct is_random_access_iterator
     : integral_constant<bool, 
     is_same<
-    typename ::std::iterator_traits<IterT>::category, 
+    typename ::std::iterator_traits<IterT>::iterator_category, 
     ::std::random_access_iterator_tag>::value>
 {};
 

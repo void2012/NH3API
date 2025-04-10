@@ -12,6 +12,7 @@
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
+NH3API_DISABLE_MSVC_WARNING_BEGIN(4341)
 // Victory condition type /
 // Тип условия победы.
 enum EVictoryConditionType : int8_t
@@ -33,7 +34,9 @@ enum EVictoryConditionType : int8_t
 
     MAX_VICTORY_CONDITIONS = 13
 };
+NH3API_DISABLE_MSVC_WARNING_END
 
+NH3API_DISABLE_MSVC_WARNING_BEGIN(4341)
 // Loss condition type /
 // Тип условия поражения.
 enum ELossConditionType : int8_t
@@ -45,6 +48,7 @@ enum ELossConditionType : int8_t
 
     MAX_LOSS_CONDITIONS = 3
 };
+NH3API_DISABLE_MSVC_WARNING_END
 
 class town;
 class hero;
@@ -207,7 +211,7 @@ struct LossConditionStruct
         { return THISCALL_2(bool, 0x5F31B0, this, loser); }
 
         bool CheckForDefeatedTownLoss(int32_t old_owner, const town* lost_town)
-        { return THISCALL_3(char, 0x5F31E0, this, old_owner, lost_town); }
+        { return THISCALL_3(bool, 0x5F31E0, this, old_owner, lost_town); }
 
         bool CheckForTimeLimitExpired()
         { return THISCALL_1(bool, 0x5F32C0, this); }

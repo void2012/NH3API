@@ -206,17 +206,17 @@ NH3API_VIRTUAL_STRUCT TPalette24 : public resource
 public:
     NH3API_FORCEINLINE
     TPalette24() NH3API_NOEXCEPT
-    NH3API_DELEGATE_DUMMY(TPalette24)
+    NH3API_DELEGATE_DUMMY_OR_BASE(TPalette24, resource)
     { THISCALL_1(void, 0x523320, this); }
 
     NH3API_FORCEINLINE
     TPalette24(const uint8_t* data) NH3API_NOEXCEPT
-    NH3API_DELEGATE_DUMMY(TPalette24)
+    NH3API_DELEGATE_DUMMY_OR_BASE(TPalette24, resource)
     { THISCALL_2(void, 0x523370, this, data); }
 
     NH3API_FORCEINLINE
     TPalette24(const TRGBA* rgba) NH3API_NOEXCEPT
-    NH3API_DELEGATE_DUMMY(TPalette24)
+    NH3API_DELEGATE_DUMMY_OR_BASE(TPalette24, resource)
     { THISCALL_2(void, 0x5233A0, this, rgba); }
 
     NH3API_FORCEINLINE
@@ -253,12 +253,12 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
     public:
         NH3API_FORCEINLINE
         TPalette16() NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(TPalette16)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette16, resource)
         { THISCALL_1(void, 0x522B40, this); }
 
         NH3API_FORCEINLINE
         TPalette16(uint16_t* p24) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(TPalette16)// resource(nullptr, RType_misc)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette16, resource)
         { THISCALL_2(void, 0x522B90, this, p24); }
 
         NH3API_FORCEINLINE
@@ -269,7 +269,7 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
                    int32_t gshift,
                    int32_t bbits,
                    int32_t bshift) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(TPalette16)// resource(nullptr, RType_misc)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette16, resource)
         { THISCALL_8(void, 0x522BC0, this, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
@@ -281,7 +281,7 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
                    int32_t gshift,
                    int32_t bbits,
                    int32_t bshift) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(TPalette16)// resource(name, RType_palette)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette16, resource)
         { THISCALL_9(void, 0x522C60, this, name, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
@@ -347,7 +347,7 @@ NH3API_VIRTUAL_STRUCT CSpriteFrame : public resource
                      uint16_t* data,
                      int32_t csize,
                      TEncodingMethod encoding) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(CSpriteFrame) // resource(name, RType_sprite)
+        NH3API_DELEGATE_DUMMY_OR_BASE(CSpriteFrame, resource)
         { THISCALL_7(void, 0x47BBD0, this, name, w, h, data, csize, encoding); }
 
         NH3API_FORCEINLINE
@@ -361,7 +361,7 @@ NH3API_VIRTUAL_STRUCT CSpriteFrame : public resource
                      int32_t ch,
                      int32_t cx,
                      int32_t cy) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(CSpriteFrame) // resource(name, RType_sprite)
+        NH3API_DELEGATE_DUMMY_OR_BASE(CSpriteFrame, resource)
         { THISCALL_11(void, 0x47BC80, this, name, w, h, data, csize, encoding, cw, ch, cx, cy); }
 
         NH3API_FORCEINLINE
@@ -599,7 +599,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
     public:
         NH3API_FORCEINLINE
         CSprite(const char* name, EResourceType sprtype, int32_t w, int32_t h) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(CSprite) // resource(name, sprtype)
+        NH3API_DELEGATE_DUMMY_OR_BASE(CSprite, resource)
         { THISCALL_5(void, 0x47B240, this, name, sprtype, w, h); }
 
         NH3API_FORCEINLINE
@@ -951,12 +951,12 @@ NH3API_VIRTUAL_STRUCT Bitmap16Bit : public resource
     public:
         NH3API_FORCEINLINE
         Bitmap16Bit(int32_t w, int32_t h) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(Bitmap16Bit) // resource(nullptr, RType_misc)
+        NH3API_DELEGATE_DUMMY_OR_BASE(Bitmap16Bit, resource)
         { THISCALL_3(void, 0x44DC40, this, w, h); }
 
         NH3API_FORCEINLINE
         Bitmap16Bit(const char* name, int32_t w, int32_t h) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(Bitmap16Bit) // resource(name, RType_bitmap16)
+        NH3API_DELEGATE_DUMMY_OR_BASE(Bitmap16Bit, resource)
         { THISCALL_4(void, 0x44DD20, this, name, w, h); }
 
         NH3API_FORCEINLINE
@@ -1073,7 +1073,7 @@ NH3API_VIRTUAL_STRUCT Bitmap816 : public resource
                   uint8_t* data,
                   TPalette16* p16,
                   int32_t csize) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(Bitmap816)
+        NH3API_DELEGATE_DUMMY_OR_BASE(Bitmap816, resource)
         { THISCALL_7(void, 0x44F4D0, this, name, w, h, data, p16, csize); }
 
         NH3API_FORCEINLINE
@@ -1085,7 +1085,7 @@ NH3API_VIRTUAL_STRUCT Bitmap816 : public resource
                   int32_t gshift,
                   int32_t bbits,
                   int32_t bshift) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(Bitmap816)
+        NH3API_DELEGATE_DUMMY_OR_BASE(Bitmap816, resource)
         { THISCALL_9(void, 0x44F5A0, this, name, path, rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
@@ -1178,12 +1178,12 @@ NH3API_VIRTUAL_STRUCT Bitmap24Bit : public resource
     public:
         NH3API_FORCEINLINE
         Bitmap24Bit(const char* name, int32_t w, int32_t h, const uint8_t* data, int32_t size)
-        NH3API_DELEGATE_DUMMY(Bitmap24Bit) // resource(name, RType_bitmap24)
+        NH3API_DELEGATE_DUMMY_OR_BASE(Bitmap24Bit, resource) // resource(name, RType_bitmap24)
         { THISCALL_6(void, 0x44EA20, this, name, w, h, data, size); }
 
         NH3API_FORCEINLINE
         Bitmap24Bit(const char* name, const char* path)
-        NH3API_DELEGATE_DUMMY(Bitmap24Bit) // resource(name, RType_bitmap24)
+        NH3API_DELEGATE_DUMMY_OR_BASE(Bitmap24Bit, resource) // resource(name, RType_bitmap24)
         { THISCALL_3(void, 0x44EAD0, this, name, path); }
 
         NH3API_FORCEINLINE
@@ -1276,19 +1276,19 @@ NH3API_VIRTUAL_STRUCT font : public resource
             int32_t numpal;
 
             // offset: +0xC = +12,  size = 0x14 = 20
-            std::array<uint16_t, 10> pal;
+            ::std::array<uint16_t, 10> pal;
 
             // offset: +0x20 = +32,  size = 0xC00 = 3072
-            std::array<myABC, 256> abc;
+            ::std::array<myABC, 256> abc;
 
             // offset: +0xC20 = +3104,  size = 0x400 = 1024
-            std::array<uint32_t, 256> Offset;
+            ::std::array<uint32_t, 256> Offset;
 
         };
 
         // Font color /
         // Цвет шрифта.
-        enum TColor
+        enum TColor : int32_t
         {
             PRIMARY                = 1,
             PRIMARY_HIGHLIGHT      = 2,
@@ -1312,7 +1312,7 @@ NH3API_VIRTUAL_STRUCT font : public resource
 
         // Font justification /
         // Выравнивание шрифта.
-        enum EJustify
+        enum EJustify : int32_t
         {
             LEFT_JUSTIFIED         = 0, // Выравнивание по левому краю
             CENTER_JUSTIFIED       = 1, // Выравнивание по центру
@@ -1324,7 +1324,7 @@ NH3API_VIRTUAL_STRUCT font : public resource
     public:
         NH3API_FORCEINLINE
         font(const char* name, const TFontSpec& fontspec, int32_t dsize, bool* d) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(font)
+        NH3API_DELEGATE_DUMMY_OR_BASE(font, resource)
         { THISCALL_5(void, 0x4B4DD0, this, name, &fontspec, dsize, d); }
 
         NH3API_FORCEINLINE
@@ -1472,7 +1472,7 @@ NH3API_VIRTUAL_STRUCT TTextResource : public resource
     public:
         NH3API_FORCEINLINE
         TTextResource(const char* name, int32_t size, const char* data) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(TTextResource)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TTextResource, resource)
         { THISCALL_4(void,  0x5BBF90, this, name, size, data); }
 
         TTextResource(const nh3api::dummy_tag_t& tag)
@@ -1523,7 +1523,7 @@ NH3API_VIRTUAL_STRUCT TSpreadsheetResource : public resource
 {
     public:
         TSpreadsheetResource(const char* name, int32_t size, const char* data)
-        NH3API_DELEGATE_DUMMY(TSpreadsheetResource) // resource(name, RType_text)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TSpreadsheetResource, resource) // resource(name, RType_text)
         { THISCALL_4(void, 0x5BC260, this, name, size, data); }
 
         TSpreadsheetResource(const nh3api::dummy_tag_t& tag)
@@ -1584,17 +1584,17 @@ namespace ResourceManager
 struct TCacheMapKey
 {
     public:
-        TCacheMapKey(const char * _name)
-        { std::copy_n(_name, 12, name.data()); name.back() = '\0'; }
+        TCacheMapKey(const char * _name) NH3API_NOEXCEPT
+        { nh3api::copy_n_constexpr(_name, 12, name.data()); name.back() = '\0'; }
 
-        bool operator<(TCacheMapKey const & rhf)const
-        { return _stricmp(this->name.data(), rhf.name.data()) < 0; }
+        bool operator<(TCacheMapKey const& rhf) const NH3API_NOEXCEPT
+        { return ::nh3api::case_insensitive_traits::compare(this->name.data(), rhf.name.data(), this->name.size()) < 0; }
 
     public:
         // Resource name /
         // Длина ресурса.
         // offset: +0x0 = +0,  size = 0xC = 12
-        std::array<char, 13> name;
+        ::std::array<char, 13> name;
 };
 #pragma pack(pop)
 

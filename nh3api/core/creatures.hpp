@@ -6,8 +6,8 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std/exe_string.hpp"
-#include "terrain.hpp" // EMagicTerrain, TTerrainType
+#include "nh3api_std/exe_string.hpp" // exe_string
+#include "terrain.hpp" // EMagicTerrain, TTerrainType, TTownType, kNumTowns
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -357,7 +357,6 @@ enum creature_flags : uint32_t
 
 };
 
-enum TTownType : int32_t;
 #pragma pack(push, 4)
 // Creature traits /
 // Свойства существ.
@@ -578,7 +577,7 @@ public:
     // Can creature of type <monType> join army? /
     // Может ли существо типа <monType> присоединится?
     bool    CanJoin(TCreatureType monType) const
-    { return THISCALL_2(int32_t, 0x44A920, this, monType); }
+    { return !!THISCALL_2(bool32_t, 0x44A920, this, monType); }
 
     // Sum AI_value of each creature /
     // Посчитать сумму AI_value всей армии.
@@ -596,7 +595,7 @@ public:
     /// @param newNumTroops Количество существ
     /// @param newIndex Индекс добавления
     bool    Add(TCreatureType armyType, int32_t newNumTroops, int32_t newIndex)
-    { return THISCALL_4(int32_t, 0x44A9B0, this, armyType, newNumTroops, newIndex); }
+    { return !!THISCALL_4(bool32_t, 0x44A9B0, this, armyType, newNumTroops, newIndex); }
 
     // Swap two armies stacks. Use std::swap to swap whole two armies /
     // Обмен ячеек двух армий. Используйте std::swap чтобы полностью обменять ячейки двух армией.

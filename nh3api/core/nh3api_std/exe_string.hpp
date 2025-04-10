@@ -44,7 +44,7 @@ typename _E,
 typename _Tr = std::char_traits<_E>,
 typename _A = exe_allocator<_E>
 >
-struct NH3API_NODEBUG exe_string_helper
+struct exe_string_helper
 {
     public:
         typedef _A allocator_type;
@@ -804,12 +804,6 @@ public:
         }
     }
 
-    exe_basic_string(const nh3api::dummy_tag_t& tag)
-        : helper(tag)
-    {
-        NH3API_IGNORE(_Ptr, _Len, _Res);
-    }
-
     exe_basic_string& operator=(exe_basic_string&& other)
         NH3API_NOEXCEPT_EXPR(helper_type::is_always_equal::value)
     { return assign(std::forward<exe_basic_string>(other)); }
@@ -848,6 +842,12 @@ public:
     }
 
     #endif
+
+    exe_basic_string(const nh3api::dummy_tag_t& tag)
+        : helper(tag)
+    {
+        NH3API_IGNORE(_Ptr, _Len, _Res);
+    }
 
     NH3API_FLATTEN
     ~exe_basic_string()
@@ -1907,8 +1907,8 @@ template<class _Elem,
 
 #if !NH3API_STD_MOVE_SEMANTICS
 template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-void std::swap(const exe_basic_string<_E, _Tr, _A>& lhs,
-               const exe_basic_string<_E, _Tr, _A>& rhs)
+void swap(const exe_basic_string<_E, _Tr, _A>& lhs,
+          const exe_basic_string<_E, _Tr, _A>& rhs) // ADL swap
 { lhs.swap(rhs); }
 #endif
 
@@ -2153,6 +2153,56 @@ char digit_to_char(int32_t digit, char) NH3API_NOEXCEPT
 NH3API_FORCEINLINE NH3API_CONSTEXPR
 wchar_t digit_to_char(int32_t digit, wchar_t) NH3API_NOEXCEPT
 { return L'0' + static_cast<wchar_t>(digit); }
+
+// convert letter character to lowercase
+NH3API_CONST NH3API_FORCEINLINE NH3API_CONSTEXPR 
+char fast_tolower(const char c) NH3API_NOEXCEPT
+{ return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; }
+
+struct case_insensitive_traits : public ::std::char_traits<char>
+{
+    static NH3API_CONST NH3API_CONSTEXPR bool eq(char c1, char c2) NH3API_NOEXCEPT
+    {
+        return fast_tolower(c1) == fast_tolower(c2);
+    }
+
+    static NH3API_CONST NH3API_CONSTEXPR bool ne(char c1, char c2) NH3API_NOEXCEPT
+    {
+        return fast_tolower(c1) != fast_tolower(c2);
+    }
+
+    static NH3API_CONST NH3API_CONSTEXPR bool lt(char c1, char c2) NH3API_NOEXCEPT
+    {
+        return fast_tolower(c1) < fast_tolower(c2);
+    }
+
+    static NH3API_CONSTEXPR int compare(const char* s1, const char* s2, size_t n) NH3API_NOEXCEPT
+    {
+        while (n-- != 0)
+        {
+            if (fast_tolower(*s1) < fast_tolower(*s2))
+                return -1;
+            if (fast_tolower(*s1) > fast_tolower(*s2))
+                return 1;
+            ++s1; 
+            ++s2;
+        }
+        return 0;
+    }
+
+    static NH3API_CONSTEXPR const char* find(const char* s, int n, char a) NH3API_NOEXCEPT
+    {
+        while ( n-- > 0)
+        {
+            if (fast_tolower(*s) == fast_tolower(a))
+            {
+                return s;
+            }
+            ++s;
+        }
+        return nullptr;
+    }
+};
 
 // fast algorithm by void_17
 template<class StringT>

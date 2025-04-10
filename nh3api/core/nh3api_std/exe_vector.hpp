@@ -11,6 +11,7 @@
 
 #pragma once
 
+
 #include "nh3api_std.hpp"
 #include "memory.hpp"
 #include "algorithm.hpp"
@@ -21,10 +22,15 @@
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
+// Disable warning for std::uninitialized_xyz on old MSVC STL
+#if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
+NH3API_DISABLE_MSVC_WARNING_BEGIN(4996)
+#endif
+
 //namespace
 //{
 template<typename AllocatorT>
-struct NH3API_NODEBUG exe_vector_helper
+struct exe_vector_helper
 {
     public:
         typedef AllocatorT allocator_type;
@@ -416,7 +422,7 @@ struct exe_vector_helper<exe_allocator<T> >
         #if !defined(NH3API_FLAG_NO_CPP_EXCEPTIONS)
         nh3api::tt::is_nothrow_copy_constructible<_Ty>
         #else
-        std::false_type
+        nh3api::tt::false_type
         #endif
         noexcept_copy;
 
@@ -424,7 +430,7 @@ struct exe_vector_helper<exe_allocator<T> >
         #if NH3API_STD_MOVE_SEMANTICS && !defined(NH3API_FLAG_NO_CPP_EXCEPTIONS)
         nh3api::tt::is_nothrow_move_constructible<_Ty>
         #else
-        std::false_type
+        nh3api::tt::false_type
         #endif
         noexcept_move;
 
@@ -935,11 +941,20 @@ struct exe_vector_helper<exe_allocator<T> >
         }
 
     protected:
+
+        #if NH3API_CHECK_MSVC && !NH3API_VS2010 
+        iterator _Add_alignment_assumption(pointer ptr) NH3API_NOEXCEPT
+        { return nh3api::assume_aligned<__alignof(value_type)>(ptr); }
+
+        const_iterator _Add_alignment_assumption(const_pointer ptr) const NH3API_NOEXCEPT
+        { return nh3api::assume_aligned<__alignof(value_type)>(ptr); }
+        #else 
         iterator _Add_alignment_assumption(pointer ptr) NH3API_NOEXCEPT
         { return nh3api::assume_aligned<nh3api::tt::alignment_of<value_type>::value>(ptr); }
 
         const_iterator _Add_alignment_assumption(const_pointer ptr) const NH3API_NOEXCEPT
         { return nh3api::assume_aligned<nh3api::tt::alignment_of<value_type>::value>(ptr); }
+        #endif
 
     public:
         iterator begin() NH3API_NOEXCEPT
@@ -1831,8 +1846,7 @@ struct exe_vector_helper<exe_allocator<T> >
 #if !NH3API_STD_MOVE_SEMANTICS
 template< class T, class Alloc >
 NH3API_FORCEINLINE
-void std::swap( exe_vector<T, Alloc>& lhs,
-                exe_vector<T, Alloc>& rhs )
+void swap( exe_vector<T, Alloc>& lhs, exe_vector<T, Alloc>& rhs ) // ADL swap
 { lhs.swap(rhs); }
 #endif
 
@@ -1885,5 +1899,9 @@ template<class T,
 {	// test if _Left >= _Right for vectors
     return (!(_Left < _Right));
 }
+
+#if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
+NH3API_DISABLE_MSVC_WARNING_END
+#endif
 
 NH3API_DISABLE_WARNING_END

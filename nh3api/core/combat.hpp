@@ -390,7 +390,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         { return THISCALL_1(bool, 0x465410, this); }
 
         bool IsWinner(int32_t this_side) const
-        { return THISCALL_2(char, 0x465490, this, this_side); }
+        { return THISCALL_2(bool, 0x465490, this, this_side); }
 
         static TWallTargetId GetTargetWallIndex(int32_t grid_index)
         { return FASTCALL_1(TWallTargetId, 0x465550, grid_index); }
@@ -489,7 +489,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         { return THISCALL_3(bool, 0x475D20, this, group, index); }
 
         bool valid_wall_target(TWallTargetId wall_target) const
-        { return static_cast<bool>(THISCALL_2(bool32_t, 0x475D70, this, wall_target)); }
+        { return !!THISCALL_2(bool32_t, 0x475D70, this, wall_target); }
 
         int32_t get_surrender_cost() const
         { return THISCALL_1(int32_t, 0x477330, this); }

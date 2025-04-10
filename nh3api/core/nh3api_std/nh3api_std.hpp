@@ -275,9 +275,24 @@
     #endif
 #endif
 
+#ifndef NH3API_DISABLE_MSVC_WARNING_BEGIN
+    #if NH3API_CHECK_MSVC 
+        #define NH3API_DISABLE_MSVC_WARNING_BEGIN(WARNING_NUMBER) NH3API_PRAGMA(warning(push)) \
+                                                  NH3API_PRAGMA(warning(disable : WARNING_NUMBER))
+        #define NH3API_DISABLE_MSVC_WARNING_END   NH3API_PRAGMA(warning(pop))                              
+    #else 
+        #define NH3API_DISABLE_MSVC_WARNING_BEGIN(WARNING_NUMBER)
+        #define NH3API_DISABLE_MSVC_WARNING_END
+    #endif
+#endif
+
 // disable useless C++ warnings
 #if NH3API_CHECK_MSVC
-// MSVC warnings
+#if !NH3API_STD_MOVE_SEMANTICS
+// Qualifying an enumerator by the enumeration name is an C++98 Microsoft extension 
+// standardized since C++11
+NH3API_DISABLE_WARNING(4482) 
+#endif
 #else
 // GCC/Clang warnings
 NH3API_DISABLE_WARNING("-Wc++98-compat") // C++98 compatibility
@@ -944,6 +959,14 @@ const omit_base_vftable_tag;
         #define NH3API_DELEGATE_DUMMY(CLASS_NAME) : CLASS_NAME(nh3api::dummy_tag)
     #else
         #define NH3API_DELEGATE_DUMMY(CLASS_NAME)
+    #endif
+#endif
+
+#ifndef NH3API_DELEGATE_DUMMY_OR_BASE
+    #if NH3API_STD_DELEGATING_CONSTRUCTORS
+        #define NH3API_DELEGATE_DUMMY_OR_BASE(CLASS_NAME, BASE) : CLASS_NAME(nh3api::dummy_tag)
+    #else
+        #define NH3API_DELEGATE_DUMMY_OR_BASE(CLASS_NAME, BASE) : BASE(nh3api::dummy_tag)
     #endif
 #endif
 

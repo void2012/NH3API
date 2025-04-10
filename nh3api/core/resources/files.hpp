@@ -419,12 +419,12 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
         { return lod_file; }
 
         NH3API_NODISCARD
-        bool is_open() const  NH3API_NOEXCEPT
+        bool is_open() const NH3API_NOEXCEPT
         { 
             if (lod_file == nullptr)
                 return false;
             else 
-                return lod_file->opened;
+                return !!lod_file->opened;
         }
 
         // get entry by name

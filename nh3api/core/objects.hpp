@@ -1363,7 +1363,7 @@ class type_obscuring_object
         { return type_point(mapX & 0xFF, mapY & 0xFF, mapZ & 0xFF); }
 
         bool obscured_is_trigger() const
-        { return was_trigger; }
+        { return !!was_trigger; }
 
         //mine* get_obscured_mine() const
         //{ return ( !is_on_map() || get_obscured_type() != OBJECT_MINE || extra_info.Mine.ID == -1 ) ? nullptr : &gpGame->minePool[extra_info]; }

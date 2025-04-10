@@ -23,6 +23,7 @@
  */
 #pragma once
 
+#include <functional> // std::less
 #include "exe_rbtree.hpp"
 
 // clang-format off
@@ -101,8 +102,13 @@ public:
 
 public:
     exe_map() NH3API_NOEXCEPT_ALLOC
+    #if NH3API_STD_DELEGATING_CONSTRUCTORS
         : exe_map(key_compare())
     {}
+    #else 
+        : base_type(key_compare(), true, allocator_type())
+    {}
+    #endif
 
     explicit exe_map(const key_compare &keycomp, const allocator_type& allocator = allocator_type())
     NH3API_NOEXCEPT_ALLOC

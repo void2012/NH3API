@@ -78,7 +78,7 @@ NH3API_FORCEINLINE NH3API_CONSTEXPR
 void destroy(ForwardIt first, ForwardIt last)
 {
     for (; first != last; ++first)
-        destroy_at(nh3api::addressof(*first));
+        destroy_at(::nh3api::addressof(*first));
 }
 
 template<class ForwardIt, class Size>
@@ -86,7 +86,7 @@ NH3API_FORCEINLINE NH3API_CONSTEXPR
 ForwardIt destroy_n(ForwardIt first, Size n)
 {
     for (; n > 0; (void) ++first, --n)
-        destroy_at(nh3api::addressof(*first));
+        destroy_at(::nh3api::addressof(*first));
     return first;
 }
 
@@ -144,7 +144,7 @@ const T& clamp(const T& v, const T& lo, const T& hi, Compare comp)
 
 template<class T> NH3API_CONSTEXPR
 const T& clamp(const T& v, const T& lo, const T& hi)
-{ return clamp(v, lo, hi, nh3api::less_functor<T>{}); }
+{ return clamp(v, lo, hi, less_functor<T>()); }
 #else 
 using ::std::clamp;
 #endif
@@ -181,35 +181,35 @@ NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t operator~(byte_t arg) NH3API_NOEXCEPT
 template <class _Integer>
 NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t& operator<<=(byte_t& lhs, _Integer shift) NH3API_NOEXCEPT
 {
-    NH3API_STATIC_ASSERT("operand must be an integral type", nh3api::tt::is_integral<_Integer>::value);
+    NH3API_STATIC_ASSERT("operand must be an integral type", tt::is_integral<_Integer>::value);
     return lhs = lhs << shift;
 }
 
 template <class _Integer>
 NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t operator<<(byte_t lhs, _Integer shift) NH3API_NOEXCEPT
 {
-    NH3API_STATIC_ASSERT("operand must be an integral type", nh3api::tt::is_integral<_Integer>::value);
+    NH3API_STATIC_ASSERT("operand must be an integral type", tt::is_integral<_Integer>::value);
     return static_cast<byte_t>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) << shift));
 }
 
 template <class _Integer>
 NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t& operator>>=(byte_t& lhs, _Integer shift) NH3API_NOEXCEPT
 {
-    NH3API_STATIC_ASSERT("operand must be an integral type", nh3api::tt::is_integral<_Integer>::value);
+    NH3API_STATIC_ASSERT("operand must be an integral type", tt::is_integral<_Integer>::value);
     return lhs = lhs >> shift;
 }
 
 template <class _Integer>
 NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t operator>>(byte_t lhs, _Integer shift) NH3API_NOEXCEPT
 {
-    NH3API_STATIC_ASSERT("operand must be an integral type", nh3api::tt::is_integral<_Integer>::value);
+    NH3API_STATIC_ASSERT("operand must be an integral type", tt::is_integral<_Integer>::value);
     return static_cast<byte_t>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) >> shift));
 }
 
 template <class _Integer>
 NH3API_CONSTEXPR NH3API_FORCEINLINE _Integer to_integer(byte_t value) NH3API_NOEXCEPT
 {
-    NH3API_STATIC_ASSERT("operand must be an integral type", nh3api::tt::is_integral<_Integer>::value);
+    NH3API_STATIC_ASSERT("operand must be an integral type", tt::is_integral<_Integer>::value);
     return static_cast<_Integer>(value);
 }
 

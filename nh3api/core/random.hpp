@@ -55,7 +55,7 @@ struct TPickANumber
     public:
         NH3API_FORCEINLINE
         TPickANumber(int32_t low, int32_t high) NH3API_NOEXCEPT
-            : TPickANumber(nh3api::dummy_tag)
+        NH3API_DELEGATE_DUMMY(TPickANumber)
         { THISCALL_3(void, 0x50C8D0, this, low, high); }
 
         NH3API_FORCEINLINE

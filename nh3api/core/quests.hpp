@@ -407,8 +407,6 @@ NH3API_VIRTUAL_CLASS type_artifact_quest : public type_quest
 };
 #pragma pack(pop)
 
-enum TCreatureType : int32_t;
-
 #pragma pack(push, 4)
 // Defeat the monster quest /
 // Квест, для выполнения которого необходимо убить определённого монстра.

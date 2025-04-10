@@ -21,28 +21,6 @@ namespace nh3api
 
 namespace tt
 {
-namespace details
-{
-template <typename T>
-struct alignment_of_hack
-{
-    char c;
-    T t;
-    alignment_of_hack();
-};
-
-template <unsigned A, unsigned S>
-struct alignment_logic
-{
-    enum { value = A < S ? A : S };
-};
-
-template<typename T>
-struct alignment_of_impl
-{
-    enum { value = (alignment_logic<sizeof(alignment_of_hack<T>) - sizeof(T), __alignof(T)>::value)};
-};
-} // namespace details
 
 template<bool B, class T = void>
 struct enable_if {};
@@ -62,20 +40,6 @@ template <class T> struct is_same<T&, T&> : public true_type{};
 
 #pragma warning(push)
 #pragma warning(disable: 4121 4512 4324)
-template <typename T> struct alignment_of;
-
-template <class T>
-struct alignment_of : public integral_constant<size_t, details::alignment_of_impl<T>::value>
-{};
-
-template <typename T>
-struct alignment_of<T&> : public alignment_of<T*>
-{};
-
-template<> struct alignment_of<void> : integral_constant<size_t, 0>{};
-template<> struct alignment_of<void const> : integral_constant<size_t, 0>{};
-template<> struct alignment_of<void const volatile> : integral_constant<size_t, 0>{};
-template<> struct alignment_of<void volatile> : integral_constant<size_t, 0>{};
 
 template <bool b, class T, class U>
 struct conditional

@@ -6,6 +6,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <iterator> // std::reverse_iterator
 #include "nh3api_exceptions.hpp"
 
 // NH3API normally implement STL things in its own namespace or use 'using ::std::xyz'
@@ -32,8 +33,8 @@ namespace std // C++98 <array> implementation
             typedef const value_type*			     const_iterator;
             typedef size_t                    	     size_type;
             typedef ptrdiff_t                   	 difference_type;
-            typedef reverse_iterator<iterator>	     reverse_iterator;
-            typedef reverse_iterator<const_iterator> const_reverse_iterator;
+            typedef ::std::reverse_iterator<iterator>	     reverse_iterator;
+            typedef ::std::reverse_iterator<const_iterator> const_reverse_iterator;
 
         public:
             /// @brief fills array with values <arg>
@@ -154,7 +155,7 @@ namespace std // C++98 <array> implementation
             /// @brief
             /// @param pos
             /// @return
-            reference at(size_type pos) throw(std::out_of_range)
+            reference at(size_type pos)
             {
                 return  ( size() < pos ) ? _data[pos] :
                 (NH3API_THROW(std::out_of_range, "std::array::at pos out of range."), _data[pos]);
@@ -163,7 +164,7 @@ namespace std // C++98 <array> implementation
             /// @brief
             /// @param pos
             /// @return
-            const_reference at(size_type pos) const throw(std::out_of_range)
+            const_reference at(size_type pos) const
             {
                 return  ( size() < pos ) ? _data[pos] :
                 (NH3API_THROW(std::out_of_range, "std::array::at pos out of range."), _data[pos]);

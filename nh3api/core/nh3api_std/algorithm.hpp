@@ -6,8 +6,15 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <algorithm> 
+#include "iterator.hpp" // tt::is_random_access_iterator
 #include "memory.hpp"   // exe_allocator
-#include "iterator.hpp" // is_random_access_iterator
+
+// for *whatever* reason old MSVC ignores exe_allocator from memory.hpp
+#if NH3API_CHECK_MSVC && !NH3API_VS2010
+template<class T>
+class exe_allocator;
+#endif
 
 #if NH3API_CHECK_MSVC
 #pragma component(mintypeinfo, on)
@@ -40,7 +47,7 @@ template<typename T, size_t SizeOfT = sizeof(T)>
 struct stosx_chooser
 {
     template<typename IterT>
-    inline void operator()(IterT, const T&, size_t) NH3API_NOEXCEPT
+    inline static void stosx(IterT, const T&, size_t) NH3API_NOEXCEPT
     {} // intentional no-op
 };
 
@@ -48,49 +55,49 @@ template<typename T, size_t SizeOfT = sizeof(T)>
 struct movsx_chooser
 {
     template<typename IterT, typename ConstIterT>
-    inline void operator()(IterT, ConstIterT, size_t) NH3API_NOEXCEPT
+    inline static void movsx(IterT, ConstIterT, size_t) NH3API_NOEXCEPT
     {} // intentional no-op
 };
 
 template<typename T>
 struct stosx_chooser<T, 1>
 {
-    inline void operator()(T* dst, const T& value, size_t count) NH3API_NOEXCEPT
+    inline static void stosx(T* dst, const T& value, size_t count) NH3API_NOEXCEPT
     { __stosb(reinterpret_cast<unsigned char*>(dst), static_cast<unsigned char>(value), (count)); }
 };
 
 template<typename T>
 struct movsx_chooser<T, 1>
 {
-    inline void operator()(T* dst, const T* src, size_t count) NH3API_NOEXCEPT
+    inline static void movsx(T* dst, const T* src, size_t count) NH3API_NOEXCEPT
     { __movsb(reinterpret_cast<unsigned char*>(dst), reinterpret_cast<const unsigned char*>(src), (count)); }
 };
 
 template<typename T>
 struct stosx_chooser<T, 2>
 {
-    inline void operator()(T* dst, const T& value, size_t count) NH3API_NOEXCEPT
+    inline static void stosx(T* dst, const T& value, size_t count) NH3API_NOEXCEPT
     { __stosw(reinterpret_cast<unsigned short*>(dst), static_cast<unsigned short>(value), (count)); }
 };
 
 template<typename T>
 struct movsx_chooser<T, 2>
 {
-    inline void operator()(T* dst, const T* src, size_t count) NH3API_NOEXCEPT
+    inline static void movsx(T* dst, const T* src, size_t count) NH3API_NOEXCEPT
     { __movsw(reinterpret_cast<unsigned short*>(dst), reinterpret_cast<const unsigned short*>(src), (count)); }
 };
 
 template<typename T>
 struct stosx_chooser<T, 4>
 {
-    inline void operator()(T* dst, const T& value, size_t count) NH3API_NOEXCEPT
+    inline static void stosx(T* dst, const T& value, size_t count) NH3API_NOEXCEPT
     { __stosd(reinterpret_cast<unsigned long*>(dst), static_cast<unsigned long>(value), (count)); }
 };
 
 template<typename T>
 struct movsx_chooser<T, 4>
 {
-    inline void operator()(T* dst, const T* src, size_t count) NH3API_NOEXCEPT
+    inline static void movsx(T* dst, const T* src, size_t count) NH3API_NOEXCEPT
     { __movsd(reinterpret_cast<unsigned long*>(dst), reinterpret_cast<const unsigned long*>(src), (count)); }
 };
 
@@ -107,11 +114,10 @@ OutputIt fill_n(OutputIt first, Size count, const T& value)
 // optimized for visual studio 2005..2013
 #if NH3API_CHECK_MSVC && (NH3API_MSVC_STL_VERSION < NH3API_MSVC_STL_VERSION_2010)
     if ( tt::is_trivially_copy_assignable<T>::value // trivial assign
-         && is_random_access_iterator<OutputIt>::value // linear memory 
+         && tt::is_random_access_iterator<OutputIt>::value // linear memory 
          && (sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1) ) // one of the overloads
     {
-        stosx_chooser<Size, T>()
-        (unfancy(first), value, count);
+        stosx_chooser<T>::stosx(unfancy(first), value, count);
         return first + count;
     }
     else 
@@ -135,11 +141,10 @@ void fill(ForwardIt first, ForwardIt last, const T &value)
 // optimized std::fill for visual studio 2005..2013
 #if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
     if ( tt::is_trivially_copy_assignable<T>::value // trivial assign
-         && is_random_access_iterator<ForwardIt>::value // linear memory 
+         && tt::is_random_access_iterator<ForwardIt>::value // linear memory 
          && (sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1) ) // one of the overloads
     {
-        stosx_chooser<T>() 
-        (unfancy(first), value, static_cast<size_t>(::std::distance(first, last)));
+        stosx_chooser<T>::stosx(unfancy(first), value, static_cast<size_t>(::std::distance(first, last)));
     }
     else 
     {
@@ -160,19 +165,31 @@ OutputIt copy_n(InputIt first, Size count, OutputIt result)
 #endif
 
 // optimized std::copy_n for visual studio 2005..2013
+// implement std::copy_n for visual studio 2005..2010
 #if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
     typedef typename ::std::iterator_traits<InputIt>::value_type ValueT;
     if ( tt::is_trivially_copy_assignable<ValueT>::value // trivial assign
-         && is_random_access_iterator<InputIt>::value // linear memory
-         && is_random_access_iterator<OutputIt>::value // linear memory 
+         && tt::is_random_access_iterator<InputIt>::value // linear memory
+         && tt::is_random_access_iterator<OutputIt>::value // linear memory 
          && (sizeof(ValueT) == 4 || sizeof(ValueT) == 2 || sizeof(ValueT) == 1) ) // one of the overloads
     {
-        movsx_chooser<ValueT>() 
-        (unfancy(result), unfancy(first), count);
+        movsx_chooser<ValueT>::movsx(unfancy(result), unfancy(first), count);
     }
     else 
     {
+        #if NH3API_MSVC_STL_VERSION >= NH3API_MSVC_STL_VERSION_2010
         return ::std::copy_n(first, count, result);
+        #else 
+        if (count > 0)
+        {
+            *result = *first;
+            ++result;
+            for (Size i = 1; i != count; ++i, (void)++result)
+                *result = *++first;
+        }
+    
+        return result;
+        #endif
     }
 #else
     return ::std::copy_n(first, count, result);
@@ -191,12 +208,11 @@ OutputIt copy(InputIt first, InputIt last, OutputIt d_first)
 #if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
     typedef typename ::std::iterator_traits<InputIt>::value_type ValueT;
     if ( tt::is_trivially_copy_assignable<ValueT>::value // trivial assign
-         && is_random_access_iterator<InputIt>::value // linear memory
-         && is_random_access_iterator<OutputIt>::value // linear memory 
+         && tt::is_random_access_iterator<InputIt>::value // linear memory
+         && tt::is_random_access_iterator<OutputIt>::value // linear memory 
          && (sizeof(ValueT) == 4 || sizeof(ValueT) == 2 || sizeof(ValueT) == 1) ) // one of the overloads
     {
-        movsx_chooser<ValueT>()
-        (unfancy(d_first), unfancy(first), static_cast<size_t>(::std::distance(first, last)));
+        movsx_chooser<ValueT>::movsx(unfancy(d_first), unfancy(first), static_cast<size_t>(::std::distance(first, last)));
     }
     else 
     {
@@ -266,7 +282,7 @@ template<class ForwardIt, class T>
 NH3API_FORCEINLINE
 void destroy(ForwardIt first,
              ForwardIt last,
-             exe_allocator<T> alloc)
+             ::exe_allocator<T> alloc)
     NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<T>::value)
 {
 #if NH3API_DEBUG
@@ -282,7 +298,7 @@ template<class ForwardIt, class T>
 NH3API_FORCEINLINE
 ForwardIt destroy_n(ForwardIt first,
                     size_t n,
-                    exe_allocator<T> alloc)
+                    ::exe_allocator<T> alloc)
     NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<T>::value)
 {
 #if NH3API_DEBUG

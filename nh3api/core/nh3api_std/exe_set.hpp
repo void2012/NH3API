@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <functional> // std::less
 #include "exe_rbtree.hpp"
 
 // clang-format off
@@ -84,8 +85,13 @@ public:
 
 public:
     exe_set() NH3API_NOEXCEPT_ALLOC
+    #if NH3API_STD_DELEGATING_CONSTRUCTORS
         : exe_set(key_compare())
     {}
+    #else 
+        : base_type(key_compare(), false, allocator_type())
+    {}
+    #endif
 
     explicit exe_set(const key_compare &keycomp, const allocator_type &allocator = allocator_type())
     NH3API_NOEXCEPT_ALLOC
@@ -129,8 +135,8 @@ template<class _K,
          uintptr_t _Nilrefs_Address, // constructor-destructor reference counter address inside .exe
          typename _Pr,
          typename _A> NH3API_FORCEINLINE
-void std::swap(exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr, _A>& lhs,
-               exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr, _A>& rhs)
+void swap(exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr, _A>& lhs,
+          exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr, _A>& rhs) // ADL Swap
 { lhs.swap(rhs); }
 #endif
 

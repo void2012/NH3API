@@ -491,7 +491,7 @@ NH3API_FORCEINLINE void default_construct(void* ptr, Allocator alloc)
 // default allocator - uses .dll operator new and operator delete /
 // allocator, использующий функции выделения памяти этого .dll
 template<class T>
-class NH3API_NODEBUG local_allocator
+class local_allocator
 {
 protected:
     NH3API_STATIC_ASSERT("The C++ Standard forbids containers of const elements because allocator<const T> is ill-formed."
@@ -599,7 +599,7 @@ bool operator!=(const local_allocator<T>&, const local_allocator<U>&)
 // allocator which uses internal .exe operator new and operator delete /
 // allocator, использующий внутренние операторы new и delete .exe для управления памятью.
 template<class T>
-class NH3API_NODEBUG exe_allocator
+class exe_allocator
 {
 protected:
     NH3API_STATIC_ASSERT("The C++ Standard forbids containers of const elements because allocator<const T> is ill-formed."
@@ -1069,7 +1069,6 @@ struct NH3API_NODEBUG allocator_adaptor<exe_allocator<T> >
         static void construct(U* ptr, Args&& ...args)
         { ::new (static_cast<void*>(ptr)) value_type(::std::forward<Args>(args)...); }
         #else
-        NH3API_FORCEINLINE
         template <class U> NH3API_FORCEINLINE
         static void construct(U* ptr, const_reference value)
         { ::new (static_cast<void*>(ptr)) value_type(value); }

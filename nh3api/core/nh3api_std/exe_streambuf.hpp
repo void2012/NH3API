@@ -766,12 +766,13 @@ NH3API_VIRTUAL_CLASS exe_strstreambuf : public exe_streambuf
         typedef exe_strstreambuf this_type NH3API_NODEBUG;
         typedef exe_streambuf    base_type NH3API_NODEBUG;
 
+    // note: 'typename' not required
     public:
-        typedef typename base_type::char_type char_type;
-        typedef typename base_type::int_type  int_type;
-        typedef typename base_type::pos_type  pos_type;
-        typedef typename base_type::off_type  off_type;
-        typedef typename base_type::traits_type traits_type;
+        typedef base_type::char_type char_type;
+        typedef base_type::int_type  int_type;
+        typedef base_type::pos_type  pos_type;
+        typedef base_type::off_type  off_type;
+        typedef base_type::traits_type traits_type;
 
     public:
         NH3API_FORCEINLINE

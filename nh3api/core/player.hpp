@@ -8,6 +8,7 @@
 
 #include "nh3api_std/exe_vector.hpp" // exe_vector<T>
 #include "player_enums.hpp" // EPlayerColor
+#include "hero_enums.hpp" // THeroID
 #include "artifact.hpp" // TArtifact
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
@@ -55,7 +56,6 @@ public:
 };
 #pragma pack(pop)
 
-enum THeroID : int32_t;
 class TAbstractFile;
 class hero;
 class town;
@@ -162,7 +162,7 @@ class playerData
         { return THISCALL_2(int32_t, 0x4BA890, this, iWhichArtifact); }
 
         bool hasGivenArtifact(TArtifact artifact) const
-        { return THISCALL_2(char, 0x4BA970, this, artifact); }
+        { return THISCALL_2(bool, 0x4BA970, this, artifact); }
 
         bool IsLocalHuman() const
         { return THISCALL_1(bool, 0x4BAA40, this); }

@@ -1040,8 +1040,24 @@ struct type_dialog_icon
 };
 #pragma pack(pop)
 
-enum EMBType : int32_t;
+// NormalDialog dialog interaction type /
+// Вид диалога NormalDialog.
+enum EMBType : int32_t
+{
+    // Accept button /
+    // Кнопка принятия.
+    NORMAL_DIALOG_DEFAULT = 1,
+    // Accept/decline dialog /
+    // Диалог, в котором нужно выбрать либо утвердительный ответ, либо отказ
+    NORMAL_DIALOG_YESNO = 2,
+    NORMAL_DIALOG_POPUP = 4,
+    NORMAL_DIALOG_CHOOSE = 7,
+    NORMAL_DIALOG_CHOOSE_OPTIONAL = 10,
+};
+
 #pragma pack(push, 4)
+// Normal Dialog info /
+// Настройки стандартного диалога.
 // size = 0x2A0 = 672, align = 4
 struct TNormalDialogInfo
 {
@@ -1090,26 +1106,12 @@ struct TNormalDialogInfo
 };
 #pragma pack(pop)
 
-// NormalDialog dialog interaction type /
-// Вид диалога NormalDialog.
-enum EMBType : int32_t
-{
-    // Accept button /
-    // Кнопка принятия.
-    NORMAL_DIALOG_DEFAULT = 1,
-    // Accept/decline dialog /
-    // Диалог, в котором нужно выбрать либо утвердительный ответ, либо отказ
-    NORMAL_DIALOG_YESNO = 2,
-    NORMAL_DIALOG_POPUP = 4,
-    NORMAL_DIALOG_CHOOSE = 7,
-    NORMAL_DIALOG_CHOOSE_OPTIONAL = 10,
-};
-
 // code size optimization
 struct _NormalDialog
 {
-    NH3API_NOINLINE __fastcall
-    static void show(const char* cText) NH3API_NOEXCEPT
+    public:
+    NH3API_NOINLINE
+    static void __fastcall show(const char* cText) NH3API_NOEXCEPT
     { FASTCALL_12(void, 
                   0x4F6C00, 
                   cText, 

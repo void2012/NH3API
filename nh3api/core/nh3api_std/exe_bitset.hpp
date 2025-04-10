@@ -380,6 +380,7 @@ protected:
     NH3API_FORCEINLINE static void _Xran()
     { NH3API_THROW(std::out_of_range, "invalid bitset position"); }
 
+    #if NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010 || NH3API_CHECK_CPP11
     size_t _Hash_code() NH3API_NOEXCEPT 
     { 
         nh3api::default_hash hasher;
@@ -389,12 +390,14 @@ protected:
 
     // allow access to _Hash_code() for std::hash
     friend std::hash<this_type>;
+    #endif
 
     // bit array
     _Ty _A[_Words + 1];
 };
 #pragma pack(pop)
 
+#if NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010 || NH3API_CHECK_CPP11
 // std::hash support for exe_bitset
 template<size_t N>
 class std::hash< exe_bitset<N> >
@@ -405,3 +408,4 @@ class std::hash< exe_bitset<N> >
             return arg._Hash_code();
         }
 };
+#endif

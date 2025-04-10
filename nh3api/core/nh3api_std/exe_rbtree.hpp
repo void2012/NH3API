@@ -153,9 +153,9 @@ class exe_rbtree
         };
 
     // iterator for nonmutable exe_tree
-    template <typename _ValueType = typename std::add_const<exe_rbtree::value_type>::type>
-    class _const_iterator
-        : public ::nh3api::container_iterator<_ValueType, exe_rbtree::difference_type, ::std::bidirectional_iterator_tag>
+    template <typename _ValueType = typename tt::add_const<typename exe_rbtree::value_type>::type>
+    class rb_tree_iterator
+        : public ::nh3api::container_iterator<_ValueType, typename exe_rbtree::difference_type, ::std::bidirectional_iterator_tag>
     {
 
       protected:
@@ -163,16 +163,16 @@ class exe_rbtree
 
       public:
         // construct with null node pointer
-        _const_iterator() NH3API_NOEXCEPT
+        rb_tree_iterator() NH3API_NOEXCEPT
             : _Ptr(nullptr)
         {}
 
         // construct with node pointer _P
-        _const_iterator(node_type* _P) NH3API_NOEXCEPT
+        rb_tree_iterator(node_type* _P) NH3API_NOEXCEPT
             : _Ptr(_P)
         {}
 
-        _const_iterator(const iterator &_X) NH3API_NOEXCEPT
+        rb_tree_iterator(const iterator &_X) NH3API_NOEXCEPT
             : _Ptr(_X._Ptr)
         {}
 
@@ -190,37 +190,37 @@ class exe_rbtree
 
         NH3API_NOINLINE
         // prefix increment
-        _const_iterator &operator++() NH3API_NOEXCEPT
+        rb_tree_iterator &operator++() NH3API_NOEXCEPT
         {
             this->_Inc();
             return (*this);
         }
 
         // postfix increment
-        _const_iterator operator++(int) NH3API_NOEXCEPT
+        rb_tree_iterator operator++(int) NH3API_NOEXCEPT
         {
-            _const_iterator _Tmp = *this;
+            rb_tree_iterator _Tmp = *this;
             ++*this;
             return (_Tmp);
         }
 
         NH3API_NOINLINE
-        _const_iterator &operator--() NH3API_NOEXCEPT
+        rb_tree_iterator &operator--() NH3API_NOEXCEPT
         {
             this->_Dec();
             return (*this);
         }
-        _const_iterator operator--(int) NH3API_NOEXCEPT
+        rb_tree_iterator operator--(int) NH3API_NOEXCEPT
         {
             const_iterator _Tmp = *this;
             --*this;
             return (_Tmp);
         }
-        bool operator==(const _const_iterator &_X) const NH3API_NOEXCEPT
+        bool operator==(const rb_tree_iterator &_X) const NH3API_NOEXCEPT
         {
             return (_Ptr == _X._Ptr);
         }
-        bool operator!=(const _const_iterator &_X) const NH3API_NOEXCEPT
+        bool operator!=(const rb_tree_iterator &_X) const NH3API_NOEXCEPT
         {
             return (!(*this == _X));
         }
@@ -274,12 +274,12 @@ class exe_rbtree
     };
     // CLASS iterator
   public:
-        typedef _const_iterator<typename std::add_const<exe_rbtree::value_type>::type> const_iterator;
+        typedef rb_tree_iterator<typename tt::add_const<typename exe_rbtree::value_type>::type> const_iterator;
         friend class iterator;
-        class iterator : public _const_iterator<exe_rbtree::value_type>
+        class iterator : public rb_tree_iterator<typename exe_rbtree::value_type>
         {
         protected:
-            typedef _const_iterator<exe_rbtree::value_type> base_type NH3API_NODEBUG;
+            typedef rb_tree_iterator<typename exe_rbtree::value_type> base_type NH3API_NODEBUG;
 
         public:
             iterator() NH3API_NOEXCEPT
@@ -329,8 +329,8 @@ class exe_rbtree
             }
         };
 
-        typedef std::reverse_iterator<iterator>       reverse_iterator;
-        typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+        typedef ::std::reverse_iterator<iterator>       reverse_iterator;
+        typedef ::std::reverse_iterator<const_iterator> const_reverse_iterator;
 
         explicit exe_rbtree(const key_compare &_Parg, bool _Marg = true, const allocator_type &allocator = allocator_type())
         NH3API_NOEXCEPT_ALLOC

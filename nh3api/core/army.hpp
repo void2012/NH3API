@@ -775,7 +775,7 @@ public:
         /// @param bAllowShifting всегда = false / always = false
         /// @param iNewDestIndex указатель на новый гекс(заполняется функцией)
         bool       CanFit(int32_t destIndex, int32_t bAllowShifting, int32_t* iNewDestIndex) const
-        { return static_cast<bool>(THISCALL_4(bool32_t, 0x446960, this, destIndex, bAllowShifting, iNewDestIndex)); }
+        { return !!THISCALL_4(bool32_t, 0x446960, this, destIndex, bAllowShifting, iNewDestIndex); }
 
         // Get resurrected from <target> army size /
         // Посчитать количество возрожденных существ из <target>
@@ -897,13 +897,13 @@ public:
         /// @param bMoveUnlimited бесконечное движение(= false)
         /// @param bLiteralTarget unused / не используется
         bool       FindPath(int32_t fpTargetCellIndex, int32_t maxMoves, bool bMoveUnlimited, bool bLiteralTarget)
-        { return static_cast<bool>(THISCALL_5(bool32_t, 0x523EC0, this, fpTargetCellIndex, maxMoves, bMoveUnlimited, bLiteralTarget)); }
+        { return !!THISCALL_5(bool32_t, 0x523EC0, this, fpTargetCellIndex, maxMoves, bMoveUnlimited, bLiteralTarget); }
 
         // Is path to <fpTargetCellIndex> valid?
         // Возможен ли путь до <fpTargetCellIndex>?
         /// @param destIndex гекс-цель
         bool       ValidPath(int32_t destIndex)
-        { return static_cast<bool>(THISCALL_3(bool32_t, 0x523F60, this, destIndex, false)); }
+        { return !!THISCALL_3(bool32_t, 0x523F60, this, destIndex, false); }
 
         // Get Attack mask
         // Маска атаки

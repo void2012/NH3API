@@ -8,6 +8,7 @@
 
 #include "resources.hpp" // resource, sample
 #include "../base_manager.hpp" // baseManager
+#include "../terrain.hpp" // TTerrainType
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -230,7 +231,6 @@ NH3API_INLINE_OR_EXTERN
 const std::array<uint8_t, 10>& giTerrainToMusicTrack
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678330, const std::array<uint8_t, 10>));
 
-enum TTerrainType : int32_t;
 #pragma pack(push, 4)
 // Sound & music manager /
 // Менеджер звуков и музыки.

@@ -232,7 +232,7 @@ struct str_func_chooser<wchar_t>
     #endif
 };
 
-template<typename CharT> constexpr
+template<typename CharT> NH3API_CONSTEXPR_CPP_14
 size_t strlen_constexpr_impl(const CharT* str) NH3API_NOEXCEPT
 {
     if ( str )
@@ -274,7 +274,7 @@ T1* memmove_constexpr(T1* dst, T2* src, uint32_t count)
     #endif
 }
 
-template<typename CharT> constexpr
+template<typename CharT> NH3API_CONSTEXPR_CPP_14
 int32_t memcmp_constexpr_impl(const CharT* s1, const CharT* s2, size_t count)
 {
     while ( count-- != 0 )
@@ -303,7 +303,7 @@ int32_t memcmp_constexpr(const CharT* s1, const CharT* s2, size_t count)
 #endif
 }
 
-template<typename T, typename CharT> constexpr
+template<typename T, typename CharT> NH3API_CONSTEXPR_CPP_14
 T* memchr_constexpr_impl(T* haystack, CharT needle, size_t count)
 {
     for ( ; count; --count )

@@ -219,7 +219,7 @@ struct type_artifact
     public:
         NH3API_CONSTEXPR
         type_artifact() NH3API_NOEXCEPT
-            : type_artifact(ARTIFACT_NONE, SPELL_NONE)
+            : type(ARTIFACT_NONE), spell(SPELL_NONE)
         {}
 
         NH3API_CONSTEXPR

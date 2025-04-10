@@ -54,6 +54,50 @@ template <typename T> struct add_pointer<T&>
 
 namespace details
 {
+/*
+template<class T>
+struct remove_all_extents 
+{
+    typedef T type;
+};
+
+template<class T>
+struct remove_all_extents<T[]> 
+{
+    typedef typename remove_all_extents<T>::type type;
+};
+
+template<class T, size_t N>
+struct remove_all_extents<T[N]> 
+{
+    typedef typename remove_all_extents<T>::type type;
+};
+
+template<class T>
+struct element_type 
+{
+    typedef typename remove_cv<typename remove_all_extents<typename
+        remove_reference<T>::type>::type>::type type;
+};
+
+template<size_t A, size_t B>
+struct min_size
+    : integral_constant<size_t, (A < B) ? A : B> 
+{};
+
+template<class T>
+struct offset_value 
+{
+    T first;
+    char value;
+    T second;
+};
+
+template<typename T>
+struct alignment_of_impl
+    : min_size<sizeof(T), sizeof(offset_value<T>) - (sizeof(T) << 1)> 
+{};
+*/
 
 template <class T>
 struct is_signed_values
@@ -254,6 +298,21 @@ private:
 public:
     typedef typename copy_cv<typename details::enum_underlying_impl<T, is_enum_value>::type, T>::type type;
 };
+
+template <typename T> struct alignment_of;
+
+template <class T>
+struct alignment_of : public integral_constant<size_t, __alignof(T)>
+{};
+
+template <typename T>
+struct alignment_of<T&> : public alignment_of<T*>
+{};
+
+template<> struct alignment_of<void> : integral_constant<size_t, 0>{};
+template<> struct alignment_of<void const> : integral_constant<size_t, 0>{};
+template<> struct alignment_of<void const volatile> : integral_constant<size_t, 0>{};
+template<> struct alignment_of<void volatile> : integral_constant<size_t, 0>{};
 
 } // namespace tt
 } // namespace nh3api

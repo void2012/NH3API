@@ -68,9 +68,9 @@ public:
     class iterator;
 
 protected:
-    template<typename _ValueType = typename std::add_const<exe_deque<_Ty,_A>::value_type>::type>
-    class _const_iterator :
-    public nh3api::container_iterator<_ValueType, exe_deque<_Ty,_A>::difference_type, std::random_access_iterator_tag>
+    template<typename _ValueType = typename nh3api::tt::add_const<typename exe_deque<_Ty,_A>::value_type>::type>
+    class deque_iterator :
+    public nh3api::container_iterator<_ValueType, typename exe_deque<_Ty,_A>::difference_type, std::random_access_iterator_tag>
     {
     public:
         friend class exe_deque<_Ty, _A>;
@@ -83,24 +83,24 @@ protected:
 
     public:
         NH3API_FORCEINLINE
-        _const_iterator() NH3API_NOEXCEPT
+        deque_iterator() NH3API_NOEXCEPT
             : _First(nullptr), _Last(nullptr), _Next(nullptr), _Map(nullptr)
         {
         }
         NH3API_FORCEINLINE
-        _const_iterator( pointer _P, _Mapptr _M ) NH3API_NOEXCEPT
+        deque_iterator( pointer _P, _Mapptr _M ) NH3API_NOEXCEPT
             : _First( *_M ), _Last( *_M + DEQUE_SIZE ),
             _Next( _P ), _Map( _M )
         {
         }
         NH3API_FORCEINLINE
-        _const_iterator( const iterator& other ) NH3API_NOEXCEPT
+        deque_iterator( const iterator& other ) NH3API_NOEXCEPT
             : _First( other._First ), _Last( other._Last ), _Next( other._Next ),
             _Map( other._Map )
         {
         }
         NH3API_FORCEINLINE
-        _const_iterator(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        deque_iterator(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
         {
             NH3API_IGNORE(_First, _Last, _Next, _Map);
         }
@@ -115,7 +115,7 @@ protected:
             return (&**this);
         }
         NH3API_FORCEINLINE
-        _const_iterator& operator++() NH3API_NOEXCEPT
+        deque_iterator& operator++() NH3API_NOEXCEPT
         {
             if ( ++_Next == _Last )
             {
@@ -126,14 +126,14 @@ protected:
             return (*this);
         }
         NH3API_FORCEINLINE
-        _const_iterator operator++( int ) NH3API_NOEXCEPT
+        deque_iterator operator++( int ) NH3API_NOEXCEPT
         {
-            _const_iterator _Tmp = *this;
+            deque_iterator _Tmp = *this;
             ++*this;
             return (_Tmp);
         }
         NH3API_FORCEINLINE
-        _const_iterator& operator--() NH3API_NOEXCEPT
+        deque_iterator& operator--() NH3API_NOEXCEPT
         {
             if ( _Next == _First )
             {
@@ -145,36 +145,36 @@ protected:
             return (*this);
         }
         NH3API_FORCEINLINE
-        _const_iterator operator--( int ) NH3API_NOEXCEPT
+        deque_iterator operator--( int ) NH3API_NOEXCEPT
         {
-            _const_iterator _Tmp = *this;
+            deque_iterator _Tmp = *this;
             --* this;
             return (_Tmp);
         }
-        _const_iterator& operator+=( difference_type _N ) NH3API_NOEXCEPT
+        deque_iterator& operator+=( difference_type _N ) NH3API_NOEXCEPT
         {
             _Add( _N );
             return (*this);
         }
         NH3API_FORCEINLINE
-        _const_iterator& operator-=( difference_type _N ) NH3API_NOEXCEPT
+        deque_iterator& operator-=( difference_type _N ) NH3API_NOEXCEPT
         {
             return (*this += -_N);
         }
         NH3API_FORCEINLINE
-        _const_iterator operator+( difference_type _N ) const NH3API_NOEXCEPT
+        deque_iterator operator+( difference_type _N ) const NH3API_NOEXCEPT
         {
-            _const_iterator _Tmp = *this;
+            deque_iterator _Tmp = *this;
             return (_Tmp += _N);
         }
         NH3API_FORCEINLINE
-        _const_iterator operator-( difference_type _N ) const NH3API_NOEXCEPT
+        deque_iterator operator-( difference_type _N ) const NH3API_NOEXCEPT
         {
-            _const_iterator _Tmp = *this;
+            deque_iterator _Tmp = *this;
             return (_Tmp -= _N);
         }
         NH3API_FORCEINLINE
-        difference_type operator-( const _const_iterator& other ) const NH3API_NOEXCEPT
+        difference_type operator-( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (_Map == other._Map ? _Next - other._Next
                         : DEQUE_SIZE * (_Map - other._Map - 1)
@@ -186,33 +186,33 @@ protected:
             return (*(*this + _N));
         }
         NH3API_FORCEINLINE
-        bool operator==( const _const_iterator& other ) const NH3API_NOEXCEPT
+        bool operator==( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (_Next == other._Next);
         }
         NH3API_FORCEINLINE
-        bool operator!=( const _const_iterator& other ) const NH3API_NOEXCEPT
+        bool operator!=( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (!(*this == other));
         }
         NH3API_FORCEINLINE
-        bool operator<( const _const_iterator& other ) const NH3API_NOEXCEPT
+        bool operator<( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (_Map < other._Map
                 || (_Map == other._Map && _Next < other._Next));
         }
         NH3API_FORCEINLINE
-        bool operator<=( const _const_iterator& other ) const NH3API_NOEXCEPT
+        bool operator<=( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (!(other < *this));
         }
         NH3API_FORCEINLINE
-        bool operator>( const _const_iterator& other ) const NH3API_NOEXCEPT
+        bool operator>( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (other < *this);
         }
         NH3API_FORCEINLINE
-        bool operator>=( const _const_iterator& other ) const NH3API_NOEXCEPT
+        bool operator>=( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (!(*this < other));
         }
@@ -238,13 +238,13 @@ protected:
     };
 
 public:
-    typedef _const_iterator<typename std::add_const<exe_deque<_Ty,_A>::value_type>::type> const_iterator;
+    typedef deque_iterator<typename nh3api::tt::add_const<typename exe_deque<_Ty,_A>::value_type>::type> const_iterator;
 
 public:
-    class iterator : public _const_iterator<exe_deque<_Ty,_A>::value_type>
+    class iterator : public deque_iterator<typename exe_deque<_Ty,_A>::value_type>
     {
     private:
-        typedef _const_iterator<exe_deque<_Ty,_A>::value_type> base_type NH3API_NODEBUG;
+        typedef deque_iterator<typename exe_deque<_Ty,_A>::value_type> base_type NH3API_NODEBUG;
     public:
         NH3API_FORCEINLINE
         iterator() NH3API_NOEXCEPT

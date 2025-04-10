@@ -95,7 +95,7 @@ constexpr const std::array<uint64_t, 64> bitNumber =
 #else
 // Bit shift masks lookup table /
 // Таблица побитовых масок.
-extern const std::array<uint64_t, 64>& bitNumber = get_global_var_ref(0x66CD98, const std::array<uint64_t, 64>);
+extern const std::array<uint64_t, 64>& bitNumber;
 #endif
 
 // Town building IDs. /
@@ -188,7 +188,6 @@ const std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>&
 gHierarchyMask NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977E8, const std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>));
 
 typedef std::array<int32_t, 7> build_cost_array_t;
-enum TCreatureType : int32_t;
 
 #pragma pack(push, 4)
 // Town /
@@ -287,7 +286,7 @@ class town
         // Is building ever available in town?
         // Возможно ли построить <building> в городе?
         bool is_legal_building(type_building_id building) const
-        { return static_cast<bool>(THISCALL_2(bool32_t, 0x5C16A0, this, building)); }
+        { return !!THISCALL_2(bool32_t, 0x5C16A0, this, building); }
 
         // Town native terrain /
         // Родная почва фракции.
