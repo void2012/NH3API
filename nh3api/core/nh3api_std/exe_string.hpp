@@ -688,8 +688,10 @@ public:
         if ( nh3api::tt::is_empty<allocator_type>::value)
         {
             #if NH3API_CHECK_MSVC
-            // GCC and Clang optimizers cause segfault on this
-            *reinterpret_cast<__m128i*>(this) = _mm_setzero_si128();
+                *reinterpret_cast<uint32_t*>(&helper) = 0;
+                _Ptr = nullptr;
+                _Len = 0;
+                _Res = 0;
             #elif __has_builtin(__builtin_memset_inline)
                 __builtin_memset_inline(this, 0, sizeof(*this));
             #elif __has_builtin(__builtin_memset_chk)
@@ -715,20 +717,10 @@ public:
     NH3API_FORCEINLINE
     void _Move_nullify(exe_basic_string* other) NH3API_NOEXCEPT
     {
-        if ( nh3api::tt::is_empty<allocator_type>::value )
-        {
-            __m128i* _this_m128i = reinterpret_cast<__m128i*>(this);
-            __m128i* _other_m128i = reinterpret_cast<__m128i*>(other);
-            *_this_m128i = *_other_m128i;
-            *_other_m128i = _mm_setzero_si128();
-        }
-        else
-        {
-            this->helper = std::move(other->helper);
-            this->_Ptr   = nh3api::exchange(other->_Ptr, nullptr);
-            this->_Len   = nh3api::exchange(other->_Len, 0);
-            this->_Res   = nh3api::exchange(other->_Res, 0);
-        }
+        this->helper = std::move(other->helper);
+        this->_Ptr   = nh3api::exchange(other->_Ptr, nullptr);
+        this->_Len   = nh3api::exchange(other->_Len, 0);
+        this->_Res   = nh3api::exchange(other->_Res, 0);
     }
     #endif
 

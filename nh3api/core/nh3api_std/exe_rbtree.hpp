@@ -817,21 +817,11 @@ class exe_rbtree
     void _Assign_rv(exe_rbtree&& other, tt::true_type)
     NH3API_NOEXCEPT_EXPR(_bit_swappable)
     {
-        if ( _bit_swappable )
-        {
-            __m128i* _this_m128i = reinterpret_cast<__m128i*>(this);
-            __m128i* _other_m128i = reinterpret_cast<__m128i*>(&other);
-            *_this_m128i = *_other_m128i;
-            *_other_m128i = _mm_setzero_si128();
-        }
-        else
-        {
-            this->adaptor.alloc = ::std::move(other.adaptor.alloc);
-            this->_KeyCompare = ::std::move(other._KeyCompare);
-            this->_Head = ::nh3api::exchange(other._Head, nullptr);
-            this->_Multi = other._Multi;
-            this->_Size = ::nh3api::exchange(other._Size, size_type());
-        }
+        this->adaptor.alloc = ::std::move(other.adaptor.alloc);
+        this->_KeyCompare = ::std::move(other._KeyCompare);
+        this->_Head = ::nh3api::exchange(other._Head, nullptr);
+        this->_Multi = other._Multi;
+        this->_Size = ::nh3api::exchange(other._Size, size_type());
     }
 
     void _Assign_rv(exe_rbtree&& other, tt::false_type)

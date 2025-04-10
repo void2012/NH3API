@@ -10,6 +10,10 @@
 #include "iterator.hpp" // tt::is_random_access_iterator
 #include "memory.hpp"   // exe_allocator
 
+#if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
+NH3API_DISABLE_MSVC_WARNING_BEGIN(4996)
+#endif
+
 // for *whatever* reason old MSVC ignores exe_allocator from memory.hpp
 #if NH3API_CHECK_MSVC && !NH3API_VS2010
 template<class T>
@@ -627,7 +631,7 @@ NoThrowForwardIt uninitialized_move_impl(InputIt first,
     }
     NH3API_CATCH (...)
     {
-        destroy(d_first, current);
+        ::nh3api::destroy(d_first, current);
         NH3API_RETHROW
     }
 }
@@ -676,7 +680,7 @@ NoThrowForwardIt uninitialized_move(InputIt first,
     else
     {
         return uninitialized_move_impl(first, last, d_first,
-            std::integral_constant<bool,
+            tt::integral_constant<bool,
             (tt::is_nothrow_move_constructible<V>::value &&
                 tt::is_nothrow_copy_constructible<V>::value)
                 || flags::no_exceptions>());
@@ -764,7 +768,7 @@ copy_n_constexpr(InputIt first, Size count, OutputIt result)
 {
 #if NH3API_CHECK_CPP14
     #ifdef __cpp_lib_constexpr_algorithms
-        return std::copy_n(first, count, result);
+        return ::std::copy_n(first, count, result);
     #else
         #if NH3API_HAS_IS_CONSTANT_EVALUATED
             if (is_constant_evaluated())
@@ -780,7 +784,7 @@ copy_n_constexpr(InputIt first, Size count, OutputIt result)
             }
             else
             {
-                return std::copy_n(first, count, result);
+                return ::std::copy_n(first, count, result);
             }
         #else
             if (count > 0)
@@ -881,5 +885,9 @@ OutputIt fill_n_constexpr(OutputIt first, Size count, const T& value)
 }
 
 }
+
+#if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
+NH3API_DISABLE_MSVC_WARNING_END
+#endif
 
 NH3API_DISABLE_WARNING_END

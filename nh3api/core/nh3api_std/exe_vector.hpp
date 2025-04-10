@@ -176,8 +176,8 @@ struct exe_vector_helper
         NH3API_CONSTEXPR_CPP_20
         pointer umove(pointer first, pointer last, pointer ptr)
         {
-            #if !NH3API_CHECK_CPP11 // old MSVC compiler
-                return nh3api::uninitialized_move(first, last, ptr, alloc);
+            #if !NH3API_STD_MOVE_SEMANTICS // old MSVC compiler
+                return nh3api::uninitialized_copy(first, last, ptr, alloc);
             #else
                 NH3API_STATIC_ASSERT("value_type must be either copy or move constructible",
                 nh3api::tt::is_move_constructible<value_type>::value || nh3api::tt::is_copy_constructible<value_type>::value);
@@ -341,10 +341,14 @@ struct exe_vector_helper<exe_allocator<T> >
         { return std::uninitialized_copy<IterT, pointer>(first, last, d_first); }
 
         NH3API_FORCEINLINE
-        static pointer umove(pointer first, pointer last, pointer ptr)
+        #if !NH3API_STD_MOVE_SEMANTICS && NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE) && NH3API_CHECK_MSVC
+        #else
+        static 
+        #endif
+        pointer umove(pointer first, pointer last, pointer ptr)
         {
-            #if !NH3API_CHECK_CPP11 // old MSVC compiler
-                return nh3api::uninitialized_move(first, last, ptr, alloc);
+            #if !NH3API_STD_MOVE_SEMANTICS && NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE) && NH3API_CHECK_MSVC
+                return std::_Uninitialized_move(first, last, ptr, alloc);
             #else
                 NH3API_STATIC_ASSERT("value_type must be either copy or move constructible",
                 nh3api::tt::is_move_constructible<value_type>::value || nh3api::tt::is_copy_constructible<value_type>::value);
@@ -355,7 +359,7 @@ struct exe_vector_helper<exe_allocator<T> >
         NH3API_FORCEINLINE
         static pointer move_backward(pointer first, pointer last, pointer ptr)
         {
-            #if !NH3API_CHECK_CPP11 // old MSVC compiler
+            #if !NH3API_STD_MOVE_SEMANTICS // old MSVC compiler
             return std::_Move_backward(first, last, ptr);
             #else
             NH3API_STATIC_ASSERT("value_type must be either copy or move constructible",
@@ -1173,10 +1177,14 @@ struct exe_vector_helper<exe_allocator<T> >
             #if NH3API_STD_MOVE_SEMANTICS
             emplace_back(value);
             #else
-            if (this->_Last == this->_End)
-                reserve(1);
-            helper.construct(this->_Last, value);
-            ++this->_Last;
+            if (size() < capacity())
+            {
+                this->_Last = helper.ufill(this->_Last, 1, value);
+            }
+            else 
+            {
+                insert(end(), value);
+            }
             #endif
         }
 
@@ -1317,6 +1325,7 @@ struct exe_vector_helper<exe_allocator<T> >
         }
         iterator insert(const_iterator _Where, size_type _Count, const value_type& _Val)
         {
+            pointer _Whereptr = const_cast<pointer>(_Where);
             const size_type _Whereoff = static_cast<size_type>(_Where - this->_First);
             const bool _One_at_back = _Count == 1 && _Where == this->_Last;
 
@@ -1352,9 +1361,9 @@ struct exe_vector_helper<exe_allocator<T> >
                     }
                     else
                     { // provide basic guarantee
-                        helper.umove(this->_First, _Where, _Newvec);
+                        helper.umove(this->_First, _Whereptr, _Newvec);
                         _Constructed_first = _Newvec;
-                        helper.umove(_Where, this->_Last, _Newvec + _Whereoff + _Count);
+                        helper.umove(_Whereptr, this->_Last, _Newvec + _Whereoff + _Count);
                     }
                 )
                 _Change_array(_Newvec, _Newsize, _Newcapacity);
@@ -1376,14 +1385,14 @@ struct exe_vector_helper<exe_allocator<T> >
                 if (_Count > _Affected_elements)
                 { // new stuff spills off end
                     this->_Last = helper.ufill(_Oldlast, _Count - _Affected_elements, _Tmp);
-                    this->_Last = helper.umove(_Where, _Oldlast, this->_Last);
-                    nh3api::fill(_Where, _Oldlast, _Tmp);
+                    this->_Last = helper.umove(_Whereptr, _Oldlast, this->_Last);
+                    nh3api::fill(_Whereptr, _Oldlast, _Tmp);
                 }
                 else
                 { // new stuff can all be assigned
                     this->_Last = helper.umove(_Oldlast - _Count, _Oldlast, _Oldlast);
-                    helper.move_backward(_Where, _Oldlast - _Count, _Oldlast);
-                    nh3api::fill(_Where, _Where + _Count, _Tmp);
+                    helper.move_backward(_Whereptr, _Oldlast - _Count, _Oldlast);
+                    nh3api::fill(_Whereptr, _Whereptr + _Count, _Tmp);
                 }
             }
             return _Make_iterator_offset(_Whereoff);
@@ -1636,29 +1645,34 @@ struct exe_vector_helper<exe_allocator<T> >
         NH3API_FORCEINLINE
         void _Nullify() NH3API_NOEXCEPT
         {
-            if ( nh3api::tt::is_empty<allocator_type>::value )
+            if (this->_First != nullptr)
             {
-                #if NH3API_CHECK_MSVC
-                // GCC and Clang optimizers cause segfault on this
-                *reinterpret_cast<__m128i*>(this) = _mm_setzero_si128();
-                #elif __has_builtin(__builtin_memset_inline)
-                    __builtin_memset_inline(this, 0, sizeof(*this));
-                #elif __has_builtin(__builtin_memset_chk)
-                    __builtin_memset_chk(this, 0, sizeof(*this));
-                #elif __has_builtin(__builtin_memset)
-                    __builtin_memset(this, 0, sizeof(*this));
-                #else
-                    *reinterpret_cast<uint32_t*>(&helper) = 0;
+                if ( nh3api::tt::is_empty<allocator_type>::value )
+                {
+                    #if NH3API_CHECK_MSVC
+                        *reinterpret_cast<uint32_t*>(&helper) = 0;
+                        _First = nullptr;
+                        _Last  = nullptr;
+                        _End   = nullptr;
+                    #elif __has_builtin(__builtin_memset_inline)
+                        __builtin_memset_inline(this, 0, sizeof(*this));
+                    #elif __has_builtin(__builtin_memset_chk)
+                        __builtin_memset_chk(this, 0, sizeof(*this));
+                    #elif __has_builtin(__builtin_memset)
+                        __builtin_memset(this, 0, sizeof(*this));
+                    #else
+                        *reinterpret_cast<uint32_t*>(&helper) = 0;
+                        _First = nullptr;
+                        _Last  = nullptr;
+                        _End   = nullptr;
+                    #endif
+                }
+                else
+                {
                     _First = nullptr;
                     _Last  = nullptr;
                     _End   = nullptr;
-                #endif
-            }
-            else
-            {
-                _First = nullptr;
-                _Last  = nullptr;
-                _End   = nullptr;
+                }    
             }
         }
 
@@ -1666,20 +1680,10 @@ struct exe_vector_helper<exe_allocator<T> >
         NH3API_FORCEINLINE
         void _Move_nullify(exe_vector* other) NH3API_NOEXCEPT
         {
-            if ( nh3api::tt::is_empty<allocator_type>::value )
-            {
-                __m128i* _this_m128i = reinterpret_cast<__m128i*>(this);
-                __m128i* _other_m128i = reinterpret_cast<__m128i*>(other);
-                *_this_m128i = *_other_m128i;
-                *_other_m128i = _mm_setzero_si128();
-            }
-            else
-            {
-                this->helper = std::move(other->helper);
-                this->_First = nh3api::exchange(other->_First, nullptr);
-                this->_Last  = nh3api::exchange(other->_Last, nullptr);
-                this->_End   = nh3api::exchange(other->_End, nullptr);
-            }
+            this->helper = std::move(other->helper);
+            this->_First = nh3api::exchange(other->_First, nullptr);
+            this->_Last  = nh3api::exchange(other->_Last, nullptr);
+            this->_End   = nh3api::exchange(other->_End, nullptr);
         }
         #endif
 
