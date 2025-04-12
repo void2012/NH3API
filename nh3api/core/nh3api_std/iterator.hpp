@@ -18,12 +18,12 @@ namespace details
 template<typename T, bool IsIterator>
 struct iter_category_helper
 {
-    typedef typename ::std::iterator_traits<T>::iterator_category type NH3API_NODEBUG;
+    typedef typename ::std::iterator_traits<T>::iterator_category type;
 };
 
 template<typename T>
 struct iter_category_helper<T, false>
-{ typedef void type NH3API_NODEBUG; };
+{ typedef void type; };
 
 }
 
