@@ -14,6 +14,45 @@
 
 #include "nh3api_std.hpp"
 #include "memory.hpp"
+
+// Three major STL implementations(MSVC STL, libc++, libstdc++) 
+// Implement std::vector<T> in the same layout as exe_vector, so we can use the native 
+// std::vector<T> implementation. Note that the sizeof(std::vector<T>) must be = 12
+// So for example in Visual Studio, you should disable iterator debugging.
+#ifdef NH3API_FLAG_USE_NATIVE_STD_VECTOR
+#include <vector>
+
+namespace nh3api 
+{
+struct nonempty_base   
+{ 
+    uint32_t dummy 
+    #if NH3API_CHECK_CPP11
+    = 0 
+    #endif
+    ;
+};
+}
+
+template<typename T>
+class exe_vector : public nh3api::nonempty_base, public std::vector<T, exe_allocator<T> >
+{
+    public:
+    #if NH3API_CHECK_CPP11
+        using std::vector<T, exe_allocator<T> >::vector;
+
+        NH3API_CONSTEXPR
+        exe_vector(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        {}
+    #else
+    // TODO: inherit constructors the old way.
+    #endif
+};
+
+NH3API_STATIC_ASSERT(
+    "sizeof(std::vector<T>) should be 12. Disable debugging iterators if you're on MSVC.",
+    sizeof(exe_vector<int>) == 16);
+#else 
 #include "algorithm.hpp"
 #include "iterator.hpp" // nh3api::is_iterator
 #include "type_traits/is_xyz.hpp"
@@ -1952,5 +1991,4 @@ NH3API_DISABLE_MSVC_WARNING_END
 #endif
 
 NH3API_DISABLE_WARNING_END
-
-#include <vector>
+#endif // NH3API_FLAG_USE_NATIVE_STD_VECTOR
