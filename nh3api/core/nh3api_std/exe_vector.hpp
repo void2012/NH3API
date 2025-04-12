@@ -423,7 +423,7 @@ struct exe_vector_helper<exe_allocator<T> >
         typedef typename helper_type::propagate_on_container_swap propagate_on_container_swap;
 
         typedef
-        #if !defined(NH3API_FLAG_NO_CPP_EXCEPTIONS)
+        #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
         nh3api::tt::is_nothrow_copy_constructible<_Ty>
         #else
         nh3api::tt::false_type
@@ -437,6 +437,22 @@ struct exe_vector_helper<exe_allocator<T> >
         nh3api::tt::false_type
         #endif
         noexcept_move;
+
+        typedef 
+        #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+        nh3api::tt::allocator_may_throw<allocator_type> 
+        #else 
+        nh3api::tt::false_type
+        #endif 
+        allocator_throws;
+
+        typedef 
+        #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+        nh3api::tt::is_nothrow_default_constructible<allocator_type> 
+        #else 
+        nh3api::tt::false_type
+        #endif 
+        noexcept_default_construct;
 
     // external typedefs
     public:
@@ -454,72 +470,28 @@ struct exe_vector_helper<exe_allocator<T> >
         typedef std::reverse_iterator<iterator>       reverse_iterator;
 
     protected:
-        #ifndef NH3API_VECTOR_TRY_CATCH_TIDY
-            #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-                #define NH3API_VECTOR_TRY_CATCH_TIDY(NO_UNWIND_CONDITION, ...) \
-                if (NO_UNWIND_CONDITION)\
-                {\
-                    __VA_ARGS__\
-                }\
-                else\
-                {\
-                    NH3API_TRY\
-                    {\
-                        __VA_ARGS__\
-                    }\
-                    NH3API_CATCH(...)\
-                    {\
-                        _Tidy();\
-                        NH3API_RETHROW\
-                    }\
-                }
-            #else
-                #define NH3API_VECTOR_TRY_CATCH_TIDY(NO_UNWIND_CONDITION, ...) __VA_ARGS__
-            #endif
-        #endif
-
-        #ifndef NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE
-            #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-                #define NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE(NO_UNWIND_CONDITION, DESTROY_FIRST, DESTROY_LAST, DEALLOC_AT, DEALLOC_SIZE, ...) \
-                if (NO_UNWIND_CONDITION)\
-                {\
-                    __VA_ARGS__\
-                }\
-                else\
-                {\
-                    NH3API_TRY\
-                    {\
-                        __VA_ARGS__\
-                    }\
-                    NH3API_CATCH(...)\
-                    {\
-                        helper.destroy_range(DESTROY_FIRST, DESTROY_LAST);\
-                        helper.deallocate(DEALLOC_AT, DEALLOC_SIZE);\
-                        NH3API_RETHROW\
-                    }\
-                }
-            #else
-                #define NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE(NO_UNWIND_CONDITION, DESTROY_FIRST, DESTROY_LAST, DEALLOC_AT, DEALLOC_SIZE, ...) __VA_ARGS__
-            #endif
-        #endif
-
+        #ifndef NH3API_MAKE_EXCEPTION_GUARD
+        #define NH3API_MAKE_EXCEPTION_GUARD(NO_UNWIND_CONDITION, FUNCTOR, ...) \
+        const typename nh3api::exception_guard_factory<NO_UNWIND_CONDITION, FUNCTOR>::type \
+        guard = nh3api::make_exception_guard<NO_UNWIND_CONDITION>(FUNCTOR(__VA_ARGS__))
+        #endif 
+        
         template<class IterT>
         void _Range_construct_or_tidy(IterT _F, IterT _L, std::input_iterator_tag)
         {
+            
         #if NH3API_STD_MOVE_SEMANTICS
-            NH3API_VECTOR_TRY_CATCH_TIDY
-            (
-            !nh3api::tt::allocator_may_throw<allocator_type>::value && noexcept_move::value,
+            NH3API_MAKE_EXCEPTION_GUARD(!allocator_throws::value && noexcept_move::value,
+                                        vector_cleanup, *this);
             for (; _F != _L; ++_F)
                 emplace_back(*_F);
-            )
+            guard.complete();
         #else
-            NH3API_VECTOR_TRY_CATCH_TIDY
-            (
-            !nh3api::tt::allocator_may_throw<allocator_type>::value && noexcept_copy::value,
+            NH3API_MAKE_EXCEPTION_GUARD(!allocator_throws::value && noexcept_copy::value,
+                                        vector_cleanup, *this);
             for (; _F != _L; ++_F)
                 push_back(*_F);
-            )
+            guard.complete();
         #endif
         }
 
@@ -528,11 +500,10 @@ struct exe_vector_helper<exe_allocator<T> >
         {
             if ( _Buy( static_cast<size_type>(std::distance(_F, _L))) )
             {
-                NH3API_VECTOR_TRY_CATCH_TIDY
-                (
-                !nh3api::tt::allocator_may_throw<allocator_type>::value && noexcept_copy::value,
+                NH3API_MAKE_EXCEPTION_GUARD(!allocator_throws::value && noexcept_copy::value,
+                                            vector_cleanup, *this);
                 this->_Last = helper.ucopy(_F, _L, this->_First);
-                )
+                guard.complete();
             }
         }
     public:
@@ -551,12 +522,10 @@ struct exe_vector_helper<exe_allocator<T> >
         {
             if (_Buy(n))
             { // nonzero, fill it
-                NH3API_VECTOR_TRY_CATCH_TIDY
-                (
-                    !nh3api::tt::allocator_may_throw<allocator_type>::value
-                    && nh3api::tt::is_nothrow_default_constructible<value_type>::value,
-                    this->_Last = helper.default_fill(this->_First, n);
-                )
+                NH3API_MAKE_EXCEPTION_GUARD(!allocator_throws::value && noexcept_default_construct::value,
+                                                vector_cleanup, *this);
+                this->_Last = helper.default_fill(this->_First, n);
+                guard.complete();
             }
         }
 
@@ -566,11 +535,10 @@ struct exe_vector_helper<exe_allocator<T> >
         {
             if (_Buy(n))
             { // nonzero, fill it
-                NH3API_VECTOR_TRY_CATCH_TIDY
-                (
-                    nh3api::tt::is_nothrow_default_constructible<value_type>::value,
-                    this->_Last = helper.default_fill(this->_First, n);
-                )
+                NH3API_MAKE_EXCEPTION_GUARD(!allocator_throws::value && noexcept_default_construct::value,
+                                                vector_cleanup, *this);
+                this->_Last = helper.default_fill(this->_First, n);
+                guard.complete();
             }
         }
     #endif
@@ -580,11 +548,9 @@ struct exe_vector_helper<exe_allocator<T> >
         {
             if (_Buy(n))
             {	// nonzero, fill it
-                NH3API_VECTOR_TRY_CATCH_TIDY
-                (
-                    noexcept_copy::value,
-                    this->_Last = helper.ufill(this->_First, n, value);
-                )
+                NH3API_MAKE_EXCEPTION_GUARD(noexcept_copy::value, vector_cleanup, *this);
+                this->_Last = helper.ufill(this->_First, n, value);
+                guard.complete();
             }
         }
 
@@ -605,11 +571,9 @@ struct exe_vector_helper<exe_allocator<T> >
         {
             if (_Buy(_Right.size()))
             {
-                NH3API_VECTOR_TRY_CATCH_TIDY
-                (
-                    noexcept_copy::value,
-                    this->_Last = helper.ucopy(_Right.begin(), _Right.end(), this->_First);
-                )
+                NH3API_MAKE_EXCEPTION_GUARD(noexcept_copy::value, vector_cleanup, *this);
+                this->_Last = helper.ucopy(_Right.begin(), _Right.end(), this->_First);
+                guard.complete();
             }
         }
 
@@ -731,33 +695,31 @@ struct exe_vector_helper<exe_allocator<T> >
             const size_type _Newsize = _Oldsize + 1;
             const size_type _Newcapacity = _Calculate_growth(_Newsize);
 
-            const pointer _Newvec = helper.allocate(_Newcapacity);
-            const pointer _Constructed_last = _Newvec + _Whereoff + 1;
+            pointer _Newvec = helper.allocate(_Newcapacity);
+            pointer _Constructed_last = _Newvec + _Whereoff + 1;
             pointer _Constructed_first = _Constructed_last;
 
-            NH3API_CONSTEXPR_VAR bool nothrow_constructible =
-            nh3api::tt::is_nothrow_constructible<value_type, Args ...>::value;
+            { // scope for exception guard
+            const auto guard = nh3api::make_exception_guard
+            <nh3api::tt::is_nothrow_constructible<value_type, Args ...>::value
+            && noexcept_move::value
+            && noexcept_copy::value>(range_cleanup(*this, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity));
 
-            NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE
-            (
-                nothrow_constructible && noexcept_move::value && noexcept_copy::value,
-                _Constructed_first, _Constructed_last, _Newvec, _Newcapacity,
+            helper.construct(_Newvec + _Whereoff, std::forward<Args>(_Val)...);
+            _Constructed_first = _Newvec + _Whereoff;
+            if (_Whereptr == this->_Last)
+            { // at back, provide strong guarantee
+                _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
+            }
+            else
+            { // provide basic guarantee
+                helper.umove(this->_First, _Whereptr, _Newvec);
+                _Constructed_first = _Newvec;
+                helper.umove(_Whereptr, this->_Last, _Newvec + _Whereoff + 1);
+            }
 
-                helper.construct(_Newvec + _Whereoff, std::forward<Args>(_Val)...);
-                _Constructed_first = _Newvec + _Whereoff;
-                if (_Whereptr == this->_Last)
-                { // at back, provide strong guarantee
-                    _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
-                }
-                else
-                { // provide basic guarantee
-                    helper.umove(this->_First, _Whereptr, _Newvec);
-                    _Constructed_first = _Newvec;
-                    helper.umove(_Whereptr, this->_Last, _Newvec + _Whereoff + 1);
-                }
-            )
-
-            (void) nothrow_constructible;
+            guard.complete(); 
+            } // scope for exception guard
 
             _Change_array(_Newvec, _Newsize, _Newcapacity);
             return (this->_First + _Whereoff);
@@ -783,11 +745,9 @@ struct exe_vector_helper<exe_allocator<T> >
             }
             else
             {
-                NH3API_VECTOR_TRY_CATCH_TIDY
-                (
-                    noexcept_move::value,
-                    _Move_from(std::move(_Right), nh3api::tt::false_type());
-                )
+                const auto guard = nh3api::make_exception_guard<noexcept_move::value>(vector_cleanup(*this));
+                _Move_from(std::move(_Right), nh3api::tt::false_type());
+                guard.complete();
             }
         }
 
@@ -945,7 +905,6 @@ struct exe_vector_helper<exe_allocator<T> >
         }
 
     protected:
-
         #if NH3API_CHECK_MSVC && !NH3API_VS2010 
         iterator _Add_alignment_assumption(pointer ptr) NH3API_NOEXCEPT
         { return nh3api::assume_aligned<__alignof(value_type)>(ptr); }
@@ -954,10 +913,10 @@ struct exe_vector_helper<exe_allocator<T> >
         { return nh3api::assume_aligned<__alignof(value_type)>(ptr); }
         #else 
         iterator _Add_alignment_assumption(pointer ptr) NH3API_NOEXCEPT
-        { return nh3api::assume_aligned<nh3api::tt::alignment_of<value_type>::value>(ptr); }
+        { return nh3api::assume_aligned<alignof(value_type)>(ptr); }
 
         const_iterator _Add_alignment_assumption(const_pointer ptr) const NH3API_NOEXCEPT
-        { return nh3api::assume_aligned<nh3api::tt::alignment_of<value_type>::value>(ptr); }
+        { return nh3api::assume_aligned<alignof(value_type)>(ptr); }
         #endif
 
     public:
@@ -1014,17 +973,18 @@ struct exe_vector_helper<exe_allocator<T> >
                 const pointer _Newvec = helper.allocate(_Newcapacity);
                 const pointer _Appended_first = _Newvec + _Oldsize;
                 pointer _Appended_last = _Appended_first;
-
-                NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE
-                (
-                    nh3api::tt::is_nothrow_default_constructible<value_type>::value
-                    && noexcept_copy::value && noexcept_move::value,
-                    _Appended_first, _Appended_last, _Newvec, _Newcapacity,
-
+                { // scope for exception guard
+                    NH3API_MAKE_EXCEPTION_GUARD(
+                    noexcept_default_construct::value 
+                    && noexcept_copy::value 
+                    && noexcept_move::value, 
+                    range_cleanup, _Appended_first, _Appended_last, _Newvec, _Newcapacity);
+                    
                     _Appended_last = helper.default_fill(_Appended_first, _Newsize - _Oldsize);
                     _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
-                )
-
+                    
+                    guard.complete();
+                } // scope for exception guard
                 _Change_array(_Newvec, _Newsize, _Newcapacity);
             }
             else if (_Newsize > _Oldsize)
@@ -1063,15 +1023,18 @@ struct exe_vector_helper<exe_allocator<T> >
                 const pointer _Appended_first = _Newvec + _Oldsize;
                 pointer _Appended_last = _Appended_first;
 
-                NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE
-                (
-                    nh3api::tt::is_nothrow_default_constructible<value_type>::value
-                    && noexcept_copy::value && noexcept_move::value,
-                    _Appended_first, _Appended_last, _Newvec, _Newcapacity,
-
+                { // scope for exception guard
+                    NH3API_MAKE_EXCEPTION_GUARD(
+                    noexcept_default_construct::value 
+                    && noexcept_copy::value 
+                    && noexcept_move::value, 
+                    range_cleanup, _Appended_first, _Appended_last, _Newvec, _Newcapacity);
+                    
                     _Appended_last = helper.ufill(_Appended_first, _Newsize - _Oldsize, _Val);
                     _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
-                )
+                    
+                    guard.complete();
+                } // scope for exception guard
 
                 _Change_array(_Newvec, _Newsize, _Newcapacity);
             }
@@ -1174,18 +1137,12 @@ struct exe_vector_helper<exe_allocator<T> >
         NH3API_INLINE_LARGE
         void push_back(const value_type& value)
         {
-            #if NH3API_STD_MOVE_SEMANTICS
-            emplace_back(value);
-            #else
-            if (size() < capacity())
+            if ( this->_Last == this->_End )
             {
-                this->_Last = helper.ufill(this->_Last, 1, value);
+                _Reallocate_exactly(_Calculate_growth(size() + 1));
             }
-            else 
-            {
-                insert(end(), value);
-            }
-            #endif
+            helper.construct(this->_Last, value);
+			++this->_Last;
         }
 
         template<class IterT
@@ -1348,10 +1305,11 @@ struct exe_vector_helper<exe_allocator<T> >
                 const pointer _Constructed_last = _Newvec + _Whereoff + _Count;
                 pointer _Constructed_first = _Constructed_last;
 
-                NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE
-                (
-                    noexcept_copy::value && noexcept_move::value,
-                    _Constructed_first, _Constructed_last, _Newvec, _Newcapacity,
+                { // scope for exception guard
+                    NH3API_MAKE_EXCEPTION_GUARD(
+                        noexcept_copy::value && noexcept_move::value,
+                        range_cleanup, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity);
+                    
                     helper.ufill(_Newvec + _Whereoff, _Count, _Val);
                     _Constructed_first = _Newvec + _Whereoff;
 
@@ -1365,7 +1323,10 @@ struct exe_vector_helper<exe_allocator<T> >
                         _Constructed_first = _Newvec;
                         helper.umove(_Whereptr, this->_Last, _Newvec + _Whereoff + _Count);
                     }
-                )
+
+                    guard.complete();
+                } // scope for exception guard
+
                 _Change_array(_Newvec, _Newsize, _Newcapacity);
             }
             else if (_One_at_back)
@@ -1518,6 +1479,83 @@ struct exe_vector_helper<exe_allocator<T> >
         }
 
     protected:
+        #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+        struct vector_cleanup
+        {
+            public:
+                NH3API_CONSTEXPR
+                vector_cleanup(exe_vector& _vec) NH3API_NOEXCEPT
+                    : vec(_vec) 
+                {}
+
+                NH3API_CONSTEXPR
+                void operator()() 
+                { 
+                    vec._Tidy();
+                    NH3API_RETHROW
+                }
+
+            private:
+                exe_vector& vec;
+        };
+
+        // functor to pass to nh3api's exception guard
+        struct range_cleanup
+        {
+            public:
+                NH3API_CONSTEXPR range_cleanup(exe_vector& _vec, 
+                                               pointer& _destroy_first, 
+                                               pointer& _destroy_last, 
+                                               pointer& _deallocate_at, 
+                                               const size_type& _deallocation_size ) NH3API_NOEXCEPT
+                    : vec(_vec), 
+                    destroy_first(_destroy_first),
+                    destroy_last(_destroy_first),
+                    deallocate_at(_deallocate_at),
+                    deallocation_size(_deallocation_size)
+                {}
+
+                void operator()() 
+                { 
+                    vec.helper.destroy_range(destroy_first, destroy_last);
+                    vec.helper.deallocate(deallocate_at, deallocation_size);
+                    NH3API_RETHROW
+                }
+                
+            private:
+                exe_vector& vec;
+                pointer& destroy_first;
+                pointer& destroy_last;
+                pointer& deallocate_at;
+                const size_type& deallocation_size;
+        };
+        #else 
+        struct vector_cleanup
+        {
+            NH3API_CONSTEXPR
+            vector_cleanup(exe_vector&) NH3API_NOEXCEPT
+            {}
+
+            NH3API_CONSTEXPR
+            void operator()() NH3API_NOEXCEPT
+            {}
+        };
+
+        struct range_cleanup
+        {
+            NH3API_CONSTEXPR range_cleanup(exe_vector&, 
+                                           pointer, 
+                                           pointer,
+                                           pointer, 
+                                           const size_type) NH3API_NOEXCEPT
+            {}
+
+            NH3API_CONSTEXPR
+            void operator()() NH3API_NOEXCEPT
+            {}
+        };
+        #endif
+
         // set capacity to _Newcapacity (without geometric growth), provide strong guarantee
         void _Reallocate_exactly(const size_type _Newcapacity)
         {
@@ -1573,6 +1611,7 @@ struct exe_vector_helper<exe_allocator<T> >
 
         // move [_F, _L) to raw _Dest, using allocator
         void _Umove_if_noexcept_impl(pointer _F, pointer _L, pointer _Dest, nh3api::tt::true_type)
+        NH3API_NOEXCEPT
         {
             helper.umove(_F, _L, _Dest);
         }
@@ -1736,24 +1775,28 @@ struct exe_vector_helper<exe_allocator<T> >
                 const pointer _Constructed_last = _Newvec + _Whereoff + _Count;
                 pointer _Constructed_first = _Constructed_last;
 
-                NH3API_VECTOR_TRY_CATCH_DESTROY_DEALLOCATE
-                (
+                { // scope for exception guard
+                NH3API_MAKE_EXCEPTION_GUARD(
                     noexcept_copy::value && noexcept_move::value,
-                    _Constructed_first, _Constructed_last, _Newvec, _Newcapacity,
+                    range_cleanup, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity);
+                
+                helper.ucopy(_F, _L, _Newvec + _Whereoff);
+                _Constructed_first = _Newvec + _Whereoff;
+                if (_One_at_back)
+                { // provide strong guarantee
+                    _Umove_if_noexcept(this->_Last, this->_Last, _Newvec);
+                }
+                else
+                { // provide basic guarantee
+                    helper.umove(this->_Last, _Where, _Newvec);
+                    _Constructed_first = _Newvec;
+                    helper.umove(_Where, this->_Last, _Newvec + _Whereoff + _Count);
+                }
 
-                    helper.ucopy(_F, _L, _Newvec + _Whereoff);
-                    _Constructed_first = _Newvec + _Whereoff;
-                    if (_One_at_back)
-                    { // provide strong guarantee
-                        _Umove_if_noexcept(this->_Last, this->_Last, _Newvec);
-                    }
-                    else
-                    { // provide basic guarantee
-                        helper.umove(this->_Last, _Where, _Newvec);
-                        _Constructed_first = _Newvec;
-                        helper.umove(_Where, this->_Last, _Newvec + _Whereoff + _Count);
-                    }
-                )
+                guard.complete();
+                
+                } // scope for exception guard
+
                 _Change_array(_Newvec, _Newsize, _Newcapacity);
             }
             else
@@ -1909,3 +1952,5 @@ NH3API_DISABLE_MSVC_WARNING_END
 #endif
 
 NH3API_DISABLE_WARNING_END
+
+#include <vector>
