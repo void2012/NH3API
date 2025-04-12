@@ -49,6 +49,22 @@ class exe_vector : public nh3api::nonempty_base, public std::vector<T, exe_alloc
     #endif
 };
 
+// Disable std::vector<bool> specialization
+template<>
+class exe_vector<bool> : public nh3api::nonempty_base, public std::vector<uint8_t, exe_allocator<uint8_t> >
+{
+    public:
+    #if NH3API_CHECK_CPP11
+        using std::vector<uint8_t, exe_allocator<uint8_t> >::vector;
+
+        NH3API_CONSTEXPR
+        exe_vector(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        {}
+    #else
+    // TODO: inherit constructors the old way.
+    #endif
+};
+
 NH3API_STATIC_ASSERT(
     "sizeof(std::vector<T>) should be 12. Disable debugging iterators if you're on MSVC.",
     sizeof(exe_vector<int>) == 16);
