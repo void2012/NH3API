@@ -41,7 +41,6 @@ class exe_vector : public nh3api::nonempty_base, public std::vector<T, exe_alloc
     #if NH3API_CHECK_CPP11
         using std::vector<T, exe_allocator<T> >::vector;
 
-        NH3API_CONSTEXPR
         exe_vector(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
         {}
     #else
@@ -57,7 +56,6 @@ class exe_vector<bool> : public nh3api::nonempty_base, public std::vector<uint8_
     #if NH3API_CHECK_CPP11
         using std::vector<uint8_t, exe_allocator<uint8_t> >::vector;
 
-        NH3API_CONSTEXPR
         exe_vector(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
         {}
     #else
