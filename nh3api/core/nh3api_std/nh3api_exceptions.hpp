@@ -89,7 +89,7 @@ struct exception_guard_rollback
     #endif 
 
     NH3API_CONSTEXPR 
-    void complete() const NH3API_NOEXCEPT 
+    void complete() NH3API_NOEXCEPT 
     { completed = true; }
 
     ~exception_guard_rollback()
@@ -100,7 +100,7 @@ struct exception_guard_rollback
 
     protected:
     RollBack rollback;
-    mutable bool completed;
+    bool completed;
 };
 
 template<typename RollBack>
@@ -129,14 +129,14 @@ struct exception_guard_noop
     #endif 
 
     NH3API_CONSTEXPR 
-    void complete() const NH3API_NOEXCEPT 
+    void complete() NH3API_NOEXCEPT 
     { completed = true; }
 
     ~exception_guard_noop()
     { assert(completed); }
 
     protected:
-    mutable bool completed;
+    bool completed;
 };
 
 template<bool IsNoexcept, typename RollBack>

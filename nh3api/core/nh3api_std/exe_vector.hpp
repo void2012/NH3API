@@ -525,7 +525,7 @@ struct exe_vector_helper<exe_allocator<T> >
     protected:
         #ifndef NH3API_MAKE_EXCEPTION_GUARD
         #define NH3API_MAKE_EXCEPTION_GUARD(NO_UNWIND_CONDITION, FUNCTOR, ...) \
-        const typename nh3api::exception_guard_factory<NO_UNWIND_CONDITION, FUNCTOR>::type \
+        typename nh3api::exception_guard_factory<NO_UNWIND_CONDITION, FUNCTOR>::type \
         guard = nh3api::make_exception_guard<NO_UNWIND_CONDITION>(FUNCTOR(__VA_ARGS__))
         #endif 
         
@@ -753,7 +753,7 @@ struct exe_vector_helper<exe_allocator<T> >
             pointer _Constructed_first = _Constructed_last;
 
             { // scope for exception guard
-            const auto guard = nh3api::make_exception_guard
+            auto guard = nh3api::make_exception_guard
             <nh3api::tt::is_nothrow_constructible<value_type, Args ...>::value
             && noexcept_move::value
             && noexcept_copy::value>(range_cleanup(*this, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity));
@@ -798,7 +798,7 @@ struct exe_vector_helper<exe_allocator<T> >
             }
             else
             {
-                const auto guard = nh3api::make_exception_guard<noexcept_move::value>(vector_cleanup(*this));
+                auto guard = nh3api::make_exception_guard<noexcept_move::value>(vector_cleanup(*this));
                 _Move_from(std::move(_Right), nh3api::tt::false_type());
                 guard.complete();
             }
