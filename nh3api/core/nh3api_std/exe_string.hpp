@@ -2115,7 +2115,7 @@ uint8_t refcount(const exe_basic_string<_E, _Tr, _A>& str)
 
 NH3API_CONSTEXPR inline
 // constexpr atoi that uses no locale
-int32_t atoi_constexpr(const char *p) NH3API_NOEXCEPT
+int32_t fast_atoi(const char* p) NH3API_NOEXCEPT
 {
     int32_t x = 0;
     bool neg = false;
@@ -2195,6 +2195,18 @@ struct case_insensitive_traits : public ::std::char_traits<char>
         return nullptr;
     }
 };
+
+NH3API_CONSTEXPR bool isalpha_constexpr(const char c) NH3API_NOEXCEPT
+{
+    const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                            "abcdefghijklmnopqrstuvwxyz";
+    const char *letter = alphabet;
+    while(*letter != '\0' && *letter != c)
+        ++letter;
+    if (*letter)
+        return true;
+    return false;
+}
 
 // fast algorithm by void_17
 template<class StringT>

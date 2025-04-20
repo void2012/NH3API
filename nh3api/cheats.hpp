@@ -9,26 +9,6 @@
 
 #include "core/nh3api_std/exe_string.hpp"
 
-namespace
-{
-
-NH3API_CONSTEXPR bool impl_isalpha(const char c) NH3API_NOEXCEPT
-{
-    const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                            "abcdefghijklmnopqrstuvwxyz";
-    const char *letter = alphabet;
-    while(*letter != '\0' && *letter != c)
-        ++letter;
-    if (*letter)
-        return true;
-    return false;
-}
-
-NH3API_CONSTEXPR char impl_tolower(const char c) NH3API_NOEXCEPT
-{ return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; }
-
-}
-
 struct TCheatCode
 {
     char code[200]
@@ -37,7 +17,7 @@ struct TCheatCode
     #endif
     ;
     NH3API_CONSTEXPR_CPP_14
-    TCheatCode( const char* _code )
+    TCheatCode(const char* _code) NH3API_NOEXCEPT
     {
         char b[] = "nopqrstuvwxyzabcdefghijklm";
 
@@ -58,13 +38,14 @@ struct TCheatCode
             if (minLength <= i)
                 break;
             curr = _code[i];
-            minLength = impl_isalpha(curr);
+            minLength = nh3api::isalpha_constexpr(curr);
             if (minLength == 0)
             {
                 symbol = curr;
             }
-            else {
-                minLength = impl_tolower(curr);
+            else 
+            {
+                minLength = nh3api::fast_tolower(curr);
                 symbol = b[minLength - 97];
             }
             code[i] = symbol;
