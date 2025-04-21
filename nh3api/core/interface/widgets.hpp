@@ -110,6 +110,7 @@ NH3API_VIRTUAL_CLASS iconWidget : public widget
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_ICONWIDGET
 #define NH3API_VIRTUAL_OVERRIDE_ICONWIDGET(CLASS_NAME) \
+NH3API_VIRTUAL_OVERRIDE_WIDGET(CLASS_NAME) \
 virtual bool __thiscall handle_click(bool down_click, bool right_click) NH3API_NOEXCEPT override\
 { return get_type_vftable(this)->handle_click(this, down_click, right_click); }
 #endif
@@ -155,7 +156,7 @@ NH3API_VIRTUAL_CLASS textWidget : public widget
         NH3API_VIRTUAL_OVERRIDE_WIDGET(textWidget)
 
         // vftable shift: +52
-        virtual void __thiscall SetText(const char* new_text) NH3API_NOEXCEPT
+        virtual void __thiscall SetText(const char* new_text)
         { get_type_vftable(this)->SetText(this, new_text); }
 
     public:
@@ -185,6 +186,7 @@ NH3API_VIRTUAL_CLASS textWidget : public widget
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_TEXTWIDGET
 #define NH3API_VIRTUAL_OVERRIDE_TEXTWIDGET(CLASS_NAME) \
+NH3API_VIRTUAL_OVERRIDE_WIDGET(CLASS_NAME) \
 virtual void __thiscall SetText(const char* new_text) override\
 { get_type_vftable(this)->SetText(this, new_text); }
 #endif
@@ -238,6 +240,8 @@ NH3API_VIRTUAL_CLASS textEntryWidget : public textWidget
 
     // virtual functions
     public:
+        NH3API_VIRTUAL_OVERRIDE_TEXTWIDGET(textEntryWidget)
+
         // vftable shift: +56
         virtual void __thiscall SetFocus(bool state)
         { get_type_vftable(this)->SetFocus(this, state); }
@@ -313,6 +317,7 @@ NH3API_VIRTUAL_CLASS textEntryWidget : public textWidget
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_TEXTENTRYWIDGET
 #define NH3API_VIRTUAL_OVERRIDE_TEXTENTRYWIDGET(CLASS_NAME) \
+NH3API_VIRTUAL_OVERRIDE_TEXTWIDGET(CLASS_NAME) \
 virtual void __thiscall SetFocus(bool state) override\
 { get_type_vftable(this)->SetFocus(this, state); }\
 virtual int32_t __thiscall OnKeyPress(message& msg) override\
@@ -359,6 +364,8 @@ NH3API_VIRTUAL_CLASS border : public widget
         { THISCALL_1(void, 0x44FC20, this); }
 
     public:
+        NH3API_VIRTUAL_OVERRIDE_WIDGET(border)
+
         // vftable shift: +52
         virtual bool __thiscall handle_click(bool down_click, bool right_click)
         { return get_type_vftable(this)->handle_click(this, down_click, right_click); }
@@ -368,7 +375,8 @@ NH3API_VIRTUAL_CLASS border : public widget
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_BORDER
 #define NH3API_VIRTUAL_OVERRIDE_BORDER(CLASS_NAME) \
-virtual bool __thiscall handle_click(bool down_click, bool right_click)\
+NH3API_VIRTUAL_OVERRIDE_WIDGET(CLASS_NAME) \
+virtual bool __thiscall handle_click(bool down_click, bool right_click) override\
 { return get_type_vftable(this)->handle_click(this, down_click, right_click); }
 #endif
 
@@ -404,14 +412,15 @@ NH3API_VIRTUAL_CLASS bitmapBorder : public border
         { THISCALL_1(void, 0x450060, this); }
 
     public:
+        NH3API_VIRTUAL_OVERRIDE_BORDER(bitmapBorder)
+
+    public:
         void SetImage(const char* bitmap_name)
         { THISCALL_2(void, 0x450170, this, bitmap_name); }
 
         void SetPlayerPaletteColors(int32_t whichPlayer)
         { THISCALL_2(void, 0x4501D0, this, whichPlayer); }
-
-        NH3API_VIRTUAL_OVERRIDE_BORDER(bitmapBorder)
-
+        
     public:
         // offset: +0x30 = +48,  size = 0x4 = 4
         Bitmap816* borderBitmap16;
@@ -493,6 +502,9 @@ NH3API_VIRTUAL_CLASS bitmapBackedTextWidget : public textWidget
         { THISCALL_1(void, 0x5BCAE0, this); }
 
     public:
+        NH3API_VIRTUAL_OVERRIDE_TEXTWIDGET(bitmapBackedTextWidget)
+
+    public:
         // offset: +0x50 = +80,  size = 0x4 = 4
         Bitmap816* Background;
 
@@ -544,6 +556,9 @@ NH3API_VIRTUAL_CLASS button : public widget
         { THISCALL_1(void, 0x455DD0, this); }
 
     public:
+        NH3API_VIRTUAL_OVERRIDE_WIDGET(button)
+
+    public:
         void SetPlayerPaletteColors(int32_t whichPlayer)
         { THISCALL_2(void, 0x4566C0, this, whichPlayer); }
 
@@ -576,12 +591,12 @@ NH3API_VIRTUAL_CLASS button : public widget
         // offset: +0x40 = +64,  size = 0x4 = 4
         int32_t highlightedFrame;
 
-protected:
+    protected:
         NH3API_MAYBE_UNUSED
         // offset: +0x44 = +68,  size = 0x1 = 1
         bool _end;
 
-public:
+    public:
         // Hotkeys that activate the button /
         // Горячие клавиши, активирующие кнопку.
         // offset: +0x48 = +72,  size = 0x10 = 16
@@ -634,6 +649,9 @@ NH3API_VIRTUAL_CLASS textButton : public button
         { THISCALL_1(void, 0x4568D0, this); }
 
     public:
+        NH3API_VIRTUAL_OVERRIDE_WIDGET(textButton)
+
+    public:
         // Button font /
         // Шрифт кнопки.
         // offset: +0x68 = +104,  size = 0x4 = 4
@@ -681,6 +699,9 @@ NH3API_VIRTUAL_CLASS type_func_button : public button
         { THISCALL_1(void, 0x456A90, this); }
 
     public:
+        NH3API_VIRTUAL_OVERRIDE_WIDGET(type_func_button)
+
+    public:
         // Callback /
         // Функция, вызываемая при нажатии на кнопку.
         // offset: +0x68 = +104,  size = 0x4 = 4
@@ -692,7 +713,7 @@ NH3API_VIRTUAL_CLASS type_func_button : public button
 typedef int32_t(__fastcall* TSliderFunction)(int32_t, heroWindow*);
 #pragma pack(push, 4)
 // size = 0x68 = 104, align = 4, baseclass: widget
-NH3API_VIRTUAL_CLASS slider : widget
+NH3API_VIRTUAL_CLASS slider : public widget
 {
     public:
         struct vftable_t : widget::vftable_t
@@ -735,6 +756,8 @@ NH3API_VIRTUAL_CLASS slider : widget
         { THISCALL_1(void, 0x596470, this); }
 
     public:
+        NH3API_VIRTUAL_OVERRIDE_WIDGET(slider)
+
         // vftable shift: +52
         virtual void __thiscall SetResolution(int32_t num)
         { get_type_vftable(this)->SetResolution(this, num); }
@@ -800,6 +823,19 @@ NH3API_VIRTUAL_CLASS slider : widget
 };
 #pragma pack(pop)
 
+#ifndef NH3API_VIRTUAL_OVERRIDE_SLIDER
+#define NH3API_VIRTUAL_OVERRIDE_SLIDER(CLASS_NAME) \
+NH3API_VIRTUAL_OVERRIDE_WIDGET(CLASS_NAME) \
+virtual void __thiscall SetResolution(int32_t num) override \
+{ get_type_vftable(this)->SetResolution(this, num); } \
+virtual void __thiscall SetState(int32_t state) override \
+{ get_type_vftable(this)->SetState(this, state); } \
+virtual void __thiscall UpdateResolution(int32_t num) override \
+{ get_type_vftable(this)->UpdateResolution(this, num); } \
+virtual void __thiscall Refresh() override \
+{ get_type_vftable(this)->Refresh(this); }
+#endif
+
 class type_text_slider;
 #pragma pack(push, 4)
 // size = 0x5C = 92, align = 4, baseclass: widget
@@ -826,6 +862,9 @@ NH3API_VIRTUAL_CLASS type_text_scroller : public widget
         NH3API_FORCEINLINE
         ~type_text_scroller() NH3API_NOEXCEPT
         { THISCALL_1(void, 0x5BA760, this); }
+    
+    public:
+        NH3API_VIRTUAL_OVERRIDE_WIDGET(type_text_scroller)
 
     public:
         // offset: +0x30 = +48,  size = 0x4 = 4
@@ -872,6 +911,9 @@ NH3API_VIRTUAL_CLASS type_text_slider : public slider
         type_text_slider(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : slider(tag)
         {}
+
+    public:
+        NH3API_VIRTUAL_OVERRIDE_SLIDER(type_text_slider)
 
     public:
         // offset: +0x68 = +104,  size = 0x4 = 4
@@ -923,6 +965,8 @@ NH3API_VIRTUAL_CLASS CChatEdit : public textEntryWidget
         {}
 
     public:
+        NH3API_VIRTUAL_OVERRIDE_TEXTENTRYWIDGET(CChatEdit)
+
         // vftable shift: +76
         virtual void __thiscall UpdateScreen() NH3API_NOEXCEPT
         { get_type_vftable(this)->UpdateScreen(this); }
@@ -949,5 +993,7 @@ NH3API_VIRTUAL_CLASS CChatEdit : public textEntryWidget
 
 };
 #pragma pack(pop)
+
+
 
 NH3API_DISABLE_WARNING_END

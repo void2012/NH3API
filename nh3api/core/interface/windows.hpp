@@ -214,14 +214,46 @@ NH3API_VIRTUAL_CLASS widget
 
     // public methods
     public:
+        // Make widget visible /
+        // Сделать виджет видимым.
         int32_t set_visible(bool arg)
         { return THISCALL_2(int32_t, 0x562C40, this, arg); }
+
+        void force_update()
+        { send_message(WIDGET_SET_STATUS, WIDGET_UPDATE); }
 
         int32_t send_message(ECommands command, int32_t extra)
         { return THISCALL_3(int32_t, 0x5FED80, this, command, extra); }
 
         void set_help_text(const char* text, const char* rclick, bool copyText)
         { THISCALL_4(void, 0x5FEE00, this, text, rclick, copyText); }
+
+        // Set widget position /
+        // Установить позицию виджета.
+        void set_pos(int32_t new_x, int32_t new_y)
+        {
+            send_message(WIDGET_SET_X, new_x);
+            send_message(WIDGET_SET_Y, new_y);
+        }
+
+        // Set widget height /
+        // Установить высоту виджета.
+        void set_height(int32_t new_height)
+        { send_message(WIDGET_SET_HEIGHT, new_height); }
+
+        // Set widget width /
+        // Установить ширину виджета.
+        void set_width(int32_t new_width)
+        { send_message(WIDGET_SET_WIDTH, new_width); }
+
+        const char* get_rclick_text() const 
+        { return freeText ? RightClick : nullptr; }
+
+        void hide()
+        { send_message(WIDGET_CLEAR_STATUS, WIDGET_DRAWN|WIDGET_ACTIVE); }
+
+        void show()
+        { send_message(WIDGET_SET_STATUS, WIDGET_DRAWN|WIDGET_ACTIVE); }
 
     // static variables
     public:
@@ -461,14 +493,41 @@ NH3API_VIRTUAL_CLASS heroWindow
         int32_t BroadcastMessage(message& msg)
         { return THISCALL_2(int32_t, 0x5FF3A0, this, &msg); }
 
+        widget* GetWidget(int32_t widget_id)
+        { return THISCALL_2(widget*, 0x5FF5B0, this, widget_id); }
+
         int32_t WidgetSetStatus(int32_t id, widget::EStatusFlags status)
         { return THISCALL_3(int32_t, 0x5FF490, this, id, status); }
 
         int32_t WidgetClearStatus(int32_t id, widget::EStatusFlags status)
         { return THISCALL_3(int32_t, 0x5FF520, this, id, status); }
 
-        widget* GetWidget(int32_t widget_id)
-        { return THISCALL_2(widget*, 0x5FF5B0, this, widget_id); }
+        // Set widget position /
+        // Установить позицию виджета.
+        void WidgetSetPos(int32_t id, int32_t new_x, int32_t new_y)
+        { 
+            widget* w = GetWidget(id);
+            if (w)
+                w->set_pos(new_x, new_y); 
+        }
+
+        // Set widget height /
+        // Установить высоту виджета.
+        void WidgetSetHeight(int32_t id, int32_t new_height)
+        {
+            widget* w = GetWidget(id);
+            if (w)
+                w->set_height(new_height); 
+        }
+
+        // Set widget width /
+        // Установить ширину виджета.
+        void WidgetSetWidth(int32_t id, int32_t new_width)
+        {
+            widget* w = GetWidget(id);
+            if (w)
+                w->set_width(new_width); 
+        }
 
         void CenterWindow(int32_t centerX, int32_t centerY)
         { THISCALL_3(void, 0x5FF800, this, centerX, centerY); }
@@ -504,61 +563,6 @@ NH3API_VIRTUAL_CLASS heroWindow
 
         int32_t SaveBackground()
         { return THISCALL_1(int32_t, 0x5FF6C0, this); }
-
-        // Set widget position /
-        // Установить позицию виджета.
-        void WidgetSetPos(int32_t id, int32_t new_x, int32_t new_y)
-        { WidgetSetPos(GetWidget(id), new_x, new_y); }
-
-        // Set widget position /
-        // Установить позицию виджета.
-        void WidgetSetPos(widget* w, int32_t new_x, int32_t new_y)
-        {
-            if (w)
-            {
-                w->send_message(widget::WIDGET_SET_X, new_x);
-                w->send_message(widget::WIDGET_SET_Y, new_y);
-            }
-        }
-
-        // Make widget visible /
-        // Сделать виджет видимым.
-        void WidgetSetVisible(int32_t id, bool arg)
-        { WidgetSetVisible(GetWidget(id), arg); }
-
-        // Make widget visible /
-        // Сделать виджет видимым.
-        void WidgetSetVisible(widget* w, bool arg)
-        {
-            if (w)
-                w->set_visible(arg);
-        }
-
-        // Set widget height /
-        // Установить высоту виджета.
-        void WidgetSetHeight(int32_t id, int32_t new_height)
-        { WidgetSetHeight(GetWidget(id), new_height); }
-
-        // Set widget height /
-        // Установить высоту виджета.
-        void WidgetSetHeight(widget* w, int32_t new_height)
-        {
-            if (w)
-                w->send_message(widget::WIDGET_SET_HEIGHT, new_height);
-        }
-
-        // Set widget width /
-        // Установить ширину виджета.
-        void WidgetSetWidth(int32_t id, int32_t new_width)
-        { WidgetSetHeight(GetWidget(id), new_width); }
-
-        // Set widget width /
-        // Установить ширину виджета.
-        void WidgetSetWidth(widget* w, int32_t new_width)
-        {
-            if (w)
-                w->send_message(widget::WIDGET_SET_HEIGHT, new_width);
-        }
 
         // Enable all widgets belonging to the current window /
         // Перерисовать все виджеты, принадлежащие текущему окну.
@@ -897,7 +901,7 @@ class CTextDialog : public TDialogBox
 #pragma pack(push, 4)
 // Modeless window /
 // i.e. such window that is not a dialog,
-// that is,
+// that is, it doesn't block other windows
 /////////////////////
 // НЕ модальное окно:
 // т.е. такое окно, не является диалогом, иными словами

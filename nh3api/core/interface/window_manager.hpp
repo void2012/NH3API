@@ -22,7 +22,8 @@ enum DialogReturnType : int32_t
 };
 
 #pragma pack(push, 4)
-//
+// Dialog system manager /
+// Менеджер системы диалогов.
 // size = 0x60 = 96, align = 4, baseclass: baseManager
 class heroWindowManager : public baseManager
 {
