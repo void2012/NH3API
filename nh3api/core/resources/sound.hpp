@@ -192,7 +192,7 @@ struct MemorySampleStructure
 // Звуковая дорожка /
 // Sound sample.
 // size = 0x34 = 52, align = 4, baseclass: resource
-NH3API_VIRTUAL_STRUCT sample : resource
+NH3API_VIRTUAL_STRUCT sample : public resource
 {
     public:
         // Sample information /
