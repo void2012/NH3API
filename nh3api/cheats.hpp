@@ -19,39 +19,32 @@ struct TCheatCode
     NH3API_CONSTEXPR_CPP_14
     TCheatCode(const char* _code) NH3API_NOEXCEPT
     {
-        char b[] = "nopqrstuvwxyzabcdefghijklm";
+        const char b[] = "nopqrstuvwxyzabcdefghijklm";
 
-        size_t codeLength = 0;
-        int minLength = 0;
-        char symbol = ' ';
-        char curr = ' ';
-        int i = 0;
+        size_t index = 0; 
+        const size_t inputLength = 
+        std::min<size_t>(std::size(code) - 1,
+        #if NH3API_CHECK_CPP14
+        nh3api::strlen_constexpr<char>(_code));
+        #else
+        nh3api::str_func_chooser<char>::_strlen(_code));
+        #endif 
 
-        while( true )
+        for (size_t i = 0; i < inputLength; ++i) 
         {
-            #if NH3API_CHECK_CPP14
-            codeLength = nh3api::strlen_constexpr<char>(_code);
-            #else
-            codeLength = nh3api::str_func_chooser<char>::_strlen(_code);
-            #endif
-            minLength = std::min<size_t>(codeLength, 199);
-            if (minLength <= i)
-                break;
-            curr = _code[i];
-            minLength = nh3api::isalpha_constexpr(curr);
-            if (minLength == 0)
+            if (nh3api::isalpha_constexpr(_code[i])) 
             {
-                symbol = curr;
-            }
+                code[index] = b[nh3api::fast_tolower(_code[i]) - 'a'];
+                index++;
+            } 
             else 
             {
-                minLength = nh3api::fast_tolower(curr);
-                symbol = b[minLength - 97];
+                code[index] = _code[i];
+                index++;
             }
-            code[i] = symbol;
-            ++i;
         }
-        code[i] = '\0';
+        
+        code[index] = '0';
     }
 
     NH3API_CONSTEXPR_CPP_14

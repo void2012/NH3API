@@ -121,11 +121,11 @@ NH3API_VIRTUAL_CLASS widget
             WIDGET_UPDATE        = 16384, //
         };
 
-    protected:
-        widget() NH3API_DELETED_FUNCTION
-
     // constructors and destructors
     protected:
+        widget() NH3API_NOEXCEPT
+        { THISCALL_1(void, 0x5FE9D0, this); }
+
         widget(int16_t x,
                int16_t y,
                int16_t w,
