@@ -38,7 +38,7 @@ typedef int8_t _BOOL1;
 typedef int16_t _BOOL2;
 typedef int32_t _BOOL4;
 
-#if NH3API_CHECK_MSVC
+#if NH3API_CHECK_MSVC_DRIVER
     #define __noreturn  __declspec(noreturn)
 #else
     #define __noreturn  __attribute__((noreturn))
