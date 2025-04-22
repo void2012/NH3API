@@ -1425,23 +1425,23 @@ NH3API_VIRTUAL_STRUCT font : public resource
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
-font*& gTinyFont // крошечный шрифт
+font*& tinyFont // крошечный шрифт
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A54, font*));
 
 NH3API_INLINE_OR_EXTERN
-font*& gSmallFont // маленький шрифт
+font*& smallFont // маленький шрифт
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A58, font*));
 
 NH3API_INLINE_OR_EXTERN
-font*& gMedFont // средний(основной для текста) шрифт
+font*& medFont // средний(основной для текста) шрифт
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A5C, font*));
 
 NH3API_INLINE_OR_EXTERN
-font*& gBigFont // большой шрифт
+font*& bigFont // большой шрифт
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A60, font*));
 
 NH3API_INLINE_OR_EXTERN
-font*& gCalli10RFont // каллиграфический шрифт
+font*& caligFont // каллиграфический шрифт
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A64, font*));
 
 #pragma pack(push, 4)
