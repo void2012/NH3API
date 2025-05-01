@@ -257,9 +257,14 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
         { THISCALL_1(void, 0x522B40, this); }
 
         NH3API_FORCEINLINE
-        TPalette16(uint16_t* p24) NH3API_NOEXCEPT
+        TPalette16(const TPalette24& p24) NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY_OR_BASE(TPalette16, resource)
-        { THISCALL_2(void, 0x522B90, this, p24); }
+        { THISCALL_2(void, 0x522D00, this, &p24); }
+
+        NH3API_FORCEINLINE
+        TPalette16(const uint16_t* data) NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette16, resource)
+        { THISCALL_2(void, 0x522B90, this, data); }
 
         NH3API_FORCEINLINE
         TPalette16(const TPalette24& p24,
@@ -289,6 +294,10 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
             : resource(tag) // resource(nullptr, RType_misc)
         { NH3API_IGNORE(Palette); }
 
+        NH3API_FORCEINLINE
+        TPalette16& operator=(const TPalette16& other) NH3API_NOEXCEPT
+        { return *THISCALL_2(TPalette16*, 0x522E00, this, other); }
+
     public:
         NH3API_FORCEINLINE
         void Convert24to16(const TRGB* p24, int32_t rbits, int32_t rshift, int32_t gbits, int32_t gshift, int32_t bbits, int32_t bshift)
@@ -301,6 +310,21 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
         NH3API_FORCEINLINE
         void Cycle(int32_t begin, int32_t end, int32_t step)
         { THISCALL_4(void, 0x522E40, this, begin, end, step); }
+
+        void AdjustSaturation(float amount)
+        { THISCALL_2(void, 0x522F00, this, amount); }
+
+        void AdjustHSV(float hue, float hue_adjust, float saturation_adjust, float value_adjust)
+        { THISCALL_5(void, 0x523040, this, hue, hue_adjust, saturation_adjust, value_adjust); }
+
+        void Gray()
+        { THISCALL_1(void, 0x523240, this); }
+
+        const uint16_t* data() const 
+        { return Palette.data(); }
+
+        uint16_t* data() 
+        { return Palette.data(); }
 
     public:
         NH3API_VIRTUAL_OVERRIDE_RESOURCE(TPalette16)
