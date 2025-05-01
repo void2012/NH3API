@@ -437,4 +437,4 @@ struct vftable_address<HD::TPalette>
 
 NH3API_FORCEINLINE
 bool isHDMod32Bit(const TPalette16* pal /* = gGamePalette */)
-{ return pal->resType == RType_palette32; }
+{ return pal->resType == static_cast<EResourceType>(RType_palette32); }
