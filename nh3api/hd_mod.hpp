@@ -201,26 +201,22 @@ enum : int32_t
 namespace HD
 {
 
-using ::resource;
-using ::TPalette16;
-using ::TPalette16;
-
-struct TBitmap : public resource 
+struct TBitmap : public ::resource 
 {
     public:
         NH3API_FORCEINLINE
         TBitmap(int32_t w, int32_t h) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TBitmap, resource)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TBitmap, ::resource)
         { THISCALL_3(void, 0x44DC40, this, w, h); }
 
         NH3API_FORCEINLINE
         TBitmap(const char* name, int32_t w, int32_t h) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TBitmap, resource)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TBitmap, ::resource)
         { THISCALL_4(void, 0x44DD20, this, name, w, h); }
 
         NH3API_FORCEINLINE
         TBitmap(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-            : resource(tag)
+            : ::resource(tag)
         { NH3API_IGNORE(DataSize, ImageSize, Width, Height, Pitch, map, keepData); }
 
         NH3API_FORCEINLINE
@@ -334,44 +330,44 @@ struct TPalette : public resource
     public:
         NH3API_FORCEINLINE
         TPalette() NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, resource)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
         { THISCALL_1(void, 0x522B40, this); }
 
         NH3API_FORCEINLINE
-        TPalette(const TPalette24& p24) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, resource)
+        TPalette(const ::TPalette24& p24) NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
         { THISCALL_2(void, 0x522D00, this, &p24); }
 
         NH3API_FORCEINLINE
         TPalette(const uint16_t* data) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, resource)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
         { THISCALL_2(void, 0x522B90, this, data); }
 
         NH3API_FORCEINLINE
-        TPalette(const TPalette24& p24,
+        TPalette(const ::TPalette24& p24,
                    int32_t rbits,
                    int32_t rshift,
                    int32_t gbits,
                    int32_t gshift,
                    int32_t bbits,
                    int32_t bshift) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, resource)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
         { THISCALL_8(void, 0x522BC0, this, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
         TPalette(const char* name,
-                   const TPalette24& p24,
+                   const ::TPalette24& p24,
                    int32_t rbits,
                    int32_t rshift,
                    int32_t gbits,
                    int32_t gshift,
                    int32_t bbits,
                    int32_t bshift) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, resource)
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
         { THISCALL_9(void, 0x522C60, this, name, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
-        TPalette(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TPalette(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : resource(tag) // resource(nullptr, RType_misc)
         { NH3API_IGNORE(Palette); }
 
@@ -380,7 +376,7 @@ struct TPalette : public resource
         { return *THISCALL_2(TPalette*, 0x522E00, this, other); }
 
         NH3API_FORCEINLINE
-        TPalette& operator=(const TPalette16& other) NH3API_NOEXCEPT
+        TPalette& operator=(const ::TPalette16& other) NH3API_NOEXCEPT
         { return *THISCALL_2(TPalette*, 0x522E00, this, other); }
 
     public:
