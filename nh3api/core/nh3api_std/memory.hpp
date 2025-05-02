@@ -6,19 +6,13 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <cstdlib>
-#include <new>
-#include <utility>
-#include <memory>
-#include <algorithm>
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-#include <stdexcept>    // std::bad_alloc, std::bad_array_new_length
-#endif
+#include <new> // std::nothrow_t
+#include <memory> // std::allocator_traits, std::unique_ptr
 
 #include "intrin.hpp"
 #include "patcher_x86.hpp"
-#include "type_traits.hpp"
-#include "stl_extras.hpp"
+#include "type_traits.hpp" // tt::has_scalar_deleting_destructor
+#include "stl_extras.hpp" 
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 
@@ -219,14 +213,14 @@ namespace nh3api
 {
 namespace details
 {
-template<typename T, bool has_deleting_destructor>
+template<typename T, bool has_deleting_destructor = tt::has_scalar_deleting_destructor<T>::value>
 struct NH3API_NODEBUG exe_invoke_delete_helper
 {
     NH3API_STATIC_ASSERT("exe_invoke_delete: can't invoke destructor on void*",
                          !::nh3api::tt::is_void<T>::value);
 
     NH3API_FORCEINLINE
-    void operator()(T* ptr) const NH3API_NOEXCEPT
+    static void do_destroy_delete(T* ptr) NH3API_NOEXCEPT
     {
         ::nh3api::destroy_at(ptr);
         exe_delete(ptr);
@@ -238,21 +232,18 @@ struct NH3API_NODEBUG exe_invoke_delete_helper<T, true>
 {
     NH3API_FORCEINLINE
     // invoke virtual destructor on polymorphic objects
-    void operator()(T* ptr) const NH3API_NOEXCEPT
+    static void do_destroy_delete(T* ptr) NH3API_NOEXCEPT
     { ptr->scalar_deleting_destructor(1); }
 };
 
-}
+} // namespace details
 
-}
+} // namespace nh3api
 
 // invoke delete and destroy (use this instead of plain exe_delete)
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_delete(T* ptr) NH3API_NOEXCEPT
-{
-    nh3api::details::exe_invoke_delete_helper
-    <T, nh3api::tt::has_scalar_deleting_destructor<T>::value>()(ptr);
-}
+{ nh3api::details::exe_invoke_delete_helper<T>::do_destroy_delete(ptr); }
 
 // overload for void*
 template<> NH3API_FORCEINLINE
@@ -263,14 +254,14 @@ namespace nh3api
 {
 namespace details
 {
-template<typename T, bool has_deleting_destructor>
+template<typename T, bool has_deleting_destructor = tt::has_scalar_deleting_destructor<T>::value>
 struct NH3API_NODEBUG exe_invoke_destructor_helper
 {
     NH3API_STATIC_ASSERT("exe_invoke_destructor: can't invoke destructor on void*",
                          !::nh3api::tt::is_void<T>::value);
 
     NH3API_FORCEINLINE
-    void operator()(T* ptr) const NH3API_NOEXCEPT
+    static void do_destroy(T* ptr) NH3API_NOEXCEPT
     { ::nh3api::destroy_at(ptr); }
 };
 
@@ -279,7 +270,7 @@ struct NH3API_NODEBUG exe_invoke_destructor_helper<T, true>
 {
     NH3API_FORCEINLINE
     // invoke virtual destructor on polymorphic objects
-    void operator()(T* ptr) const NH3API_NOEXCEPT
+    static void do_destroy(T* ptr) NH3API_NOEXCEPT
     { ptr->scalar_deleting_destructor(0); }
 };
 
@@ -289,25 +280,22 @@ struct NH3API_NODEBUG exe_invoke_destructor_helper<T, true>
 // invoke destructor(plain or scalar_deleting_destructor)
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_destructor(T* ptr) NH3API_NOEXCEPT
-{
-    nh3api::details::exe_invoke_destructor_helper
-    <T, nh3api::tt::has_scalar_deleting_destructor<T>::value>()(ptr);
-}
+{ nh3api::details::exe_invoke_destructor_helper<T>::do_destroy(ptr); }
 
 namespace nh3api
 {
 namespace details
 {
-template<typename T, bool trivially_destructible>
+template<typename T, bool trivially_destructible = tt::is_trivially_destructible<T>::value>
 struct NH3API_NODEBUG exe_invoke_array_delete_helper
 {
     NH3API_FORCEINLINE
-    void operator()(T* ptr) const NH3API_NOEXCEPT
+    static void do_destroy_delete(T* ptr) NH3API_NOEXCEPT
     {
         int32_t* pre_ptr = (reinterpret_cast<int32_t*>(ptr)) - 1;
         const int32_t array_size = *pre_ptr;
         for ( int32_t i = 0; i < array_size; ++i )
-            exe_invoke_destructor(&ptr[i]);
+            exe_invoke_destructor(::nh3api::addressof(ptr[i]));
 
         exe_delete(pre_ptr);
     }
@@ -317,7 +305,7 @@ template<typename T>
 struct NH3API_NODEBUG exe_invoke_array_delete_helper<T, true>
 {
     NH3API_FORCEINLINE
-    void operator()(T* ptr) const NH3API_NOEXCEPT
+    static void do_destroy_delete(T* ptr) NH3API_NOEXCEPT
     {
         int32_t* pre_ptr = (reinterpret_cast<int32_t*>(ptr)) - 1;
         exe_delete(pre_ptr);
@@ -330,10 +318,7 @@ struct NH3API_NODEBUG exe_invoke_array_delete_helper<T, true>
 // invoke array form of delete. Use it instead of plain exe_delete
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_array_delete(T* ptr) NH3API_NOEXCEPT
-{
-    nh3api::details::exe_invoke_array_delete_helper
-    <T, nh3api::tt::is_trivially_destructible<T>::value>()(ptr);
-}
+{ nh3api::details::exe_invoke_array_delete_helper<T>::do_destroy_delete(ptr); }
 
 // overload for void*
 template<> NH3API_FORCEINLINE
@@ -442,9 +427,7 @@ void set_vftable(T* ptr)
 // low-level virtual call with only shift in vftable
 template<typename Result, typename T, typename ... Args> inline
 Result virtual_call(T* thisPtr, size_t shift, Args&& ... args)
-{
-    return THISCALL_N(Result, reinterpret_cast<uintptr_t>(get_vftable(thisPtr)) + shift, ::std::forward<Args>(args)...);
-}
+{ return THISCALL_N(Result, reinterpret_cast<uintptr_t>(get_vftable(thisPtr)) + shift, ::std::forward<Args>(args)...); }
 #endif
 
 namespace nh3api
@@ -984,9 +967,7 @@ struct NH3API_NODEBUG allocator_adaptor<exe_allocator<T> >
 
         NH3API_CONSTEXPR
         allocator_adaptor(const dummy_tag_t&)
-        {
-            NH3API_IGNORE(alloc);
-        }
+        { NH3API_IGNORE(alloc); }
 
     // operators
     public:
