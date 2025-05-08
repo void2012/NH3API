@@ -403,7 +403,7 @@ ForwardIt uninitialized_fill_n(ForwardIt first,
 
 template<class ForwardIt, class Allocator>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-ForwardIt uninitialized_default_construct_n(ForwardIt first,
+ForwardIt uninitialized_value_construct_n(ForwardIt first,
                                             typename allocator_size_type<Allocator>::type count,
                                             Allocator& alloc)
 {
@@ -420,7 +420,7 @@ ForwardIt uninitialized_default_construct_n(ForwardIt first,
 #else
     typedef typename ::std::iterator_traits<ForwardIt>::value_type V;
     ForwardIt current = first;
-    if ( tt::is_nothrow_default_constructible<V>::value )
+    if ( tt::is_nothrow_constructible<V>::value )
     {
         for (; count > 0; ++current, (void) --count)
             default_construct(static_cast<void*>(::nh3api::addressof(*current)), alloc);
@@ -689,6 +689,7 @@ NoThrowForwardIt uninitialized_move(InputIt first,
 
 #endif
 
+#ifndef __cpp_lib_raw_memory_algorithms
 template<class T, class Size>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 T* init_array_impl(T* first, Size n, tt::false_type)
@@ -698,7 +699,7 @@ T* init_array_impl(T* first, Size n, tt::false_type)
     {
         for (; n > 0; (void) ++current, --n)
             ::new (const_cast<void*>(static_cast<const volatile void*>(
-                ::nh3api::addressof(*current)))) T;
+                ::nh3api::addressof(*current)))) T();
     }
     NH3API_CATCH(...)
     {
@@ -715,9 +716,10 @@ T* init_array_impl(T* first, Size n, tt::true_type)
     T* current = first;
     for (; n > 0; (void) ++current, --n)
         ::new (const_cast<void*>(static_cast<const volatile void*>(
-            ::nh3api::addressof(*current)))) T;
+            ::nh3api::addressof(*current)))) T();
     return current;
 }
+#endif // __cpp_lib_raw_memory_algorithms
 
 template<class T, class Size> NH3API_CONSTEXPR_CPP_20
 T* init_array(T* first, Size n)
@@ -725,7 +727,11 @@ T* init_array(T* first, Size n)
     #if NH3API_DEBUG
     verify_range_n(first, n);
     #endif
-    return init_array_impl(first, n, tt::is_nothrow_default_constructible<T>());
+    #ifdef __cpp_lib_raw_memory_algorithms
+    return std::uninitialized_value_construct_n(first, n);
+    #else 
+    return init_array_impl(first, n, tt::is_nothrow_constructible<T>());
+    #endif
 }
 
 template <typename InputIterator, typename OutputIterator>

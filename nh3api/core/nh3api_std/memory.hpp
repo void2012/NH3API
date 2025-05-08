@@ -459,7 +459,7 @@ template<typename T, class Allocator>
 NH3API_FORCEINLINE void default_construct(void* ptr, Allocator alloc)
 {
     #if NH3API_CHECK_CPP11
-    ::std::allocator_traits<Allocator>::construct(alloc, ptr);
+    ::std::allocator_traits<Allocator>::construct(alloc, ptr, T());
     #else
     alloc.construct(ptr, T());
     #endif
