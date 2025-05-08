@@ -1467,7 +1467,7 @@ struct exe_vector_helper<exe_allocator<T> >
         #else
                 nh3api::copy(_P + 1, this->_Last, _P);
         #endif
-            helper.destroy_range(this->_Last - 1, this->_Last);
+            helper.destroy(this->_Last - 1);
             --this->_Last;
             return _P;
         }
