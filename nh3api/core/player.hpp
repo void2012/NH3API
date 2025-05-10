@@ -74,10 +74,6 @@ class playerData
         NH3API_FORCEINLINE
         playerData(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : shipyards(tag),
-              MysticalGardenFlags(tag),
-              MagicSpringFlags(tag),
-              DeadGuyFlags(tag),
-              LeanToFlags(tag),
               assembledCombos(tag)
         {
             NH3API_IGNORE(color,
