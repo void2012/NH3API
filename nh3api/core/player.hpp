@@ -278,22 +278,22 @@ class playerData
         // Visited mystical gardens /
         // Посещённые магические сады.
         // offset: +0xB8 = +184,  size = 0x4 = 4
-        exe_bitset<32> MysticalGardenFlags;
+        uint32_t MysticalGardenFlags;
 
         // Visited magic springs /
         // Посещённые магические источники.
         // offset: +0xBC = +188,  size = 0x4 = 4
-        exe_bitset<32> MagicSpringFlags;
+        uint32_t MagicSpringFlags;
 
         // Visited corpses /
         // Посещённые скелеты.
         // offset: +0xC0 = +192,  size = 0x4 = 4
-        exe_bitset<32> DeadGuyFlags;
+        uint32_t DeadGuyFlags;
 
         // Visited lean-tos /
         // Посещённые навесы.
         // offset: +0xC4 = +196,  size = 0x4 = 4
-        exe_bitset<32> LeanToFlags;
+        uint32_t LeanToFlags;
 
         // Network player id /
         // Идентификатор игрока при игре по сети.
