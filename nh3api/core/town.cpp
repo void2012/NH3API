@@ -11,9 +11,9 @@ const std::array<uint64_t, 64>& bitNumber = get_global_var_ref(0x66CD98, const s
 #endif
 
 #ifndef NH3API_FLAG_INLINE_HEADERS
-const std::array<uint64_t, kNumTowns>&
-gTownEligibleBuildMask = get_global_var_ref(0x697740, const std::array<uint64_t, kNumTowns>);
+std::array<uint64_t, kNumTowns>&
+gTownEligibleBuildMask = get_global_var_ref(0x697740, std::array<uint64_t, kNumTowns>);
 
-const std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>&
-gHierarchyMask = get_global_var_ref(0x6977E8, const std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>);
+std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>&
+gHierarchyMask = get_global_var_ref(0x6977E8, std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>);
 #endif

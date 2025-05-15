@@ -546,35 +546,48 @@ struct TPoint3 : public TPoint
 #pragma pack(pop)
 
 #pragma pack(push, 4)
-// Object properties /
-// Свойства объектов.
+// Additional map objects properties /
+// Дополнительные свойства объектов на карте.
 // size = 0x10 = 16, align = 4
-struct ObjectProps
+struct ExtraObjectProperties
 {
-    // offset: +0x0 = +0,  size = 0x1 = 1
-    bool trigger_unavailable;
+    public:
+        // The object is not passable /
+        // На объект невозможно попасть, даже на триггер.
+        // offset: +0x0 = +0,  size = 0x1 = 1
+        bool impassable;
 
-    // offset: +0x1 = +1,  size = 0x1 = 1
-    bool enter_from_above;
+        // The interaction with the object is possible from any adjacent cell, including cells from above /
+        // Взаимодействие с объектом может происходить с любой клетки, в т.ч. клетки сверху.
+        // offset: +0x1 = +1,  size = 0x1 = 1
+        bool omnidirectional;
 
-    // offset: +0x2 = +2,  size = 0x1 = 1
-    bool trigger_freeable;
+        // The object can disappear upon interaction /
+        // Объект может исчезнуть после взаимодействия с ним.
+        // offset: +0x2 = +2,  size = 0x1 = 1
+        bool disappearable;
 
-    // offset: +0x4 = +4,  size = 0x4 = 4
-    const char* object_name;
+        // Object name /
+        // Название объекта
+        // offset: +0x4 = +4,  size = 0x4 = 4
+        const char* name;
 
-    // offset: +0x8 = +8,  size = 0x4 = 4
-    TAdventureObjectType object_type;
+        // Object type /
+        // Тип объекта.
+        // offset: +0x8 = +8,  size = 0x4 = 4
+        TAdventureObjectType type;
 
-    // offset: +0xC = +12,  size = 0x1 = 1
-    bool is_decor;
+        // Object is decorative /
+        // Объект является декоративным.
+        // offset: +0xC = +12,  size = 0x1 = 1
+        bool decorative;
 
 };
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
-std::array<ObjectProps, MAX_OBJECTS>& object_properties
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6916E8, std::array<ObjectProps, MAX_OBJECTS>));
+std::array<ExtraObjectProperties, MAX_OBJECTS>& gExtraObjectProperties
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6916E8, std::array<ExtraObjectProperties, MAX_OBJECTS>));
 
 NH3API_INLINE_OR_EXTERN
 const std::array<tilePoint, 8>& normalDirTable

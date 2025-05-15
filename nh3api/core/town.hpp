@@ -178,14 +178,14 @@ const char* GetBuildingName(TTownType townType, type_building_id buildingId)
 NH3API_INLINE_OR_EXTERN
 // Town possible buildings mask /
 // Маска возможных построек в городе(вообще).
-const std::array<uint64_t, kNumTowns>&
-gTownEligibleBuildMask NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697740, const std::array<uint64_t, kNumTowns>));
+std::array<uint64_t, kNumTowns>&
+gTownEligibleBuildMask NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697740, std::array<uint64_t, kNumTowns>));
 
 NH3API_INLINE_OR_EXTERN
 // Each building dependency mask /
 // Маска необходимых построек для строительства каждой постройки каждой фракции.
-const std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>&
-gHierarchyMask NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977E8, const std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>));
+std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>&
+gHierarchyMask NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977E8, std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>));
 
 typedef std::array<int32_t, 7> build_cost_array_t;
 
