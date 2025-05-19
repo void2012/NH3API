@@ -116,9 +116,9 @@ enum type_building_id : int32_t
     CASTLE_FORT_ID      = 7,  // Форт
     CASTLE_CITADEL_ID   = 8,  // Цитадель
     CASTLE_CASTLE_ID    = 9,  // Замок
-    HALL_VILLAGE_ID     = 10, // Decorative / Декор.
-    HALL_TOWN_ID        = 11, // Decorative / Декор.
-    HALL_CITY_ID        = 12, // Decorative / Декор.
+    HALL_VILLAGE_ID     = 10, // Городская управа.
+    HALL_TOWN_ID        = 11, // Префектура.
+    HALL_CITY_ID        = 12, // Муниципалитет.
     HALL_CAPITOL_ID     = 13, // Капитолий.
     MARKETPLACE_ID      = 14, // Рынок
     MARKETPLACE_SILO_ID = 15, // Хранилище ресурсов
@@ -152,10 +152,10 @@ enum type_building_id : int32_t
     DWELLING_6_UPG_ID   = 43, // Lvl. 7 upgraded creature dwelling / Улучшенное жилище существ 7 уровня
     MAX_BUILDING_TYPE   = 44, // Максимальное количество построек в городе.
 
-    const_village_hall  = 10, // Decorative / Декор.
-    const_town_hall     = 11, // Decorative / Декор.
-    const_city_hall     = 12, // Decorative / Декор.
-    const_capitol_hall  = 13, // Decorative / Декор.
+    const_village_hall  = 10, // Городская управа.
+    const_town_hall     = 11, // Префектура.
+    const_city_hall     = 12, // Муниципалитет.
+    const_capitol_hall  = 13, // Капитолий.
     const_fort          = 7,  // Форт.
     const_citadel       = 8,  // Цитадель.
     const_castle        = 9,  // Замок.
@@ -168,7 +168,52 @@ enum type_building_id : int32_t
     const_mage_guild_3  = 2,  // Гильдия магов 3 уровня.
     const_mage_guild_4  = 3,  // Гильдия магов 4 уровня.
     const_mage_guild_5  = 4,  // Гильдия магов 5 уровня.
-    const_shipyard      = 6  // Верфь.
+    const_shipyard      = 6,  // Верфь.
+
+    BUILDING_MAGE_GUILD_1       = 0,  // Гильдия магов 1 уровня
+    BUILDING_MAGE_GUILD_2       = 1,  // Гильдия магов 2 уровня
+    BUILDING_MAGE_GUILD_3       = 2,  // Гильдия магов 3 уровня
+    BUILDING_MAGE_GUILD_4       = 3,  // Гильдия магов 4 уровня
+    BUILDING_MAGE_GUILD_5       = 4,  // Гильдия магов 5 уровня
+    BUILDING_TAVERN             = 5,  // Таверна
+    BUILDING_DOCK               = 6,  // Верфь
+    BUILDING_FORT               = 7,  // Форт
+    BUILDING_CITADEL            = 8,  // Цитадель
+    BUILDING_CASTLE             = 9,  // Замок
+    BUILDING_HALL_VILLAGE       = 10, // Городская управа.
+    BUILDING_HALL_TOWN          = 11, // Префектура.
+    BUILDING_HALL_CITY          = 12, // Муниципалитет.
+    BUILDING_HALL_CAPITOL       = 13, // Капитолий.
+    BUILDING_HALL_MARKETPLACE   = 14, // Рынок
+    BUILDING_HALL_RESOURCE_SILO = 15, // Хранилище ресурсов
+    BUILDING_BLACKSMITH         = 16, // Кузница
+    BUILDING_SPECIAL            = 17, // Unique building for every town type / Специальное строение города(см. аналогичные ID для каждой фракции).
+    BUILDING_HORDE              = 18, // Орда (увеличивает прирост определенного существа)
+    BUILDING_HORDE_UPGRAGE      = 19, // Is being built altogether with HORDE_ID / Строится одновременно с HORDE_ID.
+    BUILDING_DOCK_WITH_BOAT     = 20, // Верфь с кораблём(TODO: выяснить технические подробности)
+    BUILDING_EXTRA_0            = 21, // Unique building for every town type / Специальное строение города(см. аналогичные ID для каждой фракции).
+    BUILDING_EXTRA_1            = 22, // Unique building for every town type / Специальное строение города(см. аналогичные ID для каждой фракции).
+    BUILDING_EXTRA_2            = 23, // Decorative(upon building village, so always present) / Декорация(появляется сразу)
+    BUILDING_HORDE_2            = 24, // Second horde building(if present) / Вторая орда(если есть)
+    BUILDING_HORDE_2_UPGRADE    = 25, // Is being built altogether with HORDE_2_ID / Строится одновременно с HORDE_2_ID.
+    BUILDING_HOLY_GRAIL         = 26, // Постройка Грааля
+    BUILDING_EXTRA_3            = 27, // Decorative(upon building town, so always present) / Декорация(появляется сразу)
+    BUILDING_EXTRA_4            = 28, // Decorative / Декор.
+    BUILDING_EXTRA_5            = 29, // Decorative / Декор.
+    BUILDING_DWELLING_0         = 30, // Lvl. 1 creature dwelling / Жилище существ 1 уровня.
+    BUILDING_DWELLING_1         = 31, // Lvl. 2 creature dwelling / Жилище существ 2 уровня
+    BUILDING_DWELLING_2         = 32, // Lvl. 3 creature dwelling / Жилище существ 3 уровня
+    BUILDING_DWELLING_3         = 33, // Lvl. 4 creature dwelling / Жилище существ 4 уровня
+    BUILDING_DWELLING_4         = 34, // Lvl. 5 creature dwelling / Жилище существ 5 уровня
+    BUILDING_DWELLING_5         = 35, // Lvl. 6 creature dwelling / Жилище существ 6 уровня
+    BUILDING_DWELLING_6         = 36, // Lvl. 7 creature dwelling / Жилище существ 7 уровня
+    BUILDING_DWELLING_0_UPGRADE = 37, // Lvl. 1 upgraded creature dwelling / Улучшенное жилище существ 1 уровня
+    BUILDING_DWELLING_1_UPGRADE = 38, // Lvl. 2 upgraded creature dwelling / Улучшенное жилище существ 2 уровня
+    BUILDING_DWELLING_2_UPGRADE = 39, // Lvl. 3 upgraded creature dwelling / Улучшенное жилище существ 3 уровня
+    BUILDING_DWELLING_3_UPGRADE = 40, // Lvl. 4 upgraded creature dwelling / Улучшенное жилище существ 4 уровня
+    BUILDING_DWELLING_4_UPGRADE = 41, // Lvl. 5 upgraded creature dwelling / Улучшенное жилище существ 5 уровня
+    BUILDING_DWELLING_5_UPGRADE = 42, // Lvl. 6 upgraded creature dwelling / Улучшенное жилище существ 6 уровня
+    BUILDING_DWELLING_6_UPGRADE = 43, // Lvl. 7 upgraded creature dwelling / Улучшенное жилище существ 7 уровня
 };
 
 NH3API_FORCEINLINE
