@@ -565,7 +565,7 @@ struct ExtraObjectProperties
         // The object can disappear upon interaction /
         // Объект может исчезнуть после взаимодействия с ним.
         // offset: +0x2 = +2,  size = 0x1 = 1
-        bool disappearable;
+        bool removable;
 
         // Object name /
         // Название объекта
