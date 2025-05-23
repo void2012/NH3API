@@ -12,13 +12,22 @@
 // Маска школы магии.
 enum TSpellSchool : uint32_t
 {
-    const_invalid_school = 0,  //
+    const_invalid_school = 0,  
     eSchoolAir           = 1,  // Школа магии воздуха
     eSchoolFire          = 2,  // Школа магии огня
     eSchoolWater         = 4,  // Школа магии воды
     eSchoolEarth         = 8,  // Школа магии земли
     eSchoolAll           = 15, // Все школы магии
     kNumSpellSchools     = 4,  // Кол-во школ магии
+
+    SPELL_SCHOOL_NONE    = const_invalid_school,
+    SPELL_SCHOOL_AIR     = eSchoolAir, // Школа магии воздуха
+    SPELL_SCHOOL_FIRE    = eSchoolFire, // Школа магии огня
+    SPELL_SCHOOL_WATER   = eSchoolWater, // Школа магии воды
+    SPELL_SCHOOL_EARTH   = eSchoolEarth, // Школа магии земли
+    SPELL_SCHOOL_ALL     = eSchoolAll, // Все школы магии
+    MAX_SPELL_SCHOOLS    = kNumSpellSchools // Кол-во школ магии
+
 };
 
 // Spell type /
@@ -33,14 +42,18 @@ enum SpellID : int32_t
     MAX_COMBAT_SPELLS = 71, // Кол-во боевых заклинаний
     MAX_CREATURE_SPELLS = 10, // Кол-во заклинаний, кастуемых существами
     MAX_ADVENTURE_SPELLS = 10, // Кол-во заклинаний на карте приключений
-    MAX_SPELLS_BOOK = MAX_BOOK_SPELLS,
-    MAX_SPELLS_COMBAT = MAX_COMBAT_SPELLS,
-    MAX_SPELLS_CREATURE = MAX_CREATURE_SPELLS,
-    MAX_SPELLS_ADVENTURE = MAX_ADVENTURE_SPELLS,
-    MAX_SPELL_LEVELS = 5,
-    FIRST_ADVENTURE_SPELL = 0,
-    FIRST_COMBAT_SPELL = MAX_ADVENTURE_SPELLS,
-    FIRST_CREATURE_SPELL = 70,
+    MAX_SPELLS_BOOK = MAX_BOOK_SPELLS, // Кол-во заклинаний, доступные герою для изучения.
+    MAX_SPELLS_COMBAT = MAX_COMBAT_SPELLS, // Кол-во боевых заклинаний
+    MAX_SPELLS_CREATURE = MAX_CREATURE_SPELLS, // Кол-во заклинаний, кастуемых существами
+    MAX_SPELLS_ADVENTURE = MAX_ADVENTURE_SPELLS, // Кол-во заклинаний на карте приключений
+    MAX_SPELL_LEVELS = 5, // Максимальное количество уровней заклинаний
+    FIRST_ADVENTURE_SPELL = 0, // Тип первого заклинания на карте приключений
+    FIRST_COMBAT_SPELL = 10, // Тип первого боевого заклинания
+    FIRST_CREATURE_SPELL = 70, // Тип первого заклинания существа
+    LAST_ADVENTURE_SPELL = 9, // Тип последнего заклинания на карте приключений
+    LAST_COMBAT_SPELL = 80, // Тип последнего боевого заклинания(включая заклинания существ)
+    LAST_CREATURE_SPELL = 80, // Тип последнего заклинания существа
+    LAST_CASTABLE_COMBAT_SPELL = 69, // Тип последнего заклинания, которое может вызвать герой на поле боя
 
     SPELL_SUMMON_BOAT           = 0,  // Вызвать Корабль
     SPELL_SCUTTLE_BOAT          = 1,  // Затопить Корабль
@@ -128,6 +141,8 @@ enum SpellID : int32_t
 
 };
 
+// Combat Spell Effect IDs /
+// ID Эффектов заклинаний в бою.
 enum TSpellEffectID : int32_t
 {
     eSpellEffectNone                  = -1, //
@@ -213,7 +228,7 @@ enum TSpellEffectID : int32_t
     eSpellEffectRegenerate            = 79, //
     eSpellEffectDeathStare            = 80, //
     eSpellEffectPoof                  = 81, //
-    kNumSpellEffects                  = 82, //
+    kNumSpellEffects                  = 82  //
 };
 
 enum FSpellEffectFlags : uint32_t

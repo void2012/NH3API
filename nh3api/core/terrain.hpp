@@ -26,29 +26,56 @@ enum TTerrainType : int32_t
     eTerrainWater        = 8, // Вода
     eTerrainRock         = 9, // Скала ("чернота" в подземельях)
     kNumTerrainTypes     = 10, // Кол-во видов почв
+
+    TERRAIN_TYPE_NONE         = eTerrainNone,
+    TERRAIN_TYPE_DIRT         = eTerrainDirt,  // Грязь
+    TERRAIN_TYPE_SAND         = eTerrainSand,  // Песок
+    TERRAIN_TYPE_GRASS        = eTerrainGrass, // Трава
+    TERRAIN_TYPE_SNOW         = eTerrainSnow,  // Снег
+    TERRAIN_TYPE_SWAMP        = eTerrainSwamp, // Болото
+    TERRAIN_TYPE_ROUGH        = eTerrainRough, // Степь
+    TERRAIN_TYPE_SUBTERRANEAN = eTerrainSubterranean, // Подземелье
+    TERRAIN_TYPE_LAVA         = eTerrainLava, // Лава
+    TERRAIN_TYPE_WATER        = eTerrainWater, // Вода
+    TERRAIN_TYPE_ROCK         = eTerrainRock, // Скала ("чернота" в подземельях)
+    MAX_TERRAIN_TYPES         = kNumTerrainTypes // Кол-во видов почв
+
 };
 
 // Road type /
 // Тип дороги.
 enum TRoadType : uint32_t 
 {
-    eRoadNone        = 0, //
+    eRoadNone        = 0, // Нет дороги
     eRoadDirt        = 1, // Дорога по грязи
     eRoadGravel      = 2, // Гравийная дорога
     eRoadCobblestone = 3, // Мощеная дорога
     kNumRoadTypes    = 4, // Кол-во видов дороги
+
+    ROAD_NONE        = eRoadNone,
+    ROAD_DIRT        = eRoadDirt, // Дорога по грязи
+    ROAD_GRAVEL      = eRoadGravel, // Гравийная дорога
+    ROAD_COBBLESTONE = eRoadCobblestone, // Мощеная дорога
+    MAX_ROAD_TYPES   = kNumRoadTypes // Кол-во видов дороги
 };
 
 // River type /
 // Тип реки.
 enum TRiverType : uint32_t 
 {
-    eRiverNone     = 0, 
+    eRiverNone     = 0, // Нет реки
     eRiverClear    = 1, // Чистая река
     eRiverIcy      = 2, // Ледяная река
     eRiverMuddy    = 3, // Грязная река
     eRiverLava     = 4, // Лавовая река
     kNumRiverTypes = 5, // Кол-во видов рек
+
+    RIVER_NONE = eRiverNone, // Нет реки
+    RIVER_CLEAR = eRiverClear, // Чистая река
+    RIVER_ICY = eRiverIcy, // Ледяная река
+    RIVER_MUDDY = eRiverMuddy, // Грязная река
+    RIVER_LAVA = eRiverLava, // Лавовая река
+    MAX_RIVER_TYPES = kNumRiverTypes // Кол-во видов рек
 };
 
 // Map object types /
@@ -56,170 +83,172 @@ enum TRiverType : uint32_t
 enum TAdventureObjectType : int32_t
 {
     OBJECT_ALTAR_OF_SACRIFICE          = 2,
-    OBJECT_ANCHOR_POINT                = 3, // Точка, на которой можно высадиться
-    OBJECT_ARENA                       = 4, // Арена
-    OBJECT_ARTIFACT                    = 5, // Артефакт(объект)
-    OBJECT_PANDORAS_BOX                = 6, // Ящик пандоры
-    OBJECT_BLACK_MARKET                = 7, // Чёрный рынок
-    OBJECT_BOAT                        = 8, // Лодка
-    OBJECT_BORDERGUARD                 = 9, // Страж задания
-    OBJECT_KEYMASTER                   = 10, // Палатка ключника
-    OBJECT_BUOY                        = 11, // Буй
-    OBJECT_CAMPFIRE                    = 12, // Костёр
-    OBJECT_CARTOGRAPHER                = 13, // Картограф
-    OBJECT_SWAN_POND                   = 14, // Лебединый пруд
-    OBJECT_COVER_OF_DARKNESS           = 15, // Вуаль тьмы
-    OBJECT_CREATURE_BANK               = 16, // Банк существ
-    OBJECT_CREATURE_GENERATOR1         = 17, //
-    OBJECT_CREATURE_GENERATOR2         = 18, //
-    OBJECT_CREATURE_GENERATOR3         = 19, //
-    OBJECT_CREATURE_GENERATOR4         = 20, //
-    OBJECT_CURSED_GROUND               = 21, // Проклятая земля
-    OBJECT_CORPSE                      = 22, // Скелет
-    OBJECT_MARLETTO_TOWER              = 23, // Башня Марлетто
-    OBJECT_DERELICT_SHIP               = 24, // Покинутый корабль
-    OBJECT_DRAGON_UTOPIA               = 25, // Утопия драконов
-    OBJECT_EVENT                       = 26, // Событие(объект, невидим на карте)
-    OBJECT_EYE_OF_MAGI                 = 27, // Глаз мага
-    OBJECT_FAERIE_RING                 = 28, // Кольцо фей
-    OBJECT_FLOTSAM                     = 29, // Навес
-    OBJECT_FOUNTAIN_OF_YOUTH           = 31, // Фонтан молодости
-    OBJECT_FOUNTAIN_O_FORTUNE          = 30, // Фонтан удачи
-    OBJECT_GARDEN_OF_REVELATION        = 32, // Сад откровений
-    OBJECT_GARRISON                    = 33, // Гарнизон
-    OBJECT_HERO                        = 34, // Герой(объект)
-    OBJECT_HILL_FORT                   = 35, // Форт на холме
-    OBJECT_GRAIL                       = 36, // Грааль(объект, не видим на карте)
-    OBJECT_HUT_OF_MAGI                 = 37, // Хижина мага
-    OBJECT_IDOL_OF_FORTUNE             = 38, // Идол удачи
-    OBJECT_LEAN_TO                     = 39, // Навес
-    OBJECT_DECORATIVE                  = 40, // ???
-    OBJECT_LIBRARY_OF_ENLIGHTENMENT    = 41, // Библиотека просвещения
-    OBJECT_LIGHTHOUSE                  = 42, // Маяк
-    OBJECT_MONOLITH_ONE_WAY_ENTRANCE   = 43, // Монолит входа
-    OBJECT_MONOLITH_ONE_WAY_EXIT       = 44, // Монолит выхода
-    OBJECT_MONOLITH_TWO_WAY            = 45, // Двусторонний монолит
-    OBJECT_MAGIC_PLAINS1               = 46, //
-    OBJECT_SCHOOL_OF_MAGIC             = 47, // Школа магии
-    OBJECT_MAGIC_SPRING                = 48, // Магический пруд
-    OBJECT_MAGIC_WELL                  = 49, // Колодец
-    OBJECT_MARKET_OF_TIME              = 50, // Рынок времени
-    OBJECT_MERCENARY_CAMP              = 51, // Лагерь беженцев
-    OBJECT_MERMAID                     = 52, // Русалки
-    OBJECT_MINE                        = 53, // Шахта
-    OBJECT_MONSTER                     = 54, // Монстр
-    OBJECT_MYSTICAL_GARDEN             = 55, // Мистический сад
-    OBJECT_OASIS                       = 56, // Оазис
-    OBJECT_OBELISK                     = 57, // Обелис
-    OBJECT_REDWOOD_OBSERVATORY         = 58, // Обсерватория красного дерева
-    OBJECT_OCEAN_BOTTLE                = 59, // Морская бутылка
-    OBJECT_PILLAR_OF_FIRE              = 60, //
-    OBJECT_STAR_AXIS                   = 61, //
-    OBJECT_PRISON                      = 62, // Тюрьма
-    OBJECT_PYRAMID                     = 63, // Пирамида
-    OBJECT_RALLY_FLAG                  = 64, //
-    OBJECT_RANDOM_ART                  = 65, // Случайный артефакт
-    OBJECT_RANDOM_TREASURE_ART         = 66, // Случайный артефакт-сокровище
-    OBJECT_RANDOM_MINOR_ART            = 67, // Случайный малый артефакт
-    OBJECT_RANDOM_MAJOR_ART            = 68, //
-    OBJECT_RANDOM_RELIC_ART            = 69, // Случайный артефакт-реликвия
-    OBJECT_RANDOM_HERO                 = 70, // Случайный герой
-    OBJECT_RANDOM_MONSTER              = 71, // Случайный монстр
-    OBJECT_RANDOM_MONSTER_L1           = 72, // Случайный монстр 1 уровня
-    OBJECT_RANDOM_MONSTER_L2           = 73, // Случайный монстр 2 уровня
-    OBJECT_RANDOM_MONSTER_L3           = 74, // Случайный монстр 3 уровня
-    OBJECT_RANDOM_MONSTER_L4           = 75, // Случайный монстр 4 уровня
-    OBJECT_RANDOM_RESOURCE             = 76, //
-    OBJECT_RANDOM_TOWN                 = 77, //
-    OBJECT_REFUGEE_CAMP                = 78, //
-    OBJECT_RESOURCE                    = 79, //
-    OBJECT_SANCTUARY                   = 80, //
-    OBJECT_SCHOLAR                     = 81, //
-    OBJECT_SEA_CHEST                   = 82, //
-    OBJECT_SEER_HUT                    = 83, //
-    OBJECT_CRYPT                       = 84, //
-    OBJECT_SHIPWRECK                   = 85, //
-    OBJECT_SHIPWRECK_SURVIVOR          = 86, //
-    OBJECT_SHIPYARD                    = 87, //
-    OBJECT_SHRINE_OF_MAGIC_INCANTATION = 88, //
-    OBJECT_SHRINE_OF_MAGIC_GESTURE     = 89, //
-    OBJECT_SHRINE_OF_MAGIC_THOUGHT     = 90, //
-    OBJECT_SIGN                        = 91, //
-    OBJECT_SIRENS                      = 92, //
-    OBJECT_SPELL_SCROLL                = 93,
-    OBJECT_STABLES                     = 94,
-    OBJECT_TAVERN                      = 95,
-    OBJECT_TEMPLE                      = 96,
-    OBJECT_DEN_OF_THIEVES              = 97,
-    OBJECT_TOWN                        = 98,
-    OBJECT_TRADING_POST                = 99,
-    OBJECT_LEARNING_STONE              = 100,
-    OBJECT_TREASURE_CHEST              = 101,
-    OBJECT_TREE_OF_KNOWLEDGE           = 102,
-    OBJECT_SUBTERRANEAN_GATE           = 103,
-    OBJECT_UNIVERSITY                  = 104,
-    OBJECT_WAGON                       = 105,
-    OBJECT_WAR_MACHINE_FACTORY         = 106,
-    OBJECT_SCHOOL_OF_WAR               = 107,
-    OBJECT_WARRIORS_TOMB               = 108,
-    OBJECT_WATER_WHEEL                 = 109,
-    OBJECT_WATERING_HOLE               = 110,
-    OBJECT_WHIRLPOOL                   = 111,
-    OBJECT_WINDMILL                    = 112,
-    OBJECT_WITCH_HUT                   = 113,
+    OBJECT_ANCHOR_POINT                = 3,   // Точка, на которой можно высадиться
+    OBJECT_ARENA                       = 4,   // Арена
+    OBJECT_ARTIFACT                    = 5,   // Артефакт(объект)
+    OBJECT_PANDORAS_BOX                = 6,   // Ящик пандоры
+    OBJECT_BLACK_MARKET                = 7,   // Чёрный рынок
+    OBJECT_BOAT                        = 8,   // Лодка
+    OBJECT_BORDERGUARD                 = 9,   // Страж задания
+    OBJECT_KEYMASTER                   = 10,  // Палатка ключника
+    OBJECT_BUOY                        = 11,  // Буй
+    OBJECT_CAMPFIRE                    = 12,  // Костёр
+    OBJECT_CARTOGRAPHER                = 13,  // Картограф
+    OBJECT_SWAN_POND                   = 14,  // Лебединый пруд
+    OBJECT_COVER_OF_DARKNESS           = 15,  // Вуаль тьмы
+    OBJECT_CREATURE_BANK               = 16,  // Банк существ
+    OBJECT_CREATURE_GENERATOR1         = 17,  //
+    OBJECT_CREATURE_GENERATOR2         = 18,  //
+    OBJECT_CREATURE_GENERATOR3         = 19,  //
+    OBJECT_CREATURE_GENERATOR4         = 20,  //
+    OBJECT_CURSED_GROUND               = 21,  // Проклятая земля
+    OBJECT_CORPSE                      = 22,  // Скелет
+    OBJECT_MARLETTO_TOWER              = 23,  // Башня Марлетто
+    OBJECT_DERELICT_SHIP               = 24,  // Покинутый корабль
+    OBJECT_DRAGON_UTOPIA               = 25,  // Утопия драконов
+    OBJECT_EVENT                       = 26,  // Событие(объект, невидим на карте)
+    OBJECT_EYE_OF_MAGI                 = 27,  // Глаз мага
+    OBJECT_FAERIE_RING                 = 28,  // Кольцо фей
+    OBJECT_FLOTSAM                     = 29,  // Навес
+    OBJECT_FOUNTAIN_OF_YOUTH           = 31,  // Фонтан молодости
+    OBJECT_FOUNTAIN_O_FORTUNE          = 30,  // Фонтан удачи
+    OBJECT_GARDEN_OF_REVELATION        = 32,  // Сад откровений
+    OBJECT_GARRISON                    = 33,  // Гарнизон
+    OBJECT_HERO                        = 34,  // Герой(объект)
+    OBJECT_HILL_FORT                   = 35,  // Форт на холме
+    OBJECT_GRAIL                       = 36,  // Грааль(объект, не видим на карте)
+    OBJECT_HUT_OF_MAGI                 = 37,  // Хижина мага
+    OBJECT_IDOL_OF_FORTUNE             = 38,  // Идол удачи
+    OBJECT_LEAN_TO                     = 39,  // Навес
+    OBJECT_DECORATIVE                  = 40,  // ???
+    OBJECT_LIBRARY_OF_ENLIGHTENMENT    = 41,  // Библиотека просвещения
+    OBJECT_LIGHTHOUSE                  = 42,  // Маяк
+    OBJECT_MONOLITH_ONE_WAY_ENTRANCE   = 43,  // Монолит входа
+    OBJECT_MONOLITH_ONE_WAY_EXIT       = 44,  // Монолит выхода
+    OBJECT_MONOLITH_TWO_WAY            = 45,  // Двусторонний монолит
+    OBJECT_MAGIC_PLAINS                = 46,  //
+    OBJECT_SCHOOL_OF_MAGIC             = 47,  // Школа магии
+    OBJECT_MAGIC_SPRING                = 48,  // Магический пруд
+    OBJECT_MAGIC_WELL                  = 49,  // Колодец
+    OBJECT_MARKET_OF_TIME              = 50,  // Рынок времени
+    OBJECT_MERCENARY_CAMP              = 51,  // Лагерь беженцев
+    OBJECT_MERMAID                     = 52,  // Русалки
+    OBJECT_MINE                        = 53,  // Шахта
+    OBJECT_MONSTER                     = 54,  // Монстр
+    OBJECT_MYSTICAL_GARDEN             = 55,  // Мистический сад
+    OBJECT_OASIS                       = 56,  // Оазис
+    OBJECT_OBELISK                     = 57,  // Обелис
+    OBJECT_REDWOOD_OBSERVATORY         = 58,  // Обсерватория красного дерева
+    OBJECT_OCEAN_BOTTLE                = 59,  // Морская бутылка
+    OBJECT_PILLAR_OF_FIRE              = 60,  //
+    OBJECT_STAR_AXIS                   = 61,  //
+    OBJECT_PRISON                      = 62,  // Тюрьма
+    OBJECT_PYRAMID                     = 63,  // Пирамида
+    OBJECT_RALLY_FLAG                  = 64,  //
+    OBJECT_RANDOM_ART                  = 65,  // Случайный артефакт
+    OBJECT_RANDOM_TREASURE_ART         = 66,  // Случайный артефакт-сокровище
+    OBJECT_RANDOM_MINOR_ART            = 67,  // Случайный малый артефакт
+    OBJECT_RANDOM_MAJOR_ART            = 68,  //
+    OBJECT_RANDOM_RELIC_ART            = 69,  // Случайный артефакт-реликвия
+    OBJECT_RANDOM_HERO                 = 70,  // Случайный герой
+    OBJECT_RANDOM_MONSTER              = 71,  // Случайный монстр
+    OBJECT_RANDOM_MONSTER_L1           = 72,  // Случайный монстр 1 уровня
+    OBJECT_RANDOM_MONSTER_L2           = 73,  // Случайный монстр 2 уровня
+    OBJECT_RANDOM_MONSTER_L3           = 74,  // Случайный монстр 3 уровня
+    OBJECT_RANDOM_MONSTER_L4           = 75,  // Случайный монстр 4 уровня
+    OBJECT_RANDOM_RESOURCE             = 76,  // Случайный ресурс
+    OBJECT_RANDOM_TOWN                 = 77,  // Случайный город
+    OBJECT_REFUGEE_CAMP                = 78,  // Лагерь беженцев
+    OBJECT_RESOURCE                    = 79,  // Ресурс
+    OBJECT_SANCTUARY                   = 80,  // Святилище
+    OBJECT_SCHOLAR                     = 81,  // Учёный
+    OBJECT_SEA_CHEST                   = 82,  // Морской сундук
+    OBJECT_SEER_HUT                    = 83,  // Хижина провидца
+    OBJECT_CRYPT                       = 84,  // Склеп
+    OBJECT_SHIPWRECK                   = 85,  // Кораблекрушение
+    OBJECT_SHIPWRECK_SURVIVOR          = 86,  // Потерпевший кораблекрушение
+    OBJECT_SHIPYARD                    = 87,  // Верфь
+    OBJECT_SHRINE_OF_MAGIC_INCANTATION = 88,  // Святыня 1-го уровня
+    OBJECT_SHRINE_OF_MAGIC_GESTURE     = 89,  // Святыня 2-го уровня
+    OBJECT_SHRINE_OF_MAGIC_THOUGHT     = 90,  // Святыня 3-го уровня
+    OBJECT_SIGN                        = 91,  // Знак(Табличка)
+    OBJECT_SIRENS                      = 92,  // Сирены
+    OBJECT_SPELL_SCROLL                = 93,  // Свиток с заклинанием
+    OBJECT_STABLES                     = 94,  // Конюшни
+    OBJECT_TAVERN                      = 95,  // Таверна
+    OBJECT_TEMPLE                      = 96,  // Храм
+    OBJECT_DEN_OF_THIEVES              = 97,  // Убежище воров
+    OBJECT_TOWN                        = 98,  // Город
+    OBJECT_TRADING_POST                = 99,  // Рынок
+    OBJECT_LEARNING_STONE              = 100, // Камень знаний
+    OBJECT_TREASURE_CHEST              = 101, // Сундук с сокровищами
+    OBJECT_TREE_OF_KNOWLEDGE           = 102, // Древо знаний
+    OBJECT_SUBTERRANEAN_GATE           = 103, // Врата подземного мира
+    OBJECT_UNIVERSITY                  = 104, // Университет
+    OBJECT_WAGON                       = 105, // Повозка
+    OBJECT_WAR_MACHINE_FACTORY         = 106, // Фабрика военной техники
+    OBJECT_SCHOOL_OF_WAR               = 107, // Военная школа
+    OBJECT_WARRIORS_TOMB               = 108, // Могила воина
+    OBJECT_WATER_WHEEL                 = 109, // Водяная мельница
+    OBJECT_WATERING_HOLE               = 110, // Родник
+    OBJECT_WHIRLPOOL                   = 111, // Водоворот
+    OBJECT_WINDMILL                    = 112, // Ветряная мельница
+    OBJECT_WITCH_HUT                   = 113, // Хижина ведьмы
 
-    TERRAIN_BRUSH                  = 114,
-    TERRAIN_BUSH                   = 115,
-    TERRAIN_CACTUS                 = 116,
-    TERRAIN_CANYON                 = 117,
-    TERRAIN_CRATER                 = 118,
-    TERRAIN_DEAD_VEGETATION        = 119,
-    TERRAIN_FLOWERS                = 120,
-    TERRAIN_FROZEN_LAKE            = 121,
-    TERRAIN_HEDGE                  = 122,
-    TERRAIN_HILL                   = 123,
-    TERRAIN_HOLE                   = 124,
-    TERRAIN_KELP                   = 125,
-    TERRAIN_LAKE                   = 126,
-    TERRAIN_LAVA_FLOW              = 127,
-    TERRAIN_LAVA_LAKE              = 128,
-    TERRAIN_MUSHROOMS              = 129,
-    TERRAIN_LOG                    = 130,
-    TERRAIN_MANDRAKE               = 131,
-    TERRAIN_MOSS                   = 132,
-    TERRAIN_MOUND                  = 133,
-    TERRAIN_MOUNTAIN               = 134,
-    TERRAIN_OAK_TREES              = 135,
-    TERRAIN_OUTCROPPING            = 136,
-    TERRAIN_PINE_TREES             = 137,
-    TERRAIN_PLANT                  = 138,
+    // Декоративные объекты
+
+    TERRAIN_BRUSH                  = 114, // Вереск
+    TERRAIN_BUSH                   = 115, // Куст
+    TERRAIN_CACTUS                 = 116, // Кактус
+    TERRAIN_CANYON                 = 117, // Трещины в земле
+    TERRAIN_CRATER                 = 118, // Кратер
+    TERRAIN_DEAD_VEGETATION        = 119, // Мёртвая растительность
+    TERRAIN_FLOWERS                = 120, // Цветы
+    TERRAIN_FROZEN_LAKE            = 121, // Замёрзшее озеро
+    TERRAIN_HEDGE                  = 122, // Изгородь
+    TERRAIN_HILL                   = 123, // Холм
+    TERRAIN_HOLE                   = 124, // Нора
+    TERRAIN_KELP                   = 125, // Водоросли
+    TERRAIN_LAKE                   = 126, // Озеро
+    TERRAIN_LAVA_FLOW              = 127, // Поток лавы
+    TERRAIN_LAVA_LAKE              = 128, // Озеро лавы
+    TERRAIN_MUSHROOMS              = 129, // Грибы
+    TERRAIN_LOG                    = 130, // Бревно
+    TERRAIN_MANDRAKE               = 131, // Мандрагора
+    TERRAIN_MOSS                   = 132, // Мох
+    TERRAIN_MOUND                  = 133, // Курган
+    TERRAIN_MOUNTAIN               = 134, // Гора
+    TERRAIN_OAK_TREES              = 135, // Дубовые деревья
+    TERRAIN_OUTCROPPING            = 136, // Пласт породы
+    TERRAIN_PINE_TREES             = 137, // Сосны
+    TERRAIN_PLANT                  = 138, // Растение
     TERRAIN_RIVER_1                = 139, // unused / не используется.
     TERRAIN_RIVER_2                = 140, // unused / не используется.
     TERRAIN_RIVER_3                = 141, // unused / не используется.
     TERRAIN_RIVER_4                = 142, // unused / не используется.
-    TERRAIN_RIVER_DELTA            = 143,
+    TERRAIN_RIVER_DELTA            = 143, // Дельта реки
     TERRAIN_ROAD_1                 = 144, // unused / не используется.
     TERRAIN_ROAD_2                 = 145, // unused / не используется.
     TERRAIN_ROAD_3                 = 146, // unused / не используется.
-    TERRAIN_ROCK                   = 147,
-    TERRAIN_SAND_DUNE              = 148,
-    TERRAIN_SAND_PIT               = 149,
-    TERRAIN_SHRUB                  = 150,
-    TERRAIN_SKULL                  = 151,
-    TERRAIN_STALAGMITE             = 152,
-    TERRAIN_STUMP                  = 153,
-    TERRAIN_TAR_PIT                = 154,
-    TERRAIN_TREES                  = 155,
-    TERRAIN_VINE                   = 156,
-    TERRAIN_VOLCANIC_TENT          = 157,
-    TERRAIN_VOLCANO                = 158,
-    TERRAIN_WILLOW_TREES           = 159,
-    TERRAIN_YUCCA_TREES            = 160,
-    TERRAIN_REEF                   = 161,
+    TERRAIN_ROCK                   = 147, // Камни
+    TERRAIN_SAND_DUNE              = 148, // Песчаная дюна
+    TERRAIN_SAND_PIT               = 149, // Песчаная яма
+    TERRAIN_SHRUB                  = 150, // Куст 
+    TERRAIN_SKULL                  = 151, // Череп
+    TERRAIN_STALAGMITE             = 152, // Сталагмит
+    TERRAIN_STUMP                  = 153, // Пень
+    TERRAIN_TAR_PIT                = 154, // Смоляное озеро
+    TERRAIN_TREES                  = 155, // Деревья
+    TERRAIN_VINE                   = 156, // Плющ
+    TERRAIN_VOLCANIC_TENT          = 157, // Жерло вулкана
+    TERRAIN_VOLCANO                = 158, // Вулкан
+    TERRAIN_WILLOW_TREES           = 159, // Ивы
+    TERRAIN_YUCCA_TREES            = 160, // Деревья Юкка
+    TERRAIN_REEF                   = 161, // Риф
 
-    OBJECT_RANDOM_MONSTER_L5           = 162,
-    OBJECT_RANDOM_MONSTER_L6           = 163,
-    OBJECT_RANDOM_MONSTER_L7           = 164,
+    OBJECT_RANDOM_MONSTER_L5           = 162, // Случайный монстр 5 уровня
+    OBJECT_RANDOM_MONSTER_L6           = 163, // Случайный монстр 6 уровня
+    OBJECT_RANDOM_MONSTER_L7           = 164, // Случайный монстр 7 уровня
 
     // AB objects
 
@@ -271,19 +300,20 @@ enum TAdventureObjectType : int32_t
     TERRAIN_SUBTERRANEAN_ROCKS     = 210,
     TERRAIN_SWAMP_FOLIAGE          = 211,
 
-    OBJECT_BORDER_GATE                 = 212,
-    OBJECT_HERO_PLACEHOLDER            = 214,
-    OBJECT_QUEST_GUARD                 = 215,
-    OBJECT_RANDOM_DWELLING             = 216,
-    OBJECT_RANDOM_DWELLING_LVL         = 217,
-    OBJECT_RANDOM_DWELLING_FACTION     = 218,
-    OBJECT_GARRISON2                   = 219,
-    OBJECT_ABANDONED_MINE              = 220,
-    OBJECT_TRADING_POST_SNOW           = 221,
+    OBJECT_BORDER_GATE                 = 212, // Пограничные ворота
+    OBJECT_FREELANCERS_GUILD           = 213, // Гильдия наёмников
+    OBJECT_HERO_PLACEHOLDER            = 214, // Лагерь героя
+    OBJECT_QUEST_GUARD                 = 215, // Хранитель вопроса
+    OBJECT_RANDOM_DWELLING             = 216, // Случайное жилище
+    OBJECT_RANDOM_DWELLING_LVL         = 217, // Случайное жилище определённого уровня
+    OBJECT_RANDOM_DWELLING_FACTION     = 218, // Случайное жилище определённой фракции
+    OBJECT_GARRISON2                   = 219, // Горизонтальный гарнизон
+    OBJECT_ABANDONED_MINE2             = 220, // Заброшенная шахта(AB)
+    OBJECT_TRADING_POST_SNOW           = 221, // Рынок в снегу(AB)
 
     // SoD objects
 
-    OBJECT_CLOVER_FIELD                = 222,
+    OBJECT_CLOVER_FIELD                = 222, // Клеверное поле
     OBJECT_CURSED_GROUND2              = 223, // Проклятая земля
     OBJECT_EVIL_FOG                    = 224, // Зловещий туман
     OBJECT_FAVORABLE_WINDS             = 225, // Клеверное поле
@@ -298,8 +328,15 @@ enum TAdventureObjectType : int32_t
     MAX_OBJECTS_ROE               = 165, // Кол-во объектов в RoE
     MAX_OBJECTS_AB                = 222, // Кол-во объектов в AB
     MAX_OBJECTS_SOD               = 232, // Кол-во объектов в SoD
-    MAX_OBJECTS = MAX_OBJECTS_SOD // Кол-во объектов в игре
-
+    MAX_OBJECTS = MAX_OBJECTS_SOD, // Кол-во объектов в игре
+    FIRST_AB_OBJECT               = TERRAIN_BRUSH2,
+    LAST_AB_OBJECT                = OBJECT_TRADING_POST_SNOW,
+    FIRST_SOD_OBJECT              = OBJECT_CLOVER_FIELD,
+    LAST_SOD_OBJECT               = OBJECT_ROCKLANDS,
+    FIRST_ADVENTURE_OBJECT        = OBJECT_ALTAR_OF_SACRIFICE,
+    LAST_ADVENTURE_OBJECT         = LAST_SOD_OBJECT,
+    FIRST_ROE_OBJECT              = FIRST_ADVENTURE_OBJECT,
+    LAST_ROE_OBJECT               = OBJECT_RANDOM_MONSTER_L7
 };
 
 // Magical terrain type(SoD) /
@@ -323,7 +360,7 @@ enum EMagicTerrain
 // Типы городов(фракций).
 enum TTownType : int32_t
 {
-    eTownNeutral    = -1, // Нейтральный
+    eTownNeutral    = -1, // Нейтральный город
     eTownCastle     = 0,  // Замок
     eTownRampart    = 1,  // Оплот
     eTownTower      = 2,  // Башня
@@ -333,18 +370,37 @@ enum TTownType : int32_t
     eTownStronghold = 6,  // Цитадель
     eTownFortress   = 7,  // Крепость
     eTownConflux    = 8,  // Сопряжение
-    kNumTownsRoE    = 8,  // Количество городов в RoE
-    kNumTownsAB     = 9,  // Количество городов в AB
-    kNumTownsSoD    = kNumTownsAB, // Количество городов в SoD
-    kNumTowns       = kNumTownsSoD // Количество городов в SoD
+    kNumTowns       = 9, // Количество городов в SoD
+
+    TOWN_NEUTRAL    = eTownNeutral, // Нейтральный город
+    TOWN_CASTLE     = eTownCastle, // Замок
+    TOWN_RAMPART    = eTownRampart, // Оплот
+    TOWN_TOWER      = eTownTower, // Башня
+    TOWN_INFERNO    = eTownInferno, // Инферно
+    TOWN_NECROPOLIS = eTownNecropolis, // Некрополис
+    TOWN_DUNGEON    = eTownDungeon, // Темница
+    TOWN_STRONGHOLD = eTownStronghold, // Цитадель
+    TOWN_FORTRESS   = eTownFortress, // Крепость
+    TOWN_CONFLUX    = eTownConflux, // Сопряжение
+    MAX_TOWNS_ROE   = 8, // Количество городов в RoE
+    MAX_TOWNS_AB    = 9, // Количество городов в AB
+    MAX_TOWNS_SOD   = 9, // Количество городов в SoD
+    MAX_TOWNS       = MAX_TOWNS_SOD // Количество городов в SoD
 };
 
+// Allowed alignments bitmasks / 
+// Маски разрешенных фракций.
 enum : uint32_t 
 {
     kAlignmentsMaskRoE = 0xFF,
     kAlignmentsMaskAB  = 0x1FF, 
     kAlignmentsMaskSoD = kAlignmentsMaskAB,
-    kAlignmentsMask    = kAlignmentsMaskSoD
+    kAlignmentsMask    = kAlignmentsMaskSoD,
+
+    ALIGNMENTS_MASK_ROE = 0xFF,
+    ALIGNMENTS_MASK_AB  = 0x1FF,
+    ALIGNMENTS_MASK_SOD = ALIGNMENTS_MASK_AB,
+    ALIGNMENTS_MASK     = ALIGNMENTS_MASK_SOD
 };
 
 // Map point: X, Y, Z coordinates /
