@@ -634,7 +634,7 @@ public:
         : helper( _X.helper.select_on_container_copy_construction() ),
         _Ptr(nullptr), _Len(0), _Res(0)
     {
-        assign(_X, 0, exe_basic_string::npos);
+        assign(_X, 0, npos);
     }
 
     exe_basic_string(const exe_basic_string& _X, size_type _P, size_type _M,
@@ -891,9 +891,9 @@ public:
 
     exe_basic_string& append( const exe_basic_string& _X )
     {
-        return append( _X, 0, exe_basic_string::npos );
+        return append( _X, 0, npos );
     }
-    exe_basic_string &append(const exe_basic_string &_X, size_type _P, size_type _M = exe_basic_string::npos)
+    exe_basic_string &append(const exe_basic_string &_X, size_type _P, size_type _M = npos)
     {
         if (_X.size() < _P)
         {
@@ -902,7 +902,7 @@ public:
         size_type _N = _X.size() - _P;
         if (_N < _M)
             _M = _N;
-        if (exe_basic_string::npos - _Len <= _M)
+        if (npos - _Len <= _M)
         {
             return _throw_length_exception(), *this;
         }
@@ -915,7 +915,7 @@ public:
     }
     exe_basic_string& append( const value_type* _S, size_type _M )
     {
-        if (exe_basic_string::npos - _Len <= _M)
+        if (npos - _Len <= _M)
         {
             return _throw_length_exception(), *this;
         }
@@ -933,7 +933,7 @@ public:
     }
     exe_basic_string& append( size_type _M, value_type _C )
     {
-        if (exe_basic_string::npos - _Len <= _M)
+        if (npos - _Len <= _M)
         {
             return _throw_length_exception(), *this;
         }
@@ -961,7 +961,7 @@ public:
 
     exe_basic_string& assign( const exe_basic_string& _X )
     {
-        return (assign( _X, 0, exe_basic_string::npos ));
+        return (assign( _X, 0, npos ));
     }
     NH3API_INLINE_LARGE
     exe_basic_string& assign( const exe_basic_string& _X, size_type _P, size_type _M )
@@ -1010,7 +1010,7 @@ public:
     }
     exe_basic_string& assign( size_type _N, value_type _C )
     {
-        if ( _N == exe_basic_string::npos )
+        if ( _N == npos )
         {
             return _throw_length_exception(), *this;
         }
@@ -1029,7 +1029,7 @@ public:
 
     exe_basic_string& insert( size_type _P0, const exe_basic_string& _X )
     {
-        return (insert( _P0, _X, 0, exe_basic_string::npos ));
+        return (insert( _P0, _X, 0, npos ));
     }
     exe_basic_string& insert( size_type _P0, const exe_basic_string& _X, size_type _P,
                 size_type _M )
@@ -1041,7 +1041,7 @@ public:
         size_type _N = _X.size() - _P;
         if ( _N < _M )
             _M = _N;
-        if (exe_basic_string::npos - _Len <= _M)
+        if (npos - _Len <= _M)
         {
             return _throw_length_exception(), *this;
         }
@@ -1059,7 +1059,7 @@ public:
         {
             return _throw_out_of_range_exception(), *this;
         }
-        if (exe_basic_string::npos - _Len <= _M)
+        if (npos - _Len <= _M)
         {
             return _throw_length_exception(), *this;
         }
@@ -1082,7 +1082,7 @@ public:
         {
             return _throw_out_of_range_exception(), *this;
         }
-        if ( exe_basic_string::npos - _Len <= _M )
+        if ( npos - _Len <= _M )
         {
             return _throw_length_exception(), *this;
         }
@@ -1121,8 +1121,11 @@ public:
     void pop_back()
     { erase(end() - 1); }
 
+    void shrink_to_fit()
+    { exe_basic_string(*this).swap(*this); }
+
     NH3API_INLINE_LARGE
-    exe_basic_string& erase( size_type _P0 = 0, size_type _M = exe_basic_string::npos )
+    exe_basic_string& erase( size_type _P0 = 0, size_type _M = npos )
     {
         if (_Len < _P0)
         {
@@ -1158,12 +1161,12 @@ public:
 
     exe_basic_string& replace(const size_type _P0, const size_type _N0, const exe_basic_string& _X )
     {
-        return replace(_P0, _N0, _X, 0, exe_basic_string::npos);
+        return replace(_P0, _N0, _X, 0, npos);
     }
 
     NH3API_INLINE_LARGE
     exe_basic_string& replace(const size_type _P0, size_type _N0, const exe_basic_string& _X,
-                const size_type _P, size_type _M = exe_basic_string::npos )
+                const size_type _P, size_type _M = npos )
     {
         if (_Len < _P0 || _X.size() < _P)
         {
@@ -1202,7 +1205,7 @@ public:
         }
         if (_Len - _P0 < _N0)
             _N0 = _Len - _P0;
-        if (exe_basic_string::npos - _M <= _Len - _N0)
+        if (npos - _M <= _Len - _N0)
         {
             return _throw_length_exception(), *this;
         }
@@ -1236,7 +1239,7 @@ public:
         }
         if (_Len - _P0 < _N0)
             _N0 = _Len - _P0;
-        if (exe_basic_string::npos - _M <= _Len - _N0)
+        if (npos - _M <= _Len - _N0)
         {
             return _throw_length_exception(), *this;
         }
@@ -1333,559 +1336,601 @@ public:
     }
 
     public:
-    iterator begin()
-    {
-        _Freeze();
-        return (_Ptr);
-    }
-    const_iterator begin() const
-    {
-        return (_Ptr);
-    }
-    const_iterator cbegin() const
-    {
-        return (_Ptr);
-    }
-    iterator end()
-    {
-        _Freeze();
-        return ((iterator)_Psum( _Ptr, _Len ));
-    }
-    const_iterator end() const
-    {
-        return ((const_iterator)_Psum( _Ptr, _Len ));
-    }
-    const_iterator cend() const
-    {
-        return ((const_iterator)_Psum( _Ptr, _Len ));
-    }
-    reverse_iterator rbegin()
-    {
-        return (reverse_iterator( end() ));
-    }
-    const_reverse_iterator rbegin() const
-    {
-        return (const_reverse_iterator( end() ));
-    }
-    const_reverse_iterator crbegin() const
-    {
-        return (const_reverse_iterator( end() ));
-    }
-    reverse_iterator rend()
-    {
-        return (reverse_iterator( begin() ));
-    }
-    const_reverse_iterator rend() const
-    {
-        return (const_reverse_iterator( begin() ));
-    }
-    const_reverse_iterator crend() const
-    {
-        return (const_reverse_iterator( begin() ));
-    }
-    reference at( size_type _P0 )
-    {
-        if ( _Len <= _P0 )
+        reference front()
         {
-            return _throw_out_of_range_exception(), _Ptr[_P0];
+            _Freeze();
+            return _Ptr[0];
         }
-        _Freeze();
-        return _Ptr[_P0];
-    }
-    const_reference at( size_type _P0 ) const
-    {
-        if ( _Len <= _P0 )
-        {
-            return _throw_out_of_range_exception(), _Ptr[_P0];
-        }
-        return _Ptr[_P0];
-    }
-    reference operator[]( size_type _P0 )
-    {
-    #if !NH3API_DEBUG
-        _Freeze();
-        return (_Ptr[_P0]);
-    #else
-        return at(_P0);
-    #endif
-    }
-    const_reference operator[]( size_type _P0 ) const
-    {
-    #if !NH3API_DEBUG
-        return (_Ptr[_P0]);
-    #else
-        return at(_P0);
-    #endif
-    }
-    const value_type* c_str() const
-    {
-        return _Ptr;
-    }
-    const value_type* data() const
-    {
-        return _Ptr;
-    }
-    value_type* data()
-    {
-        _Freeze();
-        return _Ptr;
-    }
-    size_type length() const
-    {
-        return (_Len);
-    }
-    size_type size() const
-    {
-        return (_Len);
-    }
-    size_type max_size() const
-    {
-        const size_type _N = helper.max_size();
-        return (_N <= 2 ? 1 : _N - 2);
-    }
 
-    void resize(const size_type _N, const value_type _C = value_type())
-    {
-        const size_type old_size = size();
-        if (_N <= old_size)
-        {
-            _Eos(_N);
-        }
-        else
-        {
-            append(_N - old_size, _C);
-        }
-    }
+        const_reference front() const
+        { return _Ptr[0]; }
 
-    size_type capacity() const
-    {
-        return (_Res);
-    }
-    void reserve( size_type _N = 0 )
-    {
-        if ( _Res < _N )
-            _Grow( _N );
-    }
-    bool empty() const
-    {
-        return (_Len == 0);
-    }
-    size_type copy( value_type* _S, size_type _N, size_type _P0 = 0 ) const
-    {
-        if ( _Len < _P0 )
+        reference back() 
         {
-            return _throw_out_of_range_exception(), 0;
+            _Freeze();
+            return _Ptr[_Len - 1];
         }
-        if ( _Len - _P0 < _N )
-            _N = _Len - _P0;
-        if ( 0 < _N )
-            helper_type::copy( _S, _Ptr + _P0, _N );
-        return (_N);
-    }
-    void swap( exe_basic_string& _X )
-    NH3API_NOEXCEPT_EXPR(helper_type::propagate_on_container_swap::value
-                             || helper_type::is_always_equal::value)
-    {
-        if ( this->helper.alloc == _X.helper.alloc )
-        {
-            std::swap( _Ptr, _X._Ptr );
-            std::swap( _Len, _X._Len );
-            std::swap( _Res, _X._Res );
-        }
-        else
-        {
-            exe_basic_string _Ts = *this;
-            *this = _X;
-            _X = _Ts;
-        }
-    }
 
-    size_type find( const exe_basic_string& _X, size_type _P = 0 ) const
-    {
-        return (find( _X.c_str(), _P, _X.size() ));
-    }
-    size_type find( const value_type* _S, size_type _P,
-                    size_type _N ) const
-    {
-        if ( _N == 0 && _P <= _Len )
-            return (_P);
-        size_type _Nm;
-        if ( _P < _Len && _N <= (_Nm = _Len - _P) )
-        {
-            const value_type* _U, * _V;
-            for ( _Nm -= _N - 1, _V = _Ptr + _P;
-                (_U = helper_type::find( _V, _Nm, *_S )) != 0;
-                _Nm -= _U - _V + 1, _V = _U + 1 )
-                if ( helper_type::compare( _U, _S, _N ) == 0 )
-                    return (_U - _Ptr);
-        }
-        return (exe_basic_string::npos);
-    }
-    size_type find( const value_type* _S, size_type _P = 0 ) const
-    {
-        return (find( _S, _P, helper_type::length( _S ) ));
-    }
-    size_type find( value_type _C, size_type _P = 0 ) const
-    {
-        return (find( static_cast<const value_type*>(&_C), _P, 1));
-    }
-    size_type rfind( const exe_basic_string& _X, size_type _P = exe_basic_string::npos ) const
-    {
-        return (rfind( _X.c_str(), _P, _X.size() ));
-    }
-    size_type rfind( const value_type* _S, size_type _P,
-                    size_type _N ) const
-    {
-        if (_N == 0)
-            return (_P < _Len ? _P : _Len);
+        const_reference back() const
+        { return _Ptr[_Len - 1]; }
 
-        if (_N <= _Len)
+        iterator begin()
         {
-            for (const value_type *_U = _Ptr + +(_P < _Len - _N ? _P : _Len - _N);; --_U)
+            _Freeze();
+            return (_Ptr);
+        }
+        const_iterator begin() const
+        {
+            return (_Ptr);
+        }
+        const_iterator cbegin() const
+        {
+            return (_Ptr);
+        }
+        iterator end()
+        {
+            _Freeze();
+            return ((iterator)_Psum( _Ptr, _Len ));
+        }
+        const_iterator end() const
+        {
+            return ((const_iterator)_Psum( _Ptr, _Len ));
+        }
+        const_iterator cend() const
+        {
+            return ((const_iterator)_Psum( _Ptr, _Len ));
+        }
+        reverse_iterator rbegin()
+        {
+            return (reverse_iterator( end() ));
+        }
+        const_reverse_iterator rbegin() const
+        {
+            return (const_reverse_iterator( end() ));
+        }
+        const_reverse_iterator crbegin() const
+        {
+            return (const_reverse_iterator( end() ));
+        }
+        reverse_iterator rend()
+        {
+            return (reverse_iterator( begin() ));
+        }
+        const_reverse_iterator rend() const
+        {
+            return (const_reverse_iterator( begin() ));
+        }
+        const_reverse_iterator crend() const
+        {
+            return (const_reverse_iterator( begin() ));
+        }
+        reference at( size_type _P0 )
+        {
+            if ( _Len <= _P0 )
             {
-                if (helper_type::eq(*_U, *_S) && helper_type::compare(_U, _S, _N) == 0)
-                    return (_U - _Ptr);
-                else if (_U == _Ptr)
-                    break;
+                return _throw_out_of_range_exception(), _Ptr[_P0];
+            }
+            _Freeze();
+            return _Ptr[_P0];
+        }
+        const_reference at( size_type _P0 ) const
+        {
+            if ( _Len <= _P0 )
+            {
+                return _throw_out_of_range_exception(), _Ptr[_P0];
+            }
+            return _Ptr[_P0];
+        }
+        reference operator[]( size_type _P0 )
+        {
+        #if !NH3API_DEBUG
+            _Freeze();
+            return (_Ptr[_P0]);
+        #else
+            return at(_P0);
+        #endif
+        }
+        const_reference operator[]( size_type _P0 ) const
+        {
+        #if !NH3API_DEBUG
+            return (_Ptr[_P0]);
+        #else
+            return at(_P0);
+        #endif
+        }
+        const value_type* c_str() const
+        {
+            return _Ptr;
+        }
+        const value_type* data() const
+        {
+            return _Ptr;
+        }
+        value_type* data()
+        {
+            _Freeze();
+            return _Ptr;
+        }
+        size_type length() const
+        {
+            return (_Len);
+        }
+        size_type size() const
+        {
+            return (_Len);
+        }
+        size_type max_size() const
+        {
+            const size_type _N = helper.max_size();
+            return (_N <= 2 ? 1 : _N - 2);
+        }
+
+        void resize(const size_type _N, const value_type _C = value_type())
+        {
+            const size_type old_size = size();
+            if (_N <= old_size)
+            {
+                _Eos(_N);
+            }
+            else
+            {
+                append(_N - old_size, _C);
             }
         }
-        return (exe_basic_string::npos);
-    }
-    size_type rfind( const value_type* _S, size_type _P = exe_basic_string::npos ) const
-    {
-        return (rfind( _S, _P, helper_type::length( _S ) ));
-    }
-    size_type rfind( value_type _C, size_type _P = exe_basic_string::npos ) const
-    {
-        return (rfind( static_cast<const value_type*>(&_C), _P, 1));
-    }
-    size_type find_first_of( const exe_basic_string& _X,
-                            size_type _P = 0 ) const
-    {
-        return (find_first_of( _X.c_str(), _P, _X.size() ));
-    }
-    size_type find_first_of( const value_type* _S, size_type _P,
-                            size_type _N ) const
-    {
-        if ( 0 < _N && _P < _Len )
+
+        size_type capacity() const
         {
-            const value_type* const _V = _Ptr + _Len;
-            for ( const value_type* _U = _Ptr + _P; _U < _V; ++_U )
-                if ( helper_type::find( _S, _N, *_U ) != 0 )
-                    return (_U - _Ptr);
+            return (_Res);
         }
-        return (exe_basic_string::npos);
-    }
-    size_type find_first_of( const value_type* _S, size_type _P = 0 ) const
-    {
-        return (find_first_of( _S, _P, helper_type::length( _S ) ));
-    }
-    size_type find_first_of( value_type _C, size_type _P = 0 ) const
-    {
-        return (find( static_cast<const value_type*>(&_C), _P, 1));
-    }
-    size_type find_last_of( const exe_basic_string& _X,
-                            size_type _P = exe_basic_string::npos ) const
-    {
-        return (find_last_of( _X.c_str(), _P, _X.size() ));
-    }
-    size_type find_last_of( const value_type* _S, size_type _P,
-                            size_type _N ) const
-    {
-        if (0 < _N && 0 < _Len)
+        void reserve( size_type _N = 0 )
         {
-            for (const value_type *_U = _Ptr + (_P < _Len ? _P : _Len - 1);; --_U)
+            if ( _Res < _N )
+                _Grow( _N );
+        }
+        bool empty() const
+        {
+            return (_Len == 0);
+        }
+        size_type copy( value_type* _S, size_type _N, size_type _P0 = 0 ) const
+        {
+            if ( _Len < _P0 )
             {
-                if (helper_type::find(_S, _N, *_U) != 0)
-                    return (_U - _Ptr);
-                else if (_U == _Ptr)
-                    break;
+                return _throw_out_of_range_exception(), 0;
+            }
+            if ( _Len - _P0 < _N )
+                _N = _Len - _P0;
+            if ( 0 < _N )
+                helper_type::copy( _S, _Ptr + _P0, _N );
+            return (_N);
+        }
+        void swap( exe_basic_string& _X )
+        NH3API_NOEXCEPT_EXPR(helper_type::propagate_on_container_swap::value
+                                || helper_type::is_always_equal::value)
+        {
+            if ( this->helper.alloc == _X.helper.alloc )
+            {
+                std::swap( _Ptr, _X._Ptr );
+                std::swap( _Len, _X._Len );
+                std::swap( _Res, _X._Res );
+            }
+            else
+            {
+                exe_basic_string _Ts = *this;
+                *this = _X;
+                _X = _Ts;
             }
         }
-        return (exe_basic_string::npos);
-    }
-    size_type find_last_of( const value_type* _S,
-                            size_type _P = exe_basic_string::npos ) const
-    {
-        return (find_last_of( _S, _P, helper_type::length( _S ) ));
-    }
-    size_type find_last_of( value_type _C, size_type _P = exe_basic_string::npos ) const
-    {
-        return (rfind( static_cast<const value_type*>(&_C), _P, 1 ));
-    }
-    size_type find_first_not_of( const exe_basic_string& _X,
+
+        bool contains(value_type c) const 
+        {
+            for ( size_type i = 0; i < _Len; ++i )
+            {
+                if ( helper_type::eq(_Ptr[i], c) )
+                    return true;
+            }
+            return false;
+        }
+
+        bool contains(const_pointer str) const 
+        { return find(str) != npos; }
+
+        bool starts_with(value_type c) const 
+        { return !empty() && helper_type::eq(front(), c); }
+
+        bool ends_with(value_type c) const 
+        { return !empty() && helper_type::eq(back(), c); }
+
+        // TODO: Implement other overloads
+
+        size_type find( const exe_basic_string& _X, size_type _P = 0 ) const
+        {
+            return (find( _X.c_str(), _P, _X.size() ));
+        }
+        size_type find( const value_type* _S, size_type _P,
+                        size_type _N ) const
+        {
+            if (!_S)
+                return npos;
+
+            if ( _N == 0 && _P <= _Len )
+                return (_P);
+            size_type _Nm;
+            if ( _P < _Len && _N <= (_Nm = _Len - _P) )
+            {
+                const value_type* _U, * _V;
+                for ( _Nm -= _N - 1, _V = _Ptr + _P;
+                    (_U = helper_type::find( _V, _Nm, *_S )) != 0;
+                    _Nm -= _U - _V + 1, _V = _U + 1 )
+                    if ( helper_type::compare( _U, _S, _N ) == 0 )
+                        return (_U - _Ptr);
+            }
+            return npos;
+        }
+        size_type find( const value_type* _S, size_type _P = 0 ) const
+        {
+            return (find( _S, _P, helper_type::length( _S ) ));
+        }
+        size_type find( value_type _C, size_type _P = 0 ) const
+        {
+            return (find( static_cast<const value_type*>(&_C), _P, 1));
+        }
+        size_type rfind( const exe_basic_string& _X, size_type _P = npos ) const
+        {
+            return (rfind( _X.c_str(), _P, _X.size() ));
+        }
+        size_type rfind( const value_type* _S, size_type _P,
+                        size_type _N ) const
+        {
+            if (_N == 0)
+                return (_P < _Len ? _P : _Len);
+
+            if (_N <= _Len)
+            {
+                for (const value_type *_U = _Ptr + +(_P < _Len - _N ? _P : _Len - _N);; --_U)
+                {
+                    if (helper_type::eq(*_U, *_S) && helper_type::compare(_U, _S, _N) == 0)
+                        return (_U - _Ptr);
+                    else if (_U == _Ptr)
+                        break;
+                }
+            }
+            return (npos);
+        }
+        size_type rfind( const value_type* _S, size_type _P = npos ) const
+        {
+            return (rfind( _S, _P, helper_type::length( _S ) ));
+        }
+        size_type rfind( value_type _C, size_type _P = npos ) const
+        {
+            return (rfind( static_cast<const value_type*>(&_C), _P, 1));
+        }
+        size_type find_first_of( const exe_basic_string& _X,
                                 size_type _P = 0 ) const
-    {
-        return (find_first_not_of( _X.c_str(), _P,
-                _X.size() ));
-    }
-    size_type find_first_not_of( const value_type* _S, size_type _P,
+        {
+            return (find_first_of( _X.c_str(), _P, _X.size() ));
+        }
+        size_type find_first_of( const value_type* _S, size_type _P,
                                 size_type _N ) const
-    {
-        if ( _P < _Len )
         {
-            const value_type* const _V = _Ptr + _Len;
-            for ( const value_type* _U = _Ptr + _P; _U < _V; ++_U )
-                if ( helper_type::find( _S, _N, *_U ) == 0 )
-                    return (_U - _Ptr);
+            if ( 0 < _N && _P < _Len )
+            {
+                const value_type* const _V = _Ptr + _Len;
+                for ( const value_type* _U = _Ptr + _P; _U < _V; ++_U )
+                    if ( helper_type::find( _S, _N, *_U ) != 0 )
+                        return (_U - _Ptr);
+            }
+            return (npos);
         }
-        return (exe_basic_string::npos);
-    }
-    size_type find_first_not_of( const value_type* _S,
-                                size_type _P = 0 ) const
-    {
-        return (find_first_not_of( _S, _P, helper_type::length( _S ) ));
-    }
-    size_type find_first_not_of( value_type _C, size_type _P = 0 ) const
-    {
-        return (find_first_not_of( static_cast<const value_type*>(&_C), _P, 1 ));
-    }
-    size_type find_last_not_of( const exe_basic_string& _X,
-                                size_type _P = exe_basic_string::npos ) const
-    {
-        return (find_last_not_of( _X.c_str(), _P, _X.size() ));
-    }
-    size_type find_last_not_of( const value_type* _S, size_type _P,
+        size_type find_first_of( const value_type* _S, size_type _P = 0 ) const
+        {
+            return (find_first_of( _S, _P, helper_type::length( _S ) ));
+        }
+        size_type find_first_of( value_type _C, size_type _P = 0 ) const
+        {
+            return (find( static_cast<const value_type*>(&_C), _P, 1));
+        }
+        size_type find_last_of( const exe_basic_string& _X,
+                                size_type _P = npos ) const
+        {
+            return (find_last_of( _X.c_str(), _P, _X.size() ));
+        }
+        size_type find_last_of( const value_type* _S, size_type _P,
                                 size_type _N ) const
-    {
-        if (0 < _Len)
         {
-            for (const value_type *_U = _Ptr + (_P < _Len ? _P : _Len - 1);; --_U)
+            if (0 < _N && 0 < _Len)
             {
-                if (helper_type::find(_S, _N, *_U) == 0)
-                    return (_U - _Ptr);
-                else if (_U == _Ptr)
-                    break;
+                for (const value_type *_U = _Ptr + (_P < _Len ? _P : _Len - 1);; --_U)
+                {
+                    if (helper_type::find(_S, _N, *_U) != 0)
+                        return (_U - _Ptr);
+                    else if (_U == _Ptr)
+                        break;
+                }
             }
+            return (npos);
         }
-        return (exe_basic_string::npos);
-    }
-    size_type find_last_not_of( const value_type* _S,
-                                size_type _P = exe_basic_string::npos ) const
-    {
-        return (find_last_not_of( _S, _P, helper_type::length( _S ) ));
-    }
-    size_type find_last_not_of( value_type _C, size_type _P = exe_basic_string::npos ) const
-    {
-        return (find_last_not_of( static_cast<const value_type*>(&_C), _P, 1 ));
-    }
-    exe_basic_string substr( size_type _P = 0, size_type _M = exe_basic_string::npos ) const
-    {
-        return (exe_basic_string( *this, _P, _M ));
-    }
-    int compare( const exe_basic_string& _X ) const
-    {
-        return (compare( 0, _Len, _X.c_str(), _X.size() ));
-    }
-    int compare( size_type _P0, size_type _N0,
-                const exe_basic_string& _X ) const
-    {
-        return (compare( _P0, _N0, _X, 0, exe_basic_string::npos ));
-    }
-    int compare( size_type _P0, size_type _N0, const exe_basic_string& _X,
-                size_type _P, size_type _M ) const
-    {
-        if ( _X.size() < _P )
+        size_type find_last_of( const value_type* _S,
+                                size_type _P = npos ) const
         {
-            return _throw_out_of_range_exception(), this->size();
+            return (find_last_of( _S, _P, helper_type::length( _S ) ));
         }
-        if ( _X._Len - _P < _M )
-            _M = _X._Len - _P;
-        return (compare( _P0, _N0, _X.c_str() + _P, _M ));
-    }
-    int compare( const value_type* _S ) const
-    {
-        return (compare( 0, _Len, _S, helper_type::length( _S ) ));
-    }
-    int compare( size_type _P0, size_type _N0, const value_type* _S ) const
-    {
-        return (compare( _P0, _N0, _S, helper_type::length( _S ) ));
-    }
-    int compare( size_type _P0, size_type _N0, const value_type* _S,
-                size_type _M ) const
-    {
-        if ( _Len < _P0 )
+        size_type find_last_of( value_type _C, size_type _P = npos ) const
         {
-            return _throw_out_of_range_exception(), this->size();
+            return (rfind( static_cast<const value_type*>(&_C), _P, 1 ));
         }
-        if ( _Len - _P0 < _N0 )
-            _N0 = _Len - _P0;
-        size_type _Ans = helper_type::compare( _Psum( _Ptr, _P0 ), _S,
-                                    _N0 < _M ? _N0 : _M );
-        return (_Ans != 0 ? _Ans : _N0 < _M ? -1
-                : _N0 == _M ? 0 : +1);
-    }
-
-    allocator_type get_allocator() const
-    { return helper.alloc; }
-
-private:
-    enum { _MIN_SIZE = sizeof( value_type ) <= 32 ? 31 : 7 };
-
-    // copy _Oldlen elements to newly allocated buffer
-    NH3API_INLINE_LARGE
-    void _Copy( size_type _N ) NH3API_NOEXCEPT
-    {
-        size_type _Ns = _N | _MIN_SIZE;
-        if ( max_size() < _Ns )
-            _Ns = _N;
-        value_type* _S;
-
-        NH3API_IF_CONSTEXPR ( nh3api::tt::allocator_may_throw<allocator_type>::value )
+        size_type find_first_not_of( const exe_basic_string& _X,
+                                    size_type _P = 0 ) const
         {
-            NH3API_TRY
+            return (find_first_not_of( _X.c_str(), _P,
+                    _X.size() ));
+        }
+        size_type find_first_not_of( const value_type* _S, size_type _P,
+                                    size_type _N ) const
+        {
+            if ( _P < _Len )
             {
-                _S = helper.allocate( _Ns + 2, nullptr );
+                const value_type* const _V = _Ptr + _Len;
+                for ( const value_type* _U = _Ptr + _P; _U < _V; ++_U )
+                    if ( helper_type::find( _S, _N, *_U ) == 0 )
+                        return (_U - _Ptr);
             }
-            NH3API_CATCH(...)
+            return (npos);
+        }
+        size_type find_first_not_of( const value_type* _S,
+                                    size_type _P = 0 ) const
+        {
+            return (find_first_not_of( _S, _P, helper_type::length( _S ) ));
+        }
+        size_type find_first_not_of( value_type _C, size_type _P = 0 ) const
+        {
+            return (find_first_not_of( static_cast<const value_type*>(&_C), _P, 1 ));
+        }
+        size_type find_last_not_of( const exe_basic_string& _X,
+                                    size_type _P = npos ) const
+        {
+            return (find_last_not_of( _X.c_str(), _P, _X.size() ));
+        }
+        size_type find_last_not_of( const value_type* _S, size_type _P,
+                                    size_type _N ) const
+        {
+            if (0 < _Len)
             {
+                for (const value_type *_U = _Ptr + (_P < _Len ? _P : _Len - 1);; --_U)
+                {
+                    if (helper_type::find(_S, _N, *_U) == 0)
+                        return (_U - _Ptr);
+                    else if (_U == _Ptr)
+                        break;
+                }
+            }
+            return (npos);
+        }
+        size_type find_last_not_of( const value_type* _S,
+                                    size_type _P = npos ) const
+        {
+            return (find_last_not_of( _S, _P, helper_type::length( _S ) ));
+        }
+        size_type find_last_not_of( value_type _C, size_type _P = npos ) const
+        {
+            return (find_last_not_of( static_cast<const value_type*>(&_C), _P, 1 ));
+        }
+        exe_basic_string substr( size_type _P = 0, size_type _M = npos ) const
+        {
+            return (exe_basic_string( *this, _P, _M ));
+        }
+        int compare( const exe_basic_string& _X ) const
+        {
+            return (compare( 0, _Len, _X.c_str(), _X.size() ));
+        }
+        int compare( size_type _P0, size_type _N0,
+                    const exe_basic_string& _X ) const
+        {
+            return (compare( _P0, _N0, _X, 0, npos ));
+        }
+        int compare( size_type _P0, size_type _N0, const exe_basic_string& _X,
+                    size_type _P, size_type _M ) const
+        {
+            if ( _X.size() < _P )
+            {
+                return _throw_out_of_range_exception(), this->size();
+            }
+            if ( _X._Len - _P < _M )
+                _M = _X._Len - _P;
+            return (compare( _P0, _N0, _X.c_str() + _P, _M ));
+        }
+        int compare( const value_type* _S ) const
+        {
+            return (compare( 0, _Len, _S, helper_type::length( _S ) ));
+        }
+        int compare( size_type _P0, size_type _N0, const value_type* _S ) const
+        {
+            return (compare( _P0, _N0, _S, helper_type::length( _S ) ));
+        }
+        int compare( size_type _P0, size_type _N0, const value_type* _S,
+                    size_type _M ) const
+        {
+            if ( _Len < _P0 )
+            {
+                return _throw_out_of_range_exception(), this->size();
+            }
+            if ( _Len - _P0 < _N0 )
+                _N0 = _Len - _P0;
+            size_type _Ans = helper_type::compare( _Psum( _Ptr, _P0 ), _S,
+                                        _N0 < _M ? _N0 : _M );
+            return (_Ans != 0 ? _Ans : _N0 < _M ? -1
+                    : _N0 == _M ? 0 : +1);
+        }
+
+        allocator_type get_allocator() const
+        { return helper.alloc; }
+
+    private:
+        enum { _MIN_SIZE = sizeof( value_type ) <= 32 ? 31 : 7 };
+
+        // copy _Oldlen elements to newly allocated buffer
+        NH3API_INLINE_LARGE
+        void _Copy( size_type _N ) NH3API_NOEXCEPT
+        {
+            size_type _Ns = _N | _MIN_SIZE;
+            if ( max_size() < _Ns )
                 _Ns = _N;
+            value_type* _S;
+
+            NH3API_IF_CONSTEXPR ( nh3api::tt::allocator_may_throw<allocator_type>::value )
+            {
+                NH3API_TRY
+                {
+                    _S = helper.allocate( _Ns + 2, nullptr );
+                }
+                NH3API_CATCH(...)
+                {
+                    _Ns = _N;
+                    _S = helper.allocate( _Ns + 2, nullptr );
+                }
+            }
+            else
+            {
                 _S = helper.allocate( _Ns + 2, nullptr );
             }
-        }
-        else
-        {
-            _S = helper.allocate( _Ns + 2, nullptr );
-        }
 
-        if ( 0 < _Len )
-            helper_type::copy( _S + 1, _Ptr, _Len > _Ns ? _Ns : _Len );
-        size_type _Olen = _Len;
-        _Tidy( true );
-        _Ptr = _S + 1;
-        _Refcnt( _Ptr ) = 0;
-        _Res = _Ns;
-        _Eos( _Olen > _Ns ? _Ns : _Olen );
-    }
-
-    // set new length and null terminator
-    void _Eos( size_type _N )
-    {
-        helper_type::assign( _Ptr[_Len = _N], value_type(0) );
-    }
-
-    void _Freeze()
-    {
-        if ( _Ptr != nullptr
-            && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
-            _Grow( _Len );
-        if ( _Ptr != nullptr )
-            _Refcnt( _Ptr ) = _FROZEN;
-    }
-
-    NH3API_INLINE_LARGE
-    // ensure buffer is big enough, trim to size if _Trim is true
-    bool _Grow( size_type _N, bool _Trim = false )
-    {
-        if ( max_size() < _N )
-        {
-            return _throw_length_exception(), false;
-        }
-        if ( _Ptr != nullptr
-            && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
-            {
-                if ( _N == 0 )
-                {
-                    --_Refcnt( _Ptr );
-                    _Tidy();
-                    return (false);
-                }
-                else
-                {
-                    _Copy( _N );
-                    return (true);
-                }
-            }
-
-        if ( _N == 0 )
-        {
-            if ( _Trim )
-                _Tidy( true );
-            else if ( _Ptr != nullptr )
-                _Eos( 0 );
-            return (false);
-        }
-        else
-        {
-            if ( _Trim && (_MIN_SIZE < _Res || _Res < _N) )
-            {
-                _Tidy( true );
-                _Copy( _N );
-            }
-            else if ( !_Trim && _Res < _N )
-                _Copy( _N );
-            return (true);
-        }
-    }
-
-    static size_type _Pdif( const_pointer _P2, const_pointer _P1 )
-    {
-        return (_P2 == nullptr ? 0 : _P2 - _P1);
-    }
-
-    static const_pointer _Psum( const_pointer _P, size_type _N )
-    {
-        return (_P == nullptr ? nullptr : _P + _N);
-    }
-
-    static pointer _Psum( pointer _P, size_type _N )
-    {
-        return (_P == nullptr ? nullptr : _P + _N);
-    }
-
-    NH3API_FORCEINLINE
-    unsigned char& _Refcnt( const value_type* _U )
-    {
-        return ((unsigned char*)(_U))[-1];
-    }
-
-    void _Split()
-    {
-        if ( _Ptr != nullptr && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
-        {
-            const value_type* _Temp = _Ptr;
+            if ( 0 < _Len )
+                helper_type::copy( _S + 1, _Ptr, _Len > _Ns ? _Ns : _Len );
+            size_type _Olen = _Len;
             _Tidy( true );
-            assign( _Temp );
+            _Ptr = _S + 1;
+            _Refcnt( _Ptr ) = 0;
+            _Res = _Ns;
+            _Eos( _Olen > _Ns ? _Ns : _Olen );
         }
-    }
 
-    NH3API_FLATTEN
-    // initialize buffer, deallocating any storage
-    void _Tidy( bool _Built = false)
-    {
-        if ( !_Built || _Ptr == nullptr )
-            ;
-        else if ( _Refcnt( _Ptr ) == 0 || _Refcnt( _Ptr ) == _FROZEN )
-            helper.deallocate( _Ptr - 1, _Res + 2 );
-        else
-            --_Refcnt( _Ptr );
-        _Nullify();
-    }
+        // set new length and null terminator
+        void _Eos( size_type _N )
+        {
+            helper_type::assign( _Ptr[_Len = _N], value_type(0) );
+        }
 
-    NH3API_FORCEINLINE
-    void _Tidy_deallocate()
-    {
-        if ( _Ptr == nullptr )
-            ;
-        else if ( _Refcnt( _Ptr ) == 0 || _Refcnt( _Ptr ) == _FROZEN )
-            helper.deallocate( _Ptr - 1, _Res + 2 );
-        else
-            --_Refcnt( _Ptr );
-    }
+        void _Freeze()
+        {
+            if ( _Ptr != nullptr
+                && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
+                _Grow( _Len );
+            if ( _Ptr != nullptr )
+                _Refcnt( _Ptr ) = _FROZEN;
+        }
 
-#if defined(_MSC_VER)
-protected:
-    // tell the ref count for natvis
-    unsigned char _natvis_RefCount()
-    { return _Refcnt( _Ptr ); }
+        NH3API_INLINE_LARGE
+        // ensure buffer is big enough, trim to size if _Trim is true
+        bool _Grow( size_type _N, bool _Trim = false )
+        {
+            if ( max_size() < _N )
+            {
+                return _throw_length_exception(), false;
+            }
+            if ( _Ptr != nullptr
+                && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
+                {
+                    if ( _N == 0 )
+                    {
+                        --_Refcnt( _Ptr );
+                        _Tidy();
+                        return (false);
+                    }
+                    else
+                    {
+                        _Copy( _N );
+                        return (true);
+                    }
+                }
 
-#endif
+            if ( _N == 0 )
+            {
+                if ( _Trim )
+                    _Tidy( true );
+                else if ( _Ptr != nullptr )
+                    _Eos( 0 );
+                return (false);
+            }
+            else
+            {
+                if ( _Trim && (_MIN_SIZE < _Res || _Res < _N) )
+                {
+                    _Tidy( true );
+                    _Copy( _N );
+                }
+                else if ( !_Trim && _Res < _N )
+                    _Copy( _N );
+                return (true);
+            }
+        }
 
-protected:
-    helper_type helper;
-    value_type* _Ptr; // data()
-    size_type _Len; // size()
-    size_type _Res; // capacity()
+        static size_type _Pdif( const_pointer _P2, const_pointer _P1 )
+        {
+            return (_P2 == nullptr ? 0 : _P2 - _P1);
+        }
+
+        static const_pointer _Psum( const_pointer _P, size_type _N )
+        {
+            return (_P == nullptr ? nullptr : _P + _N);
+        }
+
+        static pointer _Psum( pointer _P, size_type _N )
+        {
+            return (_P == nullptr ? nullptr : _P + _N);
+        }
+
+        NH3API_FORCEINLINE
+        unsigned char& _Refcnt( const value_type* _U )
+        {
+            return ((unsigned char*)(_U))[-1];
+        }
+
+        void _Split()
+        {
+            if ( _Ptr != nullptr && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
+            {
+                const value_type* _Temp = _Ptr;
+                _Tidy( true );
+                assign( _Temp );
+            }
+        }
+
+        NH3API_FLATTEN
+        // initialize buffer, deallocating any storage
+        void _Tidy( bool _Built = false)
+        {
+            if ( !_Built || _Ptr == nullptr )
+                ;
+            else if ( _Refcnt( _Ptr ) == 0 || _Refcnt( _Ptr ) == _FROZEN )
+                helper.deallocate( _Ptr - 1, _Res + 2 );
+            else
+                --_Refcnt( _Ptr );
+            _Nullify();
+        }
+
+        NH3API_FORCEINLINE
+        void _Tidy_deallocate()
+        {
+            if ( _Ptr == nullptr )
+                ;
+            else if ( _Refcnt( _Ptr ) == 0 || _Refcnt( _Ptr ) == _FROZEN )
+                helper.deallocate( _Ptr - 1, _Res + 2 );
+            else
+                --_Refcnt( _Ptr );
+        }
+
+    #if defined(_MSC_VER)
+    protected:
+        // tell the ref count for natvis
+        unsigned char _natvis_RefCount()
+        { return _Refcnt( _Ptr ); }
+
+    #endif
+
+    protected:
+        helper_type helper;
+        value_type* _Ptr; // data()
+        size_type _Len; // size()
+        size_type _Res; // capacity()
 };
 #pragma pack(pop)
 
@@ -2103,6 +2148,16 @@ template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
 bool operator!=(const exe_basic_string<_E, _Tr, _A>& _L,
                 const _E* _R)
 { return (!(_L == _R)); }
+
+#ifdef __cpp_user_defined_literals
+NH3API_FORCEINLINE
+exe_string operator"" exe( const char* str, size_t len )
+{ return exe_string{str, len}; }
+
+NH3API_FORCEINLINE
+exe_wstring operator"" exe( const wchar_t* str, size_t len )
+{ return exe_wstring{str, len}; }
+#endif
 
 namespace nh3api
 {
