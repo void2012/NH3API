@@ -26,6 +26,9 @@
 #include "exe_string.hpp" // exe_string, exceptions
 #include "intrin.hpp" // bitpopcnt
 
+template<size_t N>
+struct exe_bitset_to_string_helper;
+
 #pragma pack(push, 8)
 /// @brief Visual C++ 6.0 std::bitset implementation used by heroes3.exe
 /// @tparam _N number of bits to store
@@ -111,25 +114,47 @@ public:
                 _A[i / _Bitsperword] |= (_Ty)1 << i % _Bitsperword;
     }
 
-    template<typename _StringType>
-    exe_bitset(const _StringType& _S,
-               size_t _P = 0,
-               size_t _L = _StringType::npos,
-               typename _StringType::value_type _zero = typename _StringType::value_type('0'),
-               typename _StringType::value_type _one = typename _StringType::value_type('1') )
+    template<class T, class CharTraits, class Allocator>
+    exe_bitset(const std::basic_string<T, CharTraits, Allocator>& str,
+               size_t pos = 0,
+               size_t n = std::basic_string<T, CharTraits, Allocator>::npos,
+               typename std::basic_string<T, CharTraits, Allocator>::value_type zero = typename std::basic_string<T, CharTraits, Allocator>::value_type('0'),
+               typename std::basic_string<T, CharTraits, Allocator>::value_type one  = typename std::basic_string<T, CharTraits, Allocator>::value_type('1') )
     {
         size_t _I;
-        if (_S.size() < _P)
+        if (str.size() < pos)
             _Xran();
-        if (_S.size() - _P < _L)
-            _L = _S.size() - _P;
-        if (_N < _L)
-            _L = _N;
-        _Tidy(), _P += _L;
-        for (_I = 0; _I < _L; ++_I)
-            if (_S[--_P] == _one)
+        if (str.size() - pos < n)
+            n = str.size() - pos;
+        if (_N < n)
+            n = _N;
+        _Tidy(), pos += n;
+        for (_I = 0; _I < n; ++_I)
+            if (str[--pos] == one)
                 set(_I);
-            else if (_S[_P] != _zero)
+            else if (str[pos] != zero)
+                _Xinv();
+    }
+
+    template<class T, class CharTraits, class Allocator>
+    exe_bitset(const exe_basic_string<T, CharTraits, Allocator>& str,
+               size_t pos = 0,
+               size_t n = exe_basic_string<T, CharTraits, Allocator>::npos,
+               typename exe_basic_string<T, CharTraits, Allocator>::value_type zero = typename exe_basic_string<T, CharTraits, Allocator>::value_type('0'),
+               typename exe_basic_string<T, CharTraits, Allocator>::value_type one  = typename exe_basic_string<T, CharTraits, Allocator>::value_type('1') )
+    {
+        size_t _I;
+        if (str.size() < pos)
+            _Xran();
+        if (str.size() - pos < n)
+            n = str.size() - pos;
+        if (_N < n)
+            n = _N;
+        _Tidy(), pos += n;
+        for (_I = 0; _I < n; ++_I)
+            if (str[--pos] == one)
+                set(_I);
+            else if (str[pos] != zero)
                 _Xinv();
     }
 
@@ -258,16 +283,31 @@ public:
         return (_V);
     }
 
-    exe_string to_string(char _zero = '0', char _one = '1') const
-    {
-        exe_string _S(_N, _zero);
-        // use const_char and c_str explicitly to avoid invoking exe_string::_Freeze
-        // as an optimization
-        char* _Data = const_cast<char*>(_S.c_str());
-        for (size_t i = _N; 0 < i; ++_Data )
-            *_Data = _At(--i) ? _one : _zero;
-        return (_S);
-    }
+    #if NH3API_STD_DEFAULT_TEMPLATE_ARGUMENTS
+    template<typename CharT = char, typename CharTraits = std::char_traits<CharT>, typename Allocator = exe_allocator<CharT>> 
+    exe_basic_string<CharT, CharTraits, Allocator> 
+    to_string(CharT zero = CharT('0'), CharT one = CharT('1')) const
+    { return _To_exe_string<CharT, CharTraits, Allocator>(); }
+
+    #else
+    template<typename CharT, typename CharTraits, typename Allocator> 
+    exe_basic_string<CharT, CharTraits, Allocator> 
+    to_string(CharT zero = CharT('0'), CharT one = CharT('1')) const
+    { return _To_exe_string<CharT, CharTraits, Allocator>(); }
+
+    template<typename CharT, typename CharTraits> 
+    exe_basic_string<CharT, CharTraits> 
+    to_string(CharT zero = CharT('0'), CharT one = CharT('1')) const
+    { return _To_exe_string<CharT, CharTraits>(); }
+
+    template<typename CharT> 
+    exe_basic_string<CharT> 
+    to_string(CharT zero = CharT('0'), CharT one = CharT('1')) const
+    { return _To_exe_string<CharT>(); }
+
+    exe_string to_string(char zero = '0', char one = '1') const
+    { return _To_exe_string<char>(zero, one); }
+    #endif
 
     /*
     NH3API_CONSTEXPR size_t count() const NH3API_NOEXCEPT
@@ -391,6 +431,63 @@ protected:
     friend std::hash<this_type>;
     #endif
 
+    template<class CharT
+    #if NH3API_STD_DEFAULT_TEMPLATE_ARGUMENTS
+    , class CharTraits = std::char_traits<CharT>, class Allocator = std::allocator<CharT>
+    #endif
+    > NH3API_FORCEINLINE
+    std::basic_string<CharT,
+    #if NH3API_STD_DEFAULT_TEMPLATE_ARGUMENTS
+    CharTraits, Allocator
+    #else 
+    std::char_traits<CharT>, std::allocator<CharT>
+    #endif
+    > _To_std_string(CharT zero = CharT('0'), CharT one = CharT('1')) const
+    {
+        std::basic_string<CharT,
+        #if NH3API_STD_DEFAULT_TEMPLATE_ARGUMENTS
+        CharTraits, Allocator
+        #else 
+        std::char_traits<CharT>, std::allocator<CharT>
+        #endif
+        >
+        result(_N, zero);
+        CharT* dst = const_cast<CharT*>(result.c_str());
+        for (size_t i = _N; 0 < i; ++dst )
+            *dst = _At(--i) ? one : zero;
+        return result;
+    }
+
+    template<class CharT
+    #if NH3API_STD_DEFAULT_TEMPLATE_ARGUMENTS
+    , class CharTraits = std::char_traits<CharT>, class Allocator = exe_allocator<CharT>
+    #endif
+    > NH3API_FORCEINLINE
+    exe_basic_string<CharT,
+    #if NH3API_STD_DEFAULT_TEMPLATE_ARGUMENTS
+    CharTraits, Allocator
+    #else 
+    std::char_traits<CharT>, exe_allocator<CharT>
+    #endif
+    > _To_exe_string(CharT zero = CharT('0'), CharT one = CharT('1')) const
+    {
+        exe_basic_string<CharT,
+        #if NH3API_STD_DEFAULT_TEMPLATE_ARGUMENTS
+        CharTraits, Allocator
+        #else 
+        std::char_traits<CharT>, exe_allocator<CharT>
+        #endif
+        >
+        result(_N, zero);
+        // use const_char and c_str explicitly to avoid invoking exe_string::_Freeze
+        // as an optimization
+        CharT* dst = const_cast<CharT*>(result.c_str());
+        for (size_t i = _N; 0 < i; ++dst )
+            *dst = _At(--i) ? one : zero;
+        return result;
+    }
+    friend exe_bitset_to_string_helper<_N>;
+
     // bit array
     _Ty _A[_Words + 1];
 };
@@ -408,3 +505,31 @@ class std::hash< exe_bitset<N> >
         }
 };
 #endif
+
+template<size_t N>
+struct exe_bitset_to_string_helper
+{
+    template<typename StringT> NH3API_FORCEINLINE
+    static StringT to_std_basic_string(const exe_bitset<N>& arg, char zero = '0', char one = '1')
+    { return arg._To_std_string(zero, one); }
+
+    template<typename StringT> NH3API_FORCEINLINE
+    static StringT to_exe_basic_string(const exe_bitset<N>& arg, char zero = '0', char one = '1')
+    { return arg._To_exe_string(zero, one); }
+};
+
+template<size_t N>
+std::string to_std_string(const exe_bitset<N>& arg, char zero = '0', char one = '1')
+{ return exe_bitset_to_string_helper<N>::template to_std_basic_string<std::string>(arg, zero, one); }
+
+template<size_t N>
+std::wstring to_std_wstring(const exe_bitset<N>& arg, wchar_t zero = L'0', wchar_t one = L'1')
+{ return exe_bitset_to_string_helper<N>::template to_std_basic_string<std::wstring>(arg, zero, one); }
+
+template<size_t N>
+exe_string to_exe_string(const exe_bitset<N>& arg, char zero = '0', char one = '1')
+{ return exe_bitset_to_string_helper<N>::template to_exe_basic_string<exe_string>(arg, zero, one); }
+
+template<size_t N>
+exe_wstring to_exe_wstring(const exe_bitset<N>& arg, wchar_t zero = L'0', wchar_t one = L'1')
+{ return exe_bitset_to_string_helper<N>::template to_exe_basic_string<exe_wstring>(arg, zero, one); }
