@@ -76,7 +76,6 @@ public:
         size_t _Off;
     };
 
-    enum { bitset_size = _N };
     bool at(size_t _P) const
     {
         if (_N <= _P)
