@@ -518,6 +518,50 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
 // 2) NH3API_FORCEINLINE forces function to be inline
 // 3) NH3API_NOINLINE forces function to not to be inlined in any scenario
 
+#if defined(__OPTIMIZE_SIZE__) && !defined(NH3API_FLAG_OPTIMIZE_FOR_SPEED)
+    #ifndef NH3API_FLAG_OPTIMIZE_FOR_SIZE
+        #define NH3API_FLAG_OPTIMIZE_FOR_SIZE (1)
+    #endif
+#endif
+
+#ifndef NH3API_CHECK_SSE
+    #if defined(_M_IX86_FP) || defined(__SSE__)
+        #define NH3API_CHECK_SSE (1)
+    #else 
+        #define NH3API_CHECK_SSE (0)
+    #endif
+#endif
+
+#ifndef NH3API_CHECK_SSE2
+    #ifdef _M_IX86_FP
+        #if _M_IX86_FP == 2
+            #define NH3API_CHECK_SSE2 (1)
+        #else 
+            #define NH3API_CHECK_SSE2 (0)
+        #endif
+    #elif defined(__SSE2__)
+        #define NH3API_CHECK_SSE2 (1)
+    #else 
+        #define NH3API_CHECK_SSE2 (0)
+    #endif
+#endif
+
+#ifndef NH3API_CHECK_AVX
+    #ifdef __AVX__ 
+        #define NH3API_CHECK_AVX (1)
+    #else 
+        #define NH3API_CHECK_AVX (0)
+    #endif
+#endif
+
+#ifndef NH3API_CHECK_AVX2
+    #ifdef __AVX2__ 
+        #define NH3API_CHECK_AVX2 (1)
+    #else 
+        #define NH3API_CHECK_AVX2 (0)
+    #endif
+#endif
+
 #if NH3API_CHECK_MSVC_DRIVER
     #ifndef NH3API_NO_OPT
         #define NH3API_NO_OPT_BEGIN NH3API_PRAGMA(optimize("",off))
