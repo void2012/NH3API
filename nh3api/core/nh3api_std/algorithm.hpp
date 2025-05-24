@@ -808,6 +808,7 @@ copy_n_constexpr(InputIt first, Size count, OutputIt result)
 #endif
 }
 
+/*
 NH3API_FORCEINLINE
 #ifdef __cpp_lib_constexpr_algorithms
 constexpr
@@ -828,6 +829,7 @@ swap_chars_range_constexpr(char* __restrict first1,
     }
     #endif
 }
+*/
 
 template <typename ForwardIterator, typename T>
 NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED void
@@ -889,6 +891,30 @@ OutputIt fill_n_constexpr(OutputIt first, Size count, const T& value)
     return fill_n(first, count, value);
 #endif
 }
+
+template <class ForwardIterator1, 
+          class ForwardIterator2, 
+          class BinaryPredicate>
+NH3API_CONSTEXPR_CPP_14 ForwardIterator1 
+find_first_of_constexpr(ForwardIterator1 first1,
+                        ForwardIterator1 last1,
+                        ForwardIterator2 first2,
+                        ForwardIterator2 last2,
+                        #if NH3API_STD_MOVE_SEMANTICS
+                        BinaryPredicate&& predicate
+                        #else 
+                        BinaryPredicate predicate
+                        #endif
+                        ) 
+{
+    for (; first1 != last1; ++first1)
+        for (ForwardIterator2 i = first2; i != last2; ++i)
+            if (predicate(*first1, *i))
+                return first1;
+    return last1;
+}
+
+
 
 }
 

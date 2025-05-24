@@ -24,12 +24,16 @@
 #pragma once
 
 #include <string>        // std::char_traits, and optionally std::basic_string
+#include <limits>        // std::numeric_limits
 #include <utility>       // std::swap, std::forward
+#ifdef __cpp_lib_ranges 
+#include <ranges> // std::ranges::enable_view, std::ranges::enable_borrowed_range
+#endif
 #include "algorithm.hpp" // constexpr algorithms
 #include "intrin.hpp"    // constexpr string functions
-#include "math.hpp"      // nh3api::fpclassify, float classification macros
+#include "math.hpp"      // nh3api::fpclassify, nh3api::count_digits, float classification macros
 #include "memory.hpp"    // allocators
-#include "iterator.hpp"  // std::reverse_iterator
+#include "iterator.hpp"  // std::reverse_iterator, tt::is_iterator
 #include "nh3api_exceptions.hpp" // exceptions
 #if NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010 || NH3API_CHECK_CPP11
 #include "hash.hpp" // nh3api::default_hash
@@ -40,15 +44,15 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
 template
 <
-typename _E,
-typename _Tr = std::char_traits<_E>,
-typename _A = exe_allocator<_E>
+typename CharT,
+typename CharTraits = std::char_traits<CharT>,
+typename Allocator = exe_allocator<CharT>
 >
 struct exe_string_helper
 {
     public:
-        typedef _A allocator_type;
-        typedef _Tr traits_type;
+        typedef Allocator allocator_type;
+        typedef CharTraits traits_type;
 
     #if NH3API_CHECK_CPP11
     protected:
@@ -539,37 +543,904 @@ struct exe_string_helper<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
         allocator_type alloc;
 };
 
-//namespace nh3api
-//{
+// Implementation from libc++
+namespace nh3api 
+{
+
+template <class CharT, class SizeT, SizeT npos, class CharTraits>
+NH3API_FORCEINLINE SizeT NH3API_CONSTEXPR_CPP_14 
+str_find(const CharT* str, SizeT size, CharT c, SizeT pos) NH3API_NOEXCEPT
+{
+    if ( pos >= size )
+        return npos;
+    const CharT* found = ::exe_string_helper<CharT, CharTraits>::find(str + pos, size - pos, c);
+    if ( found == nullptr )
+        return npos;
+    return static_cast<SizeT>(found - str);
+}
+
+template <class CharT, class CharTraits>
+NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14 const CharT* 
+search_substring(const CharT* first1, 
+                 const CharT* last1, 
+                 const CharT* first2, 
+                 const CharT* last2) NH3API_NOEXCEPT 
+{
+    // Take advantage of knowing source and pattern lengths.
+    // Stop short when source is smaller than pattern.
+    const ptrdiff_t len2 = last2 - first2;
+    if (len2 == 0)
+        return first1;
+
+    ptrdiff_t len1 = last1 - first1;
+    if (len1 < len2)
+        return last1;
+
+    // First element of first2 is loop invariant.
+    CharT f2 = *first2;
+    while (true) 
+    {
+        len1 = last1 - first1;
+        // Check whether first1 still has at least len2 bytes.
+        if (len1 < len2)
+            return last1;
+
+        // Find f2 the first byte matching in first1.
+        first1 = ::exe_string_helper<CharT, CharTraits>::find(first1, len1 - len2 + 1, f2);
+        if (first1 == nullptr)
+            return last1;
+
+        // It is faster to compare from the first byte of first1 even if we
+        // already know that it matches the first byte of first2: this is because
+        // first2 is most likely aligned, as it is user's "pattern" string, and
+        // first1 + 1 is most likely not aligned, as the match is in the middle of
+        // the string.
+        if (::exe_string_helper<CharT, CharTraits>::compare(first1, first2, len2) == 0)
+            return first1;
+
+        ++first1;
+    }
+}
+
+template <class CharT, class SizeT, SizeT npos, class CharTraits>
+NH3API_FORCEINLINE SizeT NH3API_CONSTEXPR_CPP_14 
+str_find(const CharT* str, SizeT size, const CharT* needle, SizeT pos, SizeT n) NH3API_NOEXCEPT 
+{
+    if (pos > size)
+        return npos;
+
+    if (n == 0) // There is nothing to search, just return pos.
+        return pos;
+
+    const CharT* found = search_substring<CharT>(str + pos, str + size, needle, needle + n);
+
+    if (found == str + size)
+        return npos;
+    return static_cast<SizeT>(found - str);
+}
+
+template <class CharT, class SizeT, SizeT npos, class CharTraits>
+NH3API_FORCEINLINE SizeT NH3API_CONSTEXPR_CPP_14 
+str_rfind(const CharT* str, SizeT size, CharT c, SizeT pos) NH3API_NOEXCEPT 
+{
+    if (size < 1)
+        return npos;
+
+    if (pos < size)
+        ++pos;
+    else
+        pos = size;
+
+    for (const CharT* i = str + pos; i != str;) 
+    {
+        if (::exe_string_helper<CharT, CharTraits>::eq(*--i, c))
+            return static_cast<SizeT>(i - str);
+    }
+    return npos;
+}
+
+template <class CharT, class SizeT, SizeT npos, class CharTraits>
+NH3API_FORCEINLINE SizeT NH3API_CONSTEXPR_CPP_14 
+str_rfind(const CharT* str, SizeT size, const CharT* needle, SizeT pos, SizeT n) NH3API_NOEXCEPT 
+{
+    pos = std::min<SizeT>(pos, size);
+    if (n < size - pos)
+        pos += n;
+    else
+        pos = size;
+  
+    if (n == 0) 
+        return (pos <= size) ? pos : size;
+
+    if (size == 0 || n > size)
+        return npos;
+
+    for (SizeT i = pos - n; ; --i) 
+    {
+        bool match = true;
+        for (SizeT j = 0; j < n; ++j) 
+        {
+            if ( !::exe_string_helper<CharT, CharTraits>::eq(str[i + j], needle[j]) ) 
+            {
+                match = false;
+                break;
+            }
+        }
+        if (match) 
+            return i; 
+        
+        if (i == 0) 
+            break; 
+    }
+    return npos; 
+}
+
+template <class CharT, class SizeT, SizeT npos, class CharTraits>
+NH3API_FORCEINLINE SizeT NH3API_CONSTEXPR_CPP_14 
+str_find_first_of(const CharT* str, 
+                  SizeT size, 
+                  const CharT* 
+                  needle, 
+                  SizeT pos, 
+                  SizeT n) NH3API_NOEXCEPT 
+{
+    if (pos >= size || n == 0)
+        return npos;
+    const CharT* found = find_first_of_constexpr(str + pos, 
+                                                 str + size, 
+                                                 needle, 
+                                                 needle + n, 
+                                                 ::exe_string_helper<CharT, CharTraits>::eq);
+    if (found == str + size)
+        return npos;
+    return static_cast<SizeT>(found - str);
+}
+
+template <class CharT, class SizeT, SizeT npos, class CharTraits>
+NH3API_FORCEINLINE SizeT NH3API_CONSTEXPR_CPP_14 
+str_find_last_of(const CharT* str, SizeT size, const CharT* needle, SizeT pos, SizeT n) NH3API_NOEXCEPT 
+{
+    if (n != 0) 
+    {
+        if (pos < size)
+            ++pos;
+        else
+            pos = size;
+        for (const CharT* curr = str + pos; curr != str;) 
+        {
+            const CharT* found = ::exe_string_helper<CharT, CharTraits>::find(needle, n, *--curr);
+            if (found)
+                return static_cast<SizeT>(curr - str);
+        }
+    }
+    return npos;
+}
+
+template <class CharT, class SizeT, SizeT npos, class CharTraits>
+NH3API_FORCEINLINE SizeT NH3API_CONSTEXPR_CPP_14 
+str_find_first_not_of(const CharT* str, SizeT size, const CharT* needle, SizeT pos, SizeT n) NH3API_NOEXCEPT 
+{
+    if (pos < size) 
+    {
+        const CharT* shifted = str + size;
+        for (const CharT* curr = str + pos; curr != shifted; ++curr)
+            if (::exe_string_helper<CharT, CharTraits>::find(needle, n, *curr) == nullptr)
+                return static_cast<SizeT>(curr - str);
+    }
+  return npos;
+}
+
+template <class CharT, class SizeT, SizeT npos, class CharTraits>
+NH3API_FORCEINLINE SizeT NH3API_CONSTEXPR_CPP_14 
+str_find_first_not_of(const CharT* str, SizeT size, CharT c, SizeT pos) NH3API_NOEXCEPT 
+{
+    if (pos < size) 
+    {
+        const CharT* shifted = str + size;
+        for (const CharT* curr = str + pos; curr != shifted; ++curr)
+            if (!::exe_string_helper<CharT, CharTraits>::eq(*curr, c))
+                return static_cast<SizeT>(curr - str);
+    }
+    return npos;
+}
+
+template <class CharT, class SizeT, SizeT npos, class CharTraits>
+NH3API_FORCEINLINE SizeT NH3API_CONSTEXPR_CPP_14 
+str_find_last_not_of(const CharT* str, SizeT size, const CharT* needle, SizeT pos, SizeT n) NH3API_NOEXCEPT 
+{
+    if (pos < size)
+        ++pos;
+    else
+        pos = size;
+    for (const CharT* curr = str + pos; curr != str;)
+        if (::exe_string_helper<CharT, CharTraits>::find(needle, n, *--curr) == nullptr)
+            return static_cast<SizeT>(curr - str);
+    return npos;
+}
+
+template <class CharT, class SizeT, SizeT npos, class CharTraits>
+NH3API_FORCEINLINE SizeT NH3API_CONSTEXPR_CPP_14 
+str_find_last_not_of(const CharT* str, SizeT size, CharT c, SizeT pos) NH3API_NOEXCEPT 
+{
+    if (pos < size)
+        ++pos;
+    else
+        pos = size;
+    for (const CharT* curr = str + pos; curr != str;)
+        if (!::exe_string_helper<CharT, CharTraits>::eq(*--curr, c))
+            return static_cast<SizeT>(curr - str);
+    return npos;
+}
+
+template<typename CharT = char, typename CharTraits = std::char_traits<char> >
+class basic_string_view
+{
+    public:
+        typedef CharTraits    traits_type;
+        typedef CharT         value_type;
+        typedef CharT*        pointer;
+        typedef CharT const*  const_pointer;
+        typedef CharT&        reference;
+        typedef CharT const&  const_reference;
+        typedef const_pointer iterator;
+        typedef const_pointer const_iterator;
+        typedef std::reverse_iterator<const_iterator> reverse_iterator;
+        typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+        typedef size_t        size_type;
+        typedef ptrdiff_t     difference_type;
+    
+    protected:
+        typedef ::exe_string_helper<CharT, CharTraits> helper_type;
+
+    // constructors
+    public:
+        NH3API_CONSTEXPR basic_string_view() NH3API_NOEXCEPT
+            : _data(nullptr), _size(0)
+        {}
+
+        #if NH3API_CHECK_CPP11
+        NH3API_CONSTEXPR basic_string_view(const basic_string_view& other) NH3API_NOEXCEPT = default;
+        #else 
+        basic_string_view(const basic_string_view& other) NH3API_NOEXCEPT
+            : _data(other._data), _size(other._size)
+        {}
+        #endif
+
+        NH3API_CONSTEXPR basic_string_view(const CharT* str, size_type count) NH3API_NOEXCEPT
+            : _data(str), _size(count)
+        {}
+
+        NH3API_CONSTEXPR_CPP_14 basic_string_view(const CharT* str) NH3API_NOEXCEPT
+            : _data(str), _size(helper_type::length(str))
+        {}
+
+        #if NH3API_CHECK_CPP11
+        basic_string_view(std::nullptr_t) = delete;
+        #endif
+
+        #if NH3API_CHECK_CPP20
+        template <std::contiguous_iterator IterT, std::sized_sentinel_for<IterT> EndIterT>
+            requires(std::is_same_v<std::iter_value_t<IterT>, CharT> && !std::is_convertible_v<EndIterT, size_type>)
+        constexpr basic_string_view(IterT first, EndIterT last)
+            : _data(std::to_address(first)), _size(last - first)
+        { nh3api::verify_range(first, last); }
+        #endif
+
+        #if NH3API_CHECK_CPP23 
+        template <class RangeT>
+            requires(!std::is_same_v<std::remove_cvref_t<RangeT>, basic_string_view> && std::ranges::contiguous_range<RangeT> &&
+                    std::ranges::sized_range<RangeT> && std::is_same_v<std::ranges::range_value_t<RangeT>, CharT> &&
+                    !std::is_convertible_v<RangeT, const CharT*> &&
+                    (!requires(std::remove_cvref_t<RangeT>& d) { d.operator basic_string_view<CharT, CharTraits>(); }))
+        constexpr explicit basic_string_view(RangeT&& range)
+            : _data(std::ranges::data(range)), _size(std::ranges::size(range)) {}
+        #endif
+
+    // assignment
+    public:
+        #if NH3API_CHECK_CPP11
+        NH3API_CONSTEXPR_CPP_14 basic_string_view& operator=(const basic_string_view& other) NH3API_NOEXCEPT = default;
+        #else 
+        basic_string_view& operator=(const basic_string_view& other) NH3API_NOEXCEPT
+        {
+            _data = other._data;
+            _size = other._size;
+            return *this;
+        }
+        #endif
+    
+    // access
+    public:
+        NH3API_CONSTEXPR const_iterator begin() const NH3API_NOEXCEPT 
+        { return _data; }
+        
+        NH3API_CONSTEXPR const_iterator end() const NH3API_NOEXCEPT 
+        { return _data + _size; }
+
+        NH3API_CONSTEXPR const_iterator cbegin() const NH3API_NOEXCEPT 
+        { return begin(); }
+
+        NH3API_CONSTEXPR const_iterator cend() const NH3API_NOEXCEPT 
+        { return end(); }
+
+        NH3API_CONSTEXPR const_reverse_iterator rbegin() const NH3API_NOEXCEPT 
+        { return const_reverse_iterator( end() ); }
+
+        NH3API_CONSTEXPR const_reverse_iterator rend() const NH3API_NOEXCEPT 
+        { return const_reverse_iterator( begin() ); }
+
+        NH3API_CONSTEXPR const_reverse_iterator crbegin() const NH3API_NOEXCEPT 
+        { return rbegin(); }
+
+        NH3API_CONSTEXPR const_reverse_iterator crend() const NH3API_NOEXCEPT 
+        { return rend(); }
+
+        NH3API_CONSTEXPR bool empty() const NH3API_NOEXCEPT 
+        { return _size == 0; }
+
+        NH3API_CONSTEXPR size_type size() const NH3API_NOEXCEPT 
+        { return _size; }
+
+        NH3API_CONSTEXPR size_type length() const NH3API_NOEXCEPT 
+        { return _size; }
+        
+        NH3API_CONSTEXPR size_type max_size() const NH3API_NOEXCEPT 
+        { return (std::numeric_limits<size_type>::max)(); }
+
+        NH3API_CONSTEXPR const_reference operator[]( size_type pos ) const NH3API_NOEXCEPT
+        { return _data[pos]; }
+
+        NH3API_CONSTEXPR_CPP_14 const_reference at( size_type pos ) const
+        {
+            if ( pos >= size() )
+            {
+                NH3API_THROW(std::out_of_range, "string_view::at out of range");
+            }
+            return _data[pos];
+        }
+
+        NH3API_CONSTEXPR const_reference front() const NH3API_NOEXCEPT 
+        { return _data[0]; }
+
+        NH3API_CONSTEXPR const_reference back() const NH3API_NOEXCEPT 
+        { return _data[size() - 1]; }
+
+        NH3API_CONSTEXPR const_pointer data() const NH3API_NOEXCEPT 
+        { return _data; }
+
+        NH3API_CONSTEXPR_CPP_14 void remove_prefix(size_type n) NH3API_NOEXCEPT
+        {
+            assert(n <= size());
+            _data += n;
+            _size -= n;
+        }
+
+        NH3API_CONSTEXPR_CPP_14 void remove_suffix( size_type n ) NH3API_NOEXCEPT
+        {
+            assert(n <= size());
+            _size -= n;
+        }
+
+        NH3API_CONSTEXPR_CPP_14 void swap( basic_string_view& other ) NH3API_NOEXCEPT
+        {
+            const basic_string_view tmp(other);
+            other = *this;
+            *this = tmp;
+        }
+        
+        NH3API_CONSTEXPR_CPP_14
+        size_type copy( CharT* dest, size_type n, size_type pos = 0 ) const
+        {
+            if ( pos > size() )
+            {
+                NH3API_THROW(std::out_of_range, "string_view::copy out of range");
+            }
+            const size_type rlen = std::min<size_type>( n, size() - pos );
+            (void) helper_type::copy( dest, data() + pos, rlen );
+            return rlen;
+        }
+
+        NH3API_CONSTEXPR_CPP_14
+        basic_string_view substr( size_type pos = 0, size_type n = npos ) const
+        {
+            if ( pos > size() )
+            {
+                NH3API_THROW(std::out_of_range, "string_view::substr out of range");
+            }
+
+            return basic_string_view( data() + pos, std::min<size_type>( n, size() - pos ) );
+        }
+
+        NH3API_CONSTEXPR_CPP_14
+        int compare(basic_string_view other) const NH3API_NOEXCEPT
+        {
+            int result = helper_type::compare(data(), other.data(), std::min<size_type>(size(), other.size()));
+            if ( result == 0 )
+                result = size() == other.size() ? 0 : (size() < other.size() ? -1 : 1);
+            return result;
+        }
+
+        NH3API_CONSTEXPR_CPP_14 int compare( size_type pos1, size_type n1, basic_string_view other ) const 
+        { return substr( pos1, n1 ).compare( other ); }
+
+        NH3API_CONSTEXPR_CPP_14 int compare( size_type pos1, size_type n1, basic_string_view other, size_type pos2, size_type n2 ) const 
+        { return substr( pos1, n1 ).compare( other.substr( pos2, n2 ) ); }
+
+        NH3API_CONSTEXPR_CPP_14 int compare( CharT const* s ) const NH3API_NOEXCEPT
+        { return compare( basic_string_view( s ) ); }
+
+        NH3API_CONSTEXPR_CPP_14 int compare( size_type pos1, size_type n1, CharT const* s ) const 
+        { return substr( pos1, n1 ).compare( basic_string_view( s ) ); }
+
+        NH3API_CONSTEXPR_CPP_14 int compare( size_type pos1, size_type n1, CharT const* s, size_type n2 ) const
+        { return substr( pos1, n1 ).compare( basic_string_view( s, n2 ) ); }
+
+        NH3API_CONSTEXPR_CPP_14 bool starts_with( basic_string_view other ) const NH3API_NOEXCEPT
+        { return size() >= other.size() && compare( 0, other.size(), other ) == 0; }
+
+        NH3API_CONSTEXPR_CPP_14 bool starts_with( CharT c ) const NH3API_NOEXCEPT
+        { return !empty() && helper_type::eq(front(), c); }
+
+        NH3API_CONSTEXPR_CPP_14 bool starts_with( CharT const* str ) const NH3API_NOEXCEPT
+        { return starts_with(basic_string_view(str)); }
+
+        NH3API_CONSTEXPR_CPP_14 bool ends_with( basic_string_view other ) const NH3API_NOEXCEPT 
+        { return size() >= other.size() && compare( size() - other.size(), npos, other ) == 0; }
+
+        NH3API_CONSTEXPR_CPP_14 bool ends_with( CharT c ) const NH3API_NOEXCEPT
+        { return !empty() && helper_type::eq(back(), c); }
+
+        NH3API_CONSTEXPR_CPP_14 bool ends_with( CharT const* str ) const NH3API_NOEXCEPT
+        { return starts_with(basic_string_view(str)); }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find( basic_string_view other, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            assert( other._data != nullptr && other._size != 0 );
+            return nh3api::str_find<CharT, size_type, npos, traits_type>(data(), size(), other.data(), pos, other.size());
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find( CharT c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            return nh3api::str_find<CharT, size_type, npos, traits_type>(data(), size(), c, pos);
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find( const CharT* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        {
+            assert( str != nullptr && n != 0 );
+            return nh3api::str_find<CharT, size_type, npos, traits_type>(data(), size(), str, pos, n);
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find( const CharT* str, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            assert( str != nullptr );
+            return nh3api::str_find<CharT, size_type, npos, traits_type>(data(), size(), str, pos, helper_type::length(str));
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type rfind( basic_string_view other, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            assert( other._data != nullptr && other._size != 0 );
+            return nh3api::str_rfind<CharT, size_type, npos, traits_type>(data(), size(), other.data(), pos, other.size());
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type rfind( CharT c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        { return nh3api::str_rfind<CharT, size_type, npos, traits_type>(data(), size(), c, pos); }
+
+        NH3API_CONSTEXPR_CPP_14 size_type rfind( const CharT* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        {
+            assert( str != nullptr && n != 0 );
+            return nh3api::str_rfind<CharT, size_type, npos, traits_type>(data(), size(), str, pos, n);
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type rfind( const CharT* str, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            assert( str != nullptr );
+            return nh3api::str_rfind<CharT, size_type, npos, traits_type>(data(), size(), str, pos, helper_type::length(str));
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_first_of( basic_string_view other, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            assert( other._data != nullptr && other._size != 0 );
+            return nh3api::str_find_first_of<CharT, size_type, npos, traits_type>(data(), size(), other.data(), pos, other.size());
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_first_of( CharT c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        { return find(c, pos); }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_first_of( const CharT* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        {
+            assert( str != nullptr && n != 0 );
+            return nh3api::str_find_first_of<CharT, size_type, npos, traits_type>(data(), size(), str, pos, n);
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_first_of( const CharT* str, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            assert( str != nullptr );
+            return nh3api::str_find_first_of<CharT, size_type, npos, traits_type>(data(), size(), str, pos, helper_type::length(str));
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_last_of( basic_string_view other, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            assert( other._data != nullptr && other._size != 0 );
+            return nh3api::str_find_last_of<CharT, size_type, npos, traits_type>(data(), size(), other.data(), pos, other.size());
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_last_of( CharT c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        { return rfind(c, pos); }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_last_of( const CharT* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        {
+            assert( str != nullptr && n != 0 );
+            return nh3api::str_find_last_of<CharT, size_type, npos, traits_type>(data(), size(), str, pos, n);
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_last_of( const CharT* str, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            assert( str != nullptr );
+            return nh3api::str_find_last_of<CharT, size_type, npos, traits_type>(data(), size(), str, pos, helper_type::length(str));
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_first_not_of( basic_string_view other, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            assert( other._data != nullptr && other._size != 0 );
+            return nh3api::str_find_first_not_of<CharT, size_type, npos, traits_type>(data(), size(), other.data(), pos, other.size());
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_first_not_of( CharT c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        { return nh3api::str_find_first_not_of<CharT, size_type, npos, traits_type>(data(), size(), c, pos); }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_first_not_of( const CharT* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        {
+            assert( str != nullptr && n != 0 );
+            return nh3api::str_find_first_not_of<CharT, size_type, npos, traits_type>(data(), size(), str, pos, n);
+        }
+
+        NH3API_CONSTEXPR_CPP_14 size_type find_first_not_of( const CharT* str, size_type pos = 0 ) const NH3API_NOEXCEPT
+        {
+            assert( str != nullptr );
+            return nh3api::str_find_first_not_of<CharT, size_type, npos, traits_type>(data(), size(), str, pos, helper_type::length(str));
+        }
+
+        NH3API_CONSTEXPR_CPP_14 bool contains(basic_string_view other) const NH3API_NOEXCEPT
+        { return find(other) != npos; }
+
+        NH3API_CONSTEXPR_CPP_14 bool contains(CharT c) const NH3API_NOEXCEPT
+        { return find(c) != npos; }
+
+        NH3API_CONSTEXPR_CPP_14 bool contains(const CharT* str) const
+        { return find(str) != npos; }
+    
+    public:
+        #if NH3API_STD_INLINE_VARIABLES
+            static inline constexpr size_type npos = size_type(-1);
+        #else 
+            static const size_type npos;
+        #endif
+
+    protected:
+        const_pointer   _data;
+        size_type       _size;
+
+};
+
+typedef basic_string_view<char> string_view;
+typedef basic_string_view<wchar_t> wstring_view;
+
+} // namespace nh3api
+
+#if !NH3API_STD_INLINE_VARIABLES
+template<typename CharT, typename CharTraits>
+const typename nh3api::basic_string_view<CharT, CharTraits>::size_type 
+nh3api::basic_string_view<CharT, CharTraits>::npos 
+= typename nh3api::basic_string_view<CharT, CharTraits>::size_type(-1);
+#endif
+
+template< class CharT, class CharTraits >
+NH3API_CONSTEXPR bool operator== (
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits >
+NH3API_CONSTEXPR bool operator!= (
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits >
+NH3API_CONSTEXPR bool operator< (
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) < 0; }
+
+template< class CharT, class CharTraits >
+NH3API_CONSTEXPR bool operator<= (
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) <= 0; }
+
+template< class CharT, class CharTraits >
+NH3API_CONSTEXPR bool operator> (
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) > 0; }
+
+template< class CharT, class CharTraits >
+NH3API_CONSTEXPR bool operator>= (
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) >= 0; }
+
+#if !NH3API_CHECK_CPP11 || (NH3API_MSVC_VERSION >= NH3API_MSVC_VERSION_2010 && NH3API_MSVC_VERSION < NH3API_MSVC_VERSION_2015)
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator==(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return lhs.size() == exe_string_helper<CharT, CharTraits>::length( rhs ) && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator==(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return exe_string_helper<CharT, CharTraits>::length( lhs ) == rhs.size() && rhs.compare( lhs ) == 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator==(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator==(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator!=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator!=(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator!=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator!=(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) < 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) > 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) < 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) > 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) <= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<=(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) >= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) <= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<=(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) >= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) > 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) < 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) > 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) < 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) >= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>=(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) <= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) >= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>=(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) <= 0; }
+#else 
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator==(
+         nh3api::basic_string_view  <CharT, CharTraits> lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator==(
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  <CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator!= (
+         nh3api::basic_string_view  < CharT, CharTraits > lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator!= (
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator< (
+         nh3api::basic_string_view  < CharT, CharTraits > lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) < 0; }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator< (
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) < 0; }
+
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator<= (
+         nh3api::basic_string_view  < CharT, CharTraits > lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) <= 0; }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator<= (
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) <= 0; }
+
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator> (
+         nh3api::basic_string_view  < CharT, CharTraits > lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) > 0; }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator> (
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) > 0; }
+
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator>= (
+         nh3api::basic_string_view  < CharT, CharTraits > lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) >= 0; }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator>= (
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) >= 0; }
+#endif
+
+#ifdef __cpp_user_defined_literals
+namespace exe_string_literals
+{
+NH3API_CONSTEXPR nh3api::string_view operator""_exe_sv(const char* str, size_t len) NH3API_NOEXCEPT 
+{ return nh3api::string_view{ str, len }; }
+
+NH3API_CONSTEXPR nh3api::wstring_view operator""_exe_sv(const wchar_t* str, size_t len) NH3API_NOEXCEPT 
+{ return nh3api::wstring_view{ str, len }; }   
+
+}
+#endif
+
+#ifdef __cpp_lib_ranges
+template<class CharT, class CharTraits>
+inline constexpr bool std::ranges::enable_view<nh3api::basic_string_view<CharT, CharTraits>> = true;
+template<class CharT, class CharTraits>
+inline constexpr bool std::ranges::enable_borrowed_range<nh3api::basic_string_view<CharT, CharTraits>> = true;
+#endif
+
 #pragma pack(push, 4)
+
+// Visual C++ 6.0 implementation of std::basic_string, 
+// which uses unsafe copy-on-write semantics with 8-bit reference counting.
+// Use only for binary compatibility with the program. 
+// Consider using std::basic_string or exe_std_string/exe_std_wstring which use .exe allocator
 template
 <
-typename _E,
-typename _Tr = std::char_traits<_E>,
-typename _A = exe_allocator<_E>
+typename CharT,
+typename CharTraits = std::char_traits<CharT>,
+typename Allocator = exe_allocator<CharT>
 >
 class exe_basic_string
 {
-protected:
-    typedef exe_basic_string<_E, _Tr, _A> this_type;
-    template<class IterT>
-        struct is_cptr : public nh3api::tt::integral_constant<bool,
-               nh3api::tt::is_same<IterT, const _E* const>::value
-            || nh3api::tt::is_same<IterT, _E* const>::value
-            || nh3api::tt::is_same<IterT, const _E*>::value
-            || nh3api::tt::is_same<IterT, _E*>::value>
-        {};
+    protected:
+        typedef exe_basic_string<CharT, CharTraits, Allocator> this_type;
+        template<class IterT>
+            struct is_cptr : public nh3api::tt::integral_constant<bool,
+                nh3api::tt::is_same<IterT, const CharT* const>::value
+                || nh3api::tt::is_same<IterT, CharT* const>::value
+                || nh3api::tt::is_same<IterT, const CharT*>::value
+                || nh3api::tt::is_same<IterT, CharT*>::value>
+            {};
 
     protected:
-    typedef exe_string_helper<_E, _Tr, _A> helper_type NH3API_NODEBUG;
-    typedef typename helper_type::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
-    typedef typename helper_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
-    typedef typename helper_type::propagate_on_container_swap propagate_on_container_swap;
+        typedef exe_string_helper<CharT, CharTraits, Allocator> helper_type NH3API_NODEBUG;
+        typedef typename helper_type::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
+        typedef typename helper_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
+        typedef typename helper_type::propagate_on_container_swap propagate_on_container_swap;
 
     // external typedefs
     public:
-        typedef _A allocator_type;
-        typedef _Tr traits_type;
+        typedef Allocator allocator_type;
+        typedef CharTraits traits_type;
         typedef typename helper_type::size_type       size_type;
         typedef typename helper_type::difference_type difference_type;
         typedef typename helper_type::reference       reference;
@@ -583,757 +1454,761 @@ protected:
         typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
         typedef std::reverse_iterator<iterator>       reverse_iterator;
 
-// exceptions
-protected:
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    NH3API_FORCEINLINE
-    static void _throw_length_exception()
-    {
-        NH3API_IF_CONSTEXPR ( nh3api::tt::is_same<value_type, wchar_t>::value )
-            NH3API_THROW(std::length_error, "wstring too long");
-        else
-            NH3API_THROW(std::length_error, "string too long");
-    }
-    #else
-    NH3API_FORCEINLINE
-    static void _throw_length_exception()
-    {
-        NH3API_THROW(0, 0);
-    }
-    #endif
-
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS 
-    NH3API_FORCEINLINE
-    static void _throw_out_of_range_exception()
-    {
-        NH3API_IF_CONSTEXPR ( nh3api::tt::is_same<value_type, wchar_t>::value )
-            NH3API_THROW(std::out_of_range, "invalid wstring position");
-        else
-            NH3API_THROW(std::out_of_range, "invalid string position");
-    }
-    #else
-    NH3API_FORCEINLINE
-    static void _throw_out_of_range_exception()
-    {
-        NH3API_THROW(0, 0);
-    }
-    #endif
-
-    // we use the exceptions function like this:
-    // return _throw_xxx(), yyy;
-    // to help compiler optimize branches
-
-public:
-    explicit exe_basic_string( const allocator_type& _Al = allocator_type() )
-    NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<allocator_type>::value)
-      : helper(_Al), _Ptr(nullptr), _Len(0), _Res(0)
-    {
-    }
-
-    exe_basic_string(const exe_basic_string& _X)
-        : helper( _X.helper.select_on_container_copy_construction() ),
-        _Ptr(nullptr), _Len(0), _Res(0)
-    {
-        assign(_X, 0, npos);
-    }
-
-    exe_basic_string(const exe_basic_string& _X, size_type _P, size_type _M,
-                    const allocator_type& _Al = allocator_type() )
-        : helper( _Al ), _Ptr(nullptr), _Len(0), _Res(0)
-    {
-        assign( _X, _P, _M );
-    }
-
-    exe_basic_string( const value_type* _S, size_type _N,
-                    const allocator_type& _Al = allocator_type() )
-        : helper( _Al ), _Ptr(nullptr), _Len(0), _Res(0)
-    {
-        assign(_S, _N);
-    }
-
-    exe_basic_string( const value_type* _S, const allocator_type& _Al = allocator_type() )
-        : helper(_Al), _Ptr(nullptr), _Len(0), _Res(0)
-    {
-        assign(_S);
-    }
-
-    exe_basic_string(size_type _N, value_type _C)
-        : helper(), _Ptr(nullptr), _Len(0), _Res(0)
-    {
-        assign(_N, _C);
-    }
-
-    exe_basic_string(size_type _N, value_type _C, const allocator_type& _Al)
-        : helper(_Al), _Ptr(nullptr), _Len(0), _Res(0)
-    {
-        assign(_N, _C);
-    }
-
-    template <class IterT
-    NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-    exe_basic_string( IterT _F, IterT _L, const allocator_type& _Al = allocator_type()
-    NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
-        : helper(_Al), _Ptr(nullptr), _Len(0), _Res(0)
-    {
-        nh3api::verify_range(_F, _L);
-        _Construct(nh3api::unfancy(_F),
-                   nh3api::unfancy(_L),
-                   nh3api::iter_category<IterT>());
-    }
-
+    // exceptions
     protected:
-    NH3API_FORCEINLINE
-    void _Nullify() NH3API_NOEXCEPT
-    {
-        if ( nh3api::tt::is_empty<allocator_type>::value)
+        #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+        NH3API_FORCEINLINE
+        static void _throw_length_exception()
         {
-            #if NH3API_CHECK_MSVC
-                *reinterpret_cast<uint32_t*>(&helper) = 0;
-                _Ptr = nullptr;
-                _Len = 0;
-                _Res = 0;
-            #elif __has_builtin(__builtin_memset_inline)
-                __builtin_memset_inline(this, 0, sizeof(*this));
-            #elif __has_builtin(__builtin_memset_chk)
-                __builtin_memset_chk(this, 0, sizeof(*this));
-            #elif __has_builtin(__builtin_memset)
-                __builtin_memset(this, 0, sizeof(*this));
-            #else
-                *reinterpret_cast<uint32_t*>(&helper) = 0;
-                _Ptr = nullptr;
-                _Len = 0;
-                _Res = 0;
-            #endif
+            NH3API_IF_CONSTEXPR ( nh3api::tt::is_same<value_type, wchar_t>::value )
+                NH3API_THROW(std::length_error, "wstring too long");
+            else
+                NH3API_THROW(std::length_error, "string too long");
         }
-        else
+        #else
+        NH3API_FORCEINLINE
+        static void _throw_length_exception()
         {
-            _Ptr = nullptr;
-            _Len = 0;
-            _Res = 0;
+            NH3API_THROW(0, 0);
         }
-    }
+        #endif
 
-    #if NH3API_STD_MOVE_SEMANTICS
-    NH3API_FORCEINLINE
-    void _Move_nullify(exe_basic_string* other) NH3API_NOEXCEPT
-    {
-        this->helper = std::move(other->helper);
-        this->_Ptr   = nh3api::exchange(other->_Ptr, nullptr);
-        this->_Len   = nh3api::exchange(other->_Len, 0);
-        this->_Res   = nh3api::exchange(other->_Res, 0);
-    }
-    #endif
-
-    template <class IterT>
-    void _Construct(IterT _F, IterT _L, std::input_iterator_tag)
-    {
-        NH3API_TRY
+        #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS 
+        NH3API_FORCEINLINE
+        static void _throw_out_of_range_exception()
         {
-            for (; _F != _L; ++_F)
-                push_back(static_cast<_E>(*_F));
+            NH3API_IF_CONSTEXPR ( nh3api::tt::is_same<value_type, wchar_t>::value )
+                NH3API_THROW(std::out_of_range, "invalid wstring position");
+            else
+                NH3API_THROW(std::out_of_range, "invalid string position");
         }
-        NH3API_CATCH(...)
+        #else
+        NH3API_FORCEINLINE
+        static void _throw_out_of_range_exception()
         {
-            _Tidy_deallocate();
-            NH3API_RETHROW
+            NH3API_THROW(0, 0);
         }
-    }
+        #endif
 
-    template <class IterT>
-    void _Construct(IterT _F, IterT _L, std::forward_iterator_tag)
-    {
-        const size_type count = static_cast<size_type>(std::distance(_F, _L));
-        reserve(count);
-        _Construct(_F, _L, std::input_iterator_tag());
-    }
-
-    void _Construct(_E* const _F, _E* const _L, std::random_access_iterator_tag)
-    {
-        if (_F != _L)
-            assign(_F, static_cast<size_type>(_L - _F));
-    }
-
-    void _Construct(const _E* const _F, const _E* const _L, std::random_access_iterator_tag)
-    {
-        if (_F != _L)
-            assign(_F, static_cast<size_type>(_L - _F));
-    }
+        // we use the exceptions function like this:
+        // return _throw_xxx(), yyy;
+        // to help compiler optimize branches
 
     public:
-    #if NH3API_STD_MOVE_SEMANTICS
-      exe_basic_string(exe_basic_string&& other)
-        NH3API_NOEXCEPT_EXPR(helper_type::is_always_equal::value)
-        : helper(std::move(other.helper))
-    {
-        // assign(std::move(other));
-        // I decided to copy 95% of assign(exe_basic_string &&other)
-        // implementation to optimize for constructor
-
-        if (this == &other)
-        { // arguments are same, do nothing
-            return;
-        }
-        else if (this->helper.alloc != other.helper.alloc)
+        explicit exe_basic_string( const allocator_type& _Al = allocator_type() )
+        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<allocator_type>::value)
+        : helper(_Al), _Ptr(nullptr), _Len(0), _Res(0)
         {
-            // allocators are not same, we have to make a copy.
-            size_type _Ns = other._Len | _MIN_SIZE;
-            if (max_size() < _Ns)
-                _Ns = other._Len;
-            // allocate: refcnt + string + null terminator = _Len + 2
-            value_type *_S = helper.allocate(_Ns + 2, nullptr);
-            this->_Ptr = _S + 1;
-            // copy string and null terminator
-            helper_type::copy(_Ptr, other._Ptr, other.size() + 1);
-            unsigned char refcnt = other._Refcnt(other._Ptr);
-            this->_Refcnt(this->_Ptr) = refcnt;
-            this->_Len = other._Len;
-            this->_Res = other._Res;
-            other._Tidy();
         }
-        else
+
+        exe_basic_string(const exe_basic_string& other)
+            : helper( other.helper.select_on_container_copy_construction() ),
+            _Ptr(nullptr), _Len(0), _Res(0)
         {
-            _Move_nullify(&other);
+            assign(other, 0, npos);
         }
-    }
 
-    exe_basic_string& operator=(exe_basic_string&& other)
-        NH3API_NOEXCEPT_EXPR(helper_type::is_always_equal::value)
-    { return assign(std::forward<exe_basic_string>(other)); }
+        exe_basic_string(const exe_basic_string& other, size_type pos, size_type _M,
+                        const allocator_type& _Al = allocator_type() )
+            : helper( _Al ), _Ptr(nullptr), _Len(0), _Res(0)
+        {
+            assign( other, pos, _M );
+        }
 
-    NH3API_INLINE_LARGE
-    exe_basic_string& assign(exe_basic_string&& other)
-        NH3API_NOEXCEPT_EXPR(helper_type::is_always_equal::value)
-    {
-        if (this == &other)
-        { // arguments are same, do nothing
+        exe_basic_string( const value_type* _S, size_type _N,
+                        const allocator_type& _Al = allocator_type() )
+            : helper( _Al ), _Ptr(nullptr), _Len(0), _Res(0)
+        {
+            assign(_S, _N);
+        }
+
+        exe_basic_string( const value_type* _S, const allocator_type& _Al = allocator_type() )
+            : helper(_Al), _Ptr(nullptr), _Len(0), _Res(0)
+        {
+            assign(_S);
+        }
+
+        exe_basic_string(size_type _N, value_type _C)
+            : helper(), _Ptr(nullptr), _Len(0), _Res(0)
+        {
+            assign(_N, _C);
+        }
+
+        exe_basic_string(size_type _N, value_type _C, const allocator_type& _Al)
+            : helper(_Al), _Ptr(nullptr), _Len(0), _Res(0)
+        {
+            assign(_N, _C);
+        }
+
+        template <class IterT
+        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+        exe_basic_string( IterT _F, IterT _L, const allocator_type& _Al = allocator_type()
+        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+            : helper(_Al), _Ptr(nullptr), _Len(0), _Res(0)
+        {
+            nh3api::verify_range(_F, _L);
+            _Construct(nh3api::unfancy(_F),
+                    nh3api::unfancy(_L),
+                    nh3api::iter_category<IterT>());
+        }
+
+        protected:
+        NH3API_FORCEINLINE
+        void _Nullify() NH3API_NOEXCEPT
+        {
+            if ( nh3api::tt::is_empty<allocator_type>::value)
+            {
+                #if NH3API_CHECK_MSVC
+                    *reinterpret_cast<uint32_t*>(&helper) = 0;
+                    _Ptr = nullptr;
+                    _Len = 0;
+                    _Res = 0;
+                #elif __has_builtin(__builtin_memset_inline)
+                    __builtin_memset_inline(this, 0, sizeof(*this));
+                #elif __has_builtin(__builtin_memset_chk)
+                    __builtin_memset_chk(this, 0, sizeof(*this));
+                #elif __has_builtin(__builtin_memset)
+                    __builtin_memset(this, 0, sizeof(*this));
+                #else
+                    *reinterpret_cast<uint32_t*>(&helper) = 0;
+                    _Ptr = nullptr;
+                    _Len = 0;
+                    _Res = 0;
+                #endif
+            }
+            else
+            {
+                _Ptr = nullptr;
+                _Len = 0;
+                _Res = 0;
+            }
+        }
+
+        #if NH3API_STD_MOVE_SEMANTICS
+        NH3API_FORCEINLINE
+        void _Move_nullify(exe_basic_string* other) NH3API_NOEXCEPT
+        {
+            this->helper = std::move(other->helper);
+            this->_Ptr   = nh3api::exchange(other->_Ptr, nullptr);
+            this->_Len   = nh3api::exchange(other->_Len, 0);
+            this->_Res   = nh3api::exchange(other->_Res, 0);
+        }
+        #endif
+
+        template <class IterT>
+        void _Construct(IterT _F, IterT _L, std::input_iterator_tag)
+        {
+            NH3API_TRY
+            {
+                for (; _F != _L; ++_F)
+                    push_back(static_cast<CharT>(*_F));
+            }
+            NH3API_CATCH(...)
+            {
+                _Tidy_deallocate();
+                NH3API_RETHROW
+            }
+        }
+
+        template <class IterT>
+        void _Construct(IterT _F, IterT _L, std::forward_iterator_tag)
+        {
+            const size_type count = static_cast<size_type>(std::distance(_F, _L));
+            reserve(count);
+            _Construct(_F, _L, std::input_iterator_tag());
+        }
+
+        void _Construct(CharT* const _F, CharT* const _L, std::random_access_iterator_tag)
+        {
+            if (_F != _L)
+                assign(_F, static_cast<size_type>(_L - _F));
+        }
+
+        void _Construct(const CharT* const _F, const CharT* const _L, std::random_access_iterator_tag)
+        {
+            if (_F != _L)
+                assign(_F, static_cast<size_type>(_L - _F));
+        }
+
+        public:
+        #if NH3API_STD_MOVE_SEMANTICS
+        exe_basic_string(exe_basic_string&& other)
+            NH3API_NOEXCEPT_EXPR(helper_type::is_always_equal::value)
+            : helper(std::move(other.helper))
+        {
+            // assign(std::move(other));
+            // I decided to copy 95% of assign(exe_basic_string &&other)
+            // implementation to optimize for constructor
+
+            if (this == &other)
+            { // arguments are same, do nothing
+                return;
+            }
+            else if (this->helper.alloc != other.helper.alloc)
+            {
+                // allocators are not same, we have to make a copy.
+                size_type _Ns = other._Len | _MIN_SIZE;
+                if (max_size() < _Ns)
+                    _Ns = other._Len;
+                // allocate: refcnt + string + null terminator = _Len + 2
+                value_type *_S = helper.allocate(_Ns + 2, nullptr);
+                this->_Ptr = _S + 1;
+                // copy string and null terminator
+                helper_type::copy(_Ptr, other._Ptr, other.size() + 1);
+                unsigned char refcnt = other._Refcnt(other._Ptr);
+                this->_Refcnt(this->_Ptr) = refcnt;
+                this->_Len = other._Len;
+                this->_Res = other._Res;
+                other._Tidy();
+            }
+            else
+            {
+                _Move_nullify(&other);
+            }
+        }
+
+        exe_basic_string& operator=(exe_basic_string&& other)
+            NH3API_NOEXCEPT_EXPR(helper_type::is_always_equal::value)
+        { return assign(std::forward<exe_basic_string>(other)); }
+
+        NH3API_INLINE_LARGE
+        exe_basic_string& assign(exe_basic_string&& other)
+            NH3API_NOEXCEPT_EXPR(helper_type::is_always_equal::value)
+        {
+            if (this == &other)
+            { // arguments are same, do nothing
+                return *this;
+            }
+            else if ( this->helper.alloc != other.helper.alloc )
+            {
+                // allocators are not same, we have to make a copy.
+                size_type _Ns = other._Len | _MIN_SIZE;
+                if (max_size() < _Ns)
+                    _Ns = other._Len;
+                // allocate: refcnt + string + null terminator = _Len + 2
+                value_type *_S = helper.allocate(_Ns + 2, nullptr);
+                this->_Ptr = _S + 1;
+                // copy string and null terminator
+                helper_type::copy(_Ptr, other._Ptr, other.size() + 1);
+                unsigned char refcnt = other._Refcnt(other._Ptr);
+                this->_Refcnt(this->_Ptr) = refcnt;
+                this->_Len = other._Len;
+                this->_Res = other._Res;
+                other._Tidy();
+            }
+            else
+            {
+                this->_Tidy_deallocate();
+                _Move_nullify(&other);
+            }
             return *this;
         }
-        else if ( this->helper.alloc != other.helper.alloc )
-        {
-            // allocators are not same, we have to make a copy.
-            size_type _Ns = other._Len | _MIN_SIZE;
-            if (max_size() < _Ns)
-                _Ns = other._Len;
-            // allocate: refcnt + string + null terminator = _Len + 2
-            value_type *_S = helper.allocate(_Ns + 2, nullptr);
-            this->_Ptr = _S + 1;
-            // copy string and null terminator
-            helper_type::copy(_Ptr, other._Ptr, other.size() + 1);
-            unsigned char refcnt = other._Refcnt(other._Ptr);
-            this->_Refcnt(this->_Ptr) = refcnt;
-            this->_Len = other._Len;
-            this->_Res = other._Res;
-            other._Tidy();
-        }
-        else
-        {
-            this->_Tidy_deallocate();
-            _Move_nullify(&other);
-        }
-        return *this;
-    }
 
-    #endif
-
-    exe_basic_string(const nh3api::dummy_tag_t& tag)
-        : helper(tag)
-    {
-        NH3API_IGNORE(_Ptr, _Len, _Res);
-    }
-
-    NH3API_FLATTEN
-    ~exe_basic_string()
-    {
-        _Tidy_deallocate();
-    }
-
-protected:
-    enum _Mref : unsigned char { _FROZEN = 255 };
-
-public:
-    static const size_type npos;
-    exe_basic_string& operator=( const exe_basic_string& _X )
-    {
-        return assign( _X );
-    }
-    exe_basic_string& operator=( const value_type* _S )
-    {
-        return assign( _S );
-    }
-    exe_basic_string& operator=( value_type _C )
-    {
-        return assign( 1, _C );
-    }
-
-    #ifdef NH3API_FLAG_STD_CONTAINERS_RELATIONS
-    // std::string assign
-    template<typename OtherAllocator>
-    exe_basic_string& operator=( const std::basic_string<value_type, OtherAllocator> & _S )
-    {
-        return assign( _S.c_str() );
-    }
-    #endif
-    NH3API_INLINE_LARGE
-    exe_basic_string& operator+=( const exe_basic_string& _X )
-    {
-        return append( _X );
-    }
-    NH3API_INLINE_LARGE
-    exe_basic_string& operator+=( const value_type* _S )
-    {
-        return append( _S );
-    }
-    NH3API_INLINE_LARGE
-    exe_basic_string& operator+=( value_type _C )
-    {
-        return append( 1, _C );
-    }
-
-    exe_basic_string& append( const exe_basic_string& _X )
-    {
-        return append( _X, 0, npos );
-    }
-    exe_basic_string &append(const exe_basic_string &_X, size_type _P, size_type _M = npos)
-    {
-        if (_X.size() < _P)
-        {
-            return _throw_out_of_range_exception(), *this;
-        }
-        size_type _N = _X.size() - _P;
-        if (_N < _M)
-            _M = _N;
-        if (npos - _Len <= _M)
-        {
-            return _throw_length_exception(), *this;
-        }
-        if (0 < _M && _Grow(_N = _Len + _M))
-        {
-            helper_type::copy(_Ptr + _Len, &_X.c_str()[_P], _M);
-            _Eos(_N);
-        }
-        return (*this);
-    }
-    exe_basic_string& append( const value_type* _S, size_type _M )
-    {
-        if (npos - _Len <= _M)
-        {
-            return _throw_length_exception(), *this;
-        }
-        size_type _N;
-        if ( 0 < _M && _Grow( _N = _Len + _M ) )
-        {
-            helper_type::copy( _Ptr + _Len, _S, _M );
-            _Eos( _N );
-        }
-        return (*this);
-    }
-    exe_basic_string& append( const value_type* _S )
-    {
-        return append(_S, helper_type::length(_S));
-    }
-    exe_basic_string& append( size_type _M, value_type _C )
-    {
-        if (npos - _Len <= _M)
-        {
-            return _throw_length_exception(), *this;
-        }
-        size_type _N;
-        if (0 < _M && _Grow(_N = _Len + _M))
-        {
-            helper_type::assign(_Ptr + _Len, _M, _C);
-            _Eos(_N);
-        }
-        return (*this);
-    }
-
-    template<class IterT
-    NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-    exe_basic_string& append(IterT _F, IterT _L
-    NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
-    {
-        return replace(end(), end(), _F, _L);
-    }
-
-    void push_back(value_type _C)
-    {
-        append(1, _C);
-    }
-
-    exe_basic_string& assign( const exe_basic_string& _X )
-    {
-        return (assign( _X, 0, npos ));
-    }
-    NH3API_INLINE_LARGE
-    exe_basic_string& assign( const exe_basic_string& _X, size_type _P, size_type _M )
-    {
-        if ( _X.size() < _P )
-        {
-            return _throw_out_of_range_exception(), *this;
-        }
-        size_type _N = _X.size() - _P;
-        if ( _M < _N )
-            _N = _M;
-        if ( this == &_X )
-        {
-            erase(static_cast<size_type>(_P + _N));
-            erase(0, _P);
-        }
-        else if ( 0 < _N && _N == _X.size()
-                && _Refcnt( _X.c_str() ) < _FROZEN - 1
-                && (helper.alloc == _X.helper.alloc) )
-        {
-            _Tidy( true );
-            _Ptr = _X._Ptr;
-            _Len = _X.size();
-            _Res = _X.capacity();
-            ++_Refcnt( _Ptr );
-        }
-        else if ( _Grow( _N, true ) )
-        {
-            helper_type::copy( _Ptr, &_X.c_str()[_P], _N );
-            _Eos( _N );
-        }
-        return (*this);
-    }
-    exe_basic_string& assign( const value_type* _S, size_type _N )
-    {
-        if ( _Grow( _N, true ) )
-        {
-            helper_type::copy( _Ptr, _S, _N );
-            _Eos( _N );
-        }
-        return (*this);
-    }
-    exe_basic_string& assign( const value_type* _S )
-    {
-        return (assign( _S, helper_type::length( _S ) ));
-    }
-    exe_basic_string& assign( size_type _N, value_type _C )
-    {
-        if ( _N == npos )
-        {
-            return _throw_length_exception(), *this;
-        }
-        if ( _Grow( _N, true ) )
-        {
-            helper_type::assign( _Ptr, _N, _C );
-            _Eos( _N );
-        }
-        return (*this);
-    }
-    template<typename IterT
-    NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-    exe_basic_string& assign( IterT _F, IterT _L
-    NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
-    { return replace( begin(), end(), _F, _L ); }
-
-    exe_basic_string& insert( size_type _P0, const exe_basic_string& _X )
-    {
-        return (insert( _P0, _X, 0, npos ));
-    }
-    exe_basic_string& insert( size_type _P0, const exe_basic_string& _X, size_type _P,
-                size_type _M )
-    {
-        if ( _Len < _P0 || _X.size() < _P )
-        {
-            return _throw_out_of_range_exception(), *this;
-        }
-        size_type _N = _X.size() - _P;
-        if ( _N < _M )
-            _M = _N;
-        if (npos - _Len <= _M)
-        {
-            return _throw_length_exception(), *this;
-        }
-        if (0 < _M && _Grow(_N = _Len + _M))
-        {
-            helper_type::move( _Ptr + _P0 + _M, _Ptr + _P0, _Len - _P0 );
-            helper_type::copy( _Ptr + _P0, &_X.c_str()[_P], _M );
-            _Eos( _N );
-        }
-        return (*this);
-    }
-    exe_basic_string& insert( size_type _P0, const value_type* _S, size_type _M )
-    {
-        if ( _Len < _P0 )
-        {
-            return _throw_out_of_range_exception(), *this;
-        }
-        if (npos - _Len <= _M)
-        {
-            return _throw_length_exception(), *this;
-        }
-        size_type _N;
-        if ( 0 < _M && _Grow( _N = _Len + _M ) )
-        {
-            helper_type::move( _Ptr + _P0 + _M, _Ptr + _P0, _Len - _P0 );
-            helper_type::copy( _Ptr + _P0, _S, _M );
-            _Eos( _N );
-        }
-        return (*this);
-    }
-    exe_basic_string& insert( size_type _P0, const value_type* _S )
-    {
-        return (insert( _P0, _S, helper_type::length( _S ) ));
-    }
-    exe_basic_string& insert( size_type _P0, size_type _M, value_type _C )
-    {
-        if ( _Len < _P0 )
-        {
-            return _throw_out_of_range_exception(), *this;
-        }
-        if ( npos - _Len <= _M )
-        {
-            return _throw_length_exception(), *this;
-        }
-        size_type _N;
-        if ( 0 < _M && _Grow( _N = _Len + _M ) )
-        {
-            helper_type::move( _Ptr + _P0 + _M, _Ptr + _P0, _Len - _P0 );
-            helper_type::assign( _Ptr + _P0, _M, _C );
-            _Eos( _N );
-        }
-        return (*this);
-    }
-    iterator insert(const const_iterator _P, const value_type _C )
-    {
-        size_type _P0 = _Pdif( _P, begin() );
-        insert( _P0, 1, _C );
-        return (begin() + _P0);
-    }
-    iterator insert(const const_iterator _P, const size_type _M, const value_type _C)
-    {
-        size_type _P0 = _Pdif( _P, begin() );
-        insert( _P0, _M, _C );
-        return begin() + _P0;
-    }
-    template<class IterT
-    NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-    iterator insert( const const_iterator _P, IterT _F, IterT _L
-    NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
-    {
-        size_type _P0 = _Pdif( _P, begin() );
-        replace(_P, _P, _F, _L);
-        return begin() + _P0;
-    }
-
-    NH3API_FLATTEN
-    void pop_back()
-    { erase(end() - 1); }
-
-    void shrink_to_fit()
-    { exe_basic_string(*this).swap(*this); }
-
-    NH3API_INLINE_LARGE
-    exe_basic_string& erase( size_type _P0 = 0, size_type _M = npos )
-    {
-        if (_Len < _P0)
-        {
-            return _throw_out_of_range_exception(), *this;
-        }
-        _Split();
-        if (_Len - _P0 < _M)
-            _M = _Len - _P0;
-        if (0 < _M)
-        {
-            helper_type::move(_Ptr + _P0, _Ptr + _P0 + _M, _Len - _P0 - _M);
-            size_type _N = _Len - _M;
-            if (_Grow(_N))
-                _Eos(_N);
-        }
-        return *this;
-    }
-    iterator erase( const const_iterator _P )
-    {
-        size_t _M = _Pdif( _P, begin() );
-        erase( _M, 1 );
-        return (_Psum( _Ptr, _M ));
-    }
-    iterator erase( const const_iterator _F, const const_iterator _L )
-    {
-        size_t _M = _Pdif( _F, begin() );
-        erase( _M, _Pdif( _L, _F ) );
-        return _Psum( _Ptr, _M );
-    }
-
-    void clear() NH3API_NOEXCEPT
-    { _Eos(0); }
-
-    exe_basic_string& replace(const size_type _P0, const size_type _N0, const exe_basic_string& _X )
-    {
-        return replace(_P0, _N0, _X, 0, npos);
-    }
-
-    NH3API_INLINE_LARGE
-    exe_basic_string& replace(const size_type _P0, size_type _N0, const exe_basic_string& _X,
-                const size_type _P, size_type _M = npos )
-    {
-        if (_Len < _P0 || _X.size() < _P)
-        {
-            return _throw_out_of_range_exception(), *this;
-        }
-        if (_Len - _P0 < _N0)
-            _N0 = _Len - _P0;
-        size_type _N = _X.size() - _P;
-        if (_N < _M)
-            _M = _N;
-        if (npos - _M <= _Len - _N0)
-        {
-            return _throw_length_exception(), *this;
-        }
-        _Split();
-        size_type _Nm = _Len - _N0 - _P0;
-        if (_M < _N0)
-            helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
-        if ((0 < _M || 0 < _N0) && _Grow(_N = _Len + _M - _N0))
-        {
-            if (_N0 < _M)
-                helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
-            helper_type::copy(_Ptr + _P0, &_X.c_str()[_P], _M);
-            _Eos(_N);
-        }
-        return *this;
-    }
-
-    NH3API_INLINE_LARGE
-    exe_basic_string& replace(const size_type _P0, size_type _N0, const value_type* const _S,
-                const size_type _M )
-    {
-        if (_Len < _P0)
-        {
-            return _throw_out_of_range_exception(), *this;
-        }
-        if (_Len - _P0 < _N0)
-            _N0 = _Len - _P0;
-        if (npos - _M <= _Len - _N0)
-        {
-            return _throw_length_exception(), *this;
-        }
-        _Split();
-        size_type _Nm = _Len - _N0 - _P0;
-        if (_M < _N0)
-            helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
-        size_type _N;
-        if ((0 < _M || 0 < _N0) && _Grow(_N = _Len + _M - _N0))
-        {
-            if (_N0 < _M)
-                helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
-            helper_type::copy(_Ptr + _P0, _S, _M);
-            _Eos(_N);
-        }
-        return (*this);
-    }
-
-    exe_basic_string& replace( size_type _P0, size_type _N0, const value_type* _S )
-    {
-        return (replace( _P0, _N0, _S, helper_type::length( _S ) ));
-    }
-
-    NH3API_INLINE_LARGE
-    exe_basic_string& replace( size_type _P0, size_type _N0,
-                size_type _M, value_type _C )
-    {
-        if (_Len < _P0)
-        {
-            return _throw_out_of_range_exception(), *this;
-        }
-        if (_Len - _P0 < _N0)
-            _N0 = _Len - _P0;
-        if (npos - _M <= _Len - _N0)
-        {
-            return _throw_length_exception(), *this;
-        }
-        _Split();
-        size_type _Nm = _Len - _N0 - _P0;
-        if (_M < _N0)
-            helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
-        size_type _N;
-        if ((0 < _M || 0 < _N0) && _Grow(_N = _Len + _M - _N0))
-        {
-            if (_N0 < _M)
-                helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
-            helper_type::assign(_Ptr + _P0, _M, _C);
-            _Eos(_N);
-        }
-        return *this;
-    }
-
-    exe_basic_string& replace(const const_iterator _F, const const_iterator _L, const exe_basic_string& _X )
-    {
-        return replace(_Pdif( _F, begin() ), _Pdif( _L, _F ), _X );
-    }
-
-    exe_basic_string& replace(const const_iterator _F,
-                       const const_iterator _L,
-                       const value_type* const _S,
-                       size_type _M)
-    {
-        return replace(_Pdif( _F, begin() ), _Pdif( _L, _F ), _S, _M );
-    }
-
-    exe_basic_string& replace(const const_iterator _F, const const_iterator _L, const value_type* const _S)
-    {
-        return replace(_Pdif( _F, begin() ), _Pdif( _L, _F ), _S );
-    }
-
-    exe_basic_string& replace( const const_iterator _F,
-                        const const_iterator _L,
-                        const size_type _M,
-                        const value_type _C )
-    {
-        return replace(_Pdif( _F, begin() ), _Pdif( _L, _F ), _M, _C );
-    }
-
-    template<typename IterT
-    NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-    exe_basic_string& replace(const const_iterator _F1,
-                       const const_iterator _L1,
-                       const IterT _F2,
-                       const IterT _L2
-    NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
-    {
-        #if NH3API_STD_MOVE_SEMANTICS
-        nh3api::verify_range(_F2, _L2);
-        const auto _UF2 = nh3api::unfancy(_F2);
-        const auto _UL2 = nh3api::unfancy(_L2);
-        return _ReplaceRange(_F1,
-                             _L1,
-                             _UF2,
-                             _UL2,
-                             is_cptr<decltype(_UF2)>());
-        #else // Visual Studio 2005..2008 have no decltype()
-        typedef typename _STD _Checked_iterator_base_helper<IterT>::_Checked_iterator_base_type
-        unchecked_iterator_type;
-        return _ReplaceRange(_F1,
-                             _L1,
-                             nh3api::unfancy(_F2),
-                             nh3api::unfancy(_L2),
-                             is_cptr<unchecked_iterator_type>());
         #endif
-    }
+
+        exe_basic_string(const nh3api::dummy_tag_t& tag)
+            : helper(tag)
+        {
+            NH3API_IGNORE(_Ptr, _Len, _Res);
+        }
+
+        NH3API_FLATTEN
+        ~exe_basic_string()
+        {
+            _Tidy_deallocate();
+        }
 
     protected:
-    template<class IterT>
-    exe_basic_string& _ReplaceRange(const const_iterator _F1,
-                             const const_iterator _L1,
-                             const IterT _F2,
-                             const IterT _L2,
-                             nh3api::tt::true_type)
-    {
-        return replace(_Pdif(_F1, cbegin()), _Pdif(_L1, _F2), _F2, _Pdif(_L2, _F2));
-    }
+        enum _Mref : unsigned char { _FROZEN = 255 };
 
-    template<class IterT>
-    exe_basic_string& _ReplaceRange(const const_iterator _F1,
-                             const const_iterator _L1,
-                             const IterT _F2,
-                             const IterT _L2,
-                             nh3api::tt::false_type)
-    {
-        const exe_basic_string temp(_F2, _L2, get_allocator());
-        replace(_F1, _L2, temp);
-        return *this;
-    }
+    public:
+        #if NH3API_STD_INLINE_VARIABLES
+            static inline constexpr size_type npos = size_type(-1);
+        #else 
+            static const size_type npos;
+        #endif
+        exe_basic_string& operator=( const exe_basic_string& other )
+        {
+            return assign( other );
+        }
+        exe_basic_string& operator=( const value_type* _S )
+        {
+            return assign( _S );
+        }
+        exe_basic_string& operator=( value_type _C )
+        {
+            return assign( 1, _C );
+        }
+
+        #ifdef NH3API_FLAG_STD_CONTAINERS_RELATIONS
+        // std::string assign
+        template<typename OtherAllocator>
+        exe_basic_string& operator=( const std::basic_string<value_type, OtherAllocator> & _S )
+        {
+            return assign( _S.c_str() );
+        }
+        #endif
+        NH3API_INLINE_LARGE
+        exe_basic_string& operator+=( const exe_basic_string& other )
+        {
+            return append( other );
+        }
+        NH3API_INLINE_LARGE
+        exe_basic_string& operator+=( const value_type* _S )
+        {
+            return append( _S );
+        }
+        NH3API_INLINE_LARGE
+        exe_basic_string& operator+=( value_type _C )
+        {
+            return append( 1, _C );
+        }
+
+        exe_basic_string& append( const exe_basic_string& other )
+        {
+            return append( other, 0, npos );
+        }
+        exe_basic_string &append(const exe_basic_string &other, size_type pos, size_type _M = npos)
+        {
+            if (other.size() < pos)
+            {
+                return _throw_out_of_range_exception(), *this;
+            }
+            size_type _N = other.size() - pos;
+            if (_N < _M)
+                _M = _N;
+            if (npos - _Len <= _M)
+            {
+                return _throw_length_exception(), *this;
+            }
+            if (0 < _M && _Grow(_N = _Len + _M))
+            {
+                helper_type::copy(_Ptr + _Len, &other.c_str()[pos], _M);
+                _Eos(_N);
+            }
+            return (*this);
+        }
+        exe_basic_string& append( const value_type* _S, size_type _M )
+        {
+            if (npos - _Len <= _M)
+            {
+                return _throw_length_exception(), *this;
+            }
+            size_type _N;
+            if ( 0 < _M && _Grow( _N = _Len + _M ) )
+            {
+                helper_type::copy( _Ptr + _Len, _S, _M );
+                _Eos( _N );
+            }
+            return (*this);
+        }
+        exe_basic_string& append( const value_type* _S )
+        {
+            return append(_S, helper_type::length(_S));
+        }
+        exe_basic_string& append( size_type _M, value_type _C )
+        {
+            if (npos - _Len <= _M)
+            {
+                return _throw_length_exception(), *this;
+            }
+            size_type _N;
+            if (0 < _M && _Grow(_N = _Len + _M))
+            {
+                helper_type::assign(_Ptr + _Len, _M, _C);
+                _Eos(_N);
+            }
+            return (*this);
+        }
+
+        template<class IterT
+        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+        exe_basic_string& append(IterT _F, IterT _L
+        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+        {
+            return replace(end(), end(), _F, _L);
+        }
+
+        void push_back(value_type _C)
+        {
+            append(1, _C);
+        }
+
+        exe_basic_string& assign( const exe_basic_string& other )
+        {
+            return (assign( other, 0, npos ));
+        }
+        NH3API_INLINE_LARGE
+        exe_basic_string& assign( const exe_basic_string& other, size_type pos, size_type _M )
+        {
+            if ( other.size() < pos )
+            {
+                return _throw_out_of_range_exception(), *this;
+            }
+            size_type _N = other.size() - pos;
+            if ( _M < _N )
+                _N = _M;
+            if ( this == &other )
+            {
+                erase(static_cast<size_type>(pos + _N));
+                erase(0, pos);
+            }
+            else if ( 0 < _N && _N == other.size()
+                    && _Refcnt( other.c_str() ) < _FROZEN - 1
+                    && (helper.alloc == other.helper.alloc) )
+            {
+                _Tidy( true );
+                _Ptr = other._Ptr;
+                _Len = other.size();
+                _Res = other.capacity();
+                ++_Refcnt( _Ptr );
+            }
+            else if ( _Grow( _N, true ) )
+            {
+                helper_type::copy( _Ptr, &other.c_str()[pos], _N );
+                _Eos( _N );
+            }
+            return (*this);
+        }
+        exe_basic_string& assign( const value_type* _S, size_type _N )
+        {
+            if ( _Grow( _N, true ) )
+            {
+                helper_type::copy( _Ptr, _S, _N );
+                _Eos( _N );
+            }
+            return (*this);
+        }
+        exe_basic_string& assign( const value_type* _S )
+        {
+            return (assign( _S, helper_type::length( _S ) ));
+        }
+        exe_basic_string& assign( size_type _N, value_type _C )
+        {
+            if ( _N == npos )
+            {
+                return _throw_length_exception(), *this;
+            }
+            if ( _Grow( _N, true ) )
+            {
+                helper_type::assign( _Ptr, _N, _C );
+                _Eos( _N );
+            }
+            return (*this);
+        }
+        template<typename IterT
+        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+        exe_basic_string& assign( IterT _F, IterT _L
+        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+        { return replace( begin(), end(), _F, _L ); }
+
+        exe_basic_string& insert( size_type _P0, const exe_basic_string& other )
+        {
+            return (insert( _P0, other, 0, npos ));
+        }
+        exe_basic_string& insert( size_type _P0, const exe_basic_string& other, size_type pos,
+                    size_type _M )
+        {
+            if ( _Len < _P0 || other.size() < pos )
+            {
+                return _throw_out_of_range_exception(), *this;
+            }
+            size_type _N = other.size() - pos;
+            if ( _N < _M )
+                _M = _N;
+            if (npos - _Len <= _M)
+            {
+                return _throw_length_exception(), *this;
+            }
+            if (0 < _M && _Grow(_N = _Len + _M))
+            {
+                helper_type::move( _Ptr + _P0 + _M, _Ptr + _P0, _Len - _P0 );
+                helper_type::copy( _Ptr + _P0, &other.c_str()[pos], _M );
+                _Eos( _N );
+            }
+            return (*this);
+        }
+        exe_basic_string& insert( size_type _P0, const value_type* _S, size_type _M )
+        {
+            if ( _Len < _P0 )
+            {
+                return _throw_out_of_range_exception(), *this;
+            }
+            if (npos - _Len <= _M)
+            {
+                return _throw_length_exception(), *this;
+            }
+            size_type _N;
+            if ( 0 < _M && _Grow( _N = _Len + _M ) )
+            {
+                helper_type::move( _Ptr + _P0 + _M, _Ptr + _P0, _Len - _P0 );
+                helper_type::copy( _Ptr + _P0, _S, _M );
+                _Eos( _N );
+            }
+            return (*this);
+        }
+        exe_basic_string& insert( size_type _P0, const value_type* _S )
+        {
+            return (insert( _P0, _S, helper_type::length( _S ) ));
+        }
+        exe_basic_string& insert( size_type _P0, size_type _M, value_type _C )
+        {
+            if ( _Len < _P0 )
+            {
+                return _throw_out_of_range_exception(), *this;
+            }
+            if ( npos - _Len <= _M )
+            {
+                return _throw_length_exception(), *this;
+            }
+            size_type _N;
+            if ( 0 < _M && _Grow( _N = _Len + _M ) )
+            {
+                helper_type::move( _Ptr + _P0 + _M, _Ptr + _P0, _Len - _P0 );
+                helper_type::assign( _Ptr + _P0, _M, _C );
+                _Eos( _N );
+            }
+            return (*this);
+        }
+        iterator insert(const const_iterator pos, const value_type _C )
+        {
+            size_type _P0 = _Pdif( pos, begin() );
+            insert( _P0, 1, _C );
+            return (begin() + _P0);
+        }
+        iterator insert(const const_iterator pos, const size_type _M, const value_type _C)
+        {
+            size_type _P0 = _Pdif( pos, begin() );
+            insert( _P0, _M, _C );
+            return begin() + _P0;
+        }
+        template<class IterT
+        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+        iterator insert( const const_iterator pos, IterT _F, IterT _L
+        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+        {
+            size_type _P0 = _Pdif( pos, begin() );
+            replace(pos, pos, _F, _L);
+            return begin() + _P0;
+        }
+
+        NH3API_FLATTEN
+        void pop_back()
+        { erase(end() - 1); }
+
+        void shrink_to_fit()
+        { exe_basic_string(*this).swap(*this); }
+
+        NH3API_INLINE_LARGE
+        exe_basic_string& erase( size_type _P0 = 0, size_type _M = npos )
+        {
+            if (_Len < _P0)
+            {
+                return _throw_out_of_range_exception(), *this;
+            }
+            _Split();
+            if (_Len - _P0 < _M)
+                _M = _Len - _P0;
+            if (0 < _M)
+            {
+                helper_type::move(_Ptr + _P0, _Ptr + _P0 + _M, _Len - _P0 - _M);
+                size_type _N = _Len - _M;
+                if (_Grow(_N))
+                    _Eos(_N);
+            }
+            return *this;
+        }
+        iterator erase( const const_iterator pos )
+        {
+            size_t _M = _Pdif( pos, begin() );
+            erase( _M, 1 );
+            return (_Psum( _Ptr, _M ));
+        }
+        iterator erase( const const_iterator _F, const const_iterator _L )
+        {
+            size_t _M = _Pdif( _F, begin() );
+            erase( _M, _Pdif( _L, _F ) );
+            return _Psum( _Ptr, _M );
+        }
+
+        void clear() NH3API_NOEXCEPT
+        { _Eos(0); }
+
+        exe_basic_string& replace(const size_type _P0, const size_type _N0, const exe_basic_string& other )
+        {
+            return replace(_P0, _N0, other, 0, npos);
+        }
+
+        NH3API_INLINE_LARGE
+        exe_basic_string& replace(const size_type _P0, size_type _N0, const exe_basic_string& other,
+                    const size_type pos, size_type _M = npos )
+        {
+            if (_Len < _P0 || other.size() < pos)
+            {
+                return _throw_out_of_range_exception(), *this;
+            }
+            if (_Len - _P0 < _N0)
+                _N0 = _Len - _P0;
+            size_type _N = other.size() - pos;
+            if (_N < _M)
+                _M = _N;
+            if (npos - _M <= _Len - _N0)
+            {
+                return _throw_length_exception(), *this;
+            }
+            _Split();
+            size_type _Nm = _Len - _N0 - _P0;
+            if (_M < _N0)
+                helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
+            if ((0 < _M || 0 < _N0) && _Grow(_N = _Len + _M - _N0))
+            {
+                if (_N0 < _M)
+                    helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
+                helper_type::copy(_Ptr + _P0, &other.c_str()[pos], _M);
+                _Eos(_N);
+            }
+            return *this;
+        }
+
+        NH3API_INLINE_LARGE
+        exe_basic_string& replace(const size_type _P0, size_type _N0, const value_type* const _S,
+                    const size_type _M )
+        {
+            if (_Len < _P0)
+            {
+                return _throw_out_of_range_exception(), *this;
+            }
+            if (_Len - _P0 < _N0)
+                _N0 = _Len - _P0;
+            if (npos - _M <= _Len - _N0)
+            {
+                return _throw_length_exception(), *this;
+            }
+            _Split();
+            size_type _Nm = _Len - _N0 - _P0;
+            if (_M < _N0)
+                helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
+            size_type _N;
+            if ((0 < _M || 0 < _N0) && _Grow(_N = _Len + _M - _N0))
+            {
+                if (_N0 < _M)
+                    helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
+                helper_type::copy(_Ptr + _P0, _S, _M);
+                _Eos(_N);
+            }
+            return (*this);
+        }
+
+        exe_basic_string& replace( size_type _P0, size_type _N0, const value_type* _S )
+        {
+            return (replace( _P0, _N0, _S, helper_type::length( _S ) ));
+        }
+
+        NH3API_INLINE_LARGE
+        exe_basic_string& replace( size_type _P0, size_type _N0,
+                    size_type _M, value_type _C )
+        {
+            if (_Len < _P0)
+            {
+                return _throw_out_of_range_exception(), *this;
+            }
+            if (_Len - _P0 < _N0)
+                _N0 = _Len - _P0;
+            if (npos - _M <= _Len - _N0)
+            {
+                return _throw_length_exception(), *this;
+            }
+            _Split();
+            size_type _Nm = _Len - _N0 - _P0;
+            if (_M < _N0)
+                helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
+            size_type _N;
+            if ((0 < _M || 0 < _N0) && _Grow(_N = _Len + _M - _N0))
+            {
+                if (_N0 < _M)
+                    helper_type::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
+                helper_type::assign(_Ptr + _P0, _M, _C);
+                _Eos(_N);
+            }
+            return *this;
+        }
+
+        exe_basic_string& replace(const const_iterator _F, const const_iterator _L, const exe_basic_string& other )
+        {
+            return replace(_Pdif( _F, begin() ), _Pdif( _L, _F ), other );
+        }
+
+        exe_basic_string& replace(const const_iterator _F,
+                        const const_iterator _L,
+                        const value_type* const _S,
+                        size_type _M)
+        {
+            return replace(_Pdif( _F, begin() ), _Pdif( _L, _F ), _S, _M );
+        }
+
+        exe_basic_string& replace(const const_iterator _F, const const_iterator _L, const value_type* const _S)
+        {
+            return replace(_Pdif( _F, begin() ), _Pdif( _L, _F ), _S );
+        }
+
+        exe_basic_string& replace( const const_iterator _F,
+                            const const_iterator _L,
+                            const size_type _M,
+                            const value_type _C )
+        {
+            return replace(_Pdif( _F, begin() ), _Pdif( _L, _F ), _M, _C );
+        }
+
+        template<typename IterT
+        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+        exe_basic_string& replace(const const_iterator _F1,
+                        const const_iterator _L1,
+                        const IterT _F2,
+                        const IterT _L2
+        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+        {
+            #if NH3API_STD_MOVE_SEMANTICS
+            nh3api::verify_range(_F2, _L2);
+            const auto _UF2 = nh3api::unfancy(_F2);
+            const auto _UL2 = nh3api::unfancy(_L2);
+            return _ReplaceRange(_F1,
+                                _L1,
+                                _UF2,
+                                _UL2,
+                                is_cptr<decltype(_UF2)>());
+            #else // Visual Studio 2005..2008 have no decltype()
+            typedef typename _STD _Checked_iterator_base_helper<IterT>::_Checked_iterator_base_type
+            unchecked_iterator_type;
+            return _ReplaceRange(_F1,
+                                _L1,
+                                nh3api::unfancy(_F2),
+                                nh3api::unfancy(_L2),
+                                is_cptr<unchecked_iterator_type>());
+            #endif
+        }
+
+        protected:
+        template<class IterT>
+        exe_basic_string& _ReplaceRange(const const_iterator _F1,
+                                const const_iterator _L1,
+                                const IterT _F2,
+                                const IterT _L2,
+                                nh3api::tt::true_type)
+        {
+            return replace(_Pdif(_F1, cbegin()), _Pdif(_L1, _F2), _F2, _Pdif(_L2, _F2));
+        }
+
+        template<class IterT>
+        exe_basic_string& _ReplaceRange(const const_iterator _F1,
+                                const const_iterator _L1,
+                                const IterT _F2,
+                                const IterT _L2,
+                                nh3api::tt::false_type)
+        {
+            const exe_basic_string temp(_F2, _L2, get_allocator());
+            replace(_F1, _L2, temp);
+            return *this;
+        }
 
     public:
         reference front()
@@ -1503,21 +2378,21 @@ public:
                 helper_type::copy( _S, _Ptr + _P0, _N );
             return (_N);
         }
-        void swap( exe_basic_string& _X )
+        void swap( exe_basic_string& other )
         NH3API_NOEXCEPT_EXPR(helper_type::propagate_on_container_swap::value
                                 || helper_type::is_always_equal::value)
         {
-            if ( this->helper.alloc == _X.helper.alloc )
+            if ( this->helper.alloc == other.helper.alloc )
             {
-                std::swap( _Ptr, _X._Ptr );
-                std::swap( _Len, _X._Len );
-                std::swap( _Res, _X._Res );
+                std::swap( _Ptr, other._Ptr );
+                std::swap( _Len, other._Len );
+                std::swap( _Res, other._Res );
             }
             else
             {
                 exe_basic_string _Ts = *this;
-                *this = _X;
-                _X = _Ts;
+                *this = other;
+                other = _Ts;
             }
         }
 
@@ -1542,23 +2417,23 @@ public:
 
         // TODO: Implement other overloads
 
-        size_type find( const exe_basic_string& _X, size_type _P = 0 ) const
+        size_type find( const exe_basic_string& other, size_type pos = 0 ) const
         {
-            return (find( _X.c_str(), _P, _X.size() ));
+            return (find( other.c_str(), pos, other.size() ));
         }
-        size_type find( const value_type* _S, size_type _P,
+        size_type find( const value_type* _S, size_type pos,
                         size_type _N ) const
         {
             if (!_S)
                 return npos;
 
-            if ( _N == 0 && _P <= _Len )
-                return (_P);
+            if ( _N == 0 && pos <= _Len )
+                return (pos);
             size_type _Nm;
-            if ( _P < _Len && _N <= (_Nm = _Len - _P) )
+            if ( pos < _Len && _N <= (_Nm = _Len - pos) )
             {
                 const value_type* _U, * _V;
-                for ( _Nm -= _N - 1, _V = _Ptr + _P;
+                for ( _Nm -= _N - 1, _V = _Ptr + pos;
                     (_U = helper_type::find( _V, _Nm, *_S )) != 0;
                     _Nm -= _U - _V + 1, _V = _U + 1 )
                     if ( helper_type::compare( _U, _S, _N ) == 0 )
@@ -1566,27 +2441,27 @@ public:
             }
             return npos;
         }
-        size_type find( const value_type* _S, size_type _P = 0 ) const
+        size_type find( const value_type* _S, size_type pos = 0 ) const
         {
-            return (find( _S, _P, helper_type::length( _S ) ));
+            return (find( _S, pos, helper_type::length( _S ) ));
         }
-        size_type find( value_type _C, size_type _P = 0 ) const
+        size_type find( value_type _C, size_type pos = 0 ) const
         {
-            return (find( static_cast<const value_type*>(&_C), _P, 1));
+            return (find( static_cast<const value_type*>(&_C), pos, 1));
         }
-        size_type rfind( const exe_basic_string& _X, size_type _P = npos ) const
+        size_type rfind( const exe_basic_string& other, size_type pos = npos ) const
         {
-            return (rfind( _X.c_str(), _P, _X.size() ));
+            return (rfind( other.c_str(), pos, other.size() ));
         }
-        size_type rfind( const value_type* _S, size_type _P,
+        size_type rfind( const value_type* _S, size_type pos,
                         size_type _N ) const
         {
             if (_N == 0)
-                return (_P < _Len ? _P : _Len);
+                return (pos < _Len ? pos : _Len);
 
             if (_N <= _Len)
             {
-                for (const value_type *_U = _Ptr + +(_P < _Len - _N ? _P : _Len - _N);; --_U)
+                for (const value_type *_U = _Ptr + +(pos < _Len - _N ? pos : _Len - _N);; --_U)
                 {
                     if (helper_type::eq(*_U, *_S) && helper_type::compare(_U, _S, _N) == 0)
                         return (_U - _Ptr);
@@ -1596,50 +2471,50 @@ public:
             }
             return (npos);
         }
-        size_type rfind( const value_type* _S, size_type _P = npos ) const
+        size_type rfind( const value_type* _S, size_type pos = npos ) const
         {
-            return (rfind( _S, _P, helper_type::length( _S ) ));
+            return (rfind( _S, pos, helper_type::length( _S ) ));
         }
-        size_type rfind( value_type _C, size_type _P = npos ) const
+        size_type rfind( value_type _C, size_type pos = npos ) const
         {
-            return (rfind( static_cast<const value_type*>(&_C), _P, 1));
+            return (rfind( static_cast<const value_type*>(&_C), pos, 1));
         }
-        size_type find_first_of( const exe_basic_string& _X,
-                                size_type _P = 0 ) const
+        size_type find_first_of( const exe_basic_string& other,
+                                size_type pos = 0 ) const
         {
-            return (find_first_of( _X.c_str(), _P, _X.size() ));
+            return (find_first_of( other.c_str(), pos, other.size() ));
         }
-        size_type find_first_of( const value_type* _S, size_type _P,
+        size_type find_first_of( const value_type* _S, size_type pos,
                                 size_type _N ) const
         {
-            if ( 0 < _N && _P < _Len )
+            if ( 0 < _N && pos < _Len )
             {
                 const value_type* const _V = _Ptr + _Len;
-                for ( const value_type* _U = _Ptr + _P; _U < _V; ++_U )
+                for ( const value_type* _U = _Ptr + pos; _U < _V; ++_U )
                     if ( helper_type::find( _S, _N, *_U ) != 0 )
                         return (_U - _Ptr);
             }
             return (npos);
         }
-        size_type find_first_of( const value_type* _S, size_type _P = 0 ) const
+        size_type find_first_of( const value_type* _S, size_type pos = 0 ) const
         {
-            return (find_first_of( _S, _P, helper_type::length( _S ) ));
+            return (find_first_of( _S, pos, helper_type::length( _S ) ));
         }
-        size_type find_first_of( value_type _C, size_type _P = 0 ) const
+        size_type find_first_of( value_type _C, size_type pos = 0 ) const
         {
-            return (find( static_cast<const value_type*>(&_C), _P, 1));
+            return (find( static_cast<const value_type*>(&_C), pos, 1));
         }
-        size_type find_last_of( const exe_basic_string& _X,
-                                size_type _P = npos ) const
+        size_type find_last_of( const exe_basic_string& other,
+                                size_type pos = npos ) const
         {
-            return (find_last_of( _X.c_str(), _P, _X.size() ));
+            return (find_last_of( other.c_str(), pos, other.size() ));
         }
-        size_type find_last_of( const value_type* _S, size_type _P,
+        size_type find_last_of( const value_type* _S, size_type pos,
                                 size_type _N ) const
         {
             if (0 < _N && 0 < _Len)
             {
-                for (const value_type *_U = _Ptr + (_P < _Len ? _P : _Len - 1);; --_U)
+                for (const value_type *_U = _Ptr + (pos < _Len ? pos : _Len - 1);; --_U)
                 {
                     if (helper_type::find(_S, _N, *_U) != 0)
                         return (_U - _Ptr);
@@ -1650,52 +2525,52 @@ public:
             return (npos);
         }
         size_type find_last_of( const value_type* _S,
-                                size_type _P = npos ) const
+                                size_type pos = npos ) const
         {
-            return (find_last_of( _S, _P, helper_type::length( _S ) ));
+            return (find_last_of( _S, pos, helper_type::length( _S ) ));
         }
-        size_type find_last_of( value_type _C, size_type _P = npos ) const
+        size_type find_last_of( value_type _C, size_type pos = npos ) const
         {
-            return (rfind( static_cast<const value_type*>(&_C), _P, 1 ));
+            return (rfind( static_cast<const value_type*>(&_C), pos, 1 ));
         }
-        size_type find_first_not_of( const exe_basic_string& _X,
-                                    size_type _P = 0 ) const
+        size_type find_first_not_of( const exe_basic_string& other,
+                                    size_type pos = 0 ) const
         {
-            return (find_first_not_of( _X.c_str(), _P,
-                    _X.size() ));
+            return (find_first_not_of( other.c_str(), pos,
+                    other.size() ));
         }
-        size_type find_first_not_of( const value_type* _S, size_type _P,
+        size_type find_first_not_of( const value_type* _S, size_type pos,
                                     size_type _N ) const
         {
-            if ( _P < _Len )
+            if ( pos < _Len )
             {
                 const value_type* const _V = _Ptr + _Len;
-                for ( const value_type* _U = _Ptr + _P; _U < _V; ++_U )
+                for ( const value_type* _U = _Ptr + pos; _U < _V; ++_U )
                     if ( helper_type::find( _S, _N, *_U ) == 0 )
                         return (_U - _Ptr);
             }
             return (npos);
         }
         size_type find_first_not_of( const value_type* _S,
-                                    size_type _P = 0 ) const
+                                    size_type pos = 0 ) const
         {
-            return (find_first_not_of( _S, _P, helper_type::length( _S ) ));
+            return (find_first_not_of( _S, pos, helper_type::length( _S ) ));
         }
-        size_type find_first_not_of( value_type _C, size_type _P = 0 ) const
+        size_type find_first_not_of( value_type _C, size_type pos = 0 ) const
         {
-            return (find_first_not_of( static_cast<const value_type*>(&_C), _P, 1 ));
+            return (find_first_not_of( static_cast<const value_type*>(&_C), pos, 1 ));
         }
-        size_type find_last_not_of( const exe_basic_string& _X,
-                                    size_type _P = npos ) const
+        size_type find_last_not_of( const exe_basic_string& other,
+                                    size_type pos = npos ) const
         {
-            return (find_last_not_of( _X.c_str(), _P, _X.size() ));
+            return (find_last_not_of( other.c_str(), pos, other.size() ));
         }
-        size_type find_last_not_of( const value_type* _S, size_type _P,
+        size_type find_last_not_of( const value_type* _S, size_type pos,
                                     size_type _N ) const
         {
             if (0 < _Len)
             {
-                for (const value_type *_U = _Ptr + (_P < _Len ? _P : _Len - 1);; --_U)
+                for (const value_type *_U = _Ptr + (pos < _Len ? pos : _Len - 1);; --_U)
                 {
                     if (helper_type::find(_S, _N, *_U) == 0)
                         return (_U - _Ptr);
@@ -1706,37 +2581,37 @@ public:
             return (npos);
         }
         size_type find_last_not_of( const value_type* _S,
-                                    size_type _P = npos ) const
+                                    size_type pos = npos ) const
         {
-            return (find_last_not_of( _S, _P, helper_type::length( _S ) ));
+            return (find_last_not_of( _S, pos, helper_type::length( _S ) ));
         }
-        size_type find_last_not_of( value_type _C, size_type _P = npos ) const
+        size_type find_last_not_of( value_type _C, size_type pos = npos ) const
         {
-            return (find_last_not_of( static_cast<const value_type*>(&_C), _P, 1 ));
+            return (find_last_not_of( static_cast<const value_type*>(&_C), pos, 1 ));
         }
-        exe_basic_string substr( size_type _P = 0, size_type _M = npos ) const
+        exe_basic_string substr( size_type pos = 0, size_type _M = npos ) const
         {
-            return (exe_basic_string( *this, _P, _M ));
+            return (exe_basic_string( *this, pos, _M ));
         }
-        int compare( const exe_basic_string& _X ) const
+        int compare( const exe_basic_string& other ) const
         {
-            return (compare( 0, _Len, _X.c_str(), _X.size() ));
+            return (compare( 0, _Len, other.c_str(), other.size() ));
         }
         int compare( size_type _P0, size_type _N0,
-                    const exe_basic_string& _X ) const
+                    const exe_basic_string& other ) const
         {
-            return (compare( _P0, _N0, _X, 0, npos ));
+            return (compare( _P0, _N0, other, 0, npos ));
         }
-        int compare( size_type _P0, size_type _N0, const exe_basic_string& _X,
-                    size_type _P, size_type _M ) const
+        int compare( size_type _P0, size_type _N0, const exe_basic_string& other,
+                    size_type pos, size_type _M ) const
         {
-            if ( _X.size() < _P )
+            if ( other.size() < pos )
             {
                 return _throw_out_of_range_exception(), this->size();
             }
-            if ( _X._Len - _P < _M )
-                _M = _X._Len - _P;
-            return (compare( _P0, _N0, _X.c_str() + _P, _M ));
+            if ( other._Len - pos < _M )
+                _M = other._Len - pos;
+            return (compare( _P0, _N0, other.c_str() + pos, _M ));
         }
         int compare( const value_type* _S ) const
         {
@@ -1868,14 +2743,14 @@ public:
             return (_P2 == nullptr ? 0 : _P2 - _P1);
         }
 
-        static const_pointer _Psum( const_pointer _P, size_type _N )
+        static const_pointer _Psum( const_pointer pos, size_type _N )
         {
-            return (_P == nullptr ? nullptr : _P + _N);
+            return (pos == nullptr ? nullptr : pos + _N);
         }
 
-        static pointer _Psum( pointer _P, size_type _N )
+        static pointer _Psum( pointer pos, size_type _N )
         {
-            return (_P == nullptr ? nullptr : _P + _N);
+            return (pos == nullptr ? nullptr : pos + _N);
         }
 
         NH3API_FORCEINLINE
@@ -1918,7 +2793,7 @@ public:
                 --_Refcnt( _Ptr );
         }
 
-    #if defined(_MSC_VER)
+    #if NH3API_CHECK_MSVC_DRIVER
     protected:
         // tell the ref count for natvis
         unsigned char _natvis_RefCount()
@@ -1934,18 +2809,19 @@ public:
 };
 #pragma pack(pop)
 
-template<class _Elem,
-    class _Traits,
-    class _Alloc>
-    const typename exe_basic_string<_Elem, _Traits, _Alloc>::size_type
-    exe_basic_string<_Elem, _Traits, _Alloc>::npos = -1;
+#if !NH3API_STD_INLINE_VARIABLES
+template<class CharT, class CharTraits, class Allocator>
+    const typename exe_basic_string<CharT, CharTraits, Allocator>::size_type
+    exe_basic_string<CharT, CharTraits, Allocator>::npos 
+    = typename exe_basic_string<CharT, CharTraits, Allocator>::size_type(-1);
+#endif
 
 //} // namespace nh3api
 
 #if !NH3API_STD_MOVE_SEMANTICS
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-void swap(const exe_basic_string<_E, _Tr, _A>& lhs,
-          const exe_basic_string<_E, _Tr, _A>& rhs) // ADL swap
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+void swap(const exe_basic_string<CharT, CharTraits, Allocator>& lhs,
+          const exe_basic_string<CharT, CharTraits, Allocator>& rhs) // ADL swap
 { lhs.swap(rhs); }
 #endif
 
@@ -1955,59 +2831,57 @@ typedef exe_basic_string<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar
 
 // concatenation
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-exe_basic_string<_E, _Tr, _A> operator+(
-    const exe_basic_string<_E, _Tr, _A>& _L,
-    const exe_basic_string<_E, _Tr, _A>& _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+exe_basic_string<CharT, CharTraits, Allocator> operator+(
+    const exe_basic_string<CharT, CharTraits, Allocator>& _L,
+    const exe_basic_string<CharT, CharTraits, Allocator>& _R)
 {
-    exe_basic_string<_E, _Tr, _A> result;
+    exe_basic_string<CharT, CharTraits, Allocator> result;
     result.reserve(_L.size() + _R.size());
     result += _L;
     result += _R;
     return result;
 }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-exe_basic_string<_E, _Tr, _A> operator+(const _E* const _L,
-                                        const exe_basic_string<_E, _Tr, _A>& _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+exe_basic_string<CharT, CharTraits, Allocator> operator+(const CharT* const _L,
+                                        const exe_basic_string<CharT, CharTraits, Allocator>& _R)
 {
-    exe_basic_string<_E, _Tr, _A> result;
-    exe_string_helper<_E, _Tr, _A> helper;
-    result.reserve(helper.length(_L) + _R.size());
+    exe_basic_string<CharT, CharTraits, Allocator> result;
+    result.reserve(exe_string_helper<CharT, CharTraits, Allocator>::length(_L) + _R.size());
     result += _L;
     result += _R;
     return result;
 }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-exe_basic_string<_E, _Tr, _A> operator+(
-    const _E _L, const exe_basic_string<_E, _Tr, _A>& _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+exe_basic_string<CharT, CharTraits, Allocator> operator+(
+    const CharT _L, const exe_basic_string<CharT, CharTraits, Allocator>& _R)
 {
-    exe_basic_string<_E, _Tr, _A> result;
+    exe_basic_string<CharT, CharTraits, Allocator> result;
     result.reserve(1 + _R.size());
     result += _L;
     result += _R;
     return result;
 }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-exe_basic_string<_E, _Tr, _A> operator+(
-    const exe_basic_string<_E, _Tr, _A>& _L,
-    const _E* const _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+exe_basic_string<CharT, CharTraits, Allocator> operator+(
+    const exe_basic_string<CharT, CharTraits, Allocator>& _L,
+    const CharT* const _R)
 {
-    exe_basic_string<_E, _Tr, _A> result;
-    exe_string_helper<_E, _Tr, _A> helper;
-    result.reserve(_L.size() + helper.length(_R));
+    exe_basic_string<CharT, CharTraits, Allocator> result;
+    result.reserve(_L.size() + exe_string_helper<CharT, CharTraits, Allocator>::length(_R));
     result += _L;
     result += _R;
     return result;
 }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-exe_basic_string<_E, _Tr, _A> operator+(
-    const exe_basic_string<_E, _Tr, _A>& _L, const _E _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+exe_basic_string<CharT, CharTraits, Allocator> operator+(
+    const exe_basic_string<CharT, CharTraits, Allocator>& _L, const CharT _R)
 {
-    exe_basic_string<_E, _Tr, _A> result;
+    exe_basic_string<CharT, CharTraits, Allocator> result;
     result.reserve(_L.size() + 1);
     result += _L;
     result += _R;
@@ -2016,19 +2890,19 @@ exe_basic_string<_E, _Tr, _A> operator+(
 
 #if NH3API_STD_MOVE_SEMANTICS
 
-template <class _E, class _Tr, class _A>
-NH3API_FORCEINLINE exe_basic_string<_E, _Tr, _A>
-operator+(const exe_basic_string<_E, _Tr, _A> &_L, exe_basic_string<_E, _Tr, _A>&& _R)
+template <class CharT, class CharTraits, class Allocator>
+NH3API_FORCEINLINE exe_basic_string<CharT, CharTraits, Allocator>
+operator+(const exe_basic_string<CharT, CharTraits, Allocator> &_L, exe_basic_string<CharT, CharTraits, Allocator>&& _R)
 { return std::move(_R.insert(0, _L)); }
 
-template <class _E, class _Tr, class _A>
-NH3API_FORCEINLINE exe_basic_string<_E, _Tr, _A>
-operator+(exe_basic_string<_E, _Tr, _A>&& _L, const exe_basic_string<_E, _Tr, _A>& _R)
+template <class CharT, class CharTraits, class Allocator>
+NH3API_FORCEINLINE exe_basic_string<CharT, CharTraits, Allocator>
+operator+(exe_basic_string<CharT, CharTraits, Allocator>&& _L, const exe_basic_string<CharT, CharTraits, Allocator>& _R)
 { return std::move(_L.append(_R)); }
 
-template <class _E, class _Tr, class _A>
-NH3API_FORCEINLINE exe_basic_string<_E, _Tr, _A>
-operator+(exe_basic_string<_E, _Tr, _A>&& _L, exe_basic_string<_E, _Tr, _A>&& _R)
+template <class CharT, class CharTraits, class Allocator>
+NH3API_FORCEINLINE exe_basic_string<CharT, CharTraits, Allocator>
+operator+(exe_basic_string<CharT, CharTraits, Allocator>&& _L, exe_basic_string<CharT, CharTraits, Allocator>&& _R)
 {
     if (_R.size() <= _L.capacity() - _L.size() || _R.capacity() - _R.size() < _L.size())
         return std::move(_L.append(_R));
@@ -2036,28 +2910,28 @@ operator+(exe_basic_string<_E, _Tr, _A>&& _L, exe_basic_string<_E, _Tr, _A>&& _R
         return std::move(_R.insert(0, _L));
 }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-exe_basic_string<_E, _Tr, _A> operator+(const _E* const _L,
-                                        exe_basic_string<_E, _Tr, _A>&& _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+exe_basic_string<CharT, CharTraits, Allocator> operator+(const CharT* const _L,
+                                        exe_basic_string<CharT, CharTraits, Allocator>&& _R)
 { return std::move(_R.insert(0, _L)); }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-exe_basic_string<_E, _Tr, _A> operator+(
-    const _E _L, exe_basic_string<_E, _Tr, _A>&& _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+exe_basic_string<CharT, CharTraits, Allocator> operator+(
+    const CharT _L, exe_basic_string<CharT, CharTraits, Allocator>&& _R)
 {
-    typedef typename _A::size_type size_type;
+    typedef typename Allocator::size_type size_type;
     return std::move(_R.insert(static_cast<size_type>(0), static_cast<size_type>(1), _L));
 }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-exe_basic_string<_E, _Tr, _A> operator+(
-    exe_basic_string<_E, _Tr, _A>&& _L,
-    const _E* const _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+exe_basic_string<CharT, CharTraits, Allocator> operator+(
+    exe_basic_string<CharT, CharTraits, Allocator>&& _L,
+    const CharT* const _R)
 { return std::move(_L.append(_R)); }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-exe_basic_string<_E, _Tr, _A> operator+(
-    exe_basic_string<_E, _Tr, _A>&& _L, const _E _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+exe_basic_string<CharT, CharTraits, Allocator> operator+(
+    exe_basic_string<CharT, CharTraits, Allocator>&& _L, const CharT _R)
 {
     _L.push_back(_R);
     return std::move(_L);
@@ -2067,86 +2941,86 @@ exe_basic_string<_E, _Tr, _A> operator+(
 
 // relational operators
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator==(const exe_basic_string<_E, _Tr, _A>& _L,
-                const exe_basic_string<_E, _Tr, _A>& _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator==(const exe_basic_string<CharT, CharTraits, Allocator>& _L,
+                const exe_basic_string<CharT, CharTraits, Allocator>& _R)
 { return (_L.compare(_R) == 0); }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator==(const _E* _L,
-                const exe_basic_string<_E, _Tr, _A>& _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator==(const CharT* _L,
+                const exe_basic_string<CharT, CharTraits, Allocator>& _R)
 { return (_R.compare(_L) == 0); }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator==(const exe_basic_string<_E, _Tr, _A>& _L,
-                const _E* _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator==(const exe_basic_string<CharT, CharTraits, Allocator>& _L,
+                const CharT* _R)
 { return (_L.compare(_R) == 0); }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
 bool operator<(
-    const exe_basic_string<_E, _Tr, _A>& _L, const exe_basic_string<_E, _Tr, _A>& _R) NH3API_NOEXCEPT
+    const exe_basic_string<CharT, CharTraits, Allocator>& _L, const exe_basic_string<CharT, CharTraits, Allocator>& _R) NH3API_NOEXCEPT
 { return _L.compare(_R) < 0; }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator<(const _E* const _L, const exe_basic_string<_E, _Tr, _A>& _R) NH3API_NOEXCEPT
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator<(const CharT* const _L, const exe_basic_string<CharT, CharTraits, Allocator>& _R) NH3API_NOEXCEPT
 { return _R.compare(_L) > 0; }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator<(const exe_basic_string<_E, _Tr, _A>& _L, const _E* const _R) NH3API_NOEXCEPT
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator<(const exe_basic_string<CharT, CharTraits, Allocator>& _L, const CharT* const _R) NH3API_NOEXCEPT
 { return _L.compare(_R) < 0; }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
 bool operator>(
-    const exe_basic_string<_E, _Tr, _A>& _L, const exe_basic_string<_E, _Tr, _A>& _R) NH3API_NOEXCEPT
+    const exe_basic_string<CharT, CharTraits, Allocator>& _L, const exe_basic_string<CharT, CharTraits, Allocator>& _R) NH3API_NOEXCEPT
 { return _R < _L; }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator>( const _E* const _L, const exe_basic_string<_E, _Tr, _A>& _R) NH3API_NOEXCEPT
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator>( const CharT* const _L, const exe_basic_string<CharT, CharTraits, Allocator>& _R) NH3API_NOEXCEPT
 { return _R < _L; }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator>(const exe_basic_string<_E, _Tr, _A>& _L, const _E* const _R) NH3API_NOEXCEPT
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator>(const exe_basic_string<CharT, CharTraits, Allocator>& _L, const CharT* const _R) NH3API_NOEXCEPT
 { return _R < _L; }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
 bool operator<=(
-    const exe_basic_string<_E, _Tr, _A>& _L, const exe_basic_string<_E, _Tr, _A>& _R) NH3API_NOEXCEPT
+    const exe_basic_string<CharT, CharTraits, Allocator>& _L, const exe_basic_string<CharT, CharTraits, Allocator>& _R) NH3API_NOEXCEPT
 { return !(_R < _L); }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator<=(const _E* const _L, const exe_basic_string<_E, _Tr, _A>& _R) NH3API_NOEXCEPT
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator<=(const CharT* const _L, const exe_basic_string<CharT, CharTraits, Allocator>& _R) NH3API_NOEXCEPT
 { return !(_R < _L); }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator<=(const exe_basic_string<_E, _Tr, _A>& _L, const _E* const _R) NH3API_NOEXCEPT
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator<=(const exe_basic_string<CharT, CharTraits, Allocator>& _L, const CharT* const _R) NH3API_NOEXCEPT
 { return !(_R < _L); }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
 bool operator>=(
-    const exe_basic_string<_E, _Tr, _A>& _L, const exe_basic_string<_E, _Tr, _A>& _R) NH3API_NOEXCEPT
+    const exe_basic_string<CharT, CharTraits, Allocator>& _L, const exe_basic_string<CharT, CharTraits, Allocator>& _R) NH3API_NOEXCEPT
 { return !(_L < _R); }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator>=(const _E* const _L, const exe_basic_string<_E, _Tr, _A>& _R) NH3API_NOEXCEPT
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator>=(const CharT* const _L, const exe_basic_string<CharT, CharTraits, Allocator>& _R) NH3API_NOEXCEPT
 { return !(_L < _R); }
 
-template <class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator>=(const exe_basic_string<_E, _Tr, _A>& _L, const _E* const _R) NH3API_NOEXCEPT
+template <class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator>=(const exe_basic_string<CharT, CharTraits, Allocator>& _L, const CharT* const _R) NH3API_NOEXCEPT
 { return !(_L < _R); }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator!=(const exe_basic_string<_E, _Tr, _A>& _L,
-                const exe_basic_string<_E, _Tr, _A>& _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator!=(const exe_basic_string<CharT, CharTraits, Allocator>& _L,
+                const exe_basic_string<CharT, CharTraits, Allocator>& _R)
 { return (!(_L == _R)); }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator!=(const _E* _L,
-                const exe_basic_string<_E, _Tr, _A>& _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator!=(const CharT* _L,
+                const exe_basic_string<CharT, CharTraits, Allocator>& _R)
 { return (!(_L == _R)); }
 
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-bool operator!=(const exe_basic_string<_E, _Tr, _A>& _L,
-                const _E* _R)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+bool operator!=(const exe_basic_string<CharT, CharTraits, Allocator>& _L,
+                const CharT* _R)
 { return (!(_L == _R)); }
 
 #ifdef __cpp_user_defined_literals
@@ -2167,8 +3041,8 @@ namespace nh3api
 
 // get exe_basic_string reference count
 // if you need it for whatever reason
-template<class _E, class _Tr, class _A> NH3API_FORCEINLINE
-uint8_t refcount(const exe_basic_string<_E, _Tr, _A>& str)
+template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
+uint8_t refcount(const exe_basic_string<CharT, CharTraits, Allocator>& str)
 { return *(const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(str.c_str())) - 1); }
 
 NH3API_CONSTEXPR inline

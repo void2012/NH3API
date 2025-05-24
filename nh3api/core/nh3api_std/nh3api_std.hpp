@@ -52,7 +52,7 @@
 // NH3API_CHECK_MSVC_DRIVER = MSVC, Clang-CL compilers
 // NH3API_CHECK_GNU_DRIVER = MinGW GCC, Clang (GNU aka posix) compilers
 
-#ifndef NH3API_CHECK_MSVC_DRIVER
+#ifndef NH3API_COMPILER_NAME
     // some old MinGW GCC versions defines _MSC_VER, here is a workaround
     #if (defined(_MSC_VER) && !defined(__MINGW32__))
         #define NH3API_CHECK_MSVC_DRIVER (1)
@@ -63,9 +63,11 @@
         #if defined(__clang__)
             #define NH3API_CHECK_CLANG_CL (1)
             #define NH3API_CHECK_MSVC     (0)
+            #define NH3API_COMPILER_NAME   "Clang-CL"
         #else
             #define NH3API_CHECK_CLANG_CL (0)
             #define NH3API_CHECK_MSVC     (1)
+            #define NH3API_COMPILER_NAME   "MSVC"
         #endif
     #else
         #define NH3API_CHECK_GNU_DRIVER  (1)
@@ -82,6 +84,7 @@
             #if (__cplusplus < 201103L)
                 #error NH3API doesnt work on clang with -std=c++98
             #endif
+            #define NH3API_COMPILER_NAME "Clang"
         #else
             #define NH3API_CHECK_CLANG (0)
             #define NH3API_CHECK_MINGW (1)
@@ -91,6 +94,7 @@
             #if (__cplusplus < 201103L)
                 #error NH3API doesnt work on GCC with -std=c++98
             #endif
+            #define NH3API_COMPILER_NAME "GCC"
         #endif
     #endif
 #endif
@@ -190,6 +194,29 @@
     #endif
 #endif
 
+#ifndef NH3API_MSVC_VERSION 
+    #if NH3API_CHECK_MSVC_DRIVER
+        #define NH3API_MSVC_VERSION _MSC_VER
+    #else 
+        #define NH3API_MSVC_VERSION 0 
+    #endif
+    #define NH3API_MSVC_VERSION_2005 1400
+    #define NH3API_MSVC_VERSION_2008 1500
+    #define NH3API_MSVC_VERSION_2010 1600
+    #define NH3API_MSVC_VERSION_2012 1700
+    #define NH3API_MSVC_VERSION_2013 1800
+    #define NH3API_MSVC_VERSION_2015 1900 
+    #define NH3API_MSVC_VERSION_2017 1910
+    #define NH3API_MSVC_VERSION_2017_UPDATE_3 1911
+    #define NH3API_MSVC_VERSION_2017_UPDATE_5 1912
+    #define NH3API_MSVC_VERSION_2017_UPDATE_6 1913
+    #define NH3API_MSVC_VERSION_2017_UPDATE_8 1915
+    #define NH3API_MSVC_VERSION_2017_UPDATE_9 1916
+    #define NH3API_MSVC_VERSION_2019 1920
+    #define NH3API_MSVC_VERSION_2022 1930
+    #define NH3API_MSVC_VERSION_MIN  NH3API_MSVC_VERSION_2005 // Minimum supported MSVC version
+#endif
+
 #ifndef NH3API_MSVC_STL_VERSION
     #ifdef _CPPLIB_VER
         #define NH3API_MSVC_STL_VERSION (_CPPLIB_VER)
@@ -203,6 +230,7 @@
     #define NH3API_MSVC_STL_VERSION_2012 540
     #define NH3API_MSVC_STL_VERSION_2013 610
     #define NH3API_MSVC_STL_VERSION_2015_2022 650
+    #define NH3API_MSVC_STL_VERSION_MIN  NH3API_MSVC_STL_VERSION_2005 // Minimum supported version of MSVC STL
 #endif
 
 #ifndef NH3API_VS2010
@@ -1307,28 +1335,95 @@ const omit_base_vftable_tag;
 
 namespace nh3api
 {
+
+// NH3API settings as C++ constants
 namespace flags
 {
 enum : unsigned char
 {
+
+    #if NH3API_CHECK_MSVC 
+    use_msvc = true,
+    use_gcc = false,
+    use_clang = false, 
+    use_clang_cl = false,
+    #elif NH3API_CHECK_MINGW
+    use_msvc = false,
+    use_gcc = true,
+    use_clang = false, 
+    use_clang_cl = false,
+    #elif NH3API_CHECK_CLANG 
+    use_msvc = false,
+    use_gcc = false,
+    use_clang = true, 
+    use_clang_cl = false,
+    #elif NH3API_CHECK_CLANG_CL 
+    use_msvc = false,
+    use_gcc = false,
+    use_clang = false, 
+    use_clang_cl = true,
+    #endif 
+
     // see 'NH3API_FLAG_NO_CPP_EXCEPTIONS' flag
     no_exceptions =
     #ifdef NH3API_FLAG_NO_CPP_EXCEPTIONS
-        true,
+        true
     #else
-        false,
+        false
     #endif
+    ,
 
+    // Use optional ERA 3 SDK module
     use_era = 
     #ifdef NH3API_FLAG_USE_ERA
-        true 
+        true
+    #else 
+        false
+    #endif
+    ,
+
+    strict_std_template_conformance = 
+    #ifdef NH3API_FLAG_STRICT_STD_TEMPLATE_CONFORMANCE
+        true
     #else 
         false
     #endif
 
 };
 
-}
+} // namespace nh3api::flags
+
+struct compiler_info 
+{
+    #if NH3API_STD_INLINE_VARIABLES
+    inline static const char name[] = NH3API_COMPILER_NAME;
+    #else 
+    static const char name[];
+    #endif
+
+    enum version_info : unsigned int 
+    {
+#if NH3API_CHECK_MSVC_DRIVER  
+    major_version = _MSC_VER / 100,
+    minor_version = ((_MSC_VER % 100) - (_MSC_VER % 10))/10,
+    patch_level   = _MSC_VER % 10
+#elif NH3API_CHECK_GNU_DRIVER
+    #ifdef __clang__
+    major_version = __clang_major__,
+    minor_version = __clang_minor__,
+    patch_level   = __clang_patchlevel__
+    #else 
+    major_version = __GNUC__,
+    minor_version = __GNUC_MINOR__,
+    patch_level   = __GNUC_PATCHLEVEL__
+    #endif
+#endif
+    };
+};
+
+#if !NH3API_STD_INLINE_VARIABLES
+const char compiler_info::name[] = NH3API_COMPILER_NAME;
+#endif
 
 } // namespace nh3api
 
