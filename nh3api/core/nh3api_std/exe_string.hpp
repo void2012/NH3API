@@ -2150,13 +2150,16 @@ bool operator!=(const exe_basic_string<_E, _Tr, _A>& _L,
 { return (!(_L == _R)); }
 
 #ifdef __cpp_user_defined_literals
+namespace exe_string_literals
+{
 NH3API_FORCEINLINE
-exe_string operator"" exe( const char* str, size_t len )
+exe_string operator""_exe( const char* str, size_t len )
 { return exe_string{str, len}; }
 
 NH3API_FORCEINLINE
-exe_wstring operator"" exe( const wchar_t* str, size_t len )
-{ return exe_wstring{str, len}; }
+exe_wstring operator""_exe( const wchar_t* str, size_t len )
+{ return exe_wstring{str, len}; }    
+}
 #endif
 
 namespace nh3api
