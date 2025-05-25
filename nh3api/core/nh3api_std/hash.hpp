@@ -8,7 +8,13 @@
 
 #ifdef __has_include 
     #if __has_include(<string_view>)
-        #include <string_view>
+        #if defined(_MSVC_LANG)
+            #if _MSVC_LANG>=201702L
+                #include <string_view>
+            #endif
+        #elif __cplusplus >=201702L
+            #include <string_view>
+        #endif
     #endif
 #endif
 
