@@ -442,21 +442,21 @@ protected:
 public:
     exe_deque()
         NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_default_constructible<allocator_type>::value)
-        : adaptor(), _First(), _Last(), _Map(nullptr), _Mapsize(nullptr), _Size(0)
+        : adaptor(), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     {}
 
     explicit exe_deque(const allocator_type& a)
         NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<allocator_type>::value)
-        : adaptor(a), _First(), _Last(), _Map(nullptr), _Mapsize(nullptr), _Size(0)
+        : adaptor(a), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     {}
 
     explicit exe_deque( size_type _N, const value_type& _V = value_type(),
                         const _A& _Al = _A() )
-        : adaptor( _Al ), _First(), _Last(), _Map(nullptr), _Mapsize(nullptr), _Size(0)
+        : adaptor( _Al ), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     { _Construct_n(_N, _V); }
 
     explicit exe_deque( size_type _N, const value_type& _V = value_type())
-        : adaptor(), _First(), _Last(), _Map(nullptr), _Mapsize(nullptr), _Size(0)
+        : adaptor(), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     { _Construct_n(_N, _V); }
 
     exe_deque( const this_type& other )
@@ -468,7 +468,7 @@ public:
     exe_deque(IterT _F, IterT _L, const _A& _Al = _A()
     NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
         : adaptor( _Al ),
-        _First(), _Last(), _Map( nullptr ), _Mapsize( nullptr ), _Size( 0 )
+        _First(), _Last(), _Map( nullptr ), _Mapsize( 0 ), _Size( 0 )
     {
         _Construct(_F, _L);
         //std::copy( _F, _L, std::back_inserter( *this ) );
@@ -479,7 +479,7 @@ public:
     exe_deque(IterT _F, IterT _L
     NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
         : adaptor(),
-        _First(), _Last(), _Map( nullptr ), _Mapsize( nullptr ), _Size( 0 )
+        _First(), _Last(), _Map( nullptr ), _Mapsize( 0 ), _Size( 0 )
     {
         _Construct(_F, _L);
         //std::copy( _F, _L, std::back_inserter( *this ) );

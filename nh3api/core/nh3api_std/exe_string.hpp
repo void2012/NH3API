@@ -1170,224 +1170,6 @@ NH3API_CONSTEXPR bool operator>= (
     nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
 { return lhs.compare( rhs ) >= 0; }
 
-#if !NH3API_CHECK_CPP11 || (NH3API_MSVC_VERSION >= NH3API_MSVC_VERSION_2010 && NH3API_MSVC_VERSION < NH3API_MSVC_VERSION_2015)
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator==(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    CharT const * rhs ) NH3API_NOEXCEPT
-{ return lhs.size() == exe_string_helper<CharT, CharTraits>::length( rhs ) && lhs.compare( rhs ) == 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator==(
-    CharT const * lhs,
-    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return exe_string_helper<CharT, CharTraits>::length( lhs ) == rhs.size() && rhs.compare( lhs ) == 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator==(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator==(
-    exe_basic_string<CharT, CharTraits> rhs,
-    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
-{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator!=(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    CharT const * rhs ) NH3API_NOEXCEPT
-{ return !( lhs == rhs ); }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator!=(
-    CharT const * lhs,
-    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return !( lhs == rhs ); }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator!=(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return !( lhs == rhs ); }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator!=(
-    exe_basic_string<CharT, CharTraits> rhs,
-    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
-{ return !( lhs == rhs ); }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator<(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    CharT const * rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) < 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator<(
-    CharT const * lhs,
-    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return rhs.compare( lhs ) > 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator<(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) < 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator<(
-    exe_basic_string<CharT, CharTraits> rhs,
-    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
-{ return rhs.compare( lhs ) > 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator<=(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    CharT const * rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) <= 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator<=(
-    CharT const * lhs,
-    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return rhs.compare( lhs ) >= 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator<=(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) <= 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator<=(
-    exe_basic_string<CharT, CharTraits> rhs,
-    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
-{ return rhs.compare( lhs ) >= 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator>(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    CharT const * rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) > 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator>(
-    CharT const * lhs,
-    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return rhs.compare( lhs ) < 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator>(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) > 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator>(
-    exe_basic_string<CharT, CharTraits> rhs,
-    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
-{ return rhs.compare( lhs ) < 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator>=(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    CharT const * rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) >= 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator>=(
-    CharT const * lhs,
-    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return rhs.compare( lhs ) <= 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator>=(
-    nh3api::basic_string_view<CharT, CharTraits> lhs,
-    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) >= 0; }
-
-template< class CharT, class CharTraits>
-NH3API_CONSTEXPR bool operator>=(
-    exe_basic_string<CharT, CharTraits> rhs,
-    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
-{ return rhs.compare( lhs ) <= 0; }
-#else 
-template< class CharT, class CharTraits, int=1 >
-NH3API_CONSTEXPR bool operator==(
-         nh3api::basic_string_view  <CharT, CharTraits> lhs,
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
-{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
-
-template< class CharT, class CharTraits, int=2 >
-NH3API_CONSTEXPR bool operator==(
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
-         nh3api::basic_string_view  <CharT, CharTraits> rhs ) NH3API_NOEXCEPT
-{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
-
-template< class CharT, class CharTraits, int=1 >
-NH3API_CONSTEXPR bool operator!= (
-         nh3api::basic_string_view  < CharT, CharTraits > lhs,
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
-{ return !( lhs == rhs ); }
-
-template< class CharT, class CharTraits, int=2 >
-NH3API_CONSTEXPR bool operator!= (
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
-         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
-{ return !( lhs == rhs ); }
-
-template< class CharT, class CharTraits, int=1 >
-NH3API_CONSTEXPR bool operator< (
-         nh3api::basic_string_view  < CharT, CharTraits > lhs,
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) < 0; }
-
-template< class CharT, class CharTraits, int=2 >
-NH3API_CONSTEXPR bool operator< (
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
-         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) < 0; }
-
-template< class CharT, class CharTraits, int=1 >
-NH3API_CONSTEXPR bool operator<= (
-         nh3api::basic_string_view  < CharT, CharTraits > lhs,
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) <= 0; }
-
-template< class CharT, class CharTraits, int=2 >
-NH3API_CONSTEXPR bool operator<= (
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
-         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) <= 0; }
-
-template< class CharT, class CharTraits, int=1 >
-NH3API_CONSTEXPR bool operator> (
-         nh3api::basic_string_view  < CharT, CharTraits > lhs,
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) > 0; }
-
-template< class CharT, class CharTraits, int=2 >
-NH3API_CONSTEXPR bool operator> (
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
-         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) > 0; }
-
-template< class CharT, class CharTraits, int=1 >
-NH3API_CONSTEXPR bool operator>= (
-         nh3api::basic_string_view  < CharT, CharTraits > lhs,
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) >= 0; }
-
-template< class CharT, class CharTraits, int=2 >
-NH3API_CONSTEXPR bool operator>= (
-		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
-         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
-{ return lhs.compare( rhs ) >= 0; }
-#endif
-
 #ifdef __cpp_user_defined_literals
 namespace exe_string_literals
 {
@@ -3022,6 +2804,224 @@ template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
 bool operator!=(const exe_basic_string<CharT, CharTraits, Allocator>& _L,
                 const CharT* _R)
 { return (!(_L == _R)); }
+
+#if !NH3API_CHECK_CPP11 || (NH3API_MSVC_VERSION >= NH3API_MSVC_VERSION_2010 && NH3API_MSVC_VERSION < NH3API_MSVC_VERSION_2015)
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator==(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return lhs.size() == exe_string_helper<CharT, CharTraits>::length( rhs ) && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator==(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return exe_string_helper<CharT, CharTraits>::length( lhs ) == rhs.size() && rhs.compare( lhs ) == 0; }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator==(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator==(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator!=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator!=(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator!=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator!=(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) < 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) > 0; }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator<(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) < 0; }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator<(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) > 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) <= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator<=(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) >= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator<=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) <= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator<=(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) >= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) > 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) < 0; }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator>(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) > 0; }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator>(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) < 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    CharT const * rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) >= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_CONSTEXPR bool operator>=(
+    CharT const * lhs,
+    nh3api::basic_string_view<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) <= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator>=(
+    nh3api::basic_string_view<CharT, CharTraits> lhs,
+    exe_basic_string<CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) >= 0; }
+
+template< class CharT, class CharTraits>
+NH3API_FORCEINLINE bool operator>=(
+    exe_basic_string<CharT, CharTraits> rhs,
+    nh3api::basic_string_view<CharT, CharTraits> lhs ) NH3API_NOEXCEPT
+{ return rhs.compare( lhs ) <= 0; }
+#else 
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator==(
+         nh3api::basic_string_view  <CharT, CharTraits> lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator==(
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  <CharT, CharTraits> rhs ) NH3API_NOEXCEPT
+{ return lhs.size() == rhs.size() && lhs.compare( rhs ) == 0; }
+
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator!= (
+         nh3api::basic_string_view  < CharT, CharTraits > lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator!= (
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
+{ return !( lhs == rhs ); }
+
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator< (
+         nh3api::basic_string_view  < CharT, CharTraits > lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) < 0; }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator< (
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) < 0; }
+
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator<= (
+         nh3api::basic_string_view  < CharT, CharTraits > lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) <= 0; }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator<= (
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) <= 0; }
+
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator> (
+         nh3api::basic_string_view  < CharT, CharTraits > lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) > 0; }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator> (
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) > 0; }
+
+template< class CharT, class CharTraits, int=1 >
+NH3API_CONSTEXPR bool operator>= (
+         nh3api::basic_string_view  < CharT, CharTraits > lhs,
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) >= 0; }
+
+template< class CharT, class CharTraits, int=2 >
+NH3API_CONSTEXPR bool operator>= (
+		 typename std::decay< nh3api::basic_string_view<CharT, CharTraits> >::type lhs,
+         nh3api::basic_string_view  < CharT, CharTraits > rhs ) NH3API_NOEXCEPT
+{ return lhs.compare( rhs ) >= 0; }
+#endif
 
 #ifdef __cpp_user_defined_literals
 namespace exe_string_literals

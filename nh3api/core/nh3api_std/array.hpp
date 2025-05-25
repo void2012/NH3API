@@ -221,35 +221,28 @@ inline bool operator!=(const std::array<T, N> & left, const std::array<T, N> & r
 
 namespace nh3api
 {
-template<class T, size_t N>
-size_t size(const T (&array)[N]) throw()
-{ return N; }
 
-template<class T>
-typename T::size_type size(const T& container)
-{ return container.size(); }
-
-template< class T, size_t N >
+template< class T, size_t N > NH3API_FORCEINLINE
 T* begin(T (&array)[N]) throw()
 { return array; }
 
-template<class T>
+template<class T> NH3API_FORCEINLINE
 typename T::iterator begin(T& container)
 { return container.begin(); }
 
-template<class T>
+template<class T> NH3API_FORCEINLINE
 typename T::const_iterator begin(const T& container)
 { return container.begin(); }
 
-template<class T, size_t N>
+template<class T, size_t N> NH3API_FORCEINLINE
 T* end(T (&array)[N]) throw()
 { return array + N; }
 
-template<class T>
+template<class T> NH3API_FORCEINLINE
 typename T::iterator end(T& container)
 { return container.end(); }
 
-template<class T>
+template<class T> NH3API_FORCEINLINE
 typename T::const_iterator end(const T& container)
 { return container.end(); }
 
@@ -260,7 +253,18 @@ typename T::const_iterator end(const T& container)
 
 namespace nh3api
 {
+
+#ifdef __cpp_lib_nonmember_container_access
 using ::std::size;
+#else
+template<class T, size_t N> NH3API_CONSTEXPR NH3API_FORCEINLINE
+size_t size(const T (&array)[N]) NH3API_NOEXCEPT
+{ return N; }
+
+template<class T> NH3API_CONSTEXPR NH3API_FORCEINLINE
+typename T::size_type size(const T& container) NH3API_NOEXCEPT
+{ return container.size(); } 
+#endif
 using ::std::begin;
 using ::std::end;
 

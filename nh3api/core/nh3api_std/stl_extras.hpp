@@ -9,9 +9,15 @@
 #include <algorithm> // std::clamp
 #include <cmath>
 
-#ifdef __has_include
+#ifdef __has_include 
     #if __has_include(<bit>)
-        #include <bit> // std::bit_cast
+        #if defined(_MSVC_LANG)
+            #if _MSVC_LANG>=202002L
+                #include <bit>
+            #endif
+        #elif __cplusplus >=202002L
+            #include <bit>
+        #endif
     #endif
 #endif
 

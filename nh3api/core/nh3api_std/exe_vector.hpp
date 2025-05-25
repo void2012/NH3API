@@ -958,7 +958,7 @@ struct exe_vector_helper<exe_allocator<T> >
         }
 
     protected:
-        #if NH3API_CHECK_MSVC && !NH3API_VS2010 
+        #if NH3API_CHECK_MSVC && !NH3API_CHECK_CPP11
         iterator _Add_alignment_assumption(pointer ptr) NH3API_NOEXCEPT
         { return nh3api::assume_aligned<__alignof(value_type)>(ptr); }
 

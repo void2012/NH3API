@@ -1,11 +1,10 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 
 project(NH3API VERSION 1.0.0)
 
-option(NH3API_TARGET_WINDOWS_XP "Target Windows XP. This flag lowers down the Win32 SDK level." ON)
-option(NH3API_NO_CPP_EXCEPTIONS "Disable C++ exceptions globally." OFF)
-option(NH3API_LIB_NO_CPP_EXCEPTIONS "Disable C++ exceptions for NH3API" OFF)
-option(NH3API_INSTALLTARGET "Generate install target" ON)
+option(NH3API_CMAKE_TARGET_WINDOWS_XP "Target Windows XP. This flag lowers down the Win32 SDK level." OFF)
+option(NH3API_CMAKE_NO_CPP_EXCEPTIONS "Disable C++ exceptions globally." OFF)
+option(NH3API_CMAKE_LIB_NO_CPP_EXCEPTIONS "Disable C++ exceptions for NH3API" OFF)
 include(CMakeDependentOption)
 cmake_dependent_option(NH3API_CMAKE_NOTHROW_NEW "NH3APIs operators new will not throw" ON "NH3API_CMAKE_NO_CPP_EXCEPTIONS" OFF)
 option(NH3API_CMAKE_INLINE_HEADERS "Inline mode. See nh3api_std.hpp for details. Requires C++17" OFF)
@@ -44,23 +43,53 @@ add_library(nh3api::nh3api ALIAS nh3api)
 add_library(nh3api-header-only INTERFACE)
 add_library(nh3api::nh3api-header-only ALIAS nh3api-header-only)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-endif()
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-endif()
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-	if(MSVC_TOOLSET_VERSION GREATER 140)
-		target_compile_options(nh3api PUBLIC /Zc:threadSafeInit-)
-	endif()
-	if(MSVC_TOOLSET_VERSION GREATER 141)
-		target_compile_options(nh3api PUBLIC /Zc:__cplusplus)
-	endif()
+if(MSVC)
 	target_compile_definitions(nh3api PUBLIC _X86_)
+else()
+	add_compile_options(nh3api PUBLIC -m32)
 endif()
 
+if(NH3API_CMAKE_TARGET_WINDOWS_XP)
+	add_compile_definitions(nh3api PUBLIC WINVER=0x501)
+	add_compile_definitions(nh3api PUBLIC _WIN32_WINNT=0x501)
+	if(MSVC)
+		if(MSVC_TOOLSET_VERSION GREATER_EQUAL 140)
+			# Visual Studio 2015 and greater:
+			# Remove TLS static variables initialization optimization
+			# Which uses Windows Vista syscalls
+			# https://learn.microsoft.com/en-us/cpp/build/reference/zc-threadsafeinit-thread-safe-local-static-initialization
+			add_compile_options(nh3api PUBLIC /Zc:threadSafeInit-)
+			add_compile_options(nh3api PUBLIC /arch:SSE2)
+		endif()
+		if(MSVC_TOOLSET_VERSION GREATER 141)
+			message(FATAL_ERROR "Visual Studio dropped support of Windows XP since Visual Studio 2019. If you want to target Windows XP, use v141_xp toolset.")
+		endif()
+	else()
+		add_compile_options(nh3api PUBLIC -march=pentium4)
+		add_compile_options(nh3api PUBLIC -masm=intel)
+	endif() 
+endif() # Target Windows XP
 
+if(NH3API_CMAKE_LIB_NO_CPP_EXCEPTIONS)
+	add_compile_definitions(nh3api PUBLIC NH3API_FLAG_NO_CPP_EXCEPTIONS)
+endif()
+
+if(NH3API_CMAKE_NO_CPP_EXCEPTIONS)
+	if(MSVC) 
+	# MSVC sadly has no -fno-exceptions
+		add_compile_definitions(nh3api PUBLIC _HAS_EXCEPTIONS=0)
+	else()
+		add_compile_options(nh3api PUBLIC -fno-exceptions)
+	endif()
+endif()
+
+if(NH3API_CMAKE_INLINE_HEADERS)
+# Inline mode requires C++17 support 
+set(CMAKE_CXX_STANDARD 17)  
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_compile_definitions(nh3api PUBLIC NH3API_FLAG_INLINE_HEADERS)
+# Do not add source files in inline mode
+else()
 nh3api_add_files(
 	BASE_PATH
 		nh3api/core
@@ -71,15 +100,39 @@ nh3api_add_files(
 		artifact.cpp
 		base_manager.cpp
 		combat.cpp
+		creatures.cpp
 		events.cpp
 		global.cpp
 		hero.cpp
+		input_manager.cpp
 		map.cpp
+		mouse.cpp
 		pathfinding.cpp
 		player.cpp
 		skills.cpp
 		terrain.cpp
 		town.cpp
+)
+
+nh3api_add_files(
+	BASE_PATH
+		nh3api/core/interface
+	OUT
+		NH3API_SOURCES
+	FILES
+		chat_manager.cpp
+		window_manager.cpp
+		windows.cpp
+)
+
+nh3api_add_files(
+	BASE_PATH
+		nh3api/core/resources
+	OUT
+		NH3API_SOURCES
+	FILES
+		resources.cpp
+		sound.cpp
 )
 
 nh3api_add_files(
@@ -90,6 +143,7 @@ nh3api_add_files(
 	FILES
 		turn.cpp
 )
+endif()
 
 nh3api_add_files(
 	BASE_PATH 
@@ -116,6 +170,7 @@ nh3api_add_files(
 		lossvictory.hpp
 		map.hpp
 		map_header.hpp
+		mouse.hpp
 		multiplayer.hpp
 		objects.hpp
 		pathfinding.hpp
@@ -146,4 +201,7 @@ nh3api_add_files(
 		turn.hpp
 )
 
+if(NH3API_CMAKE_INLINE_HEADERS)
+else()
 target_sources(nh3api PRIVATE ${NH3API_SOURCES})
+endif()

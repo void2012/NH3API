@@ -275,6 +275,10 @@ unfancy(const _Iter_type& iter) NH3API_NOEXCEPT
 // vs 2010..2015 checked iterators
 #elif NH3API_MSVC_STL && (NH3API_MSVC_STL_VERSION >= NH3API_MSVC_STL_VERSION_2010) && !defined(_MSVC_STL_UPDATE)
 
+template<typename T> inline
+T* unfancy(T* iter) NH3API_NOEXCEPT
+{ return iter; }
+
 template<typename _Iter> inline
 typename _Iter::_Unchecked_type unfancy(const _Iter& iter) NH3API_NOEXCEPT
 { return ::std::_Unchecked(iter); }
