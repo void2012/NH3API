@@ -1439,12 +1439,6 @@ enum : unsigned char
 
 struct compiler_info 
 {
-    #if NH3API_STD_INLINE_VARIABLES
-    inline static const char name[] = NH3API_COMPILER_NAME;
-    #else 
-    static const char name[];
-    #endif
-
     enum version_info : unsigned int 
     {
 #if NH3API_CHECK_MSVC_DRIVER  
@@ -1464,10 +1458,6 @@ struct compiler_info
 #endif
     };
 };
-
-#if !NH3API_STD_INLINE_VARIABLES
-const char compiler_info::name[] = NH3API_COMPILER_NAME;
-#endif
 
 } // namespace nh3api
 
