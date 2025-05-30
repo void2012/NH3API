@@ -123,22 +123,26 @@ class exe_rbtree
 
     // internal typedefs
   protected:
-    typedef ::nh3api::allocator_adaptor<allocator_type> adaptor_type;
-    typedef typename adaptor_type::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
-    typedef typename adaptor_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
-    typedef typename adaptor_type::propagate_on_container_swap propagate_on_container_swap;
+    typedef typename tt::allocator_container_traits<allocator_type>::propagate_on_container_copy_assignment
+    propagate_allocator_on_copy_assignment;
+    typedef typename tt::allocator_container_traits<allocator_type>::propagate_on_container_move_assignment 
+    propagate_allocator_on_move_assignment;
+    typedef typename tt::allocator_container_traits<allocator_type>::propagate_on_container_swap 
+    propagate_allocator_on_swap;
 
   public:
     typedef exe_rbtree<_K, _Ty, _Kfn, _Pr, _A, _Nil_Address, _Nilrefs_Address> this_type NH3API_NODEBUG;
     typedef _K  key_type;
     typedef _Ty value_type;
     typedef _Pr key_compare;
-    typedef typename adaptor_type::size_type       size_type;
-    typedef typename adaptor_type::difference_type difference_type;
-    typedef typename adaptor_type::pointer         pointer;
-    typedef typename adaptor_type::const_pointer   const_pointer;
-    typedef typename adaptor_type::reference       reference;
-    typedef typename adaptor_type::const_reference const_reference;
+
+    typedef typename tt::allocator_container_traits<allocator_type>::size_type       size_type;
+    typedef typename tt::allocator_container_traits<allocator_type>::difference_type difference_type;
+    typedef typename tt::allocator_container_traits<allocator_type>::pointer         pointer;
+    typedef typename tt::allocator_container_traits<allocator_type>::const_pointer   const_pointer;
+    typedef typename tt::allocator_container_traits<allocator_type>::reference       reference;
+    typedef typename tt::allocator_container_traits<allocator_type>::const_reference const_reference;
+
     typedef _Node node_type;
 
     class iterator;
@@ -332,29 +336,29 @@ class exe_rbtree
         typedef ::std::reverse_iterator<iterator>       reverse_iterator;
         typedef ::std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-        explicit exe_rbtree(const key_compare &_Parg, bool _Marg = true, const allocator_type &allocator = allocator_type())
+        explicit exe_rbtree(const key_compare &_Parg, bool _Marg = true, const allocator_type &_Allocator = allocator_type())
         NH3API_NOEXCEPT_ALLOC
-            : adaptor(allocator), _KeyCompare(_Parg), _Head(nullptr), _Multi(_Marg)
+            : allocator(_Allocator), _KeyCompare(_Parg), _Head(nullptr), _Multi(_Marg)
         {
             _Init();
         }
 
-        exe_rbtree(const_pointer first, const_pointer last, const key_compare &_Parg, bool _Marg = true, const allocator_type &allocator = allocator_type())
-            : adaptor(allocator), _KeyCompare(_Parg), _Head(nullptr), _Multi(_Marg)
+        exe_rbtree(const_pointer first, const_pointer last, const key_compare &_Parg, bool _Marg = true, const allocator_type &_Allocator = allocator_type())
+            : allocator(_Allocator), _KeyCompare(_Parg), _Head(nullptr), _Multi(_Marg)
         {
             _Init();
             insert(first, last);
         }
 
         exe_rbtree(const exe_rbtree &_X)
-            : adaptor(_X.adaptor), _KeyCompare(_X._KeyCompare), _Multi(_X._Multi), _Head(nullptr)
+            : allocator(), _KeyCompare(_X._KeyCompare), _Multi(_X._Multi), _Head(nullptr)
         {
             _Init();
             _Copy(_X);
         }
 
-        exe_rbtree(const exe_rbtree &_X, const allocator_type &allocator)
-            : adaptor(allocator), _KeyCompare(_X._KeyCompare), _Multi(_X._Multi), _Head(nullptr)
+        exe_rbtree(const exe_rbtree &_X, const allocator_type &_Allocator)
+            : allocator(_Allocator), _KeyCompare(_X._KeyCompare), _Multi(_X._Multi), _Head(nullptr)
         {
             _Init();
             _Copy(_X);
@@ -371,10 +375,10 @@ class exe_rbtree
             if (this != &other)
             {
                 clear();
-                if (this->get_allocator() != other.get_allocator()
-                    && adaptor_type::propagate_on_container_copy_assignment::value)
+                if (this->allocator != other.allocator
+                    && propagate_allocator_on_copy_assignment::value)
                 {
-                    this->adaptor = other.adaptor;
+                    this->allocator = other.allocator;
                 }
                 _KeyCompare = other._KeyCompare;
                 _Copy(other);
@@ -389,10 +393,10 @@ class exe_rbtree
             if ( this != &other )
             {
                 clear();
-                if (adaptor_type::propagate_on_container_move_assignment::value
-                    && this->adaptor != other.adaptor)
+                if (propagate_allocator_on_move_assignment::value
+                    && this->allocator != other.allocator)
                 {
-                    this->adaptor = ::nh3api::exchange(other.adaptor, adaptor_type());
+                    this->allocator = ::nh3api::exchange(other.allocator, allocator_type());
                 }
                 _Assign_rv(::std::forward<exe_rbtree>(other));
             }
@@ -401,90 +405,73 @@ class exe_rbtree
 
         exe_rbtree(exe_rbtree&& other)
         NH3API_NOEXCEPT_EXPR(_bit_swappable)
-            : adaptor()
+            : allocator()
         {
             _Assign_rv(::std::forward<exe_rbtree>(other), tt::true_type());
         }
 
-        exe_rbtree(exe_rbtree&& other, const allocator_type& _Al)
+        exe_rbtree(exe_rbtree&& other, const allocator_type& _Allocator)
         NH3API_NOEXCEPT_EXPR(_bit_swappable)
-            : adaptor(_Al)
+            : allocator(_Allocator)
         {
             _Assign_rv(::std::forward<exe_rbtree>(other));
         }
         #endif
 
-        exe_rbtree(const dummy_tag_t& tag)
-        NH3API_NOEXCEPT
-            : adaptor(tag)
+        exe_rbtree(const dummy_tag_t& tag) NH3API_NOEXCEPT
         { NH3API_IGNORE(_KeyCompare, _Multi, _Head, _Size); }
 
     // access
     public:
         iterator begin() NH3API_NOEXCEPT
-        {
-            return (iterator(_Lmost()));
-        }
+        { return (iterator(_Lmost())); }
+
         const_iterator begin() const NH3API_NOEXCEPT
-        {
-            return (const_iterator(_Lmost()));
-        }
+        { return (const_iterator(_Lmost())); }
+
         const_iterator cbegin() const NH3API_NOEXCEPT
-        {
-            return (const_iterator(_Lmost()));
-        }
+        { return (const_iterator(_Lmost())); }
+
         iterator end() NH3API_NOEXCEPT
-        {
-            return (iterator(_Head));
-        }
+        { return (iterator(_Head)); }
+
         const_iterator end() const NH3API_NOEXCEPT
-        {
-            return (const_iterator(_Head));
-        }
+        { return (const_iterator(_Head)); }
+
         const_iterator cend() const NH3API_NOEXCEPT
-        {
-            return (const_iterator(_Head));
-        }
+        { return (const_iterator(_Head)); }
+
         reverse_iterator rbegin() NH3API_NOEXCEPT
-        {
-            return (reverse_iterator(end()));
-        }
+        { return (reverse_iterator(end())); }
+
         const_reverse_iterator rbegin() const NH3API_NOEXCEPT
-        {
-            return (const_reverse_iterator(end()));
-        }
+        { return (const_reverse_iterator(end())); }
+
         const_reverse_iterator crbegin() const NH3API_NOEXCEPT
-        {
-            return (const_reverse_iterator(end()));
-        }
+        { return (const_reverse_iterator(end())); }
+
         reverse_iterator rend() NH3API_NOEXCEPT
-        {
-            return (reverse_iterator(begin()));
-        }
+        { return (reverse_iterator(begin())); }
+
         const_reverse_iterator rend() const NH3API_NOEXCEPT
-        {
-            return (const_reverse_iterator(begin()));
-        }
+        { return (const_reverse_iterator(begin())); }
+
         const_reverse_iterator crend() const NH3API_NOEXCEPT
-        {
-            return (const_reverse_iterator(begin()));
-        }
+        { return (const_reverse_iterator(begin())); }
         size_type size() const NH3API_NOEXCEPT
         { return _Size; }
+
         size_type max_size() const NH3API_NOEXCEPT
-        { return (adaptor.max_size()); }
+        { return ::nh3api::allocator_max_size(allocator); }
+
         bool empty() const NH3API_NOEXCEPT
-        {
-            return size() == 0;
-        }
+        { return size() == 0; }
+
         allocator_type get_allocator() const NH3API_NOEXCEPT
-        {
-            return adaptor.alloc;
-        }
+        { return allocator;}
+
         key_compare key_comp() const NH3API_NOEXCEPT
-        {
-            return _KeyCompare;
-        }
+        { return _KeyCompare; }
 
     // inserting
     public:
@@ -539,11 +526,13 @@ class exe_rbtree
             }
             return insert(value).first;
         }
+
         void insert(iterator first, iterator last)
         {
             for (; first != last; ++first)
                 insert(*first);
         }
+
         void insert(const_pointer first, const_pointer last)
         {
             for (; first != last; ++first)
@@ -683,7 +672,7 @@ class exe_rbtree
                     }
                 _Color(_X) = _Black;
             }
-            adaptor.destroy(::nh3api::addressof(_Value(_Y)));
+            ::nh3api::allocator_destroy(allocator, ::nh3api::addressof(_Value(_Y)));
             _Freenode(_Y);
             --_Size;
             return (_P);
@@ -776,21 +765,18 @@ class exe_rbtree
             }
             if ( _bit_swappable )
             {
-                const __m128i val1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(this));
-                const __m128i val2 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(::nh3api::addressof(other)));
-                _mm_storeu_si128(reinterpret_cast<__m128i*>(this), val2);
-                _mm_storeu_si128(reinterpret_cast<__m128i*>(::nh3api::addressof(other)), val1);
+                ::nh3api::trivial_swap<sizeof(exe_rbtree)>(this, &other);
             }
-            else NH3API_IF_CONSTEXPR (adaptor == other.adaptor)
+            else NH3API_IF_CONSTEXPR (this->allocator == other.allocator)
             {
                 ::std::swap(this->_KeyCompare, other._KeyCompare);
                 ::std::swap(this->_Head, other._Head);
                 ::std::swap(this->_Multi, other._Multi);
                 ::std::swap(this->_Size, other._Size);
             }
-            else NH3API_IF_CONSTEXPR (adaptor_type::propagate_on_container_swap::value)
+            else NH3API_IF_CONSTEXPR (propagate_allocator_on_swap::value)
             {
-                ::std::swap(this->adaptor, other.adaptor);
+                ::std::swap(this->allocator, other.allocator);
                 ::std::swap(this->_KeyCompare, other._KeyCompare);
                 ::std::swap(this->_Head, other._Head);
                 ::std::swap(this->_Multi, other._Multi);
@@ -810,14 +796,13 @@ class exe_rbtree
     void _Assign_rv(exe_rbtree&& other)
     NH3API_NOEXCEPT_EXPR(_bit_swappable)
     {
-        _Assign_rv(::std::forward<exe_rbtree>(other),
-            typename adaptor_type::propagate_on_container_move_assignment());
+        _Assign_rv(::std::forward<exe_rbtree>(other), propagate_allocator_on_move_assignment());
     }
 
     void _Assign_rv(exe_rbtree&& other, tt::true_type)
     NH3API_NOEXCEPT_EXPR(_bit_swappable)
     {
-        this->adaptor.alloc = ::std::move(other.adaptor.alloc);
+        this->allocator = ::std::move(other.allocator);
         this->_KeyCompare = ::std::move(other._KeyCompare);
         this->_Head = ::nh3api::exchange(other._Head, nullptr);
         this->_Multi = other._Multi;
@@ -827,7 +812,7 @@ class exe_rbtree
     void _Assign_rv(exe_rbtree&& other, tt::false_type)
     NH3API_NOEXCEPT_EXPR(_bit_swappable)
     {
-        if (this->adaptor.alloc == other.adaptor.alloc)
+        if (allocator)
         {
             _Assign_rv(::std::forward<exe_rbtree>(other), tt::true_type());
         }
@@ -868,7 +853,7 @@ class exe_rbtree
             if (_Newroot == _Rootnode)
                 _Newroot = _Pnode; // memorize new root
             _Right(_Pnode) = _Copy(_Right(_Rootnode), _Pnode);
-            adaptor.copy_construct(::nh3api::addressof(_Value(_Pnode)), _Value(_Rootnode));
+            ::nh3api::copy_construct(::nh3api::addressof(_Value(_Pnode)), _Value(_Rootnode), allocator);
             _Left(_Wherenode) = _Pnode;
             _Wherenode = _Pnode;
         }
@@ -881,7 +866,7 @@ class exe_rbtree
         {
             _Erase(_Right(_Pnode));
             _Pnode = _Left(_Pnode);
-            adaptor.destroy(::nh3api::addressof(_Value(_Rootnode)));
+            ::nh3api::allocator_destroy(allocator, ::nh3api::addressof(_Value(_Rootnode)));
             _Freenode(_Rootnode);
         }
     }
@@ -931,7 +916,7 @@ class exe_rbtree
         node_type* _Z = _Buynode(_Y, _Red);
         _Left(_Z) = _Getnil();
         _Right(_Z) = _Getnil();
-        adaptor.copy_construct(::nh3api::addressof(_Value(_Z)), value);
+        ::nh3api::copy_construct(::nh3api::addressof(_Value(_Z)), value, allocator);
         ++_Size;
         if (_Y == _Head || !_Isnil(_X) || _KeyCompare(_Kfn()(value), _Key(_Y)))
         {
@@ -1107,16 +1092,16 @@ class exe_rbtree
     // allocate a non-value node
     node_type* _Buynode(node_type* _Parg, _Redbl _Carg) NH3API_NOEXCEPT_ALLOC
     {
-        node_type* _S = adaptor.template allocate_rebind<node_type>(1);
+        node_type* _S = allocate_rebind<node_type>(allocator, 1);
         _Parent(_S) = _Parg;
         _Color(_S) = _Carg;
         return _S;
     }
 
     void _Freenode(node_type* _S) NH3API_NOEXCEPT
-    { adaptor.template deallocate_rebind<node_type>(_S, 1); }
+    { deallocate_rebind<node_type>(allocator, _S, 1); }
 
-    adaptor_type adaptor;
+    allocator_type allocator;
     key_compare  _KeyCompare;
     node_type*   _Head;
     bool         _Multi;

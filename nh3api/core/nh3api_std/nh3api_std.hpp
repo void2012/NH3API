@@ -1157,6 +1157,14 @@ const omit_base_vftable_tag;
             #define NH3API_HAS_BUILTIN_MEMCPY      __has_builtin(__builtin_memcpy)
         #endif
 
+        #ifndef NH3API_HAS_BUILTIN_MEMCPY_INLINE
+            #define NH3API_HAS_BUILTIN_MEMCPY_INLINE __has_builtin(__builtin_memcpy_inline)
+        #endif
+
+        #ifndef NH3API_HAS_BUILTIN_MEMSET_INLINE
+            #define NH3API_HAS_BUILTIN_MEMSET_INLINE __has_builtin(__builtin_memset_inline)
+        #endif
+
         #ifndef NH3API_HAS_BUILTIN_MEMMOVE
             #define NH3API_HAS_BUILTIN_MEMMOVE     __has_builtin(__builtin_memmove)
         #endif

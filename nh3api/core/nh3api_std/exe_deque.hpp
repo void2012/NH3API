@@ -42,27 +42,31 @@ public:
     typedef _A allocator_type;
 
 protected:
-    typedef nh3api::allocator_adaptor<allocator_type> adaptor_type NH3API_NODEBUG;
-    typedef exe_deque<_Ty, _A>    this_type NH3API_NODEBUG;
-    typedef typename adaptor_type::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
-    typedef typename adaptor_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
-    typedef typename adaptor_type::propagate_on_container_swap propagate_on_container_swap;
+    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::propagate_on_container_copy_assignment
+    propagate_allocator_on_copy_assignment;
+    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::propagate_on_container_move_assignment 
+    propagate_allocator_on_move_assignment;
+    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::propagate_on_container_swap 
+    propagate_allocator_on_swap;
 
 public:
-    typedef typename adaptor_type::size_type       size_type;
-    typedef typename adaptor_type::difference_type difference_type;
-    typedef typename adaptor_type::reference       reference;
-    typedef typename adaptor_type::const_reference const_reference;
-    typedef typename adaptor_type::value_type      value_type;
-    typedef typename adaptor_type::pointer         pointer;
-    typedef typename adaptor_type::const_pointer   const_pointer;
+    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::size_type       size_type;
+    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::difference_type difference_type;
+    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::value_type      value_type;
+    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::pointer         pointer;
+    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::const_pointer   const_pointer;
+    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::reference       reference;
+    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::const_reference const_reference;
 
 protected:
     typedef pointer* _Mapptr;
 
 protected:
     enum deque_properties : unsigned
-    { DEQUE_MAP_SIZE = 2, DEQUE_SIZE = (4096 < (difference_type)(sizeof(value_type)) ? 1 : 4096 / (difference_type)(sizeof(value_type))) };
+    { 
+        DEQUE_MAP_SIZE = 2, 
+        DEQUE_SIZE = (4096 < (difference_type)(sizeof(value_type)) ? 1 : 4096 / (difference_type)(sizeof(value_type))) 
+    };
 
 public:
     class iterator;
@@ -442,32 +446,32 @@ protected:
 public:
     exe_deque()
         NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_default_constructible<allocator_type>::value)
-        : adaptor(), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
+        : allocator(), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     {}
 
     explicit exe_deque(const allocator_type& a)
         NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<allocator_type>::value)
-        : adaptor(a), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
+        : allocator(a), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     {}
 
     explicit exe_deque( size_type _N, const value_type& _V = value_type(),
                         const _A& _Al = _A() )
-        : adaptor( _Al ), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
+        : allocator( _Al ), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     { _Construct_n(_N, _V); }
 
     explicit exe_deque( size_type _N, const value_type& _V = value_type())
-        : adaptor(), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
+        : allocator(), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     { _Construct_n(_N, _V); }
 
-    exe_deque( const this_type& other )
-        : adaptor(other.adaptor.select_on_container_copy_construction())
+    exe_deque( const exe_deque& other )
+        : allocator(nh3api::allocator_select_on_container_copy_construction(other.allocator))
     { _Construct(other.begin(), other.end()); }
 
     template<class IterT
     NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
     exe_deque(IterT _F, IterT _L, const _A& _Al = _A()
     NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
-        : adaptor( _Al ),
+        : allocator( _Al ),
         _First(), _Last(), _Map( nullptr ), _Mapsize( 0 ), _Size( 0 )
     {
         _Construct(_F, _L);
@@ -478,7 +482,7 @@ public:
     NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
     exe_deque(IterT _F, IterT _L
     NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
-        : adaptor(),
+        : allocator(),
         _First(), _Last(), _Map( nullptr ), _Mapsize( 0 ), _Size( 0 )
     {
         _Construct(_F, _L);
@@ -486,7 +490,7 @@ public:
     }
 
     exe_deque(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-        : adaptor(tag), _First(tag), _Last(tag)
+        : _First(tag), _Last(tag)
     { NH3API_IGNORE(_Map, _Mapsize, _Size); }
 
     ~exe_deque() NH3API_NOEXCEPT_DESTRUCT
@@ -494,7 +498,7 @@ public:
         _Tidy();
     }
 
-    this_type& operator=( const this_type& value )
+    exe_deque& operator=( const exe_deque& value )
     {
         if ( this != &value )
         {
@@ -578,7 +582,7 @@ public:
     }
     size_type max_size() const NH3API_NOEXCEPT
     {
-        return (adaptor.max_size());
+        return nh3api::allocator_max_size(allocator);
     }
     bool empty() const NH3API_NOEXCEPT
     {
@@ -586,18 +590,18 @@ public:
     }
     allocator_type get_allocator() const NH3API_NOEXCEPT
     {
-        return adaptor.alloc;
+        return allocator;
     }
     const_reference at( size_type _P ) const
     {
         if ( size() <= _P )
-            _Xran();
+            _throw_invalid_subscript();
         return (*(begin() + _P));
     }
     reference at( size_type _P )
     {
         if ( size() <= _P )
-            _Xran();
+            _throw_invalid_subscript();
         return (*(begin() + _P));
     }
     const_reference operator[]( size_type _P ) const NH3API_NOEXCEPT
@@ -636,12 +640,12 @@ public:
     {
         if ( empty() || _First._Next == _First._First )
             _Buyfront();
-        adaptor.copy_construct( --_First._Next, value );
+        nh3api::copy_construct( --_First._Next, value, allocator );
         ++_Size;
     }
     void pop_front() NH3API_NOEXCEPT_DESTRUCT
     {
-        adaptor.destroy( _First._Next++ );
+        nh3api::allocator_destroy( allocator, _First._Next++ );
         --_Size;
         if ( empty() || _First._Next == _First._Last )
             _Freefront();
@@ -651,15 +655,15 @@ public:
         if ( empty() || (_Last._Next == _Last._Last) )
         {
             _Buyback();
-            adaptor.copy_construct( _Last._Next++, value );
+            nh3api::copy_construct( _Last._Next++, value, allocator );
         }
         else if ( _Last._Next + 1 == _Last._Last )
         {
-            adaptor.copy_construct( _Last._Next++, value );
+            nh3api::copy_construct( _Last._Next++, value, allocator );
             _Buyback();
         }
         else
-            adaptor.copy_construct( _Last._Next++, value );
+            nh3api::copy_construct( _Last._Next++, value, allocator );
         ++_Size;
     }
 
@@ -670,15 +674,15 @@ public:
         if ( empty() || (_Last._Next == _Last._Last) )
         {
             _Buyback();
-            adaptor.construct( _Last._Next++, std::forward<Args>(args)...);
+            nh3api::variadic_construct( allocator, _Last._Next++, std::forward<Args>(args)...);
         }
         else if ( _Last._Next + 1 == _Last._Last )
         {
-            adaptor.construct( _Last._Next++, std::forward<Args>(args)...);
+            nh3api::variadic_construct( allocator, _Last._Next++, std::forward<Args>(args)...);
             _Buyback();
         }
         else
-            adaptor.construct( _Last._Next++, std::forward<Args>(args)...);
+            nh3api::variadic_construct( allocator, _Last._Next++, std::forward<Args>(args)...);
         ++_Size;
         return back();
     }
@@ -691,7 +695,7 @@ public:
     {
         if ( empty() || _First._Next == _First._First )
             _Buyfront();
-        adaptor.construct( --_First._Next, std::forward<Args>(args) ...);
+        nh3api::variadic_construct( allocator, --_First._Next, std::forward<Args>(args) ...);
         ++_Size;
         return front();
     }
@@ -728,7 +732,7 @@ public:
                 _S = begin() + _Off;
                 std::copy_backward( _S, end() - 2, end() - 1 );
             }
-            adaptor.construct(_S._Next, std::forward<Args>(args) ...);
+            nh3api::variadic_construct( allocator, _S._Next, std::forward<Args>(args)...);
             return (_S);
         }
     }
@@ -739,7 +743,7 @@ public:
         if ( _Last._Next == _Last._First )
             _Freeback();
         if ( !empty() )
-            adaptor.destroy( --_Last._Next );
+            nh3api::allocator_destroy(allocator, --_Last._Next );
         --_Size;
         if ( empty() )
             _Freeback();
@@ -901,22 +905,29 @@ public:
     {
         erase( begin(), end() );
     }
-    void swap( this_type& other )
-    NH3API_NOEXCEPT_EXPR(adaptor_type::is_always_equal::value)
+    void swap( exe_deque& other )
+    NH3API_NOEXCEPT_EXPR(nh3api::tt::is_empty<allocator_type>::value)
     {
-        if ( adaptor.alloc == other.adaptor.alloc )
+        if ( this != &other )
         {
-            std::swap(_First, other._First);
-            std::swap(_Last, other._Last);
-            std::swap(_Map, other._Map);
-            std::swap(_Mapsize, other._Mapsize);
-            std::swap(_Size, other._Size);
-        }
-        else
-        {
-            this_type _Ts = *this;
-            *this = other;
-            other = _Ts;
+            if ( nh3api::tt::is_empty<allocator_type>::value )
+            {
+                nh3api::trivial_swap<sizeof(exe_deque)>(this, &other);
+            }
+            else if ( this->allocator == other.allocator )
+            {
+                std::swap(_First, other._First);
+                std::swap(_Last, other._Last);
+                std::swap(_Map, other._Map);
+                std::swap(_Mapsize, other._Mapsize);
+                std::swap(_Size, other._Size);
+            }
+            else
+            {
+                exe_deque _Ts = *this;
+                *this = other;
+                other = _Ts;
+            }    
         }
     }
 
@@ -955,7 +966,7 @@ protected:
 
     void _Buyback()
     {
-        pointer _P = adaptor.allocate( DEQUE_SIZE, nullptr );
+        pointer _P = nh3api::allocate( allocator, DEQUE_SIZE, nullptr );
         if ( empty() )
         {
             _Mapsize = DEQUE_MAP_SIZE;
@@ -981,7 +992,7 @@ protected:
     }
     void _Buyfront()
     {
-        pointer _P = adaptor.allocate( DEQUE_SIZE, nullptr );
+        pointer _P = nh3api::allocate( allocator, DEQUE_SIZE, nullptr );
         if ( empty() )
         {
             _Mapsize = DEQUE_MAP_SIZE;
@@ -1043,29 +1054,28 @@ protected:
         }
 
     }
-    static void _Xran()
+    static void _throw_invalid_subscript()
     {
         NH3API_THROW(std::out_of_range, "invalid deque position");
     }
     void _Freemap()
     {
-        adaptor.template deallocate_rebind<unsigned char>
-            (reinterpret_cast<unsigned char*>(_Map), _Mapsize * sizeof(pointer));
+        nh3api::deallocate_rebind<unsigned char>(allocator, reinterpret_cast<unsigned char*>(_Map), _Mapsize * sizeof(pointer));
     }
     void _Freeptr( _Mapptr _M )
     {
-        adaptor.deallocate( *_M, DEQUE_SIZE );
+        nh3api::deallocate( allocator, *_M, DEQUE_SIZE );
     }
     void _Getmap()
     {
-        _Map = (_Mapptr)adaptor.template allocate_rebind<unsigned char>(_Mapsize * sizeof(pointer));
+        _Map = nh3api::allocate_rebind<unsigned char>(allocator, _Mapsize * sizeof(pointer));
     }
     _Mapptr _Growmap( size_type _Newsize )
     {
-        _Mapptr _M = (_Mapptr)adaptor.template allocate_rebind<unsigned char>(_Newsize * sizeof(pointer));
+        _Mapptr _M = reinterpret_cast<_Mapptr>(nh3api::allocate_rebind<unsigned char>(allocator, _Newsize * sizeof(pointer)));
         std::copy( _First._Map, _Last._Map + 1,
                 _M + _Newsize / 4 );
-        adaptor.deallocate( _Map, _Mapsize );
+        nh3api::deallocate( allocator, _Map, _Mapsize );
         _Map = _M;
         _Mapsize = _Newsize;
         return (_M + _Newsize / 4);
@@ -1078,7 +1088,7 @@ protected:
     }
 
 protected:
-    adaptor_type adaptor;
+    allocator_type allocator;
     iterator _First;
     iterator _Last;
     _Mapptr _Map;

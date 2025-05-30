@@ -82,11 +82,11 @@ NH3API_DISABLE_MSVC_WARNING_BEGIN(4996)
 
 //namespace
 //{
-template<typename AllocatorT>
+template<typename Allocator>
 struct exe_vector_helper
 {
     public:
-        typedef AllocatorT allocator_type;
+        typedef Allocator allocator_type;
 
     #if NH3API_CHECK_CPP11
     protected:

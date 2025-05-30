@@ -3393,11 +3393,11 @@ std::wstring to_std_wstring(float x, size_t precision = 4)
 
 #if NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010 || NH3API_CHECK_CPP11
 // std::hash support for exe_basic_string
-template<typename CharT, typename TraitsT, typename AllocatorT>
-class std::hash< exe_basic_string<CharT, TraitsT, AllocatorT> >
+template<typename CharT, typename TraitsT, typename Allocator>
+class std::hash< exe_basic_string<CharT, TraitsT, Allocator> >
 {
     public:
-        size_t operator()(const exe_basic_string<CharT, TraitsT, AllocatorT>& str) NH3API_NOEXCEPT
+        size_t operator()(const exe_basic_string<CharT, TraitsT, Allocator>& str) NH3API_NOEXCEPT
         {
             nh3api::default_hash hasher;
             hasher.update(str.data(), str.size());
