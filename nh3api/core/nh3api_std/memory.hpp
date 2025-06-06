@@ -80,7 +80,7 @@ int32_t __cdecl exe_msize(const void* ptr) NH3API_NOEXCEPT
 struct exe_heap_t
 {
     static const uintptr_t handle_address = 0x6ABD60;
-    static HANDLE& get_handle()
+    static HANDLE& get_handle() NH3API_NOEXCEPT
     { return get_global_var_ref(handle_address, HANDLE); }
 
 } const exe_heap; // exe_heap constant / константа exe_heap
@@ -211,8 +211,6 @@ template<typename T> void __stdcall exe_vector_destructor_iterator(T* array_star
 
 namespace nh3api
 {
-namespace details
-{
 template<typename T, bool has_deleting_destructor = tt::has_scalar_deleting_destructor<T>::value>
 struct NH3API_NODEBUG exe_invoke_delete_helper
 {
@@ -222,7 +220,7 @@ struct NH3API_NODEBUG exe_invoke_delete_helper
     NH3API_FORCEINLINE
     static void do_destroy_delete(T* ptr) NH3API_NOEXCEPT
     {
-        ::nh3api::destroy_at(ptr);
+        ptr->~T();
         exe_delete(ptr);
     }
 };
@@ -236,14 +234,12 @@ struct NH3API_NODEBUG exe_invoke_delete_helper<T, true>
     { ptr->scalar_deleting_destructor(1); }
 };
 
-} // namespace details
-
 } // namespace nh3api
 
 // invoke delete and destroy (use this instead of plain exe_delete)
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_delete(T* ptr) NH3API_NOEXCEPT
-{ nh3api::details::exe_invoke_delete_helper<T>::do_destroy_delete(ptr); }
+{ nh3api::exe_invoke_delete_helper<T>::do_destroy_delete(ptr); }
 
 // overload for void*
 template<> NH3API_FORCEINLINE
@@ -251,8 +247,6 @@ void exe_invoke_delete<void>(void* ptr) NH3API_NOEXCEPT
 {  exe_delete(ptr); }
 
 namespace nh3api
-{
-namespace details
 {
 template<typename T, bool has_deleting_destructor = tt::has_scalar_deleting_destructor<T>::value>
 struct NH3API_NODEBUG exe_invoke_destructor_helper
@@ -262,7 +256,7 @@ struct NH3API_NODEBUG exe_invoke_destructor_helper
 
     NH3API_FORCEINLINE
     static void do_destroy(T* ptr) NH3API_NOEXCEPT
-    { ::nh3api::destroy_at(ptr); }
+    { ptr->~T(); }
 };
 
 template<typename T>
@@ -274,17 +268,14 @@ struct NH3API_NODEBUG exe_invoke_destructor_helper<T, true>
     { ptr->scalar_deleting_destructor(0); }
 };
 
-} // namespace nh3api::details
 } // namespace nh3api
 
 // invoke destructor(plain or scalar_deleting_destructor)
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_destructor(T* ptr) NH3API_NOEXCEPT
-{ nh3api::details::exe_invoke_destructor_helper<T>::do_destroy(ptr); }
+{ nh3api::exe_invoke_destructor_helper<T>::do_destroy(ptr); }
 
 namespace nh3api
-{
-namespace details
 {
 template<typename T, bool trivially_destructible = tt::is_trivially_destructible<T>::value>
 struct NH3API_NODEBUG exe_invoke_array_delete_helper
@@ -311,14 +302,12 @@ struct NH3API_NODEBUG exe_invoke_array_delete_helper<T, true>
         exe_delete(pre_ptr);
     }
 };
-
-} // namespace nh3api::details
 } // namespace nh3api
 
 // invoke array form of delete. Use it instead of plain exe_delete
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_array_delete(T* ptr) NH3API_NOEXCEPT
-{ nh3api::details::exe_invoke_array_delete_helper<T>::do_destroy_delete(ptr); }
+{ nh3api::exe_invoke_array_delete_helper<T>::do_destroy_delete(ptr); }
 
 // overload for void*
 template<> NH3API_FORCEINLINE
@@ -341,7 +330,7 @@ namespace nh3api
 template<typename T>
 void scalar_deleting_destructor(T* ptr, uint8_t flag)
 {
-    destroy_at(ptr);
+    ptr->~T();
     if ( flag )
         exe_delete(ptr);
 }
@@ -368,7 +357,7 @@ void vector_deleting_destructor(T* ptr, uint32_t flag)
     }
     else // operator delete
     {
-        destroy_at(ptr);
+        ptr->~T();
         if ( (flag & 1 ) != 0 )
             exe_delete(ptr);
     }
@@ -553,7 +542,11 @@ template <typename U, typename T, typename ... Args
 #if NH3API_CHECK_CPP11
 , class = decltype(::new(::std::declval<void*>()) U(::std::declval<Args>()...))
 #endif
-> NH3API_FORCEINLINE
+> 
+#if __cpp_lib_constexpr_new
+constexpr
+#endif
+NH3API_FORCEINLINE
 void variadic_construct(const ::exe_allocator<T>&, U* ptr, Args&& ... args)
 NH3API_NOEXCEPT_EXPR(tt::is_nothrow_constructible<U, Args ...>::value)
 { ::new ((void*)ptr) U(::std::forward<Args>(args) ... ); }
@@ -594,9 +587,7 @@ constexpr
 #endif
 void move_construct(U* ptr, U&& rvalue, const ::exe_allocator<T>&)
 NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<U>::value)
-{
-    ::new (static_cast<void*>(ptr)) U(::std::forward<U>(rvalue));
-}
+{ ::new (static_cast<void*>(ptr)) U(::std::forward<U>(rvalue)); }
 #endif
 
 template<typename T, class Allocator> NH3API_FORCEINLINE
@@ -1076,8 +1067,13 @@ struct exe_scoped_lock
 namespace nh3api 
 {
 
-template<size_t size>
-void trivial_zero(void* ptr)
+// these trivial algorithms are provided to improve peephole optimization
+// for SIMD operations (if size % 16 == 0) in loops
+// as manual SIMD may actually hurt these optimizations
+
+// fill memory at *ptr with zeroes
+template<size_t size> NH3API_FORCEINLINE
+void trivial_zero(void* ptr) NH3API_NOEXCEPT
 {
     // MSVC and Clang do a good job at optimizing it to a single zeroed SSE2 register move, if size == 16
     for (size_t i = 0; i < size; ++i )
@@ -1086,10 +1082,11 @@ void trivial_zero(void* ptr)
     }
 }
 
+// swap memory in *left and *right trivially
 template<size_t size> NH3API_FORCEINLINE
-void trivial_swap(void* __restrict left, void* __restrict right)
+void trivial_swap(void* __restrict left, void* __restrict right) NH3API_NOEXCEPT
 {
-    #if NH3API_CHECK_MSVC 
+    #if NH3API_CHECK_MSVC && NH3API_CHECK_SSE2
     if ( size == 16 )
     {
         const __m128i val1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(left));
@@ -1104,14 +1101,27 @@ void trivial_swap(void* __restrict left, void* __restrict right)
     // GCC and Clang easily optimize this to SSE2 swap if size == 16
     for (size_t i = 0; i < size; ++i) 
     {
-        unsigned char temp = (static_cast<uint8_t*>(left))[i];
-        (static_cast<uint8_t*>(left))[i] = (static_cast<uint8_t*>(right))[i];
-        (static_cast<uint8_t*>(right))[i] = temp;
+        unsigned char temp = (static_cast<uint8_t* __restrict>(left))[i];
+        (static_cast<uint8_t* __restrict>(left))[i] = (static_cast<uint8_t* __restrict>(right))[i];
+        (static_cast<uint8_t* __restrict>(right))[i] = temp;
     }
 
     #if NH3API_CHECK_MSVC
     }
     #endif
+}
+
+// move trivially memory from *src to *dst
+template<size_t size> NH3API_FORCEINLINE
+void trivial_move(void* __restrict src, void* __restrict dst) NH3API_NOEXCEPT
+{
+    for (size_t i = 0; i < size; ++i) 
+    {
+        // 1. copy from *src to *dst
+        (static_cast<uint8_t* __restrict>(dst))[i] = (static_cast<uint8_t* __restrict>(src))[i];
+        // 2. zero-fill memory at *src
+        (static_cast<uint8_t* __restrict>(src))[i] = 0;
+    }
 }
 
 } // namespace nh3api 
