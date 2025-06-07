@@ -338,14 +338,14 @@ void uninitialized_fill(ForwardIt first,
     if ( tt::is_nothrow_copy_constructible<V>::value )
     {
         for (; current != last; ++current)
-            copy_construct(static_cast<void*>(::nh3api::addressof(*current)), value, alloc);
+            memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), value);
     }
     else 
     {
         NH3API_TRY
         {
             for (; current != last; ++current)
-                copy_construct(static_cast<void*>(::nh3api::addressof(*current)), value, alloc);
+                memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), value);
         } 
         NH3API_CATCH(...)
         {
@@ -379,7 +379,7 @@ ForwardIt uninitialized_fill_n(ForwardIt first,
     if ( tt::is_nothrow_copy_constructible<V>::value )
     {
         for (; count > 0; ++current, (void) --count)
-            copy_construct(static_cast<void*>(::nh3api::addressof(*current)), value, alloc);
+            memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), value);
         return current;
     }
     else 
@@ -387,7 +387,7 @@ ForwardIt uninitialized_fill_n(ForwardIt first,
         NH3API_TRY
         {
             for (; count > 0; ++current, (void) --count)
-                copy_construct(static_cast<void*>(::nh3api::addressof(*current)), value, alloc);
+                memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), value);
             return current;
         }
         NH3API_CATCH
@@ -466,7 +466,7 @@ NoThrowForwardIt uninitialized_copy(InputIt first,
     if ( tt::is_nothrow_copy_constructible<T>::value )
     {
         for (; first != last; ++first, (void) ++current)
-            copy_construct(static_cast<void*>(::nh3api::addressof(*current)), T(*first), alloc);
+            memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
         return current;
     }
     else 
@@ -474,7 +474,7 @@ NoThrowForwardIt uninitialized_copy(InputIt first,
         NH3API_TRY
         {
             for (; first != last; ++first, (void) ++current)
-                copy_construct(static_cast<void*>(::nh3api::addressof(*current)), T(*first), alloc);
+                memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
         }
         NH3API_CATCH(...)
         {
@@ -509,7 +509,7 @@ NoThrowForwardIt uninitialized_copy_n(InputIt first,
     if ( tt::is_nothrow_copy_constructible<T>::value )
     {
         for (; count > 0; ++first, (void) ++current, --count)
-            copy_construct(static_cast<void*>(::nh3api::addressof(*current)), T(*first), alloc);
+            memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
         return current;
     }
     else 
@@ -517,7 +517,7 @@ NoThrowForwardIt uninitialized_copy_n(InputIt first,
         NH3API_TRY
         {
             for (; count > 0; ++first, (void) ++current, --count)
-                copy_construct(static_cast<void*>(::nh3api::addressof(*current)), T(*first), alloc);
+                memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
         }
         NH3API_CATCH (...)
         {
@@ -534,7 +534,7 @@ template<class InputIt, class NoThrowForwardIt, class Allocator> NH3API_FORCEINL
 NoThrowForwardIt uninitialized_move_impl(InputIt first,
                                          InputIt last,
                                          NoThrowForwardIt d_first,
-                                         Allocator& alloc,
+                                         Allocator& allocator,
                                          tt::false_type)
 {
     NoThrowForwardIt current = d_first;
@@ -544,15 +544,15 @@ NoThrowForwardIt uninitialized_move_impl(InputIt first,
         {
             void* addr = static_cast<void*>(::nh3api::addressof(*current));
             NH3API_IF_CONSTEXPR (tt::is_lvalue_reference<decltype(*first)>::value)
-                move_construct(addr, ::std::move(*first), alloc);
+                memory::move_construct(allocator, addr, ::std::move(*first));
             else
-                copy_construct(addr, *first, alloc);
+                memory::copy_construct(allocator, addr, *first);
         }
         return current;
     }
     NH3API_CATCH(...)
     {
-        destroy(d_first, current, alloc);
+        destroy(d_first, current, allocator);
         NH3API_RETHROW
     }
 }

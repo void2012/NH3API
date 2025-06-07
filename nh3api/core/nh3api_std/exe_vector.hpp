@@ -453,43 +453,41 @@ struct exe_vector_helper<exe_allocator<T> >
     /// @brief  Visual C++ 6.0 std::vector implementation used by heroes3.exe
     /// @tparam _Ty stored type
     /// @tparam _A allocator
-    template<
-        class _Ty,
-        class _A = exe_allocator<_Ty> >
+    template<class T, class Allocator = exe_allocator<T> >
     class exe_vector
     {
     protected:
         NH3API_STATIC_ASSERT("The C++ Standard forbids containers of non-object types "
                              "because of [container.requirements].",
-                             nh3api::tt::is_object<_Ty>::value);
+                             nh3api::tt::is_object<T>::value);
         NH3API_STATIC_ASSERT("The C++ Standard requires that Allocator's value_type match",
-                             nh3api::tt::is_same<_Ty, typename _A::value_type>::value);
+                             nh3api::tt::is_same<T, typename Allocator::value_type>::value);
     public:
-        typedef _A allocator_type;
+        typedef Allocator allocator_type;
 
     // internal typedefs
     protected:
         typedef exe_vector_helper<allocator_type> helper_type NH3API_NODEBUG;
-        typedef exe_vector<_Ty, _A> this_type NH3API_NODEBUG;
+        typedef exe_vector<T, Allocator> this_type NH3API_NODEBUG;
         typedef typename helper_type::propagate_on_container_copy_assignment propagate_on_container_copy_assignment;
         typedef typename helper_type::propagate_on_container_move_assignment propagate_on_container_move_assignment;
         typedef typename helper_type::propagate_on_container_swap propagate_on_container_swap;
 
         typedef
         #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-        nh3api::tt::is_nothrow_copy_constructible<_Ty>
+        nh3api::tt::is_nothrow_copy_constructible<T>
         #else
         nh3api::tt::false_type
         #endif
-        noexcept_copy;
+        noexcept_copy NH3API_NODEBUG;
 
         typedef
         #if NH3API_STD_MOVE_SEMANTICS && !defined(NH3API_FLAG_NO_CPP_EXCEPTIONS)
-        nh3api::tt::is_nothrow_move_constructible<_Ty>
+        nh3api::tt::is_nothrow_move_constructible<T>
         #else
         nh3api::tt::false_type
         #endif
-        noexcept_move;
+        noexcept_move NH3API_NODEBUG;
 
         typedef 
         #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
@@ -497,7 +495,7 @@ struct exe_vector_helper<exe_allocator<T> >
         #else 
         nh3api::tt::false_type
         #endif 
-        allocator_throws;
+        allocator_throws NH3API_NODEBUG;
 
         typedef 
         #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
@@ -505,7 +503,9 @@ struct exe_vector_helper<exe_allocator<T> >
         #else 
         nh3api::tt::false_type
         #endif 
-        noexcept_default_construct;
+        noexcept_default_construct NH3API_NODEBUG;
+
+        typedef nh3api::tt::is_same<allocator_type, ::exe_allocator<T> > is_exe_allocator NH3API_NODEBUG;
 
     // external typedefs
     public:
@@ -1392,7 +1392,7 @@ struct exe_vector_helper<exe_allocator<T> >
             }
             else
             {                          // provide basic guarantee
-                const _Ty _Tmp = _Val; // handle aliasing
+                const T _Tmp = _Val; // handle aliasing
                 const pointer _Oldlast = this->_Last;
                 const size_type _Affected_elements = static_cast<size_type>(_Oldlast - _Where);
 
@@ -1673,6 +1673,13 @@ struct exe_vector_helper<exe_allocator<T> >
         void _Umove_if_noexcept_impl(pointer _F, pointer _L, pointer _Dest, nh3api::tt::false_type)
         {
             helper.ucopy(_F, _L, _Dest);
+        }
+
+        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
+        void _Destroy_range(pointer first, pointer last)
+        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
+        {
+            NH3API_IF_CONSTEXPR ()
         }
 
         // allocate array with _Capacity elements

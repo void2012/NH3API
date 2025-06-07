@@ -522,19 +522,20 @@ bool operator!=(const exe_allocator<T>&, const exe_allocator<U>&)
 
 namespace nh3api
 {
-
+namespace memory 
+{
 #if NH3API_STD_MOVE_SEMANTICS
 template <class Allocator, class U, typename ... Args
 #if NH3API_CHECK_CPP11
 , class = decltype(::new(::std::declval<void*>()) U(::std::declval<Args>()...))
 #endif
 > NH3API_FORCEINLINE
-void variadic_construct(Allocator a, U* ptr, Args&& ... args)
+void variadic_construct(Allocator allocator, U* ptr, Args&& ... args)
 {
     #if NH3API_CHECK_CPP11
-    ::std::allocator_traits<Allocator>::construct(a, ptr, ::std::forward<Args>(args) ... );
+    ::std::allocator_traits<Allocator>::construct(allocator, ptr, ::std::forward<Args>(args) ... );
     #else
-    alloc.construct(ptr, ::std::forward<Args>(args) ...);
+    allocator.construct(ptr, ::std::forward<Args>(args) ...);
     #endif
 }
 
@@ -553,12 +554,12 @@ NH3API_NOEXCEPT_EXPR(tt::is_nothrow_constructible<U, Args ...>::value)
 #endif
 
 template<class T, class Allocator> NH3API_FORCEINLINE
-void copy_construct(T* ptr, const T& value, const Allocator& alloc)
+void copy_construct(const Allocator& allocator, T* ptr, const T& value)
 {
     #if NH3API_CHECK_CPP11
-    ::std::allocator_traits<Allocator>::construct(alloc, ptr, value);
+    ::std::allocator_traits<Allocator>::construct(allocator, ptr, value);
     #else
-    alloc.construct(ptr, value);
+    allocator.construct(ptr, value);
     #endif
 }
 
@@ -566,13 +567,13 @@ template<class U, class T> NH3API_FORCEINLINE
 #if __cpp_lib_constexpr_new
 constexpr
 #endif
-void copy_construct(U* ptr, const U& value, const ::exe_allocator<T>&)
+void copy_construct(const ::exe_allocator<T>&, U* ptr, const U& value)
 NH3API_NOEXCEPT_EXPR(tt::is_nothrow_copy_constructible<U>::value)
 { ::new (static_cast<void*>(ptr)) U(value); }
 
 #if NH3API_STD_MOVE_SEMANTICS
 template<class T, class Allocator> NH3API_FORCEINLINE
-void move_construct(T* ptr, T&& rvalue, const Allocator& alloc)
+void move_construct(const Allocator& alloc, T* ptr, T&& rvalue)
 {
     #if NH3API_CHECK_CPP11
     ::std::allocator_traits<Allocator>::construct(alloc, ptr, rvalue);
@@ -585,13 +586,13 @@ template<class U, class T> NH3API_FORCEINLINE
 #if __cpp_lib_constexpr_new
 constexpr
 #endif
-void move_construct(U* ptr, U&& rvalue, const ::exe_allocator<T>&)
+void move_construct(const ::exe_allocator<T>&, U* ptr, U&& rvalue)
 NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<U>::value)
 { ::new (static_cast<void*>(ptr)) U(::std::forward<U>(rvalue)); }
 #endif
 
 template<typename T, class Allocator> NH3API_FORCEINLINE
-void default_construct(T* ptr, const Allocator& alloc)
+void default_construct(const Allocator& alloc, T* ptr)
 {
     #if NH3API_CHECK_CPP11
     ::std::allocator_traits<Allocator>::construct(alloc, ptr, T());
@@ -604,7 +605,7 @@ template<typename U, class T> NH3API_FORCEINLINE
 #if __cpp_lib_constexpr_new
 constexpr
 #endif
-void default_construct(U* ptr, const ::exe_allocator<T>&)
+void default_construct(const ::exe_allocator<T>&, U* ptr)
 NH3API_NOEXCEPT_EXPR(tt::is_nothrow_constructible<T>::value)
 { ::new (static_cast<void*>(ptr)) U(); }
 
@@ -787,6 +788,7 @@ typename Allocator::size_type allocator_max_size(const Allocator& a)
 template<class T> NH3API_FORCEINLINE NH3API_CONSTEXPR
 size_t allocator_max_size(const ::exe_allocator<T>&) NH3API_NOEXCEPT
 { return size_t(~0) / sizeof(T); }
+} // namespace nh3api::memory
 
 } // namespace nh3api
 
