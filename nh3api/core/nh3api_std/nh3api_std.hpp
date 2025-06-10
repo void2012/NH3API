@@ -615,7 +615,7 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
     #endif
 
     #ifndef NH3API_MALLOC
-        #define NH3API_MALLOC(...) __attribute__((__returns_nonnull__, __malloc__, __alloc_size__(__VA_ARGS__)))
+        #define NH3API_MALLOC(...) __attribute__((/*__returns_nonnull__,*/ __malloc__, __alloc_size__(__VA_ARGS__)))
     #endif
 
     #ifndef NH3API_FLAG_OPTIMIZE_FOR_SIZE

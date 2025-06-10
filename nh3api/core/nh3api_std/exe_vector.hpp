@@ -1679,7 +1679,14 @@ struct exe_vector_helper<exe_allocator<T> >
         void _Destroy_range(pointer first, pointer last)
         NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
         {
-            NH3API_IF_CONSTEXPR ()
+            NH3API_IF_CONSTEXPR (is_exe_allocator::value)
+            {
+                nh3api::destroy(first, last, get_allocator());
+            }
+            else 
+            {
+
+            }
         }
 
         // allocate array with _Capacity elements

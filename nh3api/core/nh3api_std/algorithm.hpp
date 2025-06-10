@@ -67,7 +67,7 @@ template<typename T>
 struct stosx_chooser<T, 1>
 {
     inline static void stosx(T* dst, const T& value, size_t count) NH3API_NOEXCEPT
-    { __stosb(reinterpret_cast<unsigned char*>(dst), static_cast<unsigned char>(value), (count)); }
+    { __stosb(reinterpret_cast<unsigned char*>(dst), bit_cast<unsigned char>(value), (count)); }
 };
 
 template<typename T>
@@ -81,7 +81,7 @@ template<typename T>
 struct stosx_chooser<T, 2>
 {
     inline static void stosx(T* dst, const T& value, size_t count) NH3API_NOEXCEPT
-    { __stosw(reinterpret_cast<unsigned short*>(dst), static_cast<unsigned short>(value), (count)); }
+    { __stosw(reinterpret_cast<unsigned short*>(dst), bit_cast<unsigned short>(value), (count)); }
 };
 
 template<typename T>
@@ -244,7 +244,7 @@ template<class ForwardIt, class Allocator>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 void destroy(ForwardIt first,
              ForwardIt last,
-             Allocator& alloc)
+             const Allocator& allocator)
     NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<typename Allocator::value_type>::value)
 {
 #if NH3API_DEBUG
@@ -253,66 +253,27 @@ void destroy(ForwardIt first,
 
 #if NH3API_CHECK_CPP11
     for (; first != last; ++first)
-        ::std::allocator_traits<Allocator>::destroy(alloc, ::nh3api::addressof(*first));
+        ::std::allocator_traits<Allocator>::destroy(allocator, ::nh3api::addressof(*first));
 #else
     for (; first != last; ++first)
-        alloc.destroy(::nh3api::addressof(*first));
+        allocator.destroy(::nh3api::addressof(*first));
 #endif
 
-}
-
-template<class ForwardIt, class Allocator>
-NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-ForwardIt destroy_n(ForwardIt first,
-                    typename Allocator::size_type n,
-                    Allocator& alloc)
-    NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<typename Allocator::value_type>::value)
-{
-#if NH3API_DEBUG
-    verify_range_n(first, n);
-#endif
-
-#if NH3API_CHECK_CPP11
-    for (; n > 0; (void) ++first, --n)
-        ::std::allocator_traits<Allocator>::destroy(alloc, ::nh3api::addressof(*first));
-#else
-    for (; n > 0; (void) ++first, --n)
-        alloc.destroy(::nh3api::addressof(*first));
-#endif
-    return first;
 }
 
 template<class ForwardIt, class T>
 NH3API_FORCEINLINE
 void destroy(ForwardIt first,
              ForwardIt last,
-             ::exe_allocator<T> alloc)
+             const ::exe_allocator<T>&)
     NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<T>::value)
 {
 #if NH3API_DEBUG
     verify_range(first, last);
 #endif
 
-    (void) alloc;
     for (; first != last; ++first)
         ::nh3api::destroy_at(::nh3api::addressof(*first));
-}
-
-template<class ForwardIt, class T>
-NH3API_FORCEINLINE
-ForwardIt destroy_n(ForwardIt first,
-                    size_t n,
-                    ::exe_allocator<T> alloc)
-    NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<T>::value)
-{
-#if NH3API_DEBUG
-    verify_range_n(first, n);
-#endif
-
-    (void) alloc;
-    for (; n > 0; (void) ++first, --n)
-        ::nh3api::destroy_at(::nh3api::addressof(*first));
-    return first;
 }
 
 template<class ForwardIt, class T, class Allocator>
@@ -320,36 +281,36 @@ NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 void uninitialized_fill(ForwardIt first,
                         ForwardIt last,
                         const T& value,
-                        Allocator& alloc)
+                        Allocator& allocator)
 {
 #if NH3API_DEBUG
     verify_range(first, last);
     #endif
 
 #if NH3API_MSVC_STL
-    ::std::_Uninitialized_fill_n(first, ::std::distance(first, last), value, alloc);
+    ::std::_Uninitialized_fill_n(first, ::std::distance(first, last), value, allocator);
 #elif NH3API_GCC_STL
-    ::std::__uninitialized_fill_a(first, last, value, alloc);
+    ::std::__uninitialized_fill_a(first, last, value, allocator);
 #elif NH3API_CLANG_STL
-    ::std::__uninitialized_allocator_fill_n_multidimensional(alloc, first, std::distance(first, last), value);
+    ::std::__uninitialized_allocator_fill_n_multidimensional(allocator, first, std::distance(first, last), value);
 #else
     typedef typename std::iterator_traits<ForwardIt>::value_type V;
     ForwardIt current = first;
     if ( tt::is_nothrow_copy_constructible<V>::value )
     {
         for (; current != last; ++current)
-            memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), value);
+            memory::copy_construct(allocator, static_cast<void*>(::nh3api::addressof(*current)), value);
     }
     else 
     {
         NH3API_TRY
         {
             for (; current != last; ++current)
-                memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), value);
+                memory::copy_construct(allocator, static_cast<void*>(::nh3api::addressof(*current)), value);
         } 
         NH3API_CATCH(...)
         {
-            destroy(first, current, alloc);
+            destroy(first, current, allocator);
             NH3API_RETHROW
         }
     }
@@ -361,25 +322,25 @@ NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 ForwardIt uninitialized_fill_n(ForwardIt first,
                                typename allocator_size_type<Allocator>::type count,
                                const T& value,
-                               Allocator& alloc)
+                               Allocator& allocator)
 {
 #if NH3API_DEBUG
     verify_range_n(first, count);
 #endif
 
 #if NH3API_MSVC_STL
-    return ::std::_Uninitialized_fill_n(first, count, value, alloc);
+    return ::std::_Uninitialized_fill_n(first, count, value, allocator);
 #elif NH3API_GCC_STL
-    return ::std::__uninitialized_fill_n_a(first, count, value, alloc);
+    return ::std::__uninitialized_fill_n_a(first, count, value, allocator);
 #elif NH3API_CLANG_STL
-    return ::std::__uninitialized_allocator_fill_n_multidimensional(alloc, first, count, value);
+    return ::std::__uninitialized_allocator_fill_n_multidimensional(allocator, first, count, value);
 #else
     typedef typename std::iterator_traits<NoThrowForwardIt>::value_type V;
     NoThrowForwardIt current = first;
     if ( tt::is_nothrow_copy_constructible<V>::value )
     {
         for (; count > 0; ++current, (void) --count)
-            memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), value);
+            memory::copy_construct(allocator, static_cast<void*>(::nh3api::addressof(*current)), value);
         return current;
     }
     else 
@@ -387,12 +348,12 @@ ForwardIt uninitialized_fill_n(ForwardIt first,
         NH3API_TRY
         {
             for (; count > 0; ++current, (void) --count)
-                memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), value);
+                memory::copy_construct(allocator, static_cast<void*>(::nh3api::addressof(*current)), value);
             return current;
         }
         NH3API_CATCH
         {
-            destroy(first, current, alloc);
+            destroy(first, current, allocator);
             NH3API_RETHROW
         }
     }
@@ -405,36 +366,36 @@ template<class ForwardIt, class Allocator>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 ForwardIt uninitialized_value_construct_n(ForwardIt first,
                                             typename allocator_size_type<Allocator>::type count,
-                                            Allocator& alloc)
+                                            Allocator& allocator)
 {
 #if NH3API_DEBUG
     verify_range_n(first, count);
 #endif
 
 #if defined(_MSVC_STL_UPDATE)
-    return ::std::_Uninitialized_value_construct_n(first, count, alloc);
+    return ::std::_Uninitialized_value_construct_n(first, count, allocator);
 #elif NH3API_GCC_STL
-    return ::std::__uninitialized_default_n_a(first, count, alloc);
+    return ::std::__uninitialized_default_n_a(first, count, allocator);
 #elif NH3API_CLANG_STL
-    return ::std::__uninitialized_allocator_value_construct_n_multidimensional(alloc, first, count);
+    return ::std::__uninitialized_allocator_value_construct_n_multidimensional(allocator, first, count);
 #else
     typedef typename ::std::iterator_traits<ForwardIt>::value_type V;
     ForwardIt current = first;
     if ( tt::is_nothrow_constructible<V>::value )
     {
         for (; count > 0; ++current, (void) --count)
-            default_construct(static_cast<void*>(::nh3api::addressof(*current)), alloc);
+            default_construct(static_cast<void*>(::nh3api::addressof(*current)), allocator);
     }
     else
     {
         NH3API_TRY
         {
             for (; count > 0; ++current, (void) --count)
-                default_construct(static_cast<void*>(::nh3api::addressof(*current)), alloc);
+                default_construct(static_cast<void*>(::nh3api::addressof(*current)), allocator);
         }
         NH3API_CATCH(...)
         {
-            destroy(first, current, alloc);
+            destroy(first, current, allocator);
             NH3API_RETHROW
         }
     }
@@ -448,25 +409,25 @@ NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 NoThrowForwardIt uninitialized_copy(InputIt first,
                                     InputIt last,
                                     NoThrowForwardIt d_first,
-                                    Allocator& alloc)
+                                    Allocator& allocator)
 {
 #if NH3API_DEBUG
     verify_range(first, last);
 #endif
 
 #if NH3API_MSVC_STL
-    return ::std::_Uninitialized_copy(first, last, d_first, alloc);
+    return ::std::_Uninitialized_copy(first, last, d_first, allocator);
 #elif NH3API_GCC_STL
-    return ::std::__uninitialized_copy_a(first, last, d_first, alloc);
+    return ::std::__uninitialized_copy_a(first, last, d_first, allocator);
 #elif NH3API_CLANG_STL
-    return ::std::__uninitialized_allocator_copy(alloc, first, last, d_first);
+    return ::std::__uninitialized_allocator_copy(allocator, first, last, d_first);
 #else
     typedef typename std::iterator_traits<NoThrowForwardIt>::value_type T;
     NoThrowForwardIt current = d_first;
     if ( tt::is_nothrow_copy_constructible<T>::value )
     {
         for (; first != last; ++first, (void) ++current)
-            memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
+            memory::copy_construct(allocator, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
         return current;
     }
     else 
@@ -474,11 +435,11 @@ NoThrowForwardIt uninitialized_copy(InputIt first,
         NH3API_TRY
         {
             for (; first != last; ++first, (void) ++current)
-                memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
+                memory::copy_construct(allocator, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
         }
         NH3API_CATCH(...)
         {
-            destroy(d_first, current, alloc);
+            destroy(d_first, current, allocator);
             NH3API_RETHROW
         }
         return current;
@@ -491,25 +452,25 @@ NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
 NoThrowForwardIt uninitialized_copy_n(InputIt first,
                                       typename allocator_size_type<Allocator>::type count,
                                       NoThrowForwardIt d_first,
-                                      Allocator& alloc)
+                                      Allocator& allocator)
 {
     #if NH3API_DEBUG
     verify_range_n(first, count);
     #endif
 
     #if NH3API_MSVC_STL
-    return ::std::_Uninitialized_copy(first, ::std::next(first, count), d_first, alloc);
+    return ::std::_Uninitialized_copy(first, ::std::next(first, count), d_first, allocator);
     #elif NH3API_GCC_STL
-    return ::std::__uninitialized_copy_a(first, ::std::next(first, count), d_first, alloc);
+    return ::std::__uninitialized_copy_a(first, ::std::next(first, count), d_first, allocator);
     #elif NH3API_CLANG_STL
-    return ::std::__uninitialized_allocator_copy(alloc, first, ::std::next(first, count), d_first);
+    return ::std::__uninitialized_allocator_copy(allocator, first, ::std::next(first, count), d_first);
     #else
     typedef typename std::iterator_traits<NoThrowForwardIt>::value_type T;
     NoThrowForwardIt current = d_first;
     if ( tt::is_nothrow_copy_constructible<T>::value )
     {
         for (; count > 0; ++first, (void) ++current, --count)
-            memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
+            memory::copy_construct(allocator, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
         return current;
     }
     else 
@@ -517,11 +478,11 @@ NoThrowForwardIt uninitialized_copy_n(InputIt first,
         NH3API_TRY
         {
             for (; count > 0; ++first, (void) ++current, --count)
-                memory::copy_construct(alloc, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
+                memory::copy_construct(allocator, static_cast<void*>(::nh3api::addressof(*current)), T(*first));
         }
         NH3API_CATCH (...)
         {
-            destroy(d_first, current, alloc);
+            destroy(d_first, current, allocator);
             NH3API_RETHROW
         }
         return current;
@@ -561,7 +522,7 @@ template<class InputIt, class NoThrowForwardIt, class Allocator> NH3API_FORCEINL
 NoThrowForwardIt uninitialized_move_impl(InputIt first,
                                          InputIt last,
                                          NoThrowForwardIt d_first,
-                                         Allocator& alloc,
+                                         Allocator& allocator,
                                          tt::true_type) NH3API_NOEXCEPT
 {
     NoThrowForwardIt current = d_first;
@@ -569,9 +530,9 @@ NoThrowForwardIt uninitialized_move_impl(InputIt first,
     {
         void* addr = static_cast<void*>(::nh3api::addressof(*current));
         NH3API_IF_CONSTEXPR (tt::is_lvalue_reference<decltype(*first)>::value)
-            move_construct(addr, ::std::move(*first), alloc);
+            move_construct(addr, ::std::move(*first), allocator);
         else
-            copy_construct(addr, *first, alloc);
+            copy_construct(addr, *first, allocator);
     }
     return current;
 }
@@ -580,7 +541,7 @@ template<class InputIt, class NoThrowForwardIt, class Allocator> NH3API_FORCEINL
 NoThrowForwardIt uninitialized_move(InputIt first,
                                     InputIt last,
                                     NoThrowForwardIt d_first,
-                                    Allocator& alloc)
+                                    Allocator& allocator)
 {
 #if NH3API_DEBUG
     verify_range(first, last);
@@ -601,7 +562,7 @@ NoThrowForwardIt uninitialized_move(InputIt first,
     }
     else
     {
-        return uninitialized_move_impl(first, last, d_first, alloc,
+        return uninitialized_move_impl(first, last, d_first, allocator,
             std::integral_constant<bool,
             (tt::is_nothrow_move_constructible<V>::value &&
                 tt::is_nothrow_copy_constructible<V>::value)
