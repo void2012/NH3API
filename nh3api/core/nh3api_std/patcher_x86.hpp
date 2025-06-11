@@ -202,6 +202,15 @@ NH3API_DISABLE_WARNING_BEGIN("-Wunused-parameter", 4100)
 #define CALL_VA(return_type, adress, a1, ...) \
  ((return_type (__cdecl *)(uint32_t, ...))(adress))((uint32_t)(a1), __VA_ARGS__)
 
+// to be used within CALL_ templates as C++98-style throw() in function pointer type is not allowed 
+#ifndef NH3API_NOEXCEPT_PATCHERX86
+    #if NH3API_CHECK_CPP11
+        #define NH3API_NOEXCEPT_PATCHERX86 noexcept
+    #else 
+        #define NH3API_NOEXCEPT_PATCHERX86 
+    #endif
+#endif
+
 // Макросы вызова функций для совместимости
 // со старым кодом, написанным на H3API RoseKavalier-а /
 // Call macros for the compability with
@@ -210,257 +219,257 @@ NH3API_DISABLE_WARNING_BEGIN("-Wunused-parameter", 4100)
 //namespace nh3api
 //{
 template<typename return_type, typename Arg1>
-inline return_type invoke_thiscall_1(uint32_t address, Arg1 a1) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1)>(address)(a1)); }
+inline return_type invoke_thiscall_1(uintptr_t address, Arg1 a1) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1) NH3API_NOEXCEPT_PATCHERX86>(address)(a1)); }
 template<typename return_type, typename Arg1, typename Arg2>
-inline return_type invoke_thiscall_2(uint32_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2)>(address)(a1, a2)); }
+inline return_type invoke_thiscall_2(uintptr_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3>
-inline return_type invoke_thiscall_3(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3)>(address)(a1, a2, a3)); }
+inline return_type invoke_thiscall_3(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-inline return_type invoke_thiscall_4(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4)>(address)(a1, a2, a3, a4)); }
+inline return_type invoke_thiscall_4(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-inline return_type invoke_thiscall_5(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5)>(address)(a1, a2, a3, a4, a5)); }
+inline return_type invoke_thiscall_5(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-inline return_type invoke_thiscall_6(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6)>(address)(a1, a2, a3, a4, a5, a6)); }
+inline return_type invoke_thiscall_6(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-inline return_type invoke_thiscall_7(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7)>(address)(a1, a2, a3, a4, a5, a6, a7)); }
+inline return_type invoke_thiscall_7(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-inline return_type invoke_thiscall_8(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8)>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
+inline return_type invoke_thiscall_8(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-inline return_type invoke_thiscall_9(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
+inline return_type invoke_thiscall_9(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-inline return_type invoke_thiscall_10(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
+inline return_type invoke_thiscall_10(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11>
-inline return_type invoke_thiscall_11(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
+inline return_type invoke_thiscall_11(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12>
-inline return_type invoke_thiscall_12(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
+inline return_type invoke_thiscall_12(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13>
-inline return_type invoke_thiscall_13(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
+inline return_type invoke_thiscall_13(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14>
-inline return_type invoke_thiscall_14(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
+inline return_type invoke_thiscall_14(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15>
-inline return_type invoke_thiscall_15(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
+inline return_type invoke_thiscall_15(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16>
-inline return_type invoke_thiscall_16(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
+inline return_type invoke_thiscall_16(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17>
-inline return_type invoke_thiscall_17(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
+inline return_type invoke_thiscall_17(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18>
-inline return_type invoke_thiscall_18(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
+inline return_type invoke_thiscall_18(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19>
-inline return_type invoke_thiscall_19(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
+inline return_type invoke_thiscall_19(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19, typename Arg20>
-inline return_type invoke_thiscall_20(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
+inline return_type invoke_thiscall_20(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
 
 template<typename return_type>
-inline return_type invoke_fastcall_0(uint32_t address) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)()>(address)()); }
+inline return_type invoke_fastcall_0(uintptr_t address) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)() NH3API_NOEXCEPT_PATCHERX86>(address)()); }
 template<typename return_type, typename Arg1>
-inline return_type invoke_fastcall_1(uint32_t address, Arg1 a1) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1)>(address)(a1)); }
+inline return_type invoke_fastcall_1(uintptr_t address, Arg1 a1) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1) NH3API_NOEXCEPT_PATCHERX86>(address)(a1)); }
 template<typename return_type, typename Arg1, typename Arg2>
-inline return_type invoke_fastcall_2(uint32_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2)>(address)(a1, a2)); }
+inline return_type invoke_fastcall_2(uintptr_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3>
-inline return_type invoke_fastcall_3(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3)>(address)(a1, a2, a3)); }
+inline return_type invoke_fastcall_3(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-inline return_type invoke_fastcall_4(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4)>(address)(a1, a2, a3, a4)); }
+inline return_type invoke_fastcall_4(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-inline return_type invoke_fastcall_5(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5)>(address)(a1, a2, a3, a4, a5)); }
+inline return_type invoke_fastcall_5(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-inline return_type invoke_fastcall_6(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6)>(address)(a1, a2, a3, a4, a5, a6)); }
+inline return_type invoke_fastcall_6(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-inline return_type invoke_fastcall_7(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7)>(address)(a1, a2, a3, a4, a5, a6, a7)); }
+inline return_type invoke_fastcall_7(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-inline return_type invoke_fastcall_8(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8)>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
+inline return_type invoke_fastcall_8(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-inline return_type invoke_fastcall_9(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
+inline return_type invoke_fastcall_9(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-inline return_type invoke_fastcall_10(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
+inline return_type invoke_fastcall_10(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11>
-inline return_type invoke_fastcall_11(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
+inline return_type invoke_fastcall_11(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12>
-inline return_type invoke_fastcall_12(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
+inline return_type invoke_fastcall_12(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13>
-inline return_type invoke_fastcall_13(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
+inline return_type invoke_fastcall_13(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14>
-inline return_type invoke_fastcall_14(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
+inline return_type invoke_fastcall_14(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15>
-inline return_type invoke_fastcall_15(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
+inline return_type invoke_fastcall_15(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16>
-inline return_type invoke_fastcall_16(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
+inline return_type invoke_fastcall_16(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17>
-inline return_type invoke_fastcall_17(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
+inline return_type invoke_fastcall_17(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18>
-inline return_type invoke_fastcall_18(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
+inline return_type invoke_fastcall_18(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19>
-inline return_type invoke_fastcall_19(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
+inline return_type invoke_fastcall_19(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19, typename Arg20>
-inline return_type invoke_fastcall_20(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
+inline return_type invoke_fastcall_20(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
 
 template<typename return_type>
-inline return_type invoke_cdecl_0(uint32_t address) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)()>(address)()); }
+inline return_type invoke_cdecl_0(uintptr_t address) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)() NH3API_NOEXCEPT_PATCHERX86>(address)()); }
 template<typename return_type, typename Arg1>
-inline return_type invoke_cdecl_1(uint32_t address, Arg1 a1) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1)>(address)(a1)); }
+inline return_type invoke_cdecl_1(uintptr_t address, Arg1 a1) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1) NH3API_NOEXCEPT_PATCHERX86>(address)(a1)); }
 template<typename return_type, typename Arg1, typename Arg2>
-inline return_type invoke_cdecl_2(uint32_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2)>(address)(a1, a2)); }
+inline return_type invoke_cdecl_2(uintptr_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3>
-inline return_type invoke_cdecl_3(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3)>(address)(a1, a2, a3)); }
+inline return_type invoke_cdecl_3(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-inline return_type invoke_cdecl_4(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4)>(address)(a1, a2, a3, a4)); }
+inline return_type invoke_cdecl_4(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-inline return_type invoke_cdecl_5(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5)>(address)(a1, a2, a3, a4, a5)); }
+inline return_type invoke_cdecl_5(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-inline return_type invoke_cdecl_6(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6)>(address)(a1, a2, a3, a4, a5, a6)); }
+inline return_type invoke_cdecl_6(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-inline return_type invoke_cdecl_7(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7)>(address)(a1, a2, a3, a4, a5, a6, a7)); }
+inline return_type invoke_cdecl_7(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-inline return_type invoke_cdecl_8(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8)>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
+inline return_type invoke_cdecl_8(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-inline return_type invoke_cdecl_9(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
+inline return_type invoke_cdecl_9(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-inline return_type invoke_cdecl_10(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
+inline return_type invoke_cdecl_10(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11>
-inline return_type invoke_cdecl_11(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
+inline return_type invoke_cdecl_11(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12>
-inline return_type invoke_cdecl_12(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
+inline return_type invoke_cdecl_12(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13>
-inline return_type invoke_cdecl_13(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
+inline return_type invoke_cdecl_13(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14>
-inline return_type invoke_cdecl_14(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
+inline return_type invoke_cdecl_14(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15>
-inline return_type invoke_cdecl_15(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
+inline return_type invoke_cdecl_15(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16>
-inline return_type invoke_cdecl_16(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
+inline return_type invoke_cdecl_16(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17>
-inline return_type invoke_cdecl_17(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
+inline return_type invoke_cdecl_17(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18>
-inline return_type invoke_cdecl_18(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
+inline return_type invoke_cdecl_18(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19>
-inline return_type invoke_cdecl_19(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
+inline return_type invoke_cdecl_19(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19, typename Arg20>
-inline return_type invoke_cdecl_20(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
+inline return_type invoke_cdecl_20(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
 
 template<typename return_type>
-inline return_type invoke_stdcall_0(uint32_t address) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)()>(address)()); }
+inline return_type invoke_stdcall_0(uintptr_t address) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)() NH3API_NOEXCEPT_PATCHERX86>(address)()); }
 template<typename return_type, typename Arg1>
-inline return_type invoke_stdcall_1(uint32_t address, Arg1 a1) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1)>(address)(a1)); }
+inline return_type invoke_stdcall_1(uintptr_t address, Arg1 a1) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1) NH3API_NOEXCEPT_PATCHERX86>(address)(a1)); }
 template<typename return_type, typename Arg1, typename Arg2>
-inline return_type invoke_stdcall_2(uint32_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2)>(address)(a1, a2)); }
+inline return_type invoke_stdcall_2(uintptr_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3>
-inline return_type invoke_stdcall_3(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3)>(address)(a1, a2, a3)); }
+inline return_type invoke_stdcall_3(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-inline return_type invoke_stdcall_4(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4)>(address)(a1, a2, a3, a4)); }
+inline return_type invoke_stdcall_4(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-inline return_type invoke_stdcall_5(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5)>(address)(a1, a2, a3, a4, a5)); }
+inline return_type invoke_stdcall_5(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-inline return_type invoke_stdcall_6(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6)>(address)(a1, a2, a3, a4, a5, a6)); }
+inline return_type invoke_stdcall_6(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-inline return_type invoke_stdcall_7(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7)>(address)(a1, a2, a3, a4, a5, a6, a7)); }
+inline return_type invoke_stdcall_7(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-inline return_type invoke_stdcall_8(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8)>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
+inline return_type invoke_stdcall_8(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-inline return_type invoke_stdcall_9(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
+inline return_type invoke_stdcall_9(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-inline return_type invoke_stdcall_10(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
+inline return_type invoke_stdcall_10(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11>
-inline return_type invoke_stdcall_11(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
+inline return_type invoke_stdcall_11(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12>
-inline return_type invoke_stdcall_12(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
+inline return_type invoke_stdcall_12(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13>
-inline return_type invoke_stdcall_13(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
+inline return_type invoke_stdcall_13(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14>
-inline return_type invoke_stdcall_14(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
+inline return_type invoke_stdcall_14(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15>
-inline return_type invoke_stdcall_15(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
+inline return_type invoke_stdcall_15(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16>
-inline return_type invoke_stdcall_16(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
+inline return_type invoke_stdcall_16(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17>
-inline return_type invoke_stdcall_17(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
+inline return_type invoke_stdcall_17(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18>
-inline return_type invoke_stdcall_18(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
+inline return_type invoke_stdcall_18(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19>
-inline return_type invoke_stdcall_19(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
+inline return_type invoke_stdcall_19(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
 template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19, typename Arg20>
-inline return_type invoke_stdcall_20(uint32_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20)>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
+inline return_type invoke_stdcall_20(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
+{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20) NH3API_NOEXCEPT_PATCHERX86>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
 
 //} // namespace nh3api
 
