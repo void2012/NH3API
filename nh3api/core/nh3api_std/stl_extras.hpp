@@ -42,14 +42,11 @@ T* addressof(T& arg) NH3API_NOEXCEPT
 #endif // !NH3API_HAS_BUILTIN_ADDRESSOF
 
 #ifdef __cpp_lib_bit_cast
-template<class To, class From>
-NH3API_MSVC_INTRIN NH3API_FORCEINLINE 
-constexpr To bit_cast( const From& from ) noexcept
-{
-    return std::bit_cast<To>(from);
-}
+
+using ::std::bit_cast;
 
 #else
+
 template<class To, class From>
 NH3API_FORCEINLINE
 #if NH3API_HAS_BUILTIN_BIT_CAST
@@ -68,6 +65,7 @@ To bit_cast( const From& from ) NH3API_NOEXCEPT
     return result;
     #endif
 }
+
 #endif // __cpp_lib_bit_cast
 
 #if !defined(__cpp_lib_raw_memory_algorithms) && !defined(__cpp_lib_constexpr_algorithms)
@@ -75,9 +73,7 @@ To bit_cast( const From& from ) NH3API_NOEXCEPT
 template<class T>
 NH3API_FORCEINLINE NH3API_CONSTEXPR
 void destroy_at(T* p)
-{
-    p->~T();
-}
+{ p->~T(); }
 
 template<class ForwardIt>
 NH3API_FORCEINLINE NH3API_CONSTEXPR
@@ -98,25 +94,15 @@ ForwardIt destroy_n(ForwardIt first, Size n)
 
 #else // constexpr destruction algorithms
 
-template<class T>
-NH3API_FORCEINLINE constexpr
-void destroy_at(T* p)
-{ ::std::destroy_at(p); }
-
-template<class ForwardIt>
-NH3API_FORCEINLINE constexpr
-void destroy(ForwardIt first, ForwardIt last)
-{ ::std::destroy(first, last); }
-
-template<class ForwardIt, class Size>
-NH3API_FORCEINLINE constexpr
-ForwardIt destroy_n(ForwardIt first, Size n)
-{ return ::std::destroy_n(first, n); }
+using ::std::destroy_at;
+using ::std::destroy;
+using ::std::destroy_n;
 
 #endif // constexpr destruction algorithms
 
 #if NH3API_STD_MOVE_SEMANTICS
 #if NH3API_MSVC_STL_VERSION < NH3API_MSVC_STL_VERSION_2015_2022 && !defined(__cpp_lib_exchange_function)
+
 template<class T, class U> NH3API_FORCEINLINE
 T exchange(T& obj, U&& new_value)
 NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<T>::value &&
@@ -128,11 +114,9 @@ NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<T>::value &&
 }
 
 #else
-template<class T, class U> NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-T exchange(T& obj, U&& new_value)
-NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<T>::value &&
-                        tt::is_nothrow_assignable<T&, U>::value)
-{ return ::std::exchange(obj, ::std::forward<U>(new_value)); }
+
+using ::std::exchange;
+
 #endif
 #endif
 
@@ -220,10 +204,8 @@ NH3API_CONSTEXPR NH3API_FORCEINLINE _Integer to_integer(byte_t value) NH3API_NOE
 }
 
 #else
-using byte_t = std::byte;
-template <class _Integer>
-NH3API_CONSTEXPR NH3API_FORCEINLINE _Integer to_integer(byte_t value) NH3API_NOEXCEPT
-{ return ::std::to_integer<_Integer>(value); }
+using byte_t = ::std::byte;
+using ::std::to_integer;
 #endif
 
 #if NH3API_MSVC_STL_VERSION >= NH3API_MSVC_STL_VERSION_2010 || NH3API_STD_MOVE_SEMANTICS
@@ -301,7 +283,7 @@ inline short ddtest(const double* const px)
     else
         return 0;
 }    
-}
+} // namespace details
 
 inline int fpclassify(float num) NH3API_NOEXCEPT
 { return details::fdtest(&num); }

@@ -573,12 +573,12 @@ NH3API_NOEXCEPT_EXPR(tt::is_nothrow_copy_constructible<U>::value)
 
 #if NH3API_STD_MOVE_SEMANTICS
 template<class T, class Allocator> NH3API_FORCEINLINE
-void move_construct(const Allocator& alloc, T* ptr, T&& rvalue)
+void move_construct(const Allocator& allocator, T* ptr, T&& rvalue)
 {
     #if NH3API_CHECK_CPP11
-    ::std::allocator_traits<Allocator>::construct(alloc, ptr, rvalue);
+    ::std::allocator_traits<Allocator>::construct(allocator, ptr, rvalue);
     #else
-    alloc.construct(ptr, value);
+    allocator.construct(ptr, value);
     #endif
 }
 
@@ -592,12 +592,12 @@ NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<U>::value)
 #endif
 
 template<typename T, class Allocator> NH3API_FORCEINLINE
-void default_construct(const Allocator& alloc, T* ptr)
+void default_construct(const Allocator& allocator, T* ptr)
 {
     #if NH3API_CHECK_CPP11
-    ::std::allocator_traits<Allocator>::construct(alloc, ptr, T());
+    ::std::allocator_traits<Allocator>::construct(allocator, ptr, T());
     #else
-    alloc.construct(ptr, T());
+    allocator.construct(ptr, T());
     #endif
 }
 
@@ -611,28 +611,28 @@ NH3API_NOEXCEPT_EXPR(tt::is_nothrow_constructible<T>::value)
 
 template<class Allocator>
 NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-Allocator allocator_select_on_container_copy_construction(const Allocator& a)
+Allocator allocator_select_on_container_copy_construction(const Allocator& allocator)
 {
     #if NH3API_CHECK_CPP11
-        return ::std::allocator_traits<Allocator>::select_on_container_copy_construction(a);
+        return ::std::allocator_traits<Allocator>::select_on_container_copy_construction(allocator);
     #else 
-        return a;
+        return allocator;
     #endif
 }
 
 template<class T>
 NH3API_FORCEINLINE NH3API_CONSTEXPR
-exe_allocator<T> allocator_select_on_container_copy_construction(const exe_allocator<T>& a)
-{ return a; }
+exe_allocator<T> allocator_select_on_container_copy_construction(const exe_allocator<T>& allocator)
+{ return allocator; }
 
 template<class Allocator>
 NH3API_FORCEINLINE
-typename Allocator::pointer allocate( Allocator& a, typename Allocator::size_type n )
+typename Allocator::pointer allocate( Allocator& allocator, typename Allocator::size_type n )
 {
     #if NH3API_CHECK_CPP11
-        return ::std::allocator_traits<Allocator>::allocate(a, n);
+        return ::std::allocator_traits<Allocator>::allocate(allocator, n);
     #else 
-        a.allocate(n);
+        allocator.allocate(n);
     #endif
 }
 
@@ -650,12 +650,12 @@ NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
 
 template<class Allocator>
 NH3API_FORCEINLINE
-typename Allocator::pointer allocate( Allocator& a, typename Allocator::size_type n, const void* hint )
+typename Allocator::pointer allocate( Allocator& allocator, typename Allocator::size_type n, const void* hint )
 {
     #if NH3API_CHECK_CPP11
-        return ::std::allocator_traits<Allocator>::allocate(a, n, hint);
+        return ::std::allocator_traits<Allocator>::allocate(allocator, n, hint);
     #else 
-        a.allocate(n, hint);
+        allocator.allocate(n, hint);
     #endif
 }
 
@@ -677,14 +677,14 @@ decltype(auto)
 #else 
 typename Allocator::template rebind<U>::other::pointer
 #endif
-allocate_rebind(Allocator& a, typename Allocator::size_type n)
+allocate_rebind(Allocator& allocator, typename Allocator::size_type n)
 {
     #if NH3API_CHECK_CPP11
         typedef typename ::std::allocator_traits<Allocator>::template rebind_alloc<U> rebound_alloc;
-        rebound_alloc rebound(a);
+        rebound_alloc rebound(allocator);
         return ::std::allocator_traits<rebound_alloc>::allocate(rebound, size);
     #else 
-        typename Allocator::template rebind<U>::other rebound(a);
+        typename Allocator::template rebind<U>::other rebound(allocator);
         rebound.allocate(n);
     #endif
 }
@@ -706,14 +706,14 @@ decltype(auto)
 #else 
 typename Allocator::template rebind<U>::other::pointer
 #endif
-allocate_rebind(Allocator& a, typename Allocator::size_type n, const void* hint)
+allocate_rebind(Allocator& allocator, typename Allocator::size_type n, const void* hint)
 {
     #if NH3API_CHECK_CPP11
         typedef typename ::std::allocator_traits<Allocator>::template rebind_alloc<U> rebound_alloc;
-        rebound_alloc rebound(a);
+        rebound_alloc rebound(allocator);
         return ::std::allocator_traits<rebound_alloc>::allocate(rebound, size, hint);
     #else 
-        typename Allocator::template rebind<U>::other rebound(a);
+        typename Allocator::template rebind<U>::other rebound(allocator);
         rebound.allocate(n, hint);
     #endif
 }
@@ -730,58 +730,58 @@ NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
 }
 
 template<class Allocator> NH3API_FORCEINLINE
-void deallocate( Allocator& a, typename Allocator::pointer p, typename Allocator::size_type n )
+void deallocate( Allocator& allocator, typename Allocator::pointer ptr, typename Allocator::size_type n )
 {
     #if NH3API_CHECK_CPP11
-        ::std::allocator_traits<Allocator>::deallocate(a, p, n);
+        ::std::allocator_traits<Allocator>::deallocate(allocator, ptr, n);
     #else 
-        a.deallocate(p, n);
+        allocator.deallocate(ptr, n);
     #endif
 }
 
 template<class T> NH3API_FORCEINLINE
-void deallocate( ::exe_allocator<T>&, T* p, size_t ) NH3API_NOEXCEPT
-{ ::operator delete(p, ::exe_heap); }
+void deallocate( ::exe_allocator<T>&, T* ptr, size_t ) NH3API_NOEXCEPT
+{ ::operator delete(ptr, ::exe_heap); }
 
 template<class U, class Allocator> NH3API_FORCEINLINE
-void deallocate_rebind(Allocator& a, U* p, typename Allocator::size_type n )
+void deallocate_rebind(Allocator& allocator, U* ptr, typename Allocator::size_type n )
 {
     #if NH3API_CHECK_CPP11
         typedef typename ::std::allocator_traits<Allocator>::template rebind_alloc<U> rebound_alloc;
-        rebound_alloc rebound(a);
-        return ::std::allocator_traits<rebound_alloc>::deallocate(a, p, n);
+        rebound_alloc rebound(allocator);
+        return ::std::allocator_traits<rebound_alloc>::deallocate(allocator, ptr, n);
     #else 
-        typename Allocator::template rebind<U>::other rebound(a);
-        rebound.deallocate(p, n);
+        typename Allocator::template rebind<U>::other rebound(allocator);
+        rebound.deallocate(ptr, n);
     #endif
 }
 
 template<class U, class T> NH3API_FORCEINLINE
-void deallocate_rebind(::exe_allocator<T>&, U* p, size_t ) NH3API_NOEXCEPT
-{ ::operator delete(p, ::exe_heap); }
+void deallocate_rebind(::exe_allocator<T>&, U* ptr, size_t ) NH3API_NOEXCEPT
+{ ::operator delete(ptr, ::exe_heap); }
 
 template<class Allocator, class T> NH3API_FORCEINLINE
-void allocator_destroy( Allocator& a, T* p )
+void allocator_destroy( Allocator& allocator, T* ptr )
 {
     #if NH3API_CHECK_CPP11
-        ::std::allocator_traits<Allocator>::destroy(a, p);
+        ::std::allocator_traits<Allocator>::destroy(allocator, ptr);
     #else 
-        a.deallocate(p, n);
+        allocator.deallocate(ptr, n);
     #endif
 }
 
 template<class U, class T> NH3API_FORCEINLINE
-void allocator_destroy( ::exe_allocator<T>&, U* p ) 
+void allocator_destroy( ::exe_allocator<T>&, U* ptr ) 
 NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<U>::value)
-{ p->~U(); }
+{ ptr->~U(); }
 
 template<class Allocator> NH3API_FORCEINLINE
-typename Allocator::size_type allocator_max_size(const Allocator& a) 
+typename Allocator::size_type allocator_max_size(const Allocator& allocator) 
 {
     #if NH3API_CHECK_CPP11
-        return ::std::allocator_traits<Allocator>::max_size(a);
+        return ::std::allocator_traits<Allocator>::max_size(allocator);
     #else 
-        return a.max_size();
+        return allocator.max_size();
     #endif
 }
 
@@ -902,7 +902,7 @@ class exe_auto_ptr
 {
   public:
     typedef T element_type;
-    explicit exe_auto_ptr(T *_P = 0) NH3API_NOEXCEPT
+    explicit exe_auto_ptr(T* _P = nullptr) NH3API_NOEXCEPT
         : _Owns(_P != 0), _Ptr(_P)
     {}
     exe_auto_ptr(const exe_auto_ptr<T> &_Y) NH3API_NOEXCEPT :
@@ -959,17 +959,11 @@ class exe_auto_ptr
             exe_invoke_delete(_Ptr);
     }
     T& operator*() const NH3API_NOEXCEPT
-    {
-        return (*get());
-    }
+    { return (*get()); }
     T* operator->() const NH3API_NOEXCEPT
-    {
-        return (get());
-    }
+    { return (get()); }
     T* get() const NH3API_NOEXCEPT
-    {
-        return (_Ptr);
-    }
+    { return (_Ptr); }
     T* release() const NH3API_NOEXCEPT
     {
         _Owns = false;
@@ -1088,30 +1082,25 @@ void trivial_zero(void* ptr) NH3API_NOEXCEPT
 template<size_t size> NH3API_FORCEINLINE
 void trivial_swap(void* __restrict left, void* __restrict right) NH3API_NOEXCEPT
 {
-    #if NH3API_CHECK_MSVC && NH3API_CHECK_SSE2
-    if ( size == 16 )
-    {
-        const __m128i val1 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(left));
-        const __m128i val2 = _mm_loadu_si128(reinterpret_cast<const __m128i*>(right));
-        _mm_storeu_si128(reinterpret_cast<__m128i*>(left), val2);
-        _mm_storeu_si128(reinterpret_cast<__m128i*>(right), val1);  
-    }
-    else 
-    {
-    
-    #endif
     // GCC and Clang easily optimize this to SSE2 swap if size == 16
     for (size_t i = 0; i < size; ++i) 
     {
-        unsigned char temp = (static_cast<uint8_t* __restrict>(left))[i];
+        uint8_t temp = (static_cast<uint8_t* __restrict>(left))[i];
         (static_cast<uint8_t* __restrict>(left))[i] = (static_cast<uint8_t* __restrict>(right))[i];
         (static_cast<uint8_t* __restrict>(right))[i] = temp;
     }
-
-    #if NH3API_CHECK_MSVC
-    }
-    #endif
 }
+
+#if NH3API_CHECK_MSVC && NH3API_CHECK_SSE2
+template<> NH3API_FORCEINLINE
+void trivial_swap<16>(void* __restrict left, void* __restrict right) NH3API_NOEXCEPT
+{
+    const __m128i val1 = _mm_loadu_si128(static_cast<const __m128i* __restrict>(left));
+    const __m128i val2 = _mm_loadu_si128(static_cast<const __m128i* __restrict>(right));
+    _mm_storeu_si128(static_cast<__m128i* __restrict>(left), val2);
+    _mm_storeu_si128(static_cast<__m128i* __restrict>(right), val1);
+}
+#endif
 
 // move trivially memory from *src to *dst
 template<size_t size> NH3API_FORCEINLINE

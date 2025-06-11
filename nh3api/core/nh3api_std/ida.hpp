@@ -151,18 +151,16 @@ NH3API_IDA_INTRIN
 bool saturated_mul(T count, T elsize) NH3API_NOEXCEPT
 { return is_mul_ok(count, elsize) ? count * elsize : T(-1); }
 
+#if NH3API_CHECK_MSVC
+#pragma intrinsic(__movsb)
+#endif
+
 // memcpy() with determined behavoir: it always copies
 // from the start to the end of the buffer
 // note: it copies byte by byte, so it is not equivalent to, for example, rep movsd
-inline void* qmemcpy(void* dst, const void* src, size_t count) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void* qmemcpy(void* dst, const void* src, size_t count) NH3API_NOEXCEPT
 {
-    uint8_t *out = static_cast<uint8_t*>(dst);
-    const uint8_t *in = static_cast<const uint8_t*>(src);
-    while ( count > 0 )
-    {
-        *out++ = *in++;
-        --count;
-    }
+    __movsb(static_cast<unsigned char*>(dst), static_cast<const unsigned char*>(src), count);
     return dst;
 }
 
