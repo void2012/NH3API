@@ -403,6 +403,11 @@ enum : uint32_t
     ALIGNMENTS_MASK     = ALIGNMENTS_MASK_SOD
 };
 
+#if NH3API_STD_HASH
+class type_point;
+template<> class std::hash<type_point>;
+#endif
+
 // Map point: X, Y, Z coordinates /
 // Точка на карте: координаты X, Y, Z.
 class type_point
@@ -501,6 +506,20 @@ class type_point
         bool is_valid() const NH3API_NOEXCEPT
         { return THISCALL_1(bool, 0x4B1090, this); }
 
+        NH3API_CONSTEXPR size_t hash() const NH3API_NOEXCEPT
+        {
+            // for hash we simply return 32-bit mask of tuple [x,y,z] but without 
+            // unused bits which may be filled with different default values depending on 
+            // on the current heap settings(e.g. debug heap on UCRT fills unused bytes with either 0xFD or 0xED)
+            // we fill padding bits with zeroes for predictable behavior
+            // NOTE: compilers optimize this to std::bit_cast<uint32_t>(*this) & 0x3FFF03FF
+            return (0x03FF & x) | (((0x03FF & y) << 16) & 0x03FF0000) | (((0xF & z) << 26) & 0x3C000000); 
+        }
+
+        #if NH3API_STD_HASH
+        friend std::hash<type_point>;
+        #endif
+
     public:
         signed x : 10; // +00, bytes 0..1
         signed   : 6; // +10
@@ -508,6 +527,17 @@ class type_point
         signed z : 4;  // +26
         signed   : 2; // +30
 } NH3API_MSVC_LAYOUT;
+
+#if NH3API_STD_HASH
+// std::hash support for type_point
+template<>
+class std::hash<type_point>
+{
+    public:
+        size_t operator()(const type_point& arg) NH3API_NOEXCEPT
+        { return arg.hash(); }
+};
+#endif
 
 #pragma pack(push, 1)
 // size = 0x4 = 4, align = 1

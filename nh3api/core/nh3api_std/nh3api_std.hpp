@@ -1085,6 +1085,14 @@ const omit_base_vftable_tag;
     #endif
 #endif
 
+#ifndef NH3API_STD_HASH 
+    #if NH3API_CHECK_CPP11 || NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010
+        #define NH3API_STD_HASH (1)
+    #else 
+        #define NH3API_STD_HASH (0)
+    #endif
+#endif
+
 // ranges library support for containers
 #ifndef NH3API_STD_RANGES_CONTAINERS
     #if NH3API_CHECK_CPP20
@@ -1155,14 +1163,6 @@ const omit_base_vftable_tag;
 
         #ifndef NH3API_HAS_BUILTIN_MEMCPY
             #define NH3API_HAS_BUILTIN_MEMCPY      __has_builtin(__builtin_memcpy)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_MEMCPY_INLINE
-            #define NH3API_HAS_BUILTIN_MEMCPY_INLINE __has_builtin(__builtin_memcpy_inline)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_MEMSET_INLINE
-            #define NH3API_HAS_BUILTIN_MEMSET_INLINE __has_builtin(__builtin_memset_inline)
         #endif
 
         #ifndef NH3API_HAS_BUILTIN_MEMMOVE

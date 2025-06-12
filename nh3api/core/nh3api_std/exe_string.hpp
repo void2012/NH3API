@@ -3045,6 +3045,26 @@ template<class CharT, class CharTraits, class Allocator> NH3API_FORCEINLINE
 uint8_t refcount(const exe_basic_string<CharT, CharTraits, Allocator>& str)
 { return *(const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(str.c_str())) - 1); }
 
+NH3API_FORCEINLINE NH3API_CONSTEXPR size_t 
+safe_strlen(const char* str, const size_t max_size) NH3API_NOEXCEPT
+{
+    size_t len = 0;
+    while (len < max_size && str[len] != '\0') 
+        ++len;
+    
+    return len;
+}
+
+NH3API_FORCEINLINE NH3API_CONSTEXPR size_t 
+safe_strlen(const wchar_t* str, const size_t max_size) NH3API_NOEXCEPT
+{
+    size_t len = 0;
+    while (len < max_size && str[len] != L'\0') 
+        ++len;
+    
+    return len;
+}
+
 NH3API_CONSTEXPR inline
 // constexpr atoi that uses no locale
 int32_t fast_atoi(const char* p) NH3API_NOEXCEPT
@@ -3391,7 +3411,40 @@ NH3API_FORCEINLINE
 std::wstring to_std_wstring(float x, size_t precision = 4)
 { return nh3api::print_float<std::wstring>(x, precision); }
 
-#if NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010 || NH3API_CHECK_CPP11
+namespace nh3api 
+{
+
+NH3API_FORCEINLINE size_t hash_string(const ::exe_string& str) NH3API_NOEXCEPT 
+{
+    default_hash hasher;
+    hasher.update(str.c_str(), str.size());
+    return hasher.digest();
+} 
+
+NH3API_FORCEINLINE size_t hash_string(const ::exe_wstring& str) NH3API_NOEXCEPT 
+{
+    default_hash hasher;
+    hasher.update(str.c_str(), str.size());
+    return hasher.digest();
+} 
+
+NH3API_FORCEINLINE size_t hash_string(const ::std::string& str) NH3API_NOEXCEPT 
+{
+    default_hash hasher;
+    hasher.update(str.c_str(), str.size());
+    return hasher.digest();
+} 
+
+NH3API_FORCEINLINE size_t hash_string(const ::std::wstring& str) NH3API_NOEXCEPT 
+{
+    default_hash hasher;
+    hasher.update(str.c_str(), str.size());
+    return hasher.digest();
+} 
+
+}
+
+#if NH3API_STD_HASH
 // std::hash support for exe_basic_string
 template<typename CharT, typename TraitsT, typename Allocator>
 class std::hash< exe_basic_string<CharT, TraitsT, Allocator> >

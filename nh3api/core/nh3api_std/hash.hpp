@@ -43,7 +43,39 @@ public:
         result_type acc = this->state_;
         for (size_t i = 0; i < size; ++i) 
         {
-            const size_t next = size_t{static_cast<size_t>(data[i])};
+            const size_t next = static_cast<size_t>(data[i]);
+            acc = (acc ^ next) * Prime;
+        }
+        this->state_ = acc;
+    }
+
+    NH3API_CONSTEXPR_CPP_14 void update(const wchar_t* const data, const size_t size) NH3API_NOEXCEPT 
+    {
+        result_type acc = this->state_;
+        for (size_t i = 0; i < size; ++i) 
+        {
+            // we can't use reinterpret_cast in constexpr, so calculate for low and high bytes
+            size_t next = static_cast<size_t>(data[i] & 0xFF00);
+            acc = (acc ^ next) * Prime;
+            next = static_cast<size_t>(data[i] & 0x00FF);
+            acc = (acc ^ next) * Prime;
+        }
+        this->state_ = acc;
+    }
+
+    NH3API_CONSTEXPR_CPP_14 void update(const uint32_t* const data, const size_t size) NH3API_NOEXCEPT 
+    {
+        result_type acc = this->state_;
+        for (size_t i = 0; i < size; ++i) 
+        {
+            // we can't use reinterpret_cast in constexpr, so calculate for low and high bytes
+            size_t next = static_cast<size_t>(data[i] & 0xFF000000);
+            acc = (acc ^ next) * Prime;
+            next = static_cast<size_t>(data[i] & 0x00FF0000);
+            acc = (acc ^ next) * Prime;
+            next = static_cast<size_t>(data[i] & 0x0000FF00);
+            acc = (acc ^ next) * Prime;
+            next = static_cast<size_t>(data[i] & 0x000000FF);
             acc = (acc ^ next) * Prime;
         }
         this->state_ = acc;
@@ -62,14 +94,28 @@ NH3API_CONSTEXPR_CPP_14 size_t hash_string(const char* const str, size_t size) N
     return hasher.digest();
 }
 
+NH3API_CONSTEXPR_CPP_14 size_t hash_string(const wchar_t* const str, size_t size) NH3API_NOEXCEPT 
+{
+    default_hash hasher;
+    hasher.update(str, size);
+    return hasher.digest();
+}
+
 #ifdef __cpp_lib_string_view
-constexpr size_t hash_string(std::string_view str) noexcept 
+constexpr size_t hash_string(::std::string_view str) noexcept 
 {
     default_hash hasher;
     hasher.update(str.data(), str.size());
     return hasher.digest();
 }
-#else
+
+constexpr size_t hash_string(::std::wstring_view str) noexcept 
+{
+    default_hash hasher;
+    hasher.update(str.data(), str.size());
+    return hasher.digest();
+}
+#endif
 template <size_t size>
 NH3API_CONSTEXPR_CPP_14 size_t hash_string(const char (&str)[size]) NH3API_NOEXCEPT
 {
@@ -77,6 +123,13 @@ NH3API_CONSTEXPR_CPP_14 size_t hash_string(const char (&str)[size]) NH3API_NOEXC
     hasher.update(str, size);
     return hasher.digest();
 }
-#endif
+
+template <size_t size>
+NH3API_CONSTEXPR_CPP_14 size_t hash_string(const wchar_t (&str)[size]) NH3API_NOEXCEPT
+{
+    default_hash hasher;
+    hasher.update(str, size);
+    return hasher.digest();
+}
 
 } // namespace nh3api

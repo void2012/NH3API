@@ -1724,7 +1724,7 @@ NH3API_FORCEINLINE exe_string& GetDataPath()
 
 } // namespace ResourceManager
 
-#if NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010 || NH3API_CHECK_CPP11
+#if NH3API_STD_HASH
 // std::hash support for ResourceManager::TCacheMapKey
 template<>
 class std::hash< ResourceManager::TCacheMapKey >
@@ -1732,7 +1732,7 @@ class std::hash< ResourceManager::TCacheMapKey >
     public:
         size_t operator()(const ResourceManager::TCacheMapKey& key) NH3API_NOEXCEPT
         {
-            return ::nh3api::hash_string(key.name.data(), strnlen_s(key.name.data(), key.name.size()));
+            return ::nh3api::hash_string(key.name.data(), ::nh3api::safe_strlen(key.name.data(), key.name.size()));
         }
 };
 #endif
