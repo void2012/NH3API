@@ -120,7 +120,8 @@ template <size_t size>
 NH3API_CONSTEXPR_CPP_14 size_t hash_string(const char (&str)[size]) NH3API_NOEXCEPT
 {
     default_hash hasher;
-    hasher.update(str, size);
+    // ignore null terminator for string literals
+    hasher.update(str, size - 1);
     return hasher.digest();
 }
 
@@ -128,7 +129,8 @@ template <size_t size>
 NH3API_CONSTEXPR_CPP_14 size_t hash_string(const wchar_t (&str)[size]) NH3API_NOEXCEPT
 {
     default_hash hasher;
-    hasher.update(str, size);
+    // ignore null terminator for string literals
+    hasher.update(str, size - 1);
     return hasher.digest();
 }
 
