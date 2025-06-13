@@ -176,8 +176,8 @@ public:
         bool       IsActive() const
         { return (armyType > -1) && (numTroops > 0); }
 
-        // Is incapacitated? (No active spell: Blind, Stone Gaze, Paralyze) /
-        // Может ли существо ходить(Нет ли хотя бы одного закл.: Слепота, Окаменение, Паралич)
+        // Is incapacitated? (Has at least one active spell: Blind, Stone Gaze, Paralyze) /
+        // Обездвижено ли существо(Если есть хотя бы одно из этих закл.: Слепота, Окаменение, Паралич)
         bool       IsIncapacitated() const
         {
             return (spellInfluence[SPELL_BLIND] != 0)
