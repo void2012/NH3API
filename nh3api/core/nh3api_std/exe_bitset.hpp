@@ -43,8 +43,7 @@ template<size_t N>
 class exe_bitset
 {
 protected:
-    typedef uint32_t underlying_type;
-    typedef exe_bitset<N> this_type NH3API_NODEBUG;
+    typedef uint32_t word_type;
 
 public:
     typedef bool element_type;
@@ -54,71 +53,71 @@ public:
     {
     friend class exe_bitset<N>;
     public:
-        NH3API_CONSTEXPR reference& operator=(bool _X) NH3API_NOEXCEPT
+        NH3API_CONSTEXPR reference& operator=(bool value) NH3API_NOEXCEPT
         {
-            _Pbs->set(_Off, _X);
-            return (*this);
+            _parent->set(_pos, value);
+            return *this;
         }
 
-        NH3API_CONSTEXPR reference& operator=(const reference& _Bs) NH3API_NOEXCEPT
+        NH3API_CONSTEXPR reference& operator=(const reference& other) NH3API_NOEXCEPT
         {
-            _Pbs->set(_Off, bool(_Bs));
-            return (*this);
+            _parent->set(_pos, static_cast<bool>(other));
+            return *this;
         }
 
         NH3API_CONSTEXPR reference& flip()  NH3API_NOEXCEPT
         {
-            _Pbs->flip(_Off);
-            return (*this);
+            _parent->flip(_pos);
+            return *this;
         }
 
         NH3API_CONSTEXPR bool operator~() const NH3API_NOEXCEPT
-        { return (!_Pbs->test(_Off)); }
+        { return !_parent->test(_pos); }
 
         NH3API_CONSTEXPR operator bool() const NH3API_NOEXCEPT
-        { return (_Pbs->test(_Off)); }
+        { return _parent->test(_pos); }
 
     private:
-        NH3API_CONSTEXPR reference(exe_bitset<N>& _X, size_t _P) NH3API_NOEXCEPT
-            : _Pbs(&_X), _Off(_P)
+        NH3API_CONSTEXPR reference(exe_bitset<N>& value, size_t pos) NH3API_NOEXCEPT
+            : _parent(&value), _pos(pos)
             {}
-        exe_bitset<N>* _Pbs;
-        size_t _Off;
+        exe_bitset<N>* _parent;
+        size_t _pos;
     };
 
-    bool at(size_t _P) const
+    bool at(size_t pos) const
     {
-        if (N <= _P)
-            _Xran();
-        return test(_P);
+        if (N <= pos)
+            _Throw_invalid_subscript();
+        return test(pos);
     }
 
-    reference at(size_t _P)
+    reference at(size_t pos)
     {
-        if (N <= _P)
-            _Xran();
-        return reference(*this, _P);
+        if (N <= pos)
+            _Throw_invalid_subscript();
+        return reference(*this, pos);
     }
 
 public:
-    NH3API_CONSTEXPR bool operator[](size_t _P) const
-    { return test(_P); }
+    NH3API_CONSTEXPR bool operator[](size_t pos) const
+    { return test(pos); }
 
-    NH3API_CONSTEXPR reference operator[](size_t _P)
+    NH3API_CONSTEXPR reference operator[](size_t pos)
     NH3API_NOEXCEPT
-    { return reference(*this, _P); }
+    { return reference(*this, pos); }
 
     NH3API_CONSTEXPR exe_bitset()
     NH3API_NOEXCEPT
     { _Tidy(); }
 
-    explicit NH3API_CONSTEXPR exe_bitset(unsigned long _X)
+    explicit NH3API_CONSTEXPR exe_bitset(unsigned long value)
     NH3API_NOEXCEPT
     {
         _Tidy();
-        for ( size_t i = 0; _X != 0 && i < N; _X >>= 1, ++i )
-            if ( _X & 1 )
-                _A[i / _Bitsperword] |= (underlying_type)1 << i % _Bitsperword;
+        for ( size_t i = 0; value != 0 && i < N; value >>= 1, ++i )
+            if ( value & 1 )
+                _array[i / _Bitsperword] |= (word_type)1 << i % _Bitsperword;
     }
 
     template<class T, class CharTraits, class Allocator>
@@ -128,19 +127,19 @@ public:
                typename std::basic_string<T, CharTraits, Allocator>::value_type zero = typename std::basic_string<T, CharTraits, Allocator>::value_type('0'),
                typename std::basic_string<T, CharTraits, Allocator>::value_type one  = typename std::basic_string<T, CharTraits, Allocator>::value_type('1') )
     {
-        size_t _I;
+        size_t i;
         if (str.size() < pos)
-            _Xran();
+            _Throw_invalid_subscript();
         if (str.size() - pos < n)
             n = str.size() - pos;
         if (N < n)
             n = N;
         _Tidy(), pos += n;
-        for (_I = 0; _I < n; ++_I)
+        for (i = 0; i < n; ++i)
             if (str[--pos] == one)
-                set(_I);
+                set(i);
             else if (str[pos] != zero)
-                _Xinv();
+                _Throw_invalid_char();
     }
 
     template<class T, class CharTraits, class Allocator>
@@ -150,89 +149,90 @@ public:
                typename exe_basic_string<T, CharTraits, Allocator>::value_type zero = typename exe_basic_string<T, CharTraits, Allocator>::value_type('0'),
                typename exe_basic_string<T, CharTraits, Allocator>::value_type one  = typename exe_basic_string<T, CharTraits, Allocator>::value_type('1') )
     {
-        size_t _I;
+        size_t i;
         if (str.size() < pos)
-            _Xran();
+            _Throw_invalid_subscript();
         if (str.size() - pos < n)
             n = str.size() - pos;
         if (N < n)
             n = N;
         _Tidy(), pos += n;
-        for (_I = 0; _I < n; ++_I)
+        for (i = 0; i < n; ++i)
             if (str[--pos] == one)
-                set(_I);
+                set(i);
             else if (str[pos] != zero)
-                _Xinv();
+                _Throw_invalid_char();
     }
 
     NH3API_FORCEINLINE
     exe_bitset(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-    { NH3API_IGNORE(_A); }
+    { NH3API_IGNORE(_array); }
 
-    NH3API_CONSTEXPR exe_bitset<N>& operator&=(const exe_bitset<N>& _R) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR exe_bitset<N>& operator&=(const exe_bitset<N>& other) NH3API_NOEXCEPT
     {
-        for (int _I = _Words; 0 <= _I; --_I)
-            _A[_I] &= _R._W(_I);
+        for (int i = _Words; 0 <= i; --i)
+            _array[i] &= other._array[i];
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& operator|=(const exe_bitset<N>& _R) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR exe_bitset<N>& operator|=(const exe_bitset<N>& other) NH3API_NOEXCEPT
     {
-        for (int _I = _Words; 0 <= _I; --_I)
-            _A[_I] |= _R._W(_I);
+        for (int i = _Words; 0 <= i; --i)
+            _array[i] |= other._array[i];
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& operator^=(const exe_bitset<N>& _R) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR exe_bitset<N>& operator^=(const exe_bitset<N>& other) NH3API_NOEXCEPT
     {
-        for (int _I = _Words; 0 <= _I; --_I)
-            _A[_I] ^= _R._W(_I);
+        for (int i = _Words; 0 <= i; --i)
+            _array[i] ^= other._array[i];
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& operator<<=(size_t _P) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR exe_bitset<N>& operator<<=(size_t pos) NH3API_NOEXCEPT
     {
-        const size_t _D = _P / _Bitsperword;
+        const size_t _D = pos / _Bitsperword;
         if (_D != 0)
-            for (int _I = _Words; 0 <= _I; --_I)
-                _A[_I] = _D <= _I ? _A[_I - _D] : 0;
-        if ((_P %= _Bitsperword) != 0)
+            for (int i = _Words; 0 <= i; --i)
+                _array[i] = _D <= i ? _array[i - _D] : 0;
+        if ((pos %= _Bitsperword) != 0)
         {
-            for (int _I = _Words; 0 < _I; --_I)
-                _A[_I] = (_A[_I] << _P) | (_A[_I - 1] >> (_Bitsperword - _P));
-            _A[0] <<= _P, _Trim();
+            for (int i = _Words; 0 < i; --i)
+                _array[i] = (_array[i] << pos) | (_array[i - 1] >> (_Bitsperword - pos));
+            _array[0] <<= pos;
+            _Trim();
         }
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& operator>>=(size_t _P) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR exe_bitset<N>& operator>>=(size_t pos) NH3API_NOEXCEPT
     {
-        const size_t _D = _P / _Bitsperword;
+        const size_t _D = pos / _Bitsperword;
         if (_D != 0)
-            for (size_t _I = 0; _I <= _Words; ++_I)
-                _A[_I] = _D <= _Words - _I ? _A[_I + _D] : 0;
-        if ((_P %= _Bitsperword) != 0)
-            {for (size_t _I = 0; _I < _Words; ++_I)
-                _A[_I] = (_A[_I] >> _P)
-                    | (_A[_I + 1] << (_Bitsperword - _P));
-            _A[_Words] >>= _P; }
+            for (size_t i = 0; i <= _Words; ++i)
+                _array[i] = _D <= _Words - i ? _array[i + _D] : 0;
+        if ((pos %= _Bitsperword) != 0)
+            {for (size_t i = 0; i < _Words; ++i)
+                _array[i] = (_array[i] >> pos)
+                    | (_array[i + 1] << (_Bitsperword - pos));
+            _array[_Words] >>= pos; }
         return *this;
     }
 
     NH3API_CONSTEXPR exe_bitset<N>& set() NH3API_NOEXCEPT
     {
-        _Tidy(~(underlying_type)0);
+        _Tidy(~(word_type)0);
         return (*this);
     }
 
-    exe_bitset<N>& set(size_t _P, bool _X = true)
+    exe_bitset<N>& set(size_t pos, bool value = true)
     {
-        if (N <= _P)
-            _Xran();
-        if (_X)
-            _A[_P / _Bitsperword] |= (underlying_type)1 << _P % _Bitsperword;
+        if (N <= pos)
+            _Throw_invalid_subscript();
+        if (value)
+            _array[pos / _Bitsperword] |= (word_type)1 << pos % _Bitsperword;
         else
-            _A[_P / _Bitsperword] &= ~((underlying_type)1 << _P % _Bitsperword);
+            _array[pos / _Bitsperword] &= ~((word_type)1 << pos % _Bitsperword);
         return *this;
     }
 
@@ -242,52 +242,52 @@ public:
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& reset(size_t _P)
-    { return set(_P, 0); }
+    NH3API_CONSTEXPR exe_bitset<N>& reset(size_t pos)
+    { return set(pos, 0); }
 
     NH3API_CONSTEXPR exe_bitset<N> operator~() const NH3API_NOEXCEPT
     { return exe_bitset<N>(*this).flip(); }
 
     NH3API_CONSTEXPR exe_bitset<N>& flip() NH3API_NOEXCEPT
     {
-        for (int _I = _Words; 0 <= _I; --_I)
-            _A[_I] = ~_A[_I];
+        for (int i = _Words; 0 <= i; --i)
+            _array[i] = ~_array[i];
         _Trim();
         return *this;
     }
 
-    exe_bitset<N>& flip(size_t _P)
+    exe_bitset<N>& flip(size_t pos)
     {
-        if (N <= _P)
-            _Xran();
-        _A[_P / _Bitsperword] ^= (underlying_type)1 << _P % _Bitsperword;
+        if (N <= pos)
+            _Throw_invalid_subscript();
+        _array[pos / _Bitsperword] ^= (word_type)1 << pos % _Bitsperword;
         return (*this);
     }
 
     unsigned long to_ulong() const
     {
-        NH3API_STATIC_ASSERT("", (sizeof (unsigned long) % sizeof (underlying_type) == 0));
-        int _I = _Words;
-        for (; sizeof (unsigned long) / sizeof (underlying_type) <= _I; --_I)
-            if (_A[_I] != 0)
-                _Xoflo();
-        unsigned long _V = _A[_I];
-        for (; 0 <= --_I; )
-            _V = ((_V << (_Bitsperword - 1)) << 1) | _A[_I];
-        return (_V);
+        NH3API_STATIC_ASSERT("", (sizeof (unsigned long) % sizeof (word_type) == 0));
+        int i = _Words;
+        for (; sizeof (unsigned long) / sizeof (word_type) <= i; --i)
+            if (_array[i] != 0)
+                _Throw_ulong_conversion_overflow();
+        unsigned long result = _array[i];
+        for (; 0 <= --i; )
+            result = ((result << (_Bitsperword - 1)) << 1) | _array[i];
+        return (result);
     }
 
     unsigned long long to_ullong() const
     {
-        NH3API_STATIC_ASSERT("", (sizeof (unsigned long long) % sizeof (underlying_type) == 0));
-        int _I = _Words;
-        for (; sizeof (unsigned long long) / sizeof (underlying_type) <= _I; --_I)
-            if (_A[_I] != 0)
-                _Xoflo();
-        unsigned long long _V = _A[_I];
-        for (; 0 <= --_I; )
-            _V = ((_V << (_Bitsperword - 1)) << 1) | _A[_I];
-        return (_V);
+        NH3API_STATIC_ASSERT("", (sizeof (unsigned long long) % sizeof (word_type) == 0));
+        int i = _Words;
+        for (; sizeof (unsigned long long) / sizeof (word_type) <= i; --i)
+            if (_array[i] != 0)
+                _Throw_ullong_conversion_overflow();
+        unsigned long long result = _array[i];
+        for (; 0 <= --i; )
+            result = ((result << (_Bitsperword - 1)) << 1) | _array[i];
+        return (result);
     }
 
     #if NH3API_STD_DEFAULT_TEMPLATE_ARGUMENTS
@@ -319,49 +319,49 @@ public:
     /*
     NH3API_CONSTEXPR size_t count() const NH3API_NOEXCEPT
     {
-        size_t _V = 0;
-        for (int _I = _Words; 0 <= _I; --_I)
-            for (underlying_type _X = _A[_I]; _X != 0; _X >>= 4)
-                _V += "\0\1\1\2\1\2\2\3"
-                    "\1\2\2\3\2\3\3\4"[_X & 0xF];
-        return (_V);
+        size_t result = 0;
+        for (int i = _Words; 0 <= i; --i)
+            for (word_type value = _array[i]; value != 0; value >>= 4)
+                result += "\0\1\1\2\1\2\2\3"
+                    "\1\2\2\3\2\3\3\4"[value & 0xF];
+        return (result);
     }
     */
 
     NH3API_CONSTEXPR size_t count() const NH3API_NOEXCEPT
     {
-        size_t _V = 0;
-        for (size_t _I = 0; _I < _Words + 1; ++_I)
-            _V += bitpopcnt(_A[_I]);
+        size_t result = 0;
+        for (size_t i = 0; i < _Words + 1; ++i)
+            result += bitpopcnt(_array[i]);
 
-        return _V;
+        return result;
     }
 
     NH3API_CONSTEXPR size_t size() const NH3API_NOEXCEPT
     { return N; }
 
-    NH3API_CONSTEXPR bool operator==(const exe_bitset<N>& _R) const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR bool operator==(const exe_bitset<N>& other) const NH3API_NOEXCEPT
     {
-        for (int _I = _Words; 0 <= _I; --_I)
-            if (_A[_I] != _R._W(_I))
+        for (int i = _Words; 0 <= i; --i)
+            if (_array[i] != other._array[i])
                 return false;
         return true;
     }
 
-    NH3API_CONSTEXPR bool operator!=(const exe_bitset<N>& _R) const NH3API_NOEXCEPT
-    { return (!(*this == _R)); }
+    NH3API_CONSTEXPR bool operator!=(const exe_bitset<N>& other) const NH3API_NOEXCEPT
+    { return (!(*this == other)); }
 
-    bool test(size_t _P) const
+    bool test(size_t pos) const
     {
-        if (N <= _P)
-            _Xran();
-        return ((_A[_P / _Bitsperword] & ((underlying_type)1 << _P % _Bitsperword)) != 0);
+        if (N <= pos)
+            _Throw_invalid_subscript();
+        return ((_array[pos / _Bitsperword] & ((word_type)1 << pos % _Bitsperword)) != 0);
     }
 
     NH3API_CONSTEXPR bool any() const NH3API_NOEXCEPT
     {
-        for (int _I = _Words; 0 <= _I; --_I)
-            if (_A[_I] != 0)
+        for (int i = _Words; 0 <= i; --i)
+            if (_array[i] != 0)
                 return true;
         return false;
     }
@@ -369,73 +369,72 @@ public:
     NH3API_CONSTEXPR bool none() const NH3API_NOEXCEPT
     { return !any(); }
 
-    NH3API_CONSTEXPR exe_bitset<N> operator<<(size_t _R) const NH3API_NOEXCEPT
-    { return exe_bitset<N>(*this) <<= _R; }
+    NH3API_CONSTEXPR exe_bitset<N> operator<<(size_t other) const NH3API_NOEXCEPT
+    { return exe_bitset<N>(*this) <<= other; }
 
-    NH3API_CONSTEXPR exe_bitset<N> operator>>(size_t _R) const NH3API_NOEXCEPT
-    { return exe_bitset<N>(*this) >>= _R; }
+    NH3API_CONSTEXPR exe_bitset<N> operator>>(size_t other) const NH3API_NOEXCEPT
+    { return exe_bitset<N>(*this) >>= other; }
 
-    NH3API_CONSTEXPR friend exe_bitset<N> operator&(const exe_bitset<N>& _L,
-        const exe_bitset<N>& _R) NH3API_NOEXCEPT
-    { return exe_bitset<N>(_L) &= _R; }
+    NH3API_CONSTEXPR friend exe_bitset<N> operator&(const exe_bitset<N>& lhs,
+        const exe_bitset<N>& other) NH3API_NOEXCEPT
+    { return exe_bitset<N>(lhs) &= other; }
 
-    NH3API_CONSTEXPR friend exe_bitset<N> operator|(const exe_bitset<N>& _L,
-        const exe_bitset<N>& _R) NH3API_NOEXCEPT
-    { return exe_bitset<N>(_L) |= _R; }
+    NH3API_CONSTEXPR friend exe_bitset<N> operator|(const exe_bitset<N>& lhs,
+        const exe_bitset<N>& other) NH3API_NOEXCEPT
+    { return exe_bitset<N>(lhs) |= other; }
 
-    NH3API_CONSTEXPR friend exe_bitset<N> operator^(const exe_bitset<N>& _L,
-        const exe_bitset<N>& _R) NH3API_NOEXCEPT
-    { return exe_bitset<N>(_L) ^= _R; }
+    NH3API_CONSTEXPR friend exe_bitset<N> operator^(const exe_bitset<N>& lhs,
+        const exe_bitset<N>& other) NH3API_NOEXCEPT
+    { return exe_bitset<N>(lhs) ^= other; }
 
 protected:
-    // array position
-    NH3API_CONSTEXPR underlying_type _W(size_t _I) const NH3API_NOEXCEPT
-    { return (_A[_I]); }
-
     // used for iterations inside the bitset.
     // no need to check for bounds.
-    NH3API_CONSTEXPR bool _At(size_t _P) const NH3API_NOEXCEPT
-    { return ((_A[_P / _Bitsperword] & ((underlying_type)1 << _P % _Bitsperword)) != 0); }
+    NH3API_CONSTEXPR bool _At(size_t pos) const NH3API_NOEXCEPT
+    { return ((_array[pos / _Bitsperword] & ((word_type)1 << pos % _Bitsperword)) != 0); }
 
-    enum : unsigned int
+    enum : uint32_t
     {
-        _Bitsperword = CHAR_BIT * sizeof (underlying_type),
+        _Bitsperword = CHAR_BIT * sizeof (word_type),
         _Words = N == 0 ? 0 : (N - 1) / _Bitsperword
     };
 
-    NH3API_CONSTEXPR void _Tidy(underlying_type _X = 0) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR void _Tidy(word_type value = 0) NH3API_NOEXCEPT
     {
-        for (int _I = _Words; 0 <= _I; --_I)
-            _A[_I] = _X;
-        if (_X != 0)
+        for (int i = _Words; 0 <= i; --i)
+            _array[i] = value;
+        if (value != 0)
             _Trim();
     }
 
     NH3API_CONSTEXPR void _Trim() NH3API_NOEXCEPT
     {
         if (N % _Bitsperword != 0)
-            _A[_Words] &= ((underlying_type)1 << N % _Bitsperword) - 1;
+            _array[_Words] &= ((word_type)1 << N % _Bitsperword) - 1;
     }
 
-    NH3API_FORCEINLINE static void _Xinv() 
-    { NH3API_THROW(std::invalid_argument, "invalid bitset char"); }
+    NH3API_FORCEINLINE static void _Throw_invalid_char() 
+    { NH3API_THROW(std::invalid_argument, "bitset construction failure: invalid bitset char"); }
 
-    NH3API_FORCEINLINE static void _Xoflo()
-    { NH3API_THROW(std::overflow_error, "bitset conversion overflow"); }
+    NH3API_FORCEINLINE static void _Throw_ulong_conversion_overflow()
+    { NH3API_THROW(std::overflow_error, "bitset::to_ulong conversion overflow"); }
 
-    NH3API_FORCEINLINE static void _Xran()
+    NH3API_FORCEINLINE static void _Throw_ullong_conversion_overflow()
+    { NH3API_THROW(std::overflow_error, "bitset::to_ullong conversion overflow"); }
+
+    NH3API_FORCEINLINE static void _Throw_invalid_subscript()
     { NH3API_THROW(std::out_of_range, "invalid bitset position"); }
 
     #if NH3API_STD_HASH
     NH3API_CONSTEXPR size_t _Hash_code() NH3API_NOEXCEPT 
     { 
         nh3api::default_hash hasher;
-        hasher.update(&_A[0], _Words + 1);
+        hasher.update(&_array[0], _Words + 1);
         return hasher.digest();
     }
 
     // allow access to _Hash_code() for std::hash
-    friend std::hash<this_type>;
+    friend std::hash< exe_bitset<N> >;
     #endif
 
     template<class CharT
@@ -496,7 +495,7 @@ protected:
     friend exe_bitset_to_string_helper<N>;
 
     // bit array
-    underlying_type _A[_Words + 1];
+    word_type _array[_Words + 1];
 };
 #pragma pack(pop)
 
