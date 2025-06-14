@@ -1120,6 +1120,7 @@ const omit_base_vftable_tag;
 #ifndef NH3API_HAS_BUILTINS
     #ifdef __has_builtin
         #define NH3API_HAS_BUILTINS (1)
+        #define NH3API_HAS_BUILTIN(BUILTIN_TO_CHECK) __has_builtin(BUILTIN_TO_CHECK)
 
         #ifndef NH3API_HAS_BUILTIN_ADDRESSOF
             #define NH3API_HAS_BUILTIN_ADDRESSOF   __has_builtin(__builtin_addressof)
@@ -1175,6 +1176,7 @@ const omit_base_vftable_tag;
 
     #else
         #define NH3API_HAS_BUILTINS                      (0)
+        #define NH3API_HAS_BUILTIN(BUILTIN_TO_CHECK)     (0)
 
         #define NH3API_HAS_BUILTIN_ADDRESSOF             (0)
         #define NH3API_HAS_BUILTIN_CONSTANT_P            (0)
