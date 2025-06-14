@@ -403,11 +403,6 @@ enum : uint32_t
     ALIGNMENTS_MASK     = ALIGNMENTS_MASK_SOD
 };
 
-#if NH3API_STD_HASH
-class type_point;
-template<> class std::hash<type_point>;
-#endif
-
 // Map point: X, Y, Z coordinates /
 // Точка на карте: координаты X, Y, Z.
 class type_point
@@ -515,10 +510,6 @@ class type_point
             // NOTE: compilers optimize this to std::bit_cast<uint32_t>(*this) & 0x3FFF03FF
             return (0x03FF & x) | (((0x03FF & y) << 16) & 0x03FF0000) | (((0xF & z) << 26) & 0x3C000000); 
         }
-
-        #if NH3API_STD_HASH
-        friend std::hash<type_point>;
-        #endif
 
     public:
         signed x : 10; // +00, bytes 0..1
