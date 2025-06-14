@@ -1755,23 +1755,7 @@ struct exe_vector_helper<exe_allocator<T> >
             {
                 if ( nh3api::tt::is_empty<allocator_type>::value )
                 {
-                    #if NH3API_CHECK_MSVC
-                        *reinterpret_cast<uint32_t*>(&helper) = 0;
-                        _First = nullptr;
-                        _Last  = nullptr;
-                        _End   = nullptr;
-                    #elif __has_builtin(__builtin_memset_inline)
-                        __builtin_memset_inline(this, 0, sizeof(*this));
-                    #elif __has_builtin(__builtin_memset_chk)
-                        __builtin_memset_chk(this, 0, sizeof(*this));
-                    #elif __has_builtin(__builtin_memset)
-                        __builtin_memset(this, 0, sizeof(*this));
-                    #else
-                        *reinterpret_cast<uint32_t*>(&helper) = 0;
-                        _First = nullptr;
-                        _Last  = nullptr;
-                        _End   = nullptr;
-                    #endif
+                    nh3api::trivial_zero<sizeof(exe_vector)>(this);
                 }
                 else
                 {
@@ -1786,10 +1770,7 @@ struct exe_vector_helper<exe_allocator<T> >
         NH3API_FORCEINLINE
         void _Move_nullify(exe_vector* other) NH3API_NOEXCEPT
         {
-            this->helper = std::move(other->helper);
-            this->_First = nh3api::exchange(other->_First, nullptr);
-            this->_Last  = nh3api::exchange(other->_Last, nullptr);
-            this->_End   = nh3api::exchange(other->_End, nullptr);
+            nh3api::trivial_move<sizeof(exe_vector)>(other, this);
         }
         #endif
 
