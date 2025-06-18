@@ -34,7 +34,7 @@ struct TCheatCode
         {
             if (nh3api::isalpha_constexpr(_code[i])) 
             {
-                code[index] = b[nh3api::fast_tolower(_code[i]) - 'a'];
+                code[index] = b[nh3api::tolower_constexpr(_code[i]) - 'a'];
                 index++;
             } 
             else 

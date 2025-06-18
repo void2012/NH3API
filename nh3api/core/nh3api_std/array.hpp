@@ -40,12 +40,12 @@ namespace std // C++98 <array> implementation
             /// @brief fills array with values <arg>
             /// @param arg value to fill array with
             void fill(const value_type & arg)
-            { nh3api::fill(begin(), end(), arg); }
+            { ::nh3api::fill(begin(), end(), arg); }
 
             /// @brief
             /// @param other
             void swap(array & other)
-            { std::swap_ranges(begin(), end(), other.begin()); }
+            { ::std::swap_ranges(begin(), end(), other.begin()); }
 
             /// @brief
             /// @return iterator to the beginning
@@ -158,7 +158,7 @@ namespace std // C++98 <array> implementation
             reference at(size_type pos)
             {
                 return  ( size() < pos ) ? _data[pos] :
-                (NH3API_THROW(std::out_of_range, "std::array::at pos out of range."), _data[pos]);
+                (NH3API_THROW(::std::out_of_range, "std::array::at pos out of range."), _data[pos]);
             }
 
             /// @brief
@@ -167,7 +167,7 @@ namespace std // C++98 <array> implementation
             const_reference at(size_type pos) const
             {
                 return  ( size() < pos ) ? _data[pos] :
-                (NH3API_THROW(std::out_of_range, "std::array::at pos out of range."), _data[pos]);
+                (NH3API_THROW(::std::out_of_range, "std::array::at pos out of range."), _data[pos]);
             }
 
             /// @brief access the beginning of the array

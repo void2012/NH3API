@@ -1108,11 +1108,11 @@ const omit_base_vftable_tag;
     #define NH3API_STD_RANGES_CONTAINERS (0)
 #endif
 
-#ifndef NH3API_HAS_CHECK_INCLUDE
+#ifndef NH3API_HAS_INCLUDE
     #ifdef __has_include
-        #define NH3API_HAS_CHECK_INCLUDE (1)
+        #define NH3API_HAS_INCLUDE(ARG) __has_include(ARG)
     #else
-        #define NH3API_HAS_CHECK_INCLUDE (0)
+        #define NH3API_HAS_INCLUDE() (0)
     #endif
 #endif
 
@@ -1121,81 +1121,14 @@ const omit_base_vftable_tag;
     #ifdef __has_builtin
         #define NH3API_HAS_BUILTINS (1)
         #define NH3API_HAS_BUILTIN(BUILTIN_TO_CHECK) __has_builtin(BUILTIN_TO_CHECK)
-
-        #ifndef NH3API_HAS_BUILTIN_ADDRESSOF
-            #define NH3API_HAS_BUILTIN_ADDRESSOF   __has_builtin(__builtin_addressof)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_CONSTANT_P
-            #define NH3API_HAS_BUILTIN_CONSTANT_P  __has_builtin(__builtin_constant_p)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_BIT_CAST
-            #define NH3API_HAS_BUILTIN_BIT_CAST    __has_builtin(__builtin_bit_cast)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_STRLEN
-            #define NH3API_HAS_BUILTIN_STRLEN      __has_builtin(__builtin_strlen)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_WCSLEN
-            #define NH3API_HAS_BUILTIN_WCSLEN      __has_builtin(__builtin_wcslen)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_MEMCMP
-            #define NH3API_HAS_BUILTIN_MEMCMP      __has_builtin(__builtin_memcmp)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_WMEMCMP
-            #define NH3API_HAS_BUILTIN_WMEMCMP     __has_builtin(__builtin_wmemcmp)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_MEMCHR
-            #define NH3API_HAS_BUILTIN_MEMCHR      __has_builtin(__builtin_memchr)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_CHAR_MEMCHR
-            #define NH3API_HAS_BUILTIN_CHAR_MEMCHR __has_builtin(__builtin_char_memchr)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_WMEMCHR
-            #define NH3API_HAS_BUILTIN_WMEMCHR     __has_builtin(__builtin_wmemchr)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_MEMCPY
-            #define NH3API_HAS_BUILTIN_MEMCPY      __has_builtin(__builtin_memcpy)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_MEMMOVE
-            #define NH3API_HAS_BUILTIN_MEMMOVE     __has_builtin(__builtin_memmove)
-        #endif
-
-        #ifndef NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
-            #define NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED __has_builtin(__builtin_is_constant_evaluated)
-        #endif
-
     #else
         #define NH3API_HAS_BUILTINS                      (0)
         #define NH3API_HAS_BUILTIN(BUILTIN_TO_CHECK)     (0)
-
-        #define NH3API_HAS_BUILTIN_ADDRESSOF             (0)
-        #define NH3API_HAS_BUILTIN_CONSTANT_P            (0)
-        #define NH3API_HAS_BUILTIN_BIT_CAST              (0)
-        #define NH3API_HAS_BUILTIN_STRLEN                (0)
-        #define NH3API_HAS_BUILTIN_WCSLEN                (0)
-        #define NH3API_HAS_BUILTIN_MEMCMP                (0)
-        #define NH3API_HAS_BUILTIN_WMEMCMP               (0)
-        #define NH3API_HAS_BUILTIN_MEMCHR                (0)
-        #define NH3API_HAS_BUILTIN_CHAR_MEMCHR           (0)
-        #define NH3API_HAS_BUILTIN_WMEMCHR               (0)
-        #define NH3API_HAS_BUILTIN_MEMCPY                (0)
-        #define NH3API_HAS_BUILTIN_MEMMOVE               (0)
-        #define NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED (0)
     #endif
 #endif
 
 #ifndef NH3API_HAS_IS_CONSTANT_EVALUATED
-    #if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
+    #if NH3API_HAS_BUILTIN(__builtin_is_constant_evaluated)
         #define NH3API_HAS_IS_CONSTANT_EVALUATED (1)
         namespace nh3api
         {
@@ -1227,15 +1160,6 @@ const omit_base_vftable_tag;
         #define NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED constexpr
     #else
         #define NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
-    #endif
-#endif
-
-// nodebug attribute which makes the type/variable/function not include in the debug information
-#ifndef NH3API_NODEBUG
-    #if NH3API_CHECK_GNU_DRIVER || NH3API_CHECK_CLANG_CL 
-        #define NH3API_NODEBUG [[__gnu__::__nodebug__]]
-    #else 
-        #define NH3API_NODEBUG
     #endif
 #endif
 
@@ -1377,10 +1301,6 @@ const omit_base_vftable_tag;
     #ifndef NH3API_RETHROW
         #define NH3API_RETHROW ((void)0);
     #endif
-#endif
-
-#ifndef NH3API_NOEXCEPT_ALLOC
-    #define NH3API_NOEXCEPT_ALLOC NH3API_NOEXCEPT_EXPR(::nh3api::tt::allocator_may_throw<allocator_type>::value)
 #endif
 
 #ifndef NH3API_NOEXCEPT_DESTRUCT

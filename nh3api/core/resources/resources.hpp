@@ -1609,7 +1609,7 @@ struct TCacheMapKey
 {
     public:
         TCacheMapKey(const char * _name) NH3API_NOEXCEPT
-        { nh3api::copy_n_constexpr(_name, 12, name.data()); name.back() = '\0'; }
+        { ::nh3api::constexpr_char_traits::copy(name.data(), _name, 12); name.back() = '\0'; }
 
         bool operator<(TCacheMapKey const& rhf) const NH3API_NOEXCEPT
         { return ::nh3api::case_insensitive_traits::compare(this->name.data(), rhf.name.data(), this->name.size()) < 0; }

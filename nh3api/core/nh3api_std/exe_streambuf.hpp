@@ -352,15 +352,15 @@ virtual void __thiscall imbue(void* ptr) override\
 { get_type_vftable(this)->imbue(this, ptr); }
 #endif
 
-template<class _E, class _Tr = std::char_traits<_E> >
+template<class CharT, class CharTraits = std::char_traits<CharT> >
 NH3API_VIRTUAL_CLASS exe_basic_streambuf
 {
 private:
-    typedef exe_basic_streambuf<_E, _Tr> this_type NH3API_NODEBUG;
+    typedef exe_basic_streambuf<CharT, CharTraits> this_type;
 
 public:
-    typedef _E                    char_type;
-    typedef _Tr                   traits_type;
+    typedef CharT                    char_type;
+    typedef CharTraits                   traits_type;
     typedef int32_t               int_type;
     typedef exe_streampos         pos_type;
     typedef int32_t               off_type;
@@ -669,12 +669,12 @@ typedef exe_basic_streambuf<char, std::char_traits<char> > exe_streambuf;
 #pragma pack(push, 4)
 //
 // size = 0x54 = 84, align = 4, baseclass: std::streambuf
-template<class _E, class _Tr = std::char_traits<_E> >
-NH3API_VIRTUAL_CLASS exe_basic_filebuf : public exe_basic_streambuf<_E, _Tr>
+template<class CharT, class CharTraits = std::char_traits<CharT> >
+NH3API_VIRTUAL_CLASS exe_basic_filebuf : public exe_basic_streambuf<CharT, CharTraits>
 {
     protected:
-        typedef exe_basic_filebuf<_E, _Tr> this_type NH3API_NODEBUG;
-        typedef exe_basic_streambuf<_E, _Tr> base_type NH3API_NODEBUG;
+        typedef exe_basic_filebuf<CharT, CharTraits> this_type;
+        typedef exe_basic_streambuf<CharT, CharTraits> base_type;
 
     public:
         typedef HANDLE native_handle_type;
@@ -763,8 +763,8 @@ NH3API_VIRTUAL_CLASS exe_basic_filebuf : public exe_basic_streambuf<_E, _Tr>
 NH3API_VIRTUAL_CLASS exe_strstreambuf : public exe_streambuf
 {
     protected:
-        typedef exe_strstreambuf this_type NH3API_NODEBUG;
-        typedef exe_streambuf    base_type NH3API_NODEBUG;
+        typedef exe_strstreambuf this_type;
+        typedef exe_streambuf    base_type;
 
     // note: 'typename' not required
     public:

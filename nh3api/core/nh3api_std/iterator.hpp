@@ -326,6 +326,7 @@ _Iter unfancy(const _Iter&& iter) NH3API_NOEXCEPT
 template<typename _Iter>
 _Iter unfancy(const _Iter& iter) NH3API_NOEXCEPT
 { return iter; }
+
 #endif
 
 // typedefs to comply with the C++ standard
@@ -339,10 +340,12 @@ struct container_iterator
         typedef _DiffType difference_type;
         typedef value_type* pointer;
         typedef value_type& reference;
+
 };
 
 namespace tt 
 {
+
 template<typename IterT, bool IsIterator = is_iterator<IterT>::value>
 struct is_random_access_iterator
     : integral_constant<bool, 
@@ -355,6 +358,7 @@ template<typename IterT>
 struct is_random_access_iterator<IterT, false>
     : false_type
 {};    
-}
 
-}
+} // namespace nh3api::tt
+
+} // namespace nh3api

@@ -29,34 +29,20 @@
 #include "nh3api_exceptions.hpp" // exceptions
 
 #pragma pack(push, 4)
-//namespace nh3api
-//{
-
 /// @brief Visual C++ 6.0 std::deque implementation used by heroes3.exe
-/// @tparam _Ty stored type
-/// @tparam _A  allocator type
-template<class _Ty, typename _A = exe_allocator<_Ty> >
+/// @tparam T stored type
+template<class T>
 class exe_deque
 {
 public:
-    typedef _A allocator_type;
-
-protected:
-    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::propagate_on_container_copy_assignment
-    propagate_allocator_on_copy_assignment;
-    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::propagate_on_container_move_assignment 
-    propagate_allocator_on_move_assignment;
-    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::propagate_on_container_swap 
-    propagate_allocator_on_swap;
-
-public:
-    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::size_type       size_type;
-    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::difference_type difference_type;
-    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::value_type      value_type;
-    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::pointer         pointer;
-    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::const_pointer   const_pointer;
-    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::reference       reference;
-    typedef typename ::nh3api::tt::allocator_container_traits<allocator_type>::const_reference const_reference;
+    typedef exe_allocator<T> allocator_type;
+    typedef size_t            size_type;
+    typedef ptrdiff_t         difference_type;
+    typedef T                 value_type;
+    typedef value_type*       pointer;
+    typedef const value_type* const_pointer;
+    typedef value_type&       reference;
+    typedef const value_type& const_reference;
 
 protected:
     typedef pointer* _Mapptr;
@@ -72,12 +58,12 @@ public:
     class iterator;
 
 protected:
-    template<typename _ValueType = typename nh3api::tt::add_const<typename exe_deque<_Ty,_A>::value_type>::type>
+    template<typename _ValueType = typename nh3api::tt::add_const<typename exe_deque<T>::value_type>::type>
     class deque_iterator :
-    public nh3api::container_iterator<_ValueType, typename exe_deque<_Ty,_A>::difference_type, std::random_access_iterator_tag>
+    public nh3api::container_iterator<_ValueType, typename exe_deque<T>::difference_type, std::random_access_iterator_tag>
     {
     public:
-        friend class exe_deque<_Ty, _A>;
+        friend class exe_deque<T>;
 
     protected:
         pointer _First;
@@ -132,9 +118,9 @@ protected:
         NH3API_FORCEINLINE
         deque_iterator operator++( int ) NH3API_NOEXCEPT
         {
-            deque_iterator _Tmp = *this;
+            deque_iterator temp = *this;
             ++*this;
-            return (_Tmp);
+            return (temp);
         }
         NH3API_FORCEINLINE
         deque_iterator& operator--() NH3API_NOEXCEPT
@@ -151,9 +137,9 @@ protected:
         NH3API_FORCEINLINE
         deque_iterator operator--( int ) NH3API_NOEXCEPT
         {
-            deque_iterator _Tmp = *this;
+            deque_iterator temp = *this;
             --* this;
-            return (_Tmp);
+            return (temp);
         }
         deque_iterator& operator+=( difference_type _N ) NH3API_NOEXCEPT
         {
@@ -168,14 +154,14 @@ protected:
         NH3API_FORCEINLINE
         deque_iterator operator+( difference_type _N ) const NH3API_NOEXCEPT
         {
-            deque_iterator _Tmp = *this;
-            return (_Tmp += _N);
+            deque_iterator temp = *this;
+            return (temp += _N);
         }
         NH3API_FORCEINLINE
         deque_iterator operator-( difference_type _N ) const NH3API_NOEXCEPT
         {
-            deque_iterator _Tmp = *this;
-            return (_Tmp -= _N);
+            deque_iterator temp = *this;
+            return (temp -= _N);
         }
         NH3API_FORCEINLINE
         difference_type operator-( const deque_iterator& other ) const NH3API_NOEXCEPT
@@ -242,13 +228,13 @@ protected:
     };
 
 public:
-    typedef deque_iterator<typename nh3api::tt::add_const<typename exe_deque<_Ty,_A>::value_type>::type> const_iterator;
+    typedef deque_iterator<typename nh3api::tt::add_const<typename exe_deque<T>::value_type>::type> const_iterator;
 
 public:
-    class iterator : public deque_iterator<typename exe_deque<_Ty,_A>::value_type>
+    class iterator : public deque_iterator<typename exe_deque<T>::value_type>
     {
     private:
-        typedef deque_iterator<typename exe_deque<_Ty,_A>::value_type> base_type NH3API_NODEBUG;
+        typedef deque_iterator<typename exe_deque<T>::value_type> base_type;
     public:
         NH3API_FORCEINLINE
         iterator() NH3API_NOEXCEPT
@@ -289,9 +275,9 @@ public:
         NH3API_FORCEINLINE
         iterator operator++( int )
         {
-            iterator _Tmp = *this;
+            iterator temp = *this;
             ++* this;
-            return (_Tmp);
+            return (temp);
         }
         NH3API_FORCEINLINE
         iterator& operator--()
@@ -308,9 +294,9 @@ public:
         NH3API_FORCEINLINE
         iterator operator--( int )
         {
-            iterator _Tmp = *this;
+            iterator temp = *this;
             --*this;
-            return (_Tmp);
+            return (temp);
         }
         NH3API_FORCEINLINE
         iterator& operator+=( difference_type _N )
@@ -326,14 +312,14 @@ public:
         NH3API_FORCEINLINE
         iterator operator+( difference_type _N ) const
         {
-            iterator _Tmp = *this;
-            return (_Tmp += _N);
+            iterator temp = *this;
+            return (temp += _N);
         }
         NH3API_FORCEINLINE
         iterator operator-( difference_type _N ) const
         {
-            iterator _Tmp = *this;
-            return (_Tmp -= _N);
+            iterator temp = *this;
+            return (temp -= _N);
         }
         NH3API_FORCEINLINE
         difference_type operator-( const iterator& other ) const
@@ -383,117 +369,81 @@ public:
     typedef std::reverse_iterator<iterator>       reverse_iterator;
 
 protected:
-    // initialize from [_First, _Last), input iterators
+    // initialize from [_Begin, _End), input iterators
     template<class IterT>
     void _Construct(IterT _Begin, IterT _End)
     {
-        NH3API_IF_CONSTEXPR ( !nh3api::tt::allocator_may_throw<allocator_type>::value )
+        NH3API_TRY
         {
-            #if NH3API_STD_MOVE_SEMANTICS
-            for (; _Begin != _End; ++_Begin)
-                emplace_back(*_Begin);
-            #else
-            for (; _Begin != _End; ++_Begin)
-                push_back(*_Begin);
-            #endif
+            insert(begin(), _Begin, _End);
         }
-        else
+        NH3API_CATCH(...)
         {
-            NH3API_TRY
-            {
-                #if NH3API_STD_MOVE_SEMANTICS
-                for (; _Begin != _End; ++_Begin)
-                    emplace_back(*_Begin);
-                #else
-                for (; _Begin != _End; ++_Begin)
-                    push_back(*_Begin);
-                #endif
-            }
-            NH3API_CATCH(...)
-            {
-                _Tidy();
-                NH3API_RETHROW
-            }
+            _Tidy();
+            NH3API_RETHROW
         }
     }
 
     void _Construct_n(size_type _Count, const value_type& _Val)
     {
-        if (_Buy(_Count))
-        {	// nonzero, fill it
-            NH3API_IF_CONSTEXPR ( nh3api::tt::is_nothrow_copy_constructible<value_type>::value
-                                  || !nh3api::tt::allocator_may_throw<allocator_type>::value )
-            {
-                for (; 0 < _Count; --_Count)
-                    push_back(_Val);
-            }
-            else
-            {
-                NH3API_TRY
-                {
-                    for (; 0 < _Count; --_Count)
-                        push_back(_Val);
-                }
-                NH3API_CATCH(...)
-                {
-                    _Tidy();
-                    NH3API_RETHROW
-                }
-            }
+        NH3API_TRY
+        {
+            _Insert_n(begin(), _Count, _Val);
+        }
+        NH3API_CATCH(...)
+        {
+            _Tidy();
+            NH3API_RETHROW
         }
     }
 
 public:
-    exe_deque()
-        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_default_constructible<allocator_type>::value)
-        : allocator(), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
+    exe_deque() NH3API_NOEXCEPT
+        : _Dummy(0), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     {}
 
-    explicit exe_deque(const allocator_type& a)
-        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<allocator_type>::value)
-        : allocator(a), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
+    explicit exe_deque(const allocator_type& a) NH3API_NOEXCEPT
+        : _Dummy(0), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     {}
 
-    explicit exe_deque( size_type _N, const value_type& _V = value_type(),
-                        const _A& _Al = _A() )
-        : allocator( _Al ), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
+    explicit exe_deque( size_type _N, const value_type& _V,
+                        const allocator_type& _Al = allocator_type() )
+        : _Dummy(0), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     { _Construct_n(_N, _V); }
 
     explicit exe_deque( size_type _N, const value_type& _V = value_type())
-        : allocator(), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
+        : _Dummy(0), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     { _Construct_n(_N, _V); }
 
     exe_deque( const exe_deque& other )
-        : allocator(nh3api::allocator_select_on_container_copy_construction(other.allocator))
+        : _Dummy(0)
     { _Construct(other.begin(), other.end()); }
 
     template<class IterT
     NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-    exe_deque(IterT _F, IterT _L, const _A& _Al = _A()
+    exe_deque(IterT first, IterT last, const allocator_type& _Al = allocator_type()
     NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
-        : allocator( _Al ),
-        _First(), _Last(), _Map( nullptr ), _Mapsize( 0 ), _Size( 0 )
+        : _Dummy(0), _First(), _Last(), _Map( nullptr ), _Mapsize( 0 ), _Size( 0 )
     {
-        _Construct(_F, _L);
-        //std::copy( _F, _L, std::back_inserter( *this ) );
+        _Construct(first, last);
+        //std::copy( first, last, std::back_inserter( *this ) );
     }
 
     template<class IterT
     NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-    exe_deque(IterT _F, IterT _L
+    exe_deque(IterT first, IterT last
     NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
-        : allocator(),
-        _First(), _Last(), _Map( nullptr ), _Mapsize( 0 ), _Size( 0 )
+        : _Dummy(0), _First(), _Last(), _Map( nullptr ), _Mapsize( 0 ), _Size( 0 )
     {
-        _Construct(_F, _L);
-        //std::copy( _F, _L, std::back_inserter( *this ) );
+        _Construct(first, last);
+        //std::copy( first, last, std::back_inserter( *this ) );
     }
 
     exe_deque(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
         : _First(tag), _Last(tag)
-    { NH3API_IGNORE(_Map, _Mapsize, _Size); }
+    { NH3API_IGNORE(_Dummy, _Map, _Mapsize, _Size); }
 
-    ~exe_deque() NH3API_NOEXCEPT_DESTRUCT
+    ~exe_deque() NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
     {
         _Tidy();
     }
@@ -561,47 +511,52 @@ public:
     {
         return (const_reverse_iterator( begin() ));
     }
+
     const_reverse_iterator crbegin() const NH3API_NOEXCEPT
     {
         return (const_reverse_iterator( end() ));
     }
+
     const_reverse_iterator crend() const NH3API_NOEXCEPT
     {
         return (const_reverse_iterator( begin() ));
     }
+
     void resize( size_type _N, value_type value = value_type() )
     {
         if ( size() < _N )
-            insert( end(), _N - size(), value );
+            _Insert_n( end(), _N - size(), value );
         else if ( _N < size() )
             erase( begin() + _N, end() );
     }
+
     size_type size() const NH3API_NOEXCEPT
     {
         return (_Size);
     }
+
+    NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
     size_type max_size() const NH3API_NOEXCEPT
-    {
-        return nh3api::allocator_max_size(allocator);
-    }
+    { return size_type(~0) / sizeof(value_type); }
+
     bool empty() const NH3API_NOEXCEPT
     {
         return (size() == 0);
     }
+
     allocator_type get_allocator() const NH3API_NOEXCEPT
-    {
-        return allocator;
-    }
+    { return allocator_type(); }
+
     const_reference at( size_type _P ) const
     {
         if ( size() <= _P )
-            _throw_invalid_subscript();
+            _Throw_invalid_subscript();
         return (*(begin() + _P));
     }
     reference at( size_type _P )
     {
         if ( size() <= _P )
-            _throw_invalid_subscript();
+            _Throw_invalid_subscript();
         return (*(begin() + _P));
     }
     const_reference operator[]( size_type _P ) const NH3API_NOEXCEPT
@@ -640,12 +595,12 @@ public:
     {
         if ( empty() || _First._Next == _First._First )
             _Buyfront();
-        nh3api::copy_construct( --_First._Next, value, allocator );
+        nh3api::construct_at( --_First._Next, value );
         ++_Size;
     }
-    void pop_front() NH3API_NOEXCEPT_DESTRUCT
+    void pop_front() NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
     {
-        nh3api::allocator_destroy( allocator, _First._Next++ );
+        nh3api::destroy_at(_First._Next++);
         --_Size;
         if ( empty() || _First._Next == _First._Last )
             _Freefront();
@@ -655,34 +610,47 @@ public:
         if ( empty() || (_Last._Next == _Last._Last) )
         {
             _Buyback();
-            nh3api::copy_construct( _Last._Next++, value, allocator );
+            nh3api::construct_at( _Last._Next++, value );
         }
         else if ( _Last._Next + 1 == _Last._Last )
         {
-            nh3api::copy_construct( _Last._Next++, value, allocator );
+            nh3api::construct_at( _Last._Next++, value );
             _Buyback();
         }
         else
-            nh3api::copy_construct( _Last._Next++, value, allocator );
+            nh3api::construct_at( _Last._Next++, value );
         ++_Size;
     }
 
 #if NH3API_STD_MOVE_SEMANTICS
+    exe_deque(exe_deque&& other) NH3API_NOEXCEPT
+    { nh3api::trivial_move<sizeof(*this)>(&other, this); }
+
+    exe_deque& operator=(exe_deque&& other) NH3API_NOEXCEPT
+    {
+        if (this != &other)
+        {
+            _Tidy();
+            nh3api::trivial_move<sizeof(*this)>(&other, this);
+        }
+        return *this;
+    }
+
     template<class ...Args>
     reference emplace_back(Args&& ...args)
     {
         if ( empty() || (_Last._Next == _Last._Last) )
         {
             _Buyback();
-            nh3api::variadic_construct( allocator, _Last._Next++, std::forward<Args>(args)...);
+            nh3api::construct_at(_Last._Next++, std::forward<Args>(args)...);
         }
         else if ( _Last._Next + 1 == _Last._Last )
         {
-            nh3api::variadic_construct( allocator, _Last._Next++, std::forward<Args>(args)...);
+            nh3api::construct_at(_Last._Next++, std::forward<Args>(args)...);
             _Buyback();
         }
         else
-            nh3api::variadic_construct( allocator, _Last._Next++, std::forward<Args>(args)...);
+            nh3api::construct_at(_Last._Next++, std::forward<Args>(args)...);
         ++_Size;
         return back();
     }
@@ -695,7 +663,7 @@ public:
     {
         if ( empty() || _First._Next == _First._First )
             _Buyfront();
-        nh3api::variadic_construct( allocator, --_First._Next, std::forward<Args>(args) ...);
+        nh3api::construct_at(--_First._Next, std::forward<Args>(args) ...);
         ++_Size;
         return front();
     }
@@ -732,40 +700,51 @@ public:
                 _S = begin() + _Off;
                 std::copy_backward( _S, end() - 2, end() - 1 );
             }
-            nh3api::variadic_construct( allocator, _S._Next, std::forward<Args>(args)...);
+            nh3api::construct_at( _S._Next, std::forward<Args>(args)...);
             return (_S);
         }
     }
-#endif
+#endif // move semantics
+
+    void shrink_to_fit()
+    {	// reduce capacity
+        exe_deque temp(*this);
+        swap(temp);
+    }
 
     void pop_back()
     {
         if ( _Last._Next == _Last._First )
             _Freeback();
         if ( !empty() )
-            nh3api::allocator_destroy(allocator, --_Last._Next );
+            nh3api::destroy_at(--_Last._Next );
         --_Size;
         if ( empty() )
             _Freeback();
     }
-    void assign( const_iterator _F, const_iterator _L )
+
+    template<class IterT
+    NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+    void assign(IterT first, IterT last
+    NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
     {
+        nh3api::verify_range(first, last);
         erase( begin(), end() );
-        insert( begin(), _F, _L );
+        insert( begin(), first, last );
     }
-    void assign( size_type _N, const value_type& value = value_type() )
+
+    void assign( size_type _Count, const value_type& value )
     {
-        erase( begin(), end() );
-        insert( begin(), _N, value );
+        _Assign_n(_Count, value);
     }
-    iterator insert( iterator _P, const value_type& value = value_type() )
+    iterator insert( iterator pos, const value_type& value )
     {
-        if ( _P == begin() )
+        if ( pos == begin() )
         {
             push_front( value );
             return (begin());
         }
-        else if ( _P == end() )
+        else if ( pos == end() )
         {
             push_back( value );
             return (end() - 1);
@@ -773,7 +752,7 @@ public:
         else
         {
             iterator _S;
-            size_type _Off = _P - begin();
+            size_type _Off = pos - begin();
             if ( _Off < size() / 2 )
             {
                 push_front( front() );
@@ -791,65 +770,30 @@ public:
         }
     }
 
-    void insert( iterator _P, size_type _M, const value_type& value )
+    void insert( iterator pos, size_type _Count, const value_type& value)
     {
-        iterator _S;
-        size_type _I;
-        size_type _Off = _P - begin();
-        size_type _Rem = _Size - _Off;
-        if ( _Off < _Rem )
-            if ( _Off < _M )
-            {
-                for ( _I = _M - _Off; 0 < _I; --_I )
-                    push_front( value );
-                for ( _I = _Off; 0 < _I; --_I )
-                    push_front( begin()[_M - 1] );
-                _S = begin() + _M;
-                std::fill( _S, _S + _Off, value );
-            }
-            else
-            {
-                for ( _I = _M; 0 < _I; --_I )
-                    push_front( begin()[_M - 1] );
-                _S = begin() + _M;
-                _Umove( _S + _M, _S + _Off, _S );
-                std::fill( begin() + _Off, _S + _Off, value );
-            }
-        else
-            if ( _Rem < _M )
-            {
-                for ( _I = _M - _Rem; 0 < _I; --_I )
-                    push_back( value );
-                for ( _I = 0; _I < _Rem; ++_I )
-                    push_back( begin()[_Off + _I] );
-                _S = begin() + _Off;
-                std::fill( _S, _S + _Rem, value );
-            }
-            else
-            {
-                for ( _I = 0; _I < _M; ++_I )
-                    push_back( begin()[_Off + _Rem - _M + _I] );
-                _S = begin() + _Off;
-                std::copy_backward( _S, _S + _Rem - _M, _S + _Rem );
-                std::fill( _S, _S + _M, value );
-            }
+        _Insert_n(pos, _Count, value);
     }
-    void insert( iterator _P, const_iterator _F, const_iterator _L )
+
+    template<class IterT
+    NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+    void insert( const_iterator _Where, const_iterator first, const_iterator last 
+    NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
     {
-        size_type _M = std::distance(_F, _L);
+        size_type _M = std::distance(first, last);
         size_type _I;
-        size_type _Off = _P - begin();
+        size_type _Off = _Where - begin();
         size_type _Rem = _Size - _Off;
         if ( _Off < _Rem )
             if ( _Off < _M )
             {
-                const_iterator _Qx = _F;
+                const_iterator _Qx = first;
                 std::advance( _Qx, _M - _Off );
-                for ( const_iterator _Q = _Qx; _F != _Q; )
+                for ( const_iterator _Q = _Qx; first != _Q; )
                     push_front( *--_Q );
                 for ( _I = _Off; 0 < _I; --_I )
                     push_front( begin()[_M - 1] );
-                std::copy( _Qx, _L, begin() + _M );
+                std::copy( _Qx, last, begin() + _M );
             }
             else
             {
@@ -857,18 +801,18 @@ public:
                     push_front( begin()[_M - 1] );
                 iterator _S = begin() + _M;
                 std::copy( _S + _M, _S + _Off, _S );
-                std::copy( _F, _L, begin() + _Off );
+                std::copy( first, last, begin() + _Off );
             }
         else
             if ( _Rem < _M )
             {
-                const_iterator _Qx = _F;
+                const_iterator _Qx = first;
                 std::advance( _Qx, _Rem );
-                for ( const_iterator _Q = _Qx; _Q != _L; ++_Q )
+                for ( const_iterator _Q = _Qx; _Q != last; ++_Q )
                     push_back( *_Q );
                 for ( _I = 0; _I < _Rem; ++_I )
                     push_back( begin()[_Off + _I] );
-                std::copy( _F, _Qx, begin() + _Off );
+                std::copy( first, _Qx, begin() + _Off );
             }
             else
             {
@@ -876,64 +820,46 @@ public:
                     push_back( begin()[_Off + _Rem - _M + _I] );
                 iterator _S = begin() + _Off;
                 std::copy_backward( _S, _S + _Rem - _M, _S + _Rem );
-                std::copy( _F, _L, _S );
+                std::copy( first, last, _S );
             }
     }
-    iterator erase( iterator _P ) NH3API_NOEXCEPT_DESTRUCT
+    iterator erase( iterator _P ) NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
     {
         return (erase( _P, _P + 1 ));
     }
-    iterator erase( iterator _F, iterator _L ) NH3API_NOEXCEPT_DESTRUCT
+    iterator erase( iterator first, iterator last ) NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
     {
-        size_type _N = _L - _F;
-        size_type _M = _F - begin();
-        if ( _M < end() - _L )
+        size_type _N = last - first;
+        size_type _M = first - begin();
+        if ( _M < end() - last )
         {
-            std::copy_backward( begin(), _F, _L );
+            std::copy_backward( begin(), first, last );
             for ( ; 0 < _N; --_N )
                 pop_front();
         }
         else
         {
-            std::copy( _L, end(), _F );
+            std::copy( last, end(), first );
             for ( ; 0 < _N; --_N )
                 pop_back();
         }
         return (_M == 0 ? begin() : begin() + _M);
     }
-    void clear() NH3API_NOEXCEPT_DESTRUCT
+    void clear() NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
     {
         erase( begin(), end() );
     }
-    void swap( exe_deque& other )
-    NH3API_NOEXCEPT_EXPR(nh3api::tt::is_empty<allocator_type>::value)
+    void swap( exe_deque& other ) NH3API_NOEXCEPT
     {
         if ( this != &other )
         {
-            if ( nh3api::tt::is_empty<allocator_type>::value )
-            {
-                nh3api::trivial_swap<sizeof(exe_deque)>(this, &other);
-            }
-            else if ( this->allocator == other.allocator )
-            {
-                std::swap(_First, other._First);
-                std::swap(_Last, other._Last);
-                std::swap(_Map, other._Map);
-                std::swap(_Mapsize, other._Mapsize);
-                std::swap(_Size, other._Size);
-            }
-            else
-            {
-                exe_deque _Ts = *this;
-                *this = other;
-                other = _Ts;
-            }    
+            nh3api::trivial_swap<sizeof(*this)>(this, &other);
         }
     }
 
 protected:
-    template<class _Iter>
-    pointer _Umove(_Iter _Begin, _Iter _End, pointer _Ptr)
+    template<class _Iter> static
+    pointer _Move(_Iter _Begin, _Iter _End, pointer _Ptr)
     {
         #if !NH3API_STD_MOVE_SEMANTICS
             return std::copy(_Begin, _End, _Ptr);
@@ -948,8 +874,8 @@ protected:
         #endif
     }
 
-    template<class _Iter>
-    pointer _UmoveBackward(_Iter _Begin, _Iter _End, pointer _Ptr)
+    template<class _Iter> static
+    pointer _Move_backward(_Iter _Begin, _Iter _End, pointer _Ptr)
     {
         #if !NH3API_STD_MOVE_SEMANTICS
             return std::copy_backward(_Begin, _End, _Ptr);
@@ -964,9 +890,82 @@ protected:
         #endif
     }
 
+    void _Assign_n(size_type _Count, const value_type& _Val)
+    {	// assign _Count * _Val
+        value_type temp = _Val;	// in case _Val is in sequence
+        erase(begin(), end());
+        _Insert_n(begin(), _Count, temp);
+    }
+
+    void _Insert_n(const_iterator _Where, size_type _Count,
+                   const value_type &_Val) { // insert _Count * _Val at _Where
+      iterator _Mid;
+      size_type _Num;
+      size_type _Off = _Where - begin();
+      size_type _Rem = this->_Size - _Off;
+      size_type _Oldsize = this->_Size;
+
+      if (_Off < _Rem) { // closer to front
+        NH3API_TRY {
+          if (_Off < _Count) { // insert longer than prefix
+            for (_Num = _Count - _Off; 0 < _Num; --_Num)
+              push_front(_Val); // push excess values
+            for (_Num = _Off; 0 < _Num; --_Num)
+              push_front(begin()[_Count - 1]); // push prefix
+
+            _Mid = begin() + _Count;
+            std::fill(_Mid, _Mid + _Off,
+                      _Val); // fill in rest of values
+          } else {           // insert not longer than prefix
+            for (_Num = _Count; 0 < _Num; --_Num)
+              push_front(begin()[_Count - 1]); // push part of prefix
+
+            _Mid = begin() + _Count;
+            value_type temp = _Val; // in case _Val is in sequence
+            _Move(_Mid + _Count, _Mid + _Off, _Mid);      // copy rest of prefix
+            std::fill(begin() + _Off, _Mid + _Off, temp); // fill in values
+          }
+        }
+        NH3API_CATCH(...) {
+          for (; _Oldsize < this->_Size;)
+            pop_front(); // restore old size, at least
+          NH3API_RETHROW
+        }
+      } else { // closer to back
+        NH3API_TRY {
+          if (_Rem < _Count) { // insert longer than suffix
+            for (_Num = _Count - _Rem; 0 < _Num; --_Num)
+              push_back(_Val); // push excess values
+            for (_Num = 0; _Num < _Rem; ++_Num)
+              push_back(begin()[_Off + _Num]); // push suffix
+
+            _Mid = begin() + _Off;
+            std::fill(_Mid, _Mid + _Rem,
+                      _Val); // fill in rest of values
+          } else {           // insert not longer than prefix
+            for (_Num = 0; _Num < _Count; ++_Num)
+              push_back(
+                  begin()[_Off + _Rem - _Count + _Num]); // push part of prefix
+
+            _Mid = begin() + _Off;
+            value_type temp = _Val; // in case _Val is in sequence
+            _Move_backward(_Mid, _Mid + _Rem - _Count,
+                           _Mid + _Rem); // copy rest of prefix
+            std::fill(_Mid, _Mid + _Count,
+                      temp); // fill in values
+          }
+        }
+        NH3API_CATCH(...) {
+          for (; _Oldsize < this->_Size;)
+            pop_back(); // restore old size, at least
+          NH3API_RETHROW
+        }
+      }
+    }
+
     void _Buyback()
     {
-        pointer _P = nh3api::allocate( allocator, DEQUE_SIZE, nullptr );
+        pointer _P = static_cast<pointer>(::operator new(DEQUE_SIZE * sizeof(value_type), exe_heap, std::nothrow));
         if ( empty() )
         {
             _Mapsize = DEQUE_MAP_SIZE;
@@ -992,7 +991,7 @@ protected:
     }
     void _Buyfront()
     {
-        pointer _P = nh3api::allocate( allocator, DEQUE_SIZE, nullptr );
+        pointer _P = static_cast<pointer>(::operator new(DEQUE_SIZE * sizeof(value_type), exe_heap, std::nothrow));
         if ( empty() )
         {
             _Mapsize = DEQUE_MAP_SIZE;
@@ -1054,86 +1053,80 @@ protected:
         }
 
     }
-    static void _throw_invalid_subscript()
-    {
-        NH3API_THROW(std::out_of_range, "invalid deque position");
-    }
+    
+    static void _Throw_invalid_subscript()
+    { NH3API_THROW(std::out_of_range, "invalid deque position"); }
+
     void _Freemap()
-    {
-        nh3api::deallocate_rebind<unsigned char>(allocator, reinterpret_cast<unsigned char*>(_Map), _Mapsize * sizeof(pointer));
-    }
-    void _Freeptr( _Mapptr _M )
-    {
-        nh3api::deallocate( allocator, *_M, DEQUE_SIZE );
-    }
+    { _Freeptr(_Map); }
+
+    static void _Freeptr( _Mapptr _M )
+    { ::operator delete(_M, exe_heap); }
+
     void _Getmap()
-    {
-        _Map = nh3api::allocate_rebind<unsigned char>(allocator, _Mapsize * sizeof(pointer));
-    }
+    { _Map = static_cast<_Mapptr>(::operator new(_Mapsize * sizeof(pointer), exe_heap, std::nothrow)); }
+    
     _Mapptr _Growmap( size_type _Newsize )
     {
-        _Mapptr _M = reinterpret_cast<_Mapptr>(nh3api::allocate_rebind<unsigned char>(allocator, _Newsize * sizeof(pointer)));
-        std::copy( _First._Map, _Last._Map + 1,
-                _M + _Newsize / 4 );
-        nh3api::deallocate( allocator, _Map, _Mapsize );
+        _Mapptr _M = static_cast<_Mapptr>(::operator new(_Newsize * sizeof(pointer), exe_heap, std::nothrow));
+        std::copy( _First._Map, _Last._Map + 1,_M + _Newsize / 4 );
+        _Freeptr( _Map );
         _Map = _M;
         _Mapsize = _Newsize;
         return (_M + _Newsize / 4);
     }
 
-    void _Tidy() NH3API_NOEXCEPT_DESTRUCT
+    void _Tidy() NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
     {
         while (!empty())
             pop_front();
     }
 
 protected:
-    allocator_type allocator;
+    uint32_t _Dummy;
     iterator _First;
     iterator _Last;
-    _Mapptr _Map;
-    size_type _Mapsize;
-    size_type _Size;
+    _Mapptr _Map; // pointer to array of pointers to blocks
+    size_type _Mapsize; // size of map array
+    size_type _Size; // current length of sequence
 };
 
 #pragma pack(pop)
 
     // exe_deque TEMPLATE OPERATORS
-template<class _Ty, class _A> inline
-    bool operator==( const exe_deque<_Ty, _A>& lhs,
-                        const exe_deque<_Ty, _A>& rhs )
+template<class T> inline bool operator==(const exe_deque<T>& lhs,
+                                         const exe_deque<T>& rhs)
 {
     return (lhs.size() == rhs.size()
                 && std::equal( lhs.begin(), lhs.end(), rhs.begin() ));
 }
-template<class _Ty, class _A> inline
-    bool operator!=( const exe_deque<_Ty, _A>& lhs,
-                        const exe_deque<_Ty, _A>& rhs )
+template<class T> inline bool operator!=(const exe_deque<T>& lhs,
+                                         const exe_deque<T>& rhs)
 {
     return (!(lhs == rhs));
 }
-template<class _Ty, class _A> inline
-    bool operator<( const exe_deque<_Ty, _A>& lhs,
-                    const exe_deque<_Ty, _A>& rhs )
+template<class T> inline
+    bool operator<(const exe_deque<T>& lhs,
+                   const exe_deque<T>& rhs)
 {
     return (std::lexicographical_compare( lhs.begin(), lhs.end(),
                 rhs.begin(), rhs.end() ));
 }
-template<class _Ty, class _A> inline
-    bool operator<=( const exe_deque<_Ty, _A>& lhs,
-                        const exe_deque<_Ty, _A>& rhs )
+template<class T> inline
+    bool operator<=( const exe_deque<T>& lhs,
+                        const exe_deque<T>& rhs )
 {
     return (!(rhs < lhs));
 }
-template<class _Ty, class _A> inline
-    bool operator>( const exe_deque<_Ty, _A>& lhs,
-                    const exe_deque<_Ty, _A>& rhs )
+template<class T> inline
+    bool operator>( const exe_deque<T>& lhs,
+                    const exe_deque<T>& rhs )
 {
     return (rhs < lhs);
 }
-template<class _Ty, class _A> inline
-    bool operator>=( const exe_deque<_Ty, _A>& lhs,
-                        const exe_deque<_Ty, _A>& rhs )
+template<class T> inline
+    bool operator>=( const exe_deque<T>& lhs,
+                        const exe_deque<T>& rhs )
 {
     return (!(lhs < rhs));
 }

@@ -209,10 +209,10 @@ template<typename T> void __stdcall exe_vector_destructor_iterator(T* array_star
                                                                    size_t count)
 { STDCALL_4(void, 0x61827C, array_start, size, count, reinterpret_cast<void (__thiscall*)(T*)>(&nh3api::destroy_indirect<T>)); }
 
-namespace nh3api
+namespace details
 {
-template<typename T, bool has_deleting_destructor = tt::has_scalar_deleting_destructor<T>::value>
-struct NH3API_NODEBUG exe_invoke_delete_helper
+template<typename T, bool has_deleting_destructor = ::nh3api::tt::has_scalar_deleting_destructor<T>::value>
+struct exe_invoke_delete_helper
 {
     NH3API_STATIC_ASSERT("exe_invoke_delete: can't invoke destructor on void*",
                          !::nh3api::tt::is_void<T>::value);
@@ -226,7 +226,7 @@ struct NH3API_NODEBUG exe_invoke_delete_helper
 };
 
 template<typename T>
-struct NH3API_NODEBUG exe_invoke_delete_helper<T, true>
+struct exe_invoke_delete_helper<T, true>
 {
     NH3API_FORCEINLINE
     // invoke virtual destructor on polymorphic objects
@@ -234,22 +234,22 @@ struct NH3API_NODEBUG exe_invoke_delete_helper<T, true>
     { ptr->scalar_deleting_destructor(1); }
 };
 
-} // namespace nh3api
+} // namespace details
 
 // invoke delete and destroy (use this instead of plain exe_delete)
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_delete(T* ptr) NH3API_NOEXCEPT
-{ nh3api::exe_invoke_delete_helper<T>::do_destroy_delete(ptr); }
+{ details::exe_invoke_delete_helper<T>::do_destroy_delete(ptr); }
 
 // overload for void*
 template<> NH3API_FORCEINLINE
 void exe_invoke_delete<void>(void* ptr) NH3API_NOEXCEPT
 {  exe_delete(ptr); }
 
-namespace nh3api
+namespace details
 {
-template<typename T, bool has_deleting_destructor = tt::has_scalar_deleting_destructor<T>::value>
-struct NH3API_NODEBUG exe_invoke_destructor_helper
+template<typename T, bool has_deleting_destructor = ::nh3api::tt::has_scalar_deleting_destructor<T>::value>
+struct exe_invoke_destructor_helper
 {
     NH3API_STATIC_ASSERT("exe_invoke_destructor: can't invoke destructor on void*",
                          !::nh3api::tt::is_void<T>::value);
@@ -260,7 +260,7 @@ struct NH3API_NODEBUG exe_invoke_destructor_helper
 };
 
 template<typename T>
-struct NH3API_NODEBUG exe_invoke_destructor_helper<T, true>
+struct exe_invoke_destructor_helper<T, true>
 {
     NH3API_FORCEINLINE
     // invoke virtual destructor on polymorphic objects
@@ -268,17 +268,17 @@ struct NH3API_NODEBUG exe_invoke_destructor_helper<T, true>
     { ptr->scalar_deleting_destructor(0); }
 };
 
-} // namespace nh3api
+} // namespace details
 
 // invoke destructor(plain or scalar_deleting_destructor)
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_destructor(T* ptr) NH3API_NOEXCEPT
-{ nh3api::exe_invoke_destructor_helper<T>::do_destroy(ptr); }
+{ details::exe_invoke_destructor_helper<T>::do_destroy(ptr); }
 
-namespace nh3api
+namespace details
 {
-template<typename T, bool trivially_destructible = tt::is_trivially_destructible<T>::value>
-struct NH3API_NODEBUG exe_invoke_array_delete_helper
+template<typename T, bool trivially_destructible = ::nh3api::tt::is_trivially_destructible<T>::value>
+struct exe_invoke_array_delete_helper
 {
     NH3API_FORCEINLINE
     static void do_destroy_delete(T* ptr) NH3API_NOEXCEPT
@@ -293,7 +293,7 @@ struct NH3API_NODEBUG exe_invoke_array_delete_helper
 };
 
 template<typename T>
-struct NH3API_NODEBUG exe_invoke_array_delete_helper<T, true>
+struct exe_invoke_array_delete_helper<T, true>
 {
     NH3API_FORCEINLINE
     static void do_destroy_delete(T* ptr) NH3API_NOEXCEPT
@@ -302,12 +302,12 @@ struct NH3API_NODEBUG exe_invoke_array_delete_helper<T, true>
         exe_delete(pre_ptr);
     }
 };
-} // namespace nh3api
+} // namespace details
 
 // invoke array form of delete. Use it instead of plain exe_delete
 template<typename T> NH3API_FORCEINLINE
 void exe_invoke_array_delete(T* ptr) NH3API_NOEXCEPT
-{ nh3api::exe_invoke_array_delete_helper<T>::do_destroy_delete(ptr); }
+{ details::exe_invoke_array_delete_helper<T>::do_destroy_delete(ptr); }
 
 // overload for void*
 template<> NH3API_FORCEINLINE
@@ -520,380 +520,6 @@ template<class T, class U> NH3API_CONSTEXPR
 bool operator!=(const exe_allocator<T>&, const exe_allocator<U>&)
 { return false; }
 
-namespace nh3api
-{
-namespace memory 
-{
-#if NH3API_STD_MOVE_SEMANTICS
-template <class Allocator, class U, typename ... Args
-#if NH3API_CHECK_CPP11
-, class = decltype(::new(::std::declval<void*>()) U(::std::declval<Args>()...))
-#endif
-> NH3API_FORCEINLINE
-void variadic_construct(Allocator allocator, U* ptr, Args&& ... args)
-{
-    #if NH3API_CHECK_CPP11
-    ::std::allocator_traits<Allocator>::construct(allocator, ptr, ::std::forward<Args>(args) ... );
-    #else
-    allocator.construct(ptr, ::std::forward<Args>(args) ...);
-    #endif
-}
-
-template <typename U, typename T, typename ... Args 
-#if NH3API_CHECK_CPP11
-, class = decltype(::new(::std::declval<void*>()) U(::std::declval<Args>()...))
-#endif
-> 
-#if __cpp_lib_constexpr_new
-constexpr
-#endif
-NH3API_FORCEINLINE
-void variadic_construct(const ::exe_allocator<T>&, U* ptr, Args&& ... args)
-NH3API_NOEXCEPT_EXPR(tt::is_nothrow_constructible<U, Args ...>::value)
-{ ::new ((void*)ptr) U(::std::forward<Args>(args) ... ); }
-#endif
-
-template<class T, class Allocator> NH3API_FORCEINLINE
-void copy_construct(const Allocator& allocator, T* ptr, const T& value)
-{
-    #if NH3API_CHECK_CPP11
-    ::std::allocator_traits<Allocator>::construct(allocator, ptr, value);
-    #else
-    allocator.construct(ptr, value);
-    #endif
-}
-
-template<class U, class T> NH3API_FORCEINLINE 
-#if __cpp_lib_constexpr_new
-constexpr
-#endif
-void copy_construct(const ::exe_allocator<T>&, U* ptr, const U& value)
-NH3API_NOEXCEPT_EXPR(tt::is_nothrow_copy_constructible<U>::value)
-{ ::new (static_cast<void*>(ptr)) U(value); }
-
-#if NH3API_STD_MOVE_SEMANTICS
-template<class T, class Allocator> NH3API_FORCEINLINE
-void move_construct(const Allocator& allocator, T* ptr, T&& rvalue)
-{
-    #if NH3API_CHECK_CPP11
-    ::std::allocator_traits<Allocator>::construct(allocator, ptr, rvalue);
-    #else
-    allocator.construct(ptr, value);
-    #endif
-}
-
-template<class U, class T> NH3API_FORCEINLINE 
-#if __cpp_lib_constexpr_new
-constexpr
-#endif
-void move_construct(const ::exe_allocator<T>&, U* ptr, U&& rvalue)
-NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<U>::value)
-{ ::new (static_cast<void*>(ptr)) U(::std::forward<U>(rvalue)); }
-#endif
-
-template<typename T, class Allocator> NH3API_FORCEINLINE
-void default_construct(const Allocator& allocator, T* ptr)
-{
-    #if NH3API_CHECK_CPP11
-    ::std::allocator_traits<Allocator>::construct(allocator, ptr, T());
-    #else
-    allocator.construct(ptr, T());
-    #endif
-}
-
-template<typename U, class T> NH3API_FORCEINLINE
-#if __cpp_lib_constexpr_new
-constexpr
-#endif
-void default_construct(const ::exe_allocator<T>&, U* ptr)
-NH3API_NOEXCEPT_EXPR(tt::is_nothrow_constructible<T>::value)
-{ ::new (static_cast<void*>(ptr)) U(); }
-
-template<class Allocator>
-NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-Allocator allocator_select_on_container_copy_construction(const Allocator& allocator)
-{
-    #if NH3API_CHECK_CPP11
-        return ::std::allocator_traits<Allocator>::select_on_container_copy_construction(allocator);
-    #else 
-        return allocator;
-    #endif
-}
-
-template<class T>
-NH3API_FORCEINLINE NH3API_CONSTEXPR
-exe_allocator<T> allocator_select_on_container_copy_construction(const exe_allocator<T>& allocator)
-{ return allocator; }
-
-template<class Allocator>
-NH3API_FORCEINLINE
-typename Allocator::pointer allocate( Allocator& allocator, typename Allocator::size_type n )
-{
-    #if NH3API_CHECK_CPP11
-        return ::std::allocator_traits<Allocator>::allocate(allocator, n);
-    #else 
-        allocator.allocate(n);
-    #endif
-}
-
-template<class T>
-NH3API_FORCEINLINE
-T* allocate( const exe_allocator<T>&, size_t n ) 
-NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
-{
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    return static_cast<T*>(::operator new(n * sizeof(T), exe_heap));
-    #else
-    return static_cast<T*>(::operator new(n * sizeof(T), exe_heap, ::std::nothrow));
-    #endif
-}
-
-template<class Allocator>
-NH3API_FORCEINLINE
-typename Allocator::pointer allocate( Allocator& allocator, typename Allocator::size_type n, const void* hint )
-{
-    #if NH3API_CHECK_CPP11
-        return ::std::allocator_traits<Allocator>::allocate(allocator, n, hint);
-    #else 
-        allocator.allocate(n, hint);
-    #endif
-}
-
-template<class T>
-NH3API_FORCEINLINE
-T* allocate( const exe_allocator<T>&, size_t n, const void* ) 
-NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
-{
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    return static_cast<T*>(::operator new(n * sizeof(T), ::exe_heap));
-    #else
-    return static_cast<T*>(::operator new(n * sizeof(T), ::exe_heap, ::std::nothrow));
-    #endif
-}
-
-template<typename U, class Allocator> NH3API_FORCEINLINE
-#ifdef __cpp_decltype_auto	
-decltype(auto)
-#else 
-typename Allocator::template rebind<U>::other::pointer
-#endif
-allocate_rebind(Allocator& allocator, typename Allocator::size_type n)
-{
-    #if NH3API_CHECK_CPP11
-        typedef typename ::std::allocator_traits<Allocator>::template rebind_alloc<U> rebound_alloc;
-        rebound_alloc rebound(allocator);
-        return ::std::allocator_traits<rebound_alloc>::allocate(rebound, size);
-    #else 
-        typename Allocator::template rebind<U>::other rebound(allocator);
-        rebound.allocate(n);
-    #endif
-}
-
-template<typename U, class T> NH3API_FORCEINLINE
-U* allocate_rebind(::exe_allocator<T>&, size_t n)
-NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
-{
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    return static_cast<U*>(::operator new(n * sizeof(U), ::exe_heap));
-    #else
-    return static_cast<U*>(::operator new(n * sizeof(U), ::exe_heap, ::std::nothrow));
-    #endif
-}
-
-template<typename U, class Allocator> NH3API_FORCEINLINE
-#ifdef __cpp_decltype_auto	
-decltype(auto)
-#else 
-typename Allocator::template rebind<U>::other::pointer
-#endif
-allocate_rebind(Allocator& allocator, typename Allocator::size_type n, const void* hint)
-{
-    #if NH3API_CHECK_CPP11
-        typedef typename ::std::allocator_traits<Allocator>::template rebind_alloc<U> rebound_alloc;
-        rebound_alloc rebound(allocator);
-        return ::std::allocator_traits<rebound_alloc>::allocate(rebound, size, hint);
-    #else 
-        typename Allocator::template rebind<U>::other rebound(allocator);
-        rebound.allocate(n, hint);
-    #endif
-}
-
-template<typename U, class T> NH3API_FORCEINLINE
-U* allocate_rebind(::exe_allocator<T>&, size_t n, const void*)
-NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
-{
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    return static_cast<U*>(::operator new(n * sizeof(U), ::exe_heap));
-    #else
-    return static_cast<U*>(::operator new(n * sizeof(U), ::exe_heap, ::std::nothrow));
-    #endif
-}
-
-template<class Allocator> NH3API_FORCEINLINE
-void deallocate( Allocator& allocator, typename Allocator::pointer ptr, typename Allocator::size_type n )
-{
-    #if NH3API_CHECK_CPP11
-        ::std::allocator_traits<Allocator>::deallocate(allocator, ptr, n);
-    #else 
-        allocator.deallocate(ptr, n);
-    #endif
-}
-
-template<class T> NH3API_FORCEINLINE
-void deallocate( ::exe_allocator<T>&, T* ptr, size_t ) NH3API_NOEXCEPT
-{ ::operator delete(ptr, ::exe_heap); }
-
-template<class U, class Allocator> NH3API_FORCEINLINE
-void deallocate_rebind(Allocator& allocator, U* ptr, typename Allocator::size_type n )
-{
-    #if NH3API_CHECK_CPP11
-        typedef typename ::std::allocator_traits<Allocator>::template rebind_alloc<U> rebound_alloc;
-        rebound_alloc rebound(allocator);
-        return ::std::allocator_traits<rebound_alloc>::deallocate(allocator, ptr, n);
-    #else 
-        typename Allocator::template rebind<U>::other rebound(allocator);
-        rebound.deallocate(ptr, n);
-    #endif
-}
-
-template<class U, class T> NH3API_FORCEINLINE
-void deallocate_rebind(::exe_allocator<T>&, U* ptr, size_t ) NH3API_NOEXCEPT
-{ ::operator delete(ptr, ::exe_heap); }
-
-template<class Allocator, class T> NH3API_FORCEINLINE
-void allocator_destroy( Allocator& allocator, T* ptr )
-{
-    #if NH3API_CHECK_CPP11
-        ::std::allocator_traits<Allocator>::destroy(allocator, ptr);
-    #else 
-        allocator.deallocate(ptr, n);
-    #endif
-}
-
-template<class U, class T> NH3API_FORCEINLINE
-void allocator_destroy( ::exe_allocator<T>&, U* ptr ) 
-NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<U>::value)
-{ ptr->~U(); }
-
-template<class Allocator> NH3API_FORCEINLINE
-typename Allocator::size_type allocator_max_size(const Allocator& allocator) 
-{
-    #if NH3API_CHECK_CPP11
-        return ::std::allocator_traits<Allocator>::max_size(allocator);
-    #else 
-        return allocator.max_size();
-    #endif
-}
-
-template<class T> NH3API_FORCEINLINE NH3API_CONSTEXPR
-size_t allocator_max_size(const ::exe_allocator<T>&) NH3API_NOEXCEPT
-{ return size_t(~0) / sizeof(T); }
-} // namespace nh3api::memory
-
-} // namespace nh3api
-
-namespace nh3api
-{
-
-namespace tt
-{
-#if NH3API_CHECK_CPP11
-template<typename Allocator>
-struct NH3API_NODEBUG allocator_may_throw
-    : public integral_constant<bool,
-    !noexcept(declval<Allocator>().allocate( declval<typename Allocator::size_type>() ))>
-{};
-#else
-template<typename Allocator>
-struct NH3API_NODEBUG allocator_may_throw
-    : public integral_constant<bool, true>
-{};
-#endif
-
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-template<typename T>
-struct NH3API_NODEBUG allocator_may_throw<exe_allocator<T> >
-    : public true_type
-{};
-#else
-template<typename T>
-struct NH3API_NODEBUG allocator_may_throw<exe_allocator<T> >
-    : public false_type
-{};
-#endif
-
-template<typename Allocator> 
-struct allocator_container_traits
-{
-    #if NH3API_CHECK_CPP11
-    typedef typename ::std::allocator_traits<Allocator>::propagate_on_container_copy_assignment 
-    propagate_on_container_copy_assignment;
-    typedef typename ::std::allocator_traits<Allocator>::propagate_on_container_move_assignment
-    propagate_on_container_move_assignment;
-    typedef typename ::std::allocator_traits<Allocator>::propagate_on_container_swap
-    propagate_on_container_swap;
-    typedef typename ::std::allocator_traits<Allocator>::is_always_equal
-    is_always_equal;
-
-    typedef typename ::std::allocator_traits<Allocator>::size_type       size_type;
-    typedef typename ::std::allocator_traits<Allocator>::difference_type difference_type;
-    typedef typename ::std::allocator_traits<Allocator>::value_type      value_type;
-    typedef typename ::std::allocator_traits<Allocator>::pointer         pointer;
-    typedef typename ::std::allocator_traits<Allocator>::const_pointer   const_pointer;
-    typedef typename ::std::allocator_traits<Allocator>::reference       reference;
-    typedef typename ::std::allocator_traits<Allocator>::const_reference const_reference;
-    #else 
-    typedef true_type  propagate_on_container_copy_assignment;
-    typedef true_type  propagate_on_container_move_assignment;
-    typedef true_type  propagate_on_container_swap;
-    typedef false_type is_always_equal;
-
-    typedef typename Allocator::size_type       size_type;
-    typedef typename Allocator::difference_type difference_type;
-    typedef typename Allocator::value_type      value_type;
-    typedef typename Allocator::pointer         pointer;
-    typedef typename Allocator::const_pointer   const_pointer;
-    typedef typename Allocator::reference       reference;
-    typedef typename Allocator::const_reference const_reference;
-    #endif
-};
-
-template<typename T> 
-struct allocator_container_traits<::exe_allocator<T> >
-{
-    typedef false_type propagate_on_container_copy_assignment;
-    typedef false_type propagate_on_container_move_assignment;
-    typedef false_type propagate_on_container_swap;
-    typedef true_type  is_always_equal;
-
-    typedef size_t            size_type;
-    typedef ptrdiff_t         difference_type;
-    typedef T                 value_type;
-    typedef value_type*       pointer;
-    typedef const value_type* const_pointer;
-    typedef value_type&       reference;
-    typedef const value_type& const_reference;
-};
-
-#if NH3API_CHECK_CPP11
-template<typename Allocator>
-struct NH3API_NODEBUG allocator_always_equal_after_move
-    : integral_constant<bool,
-    ::std::allocator_traits<Allocator>::is_always_equal::value && 
-    ::std::allocator_traits<Allocator>::propagate_on_container_move_assignment::value>
-{};
-
-template<typename T>
-struct NH3API_NODEBUG allocator_always_equal_after_move<exe_allocator<T> >
-    : true_type
-{};
-#endif
-
-
-
-} // namespace tt
-} // namespace nh3api
-
 // used only in map editor and campaign editor
 // remains in NH3API for binary compability with the .exe-s
 // dangerous in C++98 mode!
@@ -905,47 +531,50 @@ class exe_auto_ptr
     explicit exe_auto_ptr(T* _P = nullptr) NH3API_NOEXCEPT
         : _Owns(_P != 0), _Ptr(_P)
     {}
-    exe_auto_ptr(const exe_auto_ptr<T> &_Y) NH3API_NOEXCEPT :
-        _Owns(_Y._Owns), _Ptr(_Y.release())
+
+    exe_auto_ptr(const exe_auto_ptr<T> &other) NH3API_NOEXCEPT :
+        _Owns(other._Owns), _Ptr(other.release())
     {}
-    exe_auto_ptr<T>& operator=(const exe_auto_ptr<T>& _Y) NH3API_NOEXCEPT
+
+    exe_auto_ptr<T>& operator=(const exe_auto_ptr<T>& other) NH3API_NOEXCEPT
     {
-        if (this != &_Y)
+        if (this != &other)
         {
-            if (this->_Ptr != _Y.get())
+            if (this->_Ptr != other.get())
             {
                 if (this->_Owns)
                     exe_invoke_delete(this->_Ptr);
-                this->_Owns = _Y._Owns;
+                this->_Owns = other._Owns;
             }
-            else if (_Y._Owns)
+            else if (other._Owns)
             {
                 this->_Owns = true;
             }
-            this->_Ptr = _Y.release();
+            this->_Ptr = other.release();
         }
         return *this;
     }
+    
     #if NH3API_STD_MOVE_SEMANTICS
-    exe_auto_ptr(exe_auto_ptr<T>&& _Y) NH3API_NOEXCEPT :
-        _Owns(nh3api::exchange(_Y._Owns, false)), _Ptr(nh3api::exchange(_Y._Ptr, nullptr))
+    exe_auto_ptr(exe_auto_ptr<T>&& other) NH3API_NOEXCEPT :
+        _Owns(nh3api::exchange(other._Owns, false)), _Ptr(nh3api::exchange(other._Ptr, nullptr))
     {}
 
-    exe_auto_ptr<T>& operator=(exe_auto_ptr<T>&& _Y) NH3API_NOEXCEPT
+    exe_auto_ptr<T>& operator=(exe_auto_ptr<T>&& other) NH3API_NOEXCEPT
     {
-        if (this != &_Y)
+        if (this != &other)
         {
-            if (this->_Ptr != _Y._Ptr)
+            if (this->_Ptr != other._Ptr)
             {
                 if (this->_Owns)
                     exe_invoke_delete(this->_Ptr);
-                this->_Owns = nh3api::exchange(_Y._Owns, false);
+                this->_Owns = nh3api::exchange(other._Owns, false);
             }
-            else if (_Y._Owns)
+            else if (other._Owns)
             {
                 this->_Owns = true;
             }
-            this->_Ptr = _Y.release();
+            this->_Ptr = other.release();
             this->_Owns = true;
         }
 
@@ -958,12 +587,16 @@ class exe_auto_ptr
         if (_Owns)
             exe_invoke_delete(_Ptr);
     }
+
     T& operator*() const NH3API_NOEXCEPT
     { return (*get()); }
+
     T* operator->() const NH3API_NOEXCEPT
     { return (get()); }
+
     T* get() const NH3API_NOEXCEPT
     { return (_Ptr); }
+
     T* release() const NH3API_NOEXCEPT
     {
         _Owns = false;
@@ -1085,7 +718,7 @@ void trivial_swap(void* __restrict left, void* __restrict right) NH3API_NOEXCEPT
     // GCC and Clang easily optimize this to SSE2 swap if size == 16
     for (size_t i = 0; i < size; ++i) 
     {
-        uint8_t temp = (static_cast<uint8_t* __restrict>(left))[i];
+        const uint8_t temp = (static_cast<uint8_t* __restrict>(left))[i];
         (static_cast<uint8_t* __restrict>(left))[i] = (static_cast<uint8_t* __restrict>(right))[i];
         (static_cast<uint8_t* __restrict>(right))[i] = temp;
     }

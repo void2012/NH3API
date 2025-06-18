@@ -445,7 +445,7 @@ class type_point
             return *this;
         }
 
-        #if NH3API_HAS_BUILTIN_BIT_CAST
+        #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
         NH3API_CONSTEXPR
         #endif
         type_point& set(uint32_t data) NH3API_NOEXCEPT
@@ -480,14 +480,14 @@ class type_point
         int8_t getZ() const NH3API_NOEXCEPT
         { return z; }
 
-        #if NH3API_HAS_BUILTIN_BIT_CAST
+        #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
         NH3API_CONSTEXPR
         #endif
         // return the underlying data
         uint32_t to_uint() const NH3API_NOEXCEPT
         { 
             //return nh3api::bit_cast<uint32_t>(*this);
-            #if NH3API_HAS_BUILTIN_BIT_CAST
+            #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
             return __builtin_bit_cast(uint32_t, *this);
             #else
             uint32_t result;

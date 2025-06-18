@@ -1199,7 +1199,7 @@ public:
     // по определенному адресу программы
     // Тип может быть любым, даже функция.
     template<typename T> Patch* __stdcall WriteAddressOf(uintptr_t address, const T& data)
-    #if NH3API_HAS_BUILTIN_ADDRESSOF
+    #if NH3API_HAS_BUILTIN(__builtin_addressof)
     { return WriteDword(address, *reinterpret_cast<uint32_t*>(__builtin_addressof(data))); }
     #else 
     { return WriteDword(address, *reinterpret_cast<uint32_t*>(reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(data))))); }

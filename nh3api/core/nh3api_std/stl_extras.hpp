@@ -28,7 +28,7 @@ namespace nh3api
 
 // the reason we're writing our own addressof is that pre-C++17 version wasn't constexpr
 
-#if !NH3API_HAS_BUILTIN_ADDRESSOF
+#if !NH3API_HAS_BUILTIN(__builtin_addressof)
 template<typename T> NH3API_FORCEINLINE
 T* addressof(T& arg) NH3API_NOEXCEPT
 { return reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(arg))); }
@@ -39,7 +39,7 @@ NH3API_MSVC_INTRIN NH3API_CONSTEXPR NH3API_FORCEINLINE
 T* addressof(T& arg) NH3API_NOEXCEPT
 { return __builtin_addressof(arg); }
 
-#endif // !NH3API_HAS_BUILTIN_ADDRESSOF
+#endif // !NH3API_HAS_BUILTIN(__builtin_addressof)
 
 #ifdef __cpp_lib_bit_cast
 
@@ -49,7 +49,7 @@ using ::std::bit_cast;
 
 template<class To, class From>
 NH3API_FORCEINLINE
-#if NH3API_HAS_BUILTIN_BIT_CAST
+#if NH3API_HAS_BUILTIN(__builtin_bit_cast)
 NH3API_CONSTEXPR
 #endif
 To bit_cast( const From& from ) NH3API_NOEXCEPT
@@ -57,7 +57,7 @@ To bit_cast( const From& from ) NH3API_NOEXCEPT
     NH3API_STATIC_ASSERT("nh3api::bit_cast: types must have the same size and trivially copyable.",
     (sizeof(To) == sizeof(From)) && tt::is_trivially_copyable<To>::value && tt::is_trivially_copyable<From>::value);
 
-    #if NH3API_HAS_BUILTIN_BIT_CAST
+    #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
     return __builtin_bit_cast(To, from);
     #else
     To result;
@@ -71,12 +71,12 @@ To bit_cast( const From& from ) NH3API_NOEXCEPT
 #if !defined(__cpp_lib_raw_memory_algorithms) && !defined(__cpp_lib_constexpr_algorithms)
 
 template<class T>
-NH3API_FORCEINLINE NH3API_CONSTEXPR
+NH3API_FORCEINLINE
 void destroy_at(T* p)
 { p->~T(); }
 
 template<class ForwardIt>
-NH3API_FORCEINLINE NH3API_CONSTEXPR
+NH3API_FORCEINLINE
 void destroy(ForwardIt first, ForwardIt last)
 {
     for (; first != last; ++first)
@@ -84,7 +84,7 @@ void destroy(ForwardIt first, ForwardIt last)
 }
 
 template<class ForwardIt, class Size>
-NH3API_FORCEINLINE NH3API_CONSTEXPR
+NH3API_FORCEINLINE
 ForwardIt destroy_n(ForwardIt first, Size n)
 {
     for (; n > 0; (void) ++first, --n)
@@ -101,7 +101,7 @@ using ::std::destroy_n;
 #endif // constexpr destruction algorithms
 
 #if NH3API_STD_MOVE_SEMANTICS
-#if NH3API_MSVC_STL_VERSION < NH3API_MSVC_STL_VERSION_2015_2022 && !defined(__cpp_lib_exchange_function)
+#if NH3API_MSVC_STL && NH3API_MSVC_STL_VERSION < NH3API_MSVC_STL_VERSION_2015_2022 && !defined(__cpp_lib_exchange_function)
 
 template<class T, class U> NH3API_FORCEINLINE
 T exchange(T& obj, U&& new_value)
@@ -117,8 +117,44 @@ NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<T>::value &&
 
 using ::std::exchange;
 
-#endif
-#endif
+#endif // No std::exchange
+
+#if NH3API_CHECK_CPP20 
+
+using ::std::construct_at;
+
+#else // C++20
+
+#if NH3API_STD_MOVE_SEMANTICS
+
+template <class T, class... Args, class = decltype(::new(declval<void*>()) T(declval<Args>()...))> NH3API_FORCEINLINE
+T* construct_at(T* ptr, Args&&... args) 
+NH3API_NOEXCEPT_EXPR(tt::is_nothrow_constructible<T, Args...>::value)
+{ return ::new (static_cast<void*>(ptr)) T(::std::forward<Args>(args)...); }
+
+#else // C++11
+
+// overload 1. invoke copy constructor
+template <class T>
+T* construct_at(T* ptr, const T& value) 
+{ 
+    NH3API_STATIC_ASSERT("T must be copy constructible", tt::is_copy_constructible<T>::value);
+    return ::new (static_cast<void*>(ptr)) T(value); 
+}
+
+// overload 2. invoke default constructor
+template <class T>
+T* construct_at(T* ptr) 
+{ 
+    NH3API_STATIC_ASSERT("T must be default constructible", tt::is_default_constructible<T>::value);
+    return ::new (static_cast<void*>(ptr)) T(); 
+}
+
+#endif // C++11
+
+#endif // C++20
+
+#endif // Move semantics
 
 #ifndef __cpp_lib_clamp
 template<class T = void>
@@ -331,14 +367,14 @@ inline bool signbit(float num) NH3API_NOEXCEPT
 
 template <size_t N, typename T>
 NH3API_FORCEINLINE
-#if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
+#if NH3API_HAS_BUILTIN(__builtin_is_constant_evaluated)
 constexpr
 #endif
 T* assume_aligned(T* ptr) NH3API_NOEXCEPT
 {
 #if NH3API_HAS_BUILTINS
 #if __has_builtin(__builtin_assume_aligned) || NH3API_CHECK_CLANG_CL
-#if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
+#if NH3API_HAS_BUILTIN(__builtin_is_constant_evaluated)
     if (__builtin_is_constant_evaluated())
         return ptr;
     else
