@@ -119,7 +119,9 @@ using ::std::exchange;
 
 #endif // No std::exchange
 
-#if NH3API_CHECK_CPP20 
+// there is no __cpp_lib_* feature testing macro for std::construct_at
+// use __cpp_lib_constexpr_dynamic_alloc because it's closely of related 
+#ifdef __cpp_lib_constexpr_dynamic_alloc 
 
 using ::std::construct_at;
 
