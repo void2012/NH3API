@@ -89,7 +89,7 @@ template<typename T>
 struct stosx_chooser<T, 4>
 {
     inline static void stosx(T* dst, const T& value, size_t count) NH3API_NOEXCEPT
-    { __stosd(reinterpret_cast<unsigned long*>(dst), static_cast<unsigned long>(value), (count)); }
+    { __stosd(reinterpret_cast<unsigned long*>(dst), bit_cast<unsigned long>(value), (count)); }
 };
 
 template<typename T>
