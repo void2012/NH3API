@@ -33,7 +33,7 @@ struct exe_bitset_to_string_helper;
 template<size_t N>
 class exe_bitset;
 template<size_t N>
-class std::hash< exe_bitset<N> >;
+struct std::hash< exe_bitset<N> >;
 #endif
 
 #pragma pack(push, 8)
@@ -446,7 +446,7 @@ protected:
 #if NH3API_STD_HASH
 // std::hash support for exe_bitset
 template<size_t N>
-class std::hash< exe_bitset<N> >
+struct std::hash< exe_bitset<N> >
 {
     public:
         size_t operator()(const exe_bitset<N>& arg) NH3API_NOEXCEPT

@@ -1727,7 +1727,7 @@ NH3API_FORCEINLINE exe_string& GetDataPath()
 #if NH3API_STD_HASH
 // std::hash support for ResourceManager::TCacheMapKey
 template<>
-class std::hash< ResourceManager::TCacheMapKey >
+struct std::hash< ResourceManager::TCacheMapKey >
 {
     public:
         size_t operator()(const ResourceManager::TCacheMapKey& key) NH3API_NOEXCEPT

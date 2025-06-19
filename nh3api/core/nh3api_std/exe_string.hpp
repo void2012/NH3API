@@ -2409,7 +2409,7 @@ NH3API_FORCEINLINE size_t hash_string(const ::std::wstring& str) NH3API_NOEXCEPT
 #if NH3API_STD_HASH
 // std::hash support for exe_string
 template<>
-class std::hash<exe_string>
+struct std::hash<exe_string>
 {
     public:
         size_t operator()(const exe_string& str) NH3API_NOEXCEPT

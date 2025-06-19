@@ -522,7 +522,7 @@ class type_point
 #if NH3API_STD_HASH
 // std::hash support for type_point
 template<>
-class std::hash<type_point>
+struct std::hash<type_point>
 {
     public:
         size_t operator()(const type_point& arg) NH3API_NOEXCEPT
