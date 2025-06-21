@@ -1,0 +1,171 @@
+AlignAfterOpenBracket: Align
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments:
+  Enabled: true
+  AlignCompound: true
+  AlignFunctionDeclarations: true
+  AlignFunctionPointers: true
+  PadOperators: true
+AlignConsecutiveBitFields: AcrossEmptyLinesAndComments
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+  AlignCaseColons: false
+AlignEscapedNewlines: LeftWithLastLine 
+AlignOperands: AlignAfterOperator 
+AlignTrailingComments:
+  Kind: Always
+  OverEmptyLines: 2
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowBreakBeforeNoexceptSpecifier: Always
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCompoundRequirementOnASingleLine: true
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: false
+AllowShortNamespacesOnASingleLine: false
+AlwaysBreakBeforeMultilineStrings: false
+AttributeMacros: [
+                  'NH3API_DEPRECATED',
+                  'NH3API_FORCEINLINE',
+                  'NH3API_FLATTEN',
+                  'NH3API_INLINE_LARGE',
+                  'NH3API_DLLEXPORT',
+                  'NH3API_DLLIMPORT',
+                  'NH3API_SELECTANY',
+                  'NH3API_CONSTEXPR_CPP_23',
+                  'NH3API_CONSTEXPR_CPP_20',
+                  'NH3API_CONSTEXPR_CPP_17',
+                  'NH3API_CONSTEXPR_CPP_14',
+                  'NH3API_NODISCARD',
+                  'NH3API_CONSTEXPR',
+                  'NH3API_MALLOC',
+                  'NH3API_MSVC_INTRIN',
+                  'NH3API_DEALLOCATOR',
+                  'NH3API_MSVC_LAYOUT',
+                  'NH3API_NO_VFTABLE_ASSIGN',
+                  'NH3API_CONST',
+                  'NH3API_NOEXCEPT',
+                  'NH3API_MAYBE_UNUSED',
+                  'NH3API_DELETED_FUNCTION',
+                  'NH3API_NOEXCEPT_EXPR',
+                  'NH3API_EXPLICIT_CPP11',
+                  'NH3API_FINAL',
+                  'NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED',
+                  'NH3API_NORETURN',
+                  'NH3API_INLINE',
+                  'NH3API_INLINE_OR_EXTERN',
+                  'NH3API_NAKED'
+                 ]
+BinPackArguments: true 
+# BinPackLongBracedList since clang-format 21
+# BinPackLongBracedList: true
+BinPackParameters: OnePerLine
+BitFieldColonSpacing: Both
+BreakBeforeBraces: GNU
+BreakAdjacentStringLiterals: true
+BreakAfterAttributes: Leave
+BreakAfterReturnType: ExceptShortType
+BreakBeforeBinaryOperators: All
+BreakBeforeConceptDeclarations: Always
+# BreakBeforeTemplateCloser since clang-format 21
+# BreakBeforeTemplateCloser: true
+BreakBeforeTernaryOperators: true
+BreakBinaryOperations: Never
+BreakConstructorInitializers: BeforeColon
+BreakFunctionDefinitionParameters: false 
+BreakInheritanceList: AfterComma
+BreakStringLiterals: true
+BreakTemplateDeclarations: Yes
+CompactNamespaces: false
+ContinuationIndentWidth: 4
+Cpp11BracedListStyle: false 
+EmptyLineAfterAccessModifier: Never
+EmptyLineBeforeAccessModifier: LogicalBlock
+# EnumTrailingComma since clang-format 21
+# EnumTrailingComma: Remove
+FixNamespaceComments: true
+IfMacros: [ 'NH3API_IF_CONSTEXPR' ]
+IncludeBlocks: Preserve
+IndentAccessModifiers: true
+IndentCaseBlocks: true
+IndentCaseLabels: true
+IndentExportBlock: true
+IndentExternBlock: NoIndent
+IndentGotoLabels: false
+IndentPPDirectives: BeforeHash
+IndentRequiresClause: false
+IndentWidth: 4
+IndentWrappedFunctionNames: false
+InsertBraces: false
+InsertNewlineAtEOF: true
+KeepEmptyLines:
+  AtEndOfFile: false
+  AtStartOfBlock: false
+  AtStartOfFile: false
+LambdaBodyIndentation: Signature
+Language: Cpp
+NamespaceIndentation: None
+PackConstructorInitializers: NextLineOnly
+PointerAlignment: Left
+# QualifierAlignmentStyle: Custom
+# QualifierOrder: [ 'static', 'inline', 'constexpr', 'const', 'volatile', 'friend', 'type' ]
+ReferenceAlignment: Left
+ReflowComments: Never
+RemoveBracesLLVM: true
+RemoveEmptyLinesInUnwrappedLines: true
+RemoveParentheses: ReturnStatement
+RemoveSemicolon: true
+RequiresClausePosition: WithPreceding
+RequiresExpressionIndentation: OuterScope
+SeparateDefinitionBlocks: Always
+SortUsingDeclarations: Lexicographic
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false 
+# SpaceAfterOperatorKeyword since clang-format 21
+# SpaceAfterOperatorKeyword: false
+SpaceAfterTemplateKeyword: false
+SpaceAroundPointerQualifiers: Default
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterControlStatements: true
+  AfterFunctionDeclarationName: false
+  AfterFunctionDefinitionName: false
+  AfterIfMacros: true
+  AfterOverloadedOperator: false
+  AfterPlacementOperator: true
+  AfterRequiresInClause: true
+  AfterRequiresInExpression: true
+  BeforeNonEmptyParentheses: false
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false 
+SpaceInEmptyBlock: false 
+# Leave spaces in templates brackets < > for conformance with C++98
+SpacesInAngles: Leave  
+SpacesInParens: Custom
+SpacesInParensOptions:
+  ExceptDoubleParentheses: false
+  InConditionalStatements: true
+  InCStyleCasts: false
+  InEmptyParentheses : false 
+  Other: false
+SpacesInSquareBrackets: false
+Standard: c++03
+StatementMacros: [
+                  'NH3API_IGNORE',
+                  'NH3API_MAKE_EXCEPTION_GUARD'
+                 ]
+TabWidth: 4
+UseTab: Never 
+WhitespaceSensitiveMacros: [ 'NH3API_STRINGIFY' ]
+ColumnLimit: 0
