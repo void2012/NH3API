@@ -23,7 +23,7 @@ enum type_action_type : int32_t
 
 #pragma pack(push, 1)
 // size = 0x4E7D0 = 321488, align = 1
-struct game
+class game
 {
     public:
         #pragma pack(push, 4)
@@ -111,10 +111,10 @@ struct game
         const NewmapCell* get_cell(type_point point) const
         { return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
 
-        NewmapCell* get_cell(int32_t x, int32_t y, int8_t z)
+        NewmapCell* get_cell(uint8_t x, uint8_t y, uint8_t z)
         { return &this->worldMap.cellData[x + this->worldMap.Size * (y + z * this->worldMap.Size)]; }
 
-        const NewmapCell* get_cell(int32_t x, int32_t y, int8_t z) const
+        const NewmapCell* get_cell(uint8_t x, uint8_t y, uint8_t z) const
         { return &this->worldMap.cellData[x + this->worldMap.Size * (y + z * this->worldMap.Size)]; }
 
         hero* GetHero(int32_t which)
@@ -133,10 +133,10 @@ struct game
         { return THISCALL_3(boat*, 0x4CE5C0, this, id, occupied); }
 
         boat* GetBoat(int32_t id)
-        { return &boatPool[id]; }
+        { return id > 0 ? &boatPool[id] : nullptr; }
 
         const boat* GetBoat(int32_t id) const
-        { return &boatPool[id]; }
+        { return id > 0 ? &boatPool[id] : nullptr; }
 
         THeroID GetStartingHeroId(TTownType alignment, int32_t playerPos, type_point mapPosition)
         { return THISCALL_4(THeroID, 0x4BB0C0, this, alignment, playerPos, mapPosition); }
