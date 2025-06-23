@@ -1235,8 +1235,7 @@ public:
     // Create JmpHook with the <NAME> and use <JMP_REGISTER> to perform jump /
     // Создать JmpHook с именем <NAME> и использовать <JMP_REGISTER> для прыжка.
     #define CREATE_JH(NAME, JMP_REGISTER, ...) template<uintptr_t jmpaddr>\
-    __attribute__((naked))\
-    void NAME()\
+    void [[__gnu__::__naked__]] NAME()\
     { \
         __asm__ volatile ( #__VA_ARGS__ \
         "\nmov " NH3API_STRINGIFY(JMP_REGISTER) ", %0\n" \
