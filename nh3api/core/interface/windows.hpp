@@ -1161,11 +1161,24 @@ NH3API_FORCEINLINE
 // address: 0x4F7D20
 // Do extended dialog /
 // Расширенный диалог.
-void extended_dialog(const char* text,
-                     exe_vector<type_dialog_resource>& resources,
+void extended_dialog(const char* const text,
+                     const exe_vector<type_dialog_resource>& resources,
                      int32_t x = -1,
                      int32_t y = -1,
                      int32_t timeout = 0)
 { FASTCALL_5(void, 0x4F7D20, text, &resources, x, y, timeout); }
+
+#if NH3API_STD_MOVE_SEMANTICS
+NH3API_FORCEINLINE
+// address: 0x4F7D20
+// Do extended dialog /
+// Расширенный диалог.
+void extended_dialog(const char* const text,
+                     exe_vector<type_dialog_resource>&& resources,
+                     int32_t x = -1,
+                     int32_t y = -1,
+                     int32_t timeout = 0)
+{ FASTCALL_5(void, 0x4F7D20, text, &resources, x, y, timeout); }
+#endif
 
 NH3API_DISABLE_WARNING_END
