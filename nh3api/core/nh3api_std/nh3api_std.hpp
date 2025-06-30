@@ -569,6 +569,16 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
         #define NH3API_NO_OPT
     #endif // NH3API_NO_OPT
 
+    // try to use [[msvc::forceinline]] if present
+    #ifndef NH3API_FORCEINLINE
+        #ifdef __has_cpp_attribute
+            #if __has_cpp_attribute(msvc::forceinline)
+                #define NH3API_FORCEINLINE [[msvc::forceinline]]
+            #endif 
+        #endif
+    #endif
+
+    // fallback to old MSVC
     #ifndef NH3API_FORCEINLINE
         #define NH3API_FORCEINLINE __forceinline
     #endif // NH3API_FORCEINLINE
@@ -606,7 +616,7 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
         #endif
     #endif
 
-    #ifndef NH3API_FORCEINLINE
+    #ifndef NH3API_FORCEINLINE 
         #define NH3API_FORCEINLINE __attribute__((__always_inline__))
     #endif
 

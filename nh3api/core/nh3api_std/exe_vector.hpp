@@ -145,7 +145,7 @@ protected:
     template<class IterT>
     void _Range_construct_or_tidy(IterT first, IterT last, std::input_iterator_tag)
     {
-        
+        nh3api::verify_range(first, last);
     #if NH3API_STD_MOVE_SEMANTICS
         NH3API_MAKE_EXCEPTION_GUARD(noexcept_move::value, vector_cleanup, *this);
         for (; first != last; ++first)
@@ -162,6 +162,7 @@ protected:
     template<class IterT>
     void _Range_construct_or_tidy(IterT first, IterT last, std::forward_iterator_tag)
     {
+        nh3api::verify_range(first, last);
         if ( _Buy( static_cast<size_type>(std::distance(first, last))) )
         {
             NH3API_MAKE_EXCEPTION_GUARD(noexcept_copy::value, vector_cleanup, *this);
@@ -345,8 +346,8 @@ public:
     template<class ... Args>
     iterator emplace( const_iterator _Where, Args&& ... args )
     {
-        const pointer _Whereptr = const_cast<const pointer>(_Where);
-        const pointer _Oldlast  = this->_Last;
+        pointer _Whereptr = const_cast<const_pointer>(_Where);
+        pointer _Oldlast  = this->_Last;
     #if NH3API_DEBUG
         if (_Whereptr >= this->_First && _Oldlast >= _Whereptr)
             NH3API_THROW(std::out_of_range, "vector::emplace iterator outside range");
@@ -518,15 +519,15 @@ public:
             }
 
             const size_type _Newcapacity = _Calculate_growth(_Newsize);
-            const pointer _Newvec = _Allocate(_Newcapacity);
-            const pointer _Appended_first = _Newvec + _Oldsize;
+            pointer _Newvec = _Allocate(_Newcapacity);
+            pointer _Appended_first = _Newvec + _Oldsize;
             pointer _Appended_last = _Appended_first;
             { // scope for exception guard
                 NH3API_MAKE_EXCEPTION_GUARD(
                 noexcept_default_construct::value 
                 && noexcept_copy::value 
                 && noexcept_move::value, 
-                range_cleanup, _Appended_first, _Appended_last, _Newvec, _Newcapacity);
+                range_cleanup, *this, _Appended_first, _Appended_last, _Newvec, _Newcapacity);
                 
                 _Appended_last = _Default_fill(_Appended_first, _Newsize - _Oldsize);
                 _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
@@ -567,8 +568,8 @@ public:
             }
 
             const size_type _Newcapacity = _Calculate_growth(_Newsize);
-            const pointer _Newvec = _Allocate(_Newcapacity);
-            const pointer _Appended_first = _Newvec + _Oldsize;
+            pointer _Newvec = _Allocate(_Newcapacity);
+            pointer _Appended_first = _Newvec + _Oldsize;
             pointer _Appended_last = _Appended_first;
 
             { // scope for exception guard
@@ -576,7 +577,7 @@ public:
                 noexcept_default_construct::value 
                 && noexcept_copy::value 
                 && noexcept_move::value, 
-                range_cleanup, _Appended_first, _Appended_last, _Newvec, _Newcapacity);
+                range_cleanup, *this, _Appended_first, _Appended_last, _Newvec, _Newcapacity);
                 
                 _Appended_last = _Ufill(_Appended_first, _Newsize - _Oldsize, _Val);
                 _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
@@ -849,14 +850,14 @@ public:
             const size_type _Newsize = _Oldsize + _Count;
             const size_type _Newcapacity = _Calculate_growth(_Newsize);
 
-            const pointer _Newvec = _Allocate(_Newcapacity);
-            const pointer _Constructed_last = _Newvec + _Whereoff + _Count;
+            pointer _Newvec = _Allocate(_Newcapacity);
+            pointer _Constructed_last = _Newvec + _Whereoff + _Count;
             pointer _Constructed_first = _Constructed_last;
 
             { // scope for exception guard
                 NH3API_MAKE_EXCEPTION_GUARD(
                     noexcept_copy::value && noexcept_move::value,
-                    range_cleanup, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity);
+                    range_cleanup, *this, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity);
                 
                 _Ufill(_Newvec + _Whereoff, _Count, _Val);
                 _Constructed_first = _Newvec + _Whereoff;
@@ -1123,6 +1124,7 @@ protected:
     // move [first, last) to raw _Dest, using allocator
     void _Umove_if_noexcept(pointer first, pointer last, pointer _Dest)
     {
+        nh3api::verify_range(first, last);
         #if NH3API_STD_MOVE_SEMANTICS
         _Umove_if_noexcept_impl(first, last, _Dest,
         nh3api::tt::disjunction_2<
@@ -1145,7 +1147,10 @@ protected:
     NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
     static void _Destroy_range(pointer first, pointer last)
     NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
-    { nh3api::destroy<pointer>(first, last); }
+    { 
+        nh3api::verify_range(first, last);
+        nh3api::destroy<pointer>(first, last); 
+    }
 
     NH3API_FORCEINLINE
     #if !NH3API_STD_MOVE_SEMANTICS && NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE) && NH3API_CHECK_MSVC
@@ -1154,6 +1159,7 @@ protected:
     #endif
     pointer _Umove(pointer first, pointer last, pointer ptr)
     {
+        nh3api::verify_range(first, last);
         #if !NH3API_STD_MOVE_SEMANTICS && NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
             return std::_Uninitialized_move(first, last, ptr, allocator_type());
         #else
@@ -1166,6 +1172,7 @@ protected:
     NH3API_FORCEINLINE
     static pointer _Move_backward(pointer first, pointer last, pointer ptr)
     {
+        nh3api::verify_range(first, last);
         #if NH3API_MSVC_STL && NH3API_MSVC_STL_VERSION < NH3API_MSVC_STL_VERSION_2010 // old MSVC compiler
         return std::_Move_backward(first, last, ptr);
         #else
@@ -1223,11 +1230,9 @@ protected:
     static pointer _Default_fill(pointer first, size_type count)
     NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_constructible<value_type>::value)
     {
-        #if NH3API_DEBUG
-        verify_range_n(first, count);
-        #endif
+        nh3api::verify_range_n(first, count);
         #ifdef __cpp_lib_raw_memory_algorithms
-        return std::uninitialized_value_construct_n(first, count);
+        return std::uninitialized_value_construct_n<pointer, size_type>(first, count);
         #else 
         return _Default_fill_impl(first, count, nh3api::tt::is_nothrow_constructible<value_type>());
         #endif
@@ -1276,8 +1281,8 @@ protected:
 
     // discard old array, acquire new array
     void _Change_array(const pointer _Newvec, 
-                        const size_type _Newsize, 
-                        const size_type _Newcapacity) NH3API_NOEXCEPT
+                       const size_type _Newsize, 
+                       const size_type _Newcapacity) NH3API_NOEXCEPT
     {
         _Tidy();
 
@@ -1322,6 +1327,8 @@ protected:
     template<class IterT>
     void _Insert_range(const_iterator _Where, IterT first, IterT last, std::forward_iterator_tag)
     {
+        nh3api::verify_range(first, last);
+        iterator _Whereptr = const_cast<pointer>(_Where);
         const size_type _Count = static_cast<size_type>(static_cast<size_t>(std::distance(first, last)));
         const size_type _Whereoff = static_cast<size_type>(_Where - this->_Last);
         const bool _One_at_back = _Count == 1 && _Where == this->_Last;
@@ -1341,14 +1348,14 @@ protected:
             const size_type _Newsize = _Oldsize + _Count;
             const size_type _Newcapacity = _Calculate_growth(_Newsize);
 
-            const pointer _Newvec = _Allocate(_Newcapacity);
-            const pointer _Constructed_last = _Newvec + _Whereoff + _Count;
+            pointer _Newvec = _Allocate(_Newcapacity);
+            pointer _Constructed_last = _Newvec + _Whereoff + _Count;
             pointer _Constructed_first = _Constructed_last;
 
             { // scope for exception guard
             NH3API_MAKE_EXCEPTION_GUARD(
                 noexcept_copy::value && noexcept_move::value,
-                range_cleanup, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity);
+                range_cleanup, *this, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity);
             
             std::uninitialized_copy(first, last, _Newvec + _Whereoff);
             _Constructed_first = _Newvec + _Whereoff;
@@ -1358,9 +1365,9 @@ protected:
             }
             else
             { // provide basic guarantee
-                _Umove(this->_Last, _Where, _Newvec);
+                _Umove(this->_Last, _Whereptr, _Newvec);
                 _Constructed_first = _Newvec;
-                _Umove(_Where, this->_Last, _Newvec + _Whereoff + _Count);
+                _Umove(_Whereptr, this->_Last, _Newvec + _Whereoff + _Count);
             }
 
             guard.complete();
@@ -1380,33 +1387,33 @@ protected:
             if (_Count < _Affected_elements)
             { // some affected elements must be assigned
                 this->_Last = _Umove(_Oldlast - _Count, _Oldlast, _Oldlast);
-                _Move_backward(_Where, _Oldlast - _Count, _Oldlast);
-                _Destroy_range(_Where, _Where + _Count);
+                _Move_backward(_Whereptr, _Oldlast - _Count, _Oldlast);
+                _Destroy_range(_Whereptr, _Whereptr + _Count);
 
                 NH3API_IF_CONSTEXPR ( noexcept_copy::value )
                 {
-                    std::uninitialized_copy<IterT, const_iterator>(first, last, _Where);
+                    std::uninitialized_copy<IterT, pointer>(first, last, _Whereptr);
                 }
                 else
                 {
                     NH3API_TRY
                     {
-                        std::uninitialized_copy<IterT, const_iterator>(first, last, _Where);
+                        std::uninitialized_copy<IterT, pointer>(first, last, _Whereptr);
                     }
                     NH3API_CATCH(...)
                     {
                         NH3API_TRY
                         {
-                            _Umove(_Where + _Count, _Where + 2 * _Count, _Where);
+                            _Umove(_Whereptr + _Count, _Whereptr + 2 * _Count, _Whereptr);
                         }
                         NH3API_CATCH(...)
                         {
                             // vaporize the detached piece
-                            _Destroy_range(_Where + _Count, this->_Last);
-                            this->_Last = _Where;
+                            _Destroy_range(_Whereptr + _Count, this->_Last);
+                            this->_Last = _Whereptr;
                             NH3API_RETHROW
                         }
-                        std::move(_Where + 2 * _Count, this->_Last, _Where + _Count);
+                        std::move(_Whereptr + 2 * _Count, this->_Last, _Whereptr + _Count);
                         _Destroy_range(_Oldlast, this->_Last);
                         this->_Last = _Oldlast;
                         NH3API_RETHROW
@@ -1415,30 +1422,30 @@ protected:
             }
             else
             { // affected elements don't overlap before/after
-                const pointer _Relocated = _Where + _Count;
-                this->_Last = _Umove(_Where, _Oldlast, _Relocated);
-                _Destroy_range(_Where, _Oldlast);
+                const pointer _Relocated = _Whereptr + _Count;
+                this->_Last = _Umove(_Whereptr, _Oldlast, _Relocated);
+                _Destroy_range(_Whereptr, _Oldlast);
                 NH3API_IF_CONSTEXPR ( noexcept_copy::value )
                 {
-                    std::uninitialized_copy<IterT, const_iterator>(first, last, _Where);
+                    std::uninitialized_copy<IterT, pointer>(first, last, _Whereptr);
                 }
                 else
                 {
                     NH3API_TRY
                     {
-                        std::uninitialized_copy<IterT, const_iterator>(first, last, _Where);
+                        std::uninitialized_copy<IterT, pointer>(first, last, _Whereptr);
                     }
                     NH3API_CATCH(...)
                     {
                         NH3API_TRY
                         {
-                            _Umove(_Relocated, this->_Last, _Where);
+                            _Umove(_Relocated, this->_Last, _Whereptr);
                         }
                         NH3API_CATCH(...)
                         {
                             // vaporize the detached piece
                             _Destroy_range(_Relocated, this->_Last);
-                            this->_Last = _Where;
+                            this->_Last = _Whereptr;
                             NH3API_RETHROW
                         }
                         _Destroy_range(_Relocated, this->_Last);
