@@ -383,12 +383,18 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         bool can_cast_spells(int32_t side, bool hero_spell) const
         { return THISCALL_3(bool, 0x41FA10, this, side, hero_spell); }
 
+        // Get hex index by screen coordinates /
+        // Индекс клетки по координатам точки на экране.
         int32_t GetGridIndex(int32_t x, int32_t y) const
         { return THISCALL_3(int32_t, 0x464380, this, x, y); }
 
+        // Combat is over /
+        // Битва завершилась.
         bool CombatIsOver() const
         { return THISCALL_1(bool, 0x465410, this); }
 
+        // Is <this_side> winner? /
+        // Является ли <this_side> победителем в битве?
         bool IsWinner(int32_t this_side) const
         { return THISCALL_2(bool, 0x465490, this, this_side); }
 
@@ -491,6 +497,8 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         bool valid_wall_target(TWallTargetId wall_target) const
         { return !!THISCALL_2(bool32_t, 0x475D70, this, wall_target); }
 
+        // Current side surrender cost /
+        // Стоимость откупа у текущей стороны битвы.
         int32_t get_surrender_cost() const
         { return THISCALL_1(int32_t, 0x477330, this); }
 
@@ -523,6 +531,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
                      iDelay,
                      static_cast<bool32_t>(bRefreshBackground),
                      static_cast<bool32_t>(bDoDelayTil)); }
+
+        void ComputeExtent(CSprite* sprite, int32_t sequence, int32_t frame, int32_t x, int32_t y, SLimitData* pLimitData, int32_t isFlipped, bool SaveBiggestExtent)
+        { THISCALL_9(void, 0x495AD0, this, sprite, sequence, frame, x, y, pLimitData, isFlipped, SaveBiggestExtent); }
 
         void ComputeMaxExtent()
         { THISCALL_1(void, 0x495770, this); }
