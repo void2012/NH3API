@@ -279,7 +279,7 @@ struct type_artifact
 // Combination artifact /
 // Сборный артефакт /
 // size = 0x18 = 24, align = 4
-struct combo_artifact
+struct CombinationArtifact
 {
     // Artifact type /
     // Тип артефакта.
@@ -295,7 +295,7 @@ struct combo_artifact
 
 // Combination artifact type /
 // Тип собираемого артефакта.
-enum ComboArtifactType : int32_t
+enum CombinationArtifactType : int32_t
 {
     COMBO_NONE = -1,
     COMBO_ANGELIC_ALLIANCE           = 0, // Альянс Ангелов
@@ -346,12 +346,12 @@ struct TArtifactTraits
     // Combo artifact type(COMBO_NONE if not combo) /
     // Тип сборного артефакта, если этот артефакт им является.
     // offset: +0x14 = +20,  size = 0x4 = 4
-    ComboArtifactType m_comboType;
+    CombinationArtifactType m_comboType;
 
     // Combo artifact which the current artifact is one of the requirements /
     // Тип сборного артефакта, для которого данный артефакт является составным.
     // offset: +0x18 = +24,  size = 0x4 = 4
-    ComboArtifactType m_targetCombo;
+    CombinationArtifactType m_targetCombo;
 
 protected:
     NH3API_MAYBE_UNUSED
@@ -398,7 +398,7 @@ std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>& akArtifactSlotTraits
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x694C58, std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>));
 
 NH3API_INLINE_OR_EXTERN
-std::array<combo_artifact, MAX_COMBO_ARTIFACTS>& combo_artifacts
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x693938, std::array<combo_artifact, MAX_COMBO_ARTIFACTS>));
+std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>& gCombinationArtifacts
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x693938, std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>));
 
 NH3API_DISABLE_WARNING_END

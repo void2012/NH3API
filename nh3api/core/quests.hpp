@@ -228,6 +228,8 @@ NH3API_VIRTUAL_CLASS type_quest
 
 };
 
+NH3API_SIZE_ASSERT(0x40, type_quest);
+
 #ifndef NH3API_VIRTUAL_OVERRIDE_TYPE_QUEST
 #define NH3API_VIRTUAL_OVERRIDE_TYPE_QUEST(CLASS_NAME) \
 virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override \

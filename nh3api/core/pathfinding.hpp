@@ -228,6 +228,8 @@ struct searchArray
 };
 #pragma pack(pop)
 
+NH3API_SIZE_ASSERT(0x70, searchArray);
+
 NH3API_INLINE_OR_EXTERN
 searchArray*& gpSearchArray
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992D4, searchArray*));

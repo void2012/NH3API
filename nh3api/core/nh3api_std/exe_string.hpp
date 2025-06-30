@@ -1838,7 +1838,7 @@ void swap(const exe_string& lhs,
 { lhs.swap(rhs); }
 #endif
 
-NH3API_SIZE_TEST(0x10, exe_string);
+NH3API_SIZE_ASSERT(0x10, exe_string);
 
 // concatenation
 

@@ -64,52 +64,52 @@ struct type_ballistics_traits
 #pragma pack(push, 4)
 // army class: stores information for every troop in a combat. /
 // класс army: содержит информацию о каждом существе на поле боя.
+// size = 0x548 = 1352, align = 4
 class army
 {
+    public:
+        // Sample IDs /
+        // ID звуковых эффектов.
+        enum TSampleID : int32_t
+        {
+            WALK_SAMPLE      = 0, // Звук ходьбы
+            ATTACK_SAMPLE    = 1, // Звук атаки
+            WINCE_SAMPLE     = 2, // Звук кривляний
+            SHOOT_SAMPLE     = 3, // Звук выстрела
+            DIE_SAMPLE       = 4, // Звук смерти
+            DEFEND_SAMPLE    = 5, // Звук получения урона в стойке защиты
+            PRE_WALK_SAMPLE  = 6, // Звук начала ходьбы
+            POST_WALK_SAMPLE = 7, // Звук окончания ходьбы
+            MAX_SAMPLES      = 8  // Количество звуков
+        };
 
-public:
-    // Sample IDs /
-    // ID звуковых эффектов.
-    enum TSampleID : int32_t
-    {
-        WALK_SAMPLE      = 0, // Звук ходьбы
-        ATTACK_SAMPLE    = 1, // Звук атаки
-        WINCE_SAMPLE     = 2, // Звук кривляний
-        SHOOT_SAMPLE     = 3, // Звук выстрела
-        DIE_SAMPLE       = 4, // Звук смерти
-        DEFEND_SAMPLE    = 5, // Звук получения урона в стойке защиты
-        PRE_WALK_SAMPLE  = 6, // Звук начала ходьбы
-        POST_WALK_SAMPLE = 7, // Звук окончания ходьбы
-        MAX_SAMPLES      = 8  // Количество звуков
-    };
+        enum
+        {
+            OFFSET_X = 196,
+            OFFSET_Y = 267,
+        };
 
-    enum
-    {
-        OFFSET_X = 196,
-        OFFSET_Y = 267,
-    };
+    public:
+        army() NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY(army)
+        { THISCALL_1(void, 0x43CF70, this); }
 
-public:
-    army()
-    NH3API_DELEGATE_DUMMY(army)
-    { THISCALL_1(void, 0x43CF70, this); }
+        army(const army& other) NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY(army)
+        { THISCALL_2(void, 0x437650, this, &other); }
 
-    army(const army& other)
-    NH3API_DELEGATE_DUMMY(army)
-    { THISCALL_2(void, 0x437650, this, &other); }
+        army(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            : SpellInfluenceQueue(tag),
+            bound_armies(tag),
+            binders(tag),
+            aura_clients(tag),
+            aura_sources(tag)
+        {}
 
-    army(const nh3api::dummy_tag_t& tag)
-        : SpellInfluenceQueue(tag),
-          bound_armies(tag),
-          binders(tag),
-          aura_clients(tag),
-          aura_sources(tag)
-    {}
+        ~army() NH3API_NOEXCEPT
+        { THISCALL_1(void, 0x43D120, this); }
 
-    ~army() NH3API_NOEXCEPT
-    { THISCALL_1(void, 0x43D120, this); }
-
-public:
+    public:
         // offset to front(returns either 1 or -1) /
         // поворот вперед(возвращает 1 или -1)
         /// @param direction направление
@@ -205,8 +205,8 @@ public:
                     );
         }
 
-    // Is war machine? /
-    // Является боевой машиной
+        // Is war machine? /
+        // Является боевой машиной
         bool       isWarMachine() const
         {
             return (   armyType == CREATURE_CATAPULT
@@ -1330,6 +1330,8 @@ public:
 
 };
 #pragma pack(pop)
+
+NH3API_SIZE_ASSERT(0x548, army);
 
 #undef army_hpp_gpCombatManager
 #undef army_hpp_gpCombatManager_get

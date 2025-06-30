@@ -348,6 +348,8 @@ struct TSpellTraits
 };
 #pragma pack(pop)
 
+NH3API_SIZE_ASSERT(0x88, TSpellTraits);
+
 NH3API_FORCEINLINE
 int32_t modify_spell_damage(int32_t damage, SpellID spell, TCreatureType creature)
 { return FASTCALL_3(int32_t, 0x44B180, damage, spell, creature); }

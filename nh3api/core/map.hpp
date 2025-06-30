@@ -124,6 +124,8 @@ class TTownEvent : TTimedEvent
 };
 #pragma pack(pop)
 
+NH3API_SIZE_ASSERT(0x50, TTownEvent);
+
 #pragma pack(push, 4)
 // Map information /
 // Информация о карте

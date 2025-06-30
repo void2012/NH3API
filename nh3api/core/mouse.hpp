@@ -123,6 +123,8 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
 
 };
 
+NH3API_SIZE_ASSERT(0x90, mouseManager);
+
 NH3API_INLINE_OR_EXTERN
 mouseManager*& gpMouseManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992B0, mouseManager*));
 

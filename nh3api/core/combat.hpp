@@ -683,9 +683,13 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x54BC = +21692,  size = 0x8 = 8
         std::array<int32_t, NUM_SIDES> numArmies;
 
+        // Both sides armies /
+        // Изначальные армии двух сторон.
         // offset: +0x54C4 = +21700,  size = 0x8 = 8
         std::array<armyGroup*, NUM_SIDES> ArmyGroups;
 
+        // Combat creature stacks /
+        // Стеки существ на поле боя.
         // offset: +0x54CC = +21708,  size = 0xDDD0 = 56784
         std::array<std::array<army, MAX_COMBAT_ARMIES + 1>, NUM_SIDES> Armies;
 
@@ -703,6 +707,8 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x132A8 = +78504,  size = 0x8 = 8
         std::array<TTerrainType, NUM_SIDES> nativeTerrain;
 
+        // Side summoned elemental at least once /
+        // Сторона вызывала элементаля хотя бы один раз.
         // offset: +0x132B0 = +78512,  size = 0x2 = 2
         std::array<bool, NUM_SIDES> SummonedElemental;
 
@@ -765,7 +771,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         //TCombatWindow* mainWindow; // TODO: Define TCombatWindow
 
         // offset: +0x13300 = +78592,  size = 0x4 = 4
-        int32_t bCombatShowIt;
+        bool32_t bCombatShowIt;
 
         // offset: +0x13304 = +78596,  size = 0x64 = 100
         std::array<iconWidget*, 25> iconWidgetWL;
@@ -872,6 +878,8 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x13FA8 = +81832,  size = 0x48 = 72
         std::array<int32_t, 18> wall_frame;
 
+        // Map point of the location of the battle /
+        // Точка карты, на которой происходит сражение.
         // offset: +0x13FF0 = +81904,  size = 0x4 = 4
         type_point map_point;
 
@@ -909,6 +917,8 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
 };
 #pragma pack(pop)
+
+NH3API_SIZE_ASSERT(0x140EC, combatManager);
 
 NH3API_INLINE_OR_EXTERN
 combatManager*& gpCombatManager

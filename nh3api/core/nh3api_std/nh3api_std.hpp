@@ -1028,7 +1028,7 @@ const omit_base_vftable_tag;
 
 #ifndef NH3API_DELEGATE_DUMMY
     #if NH3API_STD_DELEGATING_CONSTRUCTORS
-        #define NH3API_DELEGATE_DUMMY(CLASS_NAME) : CLASS_NAME(nh3api::dummy_tag)
+        #define NH3API_DELEGATE_DUMMY(CLASS_NAME) : CLASS_NAME(::nh3api::dummy_tag)
     #else
         #define NH3API_DELEGATE_DUMMY(CLASS_NAME)
     #endif
@@ -1036,15 +1036,15 @@ const omit_base_vftable_tag;
 
 #ifndef NH3API_DELEGATE_DUMMY_OR_BASE
     #if NH3API_STD_DELEGATING_CONSTRUCTORS
-        #define NH3API_DELEGATE_DUMMY_OR_BASE(CLASS_NAME, BASE) : CLASS_NAME(nh3api::dummy_tag)
+        #define NH3API_DELEGATE_DUMMY_OR_BASE(CLASS_NAME, BASE) : CLASS_NAME(::nh3api::dummy_tag)
     #else
-        #define NH3API_DELEGATE_DUMMY_OR_BASE(CLASS_NAME, BASE) : BASE(nh3api::dummy_tag)
+        #define NH3API_DELEGATE_DUMMY_OR_BASE(CLASS_NAME, BASE) : BASE(::nh3api::dummy_tag)
     #endif
 #endif
 
 #ifndef NH3API_DELEGATE_DUMMY_COMMA
     #if NH3API_STD_DELEGATING_CONSTRUCTORS
-        #define NH3API_DELEGATE_DUMMY_COMMA(CLASS_NAME) ,CLASS_NAME(nh3api::dummy_tag)
+        #define NH3API_DELEGATE_DUMMY_COMMA(CLASS_NAME) ,CLASS_NAME(::nh3api::dummy_tag)
     #else
         #define NH3API_DELEGATE_DUMMY_COMMA(CLASS_NAME)
     #endif
@@ -1447,8 +1447,8 @@ struct compiler_info
     #define NH3API_DEBUG_SWITCH(debug_expr, release_expr) (debug_expr)
 #endif // NH3API_DEBUG
 
-#ifndef NH3API_SIZE_TEST
-    #define NH3API_SIZE_TEST(EXPECTED_SIZE, ...) NH3API_STATIC_ASSERT("size mismatch", sizeof(__VA_ARGS__) == EXPECTED_SIZE)
+#ifndef NH3API_SIZE_ASSERT
+    #define NH3API_SIZE_ASSERT(EXPECTED_SIZE, ...) NH3API_STATIC_ASSERT("size mismatch", sizeof(__VA_ARGS__) == EXPECTED_SIZE)
 #endif
 
 #ifndef NH3API_IGNORE

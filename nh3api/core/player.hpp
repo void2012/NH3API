@@ -334,6 +334,8 @@ class playerData
 };
 #pragma pack(pop)
 
+NH3API_SIZE_ASSERT(0x168, playerData);
+
 NH3API_FORCEINLINE
 int32_t GetNumObelisks(int32_t whichPlayer)
 { return FASTCALL_1(int32_t, 0x4BA860, whichPlayer); }

@@ -13,6 +13,6 @@ std::array<TArtifactTraits, MAX_ARTIFACTS>& akArtifactTraits
 std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>& akArtifactSlotTraits
 = get_global_var_ref(0x694C58, std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>);
 
-std::array<combo_artifact, MAX_COMBO_ARTIFACTS>& combo_artifacts
-= get_global_var_ref(0x693938, std::array<combo_artifact, MAX_COMBO_ARTIFACTS>);
+std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>& gCombinationArtifacts
+= get_global_var_ref(0x693938, std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>);
 #endif

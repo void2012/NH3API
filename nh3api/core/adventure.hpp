@@ -530,6 +530,8 @@ class advManager : public baseManager
 };
 #pragma pack(pop)
 
+NH3API_SIZE_ASSERT(0x3B8, advManager);
+
 NH3API_INLINE_OR_EXTERN
 advManager*& gpAdvManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992B8, advManager*));
 

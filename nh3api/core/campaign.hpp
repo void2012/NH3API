@@ -62,6 +62,8 @@ struct CampaignScenarioPreview : public NewSMapHeader
 };
 #pragma pack(pop)
 
+NH3API_SIZE_ASSERT(0x4D4, CampaignScenarioPreview);
+
 #pragma pack(push, 4)
 // Campaign scenario dialog /
 // Диалог кампании.

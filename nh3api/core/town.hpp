@@ -505,6 +505,8 @@ class town
 };
 #pragma pack(pop)
 
+NH3API_SIZE_ASSERT(0x168, town);
+
 #pragma pack(push, 4)
 // Town map information /
 // Информация о городе с карты.
@@ -589,5 +591,7 @@ public:
 
 };
 #pragma pack(pop)
+
+NH3API_SIZE_ASSERT(0x88, TownExtra);
 
 NH3API_DISABLE_WARNING_END

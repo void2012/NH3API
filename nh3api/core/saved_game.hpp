@@ -76,3 +76,5 @@ struct SavedGameHeader
 
 };
 #pragma pack(pop)
+
+NH3API_SIZE_ASSERT(0x5A4, SavedGameHeader);

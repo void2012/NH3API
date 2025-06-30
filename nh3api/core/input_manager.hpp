@@ -202,6 +202,8 @@ NH3API_VIRTUAL_CLASS inputManager : public baseManager
 };
 #pragma pack(pop)
 
+NH3API_SIZE_ASSERT(0x960, inputManager);
+
 NH3API_INLINE_OR_EXTERN
 inputManager*& gpInputManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699530, inputManager*));
 

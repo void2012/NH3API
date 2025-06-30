@@ -432,6 +432,8 @@ class game
 };
 #pragma pack(pop)
 
+NH3API_SIZE_ASSERT(0x4E7D0, game);
+
 NH3API_INLINE_OR_EXTERN
 game*& gpGame
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699538, game*));

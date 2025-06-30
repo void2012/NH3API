@@ -1260,6 +1260,8 @@ struct ExtraInfoUnion
 };
 #pragma pack(pop) // 4
 
+NH3API_SIZE_ASSERT(4, ExtraInfoUnion);
+
 #pragma pack(push, 2)
 // Map object /
 // Объект на карте.
@@ -1328,6 +1330,8 @@ class CObject : public ExtraInfoUnion
         uint8_t frameOffset;
 };
 #pragma pack(pop) // 2
+
+NH3API_SIZE_ASSERT(0xC, CObject);
 
 #pragma pack(push, 1)
 // Base class for hero and boat/
@@ -1625,6 +1629,8 @@ class NewmapCell : public ExtraInfoUnion
 
 } NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
+
+NH3API_SIZE_ASSERT(0x26, NewmapCell);
 
 NH3API_FORCEINLINE
 bool hasFlag(TAdventureObjectType objType) NH3API_NOEXCEPT
