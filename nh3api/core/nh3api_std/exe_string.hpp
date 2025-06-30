@@ -616,12 +616,15 @@ class exe_string
         // to help compiler optimize branches
 
     public:
-        explicit exe_string( const allocator_type& _Al = allocator_type() )
-        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<allocator_type>::value)
+        exe_string() NH3API_NOEXCEPT
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {}
 
-        exe_string(const exe_string& other)
+        explicit exe_string( const allocator_type& _Al ) NH3API_NOEXCEPT
+            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
+        {}
+
+        explicit exe_string(const exe_string& other)
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {
             assign(other, 0, npos);
@@ -672,9 +675,6 @@ class exe_string
         }
 
         protected:
-        NH3API_FORCEINLINE void _Nullify() NH3API_NOEXCEPT
-        { nh3api::trivial_zero<sizeof(*this)>(this); }
-
         NH3API_FORCEINLINE void _Move_nullify(exe_string* other) NH3API_NOEXCEPT
         { nh3api::trivial_move<sizeof(*this)>(other, this); }
 
@@ -825,7 +825,8 @@ class exe_string
                 return _Throw_out_of_range_exception(), *this;
             }
             size_type _N;
-            if ( 0 < _M && _Grow<false>( _N = _Len + _M ) )
+            // we use noexcept version of _Grow because it is nearly impossible to get the string literal to overflow
+            if ( 0 < _M && _Grow<true>( _N = _Len + _M ) )
             {
                 nh3api::constexpr_char_traits::copy( _Ptr + _Len, _S, _M );
                 _Eos( _N );
@@ -885,7 +886,7 @@ class exe_string
             }
             else if ( 0 < _N && _N == other.size() && _Refcnt( other.c_str() ) < _FROZEN - 1)
             {
-                _Tidy( true );
+                _Tidy_deallocate();
                 _Ptr = other._Ptr;
                 _Len = other.size();
                 _Res = other.capacity();
@@ -1681,7 +1682,7 @@ class exe_string
             if ( 0 < _Len )
                 nh3api::constexpr_char_traits::copy( _S + 1, _Ptr, _Len > _Ns ? _Ns : _Len );
             size_type _Olen = _Len;
-            _Tidy( true );
+            _Tidy_deallocate();
             _Ptr = _S + 1;
             _Refcnt( _Ptr ) = 0;
             _Res = _Ns;
@@ -1735,7 +1736,7 @@ class exe_string
             if ( _N == 0 )
             {
                 if ( _Trim )
-                    _Tidy( true );
+                    _Tidy_deallocate();
                 else if ( _Ptr != nullptr )
                     _Eos( 0 );
                 return false;
@@ -1744,7 +1745,7 @@ class exe_string
             {
                 if ( _Trim && (_MIN_SIZE < _Res || _Res < _N) )
                 {
-                    _Tidy( true );
+                    _Tidy_deallocate();
                     _Copy( _N );
                 }
                 else if ( !_Trim && _Res < _N )
@@ -1779,7 +1780,7 @@ class exe_string
             if ( _Ptr != nullptr && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
             {
                 const value_type* _Temp = _Ptr;
-                _Tidy( true );
+                _Tidy_deallocate();
                 assign( _Temp );
             }
         }
@@ -1794,7 +1795,8 @@ class exe_string
                 ::operator delete( _Ptr - 1, exe_heap );
             else
                 --_Refcnt( _Ptr );
-            _Nullify();
+
+            nh3api::trivial_zero<sizeof(*this)>(this);
         }
 
         NH3API_FORCEINLINE
