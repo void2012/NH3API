@@ -60,7 +60,7 @@ enum EGameResource : int32_t
     ABANDONED                   = 7,  // Заброшенная шахта
     RES_ARTIFACT                = 8,  // Спрайт диалога: артефакт
     RES_SPELL                   = 9,  // Спрайт диалога: заклинание
-    RES_COLOR                   = 10, //
+    RES_COLOR                   = 10, // Изображение флага игрока определенного цвета
     RES_GOOD_LUCK               = 11, // Спрайт диалога: положительная удача
     RES_NEUTRAL_LUCK            = 12, // Спрайт диалога: нейтральная удача
     RES_BAD_LUCK                = 13, // Спрайт диалога: отрицательная удача
@@ -69,23 +69,24 @@ enum EGameResource : int32_t
     RES_BAD_MORALE              = 16, // Спрайт диалога: отрицательный боевой дух
     RES_EXPERIENCE              = 17, // Спрайт диалога: опыт
     RES_HERO                    = 18, // Спрайт диалога: портрет героя
-    RES_ARTIFACT_W_TEXT         = 19, //
+    RES_ARTIFACT_W_TEXT         = 19, // Unused / Не используется
     RES_SECONDARY_SKILL         = 20, // Спрайт диалога: вторичный навык
     RES_MONSTER                 = 21, // Спрайт диалога: существо
-    RES_BUILDING_TT_0           = 22, //
-    RES_BUILDING_TT_1           = 23, //
-    RES_BUILDING_TT_2           = 24, //
-    RES_BUILDING_TT_3           = 25, //
-    RES_BUILDING_TT_4           = 26, //
-    RES_BUILDING_TT_5           = 27, //
-    RES_BUILDING_TT_6           = 28, //
-    RES_BUILDING_TT_7           = 29, //
-    RES_PRIMARY_SKILL_ATTACK    = 30, // Спрайт диалога: первичный навык атака
-    RES_PRIMARY_SKILL_DEFENSE   = 31, // Спрайт диалога: первичный навык защита
-    RES_PRIMARY_SKILL_POWER     = 32, // Спрайт диалога: первичный навык сила магии
-    RES_PRIMARY_SKILL_KNOWLEDGE = 33, // Спрайт диалога: первичный навык знание
-    RES_MANA                    = 34, // Спрайт диалога: мана
-    RES_SMALL_GOLD              = 35, //
+    RES_BUILDING_TT_0           = 22, // Здание фракции Замок
+    RES_BUILDING_TT_1           = 23, // Здание фракции Оплот
+    RES_BUILDING_TT_2           = 24, // Здание фракции Башня
+    RES_BUILDING_TT_3           = 25, // Здание фракции Инферно
+    RES_BUILDING_TT_4           = 26, // Здание фракции Некрополис
+    RES_BUILDING_TT_5           = 27, // Здание фракции Темница
+    RES_BUILDING_TT_6           = 28, // Здание фракции Цитадель
+    RES_BUILDING_TT_7           = 29, // Здание фракции Крепость
+    RES_BUILDING_TT_8           = 30, // Здание фракции Сопряжение
+    RES_PRIMARY_SKILL_ATTACK    = 31, // Спрайт диалога: первичный навык атака
+    RES_PRIMARY_SKILL_DEFENSE   = 32, // Спрайт диалога: первичный навык защита
+    RES_PRIMARY_SKILL_POWER     = 33, // Спрайт диалога: первичный навык сила магии
+    RES_PRIMARY_SKILL_KNOWLEDGE = 34, // Спрайт диалога: первичный навык знание
+    RES_MANA                    = 35, // Спрайт диалога: мана
+    RES_SMALL_GOLD              = 36  // Маленький спрайт золота
 };
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_RESOURCE
