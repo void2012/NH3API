@@ -630,24 +630,24 @@ class exe_string
             assign(other, 0, npos);
         }
 
-        exe_string(const exe_string& other, size_type pos, size_type _M,
+        exe_string(const exe_string& other, size_type pos, size_type n,
                         const allocator_type& _Al = allocator_type() )
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {
-            assign( other, pos, _M );
+            assign( other, pos, n );
         }
 
-        exe_string( const value_type* _S, size_type _N,
+        exe_string( const value_type* str, size_type _N,
                         const allocator_type& _Al = allocator_type() )
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {
-            assign(_S, _N);
+            assign(str, _N);
         }
 
-        exe_string( const value_type* _S, const allocator_type& _Al = allocator_type() )
+        exe_string( const value_type* str, const allocator_type& _Al = allocator_type() )
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {
-            assign(_S);
+            assign(str);
         }
 
         exe_string(size_type _N, value_type _C)
@@ -769,9 +769,9 @@ class exe_string
         {
             return assign( other );
         }
-        exe_string& operator=( const value_type* _S )
+        exe_string& operator=( const value_type* str )
         {
-            return assign( _S );
+            return assign( str );
         }
         exe_string& operator=( value_type _C )
         {
@@ -784,9 +784,9 @@ class exe_string
             return append( other );
         }
         NH3API_INLINE_LARGE
-        exe_string& operator+=( const value_type* _S )
+        exe_string& operator+=( const value_type* str )
         {
-            return append( _S );
+            return append( str );
         }
         NH3API_INLINE_LARGE
         exe_string& operator+=( value_type _C )
@@ -798,55 +798,55 @@ class exe_string
         {
             return append( other, 0, npos );
         }
-        exe_string &append(const exe_string &other, size_type pos, size_type _M = npos)
+        exe_string &append(const exe_string &other, size_type pos, size_type n = npos)
         {
             if (other.size() < pos)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             size_type _N = other.size() - pos;
-            if (_N < _M)
-                _M = _N;
-            if (npos - _Len <= _M)
+            if (_N < n)
+                n = _N;
+            if (npos - _Len <= n)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
-            if (0 < _M && _Grow<false>(_N = _Len + _M))
+            if (0 < n && _Grow<false>(_N = _Len + n))
             {
-                nh3api::constexpr_char_traits::copy(_Ptr + _Len, &other.c_str()[pos], _M);
+                nh3api::constexpr_char_traits::copy(_Ptr + _Len, &other.c_str()[pos], n);
                 _Eos(_N);
             }
             return (*this);
         }
-        exe_string& append( const value_type* _S, size_type _M )
+        exe_string& append( const value_type* str, size_type n )
         {
-            if (npos - _Len <= _M)
+            if (npos - _Len <= n)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             size_type _N;
             // we use noexcept version of _Grow because it is nearly impossible to get the string literal to overflow
-            if ( 0 < _M && _Grow<true>( _N = _Len + _M ) )
+            if ( 0 < n && _Grow<true>( _N = _Len + n ) )
             {
-                nh3api::constexpr_char_traits::copy( _Ptr + _Len, _S, _M );
+                nh3api::constexpr_char_traits::copy( _Ptr + _Len, str, n );
                 _Eos( _N );
             }
             return (*this);
         }
-        exe_string& append( const value_type* _S )
+        exe_string& append( const value_type* str )
         {
-            return append(_S, nh3api::constexpr_char_traits::length(_S));
+            return append(str, nh3api::constexpr_char_traits::length(str));
         }
-        exe_string& append( size_type _M, value_type _C )
+        exe_string& append( size_type n, value_type _C )
         {
-            if (npos - _Len <= _M)
+            if (npos - _Len <= n)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             size_type _N;
-            if (0 < _M && _Grow<false>(_N = _Len + _M))
+            if (0 < n && _Grow<false>(_N = _Len + n))
             {
-                nh3api::constexpr_char_traits::assign(_Ptr + _Len, _M, _C);
+                nh3api::constexpr_char_traits::assign(_Ptr + _Len, n, _C);
                 _Eos(_N);
             }
             return (*this);
@@ -870,15 +870,15 @@ class exe_string
             return (assign( other, 0, npos ));
         }
         NH3API_INLINE_LARGE
-        exe_string& assign( const exe_string& other, size_type pos, size_type _M )
+        exe_string& assign( const exe_string& other, size_type pos, size_type n )
         {
             if ( other.size() < pos )
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             size_type _N = other.size() - pos;
-            if ( _M < _N )
-                _N = _M;
+            if ( n < _N )
+                _N = n;
             if ( this == &other )
             {
                 erase(static_cast<size_type>(pos + _N));
@@ -899,18 +899,18 @@ class exe_string
             }
             return (*this);
         }
-        exe_string& assign( const value_type* _S, size_type _N )
+        exe_string& assign( const value_type* str, size_type _N )
         {
             if ( _Grow<false>( _N, true ) )
             {
-                nh3api::constexpr_char_traits::copy( _Ptr, _S, _N );
+                nh3api::constexpr_char_traits::copy( _Ptr, str, _N );
                 _Eos( _N );
             }
             return (*this);
         }
-        exe_string& assign( const value_type* _S )
+        exe_string& assign( const value_type* str )
         {
-            return (assign( _S, nh3api::constexpr_char_traits::length( _S ) ));
+            return (assign( str, nh3api::constexpr_char_traits::length( str ) ));
         }
         exe_string& assign( size_type _N, value_type _C )
         {
@@ -931,94 +931,94 @@ class exe_string
         NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
         { return replace( begin(), end(), _F, lhs ); }
 
-        exe_string& insert( size_type _P0, const exe_string& other )
+        exe_string& insert( size_type pos1, const exe_string& other )
         {
-            return (insert( _P0, other, 0, npos ));
+            return (insert( pos1, other, 0, npos ));
         }
-        exe_string& insert( size_type _P0, const exe_string& other, size_type pos,
-                    size_type _M )
+        exe_string& insert( size_type pos1, const exe_string& other, size_type pos,
+                    size_type n )
         {
-            if ( _Len < _P0 || other.size() < pos )
+            if ( _Len < pos1 || other.size() < pos )
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             size_type _N = other.size() - pos;
-            if ( _N < _M )
-                _M = _N;
-            if (npos - _Len <= _M)
+            if ( _N < n )
+                n = _N;
+            if (npos - _Len <= n)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
-            if (0 < _M && _Grow<false>(_N = _Len + _M))
+            if (0 < n && _Grow<false>(_N = _Len + n))
             {
-                nh3api::constexpr_char_traits::move( _Ptr + _P0 + _M, _Ptr + _P0, _Len - _P0 );
-                nh3api::constexpr_char_traits::copy( _Ptr + _P0, &other.c_str()[pos], _M );
+                nh3api::constexpr_char_traits::move( _Ptr + pos1 + n, _Ptr + pos1, _Len - pos1 );
+                nh3api::constexpr_char_traits::copy( _Ptr + pos1, &other.c_str()[pos], n );
                 _Eos( _N );
             }
             return (*this);
         }
-        exe_string& insert( size_type _P0, const value_type* _S, size_type _M )
+        exe_string& insert( size_type pos1, const value_type* str, size_type n )
         {
-            if ( _Len < _P0 )
+            if ( _Len < pos1 )
             {
                 return _Throw_out_of_range_exception(), *this;
             }
-            if (npos - _Len <= _M)
+            if (npos - _Len <= n)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             size_type _N;
-            if ( 0 < _M && _Grow<false>( _N = _Len + _M ) )
+            if ( 0 < n && _Grow<false>( _N = _Len + n ) )
             {
-                nh3api::constexpr_char_traits::move( _Ptr + _P0 + _M, _Ptr + _P0, _Len - _P0 );
-                nh3api::constexpr_char_traits::copy( _Ptr + _P0, _S, _M );
+                nh3api::constexpr_char_traits::move( _Ptr + pos1 + n, _Ptr + pos1, _Len - pos1 );
+                nh3api::constexpr_char_traits::copy( _Ptr + pos1, str, n );
                 _Eos( _N );
             }
             return (*this);
         }
-        exe_string& insert( size_type _P0, const value_type* _S )
+        exe_string& insert( size_type pos1, const value_type* str )
         {
-            return (insert( _P0, _S, nh3api::constexpr_char_traits::length( _S ) ));
+            return (insert( pos1, str, nh3api::constexpr_char_traits::length( str ) ));
         }
-        exe_string& insert( size_type _P0, size_type _M, value_type _C )
+        exe_string& insert( size_type pos1, size_type n, value_type _C )
         {
-            if ( _Len < _P0 )
+            if ( _Len < pos1 )
             {
                 return _Throw_out_of_range_exception(), *this;
             }
-            if ( npos - _Len <= _M )
+            if ( npos - _Len <= n )
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             size_type _N;
-            if ( 0 < _M && _Grow<false>( _N = _Len + _M ) )
+            if ( 0 < n && _Grow<false>( _N = _Len + n ) )
             {
-                nh3api::constexpr_char_traits::move( _Ptr + _P0 + _M, _Ptr + _P0, _Len - _P0 );
-                nh3api::constexpr_char_traits::assign( _Ptr + _P0, _M, _C );
+                nh3api::constexpr_char_traits::move( _Ptr + pos1 + n, _Ptr + pos1, _Len - pos1 );
+                nh3api::constexpr_char_traits::assign( _Ptr + pos1, n, _C );
                 _Eos( _N );
             }
             return (*this);
         }
         iterator insert(const const_iterator pos, const value_type _C )
         {
-            size_type _P0 = _Pdif( pos, begin() );
-            insert( _P0, 1, _C );
-            return (begin() + _P0);
+            size_type pos1 = _Pdif( pos, begin() );
+            insert( pos1, 1, _C );
+            return (begin() + pos1);
         }
-        iterator insert(const const_iterator pos, const size_type _M, const value_type _C)
+        iterator insert(const const_iterator pos, const size_type n, const value_type _C)
         {
-            size_type _P0 = _Pdif( pos, begin() );
-            insert( _P0, _M, _C );
-            return begin() + _P0;
+            size_type pos1 = _Pdif( pos, begin() );
+            insert( pos1, n, _C );
+            return begin() + pos1;
         }
         template<class IterT
         NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
         iterator insert( const const_iterator pos, IterT _F, IterT lhs
         NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
         {
-            size_type _P0 = _Pdif( pos, begin() );
+            size_type pos1 = _Pdif( pos, begin() );
             replace(pos, pos, _F, lhs);
-            return begin() + _P0;
+            return begin() + pos1;
         }
 
         NH3API_FLATTEN
@@ -1029,19 +1029,19 @@ class exe_string
         { exe_string(*this).swap(*this); }
 
         NH3API_INLINE_LARGE
-        exe_string& erase( size_type _P0 = 0, size_type _M = npos )
+        exe_string& erase( size_type pos1 = 0, size_type n = npos )
         {
-            if (_Len < _P0)
+            if (_Len < pos1)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             _Split();
-            if (_Len - _P0 < _M)
-                _M = _Len - _P0;
-            if (0 < _M)
+            if (_Len - pos1 < n)
+                n = _Len - pos1;
+            if (0 < n)
             {
-                nh3api::constexpr_char_traits::move(_Ptr + _P0, _Ptr + _P0 + _M, _Len - _P0 - _M);
-                size_type _N = _Len - _M;
+                nh3api::constexpr_char_traits::move(_Ptr + pos1, _Ptr + pos1 + n, _Len - pos1 - n);
+                size_type _N = _Len - n;
                 if (_Grow<false>(_N))
                     _Eos(_N);
             }
@@ -1049,114 +1049,114 @@ class exe_string
         }
         iterator erase( const const_iterator pos )
         {
-            size_t _M = _Pdif( pos, begin() );
-            erase( _M, 1 );
-            return (_Psum( _Ptr, _M ));
+            size_t n = _Pdif( pos, begin() );
+            erase( n, 1 );
+            return (_Psum( _Ptr, n ));
         }
         iterator erase( const const_iterator _F, const const_iterator lhs )
         {
-            size_t _M = _Pdif( _F, begin() );
-            erase( _M, _Pdif( lhs, _F ) );
-            return _Psum( _Ptr, _M );
+            size_t n = _Pdif( _F, begin() );
+            erase( n, _Pdif( lhs, _F ) );
+            return _Psum( _Ptr, n );
         }
 
         void clear() NH3API_NOEXCEPT
         { _Eos(0); }
 
-        exe_string& replace(const size_type _P0, const size_type _N0, const exe_string& other )
+        exe_string& replace(const size_type pos1, const size_type n1, const exe_string& other )
         {
-            return replace(_P0, _N0, other, 0, npos);
+            return replace(pos1, n1, other, 0, npos);
         }
 
         NH3API_INLINE_LARGE
-        exe_string& replace(const size_type _P0, size_type _N0, const exe_string& other,
-                    const size_type pos, size_type _M = npos )
+        exe_string& replace(const size_type pos1, size_type n1, const exe_string& other,
+                    const size_type pos, size_type n = npos )
         {
-            if (_Len < _P0 || other.size() < pos)
+            if (_Len < pos1 || other.size() < pos)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
-            if (_Len - _P0 < _N0)
-                _N0 = _Len - _P0;
+            if (_Len - pos1 < n1)
+                n1 = _Len - pos1;
             size_type _N = other.size() - pos;
-            if (_N < _M)
-                _M = _N;
-            if (npos - _M <= _Len - _N0)
+            if (_N < n)
+                n = _N;
+            if (npos - n <= _Len - n1)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             _Split();
-            size_type _Nm = _Len - _N0 - _P0;
-            if (_M < _N0)
-                nh3api::constexpr_char_traits::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
-            if ((0 < _M || 0 < _N0) && _Grow<false>(_N = _Len + _M - _N0))
+            size_type _Nm = _Len - n1 - pos1;
+            if (n < n1)
+                nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
+            if ((0 < n || 0 < n1) && _Grow<false>(_N = _Len + n - n1))
             {
-                if (_N0 < _M)
-                    nh3api::constexpr_char_traits::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
-                nh3api::constexpr_char_traits::copy(_Ptr + _P0, &other.c_str()[pos], _M);
+                if (n1 < n)
+                    nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
+                nh3api::constexpr_char_traits::copy(_Ptr + pos1, &other.c_str()[pos], n);
                 _Eos(_N);
             }
             return *this;
         }
 
         NH3API_INLINE_LARGE
-        exe_string& replace(const size_type _P0, size_type _N0, const value_type* const _S,
-                    const size_type _M )
+        exe_string& replace(const size_type pos1, size_type n1, const value_type* const str,
+                    const size_type n )
         {
-            if (_Len < _P0)
+            if (_Len < pos1)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
-            if (_Len - _P0 < _N0)
-                _N0 = _Len - _P0;
-            if (npos - _M <= _Len - _N0)
+            if (_Len - pos1 < n1)
+                n1 = _Len - pos1;
+            if (npos - n <= _Len - n1)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             _Split();
-            size_type _Nm = _Len - _N0 - _P0;
-            if (_M < _N0)
-                nh3api::constexpr_char_traits::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
+            size_type _Nm = _Len - n1 - pos1;
+            if (n < n1)
+                nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
             size_type _N;
-            if ((0 < _M || 0 < _N0) && _Grow<false>(_N = _Len + _M - _N0))
+            if ((0 < n || 0 < n1) && _Grow<false>(_N = _Len + n - n1))
             {
-                if (_N0 < _M)
-                    nh3api::constexpr_char_traits::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
-                nh3api::constexpr_char_traits::copy(_Ptr + _P0, _S, _M);
+                if (n1 < n)
+                    nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
+                nh3api::constexpr_char_traits::copy(_Ptr + pos1, str, n);
                 _Eos(_N);
             }
             return (*this);
         }
 
-        exe_string& replace( size_type _P0, size_type _N0, const value_type* _S )
+        exe_string& replace( size_type pos1, size_type n1, const value_type* str )
         {
-            return (replace( _P0, _N0, _S, nh3api::constexpr_char_traits::length( _S ) ));
+            return (replace( pos1, n1, str, nh3api::constexpr_char_traits::length( str ) ));
         }
 
         NH3API_INLINE_LARGE
-        exe_string& replace( size_type _P0, size_type _N0,
-                    size_type _M, value_type _C )
+        exe_string& replace( size_type pos1, size_type n1,
+                    size_type n, value_type _C )
         {
-            if (_Len < _P0)
+            if (_Len < pos1)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
-            if (_Len - _P0 < _N0)
-                _N0 = _Len - _P0;
-            if (npos - _M <= _Len - _N0)
+            if (_Len - pos1 < n1)
+                n1 = _Len - pos1;
+            if (npos - n <= _Len - n1)
             {
                 return _Throw_out_of_range_exception(), *this;
             }
             _Split();
-            size_type _Nm = _Len - _N0 - _P0;
-            if (_M < _N0)
-                nh3api::constexpr_char_traits::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
+            size_type _Nm = _Len - n1 - pos1;
+            if (n < n1)
+                nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
             size_type _N;
-            if ((0 < _M || 0 < _N0) && _Grow<false>(_N = _Len + _M - _N0))
+            if ((0 < n || 0 < n1) && _Grow<false>(_N = _Len + n - n1))
             {
-                if (_N0 < _M)
-                    nh3api::constexpr_char_traits::move(_Ptr + _P0 + _M, _Ptr + _P0 + _N0, _Nm);
-                nh3api::constexpr_char_traits::assign(_Ptr + _P0, _M, _C);
+                if (n1 < n)
+                    nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
+                nh3api::constexpr_char_traits::assign(_Ptr + pos1, n, _C);
                 _Eos(_N);
             }
             return *this;
@@ -1169,23 +1169,23 @@ class exe_string
 
         exe_string& replace(const const_iterator _F,
                         const const_iterator lhs,
-                        const value_type* const _S,
-                        size_type _M)
+                        const value_type* const str,
+                        size_type n)
         {
-            return replace(_Pdif( _F, begin() ), _Pdif( lhs, _F ), _S, _M );
+            return replace(_Pdif( _F, begin() ), _Pdif( lhs, _F ), str, n );
         }
 
-        exe_string& replace(const const_iterator _F, const const_iterator lhs, const value_type* const _S)
+        exe_string& replace(const const_iterator _F, const const_iterator lhs, const value_type* const str)
         {
-            return replace(_Pdif( _F, begin() ), _Pdif( lhs, _F ), _S );
+            return replace(_Pdif( _F, begin() ), _Pdif( lhs, _F ), str );
         }
 
         exe_string& replace( const const_iterator _F,
                             const const_iterator lhs,
-                            const size_type _M,
+                            const size_type n,
                             const value_type _C )
         {
-            return replace(_Pdif( _F, begin() ), _Pdif( lhs, _F ), _M, _C );
+            return replace(_Pdif( _F, begin() ), _Pdif( lhs, _F ), n, _C );
         }
 
         template<typename IterT
@@ -1308,44 +1308,44 @@ class exe_string
         {
             return (const_reverse_iterator( begin() ));
         }
-        reference at( size_type _P0 )
+        reference at( size_type pos1 )
         {
-            if ( _Len <= _P0 )
+            if ( _Len <= pos1 )
             {
-                return _Throw_out_of_range_exception(), _Ptr[_P0];
+                return _Throw_out_of_range_exception(), _Ptr[pos1];
             }
             _Freeze();
-            return _Ptr[_P0];
+            return _Ptr[pos1];
         }
-        const_reference at( size_type _P0 ) const
+        const_reference at( size_type pos1 ) const
         {
-            if ( _Len <= _P0 )
+            if ( _Len <= pos1 )
             {
-                return _Throw_out_of_range_exception(), _Ptr[_P0];
+                return _Throw_out_of_range_exception(), _Ptr[pos1];
             }
-            return _Ptr[_P0];
+            return _Ptr[pos1];
         }
-        reference operator[]( size_type _P0 )
+        reference operator[]( size_type pos1 )
         #if !NH3API_DEBUG
         NH3API_NOEXCEPT
         #endif
         {
         #if !NH3API_DEBUG
             _Freeze();
-            return (_Ptr[_P0]);
+            return (_Ptr[pos1]);
         #else
-            return at(_P0);
+            return at(pos1);
         #endif
         }
-        const_reference operator[]( size_type _P0 ) const
+        const_reference operator[]( size_type pos1 ) const
         #if !NH3API_DEBUG
         NH3API_NOEXCEPT
         #endif
         {
         #if !NH3API_DEBUG
-            return (_Ptr[_P0]);
+            return (_Ptr[pos1]);
         #else
-            return at(_P0);
+            return at(pos1);
         #endif
         }
         const value_type* c_str() const NH3API_NOEXCEPT
@@ -1405,16 +1405,16 @@ class exe_string
             return (_Len == 0);
         }
         
-        size_type copy( value_type* _S, size_type _N, size_type _P0 = 0 ) const
+        size_type copy( value_type* str, size_type _N, size_type pos1 = 0 ) const
         {
-            if ( _Len < _P0 )
+            if ( _Len < pos1 )
             {
                 return _Throw_out_of_range_exception(), 0;
             }
-            if ( _Len - _P0 < _N )
-                _N = _Len - _P0;
+            if ( _Len - pos1 < _N )
+                _N = _Len - pos1;
             if ( 0 < _N )
-                nh3api::constexpr_char_traits::copy( _S, _Ptr + _P0, _N );
+                nh3api::constexpr_char_traits::copy( str, _Ptr + pos1, _N );
             return (_N);
         }
 
@@ -1571,51 +1571,62 @@ class exe_string
             assert( str != nullptr );
             return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
+        
+        #if NH3API_CHECK_CPP20 
 
-        exe_string substr( size_type pos = 0, size_type _M = npos ) const
-        {
-            return (exe_string( *this, pos, _M ));
-        }
+        exe_string substr( size_type pos = 0, size_type n = npos ) const&
+        { return exe_string( *this, pos, n ); }
+
+        exe_string substr( size_type pos = 0, size_type n = npos ) &&
+        { return exe_string( std::move(*this), pos, n ); }
+
+        #else
+
+        exe_string substr( size_type pos = 0, size_type n = npos ) const
+        { return exe_string( *this, pos, n ); }
+
+        #endif
+
         int compare( const exe_string& other ) const
         {
             return (compare( 0, _Len, other.c_str(), other.size() ));
         }
-        int compare( size_type _P0, size_type _N0,
+        int compare( size_type pos1, size_type n1,
                     const exe_string& other ) const
         {
-            return (compare( _P0, _N0, other, 0, npos ));
+            return (compare( pos1, n1, other, 0, npos ));
         }
-        int compare( size_type _P0, size_type _N0, const exe_string& other,
-                    size_type pos, size_type _M ) const
+        int compare( size_type pos1, size_type n1, const exe_string& other,
+                    size_type pos, size_type n ) const
         {
             if ( other.size() < pos )
             {
                 return _Throw_out_of_range_exception(), this->size();
             }
-            if ( other._Len - pos < _M )
-                _M = other._Len - pos;
-            return (compare( _P0, _N0, other.c_str() + pos, _M ));
+            if ( other._Len - pos < n )
+                n = other._Len - pos;
+            return (compare( pos1, n1, other.c_str() + pos, n ));
         }
-        int compare( const value_type* _S ) const
+        int compare( const value_type* str ) const
         {
-            return (compare( 0, _Len, _S, nh3api::constexpr_char_traits::length( _S ) ));
+            return (compare( 0, _Len, str, nh3api::constexpr_char_traits::length( str ) ));
         }
-        int compare( size_type _P0, size_type _N0, const value_type* _S ) const
+        int compare( size_type pos1, size_type n1, const value_type* str ) const
         {
-            return (compare( _P0, _N0, _S, nh3api::constexpr_char_traits::length( _S ) ));
+            return (compare( pos1, n1, str, nh3api::constexpr_char_traits::length( str ) ));
         }
-        int compare( size_type _P0, size_type _N0, const value_type* _S,
-                    size_type _M ) const
+        int compare( size_type pos1, size_type n1, const value_type* str,
+                    size_type n ) const
         {
-            if ( _Len < _P0 )
+            if ( _Len < pos1 )
             {
                 return _Throw_out_of_range_exception(), this->size();
             }
-            if ( _Len - _P0 < _N0 )
-                _N0 = _Len - _P0;
-            size_type _Ans = nh3api::constexpr_char_traits::compare( _Psum( _Ptr, _P0 ), _S, _N0 < _M ? _N0 : _M );
-            return (_Ans != 0 ? _Ans : _N0 < _M ? -1
-                    : _N0 == _M ? 0 : +1);
+            if ( _Len - pos1 < n1 )
+                n1 = _Len - pos1;
+            size_type _Ans = nh3api::constexpr_char_traits::compare( _Psum( _Ptr, pos1 ), str, n1 < n ? n1 : n );
+            return (_Ans != 0 ? _Ans : n1 < n ? -1
+                    : n1 == n ? 0 : +1);
         }
 
         allocator_type get_allocator() const
@@ -1626,23 +1637,21 @@ class exe_string
 
         // copy _Oldlen elements to newly allocated buffer
         NH3API_INLINE_LARGE
-        void _Copy( size_type _N ) NH3API_NOEXCEPT
+        void _Copy( size_type _Newsize ) NH3API_NOEXCEPT
         {
-            size_type _Ns = _N | _MIN_SIZE;
-            if ( max_size() < _Ns )
-                _Ns = _N;
-            value_type* _S;
-
-            _S = static_cast<value_type*>(::operator new( _Ns + 2, exe_heap, std::nothrow ));
+            size_type _Clamped_newsize = _Newsize | _MIN_SIZE;
+            if ( max_size() < _Clamped_newsize )
+                _Clamped_newsize = _Newsize;
+            value_type* str = static_cast<value_type*>(::operator new( _Clamped_newsize + 2, exe_heap, std::nothrow ));
 
             if ( 0 < _Len )
-                nh3api::constexpr_char_traits::copy( _S + 1, _Ptr, _Len > _Ns ? _Ns : _Len );
-            size_type _Olen = _Len;
+                nh3api::constexpr_char_traits::copy( str + 1, _Ptr, _Len > _Clamped_newsize ? _Clamped_newsize : _Len );
+            size_type _Old_length = _Len;
             _Tidy_deallocate();
-            _Ptr = _S + 1;
+            _Ptr = str + 1;
             _Refcnt( _Ptr ) = 0;
-            _Res = _Ns;
-            _Eos( _Olen > _Ns ? _Ns : _Olen );
+            _Res = _Clamped_newsize;
+            _Eos( _Old_length > _Clamped_newsize ? _Clamped_newsize : _Old_length );
         }
 
         // set new length and null terminator
