@@ -1444,178 +1444,134 @@ class exe_string
 
         // TODO: Implement other overloads
 
-        size_type find( const exe_string& other, size_type pos = 0 ) const
+        size_type find(const exe_string& other, size_type pos = 0 ) const NH3API_NOEXCEPT
         {
-            return (find( other.c_str(), pos, other.size() ));
+            assert( other.data() != nullptr && other.size() != 0 );
+            return nh3api::constexpr_char_traits::str_find(data(), size(), other.data(), pos, other.size());
         }
-        size_type find( const value_type* _S, size_type pos,
-                        size_type _N ) const
-        {
-            if (!_S)
-                return npos;
 
-            if ( _N == 0 && pos <= _Len )
-                return (pos);
-            size_type _Nm;
-            if ( pos < _Len && _N <= (_Nm = _Len - pos) )
-            {
-                const value_type* _U, * _V;
-                for ( _Nm -= _N - 1, _V = _Ptr + pos;
-                    (_U = nh3api::constexpr_char_traits::find( _V, _Nm, *_S )) != 0;
-                    _Nm -= _U - _V + 1, _V = _U + 1 )
-                    if ( nh3api::constexpr_char_traits::compare( _U, _S, _N ) == 0 )
-                        return (_U - _Ptr);
-            }
-            return npos;
-        }
-        size_type find( const value_type* _S, size_type pos = 0 ) const
+        size_type find( char c, size_type pos = 0 ) const NH3API_NOEXCEPT
         {
-            return (find( _S, pos, nh3api::constexpr_char_traits::length( _S ) ));
+            return nh3api::constexpr_char_traits::str_find(data(), size(), c, pos);
         }
-        size_type find( value_type _C, size_type pos = 0 ) const
-        {
-            return (find( static_cast<const value_type*>(&_C), pos, 1));
-        }
-        size_type rfind( const exe_string& other, size_type pos = npos ) const
-        {
-            return (rfind( other.c_str(), pos, other.size() ));
-        }
-        size_type rfind( const value_type* _S, size_type pos,
-                        size_type _N ) const
-        {
-            if (_N == 0)
-                return (pos < _Len ? pos : _Len);
 
-            if (_N <= _Len)
-            {
-                for (const value_type *_U = _Ptr + +(pos < _Len - _N ? pos : _Len - _N);; --_U)
-                {
-                    if (nh3api::constexpr_char_traits::eq(*_U, *_S) && nh3api::constexpr_char_traits::compare(_U, _S, _N) == 0)
-                        return (_U - _Ptr);
-                    else if (_U == _Ptr)
-                        break;
-                }
-            }
-            return (npos);
-        }
-        size_type rfind( const value_type* _S, size_type pos = npos ) const
+        size_type find( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
         {
-            return (rfind( _S, pos, nh3api::constexpr_char_traits::length( _S ) ));
+            assert( str != nullptr && n != 0 );
+            return nh3api::constexpr_char_traits::str_find(data(), size(), str, pos, n);
         }
-        size_type rfind( value_type _C, size_type pos = npos ) const
+
+        size_type find( const char* str, size_type pos = 0 ) const NH3API_NOEXCEPT
         {
-            return (rfind( static_cast<const value_type*>(&_C), pos, 1));
+            assert( str != nullptr );
+            return nh3api::constexpr_char_traits::str_find(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
-        size_type find_first_of( const exe_string& other,
-                                size_type pos = 0 ) const
+
+        size_type rfind(const exe_string& other, size_type pos = npos ) const NH3API_NOEXCEPT
         {
-            return (find_first_of( other.c_str(), pos, other.size() ));
+            assert( other.data() != nullptr && other.size() != 0 );
+            return nh3api::constexpr_char_traits::str_rfind(data(), size(), other.data(), pos, other.size());
         }
-        size_type find_first_of( const value_type* _S, size_type pos,
-                                size_type _N ) const
+
+        size_type rfind( char c, size_type pos = npos ) const NH3API_NOEXCEPT
+        { return nh3api::constexpr_char_traits::str_rfind(data(), size(), c, pos); }
+
+        size_type rfind( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
         {
-            if ( 0 < _N && pos < _Len )
-            {
-                const value_type* const _V = _Ptr + _Len;
-                for ( const value_type* _U = _Ptr + pos; _U < _V; ++_U )
-                    if ( nh3api::constexpr_char_traits::find( _S, _N, *_U ) != 0 )
-                        return (_U - _Ptr);
-            }
-            return (npos);
+            assert( str != nullptr && n != 0 );
+            return nh3api::constexpr_char_traits::str_rfind(data(), size(), str, pos, n);
         }
-        size_type find_first_of( const value_type* _S, size_type pos = 0 ) const
+
+        size_type rfind( const char* str, size_type pos = npos ) const NH3API_NOEXCEPT
         {
-            return (find_first_of( _S, pos, nh3api::constexpr_char_traits::length( _S ) ));
+            assert( str != nullptr );
+            return nh3api::constexpr_char_traits::str_rfind(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
-        size_type find_first_of( value_type _C, size_type pos = 0 ) const
+
+        size_type find_first_of(const exe_string& other, size_type pos = 0 ) const NH3API_NOEXCEPT
         {
-            return (find( static_cast<const value_type*>(&_C), pos, 1));
+            assert( other.data() != nullptr && other.size() != 0 );
+            return nh3api::constexpr_char_traits::str_find_first_of(data(), size(), other.data(), pos, other.size());
         }
-        size_type find_last_of( const exe_string& other,
-                                size_type pos = npos ) const
+
+        size_type find_first_of( char c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        { return find(c, pos); }
+
+        size_type find_first_of( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
         {
-            return (find_last_of( other.c_str(), pos, other.size() ));
+            assert( str != nullptr && n != 0 );
+            return nh3api::constexpr_char_traits::str_find_first_of(data(), size(), str, pos, n);
         }
-        size_type find_last_of( const value_type* _S, size_type pos,
-                                size_type _N ) const
+
+        size_type find_first_of( const char* str, size_type pos = 0 ) const NH3API_NOEXCEPT
         {
-            if (0 < _N && 0 < _Len)
-            {
-                for (const value_type *_U = _Ptr + (pos < _Len ? pos : _Len - 1);; --_U)
-                {
-                    if (nh3api::constexpr_char_traits::find(_S, _N, *_U) != 0)
-                        return (_U - _Ptr);
-                    else if (_U == _Ptr)
-                        break;
-                }
-            }
-            return (npos);
+            assert( str != nullptr );
+            return nh3api::constexpr_char_traits::str_find_first_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
-        size_type find_last_of( const value_type* _S,
-                                size_type pos = npos ) const
+
+        size_type find_last_of(const exe_string& other, size_type pos = npos ) const NH3API_NOEXCEPT
         {
-            return (find_last_of( _S, pos, nh3api::constexpr_char_traits::length( _S ) ));
+            assert( other.data() != nullptr && other.size() != 0 );
+            return nh3api::constexpr_char_traits::str_find_last_of(data(), size(), other.data(), pos, other.size());
         }
-        size_type find_last_of( value_type _C, size_type pos = npos ) const
+
+        size_type find_last_of( char c, size_type pos = npos ) const NH3API_NOEXCEPT
+        { return rfind(c, pos); }
+
+        size_type find_last_of( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
         {
-            return (rfind( static_cast<const value_type*>(&_C), pos, 1 ));
+            assert( str != nullptr && n != 0 );
+            return nh3api::constexpr_char_traits::str_find_last_of(data(), size(), str, pos, n);
         }
-        size_type find_first_not_of( const exe_string& other,
-                                    size_type pos = 0 ) const
+
+        size_type find_last_of( const char* str, size_type pos = npos ) const NH3API_NOEXCEPT
         {
-            return (find_first_not_of( other.c_str(), pos,
-                    other.size() ));
+            assert( str != nullptr );
+            return nh3api::constexpr_char_traits::str_find_last_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
-        size_type find_first_not_of( const value_type* _S, size_type pos,
-                                    size_type _N ) const
+
+        size_type find_first_not_of(const exe_string& other, size_type pos = 0 ) const NH3API_NOEXCEPT
         {
-            if ( pos < _Len )
-            {
-                const value_type* const _V = _Ptr + _Len;
-                for ( const value_type* _U = _Ptr + pos; _U < _V; ++_U )
-                    if ( nh3api::constexpr_char_traits::find( _S, _N, *_U ) == 0 )
-                        return (_U - _Ptr);
-            }
-            return (npos);
+            assert( other.data() != nullptr && other.size() != 0 );
+            return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), other.data(), pos, other.size());
         }
-        size_type find_first_not_of( const value_type* _S,
-                                    size_type pos = 0 ) const
+
+        size_type find_first_not_of( char c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        { return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), c, pos); }
+
+        size_type find_first_not_of( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
         {
-            return (find_first_not_of( _S, pos, nh3api::constexpr_char_traits::length( _S ) ));
+            assert( str != nullptr && n != 0 );
+            return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), str, pos, n);
         }
-        size_type find_first_not_of( value_type _C, size_type pos = 0 ) const
+
+        size_type find_first_not_of( const char* str, size_type pos = 0 ) const NH3API_NOEXCEPT
         {
-            return (find_first_not_of( static_cast<const value_type*>(&_C), pos, 1 ));
+            assert( str != nullptr );
+            return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
-        size_type find_last_not_of( const exe_string& other,
-                                    size_type pos = npos ) const
+
+        size_type find_last_not_of(const exe_string& other, size_type pos = npos ) const NH3API_NOEXCEPT
         {
-            return (find_last_not_of( other.c_str(), pos, other.size() ));
+            assert( other.data() != nullptr && other.size() != 0 );
+            return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), other.data(), pos, other.size());
         }
-        size_type find_last_not_of( const value_type* _S, size_type pos,
-                                    size_type _N ) const
+
+        size_type find_last_not_of( char c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        { return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), c, pos); }
+
+        size_type find_last_not_of( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
         {
-            if (0 < _Len)
-            {
-                for (const value_type *_U = _Ptr + (pos < _Len ? pos : _Len - 1);; --_U)
-                {
-                    if (nh3api::constexpr_char_traits::find(_S, _N, *_U) == 0)
-                        return (_U - _Ptr);
-                    else if (_U == _Ptr)
-                        break;
-                }
-            }
-            return (npos);
+            assert( str != nullptr && n != 0 );
+            return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), str, pos, n);
         }
-        size_type find_last_not_of( const value_type* _S,
-                                    size_type pos = npos ) const
+
+        size_type find_last_not_of( const char* str, size_type pos = npos ) const NH3API_NOEXCEPT
         {
-            return (find_last_not_of( _S, pos, nh3api::constexpr_char_traits::length( _S ) ));
+            assert( str != nullptr );
+            return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
-        size_type find_last_not_of( value_type _C, size_type pos = npos ) const
-        {
-            return (find_last_not_of( static_cast<const value_type*>(&_C), pos, 1 ));
-        }
+
         exe_string substr( size_type pos = 0, size_type _M = npos ) const
         {
             return (exe_string( *this, pos, _M ));
