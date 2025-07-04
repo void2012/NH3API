@@ -1374,7 +1374,7 @@ class exe_string
 
         NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
         size_type max_size() const NH3API_NOEXCEPT
-        { return size_type(~0); }
+        { return NH3API_MAX_HEAP_REQUEST; }
 
         void resize(const size_type _N, const value_type _C = value_type())
         {

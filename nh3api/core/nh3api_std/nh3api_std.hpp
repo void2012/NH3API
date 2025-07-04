@@ -38,7 +38,6 @@
 #include <cassert>
 #include <cstring>
 #include <cstddef>
-#include <cwchar>
 #include <windows.h>
 
 #ifndef NH3API_JOIN_STRING
@@ -569,15 +568,6 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
         #define NH3API_NO_OPT
     #endif // NH3API_NO_OPT
 
-    // try to use [[msvc::forceinline]] if present
-    #ifndef NH3API_FORCEINLINE
-        #ifdef __has_cpp_attribute
-            #if __has_cpp_attribute(msvc::forceinline)
-                #define NH3API_FORCEINLINE [[msvc::forceinline]]
-            #endif 
-        #endif
-    #endif
-
     // fallback to old MSVC
     #ifndef NH3API_FORCEINLINE
         #define NH3API_FORCEINLINE __forceinline
@@ -639,6 +629,18 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
     #endif
 #endif
 
+#ifndef NH3API_RETURNS_ALIGNED
+    #ifdef __has_cpp_attribute
+        #if __has_cpp_attribute(gnu::assume_aligned)
+            #define NH3API_RETURNS_ALIGNED(ALIGNMENT) [[gnu::assume_aligned(ALIGNMENT)]]
+        #endif
+    #endif
+#endif 
+
+#ifndef NH3API_RETURNS_ALIGNED
+    #define NH3API_RETURNS_ALIGNED(ALIGNMENT) 
+#endif 
+
 #ifndef NH3API_INLINE_LARGE
     #if defined(NH3API_FLAG_OPTIMIZE_FOR_SPEED) && !defined(NH3API_FLAG_OPTIMIZE_FOR_SIZE)
         #define NH3API_INLINE_LARGE NH3API_NOINLINE NH3API_FLATTEN
@@ -657,6 +659,10 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
     #else
         #define NH3API_MSVC_INTRIN
     #endif
+#endif
+
+#ifndef NH3API_MAX_HEAP_REQUEST
+    #define NH3API_MAX_HEAP_REQUEST 0xFFFFFFE0
 #endif
 
 // indicates that the pointer returned by that function must be freed by deallocator function

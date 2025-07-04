@@ -537,7 +537,7 @@ public:
 
     NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
     size_type max_size() const NH3API_NOEXCEPT
-    { return size_type(~0) / sizeof(value_type); }
+    { return NH3API_MAX_HEAP_REQUEST / sizeof(value_type); }
 
     bool empty() const NH3API_NOEXCEPT
     {

@@ -24,8 +24,19 @@ NH3API_MALLOC(1)
 // address: 0x617492
 // Heroes3.exe internal operator delete /
 // Внутренняя реализация CRT-функции operator new Heroes3.exe.
-void* __cdecl exe_new(size_t size) NH3API_NOEXCEPT
-{ return CDECL_1(void*, 0x617492, size); }
+void* NH3API_RETURNS_ALIGNED(8) __cdecl exe_new(size_t size) NH3API_NOEXCEPT
+{ 
+    #if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
+    #ifdef NH3API_FLAG_ALIGNED_SMALL_HEAP
+    if ( size < 0x3f8 )
+        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); 
+    else 
+    #endif
+        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+    #else 
+    return CDECL_1(void*, 0x617492, size);
+    #endif
+}
 
 NH3API_FORCEINLINE
 // address: 0x60B0F0
@@ -40,7 +51,7 @@ NH3API_MALLOC(1)
 // address: 0x61A9D5
 // Heroes3.exe internal malloc /
 // Внутренняя реализация CRT-функции malloc Heroes3.exe.
-void* __cdecl exe_malloc(size_t size) NH3API_NOEXCEPT
+void* NH3API_RETURNS_ALIGNED(8) __cdecl exe_malloc(size_t size) NH3API_NOEXCEPT
 { return CDECL_1(void*, 0x61A9D5, size); }
 
 NH3API_FORCEINLINE
@@ -64,7 +75,7 @@ NH3API_MALLOC(1, 2)
 // address: 0x61AA61
 // Heroes3.exe internal calloc /
 // Внутренняя реализация CRT-функции calloc Heroes3.exe.
-void* __cdecl exe_calloc(size_t numOfElements, size_t sizeOfElements) NH3API_NOEXCEPT
+void* NH3API_RETURNS_ALIGNED(8) __cdecl exe_calloc(size_t numOfElements, size_t sizeOfElements) NH3API_NOEXCEPT
 { return CDECL_2(void*, 0x61AA61, numOfElements, sizeOfElements); }
 
 NH3API_NODISCARD
@@ -83,6 +94,10 @@ struct exe_heap_t
     static HANDLE& get_handle() NH3API_NOEXCEPT
     { return get_global_var_ref(handle_address, HANDLE); }
 
+    // maximum size a heap can manage
+    NH3API_CONSTEXPR size_t max_size() NH3API_NOEXCEPT
+    { return NH3API_MAX_HEAP_REQUEST; }
+
 } const exe_heap; // exe_heap constant / константа exe_heap
 
 // I tried to make new throw exception on invalid allocation
@@ -94,15 +109,37 @@ NH3API_NODISCARD
 NH3API_FORCEINLINE
 NH3API_MALLOC(1)
 // usage: new (exe_heap) new-initializer...
-void* __cdecl operator new(size_t size, const exe_heap_t&)
-{ return exe_new(size); }
+void* NH3API_RETURNS_ALIGNED(8) __cdecl operator new(size_t size, const exe_heap_t&)
+{ 
+    #if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
+    #ifdef NH3API_FLAG_ALIGNED_SMALL_HEAP
+    if ( size < 0x3f8 )
+        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); 
+    else 
+    #endif
+        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+    #else 
+    return CDECL_1(void*, 0x617492, size);
+    #endif
+}
 
 NH3API_NODISCARD
 NH3API_FORCEINLINE
 NH3API_MALLOC(1)
 // usage: new (exe_heap, std::nothrow) new-initializer...
-void* __cdecl operator new(size_t size, const exe_heap_t&, const std::nothrow_t&) NH3API_NOEXCEPT
-{ return exe_new(size); }
+void* NH3API_RETURNS_ALIGNED(8) __cdecl operator new(size_t size, const exe_heap_t&, const std::nothrow_t&) NH3API_NOEXCEPT
+{ 
+    #if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
+    #ifdef NH3API_FLAG_ALIGNED_SMALL_HEAP
+    if ( size < 0x3f8 )
+        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); 
+    else 
+    #endif
+        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+    #else 
+    return CDECL_1(void*, 0x617492, size);
+    #endif
+}
 
 NH3API_NODISCARD
 NH3API_FORCEINLINE
@@ -110,8 +147,19 @@ NH3API_MALLOC(1)
 // usage: new (exe_heap) new-initializer...
 // NOTE: It appears that both Itanium ABI and MSVC ABI implicitly allocate size + 4,
 // and return exe_new(size) + 4 pointer, so we don't do manual handling
-void* __cdecl operator new[](size_t size, const exe_heap_t&)
-{ return exe_new(size); }
+void* NH3API_RETURNS_ALIGNED(8) __cdecl operator new[](size_t size, const exe_heap_t&)
+{ 
+    #if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
+    #ifdef NH3API_FLAG_ALIGNED_SMALL_HEAP
+    if ( size < 0x3f8 )
+        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); 
+    else 
+    #endif
+        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+    #else 
+    return CDECL_1(void*, 0x617492, size);
+    #endif
+}
 
 NH3API_NODISCARD
 NH3API_FORCEINLINE
@@ -119,8 +167,19 @@ NH3API_MALLOC(1)
 // usage: new (exe_heap, std::nothrow) new-initializer...
 // NOTE: It appears that both Itanium ABI and MSVC ABI implicitly allocate size + 4,
 // and return exe_new(size) + 4 pointer, so we don't do manual handling
-void* __cdecl operator new[](size_t size, const exe_heap_t&, const std::nothrow_t&) NH3API_NOEXCEPT
-{ return exe_new(size); }
+void* NH3API_RETURNS_ALIGNED(8) __cdecl operator new[](size_t size, const exe_heap_t&, const std::nothrow_t&) NH3API_NOEXCEPT
+{ 
+    #if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
+    #ifdef NH3API_FLAG_ALIGNED_SMALL_HEAP
+    if ( size < 0x3f8 )
+        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); 
+    else 
+    #endif
+        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+    #else 
+    return CDECL_1(void*, 0x617492, size);
+    #endif
+}
 
 /*
 // what I mean is that if both ABIs didn't do that, we would have to manually handle that:

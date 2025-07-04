@@ -453,39 +453,24 @@ public:
         }
     }
 
-protected:
-    #if NH3API_CHECK_MSVC && !NH3API_CHECK_CPP11
-    iterator _Add_alignment_assumption(pointer ptr) NH3API_NOEXCEPT
-    { return nh3api::assume_aligned<__alignof(value_type)>(ptr); }
-
-    const_iterator _Add_alignment_assumption(const_pointer ptr) const NH3API_NOEXCEPT
-    { return nh3api::assume_aligned<__alignof(value_type)>(ptr); }
-    #else 
-    iterator _Add_alignment_assumption(pointer ptr) NH3API_NOEXCEPT
-    { return nh3api::assume_aligned<alignof(value_type)>(ptr); }
-
-    const_iterator _Add_alignment_assumption(const_pointer ptr) const NH3API_NOEXCEPT
-    { return nh3api::assume_aligned<alignof(value_type)>(ptr); }
-    #endif
-
 public:
     iterator begin() NH3API_NOEXCEPT
-    { return _Add_alignment_assumption(_First); }
+    { return (_First); }
 
     const_iterator begin() const NH3API_NOEXCEPT
-    { return (const_iterator)_Add_alignment_assumption(_First); }
+    { return (const_iterator)(_First); }
 
     const_iterator cbegin() const NH3API_NOEXCEPT
-    { return (const_iterator)_Add_alignment_assumption(_First); }
+    { return (const_iterator)(_First); }
 
     iterator end() NH3API_NOEXCEPT
-    { return _Add_alignment_assumption(_Last); }
+    { return (_Last); }
 
     const_iterator end() const NH3API_NOEXCEPT
-    { return (const_iterator)_Add_alignment_assumption(_Last); }
+    { return (const_iterator)(_Last); }
 
     const_iterator cend() const NH3API_NOEXCEPT
-    { return (const_iterator)_Add_alignment_assumption(_Last); }
+    { return (const_iterator)(_Last); }
 
     reverse_iterator rbegin() NH3API_NOEXCEPT
     { return reverse_iterator(end()); }
@@ -609,7 +594,7 @@ public:
 
     NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
     size_type max_size() const NH3API_NOEXCEPT
-    { return size_type(~0) / sizeof(value_type); }
+    { return NH3API_MAX_HEAP_REQUEST / sizeof(value_type); }
 
     NH3API_FORCEINLINE
     bool empty() const NH3API_NOEXCEPT
