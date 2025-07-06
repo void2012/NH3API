@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--NH3API standard library visualizers for Visual Studio debugger-->
+<!--NH3API is distributed under the terms of Apache 2.0 license-->
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<!--exe_bitset<N> visualizer-->
+	<Type Name="exe_bitset&lt;*&gt;">
+		<DisplayString>{{ size={$T1} }}</DisplayString>
+		<Expand>
+			<IndexListItems>
+				<Size>$T1</Size>
+				<ValueNode>(_array[$i / _Bitsperword] &gt;&gt; ($i % _Bitsperword)) &amp; 1,d</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<!--exe_bitset<N>::reference visualizer-->
+	<Type Name="exe_bitset&lt;*&gt;::reference">
+		<DisplayString>{(_parent._array[_pos / _parent._Bitsperword] &gt;&gt; (_pos % _parent._Bitsperword)) &amp; 1,d}</DisplayString>
+		<Expand>
+			<Item Name="[bitset]">&amp;_parent</Item>
+			<Item Name="[pos]">_pos</Item>
+		</Expand>
+	</Type>
+
+	<!--exe_deque<T> visualizer-->
+	<Type Name="exe_deque&lt;*&gt;">
+		<DisplayString>{{ size={_Size} }}</DisplayString>
+		<Expand>
+			<Item Name="[size]">_Size</Item>
+			<Item Name="[capacity]">_Mapsize * DEQUE_SIZE</Item>
+			<Item Name="[first]">_First</Item>
+			<Item Name="[last]">_Last</Item>
+			<ArrayItems>
+				<Size>_Size</Size>
+				<ValuePointer>_First._Next</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<!--exe_deque<T>::iterator visualizer-->
+	<Type Name="exe_deque&lt;*&gt;::iterator">
+		<DisplayString>{_Next}</DisplayString>
+		<Expand>
+			<Item Name="[first]">_First</Item>
+			<Item Name="[last]">_Last</Item>
+			<Item Name="[next]">_Next</Item>
+			<Item Name="[map]">_Map</Item>
+		</Expand>
+	</Type>
+
+	<!--exe_deque<T>::const_iterator visualizer-->
+	<Type Name="exe_deque&lt;*&gt;::const_iterator">
+		<DisplayString>{_Next}</DisplayString>
+		<Expand>
+			<Item Name="[first]">_First</Item>
+			<Item Name="[last]">_Last</Item>
+			<Item Name="[next]">_Next</Item>
+			<Item Name="[map]">_Map</Item>
+		</Expand>
+	</Type>
+
+	<!--exe_string visualizer-->
+	<Type Name="exe_string">
+		<Intrinsic Name="isEmpty" Expression="_Len == 0" />
+		<!--In debug mode, MSVC fills uninitialized bytes with 0xCC-->
+		<Intrinsic Name="isUninitialized" Expression="_Len == 0xCCCCCCCC &amp;&amp; (unsigned int)_Ptr == 0xCCCCCCCC" />
+		<DisplayString Condition="(!isEmpty() &amp;&amp; !isUninitialized())">{_Ptr,s}</DisplayString>
+		<DisplayString Condition="isEmpty()">[empty]</DisplayString>
+		<DisplayString Condition="isUninitialized()">[uninitialized]</DisplayString>
+		<StringView>_Ptr,s</StringView>
+		<Expand>
+			<Item Name="[size]">_Len</Item>
+			<Item Name="[capacity]">_Res</Item>
+			<Item Name="[string]">_Ptr</Item>
+			<!--Display string reference count only if the string is allocated-->
+			<Item Name="[refcount]" Condition="_Ptr != nullptr">(const unsigned int)(*((unsigned char*)(_Ptr)-1))</Item>
+		</Expand>
+	</Type>
+
+	<!--exe_vector<T> visualizer-->
+	<Type Name="exe_vector&lt;*&gt;">
+		<DisplayString>{{ size={_Last - _First} }}</DisplayString>
+		<Expand>
+			<Item Name="[size]">_Last - _First</Item>
+			<Item Name="[capacity]">_End - _First</Item>
+			<Item Name="[first]">_First</Item>
+			<Item Name="[last]">_Last</Item>
+			<ArrayItems>
+				<Size>_Last - _First</Size>
+				<ValuePointer>_First</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+</AutoVisualizer>
