@@ -670,8 +670,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x543C = +21564,  size = 0x20 = 32
         std::array<SLimitData, NUM_SIDES> sCmbtHeroFlagLimitData;
 
+        typedef exe_set<SpellID, 0x694FA0, 0x694FA4> TSpellSet;
         // offset: +0x545C = +21596,  size = 0x20 = 32
-        std::array<exe_set<SpellID>, NUM_SIDES> EagleEyeSpellLearned;
+        std::array<TSpellSet, NUM_SIDES> EagleEyeSpellLearned;
 
         // offset: +0x547C = +21628,  size = 0x28 = 40
         std::array<std::array<bool, MAX_COMBAT_ARMIES>, NUM_SIDES> ArmyEffected;

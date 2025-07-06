@@ -1069,11 +1069,14 @@ protected:
         _Mapsize = 0;
     }
 
-    static void _Freeptr( _Mapptr _M )
+    static void _Freeptr( _Mapptr _M ) NH3API_NOEXCEPT
     { ::operator delete(_M, exe_heap); }
 
-    void _Getmap()
-    { _Map = static_cast<_Mapptr>(::exe_calloc(_Mapsize, sizeof(pointer))); }
+    void _Getmap() NH3API_NOEXCEPT
+    { 
+        _Map = static_cast<_Mapptr>(::operator new(_Mapsize * sizeof(pointer), exe_heap, std::nothrow)); 
+        std::memset(_Map, 0, _Mapsize * sizeof(pointer));
+    }
     
     _Mapptr _Growmap( size_type _Newsize )
     {

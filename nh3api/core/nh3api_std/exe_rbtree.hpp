@@ -132,9 +132,6 @@ class exe_rbtree
 
     typedef _Node node_type;
 
-    class iterator;
-    friend class const_iterator;
-
   protected:
 
     // iterator for nonmutable exe_tree
@@ -142,6 +139,7 @@ class exe_rbtree
     class rbtree_iterator
         : public ::nh3api::container_iterator<_ValueType, typename exe_rbtree::difference_type, ::std::bidirectional_iterator_tag>
     {
+        friend class exe_rbtree;
       protected:
         node_type* _Ptr;
 
@@ -156,7 +154,7 @@ class exe_rbtree
             : _Ptr(source)
         {}
 
-        rbtree_iterator(const iterator &other) NH3API_NOEXCEPT
+        rbtree_iterator(const rbtree_iterator &other) NH3API_NOEXCEPT
             : _Ptr(other._Ptr)
         {}
 
@@ -210,6 +208,7 @@ class exe_rbtree
             return (!(*this == other));
         }
 
+    protected:
         NH3API_FORCEINLINE
         // move to node with next smaller value
         void _Dec() NH3API_NOEXCEPT
@@ -254,15 +253,17 @@ class exe_rbtree
         }
 
         node_type* _Mynode() const NH3API_NOEXCEPT
-        {
-            return (_Ptr);
-        }
+        { return _Ptr; }
         
     };
+
+    template <typename _ValueType>
+    friend class rbtree_iterator;
+    
     // CLASS iterator
   public:
         typedef rbtree_iterator<typename tt::add_const<typename exe_rbtree::value_type>::type> const_iterator;
-        friend class iterator;
+        friend const_iterator;
         class iterator : public rbtree_iterator<typename exe_rbtree::value_type>
         {
         protected:
@@ -315,6 +316,8 @@ class exe_rbtree
                 return (!(*this == _X));
             }
         };
+
+        friend class iterator;
 
         typedef ::std::reverse_iterator<iterator>       reverse_iterator;
         typedef ::std::reverse_iterator<const_iterator> const_reverse_iterator;
