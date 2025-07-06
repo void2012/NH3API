@@ -109,7 +109,8 @@ protected:
         {
             if ( ++_Next == _Last )
             {
-                _First = *++_Map;
+                ++_Map;
+                _First = *_Map;
                 _Last = _First + DEQUE_SIZE;
                 _Next = _First;
             }
@@ -127,7 +128,8 @@ protected:
         {
             if ( _Next == _First )
             {
-                _First = *--_Map;
+                --_Map;
+                _First = *_Map;
                 _Last = _First + DEQUE_SIZE;
                 _Next = _Last;
             }
@@ -167,8 +169,8 @@ protected:
         difference_type operator-( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (_Map == other._Map ? _Next - other._Next
-                        : DEQUE_SIZE * (_Map - other._Map - 1)
-                        + (_Next - _First) + (other._Last - other._Next));
+                        : DEQUE_SIZE * (_Map - other._Map)
+                        + (_Next - _First) - (other._Next - other._First));
         }
         NH3API_FORCEINLINE
         const_reference operator[]( difference_type _N ) const NH3API_NOEXCEPT
@@ -178,7 +180,7 @@ protected:
         NH3API_FORCEINLINE
         bool operator==( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
-            return (_Next == other._Next);
+            return (_Next == other._Next && _Map == other._Map);
         }
         NH3API_FORCEINLINE
         bool operator!=( const deque_iterator& other ) const NH3API_NOEXCEPT
@@ -598,6 +600,7 @@ public:
         nh3api::construct_at( --_First._Next, value );
         ++_Size;
     }
+
     void pop_front() NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
     {
         nh3api::destroy_at(_First._Next++);
@@ -776,9 +779,8 @@ public:
     }
 
     template<class IterT
-    NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-    void insert( const_iterator _Where, const_iterator first, const_iterator last 
-    NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+                 NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+    void insert(const_iterator _Where, const_iterator first, const_iterator last NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
     {
         size_type _M = std::distance(first, last);
         size_type _I;
@@ -786,41 +788,40 @@ public:
         size_type _Rem = _Size - _Off;
         if ( _Off < _Rem )
             if ( _Off < _M )
+                {
+                    const_iterator _Qx = first;
+                    std::advance(_Qx, _M - _Off);
+                    for ( const_iterator _Q = _Qx; first != _Q; )
+                        push_front(*--_Q);
+                    for ( _I = _Off; 0 < _I; --_I )
+                        push_front(begin()[_M - 1]);
+                    std::copy(_Qx, last, begin() + _M);
+                }
+            else
+                {
+                    for ( _I = _M; 0 < _I; --_I )
+                        push_front(begin()[_M - 1]);
+                    iterator _S = begin() + _M;
+                    std::copy(_S + _M, _S + _Off, _S);
+                    std::copy(first, last, begin() + _Off);
+                }
+        else if ( _Rem < _M )
             {
                 const_iterator _Qx = first;
-                std::advance( _Qx, _M - _Off );
-                for ( const_iterator _Q = _Qx; first != _Q; )
-                    push_front( *--_Q );
-                for ( _I = _Off; 0 < _I; --_I )
-                    push_front( begin()[_M - 1] );
-                std::copy( _Qx, last, begin() + _M );
-            }
-            else
-            {
-                for ( _I = _M; 0 < _I; --_I )
-                    push_front( begin()[_M - 1] );
-                iterator _S = begin() + _M;
-                std::copy( _S + _M, _S + _Off, _S );
-                std::copy( first, last, begin() + _Off );
+                std::advance(_Qx, _Rem);
+                for ( const_iterator _Q = _Qx; _Q != last; ++_Q )
+                    push_back(*_Q);
+                for ( _I = 0; _I < _Rem; ++_I )
+                    push_back(begin()[_Off + _I]);
+                std::copy(first, _Qx, begin() + _Off);
             }
         else
-            if ( _Rem < _M )
-            {
-                const_iterator _Qx = first;
-                std::advance( _Qx, _Rem );
-                for ( const_iterator _Q = _Qx; _Q != last; ++_Q )
-                    push_back( *_Q );
-                for ( _I = 0; _I < _Rem; ++_I )
-                    push_back( begin()[_Off + _I] );
-                std::copy( first, _Qx, begin() + _Off );
-            }
-            else
             {
                 for ( _I = 0; _I < _M; ++_I )
-                    push_back( begin()[_Off + _Rem - _M + _I] );
+                    push_back(begin()[_Off + _Rem - _M + _I]);
                 iterator _S = begin() + _Off;
-                std::copy_backward( _S, _S + _Rem - _M, _S + _Rem );
-                std::copy( first, last, _S );
+                std::copy_backward(_S, _S + _Rem - _M, _S + _Rem);
+                std::copy(first, last, _S);
             }
     }
     iterator erase( iterator _P ) NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
@@ -911,18 +912,18 @@ protected:
             for (_Num = _Count - _Off; 0 < _Num; --_Num)
               push_front(_Val); // push excess values
             for (_Num = _Off; 0 < _Num; --_Num)
-              push_front(begin()[_Count - 1]); // push prefix
+              push_front(front()); // push prefix
 
             _Mid = begin() + _Count;
             std::fill(_Mid, _Mid + _Off,
                       _Val); // fill in rest of values
           } else {           // insert not longer than prefix
             for (_Num = _Count; 0 < _Num; --_Num)
-              push_front(begin()[_Count - 1]); // push part of prefix
+              push_front(front()); // push part of prefix
 
             _Mid = begin() + _Count;
             value_type temp = _Val; // in case _Val is in sequence
-            _Move(_Mid + _Count, _Mid + _Off, _Mid);      // copy rest of prefix
+            _Move(begin() + _Count, begin() + _Off, begin());      // copy rest of prefix
             std::fill(begin() + _Off, _Mid + _Off, temp); // fill in values
           }
         }
@@ -949,8 +950,8 @@ protected:
 
             _Mid = begin() + _Off;
             value_type temp = _Val; // in case _Val is in sequence
-            _Move_backward(_Mid, _Mid + _Rem - _Count,
-                           _Mid + _Rem); // copy rest of prefix
+            _Move_backward(begin() + _Off, begin() + _Rem - _Count,
+                           begin() + _Rem); // copy rest of prefix
             std::fill(_Mid, _Mid + _Count,
                       temp); // fill in values
           }
@@ -968,103 +969,111 @@ protected:
         pointer _P = static_cast<pointer>(::operator new(DEQUE_SIZE * sizeof(value_type), exe_heap, std::nothrow));
         if ( empty() )
         {
-            _Mapsize = DEQUE_MAP_SIZE;
+            _Mapsize     = DEQUE_MAP_SIZE;
             size_type _N = _Mapsize / 2;
             _Getmap();
             *(_Map + _N) = _P;
-            _First = iterator( _P + DEQUE_SIZE / 2, _Map + _N );
-            _Last = _First;
+            _First = iterator(_P + DEQUE_SIZE / 2, _Map + _N);
+            _Last  = _First;
         }
         else if ( _Last._Map < _Map + (_Mapsize - 1) )
         {
             *(++_Last._Map) = _P;
-            _Last = iterator( _P, _Last._Map );
+            _Last = iterator(_P, _Last._Map);
         }
         else
         {
             difference_type _I = _Last._Map - _First._Map + 1;
-            _Mapptr _M = _Growmap( 2 * _I );
-            *(_M + _I) = _P;
-            _First = iterator( _First._Next, _M );
-            _Last = iterator( _P, _M + _I );
+            _Mapptr         _M = _Growmap(2 * _I);
+            *(_M + _I)         = _P;
+            _First = iterator(_First._Next, _M);
+            _Last  = iterator(_P, _M + _I);
         }
     }
+
     void _Buyfront()
     {
         pointer _P = static_cast<pointer>(::operator new(DEQUE_SIZE * sizeof(value_type), exe_heap, std::nothrow));
         if ( empty() )
         {
-            _Mapsize = DEQUE_MAP_SIZE;
+            _Mapsize     = DEQUE_MAP_SIZE;
             size_type _N = _Mapsize / 2;
             _Getmap();
             *(_Map + _N) = _P;
-            _First = iterator( _P + (DEQUE_SIZE / 2 + 1),
-                                _Map + _N );
-            _Last = _First;
+            _First = iterator(_P + (DEQUE_SIZE / 2 + 1),
+                                _Map + _N);
+            _Last  = _First;
         }
         else if ( _Map < _First._Map )
         {
             *(--_First._Map) = _P;
-            _First = iterator( _P + DEQUE_SIZE, _First._Map );
+            _First = iterator(_P + DEQUE_SIZE, _First._Map);
         }
         else if ( _Last._Map == _First._Map )
         {
-            *(_Last._Map++) = *_First._Map ;
-            *(_First._Map + 1) = *_First._Map ;
-            *(_First._Map) = _P ;
-            _First = iterator( _P + DEQUE_SIZE, _First._Map );
+            *(_Last._Map++) = *_First._Map;
+            *(_First._Map + 1) = *_First._Map;
+            *(_First._Map)     = _P;
+            _First = iterator(_P + DEQUE_SIZE, _First._Map);
         }
         else
         {
             difference_type _I = _Last._Map - _First._Map + 1;
-            _Mapptr _M = _Growmap( 2 * _I );
-            *( --_M) = _P;
-            _First = iterator( _P + DEQUE_SIZE, _M );
-            _Last = iterator( _Last._Next, _M + _I );
+            _Mapptr         _M = _Growmap(2 * _I);
+            *(--_M)            = _P;
+            _First = iterator(_P + DEQUE_SIZE, _M);
+            _Last  = iterator(_Last._Next, _M + _I);
         }
     }
     void _Freeback()
     {
-        _Freeptr( _Last._Map-- );
-        if ( empty() )
+        nh3api::destroy_at(--_Last._Next);
+        if (_Last._Next == _Last._First) 
         {
+            _Freeptr( _Last._Map );
             if ( _First._Map == _Last._Map )
-                _Freeptr( _First._Map );
-            _First = iterator();
-            _Last = _First;
-            _Freemap();
+            {
+                _Freemap();
+            }
+            else
+            {
+                --_Last._Map;
+            }
         }
-        else
-            _Last = iterator( *_Last._Map + DEQUE_SIZE,
-                                _Last._Map );
     }
     void _Freefront()
     {
-        _Freeptr( _First._Map++ );
-        if ( empty() )
+        nh3api::destroy_at(_First._Next);
+        _First._Next++;
+        if ( _First._Next == _First._Last)
         {
-            _First = iterator();
-            _Last = _First;
-            _Freemap();
+            _Freeptr( _First._Map );
+            if ( _First._Map == _Last._Map )
+            {
+                _Freemap();
+            }
+            else
+            {
+                ++_First._Map;
+            }
         }
-        else
-        {
-            _First = iterator( *_First._Map, _First._Map );
-        }
-
     }
     
     static void _Throw_invalid_subscript()
     { NH3API_THROW(std::out_of_range, "invalid deque position"); }
 
     void _Freemap()
-    { _Freeptr(_Map); }
+    { 
+        _Freeptr(_Map); 
+        _Map = nullptr;
+        _Mapsize = 0;
+    }
 
     static void _Freeptr( _Mapptr _M )
     { ::operator delete(_M, exe_heap); }
 
     void _Getmap()
-    { _Map = static_cast<_Mapptr>(::operator new(_Mapsize * sizeof(pointer), exe_heap, std::nothrow)); }
+    { _Map = static_cast<_Mapptr>(::exe_calloc(_Mapsize, sizeof(pointer))); }
     
     _Mapptr _Growmap( size_type _Newsize )
     {
@@ -1080,6 +1089,8 @@ protected:
     {
         while (!empty())
             pop_front();
+        if (_Map)
+            _Freemap();
     }
 
 protected:
