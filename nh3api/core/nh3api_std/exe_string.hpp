@@ -1770,15 +1770,6 @@ class exe_string
                 --_Refcnt( _Ptr );
         }
 
-    #if NH3API_CHECK_MSVC_DRIVER
-
-    protected:
-        // tell the ref count for natvis
-        uint8_t _natvis_RefCount()
-        { return _Refcnt( _Ptr ); }
-
-    #endif
-
     protected:
         uint32_t _Dummy;
         value_type* _Ptr; // data()
