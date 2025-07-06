@@ -113,7 +113,7 @@ protected:
 
     typedef 
     #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    nh3api::tt::is_nothrow_constructible<T> 
+    nh3api::tt::is_nothrow_default_constructible<T> 
     #else 
     nh3api::tt::true_type
     #endif 
@@ -1213,13 +1213,13 @@ protected:
 
     NH3API_FORCEINLINE
     static pointer _Default_fill(pointer first, size_type count)
-    NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_constructible<value_type>::value)
+    NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_default_constructible<value_type>::value)
     {
         nh3api::verify_range_n(first, count);
         #ifdef __cpp_lib_raw_memory_algorithms
         return std::uninitialized_value_construct_n<pointer, size_type>(first, count);
         #else 
-        return _Default_fill_impl(first, count, nh3api::tt::is_nothrow_constructible<value_type>());
+        return _Default_fill_impl(first, count, nh3api::tt::is_nothrow_default_constructible<value_type>());
         #endif
     }
 
