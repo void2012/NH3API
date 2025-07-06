@@ -142,7 +142,7 @@ public:
 public:
     mapped_type& operator[](const key_type& key)
     {
-        iterator pos = insert(value_type(key, mapped_type())).first;
+        iterator pos = this->insert(value_type(key, mapped_type())).first;
         return (*pos).second;
     }
 
@@ -152,5 +152,16 @@ public:
 };
 
 #pragma pack(pop)
+
+#if !NH3API_STD_MOVE_SEMANTICS
+template<class _K,
+         class _Ty,
+         uintptr_t _Nil_Address, // null node address inside .exe
+         uintptr_t _Nilrefs_Address, // constructor-destructor reference counter address inside .exe
+         typename _Pr> NH3API_FORCEINLINE
+void swap(exe_map<_K, _Ty, _Nil_Address, _Nilrefs_Address, _Pr>& lhs,
+          exe_map<_K, _Ty, _Nil_Address, _Nilrefs_Address, _Pr>& rhs) // ADL Swap
+{ lhs.swap(rhs); }
+#endif
 
 // clang-format on

@@ -254,7 +254,11 @@ class exe_rbtree
 
         node_type* _Mynode() const NH3API_NOEXCEPT
         { return _Ptr; }
-        
+
+    #if NH3API_MSVC_DRIVER
+        bool _natvis_Isnil() const NH3API_NOEXCEPT
+        { return _IsNil(this); }
+    #endif
     };
 
     template <typename _ValueType>
@@ -330,6 +334,14 @@ class exe_rbtree
         }
 
         exe_rbtree(const_pointer first, const_pointer last, const key_compare &_OtherKeyCompare, bool _Marg = true, const allocator_type &_Allocator = allocator_type())
+        NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<value_type>::value)
+            : _Dummy(0), _KeyCompare(_OtherKeyCompare), _Head(nullptr), _Multi(_Marg)
+        {
+            _Init();
+            insert(first, last);
+        }
+
+        exe_rbtree(const_iterator first, const_iterator last, const key_compare &_OtherKeyCompare, bool _Marg = true, const allocator_type &_Allocator = allocator_type())
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<value_type>::value)
             : _Dummy(0), _KeyCompare(_OtherKeyCompare), _Head(nullptr), _Multi(_Marg)
         {
@@ -473,24 +485,24 @@ class exe_rbtree
                 return ::std::make_pair(_Insert(_Trynode, _Wherenode, value), true);
             return ::std::make_pair(_Where, false);
         }
-        iterator insert(iterator pos, const value_type &value)
+        iterator insert(const_iterator pos, const value_type &value)
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_copy_constructible<value_type>::value)
         {
             if (size() == 0)
                 ;
-            else if (pos == begin())
+            else if (pos == cbegin())
             {
                 if (_KeyCompare(_Kfn()(value), _Key(pos._Mynode())))
                     return _Insert(_Head, pos._Mynode(), value);
             }
-            else if (pos == end())
+            else if (pos == cend())
             { // _Lockit Lk;
                 if (_KeyCompare(_Key(_Rmost()), _Kfn()(value)))
                     return _Insert(const_cast<node_type*>(_Getnil()), _Rmost(), value);
             }
             else
             {
-                iterator _Next = pos;
+                const_iterator _Next = pos;
                 if (_KeyCompare(_Key((--_Next)._Mynode()), _Kfn()(value)) && _KeyCompare(_Kfn()(value), _Key(pos._Mynode())))
                 { // _Lockit _Lk;
                     if (_Isnil(_Right(_Next._Mynode())))
@@ -502,7 +514,7 @@ class exe_rbtree
             return insert(value).first;
         }
 
-        void insert(iterator first, iterator last)
+        void insert(const_iterator first, const_iterator last)
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_copy_constructible<value_type>::value)
         {
             for (; first != last; ++first)
@@ -518,7 +530,7 @@ class exe_rbtree
 
     // erasing
     public:
-        iterator erase(iterator pos)
+        iterator erase(const_iterator pos)
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<value_type>::value)
         {
             node_type* _Fixnode = nullptr;
@@ -653,17 +665,17 @@ class exe_rbtree
             ::nh3api::destroy_at(::nh3api::addressof(_Value(_Erasednode)));
             _Freenode(_Erasednode);
             --_Size;
-            return (pos);
+            return iterator(pos._Mynode());
         }
 
-        iterator erase(iterator first, iterator last)
+        iterator erase(const_iterator first, const_iterator last)
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<value_type>::value)
         {
-            if (empty() || first != begin() || last != end())
+            if (empty() || first != cbegin() || last != cend())
             {
                 while (first != last)
                     erase(first++);
-                return (first);
+                return iterator((first)._Mynode());
             }
             else
             {
@@ -679,10 +691,10 @@ class exe_rbtree
         size_type erase(const key_type &value)
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<value_type>::value)
         {
-            ::std::pair<iterator, iterator> _P = equal_range(value);
-            size_type _N = static_cast<size_type>(::std::distance(_P.first, _P.second));
-            erase(_P.first, _P.second);
-            return (_N);
+            ::std::pair<const_iterator, const_iterator> result = ::nh3api::as_const(*this).equal_range(value);
+            size_type erased = static_cast<size_type>(::std::distance(result.first, result.second));
+            erase(result.first, result.second);
+            return erased;
         }
 
         void erase(const key_type *first, const key_type *last)
@@ -694,7 +706,7 @@ class exe_rbtree
 
         void clear()
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<value_type>::value)
-        { erase(begin(), end()); }
+        { erase(cbegin(), cend()); }
 
     // finding, counting, etc.
     public:
