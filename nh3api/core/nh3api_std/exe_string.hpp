@@ -76,24 +76,22 @@ struct constexpr_char_traits
         static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         size_t length(const char* str) NH3API_NOEXCEPT
         {
+            if ( str == nullptr )
+                return 0;
+
             #if NH3API_HAS_BUILTIN(__builtin_strlen)
-                return __builtin_strlen(str);
+            return __builtin_strlen(str);
             #else // __has_builtin(__builtin_strlen)
                 #if NH3API_STD_RELAXED_CONSTEXPR
                 #if NH3API_HAS_IS_CONSTANT_EVALUATED
                 if (is_constant_evaluated())
                 {
-                    if ( str )
-                    {
-                        const char* ptr = str;
-                        while (*ptr != '\0')
-                            ++ptr;
-                        return ptr - str;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
+                    const char* ptr = str;
+                    while (*ptr != '\0')
+                        ++ptr;
+                    return ptr - str;
+
+                    return 0;
                 }
                 else  
                 {
@@ -111,6 +109,9 @@ struct constexpr_char_traits
         static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
         int compare(const char* left, const char* right, size_t count) NH3API_NOEXCEPT
         {
+            if ( left == nullptr || right == nullptr || count == 0 )
+                return 0;
+            
             #if NH3API_HAS_BUILTIN(__builtin_memcmp)
             return __builtin_memcmp(left, right, count);
             #else // __has_builtin(__builtin_memcmp)
@@ -118,23 +119,16 @@ struct constexpr_char_traits
             #if NH3API_HAS_IS_CONSTANT_EVALUATED
             if (is_constant_evaluated())
             {
-                if (left != nullptr && right != nullptr)
+                while ( count-- != 0 )
                 {
-                    while ( count-- != 0 )
-                    {
-                        if ( *left < *right )
-                            return -1;
-                        if ( *left > *right )
-                            return +1;
-                        ++left;
-                        ++right;
-                    }
-                    return 0;
+                    if ( *left < *right )
+                        return -1;
+                    if ( *left > *right )
+                        return +1;
+                    ++left;
+                    ++right;
                 }
-                else  
-                {
-                    return 0;
-                }
+                return 0;
             }
             else
             {
@@ -316,7 +310,7 @@ struct constexpr_char_traits
             }
             #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
             #else // NH3API_STD_RELAXED_CONSTEXPR
-            return ::memchr(str, ch, count);
+            return static_cast<const char*>(::memchr(str, ch, count));
             #endif // NH3API_STD_RELAXED_CONSTEXPR
             #endif // __has_builtin(__builtin_char_memchr)
         }
