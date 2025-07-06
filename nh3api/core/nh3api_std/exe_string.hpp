@@ -53,7 +53,7 @@ struct constexpr_char_traits
         typedef ::std::streamoff off_type;
         typedef ::std::streampos pos_type;
         typedef ::std::mbstate_t state_type;
-        #if NH3API_CHECK_CPP29
+        #if NH3API_CHECK_CPP20
         using comparison_category = ::std::strong_ordering;
         #endif
 
@@ -2055,7 +2055,7 @@ struct case_insensitive_traits
     typedef ::std::streamoff off_type;
     typedef ::std::streampos pos_type;
     typedef ::std::mbstate_t state_type;
-    #if NH3API_CHECK_CPP29
+    #if NH3API_CHECK_CPP20
     using comparison_category = ::std::strong_ordering;
     #endif
 
