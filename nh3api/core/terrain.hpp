@@ -436,7 +436,7 @@ class type_point
 
     // setters
     public:
-        NH3API_CONSTEXPR
+        NH3API_CONSTEXPR_CPP_14
         type_point& set(int8_t X, int8_t Y, int8_t Z) NH3API_NOEXCEPT
         {
             x = X;
@@ -446,7 +446,7 @@ class type_point
         }
 
         #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
-        NH3API_CONSTEXPR
+        NH3API_CONSTEXPR_CPP_14
         #endif
         type_point& set(uint32_t data) NH3API_NOEXCEPT
         {
@@ -454,34 +454,34 @@ class type_point
             return *this;
         }
 
-        NH3API_CONSTEXPR
-        type_point& setX(int8_t X) NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14
+        type_point& set_x(int8_t X) NH3API_NOEXCEPT
         { x = X; return *this; }
 
-        NH3API_CONSTEXPR
-        type_point& setY(int8_t Y) NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14
+        type_point& set_y(int8_t Y) NH3API_NOEXCEPT
         { y = Y; return *this; }
 
-        NH3API_CONSTEXPR
-        type_point& setZ(int8_t Z) NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14
+        type_point& set_z(int8_t Z) NH3API_NOEXCEPT
         { z = Z; return *this; }
 
     // getters
     public:
         NH3API_CONSTEXPR
-        int16_t getX() const NH3API_NOEXCEPT
+        int16_t get_x() const NH3API_NOEXCEPT
         { return x; }
 
         NH3API_CONSTEXPR
-        int16_t getY() const NH3API_NOEXCEPT
+        int16_t get_y() const NH3API_NOEXCEPT
         { return y; }
 
         NH3API_CONSTEXPR
-        int8_t getZ() const NH3API_NOEXCEPT
+        int8_t get_z() const NH3API_NOEXCEPT
         { return z; }
 
         #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
-        NH3API_CONSTEXPR
+        NH3API_CONSTEXPR_CPP_14
         #endif
         // return the underlying data
         uint32_t to_uint() const NH3API_NOEXCEPT
@@ -563,7 +563,7 @@ struct TPoint
         {}
 
     public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14
         TPoint& operator+=(const TPoint& other)
         {
             this->x += other.x;
@@ -571,7 +571,7 @@ struct TPoint
             return *this;
         }
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14
         TPoint& operator-=(const TPoint& other)
         {
             this->x -= other.x;
@@ -579,14 +579,14 @@ struct TPoint
             return *this;
         }
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14
         friend TPoint operator+(TPoint left, const TPoint& right)
         {
             left += right;
             return left;
         }
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14
         friend TPoint operator-(TPoint left, const TPoint& right)
         {
             left -= right;

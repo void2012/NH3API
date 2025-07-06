@@ -215,7 +215,7 @@ struct LODEntry
 public:
     NH3API_FORCEINLINE
     LODEntry() NH3API_NOEXCEPT
-    { memset_0(this, sizeof(*this)); }
+    { nh3api::trivial_zero<sizeof(LODEntry)>(this); }
 
     NH3API_FORCEINLINE
     LODEntry(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT

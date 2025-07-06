@@ -62,13 +62,13 @@ T* get_ptr(bstruct_t arg, size_t pos) NH3API_NOEXCEPT
 template<size_t N>
 struct padstruct_construct_t
 {
-    NH3API_CONSTEXPR padstruct_construct_t() NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 padstruct_construct_t() NH3API_NOEXCEPT
     {}
 
-    NH3API_CONSTEXPR padstruct_construct_t(const padstruct_construct_t&) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 padstruct_construct_t(const padstruct_construct_t&) NH3API_NOEXCEPT
     {}
 
-    NH3API_CONSTEXPR void operator()(std::array<uint8_t, N>& buf) const
+    NH3API_CONSTEXPR_CPP_14 void operator()(std::array<uint8_t, N>& buf) const
     { buf.fill(0); }
 };
 
@@ -76,13 +76,13 @@ struct padstruct_construct_t
 template<size_t N>
 struct padstruct_destruct_t
 {
-    NH3API_CONSTEXPR padstruct_destruct_t() NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 padstruct_destruct_t() NH3API_NOEXCEPT
     {}
 
-    NH3API_CONSTEXPR padstruct_destruct_t(const padstruct_destruct_t&) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 padstruct_destruct_t(const padstruct_destruct_t&) NH3API_NOEXCEPT
     {}
 
-    NH3API_CONSTEXPR void operator()(std::array<uint8_t, N>&) const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 void operator()(std::array<uint8_t, N>&) const NH3API_NOEXCEPT
     {}
 };
 
@@ -103,7 +103,7 @@ struct padstruct_t
 
         // C++23's std::start_lifetime_as is ideal for such a task,
         // sadly it cannot be implemented in C++11..20 without compiler magic.
-        NH3API_CONSTEXPR NH3API_FORCEINLINE padstruct_t()
+        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE padstruct_t()
         NH3API_NOEXCEPT_EXPR(nh3api::declval<constructor_type>().operator())
         { constructor_type()(buf); }
 
@@ -118,28 +118,28 @@ struct padstruct_t
             destructor_type()(buf);
         }
 
-        NH3API_CONSTEXPR NH3API_FORCEINLINE uint8_t* data() NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE uint8_t* data() NH3API_NOEXCEPT
         { return buf.data(); }
 
-        NH3API_CONSTEXPR NH3API_FORCEINLINE const uint8_t* data() const NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE const uint8_t* data() const NH3API_NOEXCEPT
         { return buf.data(); }
 
-        NH3API_CONSTEXPR NH3API_FORCEINLINE size_t size() const NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE size_t size() const NH3API_NOEXCEPT
         { return buf.size(); }
 
-        NH3API_CONSTEXPR NH3API_FORCEINLINE std::array<uint8_t, N>& get() NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE std::array<uint8_t, N>& get() NH3API_NOEXCEPT
         { return buf; }
 
-        NH3API_CONSTEXPR NH3API_FORCEINLINE const std::array<uint8_t, N>& get() const NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE const std::array<uint8_t, N>& get() const NH3API_NOEXCEPT
         { return buf; }
 
         template <typename T>
-        NH3API_CONSTEXPR NH3API_FORCEINLINE
+        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
         T& get(int32_t offset) NH3API_NOEXCEPT
         { return *(T*)((uintptr_t)data() + offset); }
 
         template <typename T>
-        NH3API_CONSTEXPR NH3API_FORCEINLINE
+        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
         const T& get(int32_t offset) const NH3API_NOEXCEPT
         { return *(const T*)((uintptr_t)data() + offset); }
 

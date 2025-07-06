@@ -784,8 +784,8 @@ typedef uint32_t bool32_t;
 
 #ifndef NH3API_CONST
     #if !NH3API_CHECK_MSVC
-        #if __has_attribute(__const__)
-            #define NH3API_CONST __attribute__((__const__))
+        #if __has_cpp_attribute(gnu::const)
+            #define NH3API_CONST [[gnu::const]]
         #else
             #define NH3API_CONST
         #endif
@@ -904,15 +904,19 @@ typedef uint32_t bool32_t;
         #define nullptr NULL
     #endif
 
-    template <bool condition> struct STATIC_ASSERTION_FAILURE;
-    template <> struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
+    #ifndef __cpp_static_assert
+        template <bool condition> struct STATIC_ASSERTION_FAILURE;
+        template <> struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
 
-    #if !defined(NH3API_STATIC_ASSERT)
-        //#define NH3API_CONCAT_LINE_FILE "static assertion failed: " __FILE__ " at line: " NH3API_LINE_AS_STRING(__LINE__)
-        #define NH3API_STATIC_ASSERT(msg, ...) \
-         enum { NH3API_JOIN_STRING(static_assert_failure_, __COUNTER__) \
-            = sizeof(STATIC_ASSERTION_FAILURE< (bool)( __VA_ARGS__ ) >) }
-    #endif // NH3API_STATIC_ASSERT
+        #if !defined(NH3API_STATIC_ASSERT)
+            //#define NH3API_CONCAT_LINE_FILE "static assertion failed: " __FILE__ " at line: " NH3API_LINE_AS_STRING(__LINE__)
+            #define NH3API_STATIC_ASSERT(msg, ...) \
+            enum { NH3API_JOIN_STRING(static_assert_failure_, __COUNTER__) \
+                = sizeof(STATIC_ASSERTION_FAILURE< (bool)( __VA_ARGS__ ) >) }
+        #endif // NH3API_STATIC_ASSERT
+    #else // __cpp_static_assert
+        #define NH3API_STATIC_ASSERT(msg, ...) static_assert(__VA_ARGS__, msg)
+    #endif
 
     // use MSVC STL _NOEXCEPT
     #if !defined(NH3API_NOEXCEPT)
@@ -947,7 +951,7 @@ typedef uint32_t bool32_t;
 // C++11 features test
 
 #ifndef NH3API_STD_DELEGATING_CONSTRUCTORS
-    #if NH3API_CHECK_CPP11
+    #if NH3API_CHECK_CPP11 || defined(__cpp_delegating_constructors)
         #define NH3API_STD_DELEGATING_CONSTRUCTORS (1)
     #else
         #define NH3API_STD_DELEGATING_CONSTRUCTORS (0)
@@ -994,7 +998,11 @@ typedef uint32_t bool32_t;
 #endif
 
 #ifndef NH3API_STD_INITIALIZER_LIST
-    #define NH3API_STD_INITIALIZER_LIST NH3API_CHECK_CPP11
+    #if NH3API_CHECK_CPP11 || defined(__cpp_initializer_lists)
+        #define NH3API_STD_INITIALIZER_LIST (1)
+    #else 
+        #define NH3API_STD_INITIALIZER_LIST (0)
+    #endif  
 #endif
 
 #ifndef NH3API_STD_RELAXED_CONSTEXPR
@@ -1172,7 +1180,7 @@ const omit_base_vftable_tag;
 #endif
 
 #ifndef NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
-    #if NH3API_HAS_IS_CONSTANT_EVALUATED
+    #if NH3API_HAS_IS_CONSTANT_EVALUATED && NH3API_STD_RELAXED_CONSTEXPR
         #define NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED constexpr
     #else
         #define NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
@@ -1227,9 +1235,6 @@ const omit_base_vftable_tag;
 // which can only be catched by the exception filter
 // if exception.what() is non-empty, a pointer to the .what() string
 // is passed as an argument to the exception filter.
-// - 'NH3API_FLAG_NOTHROW_NEW':
-// operator new (exe_heap) will not throw std::bad_alloc and check for nullptr
-// operator new[] (exe_heap) will not throw std::bad_array_new_length and check for nullptr
 // - 'NH3API_FLAG_INLINE_HEADERS':
 // include the NH3API without the build system
 // (yes, it is possible)
@@ -1243,30 +1248,16 @@ const omit_base_vftable_tag;
 // blindly forceinlining everything
 // - 'NH3API_FLAG_OPTIMIZE_FOR_SIZE'
 // optimize aggressively for size
-// - 'NH3API_FLAG_STD_CONTAINERS_RELATIONS'
-// provide support of NH3API's exe_ containers
-// for STL implementations
-// for example, exe_vector from std::vector and so on.
 
-// indicate function or variable inline
-// use NH3API_FORCEINLINE for functions code inlining as
-// this macro is for inline variables too
-// which aren't available before C++17
-#ifndef NH3API_INLINE
-    #ifdef NH3API_FLAG_INLINE_HEADERS
-        #if NH3API_STD_INLINE_VARIABLES
-            #define NH3API_INLINE inline
-        #else
-            #error 'NH3API_FLAG_INLINE_HEADERS' requires C++17
-        #endif
-    #else
-        #define NH3API_INLINE
-    #endif
-#endif
 
 #ifndef NH3API_INLINE_OR_EXTERN
     #ifdef NH3API_FLAG_INLINE_HEADERS
-        #define NH3API_INLINE_OR_EXTERN inline
+        #if NH3API_STD_INLINE_VARIABLES
+            #define NH3API_INLINE_OR_EXTERN inline
+        #else 
+            #define NH3API_INLINE_OR_EXTERN
+            #error 'NH3API_FLAG_INLINE_HEADERS' requires C++17
+        #endif
     #else
         #define NH3API_INLINE_OR_EXTERN extern
     #endif
@@ -1416,14 +1407,14 @@ struct compiler_info
 #endif
 
 #ifndef NH3API_ASSUME
-    #if NH3API_CHECK_MSVC
+    #if NH3API_CHECK_MSVC_DRIVER
         #define NH3API_ASSUME(...) do { __assume(__VA_ARGS__); } while(0)
     #else
-        #if __has_builtin(__builtin_assume)
+        #if NH3API_HAS_BUILTIN(__builtin_assume)
             #define NH3API_ASSUME(...) do { __builtin_assume(__VA_ARGS__); } while(0)
         #elif __has_attribute(__assume__)
             #define NH3API_ASSUME(...) __attribute__((__assume__(__VA_ARGS__)))
-        #elif __has_builtin(__builtin_unreachable)
+        #elif NH3API_HAS_BUILTIN(__builtin_unreachable)
             #define NH3API_ASSUME(...) do { if (!bool(__VA_ARGS__)) __builtin_unreachable(); } while(0)
         #endif
     #endif

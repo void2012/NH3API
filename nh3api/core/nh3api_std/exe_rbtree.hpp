@@ -374,16 +374,16 @@ class exe_rbtree
             if ( this != &other )
             {
                 clear();
-                ::nh3api::trivial_move<sizeof(*this)>(&other, this);
+                ::nh3api::trivial_move<sizeof(exe_rbtree)>(&other, this);
             }
             return *this;
         }
 
         exe_rbtree(exe_rbtree&& other) NH3API_NOEXCEPT
-        { ::nh3api::trivial_move<sizeof(*this)>(&other, this); }
+        { ::nh3api::trivial_move<sizeof(exe_rbtree)>(&other, this); }
 
         exe_rbtree(exe_rbtree&& other, const allocator_type&) NH3API_NOEXCEPT
-        { ::nh3api::trivial_move<sizeof(*this)>(&other, this); }
+        { ::nh3api::trivial_move<sizeof(exe_rbtree)>(&other, this); }
         #endif
 
         exe_rbtree(const dummy_tag_t& tag) NH3API_NOEXCEPT
@@ -431,7 +431,7 @@ class exe_rbtree
         { return _Size; }
 
         NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
-        size_type max_size() const NH3API_NOEXCEPT
+        static size_type max_size() NH3API_NOEXCEPT
         { return NH3API_MAX_HEAP_REQUEST / sizeof(value_type); }
 
         bool empty() const NH3API_NOEXCEPT
@@ -743,7 +743,7 @@ class exe_rbtree
             {
                 return;
             }
-            ::nh3api::trivial_swap<sizeof(*this)>(this, &other);
+            ::nh3api::trivial_swap<sizeof(exe_rbtree)>(this, &other);
         }
 
     // implementation

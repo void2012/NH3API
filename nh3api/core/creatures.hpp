@@ -610,7 +610,7 @@ public:
     int32_t get_creature_total() const
     { return THISCALL_1(int32_t,  0x44AA70, this); }
 
-    NH3API_CONSTEXPR
+    NH3API_CONSTEXPR_CPP_14
     // Sum amount of creatures of type <monType> /
     // Посчитать количество существ типа <monType> в армии.
     int32_t get_creature_total(TCreatureType monType) const

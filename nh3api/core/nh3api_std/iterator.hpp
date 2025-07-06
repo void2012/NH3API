@@ -30,6 +30,25 @@ struct iter_category_helper<T, false>
 namespace tt
 {
 
+// Detect if std::iterator_traits<T> is valid for T
+template<typename T, typename = void>
+struct has_iterator_traits_impl : false_type {};
+
+template<typename T>
+struct has_iterator_traits_impl<T, 
+#if NH3API_CHECK_CPP11 || (!NH3API_CHECK_CLANG_CL && NH3API_MSVC_VERSION >= NH3API_MSVC_VERSION_2015)
+void_t<typename ::std::iterator_traits<T>::iterator_category> > 
+#else 
+typename void_1<typename ::std::iterator_traits<T>::iterator_category>::type >
+#endif
+: true_type {};
+
+template<typename T, bool = is_class<T>::value || is_pointer<T>::value>
+struct has_iterator_traits : false_type {};
+
+template<typename T>
+struct has_iterator_traits<T, true> : has_iterator_traits_impl<T> {};
+
 template<typename T, typename Enable = void>
 struct is_iterator
     : false_type {};
@@ -37,8 +56,10 @@ struct is_iterator
 // This solution works in C++98
 template<typename T>
 struct is_iterator<T, typename enable_if<
-!is_void<typename ::std::iterator_traits<T>::value_type>::value
-&& !is_integral<T>::value && !is_arithmetic<T>::value>::type>
+has_iterator_traits<T>::value 
+&& !is_integral<T>::value 
+&& !is_arithmetic<T>::value
+>::type>
     : true_type
 {};
 
@@ -52,7 +73,7 @@ struct is_iterator<void>
     : false_type
 {};
 
-#if NH3API_CHECK_CPP14
+#if NH3API_CHECK_CPP11 || NH3API_CHECK_CLANG_CL
 namespace details
 {
 template <typename T, typename = void>
@@ -178,8 +199,7 @@ struct is_iterator_class<void>
 template<typename IterT> NH3API_CONSTEXPR
 typename details::iter_category_helper<IterT, tt::is_iterator<IterT>::value>::type iter_category() NH3API_NOEXCEPT
 {
-    typename details::iter_category_helper<IterT, tt::is_iterator<IterT>::value>::type category;
-    return category;
+    return typename details::iter_category_helper<IterT, tt::is_iterator<IterT>::value>::type();
 };
 
 // verify MSVC STL range of iterators
@@ -189,14 +209,14 @@ typename details::iter_category_helper<IterT, tt::is_iterator<IterT>::value>::ty
 #ifdef _MSVC_STL_UPDATE
 
 // verify range on MSVC STL checked iterators
-template <class _Iter, class _Sentinel> inline
-constexpr void verify_range(const _Iter& _First, const _Sentinel& _Last)
+template <class IterT, class _Sentinel> inline
+constexpr void verify_range(const IterT& _First, const _Sentinel& _Last)
 { _STD _Adl_verify_range(_First, _Last); }
 
-template <class _Iter, class _Size_type> inline
-constexpr void verify_range_n(const _Iter& _First, const _Size_type _N)
+template <class IterT, class _Size_type> inline
+constexpr void verify_range_n(const IterT& _First, const _Size_type _N)
 {
-    using diff_t = typename ::std::iterator_traits<_Iter>::difference_type;
+    using diff_t = typename ::std::iterator_traits<IterT>::difference_type;
     auto _Last = next(_First, static_cast<diff_t>(_N));
     verify_range(_First, _Last);
 }
@@ -205,8 +225,8 @@ constexpr void verify_range_n(const _Iter& _First, const _Size_type _N)
 #elif NH3API_MSVC_STL_VERSION && !defined(_MSVC_STL_UPDATE)
 
 // verify range on (old) MSVC STL checked iterators
-template <class _Iter, class _Sentinel>
-inline void verify_range(const _Iter& _First, const _Sentinel& _Last)
+template <class IterT, class _Sentinel>
+inline void verify_range(const IterT& _First, const _Sentinel& _Last)
 {
     #if NH3API_DEBUG
     using namespace std; // to make _DEBUG_RANGE macro range work
@@ -216,15 +236,15 @@ inline void verify_range(const _Iter& _First, const _Sentinel& _Last)
     #endif
 }
 
-template <class _Iter, class _Size_type>
-inline void verify_range_n(const _Iter& _First, _Size_type _N)
+template <class IterT, class _Size_type>
+inline void verify_range_n(const IterT& _First, _Size_type _N)
 {
     #if NH3API_DEBUG
-    const _Iter& _Last = next(_First, static_cast<typename ::std::iterator_traits<_Iter>::difference_type>(_N));
+    const IterT& _Last = next(_First, static_cast<typename ::std::iterator_traits<IterT>::difference_type>(_N));
     using namespace std; // to make _DEBUG_RANGE macro range work
     _DEBUG_RANGE(_First, _Last);
     #else
-    NH3API_IGNORE(_First, _Last);
+    NH3API_IGNORE(_First, _N);
     #endif
 }
 #elif NH3API_GCC_STL
@@ -249,13 +269,12 @@ verify_range_n(_InputIterator _First, _Size_type _N)
 }
 #else
 
-template <class _Iter, class _Sentinel>
-NH3API_CONSTEXPR inline
-void verify_range(const _Iter &_First, const _Sentinel &_Last)
+template <class IterT, class _Sentinel>
+NH3API_CONSTEXPR_CPP_14 inline void verify_range(const IterT &_First, const _Sentinel &_Last)
 { (void)_First; (void)_Last; }
 
-template <class _Iter, class _Size_type> inline
-constexpr void verify_range_n(const _Iter& _First, const _Size_type _N)
+template <class IterT, class _Size_type>
+NH3API_CONSTEXPR_CPP_14 inline void verify_range_n(const IterT& _First, const _Size_type _N)
 { (void) _First; (void) _N;}
 
 #endif
@@ -279,52 +298,52 @@ template<typename T> inline
 T* unfancy(T* iter) NH3API_NOEXCEPT
 { return iter; }
 
-template<typename _Iter> inline
-typename _Iter::_Unchecked_type unfancy(const _Iter& iter) NH3API_NOEXCEPT
+template<typename IterT> inline
+typename IterT::_Unchecked_type unfancy(const IterT& iter) NH3API_NOEXCEPT
 { return ::std::_Unchecked(iter); }
 
 template<class _Ty, size_t _Size> inline
 typename ::std::_Array_iterator<_Ty, _Size>::_Unchecked_type
-unfancy(const ::std::_Array_iterator<_Ty, _Size>& _Iter) NH3API_NOEXCEPT
-{ return (_Iter._Unchecked()); }
+unfancy(const ::std::_Array_iterator<_Ty, _Size>& IterT) NH3API_NOEXCEPT
+{ return (IterT._Unchecked()); }
 
 template<class _Ty, size_t _Size> inline
 typename ::std::_Array_const_iterator<_Ty, _Size>::_Unchecked_type
-unfancy(const ::std::_Array_const_iterator<_Ty, _Size>& _Iter) NH3API_NOEXCEPT
-{ return (_Iter._Unchecked()); }
+unfancy(const ::std::_Array_const_iterator<_Ty, _Size>& IterT) NH3API_NOEXCEPT
+{ return (IterT._Unchecked()); }
 
 #elif defined(_MSVC_STL_UPDATE)
 
-template<class _Iter>
-_NODISCARD inline constexpr decltype(auto) unfancy(const _Iter& _It) noexcept
+template<class IterT>
+_NODISCARD inline constexpr decltype(auto) unfancy(const IterT& _It) noexcept
 { return ::std::_Get_unwrapped(_It); }
 
-template<class _Iter>
-_NODISCARD inline constexpr decltype(auto) unfancy(const _Iter&& _It) noexcept
+template<class IterT>
+_NODISCARD inline constexpr decltype(auto) unfancy(const IterT&& _It) noexcept
 { return ::std::_Get_unwrapped(::std::forward(_It)); }
 
 #elif NH3API_CLANG_STL
 
-template <class _Iter,
-          class _Impl = ::std::__unwrap_iter_impl<_Iter>,
-          ::std::__enable_if_t<::std::is_copy_constructible<_Iter>::value, int> = 0>
-inline _LIBCPP_CONSTEXPR_SINCE_CXX14 decltype(_Impl::__unwrap(::std::declval<_Iter>()))
-unfancy(_Iter __i) _NOEXCEPT
+template <class IterT,
+          class _Impl = ::std::__unwrap_iter_impl<IterT>,
+          ::std::__enable_if_t<::std::is_copy_constructible<IterT>::value, int> = 0>
+inline _LIBCPP_CONSTEXPR_SINCE_CXX14 decltype(_Impl::__unwrap(::std::declval<IterT>()))
+unfancy(IterT __i) _NOEXCEPT
 { return _Impl::__unwrap(__i); }
 
 #elif NH3API_GCC_STL
 
-template<typename _Iter>
-_Iter unfancy(const _Iter& iter) NH3API_NOEXCEPT
+template<typename IterT>
+IterT unfancy(const IterT& iter) NH3API_NOEXCEPT
 { return iter; }
 
-template<typename _Iter>
-_Iter unfancy(const _Iter&& iter) NH3API_NOEXCEPT
+template<typename IterT>
+IterT unfancy(const IterT&& iter) NH3API_NOEXCEPT
 { return iter; }
 
 #else // Unknown STL
-template<typename _Iter>
-_Iter unfancy(const _Iter& iter) NH3API_NOEXCEPT
+template<typename IterT>
+IterT unfancy(const IterT& iter) NH3API_NOEXCEPT
 { return iter; }
 
 #endif

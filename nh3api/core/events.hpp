@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std/patcher_x86.hpp"
+#include "nh3api_std/memory.hpp"
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -53,7 +53,7 @@ struct message
 
         NH3API_FORCEINLINE
         message() NH3API_NOEXCEPT
-        { memset_0(this, sizeof(*this)); }
+        { nh3api::trivial_zero<sizeof(message)>(this); }
 
         NH3API_FORCEINLINE
         message(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT

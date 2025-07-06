@@ -11,7 +11,6 @@
 
 #pragma once
 
-
 #include "nh3api_std.hpp"
 #include "memory.hpp"
 
@@ -593,7 +592,7 @@ public:
     { return this->_Last - this->_First; }
 
     NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
-    size_type max_size() const NH3API_NOEXCEPT
+    static size_type max_size() NH3API_NOEXCEPT
     { return NH3API_MAX_HEAP_REQUEST / sizeof(value_type); }
 
     NH3API_FORCEINLINE
@@ -671,12 +670,16 @@ public:
     NH3API_INLINE_LARGE
     void push_back(const value_type& value)
     {
+        #if NH3API_STD_MOVE_SEMANTICS
+        emplace_back(value);
+        #else
         if ( this->_Last == this->_End )
         {
             _Reallocate_exactly(_Calculate_growth(size() + 1));
         }
         nh3api::construct_at(this->_Last, value);
         ++this->_Last;
+        #endif
     }
 
     template<class IterT
@@ -987,7 +990,7 @@ public:
     }
 
     void swap( exe_vector& other ) NH3API_NOEXCEPT
-    { nh3api::trivial_swap<sizeof(*this)>(this, &other); }
+    { nh3api::trivial_swap<sizeof(exe_vector)>(this, &other); }
 
 protected:
     #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
@@ -999,7 +1002,6 @@ protected:
                 : vec(_vec) 
             {}
 
-            NH3API_CONSTEXPR
             void operator()() 
             { 
                 vec._Tidy();
@@ -1014,11 +1016,12 @@ protected:
     struct range_cleanup
     {
         public:
-            NH3API_CONSTEXPR range_cleanup(exe_vector& _vec, 
-                                            pointer& _destroy_first, 
-                                            pointer& _destroy_last, 
-                                            pointer& _deallocate_at, 
-                                            const size_type& _deallocation_size ) NH3API_NOEXCEPT
+            NH3API_CONSTEXPR
+            range_cleanup(exe_vector& _vec, 
+                          pointer& _destroy_first, 
+                          pointer& _destroy_last, 
+                          pointer& _deallocate_at, 
+                          const size_type& _deallocation_size ) NH3API_NOEXCEPT
                 : vec(_vec), 
                 destroy_first(_destroy_first),
                 destroy_last(_destroy_first),
@@ -1047,8 +1050,7 @@ protected:
         vector_cleanup(exe_vector&) NH3API_NOEXCEPT
         {}
 
-        NH3API_CONSTEXPR
-        void operator()() NH3API_NOEXCEPT
+        void operator()() const NH3API_NOEXCEPT
         {}
     };
 
@@ -1061,8 +1063,7 @@ protected:
                                         const size_type) NH3API_NOEXCEPT
         {}
 
-        NH3API_CONSTEXPR
-        void operator()() NH3API_NOEXCEPT
+        void operator()() const NH3API_NOEXCEPT
         {}
     };
     #endif
@@ -1106,28 +1107,28 @@ protected:
     bool _Has_unused_capacity() const NH3API_NOEXCEPT
     { return this->_End != this->_Last; }
 
-    // move [first, last) to raw _Dest, using allocator
-    void _Umove_if_noexcept(pointer first, pointer last, pointer _Dest)
+    // move [first, last) to raw dest, using allocator
+    void _Umove_if_noexcept(pointer first, pointer last, pointer dest)
     {
         nh3api::verify_range(first, last);
         #if NH3API_STD_MOVE_SEMANTICS
-        _Umove_if_noexcept_impl(first, last, _Dest,
+        _Umove_if_noexcept_impl(first, last, dest,
         nh3api::tt::disjunction_2<
         nh3api::tt::is_nothrow_move_constructible<value_type>,
         nh3api::tt::negation<nh3api::tt::is_copy_constructible<value_type>>
         >());
         #else
-        std::uninitialized_copy<pointer, pointer>(first, last, dst);
+        std::uninitialized_copy<pointer, pointer>(first, last, dest);
         #endif
     }
 
-    // move [first, last) to raw _Dest, using allocator
-    void _Umove_if_noexcept_impl(pointer first, pointer last, pointer dst, nh3api::tt::true_type) NH3API_NOEXCEPT
-    { _Umove(first, last, dst); }
+    // move [first, last) to raw dest, using allocator
+    void _Umove_if_noexcept_impl(pointer first, pointer last, pointer dest, nh3api::tt::true_type) NH3API_NOEXCEPT
+    { _Umove(first, last, dest); }
 
-    // copy [first, last) to raw _Dest, using allocator
-    void _Umove_if_noexcept_impl(pointer first, pointer last, pointer dst, nh3api::tt::false_type)
-    { std::uninitialized_copy<pointer, pointer>(first, last, dst); }
+    // copy [first, last) to raw dest, using allocator
+    void _Umove_if_noexcept_impl(pointer first, pointer last, pointer dest, nh3api::tt::false_type)
+    { std::uninitialized_copy<pointer, pointer>(first, last, dest); }
 
     NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
     static void _Destroy_range(pointer first, pointer last)
@@ -1145,12 +1146,21 @@ protected:
     pointer _Umove(pointer first, pointer last, pointer ptr)
     {
         nh3api::verify_range(first, last);
-        #if !NH3API_STD_MOVE_SEMANTICS && NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
-            return std::_Uninitialized_move(first, last, ptr, allocator_type());
-        #else
+        
+        #if NH3API_STD_MOVE_SEMANTICS
             NH3API_STATIC_ASSERT("value_type must be either copy or move constructible",
             nh3api::tt::is_move_constructible<value_type>::value || nh3api::tt::is_copy_constructible<value_type>::value);
+        #endif
+
+        #if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
+            ::std::_Wrap_alloc<allocator_type> allocator;
+            return std::_Uninitialized_move(first, last, ptr, allocator);
+        #else
+            #ifdef __cpp_lib_raw_memory_algorithms
             return std::uninitialized_move<pointer, pointer>(first, last, ptr);
+            #else 
+            return _Uninitialized_move(first, last, ptr);
+            #endif
         #endif
     }
     
@@ -1182,7 +1192,7 @@ protected:
 
     #ifndef __cpp_lib_raw_memory_algorithms
 
-    NH3API_FORCEINLINE static pointer _Default_fill_impl(pointer first, size_type n, tt::false_type)
+    NH3API_FORCEINLINE static pointer _Default_fill_impl(pointer first, size_type n, nh3api::tt::false_type)
     {
         pointer current = first;
         NH3API_TRY
@@ -1199,7 +1209,7 @@ protected:
         return current;
     }
 
-    NH3API_FORCEINLINE static pointer _Default_fill_impl(pointer first, size_type n, tt::true_type)
+    NH3API_FORCEINLINE static pointer _Default_fill_impl(pointer first, size_type n, nh3api::tt::true_type)
     NH3API_NOEXCEPT
     {
         pointer current = first;
@@ -1208,6 +1218,73 @@ protected:
                 ::nh3api::addressof(*current)))) T();
         return current;
     }
+
+    #if !NH3API_MSVC_STL 
+    NH3API_FORCEINLINE static pointer _Uninitialized_move_impl(pointer first,
+                                                               pointer last,
+                                                               pointer d_first,
+                                                               nh3api::tt::false_type)
+    {
+        pointer current = d_first;
+        NH3API_TRY
+        {
+            for (; first != last; ++first, (void) ++current)
+            {
+                void* addr = static_cast<void*>(::nh3api::addressof(*current));
+                ::new (addr) value_type(::std::move(*first));
+            }
+            return current;
+        }
+        NH3API_CATCH (...)
+        {
+            ::nh3api::destroy(d_first, current);
+            NH3API_RETHROW
+        }
+    }
+
+    NH3API_FORCEINLINE static pointer _Uninitialized_move_impl(pointer first,
+                                                               pointer last,
+                                                               pointer d_first,
+                                                               nh3api::tt::true_type) NH3API_NOEXCEPT
+    {
+        pointer current = d_first;
+        for (; first != last; ++first, (void) ++current)
+        {
+            void* addr = static_cast<void*>(::nh3api::addressof(*current));
+            ::new (addr) value_type(::std::move(*first));
+        }
+        return current;
+    }
+
+    NH3API_FORCEINLINE static pointer _Uninitialized_move(pointer first,
+                                                          pointer last,
+                                                          pointer d_first)
+    {
+    #if NH3API_DEBUG
+        verify_range(first, last);
+    #endif
+
+        NH3API_IF_CONSTEXPR
+        ( nh3api::tt::is_trivially_move_assignable<value_type>::value
+        && nh3api::tt::is_trivially_move_constructible<value_type>::value )
+        {
+            return ::std::move(first, last, d_first);
+        }
+        else if ( nh3api::tt::is_trivially_copy_constructible<value_type>::value
+                && nh3api::tt::is_trivially_copy_assignable<value_type>::value)
+        {
+            return ::std::copy(first, last, d_first);
+        }
+        else
+        {
+            return _Uninitialized_move_impl(first, last, d_first,
+                nh3api::tt::integral_constant<bool,
+                (nh3api::tt::is_nothrow_move_constructible<value_type>::value &&
+                    nh3api::tt::is_nothrow_copy_constructible<value_type>::value)
+                    || nh3api::flags::no_exceptions>());
+        }
+    }
+    #endif
 
     #endif // __cpp_lib_raw_memory_algorithms
 

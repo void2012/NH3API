@@ -145,17 +145,22 @@ using ::std::is_nothrow_constructible;
 } // namespace nh3api
 #endif
 
-#if NH3API_CHECK_CPP11
+
 namespace nh3api
 {
 namespace tt
 {
+
+#if NH3API_CHECK_CPP11
 template<class...>
 using void_t = void;
+#endif  
+template<typename T>
+struct void_1 { typedef void type; };
 
 } // namespace tt
 } // namespace nh3api
-#endif // if NH3API_CHECK_CPP11
+
 
 namespace nh3api
 {

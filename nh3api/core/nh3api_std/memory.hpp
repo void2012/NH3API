@@ -95,7 +95,7 @@ struct exe_heap_t
     { return get_global_var_ref(handle_address, HANDLE); }
 
     // maximum size a heap can manage
-    NH3API_CONSTEXPR size_t max_size() NH3API_NOEXCEPT
+    static NH3API_CONSTEXPR size_t max_size() NH3API_NOEXCEPT
     { return NH3API_MAX_HEAP_REQUEST; }
 
 } const exe_heap; // exe_heap constant / константа exe_heap
@@ -511,15 +511,15 @@ public:
 
 public:
     NH3API_NODISCARD NH3API_CONSTEXPR NH3API_FORCEINLINE
-    pointer address(reference x) const NH3API_NOEXCEPT
+    static pointer address(reference x) NH3API_NOEXCEPT
     { return ::nh3api::addressof(x); }
 
     NH3API_NODISCARD NH3API_CONSTEXPR NH3API_FORCEINLINE
-    const_pointer address(const_reference x) const NH3API_NOEXCEPT
+    static const_pointer address(const_reference x) NH3API_NOEXCEPT
     { return ::nh3api::addressof(x); }
 
     NH3API_NODISCARD NH3API_FORCEINLINE
-    pointer allocate(size_type size) NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
+    static pointer allocate(size_type size) NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
     { 
         #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
         return static_cast<pointer>(::operator new(size * sizeof(value_type), exe_heap));
@@ -529,7 +529,7 @@ public:
     }
 
     NH3API_NODISCARD NH3API_FORCEINLINE
-    pointer allocate(size_type size, const void*) NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
+    static pointer allocate(size_type size, const void*) NH3API_NOEXCEPT_EXPR(nh3api::flags::no_exceptions)
     {
         #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
         return static_cast<pointer>(::operator new(size * sizeof(value_type), exe_heap));
@@ -539,7 +539,7 @@ public:
     }
 
     NH3API_FORCEINLINE
-    void deallocate(void* ptr, size_type) NH3API_NOEXCEPT
+    static void deallocate(void* ptr, size_type) NH3API_NOEXCEPT
     { exe_delete(ptr); }
 
     #if NH3API_STD_MOVE_SEMANTICS
@@ -548,35 +548,38 @@ public:
     , class = decltype(::new(::std::declval<void*>()) U(::std::declval<Args>()...))
     #endif
     > NH3API_FORCEINLINE
-    void construct(U* ptr, Args&& ... args)
+    static void construct(U* ptr, Args&& ... args)
     NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_constructible<U, Args ...>::value)
     { ::new ((void*)ptr) U(::std::forward<Args>(args) ... ); }
+    
     #else
+
     template <typename U> NH3API_FORCEINLINE
-    void construct(U* ptr, const_reference copy_value)
+    static void construct(U* ptr, const_reference copy_value)
     { ::new (static_cast<void*>(ptr)) U(copy_value); }
+    
     #endif
 
     NH3API_FORCEINLINE
-    void destroy(pointer ptr)
+    static void destroy(pointer ptr)
     NH3API_NOEXCEPT_EXPR(::nh3api::tt::is_nothrow_destructible<value_type>::value)
     { ptr->~value_type(); }
 
     NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
-    size_t max_size() const NH3API_NOEXCEPT
+    static size_t max_size() NH3API_NOEXCEPT
     { return size_type(~0) / sizeof(value_type); }
 
     NH3API_NODISCARD NH3API_FORCEINLINE
-    const exe_allocator& select_on_container_copy_construction() const
+    const exe_allocator& select_on_container_copy_construction() const NH3API_NOEXCEPT
     { return *this; }
 };
 
 template<class T, class U> NH3API_CONSTEXPR
-bool operator==(const exe_allocator<T>&, const exe_allocator<U>&)
+bool operator==(const exe_allocator<T>&, const exe_allocator<U>&) NH3API_NOEXCEPT
 { return true; }
 
 template<class T, class U> NH3API_CONSTEXPR
-bool operator!=(const exe_allocator<T>&, const exe_allocator<U>&)
+bool operator!=(const exe_allocator<T>&, const exe_allocator<U>&) NH3API_NOEXCEPT
 { return false; }
 
 // used only in map editor and campaign editor

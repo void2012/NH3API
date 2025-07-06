@@ -36,7 +36,8 @@ private:
 
 public:
     NH3API_CONSTEXPR basic_fnv1a() NH3API_NOEXCEPT 
-        : state_{OffsetBasis} {}
+        : state_(OffsetBasis)
+        {}
 
     NH3API_CONSTEXPR_CPP_14 void update(const char* const data, const size_t size) NH3API_NOEXCEPT 
     {

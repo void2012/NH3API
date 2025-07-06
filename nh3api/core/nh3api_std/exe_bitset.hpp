@@ -53,32 +53,32 @@ public:
     {
     friend class exe_bitset<N>;
     public:
-        NH3API_CONSTEXPR reference& operator=(bool value) NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 reference& operator=(bool value) NH3API_NOEXCEPT
         {
             _parent.set(_pos, value);
             return *this;
         }
 
-        NH3API_CONSTEXPR reference& operator=(const reference& other) NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 reference& operator=(const reference& other) NH3API_NOEXCEPT
         {
             _parent.set(_pos, static_cast<bool>(other));
             return *this;
         }
 
-        NH3API_CONSTEXPR reference& flip()  NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 reference& flip()  NH3API_NOEXCEPT
         {
             _parent.flip(_pos);
             return *this;
         }
 
-        NH3API_CONSTEXPR bool operator~() const NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 bool operator~() const NH3API_NOEXCEPT
         { return !_parent.test(_pos); }
 
-        NH3API_CONSTEXPR operator bool() const NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 operator bool() const NH3API_NOEXCEPT
         { return _parent.test(_pos); }
 
     private:
-        NH3API_CONSTEXPR reference(exe_bitset<N>& value, size_t pos) NH3API_NOEXCEPT
+        NH3API_CONSTEXPR_CPP_14 reference(exe_bitset<N>& value, size_t pos) NH3API_NOEXCEPT
             : _parent(value), _pos(pos)
             {}
 
@@ -101,18 +101,18 @@ public:
     }
 
 public:
-    NH3API_CONSTEXPR bool operator[](size_t pos) const
+    NH3API_CONSTEXPR_CPP_14 bool operator[](size_t pos) const
     { return test(pos); }
 
-    NH3API_CONSTEXPR reference operator[](size_t pos)
+    NH3API_CONSTEXPR_CPP_14 reference operator[](size_t pos)
     NH3API_NOEXCEPT
     { return reference(*this, pos); }
 
-    NH3API_CONSTEXPR exe_bitset()
+    NH3API_CONSTEXPR_CPP_14 exe_bitset()
     NH3API_NOEXCEPT
     { _Tidy(); }
 
-    explicit NH3API_CONSTEXPR exe_bitset(unsigned long value)
+    explicit NH3API_CONSTEXPR_CPP_14 exe_bitset(unsigned long value)
     NH3API_NOEXCEPT
     {
         _Tidy();
@@ -170,28 +170,28 @@ public:
     exe_bitset(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
     { NH3API_IGNORE(_array); }
 
-    NH3API_CONSTEXPR exe_bitset<N>& operator&=(const exe_bitset<N>& other) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator&=(const exe_bitset<N>& other) NH3API_NOEXCEPT
     {
         for (int i = _Words; 0 <= i; --i)
             _array[i] &= other._array[i];
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& operator|=(const exe_bitset<N>& other) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator|=(const exe_bitset<N>& other) NH3API_NOEXCEPT
     {
         for (int i = _Words; 0 <= i; --i)
             _array[i] |= other._array[i];
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& operator^=(const exe_bitset<N>& other) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator^=(const exe_bitset<N>& other) NH3API_NOEXCEPT
     {
         for (int i = _Words; 0 <= i; --i)
             _array[i] ^= other._array[i];
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& operator<<=(size_t pos) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator<<=(size_t pos) NH3API_NOEXCEPT
     {
         const size_t _D = pos / _Bitsperword;
         if (_D != 0)
@@ -207,7 +207,7 @@ public:
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& operator>>=(size_t pos) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator>>=(size_t pos) NH3API_NOEXCEPT
     {
         const size_t _D = pos / _Bitsperword;
         if (_D != 0)
@@ -221,7 +221,7 @@ public:
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& set() NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& set() NH3API_NOEXCEPT
     {
         _Tidy(~(word_type)0);
         return (*this);
@@ -238,19 +238,19 @@ public:
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& reset() NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& reset() NH3API_NOEXCEPT
     {
         _Tidy();
         return *this;
     }
 
-    NH3API_CONSTEXPR exe_bitset<N>& reset(size_t pos)
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& reset(size_t pos)
     { return set(pos, 0); }
 
-    NH3API_CONSTEXPR exe_bitset<N> operator~() const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N> operator~() const NH3API_NOEXCEPT
     { return exe_bitset<N>(*this).flip(); }
 
-    NH3API_CONSTEXPR exe_bitset<N>& flip() NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& flip() NH3API_NOEXCEPT
     {
         for (int i = _Words; 0 <= i; --i)
             _array[i] = ~_array[i];
@@ -315,7 +315,7 @@ public:
     }
     */
 
-    NH3API_CONSTEXPR size_t count() const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 size_t count() const NH3API_NOEXCEPT
     {
         size_t result = 0;
         for (size_t i = 0; i < _Words + 1; ++i)
@@ -324,10 +324,10 @@ public:
         return result;
     }
 
-    NH3API_CONSTEXPR size_t size() const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 size_t size() const NH3API_NOEXCEPT
     { return N; }
 
-    NH3API_CONSTEXPR bool operator==(const exe_bitset<N>& other) const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 bool operator==(const exe_bitset<N>& other) const NH3API_NOEXCEPT
     {
         for (int i = _Words; 0 <= i; --i)
             if (_array[i] != other._array[i])
@@ -335,7 +335,7 @@ public:
         return true;
     }
 
-    NH3API_CONSTEXPR bool operator!=(const exe_bitset<N>& other) const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 bool operator!=(const exe_bitset<N>& other) const NH3API_NOEXCEPT
     { return (!(*this == other)); }
 
     bool test(size_t pos) const
@@ -345,7 +345,7 @@ public:
         return ((_array[pos / _Bitsperword] & ((word_type)1 << pos % _Bitsperword)) != 0);
     }
 
-    NH3API_CONSTEXPR bool any() const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 bool any() const NH3API_NOEXCEPT
     {
         for (int i = _Words; 0 <= i; --i)
             if (_array[i] != 0)
@@ -353,31 +353,31 @@ public:
         return false;
     }
 
-    NH3API_CONSTEXPR bool none() const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 bool none() const NH3API_NOEXCEPT
     { return !any(); }
 
-    NH3API_CONSTEXPR exe_bitset<N> operator<<(size_t other) const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N> operator<<(size_t other) const NH3API_NOEXCEPT
     { return exe_bitset<N>(*this) <<= other; }
 
-    NH3API_CONSTEXPR exe_bitset<N> operator>>(size_t other) const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 exe_bitset<N> operator>>(size_t other) const NH3API_NOEXCEPT
     { return exe_bitset<N>(*this) >>= other; }
 
-    NH3API_CONSTEXPR friend exe_bitset<N> operator&(const exe_bitset<N>& lhs,
+    NH3API_CONSTEXPR_CPP_14 friend exe_bitset<N> operator&(const exe_bitset<N>& lhs,
         const exe_bitset<N>& other) NH3API_NOEXCEPT
     { return exe_bitset<N>(lhs) &= other; }
 
-    NH3API_CONSTEXPR friend exe_bitset<N> operator|(const exe_bitset<N>& lhs,
+    NH3API_CONSTEXPR_CPP_14 friend exe_bitset<N> operator|(const exe_bitset<N>& lhs,
         const exe_bitset<N>& other) NH3API_NOEXCEPT
     { return exe_bitset<N>(lhs) |= other; }
 
-    NH3API_CONSTEXPR friend exe_bitset<N> operator^(const exe_bitset<N>& lhs,
+    NH3API_CONSTEXPR_CPP_14 friend exe_bitset<N> operator^(const exe_bitset<N>& lhs,
         const exe_bitset<N>& other) NH3API_NOEXCEPT
     { return exe_bitset<N>(lhs) ^= other; }
 
 protected:
     // used for iterations inside the bitset.
     // no need to check for bounds.
-    NH3API_CONSTEXPR bool _At(size_t pos) const NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 bool _At(size_t pos) const NH3API_NOEXCEPT
     { return ((_array[pos / _Bitsperword] & ((word_type)1 << pos % _Bitsperword)) != 0); }
 
     enum : uint32_t
@@ -386,7 +386,7 @@ protected:
         _Words = N == 0 ? 0 : (N - 1) / _Bitsperword
     };
 
-    NH3API_CONSTEXPR void _Tidy(word_type value = 0) NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 void _Tidy(word_type value = 0) NH3API_NOEXCEPT
     {
         for (int i = _Words; 0 <= i; --i)
             _array[i] = value;
@@ -394,7 +394,7 @@ protected:
             _Trim();
     }
 
-    NH3API_CONSTEXPR void _Trim() NH3API_NOEXCEPT
+    NH3API_CONSTEXPR_CPP_14 void _Trim() NH3API_NOEXCEPT
     {
         if (N % _Bitsperword != 0)
             _array[_Words] &= ((word_type)1 << N % _Bitsperword) - 1;
@@ -413,7 +413,7 @@ protected:
     { NH3API_THROW(std::out_of_range, "invalid bitset position"); }
 
     #if NH3API_STD_HASH
-    NH3API_CONSTEXPR size_t _Hash_code() NH3API_NOEXCEPT 
+    NH3API_CONSTEXPR_CPP_14 size_t _Hash_code() NH3API_NOEXCEPT 
     { 
         nh3api::default_hash hasher;
         hasher.update(&_array[0], _Words + 1);

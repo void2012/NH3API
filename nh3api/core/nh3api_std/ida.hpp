@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
+
 // This file contains definitions used by the Hex-Rays decompiler output.
 // It has type definitions and convenience macros to make the
 // output more readable.
@@ -157,7 +158,7 @@ typedef int32_t _BOOL4;
 #endif
 
 #ifndef NH3API_IDA_INTRIN
-    #define NH3API_IDA_INTRIN NH3API_CONSTEXPR NH3API_FORCEINLINE __pure
+    #define NH3API_IDA_INTRIN NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE __pure
 #endif
 
 template<typename T>

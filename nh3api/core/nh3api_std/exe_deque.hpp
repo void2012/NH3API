@@ -536,7 +536,7 @@ public:
     }
 
     NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
-    size_type max_size() const NH3API_NOEXCEPT
+    static size_type max_size() NH3API_NOEXCEPT
     { return NH3API_MAX_HEAP_REQUEST / sizeof(value_type); }
 
     bool empty() const NH3API_NOEXCEPT
@@ -624,14 +624,14 @@ public:
 
 #if NH3API_STD_MOVE_SEMANTICS
     exe_deque(exe_deque&& other) NH3API_NOEXCEPT
-    { nh3api::trivial_move<sizeof(*this)>(&other, this); }
+    { nh3api::trivial_move<sizeof(exe_deque)>(&other, this); }
 
     exe_deque& operator=(exe_deque&& other) NH3API_NOEXCEPT
     {
         if (this != &other)
         {
             _Tidy();
-            nh3api::trivial_move<sizeof(*this)>(&other, this);
+            nh3api::trivial_move<sizeof(exe_deque)>(&other, this);
         }
         return *this;
     }
@@ -853,13 +853,13 @@ public:
     {
         if ( this != &other )
         {
-            nh3api::trivial_swap<sizeof(*this)>(this, &other);
+            nh3api::trivial_swap<sizeof(exe_deque)>(this, &other);
         }
     }
 
 protected:
-    template<class _Iter> static
-    pointer _Move(_Iter _Begin, _Iter _End, pointer _Ptr)
+    template<class IterT> static
+    pointer _Move(IterT _Begin, IterT _End, pointer _Ptr)
     {
         #if !NH3API_STD_MOVE_SEMANTICS
             return std::copy(_Begin, _End, _Ptr);
@@ -874,8 +874,8 @@ protected:
         #endif
     }
 
-    template<class _Iter> static
-    pointer _Move_backward(_Iter _Begin, _Iter _End, pointer _Ptr)
+    template<class IterT> static
+    pointer _Move_backward(IterT _Begin, IterT _End, pointer _Ptr)
     {
         #if !NH3API_STD_MOVE_SEMANTICS
             return std::copy_backward(_Begin, _End, _Ptr);

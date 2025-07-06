@@ -26,18 +26,16 @@
 #include <string>        // std::char_traits, and optionally std::basic_string
 #include <limits>        // std::numeric_limits
 #include <utility>       // std::swap, std::forward
-#ifdef __cpp_lib_ranges 
-#include <ranges> // std::ranges::enable_view, std::ranges::enable_borrowed_range
-#endif
+//#ifdef __cpp_lib_ranges 
+//#include <ranges> // std::ranges::enable_view, std::ranges::enable_borrowed_range
+//#endif
 #include "algorithm.hpp" // constexpr algorithms
 #include "intrin.hpp"    // constexpr string functions
 #include "math.hpp"      // nh3api::fpclassify, nh3api::count_digits, float classification macros
 #include "memory.hpp"    // allocators
 #include "iterator.hpp"  // std::reverse_iterator, tt::is_iterator
 #include "nh3api_exceptions.hpp" // exceptions
-#if NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010 || NH3API_CHECK_CPP11
 #include "hash.hpp" // nh3api::default_hash
-#endif
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
@@ -53,7 +51,7 @@ struct constexpr_char_traits
         typedef ::std::streamoff off_type;
         typedef ::std::streampos pos_type;
         typedef ::std::mbstate_t state_type;
-        #if NH3API_CHECK_CPP20
+        #ifdef __cpp_lib_three_way_comparison
         using comparison_category = ::std::strong_ordering;
         #endif
 
@@ -61,7 +59,7 @@ struct constexpr_char_traits
         enum : uint32_t { npos = (uint32_t)(-1) };
 
     public:
-        static NH3API_CONSTEXPR NH3API_FORCEINLINE
+        static NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
         void assign(char& c1, const char& c2) NH3API_NOEXCEPT
         { c1 = c2; }
 
@@ -614,18 +612,23 @@ class exe_string
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {}
 
-        explicit exe_string( const allocator_type& _Al ) NH3API_NOEXCEPT
+        explicit exe_string(const allocator_type&) NH3API_NOEXCEPT
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {}
 
-        explicit exe_string(const exe_string& other)
+        exe_string(const exe_string& other)
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {
             assign(other, 0, npos);
         }
 
-        exe_string(const exe_string& other, size_type pos, size_type n,
-                        const allocator_type& _Al = allocator_type() )
+        exe_string(const exe_string& other, size_type pos, size_type n, const allocator_type&)
+            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
+        {
+            assign( other, pos, n );
+        }
+
+        exe_string(const exe_string& other, size_type pos, size_type n)
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {
             assign( other, pos, n );
@@ -670,7 +673,7 @@ class exe_string
 
         protected:
         NH3API_FORCEINLINE void _Move_nullify(exe_string* other) NH3API_NOEXCEPT
-        { nh3api::trivial_move<sizeof(*this)>(other, this); }
+        { nh3api::trivial_move<sizeof(exe_string)>(other, this); }
 
         template <class IterT>
         void _Construct(IterT _F, IterT lhs, std::input_iterator_tag)
@@ -1367,7 +1370,7 @@ class exe_string
         }
 
         NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
-        size_type max_size() const NH3API_NOEXCEPT
+        static size_type max_size() NH3API_NOEXCEPT
         { return NH3API_MAX_HEAP_REQUEST; }
 
         void resize(const size_type _N, const value_type c = value_type())
@@ -1414,7 +1417,7 @@ class exe_string
 
         void swap( exe_string& other ) NH3API_NOEXCEPT
         {
-            nh3api::trivial_swap<sizeof(*this)>(this, &other);
+            nh3api::trivial_swap<sizeof(exe_string)>(this, &other);
         }
 
         bool contains(value_type c) const NH3API_NOEXCEPT
@@ -1753,7 +1756,7 @@ class exe_string
             else
                 --_Refcnt( _Ptr );
 
-            nh3api::trivial_zero<sizeof(*this)>(this);
+            nh3api::trivial_zero<sizeof(exe_string)>(this);
         }
 
         NH3API_FORCEINLINE
@@ -1785,15 +1788,15 @@ class exe_string
 #pragma pack(pop)
 
 #if !NH3API_STD_INLINE_VARIABLES
-const typename exe_string::size_type exe_string::npos = typename exe_string::size_type(-1);
+const size_t exe_string::npos = size_t(-1);
 #endif
 
 //} // namespace nh3api
 
 #if !NH3API_STD_MOVE_SEMANTICS
 NH3API_FORCEINLINE
-void swap(const exe_string& lhs,
-          const exe_string& rhs) // ADL swap
+void swap(exe_string& lhs,
+          exe_string& rhs) // ADL swap
 { lhs.swap(rhs); }
 #endif
 
@@ -1984,8 +1987,9 @@ namespace nh3api
 NH3API_FORCEINLINE uint8_t refcount(const ::exe_string& str) NH3API_NOEXCEPT
 { return *(const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(str.c_str())) - 1); }
 
-NH3API_FORCEINLINE NH3API_CONSTEXPR size_t 
-safe_strlen(const char* str, const size_t max_size) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
+// safe strlen which is bound to max_size
+size_t safe_strlen(const char* str, const size_t max_size) NH3API_NOEXCEPT
 {
     size_t len = 0;
     while (len < max_size && str[len] != '\0') 
@@ -1994,8 +1998,9 @@ safe_strlen(const char* str, const size_t max_size) NH3API_NOEXCEPT
     return len;
 }
 
-NH3API_FORCEINLINE NH3API_CONSTEXPR size_t 
-safe_strlen(const wchar_t* str, const size_t max_size) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
+// safe strlen which is bound to max_size
+size_t safe_strlen(const wchar_t* str, const size_t max_size) NH3API_NOEXCEPT
 {
     size_t len = 0;
     while (len < max_size && str[len] != L'\0') 
@@ -2004,7 +2009,7 @@ safe_strlen(const wchar_t* str, const size_t max_size) NH3API_NOEXCEPT
     return len;
 }
 
-NH3API_CONSTEXPR NH3API_FORCEINLINE
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
 // constexpr atoi that uses no locale
 int32_t fast_atoi(const char* p) NH3API_NOEXCEPT
 {
@@ -2049,26 +2054,26 @@ struct case_insensitive_traits
     typedef ::std::streamoff off_type;
     typedef ::std::streampos pos_type;
     typedef ::std::mbstate_t state_type;
-    #if NH3API_CHECK_CPP20
+    #ifdef __cpp_lib_three_way_comparison
     using comparison_category = ::std::strong_ordering;
     #endif
 
-    static NH3API_CONST NH3API_CONSTEXPR bool eq(char c1, char c2) NH3API_NOEXCEPT
+    NH3API_CONST static NH3API_CONSTEXPR bool eq(char c1, char c2) NH3API_NOEXCEPT
     {
         return tolower_constexpr(c1) == tolower_constexpr(c2);
     }
 
-    static NH3API_CONST NH3API_CONSTEXPR bool ne(char c1, char c2) NH3API_NOEXCEPT
+    NH3API_CONST static NH3API_CONSTEXPR bool ne(char c1, char c2) NH3API_NOEXCEPT
     {
         return tolower_constexpr(c1) != tolower_constexpr(c2);
     }
 
-    static NH3API_CONST NH3API_CONSTEXPR bool lt(char c1, char c2) NH3API_NOEXCEPT
+    NH3API_CONST static NH3API_CONSTEXPR bool lt(char c1, char c2) NH3API_NOEXCEPT
     {
         return tolower_constexpr(c1) < tolower_constexpr(c2);
     }
 
-    static NH3API_CONSTEXPR int compare(const char* s1, const char* s2, size_t n) NH3API_NOEXCEPT
+    static NH3API_CONSTEXPR_CPP_14 int compare(const char* s1, const char* s2, size_t n) NH3API_NOEXCEPT
     {
         while (n-- != 0)
         {
@@ -2082,7 +2087,7 @@ struct case_insensitive_traits
         return 0;
     }
 
-    static NH3API_CONSTEXPR const char* find(const char* s, int n, char a) NH3API_NOEXCEPT
+    static NH3API_CONSTEXPR_CPP_14 const char* find(const char* s, int n, char a) NH3API_NOEXCEPT
     {
         while ( n-- > 0)
         {
@@ -2096,7 +2101,7 @@ struct case_insensitive_traits
     }
 };
 
-NH3API_CONSTEXPR bool isalpha_constexpr(const char c) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 bool isalpha_constexpr(const char c) NH3API_NOEXCEPT
 {
     const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                             "abcdefghijklmnopqrstuvwxyz";

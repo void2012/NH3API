@@ -131,10 +131,9 @@ public:
 template<class _K,
          uintptr_t _Nil_Address, // null node address inside .exe
          uintptr_t _Nilrefs_Address, // constructor-destructor reference counter address inside .exe
-         typename _Pr,
-         typename _A> NH3API_FORCEINLINE
-void swap(exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr, _A>& lhs,
-          exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr, _A>& rhs) // ADL Swap
+         typename _Pr> NH3API_FORCEINLINE
+void swap(exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr>& lhs,
+          exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr>& rhs) // ADL Swap
 { lhs.swap(rhs); }
 #endif
 

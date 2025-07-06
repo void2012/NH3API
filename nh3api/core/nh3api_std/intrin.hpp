@@ -138,6 +138,18 @@ NH3API_INTRIN_FUNCTION
 // Побитовый поворот вправо.
 uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
 
+#if NH3API_CHECK_CLANG_CL && !NH3API_HAS_BUILTINS 
+#pragma comment(lib, "clang_rt.builtins-i386.lib")
+extern int __builtin_clz(unsigned int) noexcept;
+extern int __builtin_clzll(unsigned long long) noexcept;
+extern int __builtin_ffs(int) noexcept;
+extern int __builtin_ffsll(long long) noexcept; 
+extern int __builtin_ctz(unsigned int) noexcept;
+extern int __builtin_ctzll(unsigned long long) noexcept;
+extern int __builtin_popcount(unsigned int) noexcept;
+extern int __builtin_popcountll(unsigned long long) noexcept;
+#endif 
+
 #if NH3API_CHECK_MSVC
     NH3API_INTRIN_FUNCTION
     uint16_t byteswap16(uint16_t x) NH3API_NOEXCEPT
@@ -242,7 +254,7 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
     NH3API_INTRIN_FUNCTION
     uint16_t byteswap16(uint16_t x) NH3API_NOEXCEPT
     { 
-    #if __has_builtin(__builtin_bswap16)
+    #if NH3API_HAS_BUILTIN(__builtin_bswap16)
         return __builtin_bswap16(x); 
     #else 
         return (x >> 8) | (x << 8);
@@ -252,7 +264,7 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
     NH3API_INTRIN_FUNCTION
     uint32_t byteswap32(uint32_t x) NH3API_NOEXCEPT
     { 
-    #if __has_builtin(__builtin_bswap32)
+    #if NH3API_HAS_BUILTIN(__builtin_bswap32)
         return __builtin_bswap32(x); 
     #else 
         return (x >> 24) | ((x & 0x00FF0000) >> 8) | ((x & 0x0000FF00) << 8) | (x << 24);
@@ -262,7 +274,7 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
     NH3API_INTRIN_FUNCTION
     uint64_t byteswap64(uint64_t x) NH3API_NOEXCEPT
     {
-    #if __has_builtin(__builtin_bswap64)
+    #if NH3API_HAS_BUILTIN(__builtin_bswap64)
         return __builtin_bswap64(x); 
     #else 
         return (x >> 56) |
@@ -295,7 +307,7 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
     NH3API_INTRIN_FUNCTION
     uint32_t bitffs(uint32_t x) NH3API_NOEXCEPT
     { 
-    #if __has_builtin(__builtin_ffs)
+    #if NH3API_HAS_BUILTIN(__builtin_ffs)
         return __builtin_ffs(x); 
     #else 
         return bitctz(x) + 1;
@@ -305,7 +317,7 @@ uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT;
     NH3API_INTRIN_FUNCTION
     uint32_t bitffs64(uint64_t x) NH3API_NOEXCEPT
     { 
-    #if __has_builtin(__builtin_ffsll)
+    #if NH3API_HAS_BUILTIN(__builtin_ffsll)
         return __builtin_ffsll(x); 
     #else 
         return bitctz64(x) + 1;

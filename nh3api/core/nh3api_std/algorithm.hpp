@@ -137,7 +137,7 @@ void fill(ForwardIt first, ForwardIt last, const T &value)
     verify_range(first, last);
 #endif
 // optimized std::fill for visual studio 2005..2013
-#if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
+#if NH3API_CHECK_MSVC && NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
     if ( tt::is_trivially_copy_assignable<T>::value // trivial assign
          && tt::is_random_access_iterator<ForwardIt>::value // linear memory 
          && (sizeof(T) == 4 || sizeof(T) == 2 || sizeof(T) == 1) ) // one of the overloads
@@ -164,7 +164,7 @@ OutputIt copy_n(InputIt first, Size count, OutputIt result)
 
 // optimized std::copy_n for visual studio 2005..2013
 // implement std::copy_n for visual studio 2005..2010
-#if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
+#if NH3API_CHECK_MSVC && NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
     typedef typename ::std::iterator_traits<InputIt>::value_type ValueT;
     if ( tt::is_trivially_copy_assignable<ValueT>::value // trivial assign
          && tt::is_random_access_iterator<InputIt>::value // linear memory
@@ -203,7 +203,7 @@ OutputIt copy(InputIt first, InputIt last, OutputIt d_first)
 #endif
 
 // optimized std::copy_n for visual studio 2005..2013
-#if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
+#if NH3API_CHECK_MSVC && NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
     typedef typename ::std::iterator_traits<InputIt>::value_type ValueT;
     if ( tt::is_trivially_copy_assignable<ValueT>::value // trivial assign
          && tt::is_random_access_iterator<InputIt>::value // linear memory

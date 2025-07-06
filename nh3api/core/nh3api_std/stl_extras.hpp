@@ -4,21 +4,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
+#pragma once
 
 #include <memory>
 #include <algorithm> // std::clamp
 #include <cmath>
 
-#ifdef __has_include 
-    #if __has_include(<bit>)
-        #if defined(_MSVC_LANG)
-            #if _MSVC_LANG>=202002L
-                #include <bit>
-            #endif
-        #elif __cplusplus >=202002L
-            #include <bit>
-        #endif
-    #endif
+#ifdef __cpp_lib_bit_cast
+#include <bit>
 #endif
 
 #include "type_traits.hpp"
@@ -101,7 +94,7 @@ using ::std::destroy_n;
 #endif // constexpr destruction algorithms
 
 #if NH3API_STD_MOVE_SEMANTICS
-#if NH3API_MSVC_STL && NH3API_MSVC_STL_VERSION < NH3API_MSVC_STL_VERSION_2015_2022 && !defined(__cpp_lib_exchange_function)
+#if !defined(__cpp_lib_exchange_function)
 
 template<class T, class U> NH3API_FORCEINLINE
 T exchange(T& obj, U&& new_value)
@@ -118,6 +111,7 @@ NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<T>::value &&
 using ::std::exchange;
 
 #endif // No std::exchange
+#endif // Move semantics
 
 // there is no __cpp_lib_* feature testing macro for std::construct_at
 // use __cpp_lib_constexpr_dynamic_alloc because it's closely of related 
@@ -134,29 +128,21 @@ T* construct_at(T* ptr, Args&&... args)
 NH3API_NOEXCEPT_EXPR(tt::is_nothrow_constructible<T, Args...>::value)
 { return ::new (static_cast<void*>(ptr)) T(::std::forward<Args>(args)...); }
 
-#else // C++11
+#else // Move semantics
 
 // overload 1. invoke copy constructor
 template <class T>
 T* construct_at(T* ptr, const T& value) 
-{ 
-    NH3API_STATIC_ASSERT("T must be copy constructible", tt::is_copy_constructible<T>::value);
-    return ::new (static_cast<void*>(ptr)) T(value); 
-}
+{ return ::new (static_cast<void*>(ptr)) T(value); }
 
 // overload 2. invoke default constructor
 template <class T>
 T* construct_at(T* ptr) 
-{ 
-    NH3API_STATIC_ASSERT("T must be default constructible", tt::is_default_constructible<T>::value);
-    return ::new (static_cast<void*>(ptr)) T(); 
-}
-
-#endif // C++11
-
-#endif // C++20
+{ return ::new (static_cast<void*>(ptr)) T(); }
 
 #endif // Move semantics
+
+#endif // C++20
 
 #ifndef __cpp_lib_clamp
 template<class T = void>
@@ -166,11 +152,11 @@ struct less_functor
     { return left < right; }
 };
 
-template<class T, class Compare> NH3API_CONSTEXPR
+template<class T, class Compare> NH3API_CONSTEXPR_CPP_14
 const T& clamp(const T& v, const T& lo, const T& hi, Compare comp)
 { return comp(v, lo) ? lo : comp(hi, v) ? hi : v; }
 
-template<class T> NH3API_CONSTEXPR
+template<class T> NH3API_CONSTEXPR_CPP_14
 const T& clamp(const T& v, const T& lo, const T& hi)
 { return clamp(v, lo, hi, less_functor<T>()); }
 #else 
@@ -188,26 +174,26 @@ byte_t : uint8_t {};
 NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t operator|(byte_t lhs, byte_t rhs) NH3API_NOEXCEPT
 { return static_cast<byte_t>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs))); }
 
-NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t& operator|=(byte_t& lhs, byte_t rhs) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE byte_t& operator|=(byte_t& lhs, byte_t rhs) NH3API_NOEXCEPT
 { return lhs = lhs | rhs; }
 
 NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t operator&(byte_t lhs, byte_t rhs) NH3API_NOEXCEPT
 { return static_cast<byte_t>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs))); }
 
-NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t& operator&=(byte_t& lhs, byte_t rhs) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE byte_t& operator&=(byte_t& lhs, byte_t rhs) NH3API_NOEXCEPT
 { return lhs = lhs & rhs; }
 
 NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t operator^(byte_t lhs, byte_t rhs) NH3API_NOEXCEPT
 { return static_cast<byte_t>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) ^ static_cast<uint32_t>(rhs))); }
 
-NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t& operator^=(byte_t& lhs, byte_t rhs) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE byte_t& operator^=(byte_t& lhs, byte_t rhs) NH3API_NOEXCEPT
 { return lhs = lhs ^ rhs; }
 
 NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t operator~(byte_t arg) NH3API_NOEXCEPT
 { return static_cast<byte_t>(static_cast<uint8_t>(~static_cast<uint32_t>(arg))); }
 
 template <class _Integer>
-NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t& operator<<=(byte_t& lhs, _Integer shift) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE byte_t& operator<<=(byte_t& lhs, _Integer shift) NH3API_NOEXCEPT
 {
     NH3API_STATIC_ASSERT("operand must be an integral type", tt::is_integral<_Integer>::value);
     return lhs = lhs << shift;
@@ -221,7 +207,7 @@ NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t operator<<(byte_t lhs, _Integer shift
 }
 
 template <class _Integer>
-NH3API_CONSTEXPR NH3API_FORCEINLINE byte_t& operator>>=(byte_t& lhs, _Integer shift) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE byte_t& operator>>=(byte_t& lhs, _Integer shift) NH3API_NOEXCEPT
 {
     NH3API_STATIC_ASSERT("operand must be an integral type", tt::is_integral<_Integer>::value);
     return lhs = lhs >> shift;
@@ -369,13 +355,11 @@ inline bool signbit(float num) NH3API_NOEXCEPT
 
 template <size_t N, typename T>
 NH3API_FORCEINLINE
-#if NH3API_HAS_BUILTIN(__builtin_is_constant_evaluated)
-constexpr
-#endif
+NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
 T* assume_aligned(T* ptr) NH3API_NOEXCEPT
 {
 #if NH3API_HAS_BUILTINS
-#if __has_builtin(__builtin_assume_aligned) || NH3API_CHECK_CLANG_CL
+#if NH3API_HAS_BUILTIN(__builtin_assume_aligned) || NH3API_CHECK_CLANG_CL
 #if NH3API_HAS_BUILTIN(__builtin_is_constant_evaluated)
     if (__builtin_is_constant_evaluated())
         return ptr;
