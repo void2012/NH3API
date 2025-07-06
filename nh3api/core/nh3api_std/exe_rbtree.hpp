@@ -486,7 +486,7 @@ class exe_rbtree
             else if (pos == end())
             { // _Lockit Lk;
                 if (_KeyCompare(_Key(_Rmost()), _Kfn()(value)))
-                    return _Insert(_Getnil(), _Rmost(), value);
+                    return _Insert(const_cast<node_type*>(_Getnil()), _Rmost(), value);
             }
             else
             {
@@ -494,7 +494,7 @@ class exe_rbtree
                 if (_KeyCompare(_Key((--_Next)._Mynode()), _Kfn()(value)) && _KeyCompare(_Kfn()(value), _Key(pos._Mynode())))
                 { // _Lockit _Lk;
                     if (_Isnil(_Right(_Next._Mynode())))
-                        return _Insert(_Getnil(), _Next._Mynode(), value);
+                        return _Insert(const_cast<node_type*>(_Getnil()), _Next._Mynode(), value);
                     else
                         return _Insert(_Head, pos._Mynode(), value);
                 }
@@ -727,7 +727,7 @@ class exe_rbtree
         }
         const_iterator upper_bound(const key_type &key) const NH3API_NOEXCEPT
         {
-            return (iterator(_Ubound(key)));
+            return (const_iterator(_Ubound(key)));
         }
         ::std::pair<iterator, iterator> equal_range(const key_type &key)
         {
@@ -787,7 +787,7 @@ class exe_rbtree
             _Left(_Wherenode) = _Pnode;
             _Wherenode = _Pnode;
         }
-        _Left(_Wherenode) = _Getnil();
+        _Left(_Wherenode) = const_cast<node_type*>(_Getnil());
         return _Newroot;
     }
     void _Erase(node_type* _Rootnode) 
@@ -846,8 +846,8 @@ class exe_rbtree
     NH3API_NOEXCEPT_EXPR(tt::is_nothrow_copy_constructible<value_type>::value)
     {
         node_type* _Z = _Buynode(_Y, _Red);
-        _Left(_Z) = _Getnil();
-        _Right(_Z) = _Getnil();
+        _Left(_Z) = const_cast<node_type*>(_Getnil());
+        _Right(_Z) = const_cast<node_type*>(_Getnil());
         ::nh3api::construct_at(::nh3api::addressof(_Value(_Z)), value);
         ++_Size;
         if (_Y == _Head || !_Isnil(_X) || _KeyCompare(_Kfn()(value), _Key(_Y)))
