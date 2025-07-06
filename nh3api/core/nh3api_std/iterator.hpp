@@ -320,7 +320,7 @@ _NODISCARD inline constexpr decltype(auto) unfancy(const IterT& _It) noexcept
 
 template<class IterT>
 _NODISCARD inline constexpr decltype(auto) unfancy(const IterT&& _It) noexcept
-{ return ::std::_Get_unwrapped(::std::forward(_It)); }
+{ return ::std::_Get_unwrapped(::std::forward<const IterT&&>(_It)); }
 
 #elif NH3API_CLANG_STL
 

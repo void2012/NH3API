@@ -48,7 +48,7 @@ protected:
     typedef pointer* _Mapptr;
 
 protected:
-    enum deque_properties : unsigned
+    enum deque_properties : signed
     { 
         DEQUE_MAP_SIZE = 2, 
         DEQUE_SIZE = (4096 < (difference_type)(sizeof(value_type)) ? 1 : 4096 / (difference_type)(sizeof(value_type))) 
@@ -656,7 +656,7 @@ public:
     }
 
     void push_back( value_type&& value )
-    { emplace_back(std::forward(value)); }
+    { emplace_back(std::forward<value_type>(value)); }
 
     template<class ... Args>
     reference emplace_front(Args&& ... args)
