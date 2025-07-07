@@ -9,19 +9,16 @@
 * The API was updated for ERA 3.9.16.
 */
 
-#include <windows.h>
-#include <cstdio>
-#include <vector>
-
 #include "../core.hpp"
 #if NH3API_STD_MOVE_SEMANTICS
 #include <initializer_list>
 #else 
+#include <vector>
 #include <string>	
 #endif
 
 // Means that returned pointer memory was allocated in era.dll and must be freed via MemFree after using
-#define ERA_MEM(var) var NH3API_DEALLOCATOR(MemFree, 1)
+#define ERA_MEM(var) var NH3API_DEALLOCATOR(::Era::MemFree, 1)
 
 // Means that variable is stored in persisted memory, which will neber be allocated and MUST NOT be modified
 #define ERA_STATIC(var) var
@@ -248,6 +245,8 @@ NH3API_FORCEINLINE
 
     return filePath;
 }
+
+void __stdcall MemFree(const void* buf) NH3API_NOEXCEPT;
 
 NH3API_FORCEINLINE
 // ======================= EVENTS ======================= //
