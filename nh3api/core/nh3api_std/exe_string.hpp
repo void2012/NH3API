@@ -2088,7 +2088,8 @@ struct case_insensitive_traits
     }
 };
 
-NH3API_CONSTEXPR_CPP_14 bool isalpha_constexpr(const char c) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE 
+bool isalpha_constexpr(const char c) NH3API_NOEXCEPT
 {
     const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                             "abcdefghijklmnopqrstuvwxyz";

@@ -88,14 +88,16 @@ public:
 
 typedef basic_fnv1a<size_t, 2166136261u, 16777619u> default_hash;
 
-NH3API_CONSTEXPR_CPP_14 size_t hash_string(const char* const str, size_t size) NH3API_NOEXCEPT 
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE 
+size_t hash_string(const char* const str, size_t size) NH3API_NOEXCEPT 
 {
     default_hash hasher;
     hasher.update(str, size);
     return hasher.digest();
 }
 
-NH3API_CONSTEXPR_CPP_14 size_t hash_string(const wchar_t* const str, size_t size) NH3API_NOEXCEPT 
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
+size_t hash_string(const wchar_t* const str, size_t size) NH3API_NOEXCEPT 
 {
     default_hash hasher;
     hasher.update(str, size);
@@ -103,14 +105,14 @@ NH3API_CONSTEXPR_CPP_14 size_t hash_string(const wchar_t* const str, size_t size
 }
 
 #ifdef __cpp_lib_string_view
-constexpr size_t hash_string(::std::string_view str) noexcept 
+constexpr NH3API_FORCEINLINE size_t hash_string(::std::string_view str) noexcept 
 {
     default_hash hasher;
     hasher.update(str.data(), str.size());
     return hasher.digest();
 }
 
-constexpr size_t hash_string(::std::wstring_view str) noexcept 
+constexpr NH3API_FORCEINLINE size_t hash_string(::std::wstring_view str) noexcept 
 {
     default_hash hasher;
     hasher.update(str.data(), str.size());
@@ -118,7 +120,7 @@ constexpr size_t hash_string(::std::wstring_view str) noexcept
 }
 #endif
 template <size_t size>
-NH3API_CONSTEXPR_CPP_14 size_t hash_string(const char (&str)[size]) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE size_t hash_string(const char (&str)[size]) NH3API_NOEXCEPT
 {
     default_hash hasher;
     // ignore null terminator for string literals
@@ -127,7 +129,7 @@ NH3API_CONSTEXPR_CPP_14 size_t hash_string(const char (&str)[size]) NH3API_NOEXC
 }
 
 template <size_t size>
-NH3API_CONSTEXPR_CPP_14 size_t hash_string(const wchar_t (&str)[size]) NH3API_NOEXCEPT
+NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE size_t hash_string(const wchar_t (&str)[size]) NH3API_NOEXCEPT
 {
     default_hash hasher;
     // ignore null terminator for string literals

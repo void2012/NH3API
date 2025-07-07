@@ -1259,10 +1259,21 @@ protected:
     struct jmpdata_t
     {
         jmpdata_t(uintptr_t addr) : opcode(0xE9), address(addr)
+
+        #if NH3API_STD_ARRAY
         { fillInstructions.fill((_generateint3) ? 0xCC : 0x90); }
+        #else 
+        { ::memset(fillInstructions, (_generateint3) ? 0xCC : 0x90, _NFillInstructions); }
+        #endif
+
         uint8_t opcode;
         uintptr_t address;
+        
+        #if NH3API_STD_ARRAY
         std::array<uint8_t, _NFillInstructions> fillInstructions;
+        #else 
+        uint8_t fillInstructions[_NFillInstructions];
+        #endif
     };
 
     template<bool _generateint3>
