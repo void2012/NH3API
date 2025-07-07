@@ -966,7 +966,7 @@ struct HeroPlaceholder
         // Map object /
         // Соответствующий объект карты
         // offset: +0x0 = +0,  size = 0x4 = 4
-        CObject* obj;
+        CObject* object;
 
         // Player this hero belongs to /
         // Игрок, которому принадлежит этот герой
@@ -976,12 +976,12 @@ struct HeroPlaceholder
         // Hero ID /
         // ID героя.
         // offset: +0x8 = +8,  size = 0x4 = 4
-        THeroID hero_id;
+        THeroID id;
 
         // Hero power /
         // Сила героя.
         // offset: +0xC = +12,  size = 0x1 = 1
-        int8_t hero_power;
+        int8_t power;
 
 };
 #pragma pack(pop)

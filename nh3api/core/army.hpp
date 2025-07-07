@@ -635,7 +635,7 @@ public:
         /// @param casting_hero указатель на героя, который будет кастовать
         void       SetSpellInfluence(SpellID spell,
                                      int32_t power,
-                                     enum TSkillMastery mastery,
+                                     TSkillMastery mastery,
                                      hero const *casting_hero)
         { THISCALL_5(void, 0x444610, this, spell, power, mastery, casting_hero); }
 

@@ -608,6 +608,7 @@ class TQuestGuard
         // Игроки, посетившие этот объект.
         // offset: +0x4 = +4,  size = 0x1 = 1
         uint8_t visitedPlayers;
+
 };
 #pragma pack(pop)
 
@@ -629,29 +630,84 @@ enum TSeerRewardType : uint32_t
 };
 
 #pragma pack(push, 4)
+// Seer hut quest completion reward as a creature /
+// Награда хижины провидца - существо.
+// size = 0x8 = 8, align = 4
+struct TCreatureStack 
+{
+public:
+    // Creature type /
+    // Тип существа.
+    // offset: +0x0 = +0,  size = 0x4 = 4
+    TCreatureType Creature;
+
+    // Number of creatures /
+    // Количество существ.
+    // offset: +0x4 = +4,  size = 0x2 = 2
+    int16_t numTroops;
+
+protected:
+    byte_t gap6[2];
+
+};
+#pragma pack(pop) 
+
+#pragma pack(push, 4)
+// Seer hut quest completion reward as a game resource /
+// Награда хижины провидца - игровой ресурс.
+// size = 0x8 = 8, align = 4
+struct TSeerResourceReward 
+{
+public:
+    // Resource type /
+    // Тип ресурса.
+    // offset: +0x0 = +0,  size = 0x4 = 4
+    EGameResource resType;
+
+    // Resource quantity /
+    // Количество ресурса.
+    // offset: +0x4 = +4,  size = 0x4 = 4
+    uint32_t resQty;
+
+};
+#pragma pack(pop) 
+
+#pragma pack(push, 4)
+// Seer hut quest completion reward as a primary skill /
+// Награда хижины провидца - первичный навык.
+// size = 0x8 = 8, align = 4
+struct TSeerPrimarySkillReward 
+{
+public:
+    // Primary skill type /
+    // Тип первичного навыка.
+    // offset: +0x0 = +0,  size = 0x4 = 4
+    TPrimarySkill skillType;
+
+    // Primary skill level increment /
+    // Уровень первичного навыка.
+    // offset: +0x4 = +4,  size = 0x1 = 1
+    uint8_t bonus;
+protected:
+    byte_t gap5[3];
+    
+};
+#pragma pack(pop) 
+
+#pragma pack(push, 4)
 // Seerhut reward /
 // Информация о вознаграждении хижины провидца.
 // size = 0xC = 12, align = 4
 struct TSeerReward
 {
     public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
-        TSeerReward(TSeerRewardType reward_type,
-                    int32_t reward_value1,
-                    int32_t reward_value2) NH3API_NOEXCEPT
-            : rewardType(reward_type),
-              rewardValue1(reward_value1),
-              rewardValue2(reward_value2)
-        {}
-
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        NH3API_FORCEINLINE
         TSeerReward() NH3API_NOEXCEPT
-            : rewardType(eRewardNone), rewardValue1(0), rewardValue2(0)
-        {}
+        { nh3api::trivial_zero<sizeof(TSeerReward)>(this); }
 
         NH3API_FORCEINLINE
         TSeerReward(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-        { NH3API_IGNORE(rewardType, rewardValue1, rewardValue2); }
+        { NH3API_IGNORE(rewardType); }
 
     public:
         int32_t getValue(hero* current_hero)
@@ -669,11 +725,49 @@ struct TSeerReward
         // offset: +0x0 = +5,  size = 0x4 = 4
         TSeerRewardType rewardType;
 
-        // offset: +0x9 = +9,  size = 0x4 = 4
-        int32_t rewardValue1;
+        union 
+        {
+            // Experience increment reward /
+            // Кол-во опыта в виде вознаграждения.
+            int32_t ExperienceBonus;
 
-        // offset: +0xD = +13,  size = 0x4 = 4
-        int32_t rewardValue2;
+            // Mana reward /
+            // Вознаграждение в виде маны.
+            int32_t ManaBonus;
+
+            // Morale reward /
+            // Вознаграждение в виде боевого духа.
+            int8_t MoraleBonus;
+
+            // Luck reward /
+            // Вознаграждение в виде удачи.
+            int8_t LuckBonus;
+
+            // Resource reward /
+            // Вознаграждение в виде ресурсов
+            TSeerResourceReward ResourceReward;
+
+            // Primary skill increment reward /
+            // Увеличение уровня первичного навыка в виде вознаграждения.
+            TSeerPrimarySkillReward PrimarySkillReward;
+
+            // Secondary skill learning reward /
+            // Обучение вторичным навыком в качестве вознаграждения.
+            SecondarySkillData SecondarySkillReward;
+
+            // Artifact reward /
+            // Вознаграждение в виде артефакта.
+            TArtifact ArtifactReward;
+
+            // Spell learning reward /
+            // Обучение заклинанию в качестве вознаграждения.
+            SpellID SpellReward;
+
+            // Creature reward /
+            // Вознаграждение в существа.
+            TCreatureStack CreatureReward;
+
+        } NH3API_MSVC_LAYOUT;
 };
 #pragma pack(pop)
 

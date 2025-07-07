@@ -242,36 +242,6 @@ struct TreasureData
 #pragma pack(pop)
 
 #pragma pack(push, 4)
-// Secondary Skill Data in Pandora's box /
-// Данные вторичного навыка, используется в структуре ящика пандоры.
-// size = 0x8 = 8, align = 4
-struct SecondarySkillData
-{
-    public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
-        SecondarySkillData() NH3API_NOEXCEPT
-            : type(SKILL_NONE), level(eMasteryNone)
-        {}
-
-        NH3API_FORCEINLINE
-        SecondarySkillData(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-        { NH3API_IGNORE(type, level); }
-
-    public:
-        // Secondary skill /
-        // Вторичный навык.
-        // offset: +0x0 = +0,  size = 0x4 = 4
-        TSecondarySkill type;
-
-        // Secondary skill mastery /
-        // Ступень вторичного навыка.
-        // offset: +0x4 = +4,  size = 0x4 = 4
-        TSkillMastery level;
-
-};
-#pragma pack(pop)
-
-#pragma pack(push, 4)
 // Adventure map monster data /
 // Информация о существе на карте.
 // size = 0x30 = 48, align = 4
