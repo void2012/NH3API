@@ -8,6 +8,7 @@ option(NH3API_CMAKE_LIB_NO_CPP_EXCEPTIONS "Disable C++ exceptions for NH3API" OF
 include(CMakeDependentOption)
 cmake_dependent_option(NH3API_CMAKE_NOTHROW_NEW "NH3APIs operators new will not throw" ON "NH3API_CMAKE_NO_CPP_EXCEPTIONS" OFF)
 option(NH3API_CMAKE_INLINE_HEADERS "Inline mode. See nh3api_std.hpp for details. Requires C++17" OFF)
+option(NH3API_CMAKE_USE_ERA "Build ERA support module" OFF)
 
 function(nh3api_add_files)
 	set(base_path BASE_PATH OUT)
@@ -201,7 +202,18 @@ nh3api_add_files(
 		turn.hpp
 )
 
+if(NH3API_CMAKE_USE_ERA)
+  find_library(ERA_LIBRARY NAMES era HINTS ${CMAKE_CURRENT_LIST_DIR}/nh3api/era)
+  add_library(nh3api-era-module UNKNOWN IMPORTED)
+  set_target_properties(nh3api-era-module PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/nh3api")
+  set_property(TARGET nh3api-era-module APPEND PROPERTY IMPORTED_LOCATION ${ERA_LIBRARY})
+  list(APPEND NH3API_SOURCES nh3api/era/era.cpp)
+  target_link_libraries(nh3api INTERFACE nh3api-era-module)
+endif()
+
 if(NH3API_CMAKE_INLINE_HEADERS)
 else()
+set_target_properties(nh3api PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}")
+set_target_properties(nh3api-header-only PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}")
 target_sources(nh3api PRIVATE ${NH3API_SOURCES})
 endif()
