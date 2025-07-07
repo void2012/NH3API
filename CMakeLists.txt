@@ -39,10 +39,13 @@ function(add_core_headers VAR)
 
 endfunction()
 
+if(NH3API_CMAKE_INLINE_HEADERS)
+else()
 add_library(nh3api STATIC)
 add_library(nh3api::nh3api ALIAS nh3api)
 add_library(nh3api-header-only INTERFACE)
 add_library(nh3api::nh3api-header-only ALIAS nh3api-header-only)
+endif()
 
 if(MSVC)
 	target_compile_definitions(nh3api PUBLIC _X86_)
