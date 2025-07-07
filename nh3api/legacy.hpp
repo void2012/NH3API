@@ -29,9 +29,6 @@ NH3API_DEPRECATED("WoG types are deprecated. use bool32_t") typedef int32_t _boo
 NH3API_DEPRECATED("WoG types are deprecated. use float") typedef float _float_;
 NH3API_DEPRECATED("WoG types are deprecated. use double") typedef double _double_;
 
-// legacy pointer macros
-// use get_ptr instead...
-
 #ifndef IntAt
     #define IntAt(address) (*(_int32_*)(address))
 #endif
@@ -68,20 +65,37 @@ NH3API_DEPRECATED("WoG types are deprecated. use double") typedef double _double
     #define DoubleAt(address) (*(_double_*)(address))
 #endif
 
-NH3API_DEPRECATED("WoG MemCpy is deprecated. Use std::memcpy or std::copy or std::copy_n")
-inline void _MemCopy(void* dst, const void* src, size_t size)
-{ ::std::memcpy(dst, src, size); }
-#define MemCopy(dst, src, size) _MemCopy((void*)(dst), (void*)(src), (size_t)(size))
-NH3API_DEPRECATED("WoG MemSet is deprecated. Use std::memset or std::fill or std::fill_n")
-inline void _MemSet(void* dst, char value, size_t size)
-{ ::std::memset(dst, value, size); }
-#define MemSet(ptr, value, size) _MemSet((void*)(ptr), (char)(value), (size_t)(size))
-#define MemZero(ptr, size) MemSet(ptr, 0, size)
-#define MemAlloc(size) ((_ptr_)::std::malloc((size_t)(size)))
-#define MemFree(ptr) ::std::free((void*)(ptr))
-#define MemRealloc(ptr, size) ((_ptr_)::std::realloc((void*)(ptr), (size_t)(size)))
-#define MemCalloc(num, size) ((_ptr_)::std::calloc((size_t)(num), (size_t)(size)))
-#define MemSize(ptr) ((_dword_)_msize((void*)(ptr)))
+template<typename T, typename Size>
+inline void* MemCopy(T* dst, const T* src, Size size) NH3API_NOEXCEPT
+{ return ::std::memcpy(reinterpret_cast<void*>(dst), reinterpret_cast<const void*>(src), size); }
+
+template<typename T, typename Size>
+inline void* MemZero(T* ptr, Size size) NH3API_NOEXCEPT
+{ return ::std::memset(reinterpret_cast<void*>(ptr), 0, static_cast<size_t>(size)); }
+
+template<typename T, typename V, typename Size>
+inline void* Memset(T* ptr, V value, Size size) NH3API_NOEXCEPT
+{ return ::std::memset(reinterpret_cast<void*>(ptr), static_cast<uint8_t>(value), static_cast<size_t>(size)); }
+
+template<typename Size>
+inline void* MemAlloc(Size size) NH3API_NOEXCEPT
+{ return ::std::malloc(static_cast<size_t>(size)); }
+
+template<typename T>
+inline void MemFree(T* ptr) NH3API_NOEXCEPT
+{ ::std::free(reinterpret_cast<void*>(ptr)); }
+
+template<typename T, typename Size>
+inline void* MemRealloc(T* ptr, Size size) NH3API_NOEXCEPT
+{ ::std::realloc(reinterpret_cast<void*>(ptr), static_cast<size_t>(size)); }
+
+template<typename Size>
+inline void* MemRealloc(Size num, Size size) NH3API_NOEXCEPT
+{ return ::std::calloc(reinterpret_cast<size_t>(num), static_cast<size_t>(size)); }
+
+template<typename T>
+inline size_t MemSize(T* ptr) NH3API_NOEXCEPT
+{ return ::_msize(reinterpret_cast<void*>(ptr)); }
 
 template<typename StringT>
 NH3API_FORCEINLINE
@@ -102,16 +116,6 @@ template<>
 NH3API_FORCEINLINE
 exe_string IntToStr<exe_string>(uint32_t x)
 { return to_exe_string(x); }
-
-template<>
-NH3API_FORCEINLINE
-exe_wstring IntToStr<exe_wstring>(int32_t x)
-{ return to_exe_wstring(x); }
-
-template<>
-NH3API_FORCEINLINE
-exe_wstring IntToStr<exe_wstring>(uint32_t x)
-{ return to_exe_wstring(x); }
 
 inline int32_t StrToInt(const char* cstr)
 { return ::std::atoi(cstr); }
