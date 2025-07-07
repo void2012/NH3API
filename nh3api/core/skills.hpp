@@ -112,16 +112,6 @@ struct TSSkillTraits
 struct SecondarySkillData
 {
     public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
-        SecondarySkillData() NH3API_NOEXCEPT
-            : type(SKILL_NONE), level(eMasteryNone)
-        {}
-
-        NH3API_FORCEINLINE
-        SecondarySkillData(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-        { NH3API_IGNORE(type, level); }
-
-    public:
         // Secondary skill /
         // Вторичный навык.
         // offset: +0x0 = +0,  size = 0x4 = 4
