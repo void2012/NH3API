@@ -760,7 +760,7 @@ class exe_string
         #if NH3API_STD_INLINE_VARIABLES
             static inline constexpr size_type npos = size_type(-1);
         #else 
-            static const size_type npos;
+            static const size_type npos = size_type(-1);
         #endif
         exe_string& operator=( const exe_string& other )
         {
@@ -1777,10 +1777,6 @@ class exe_string
         size_type _Res; // capacity()
 };
 #pragma pack(pop)
-
-#if !NH3API_STD_INLINE_VARIABLES
-const size_t exe_string::npos = size_t(-1);
-#endif
 
 //} // namespace nh3api
 

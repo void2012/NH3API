@@ -509,6 +509,22 @@ public:
     struct rebind
     { typedef exe_allocator<U> other; };
 
+// constructors for standard compliance
+public:
+    NH3API_CONSTEXPR exe_allocator() NH3API_NOEXCEPT
+    {}
+
+    NH3API_CONSTEXPR exe_allocator(const exe_allocator&) NH3API_NOEXCEPT
+    #if NH3API_CHECK_CPP11
+    = default;
+    #else 
+    {}
+    #endif
+
+    template<typename U>
+    NH3API_CONSTEXPR exe_allocator(const exe_allocator<U>&) NH3API_NOEXCEPT
+    {}
+
 public:
     NH3API_NODISCARD NH3API_CONSTEXPR NH3API_FORCEINLINE
     static pointer address(reference x) NH3API_NOEXCEPT
