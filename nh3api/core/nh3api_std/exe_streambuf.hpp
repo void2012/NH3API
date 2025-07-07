@@ -149,7 +149,6 @@ NH3API_FORCEINLINE
 int32_t __cdecl exe_ftell(exe_FILE* file) NH3API_NOEXCEPT
 { return CDECL_1(int32_t, 0x6194DD, file); }
 
-NH3API_DEALLOCATOR(exe_fclose, 1)
 NH3API_FORCEINLINE
 // address: 0x619691
 // Heroes3.exe internal thread-safe fopen /
