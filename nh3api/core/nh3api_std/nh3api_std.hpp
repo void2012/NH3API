@@ -607,7 +607,7 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
     #endif
 
     #ifndef NH3API_FORCEINLINE 
-        #define NH3API_FORCEINLINE __attribute__((__always_inline__))
+        #define NH3API_FORCEINLINE inline __attribute__((__always_inline__))
     #endif
 
     #ifndef NH3API_NOINLINE
