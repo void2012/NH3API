@@ -203,7 +203,11 @@ nh3api_add_files(
 )
 
 if(NH3API_CMAKE_USE_ERA)
+if(MSVC)
   find_library(ERA_LIBRARY NAMES era HINTS ${CMAKE_CURRENT_LIST_DIR}/nh3api/era)
+else()
+  find_library(ERA_LIBRARY NAMES libera HINTS ${CMAKE_CURRENT_LIST_DIR}/nh3api/era)
+endif()
   add_library(nh3api-era-module UNKNOWN IMPORTED)
   set_target_properties(nh3api-era-module PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/nh3api")
   set_property(TARGET nh3api-era-module APPEND PROPERTY IMPORTED_LOCATION ${ERA_LIBRARY})
