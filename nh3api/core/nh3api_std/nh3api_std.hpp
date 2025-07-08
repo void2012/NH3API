@@ -1374,29 +1374,37 @@ enum : unsigned char
 
 } // namespace nh3api::flags
 
-struct compiler_info 
-{
-    enum version_info : unsigned int 
-    {
-#if NH3API_CHECK_MSVC_DRIVER  
-    major_version = _MSC_VER / 100,
-    minor_version = ((_MSC_VER % 100) - (_MSC_VER % 10))/10,
-    patch_level   = _MSC_VER % 10
-#elif NH3API_CHECK_GNU_DRIVER
-    #ifdef __clang__
-    major_version = __clang_major__,
-    minor_version = __clang_minor__,
-    patch_level   = __clang_patchlevel__
-    #else 
-    major_version = __GNUC__,
-    minor_version = __GNUC_MINOR__,
-    patch_level   = __GNUC_PATCHLEVEL__
+} // namespace nh3api
+
+#ifndef NH3API_VERSION_STRING
+    #define NH3API_VERSION_STRING "1.0"
+#endif
+
+#ifndef NH3API_MAJOR_VERSION 
+    #define NH3API_MAJOR_VERSION 1
+#endif
+
+#ifndef NH3API_MINOR_VERSION
+    #define NH3API_MINOR_VERSION 0
+#endif
+
+#ifndef NH3API_COMPILER_MAJOR_VERSION
+    #if NH3API_CHECK_MSVC_DRIVER  
+        #define NH3API_COMPILER_MAJOR_VERSION (_MSC_VER / 100)
+        #define NH3API_COMPILER_MINOR_VERSION (((_MSC_VER % 100) - (_MSC_VER % 10))/10)
+        #define NH3API_COMPILER_PATCH_LEVEL   (_MSC_VER % 10)
+    #elif NH3API_CHECK_GNU_DRIVER
+        #ifdef __clang__
+            #define NH3API_COMPILER_MAJOR_VERSION (__clang_major__)
+            #define NH3API_COMPILER_MINOR_VERSION (__clang_minor__)
+            #define NH3API_COMPILER_PATCH_LEVEL   (__clang_patchlevel__)
+        #else 
+            #define NH3API_COMPILER_MAJOR_VERSION (__GNUC__)
+            #define NH3API_COMPILER_MINOR_VERSION (__GNUC_MINOR__)
+            #define NH3API_COMPILER_PATCH_LEVEL   (__GNUC_PATCHLEVEL__)
+        #endif
     #endif
 #endif
-    };
-};
-
-} // namespace nh3api
 
 #ifndef NH3API_UNREACHABLE
     #if NH3API_CHECK_MSVC
