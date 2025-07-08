@@ -123,8 +123,7 @@ clang++ -m32 -std=c++17 -I./nh3api -DNH3API_FLAG_INLINE_HEADERS -mdll -o hello-w
 > The NH3API contains a pretty printer for Visual Studio debugger. Add [nh3api_std.natvis](https://github.com/void2012/NH3API/blob/main/debugging/nh3api_std.natvis) to your C++ project in Visual Studio and enjoy the visualized debugging of NH3API containers which are fully binary compatible with the game.
 
 ## Contact the author
-Join our discord server!
-<img src="https://discord.com/api/guilds/BrbwGNFYgP/widget.png?style=banner2" alt="Discord Banner 2"/>
+[Join our discord server!](https://discord.com/invite/BrbwGNFYgP)
 
 ## Acknowledgements
 I want to thank AlexSpl and RoseKavalier for their enthusiasm and contribution to the HoMM III modding community.
