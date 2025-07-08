@@ -69,9 +69,9 @@ target_link_libraries(MyProject PRIVATE nh3api)
 > Define the NH3API_FLAG_INLINE_HEADERS globally and you can use NH3API without any build system! It makes things way faster.
 
 ## Build
-Simple Hello, World in a single dllmain.cpp file. The directory with dllmain.cpp also contains the copy of this repository,
+Simple Hello, World in a single dllmain.cpp file:
 ```cpp
-#include <nh3api/core.hpp>
+#include <nh3api/core.hpp> // The directory of dllmain.cpp also contains the copy of this repository
 
 // Display a "Hello, World!" dialog before the 3DO intro
 void __stdcall HelloWorld(HiHook* hook, void* _this)
@@ -107,16 +107,19 @@ Build without CMake(requries C++17):
 
 MSVC:
 ```shell
-cl.exe /std:c++17 -I./nh3api -DNH3API_FLAG_INLINE_HEADERS /LD dllmain.cpp /Fe:hello-world-nh3api.dll
+cl /std:c++17 -I./nh3api -DNH3API_FLAG_INLINE_HEADERS /LD dllmain.cpp /Fe:hello-world.dll
 ```
 GCC MinGW:
 ```shell
-g++ -m32 -std=c++17 -I./nh3api -DNH3API_FLAG_INLINE_HEADERS -mdll -o hello-world-nh3api.dll dllmain.cpp
+g++ -m32 -std=c++17 -I./nh3api -DNH3API_FLAG_INLINE_HEADERS -mdll -o hello-world.dll dllmain.cpp
 ```
 Clang MinGW:
 ```
-clang++ -m32 -std=c++17 -I./nh3api -DNH3API_FLAG_INLINE_HEADERS -mdll -o hello-world-nh3api.dll dllmain.cpp
+clang++ -m32 -std=c++17 -I./nh3api -DNH3API_FLAG_INLINE_HEADERS -mdll -o hello-world.dll dllmain.cpp
 ```
+
+## Examples
+See [Awesome-NH3API](https://github.com/void2012/Awesome-NH3API) for a curated list of plugins that use NH3API. Feel free to contribute and suggest your own plugin!
 
 ## Debugging
 > [!NOTE]  
