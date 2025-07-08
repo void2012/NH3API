@@ -42,7 +42,7 @@ NH3API supports three most popular compilers and has C++98 support for older ver
         <td>Requires custom hacky standard library build to support Windows XP. See <a href="https://github.com/void2012/llvm-mingw-winxp" target="_blank" rel="noopener noreferrer">llvm-mingw-winxp</a></td>
     </tr>
     <tr>
-        <td>Clang-CL&lt;br&gt;(MSVC)</td>
+        <td>Clang-CL</td>
         <td>8.0, Visual Studio 2019 (C++17)</td>
         <td>15.0.0, Visual Studio 2019 (C++17) or higher</td>
         <td>See Windows XP compatible build tools in <a href="https://github.com/zufuliu/llvm-utils" target="_blank" rel="noopener noreferrer">llvm-utils</a></td>
