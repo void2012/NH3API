@@ -1,6 +1,9 @@
 //===----------------------------------------------------------------------===//
 //
 // Part of the NH3API, under the Apache License v2.0.
+// Copyright void_17, 2024-2025
+// You may use this file freely as long as you list the author and the license
+// In the source code files of your project
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
@@ -319,7 +322,7 @@ NH3API_FORCEINLINE ERA_MEM(char*) __stdcall tr(const char* const key, const char
 
 /** Translates given key and returns persistent pointer to translation */
 NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall trStatic(const char* const key) NH3API_NOEXCEPT
-{ return STDCALL_1(ERA_STATIC(char*), reinterpret_cast<uintptr_t>(&::Era_imports::trStatic), key); }
+{ return STDCALL_1(char*, reinterpret_cast<uintptr_t>(&::Era_imports::trStatic), key); }
 
 NH3API_FORCEINLINE
 /** Returns persisted/static translation for a given key */
@@ -526,7 +529,7 @@ NH3API_FORCEINLINE void __stdcall GenerateDebugInfo() NH3API_NOEXCEPT
 
 /** Returns Era version string */
 NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall GetEraVersion() NH3API_NOEXCEPT
-{ return STDCALL_0(ERA_STATIC(char*), reinterpret_cast<uintptr_t>(&::Era_imports::GetEraVersion)); }
+{ return STDCALL_0(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetEraVersion)); }
 
 /** Returns Era version number in 'X.X.XX' format. 3915 means 3.9.15 */
 NH3API_FORCEINLINE int32_t __stdcall GetVersionNum() NH3API_NOEXCEPT
@@ -539,7 +542,7 @@ void __stdcall ReportPluginVersion(const char* const VersionLine) NH3API_NOEXCEP
 
 /** Returns 32-character unique key for current game process. The ID will be unique between multiple game runs */
 NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall GetProcessGuid() NH3API_NOEXCEPT
-{ return STDCALL_0(ERA_STATIC(char*), reinterpret_cast<uintptr_t>(&::Era_imports::GetProcessGuid)); }
+{ return STDCALL_0(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetProcessGuid)); }
 
 /** Returns IDs of game root dialog and current dialog. The first item in dialog class VMT tables is used as ID */
 NH3API_FORCEINLINE void __stdcall GetGameState(TGameState* GameState) NH3API_NOEXCEPT

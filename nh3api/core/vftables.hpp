@@ -1,13 +1,13 @@
 //===----------------------------------------------------------------------===//
 //
 // Part of the NH3API, under the Apache License v2.0.
+// Copyright void_17, 2024-2025
+// You may use this file freely as long as you list the author and the license
+// In the source code files of your project
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
 #pragma once
-
-#ifndef NH3API_VFTABLES_HPP
-#define NH3API_VFTABLES_HPP
 
 #include "adventure.hpp"
 #include "base_manager.hpp"
@@ -48,5 +48,3 @@ NH3API_GENERATE_VFTABLE_INSTANCE(type_be_hero_quest,          0x64193C)
 NH3API_GENERATE_VFTABLE_INSTANCE(type_belong_to_player_quest, 0x641978)
 
 #undef NH3API_GENERATE_VFTABLE_INSTANCE
-
-#endif // NH3API_VFTABLES_HPP
