@@ -120,11 +120,4 @@ NH3API_FORCEINLINE
 exe_string IntToStr<exe_string>(uint32_t x)
 { return to_exe_string(x); }
 
-inline int32_t StrToInt(const char* cstr)
-{ return ::std::atoi(cstr); }
-
-template<typename StringT> inline
-int32_t StrToInt(const StringT& str)
-{ return ::std::atoi(str.c_str()); }
-
 NH3API_DISABLE_WARNING_END
