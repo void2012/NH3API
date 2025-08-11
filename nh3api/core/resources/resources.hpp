@@ -146,6 +146,29 @@ NH3API_VIRTUAL_STRUCT resource
         virtual int32_t __thiscall GetSize() const
         { return get_vftable(this)->GetSize(this); }
 
+    public:
+        EResourceType get_resType() const 
+        { return resType; }
+
+        const char* get_Name() const 
+        { return Name.data(); }
+
+        char* get_Name()
+        { return Name.data(); }
+
+        int32_t AddRef()
+        { return ++ReferenceCount; }
+
+        int32_t Release()
+        {
+            if ( ReferenceCount > 0 )
+                --ReferenceCount;
+            return ReferenceCount;
+        }
+
+        int32_t GetReferenceCount() const
+        { return ReferenceCount; }
+
     // member variables
     public:
         // Resource name /
@@ -1764,6 +1787,24 @@ NH3API_FORCEINLINE void Dispose(resource* arg)
 
 NH3API_FORCEINLINE exe_string& GetDataPath()
 { return get_global_var_ref(0x69E528, exe_string); }
+
+NH3API_FORCEINLINE resource* GetFromCache(const char *name)
+{
+    TCacheMapKey key(name);
+    TResourceMap::iterator it = GetResourceMap().find(key);
+    if ( it == GetResourceMap().end() )
+    {
+        return nullptr;
+    }
+    else  
+    {
+        it->second->AddRef();
+        return it->second;
+    }
+}
+
+NH3API_FORCEINLINE void AddToCache(resource* r)
+{ FASTCALL_1(void, 0x5596F0, r); }
 
 NH3API_INLINE_OR_EXTERN
 uint32_t& RedBits
