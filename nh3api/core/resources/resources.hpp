@@ -634,6 +634,10 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
 
     public:
         NH3API_FORCEINLINE
+        void AllocateSeq(int32_t seqnum, int32_t numFrames) 
+        { THISCALL_3(void, 0x47B410, this, seqnum, numFrames); }
+
+        NH3API_FORCEINLINE
         int32_t GetWidth() const
         { return Width; }
 
