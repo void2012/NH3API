@@ -221,15 +221,28 @@ public:
     { THISCALL_2(void, 0x5233A0, this, rgba); }
 
     NH3API_FORCEINLINE
+    TPalette24(const TPalette24& other) NH3API_NOEXCEPT 
+    NH3API_DELEGATE_DUMMY_OR_BASE(TPalette24, resource)
+    { THISCALL_2(void, 0x5233F0, this, &other); }
+
+    NH3API_FORCEINLINE
     TPalette24(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
         : resource(tag) // resource(nullptr, RType_misc)
     { NH3API_IGNORE(Palette); }
+
+    NH3API_FORCEINLINE
+    TPalette24& operator=(TPalette24 const& other) NH3API_NOEXCEPT
+    { return THISCALL_2(TPalette24&, 0x523420, this, &other); }
 
     ~TPalette24()
     { THISCALL_1(void, 0x523450, this); }
 
 public:
     NH3API_VIRTUAL_OVERRIDE_RESOURCE(TPalette24)
+
+public: 
+    void AdjustHSV(float hue, float hue_adjust, float saturation_adjust, float value_adjust)
+    { THISCALL_5(void, 0x523470, this, hue, hue_adjust, saturation_adjust, value_adjust); }
 
 public:
 
@@ -240,6 +253,18 @@ public:
 
 };
 #pragma pack(pop)
+
+NH3API_FORCEINLINE
+// in: r, g, b
+// out: h, s, v
+void RGBToHSV(uint32_t r, uint32_t g, uint32_t b, float& h, float& s, float& v) NH3API_NOEXCEPT
+{ FASTCALL_6(void, 0x523680, r, g, b, h, s, v); }
+
+NH3API_FORCEINLINE
+// in: h, s, v
+// out: r, g, b
+void HSVToRGB(float h, float s, float v, uint32_t& r, uint32_t& g, uint32_t& b) NH3API_NOEXCEPT
+{ FASTCALL_6(void, 0x5237E0, h, s, v, r, g, b); }
 
 NH3API_INLINE_OR_EXTERN
 TPalette24*& gPlayerPalette24
@@ -263,7 +288,12 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
         { THISCALL_2(void, 0x522D00, this, &p24); }
 
         NH3API_FORCEINLINE
-        TPalette16(const uint16_t* data) NH3API_NOEXCEPT
+        TPalette16(TPalette16 const& other) NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette16, resource)
+        { THISCALL_2(void, 0x522DD0, this, &other); }
+
+        NH3API_FORCEINLINE
+        TPalette16(const void* data) NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY_OR_BASE(TPalette16, resource)
         { THISCALL_2(void, 0x522B90, this, data); }
 
@@ -297,7 +327,7 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
 
         NH3API_FORCEINLINE
         TPalette16& operator=(const TPalette16& other) NH3API_NOEXCEPT
-        { return *THISCALL_2(TPalette16*, 0x522E00, this, other); }
+        { return THISCALL_2(TPalette16&, 0x522E00, this, other); }
 
     public:
         NH3API_FORCEINLINE
