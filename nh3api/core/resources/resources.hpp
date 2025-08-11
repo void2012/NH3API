@@ -1735,6 +1735,42 @@ NH3API_FORCEINLINE void Dispose(resource* arg)
 NH3API_FORCEINLINE exe_string& GetDataPath()
 { return get_global_var_ref(0x69E528, exe_string); }
 
+NH3API_INLINE_OR_EXTERN
+uint32_t& RedBits
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69E5DC, uint32_t));
+
+NH3API_INLINE_OR_EXTERN
+uint32_t& RedShift
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69E5E4, uint32_t));
+
+NH3API_INLINE_OR_EXTERN
+uint32_t& RedMask
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69E5E8, uint32_t));
+
+NH3API_INLINE_OR_EXTERN
+uint32_t& GreenBits
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69E5D0, uint32_t));
+
+NH3API_INLINE_OR_EXTERN
+uint32_t& GreenShift
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69E5E0, uint32_t));
+
+NH3API_INLINE_OR_EXTERN
+uint32_t& GreenMask
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69E5EC, uint32_t));
+
+NH3API_INLINE_OR_EXTERN
+uint32_t& BlueBits
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69E5F0, uint32_t));
+
+NH3API_INLINE_OR_EXTERN
+uint32_t& BlueShift
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69E5D8, uint32_t));
+
+NH3API_INLINE_OR_EXTERN
+uint32_t& BlueMask
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69E5D4, uint32_t));
+
 } // namespace ResourceManager
 
 #if NH3API_STD_HASH

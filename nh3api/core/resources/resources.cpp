@@ -17,4 +17,13 @@ font*& bigFont = get_global_var_ref(0x698A60, font*);
 font*& caligFont = get_global_var_ref(0x698A64, font*);
 const TTextResource* const& GameText = get_global_var_ref(0x6A5DC4, const TTextResource* const);
 const TTextResource* const& ArrayText = get_global_var_ref(0x6A60AC, const TTextResource* const);
+uint32_t& ResourceManager::RedBits = get_global_var_ref(0x69E5DC, uint32_t);
+uint32_t& ResourceManager::RedShift = get_global_var_ref(0x69E5E4, uint32_t);
+uint32_t& ResourceManager::RedMask = get_global_var_ref(0x69E5E8, uint32_t);
+uint32_t& ResourceManager::GreenBits = get_global_var_ref(0x69E5D0, uint32_t);
+uint32_t& ResourceManager::GreenShift = get_global_var_ref(0x69E5E0, uint32_t);
+uint32_t& ResourceManager::GreenMask = get_global_var_ref(0x69E5EC, uint32_t);
+uint32_t& ResourceManager::BlueBits = get_global_var_ref(0x69E5F0, uint32_t);
+uint32_t& ResourceManager::BlueShift = get_global_var_ref(0x69E5D8, uint32_t);
+uint32_t& ResourceManager::BlueMask = get_global_var_ref(0x69E5D4, uint32_t);
 #endif
