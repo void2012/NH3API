@@ -290,10 +290,14 @@ class LODFile
         LODFile() NH3API_NOEXCEPT
         :
         fileptr(nullptr),
-        opened(0),
+        opened(false),
         dataBuffer(nullptr),
         header(),
         subindex()
+        {}
+
+        LODFile(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            : subindex(tag)
         {}
 
         ~LODFile() NH3API_NOEXCEPT
