@@ -211,7 +211,7 @@ public:
     { THISCALL_1(void, 0x523320, this); }
 
     NH3API_FORCEINLINE
-    TPalette24(const uint8_t* data) NH3API_NOEXCEPT
+    TPalette24(const void* data) NH3API_NOEXCEPT
     NH3API_DELEGATE_DUMMY_OR_BASE(TPalette24, resource)
     { THISCALL_2(void, 0x523370, this, data); }
 
@@ -598,6 +598,10 @@ struct CSequence
         { NH3API_IGNORE(numFrames, allocatedFrames, f); }
 
     public:
+        int32_t AddFrame(CSpriteFrame* frame) NH3API_NOEXCEPT
+        { return THISCALL_2(int32_t, 0x47B1C0, this, frame); }
+
+    public:
 
         // Number of frames /
         // Кол-во кадров
@@ -633,6 +637,10 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
         { NH3API_IGNORE(s, p16, p24, numSequences, validSeqMask, Width, Height); }
 
     public:
+        NH3API_FORCEINLINE 
+        int32_t AddFrame(int32_t seqnum, CSpriteFrame* frame)
+        { return THISCALL_3(int32_t, 0x47B480, this, seqnum, frame); }
+
         NH3API_FORCEINLINE
         void AllocateSeq(int32_t seqnum, int32_t numFrames) 
         { THISCALL_3(void, 0x47B410, this, seqnum, numFrames); }
@@ -1099,7 +1107,7 @@ NH3API_VIRTUAL_STRUCT Bitmap816 : public resource
         Bitmap816(const char* name,
                   int32_t w,
                   int32_t h,
-                  uint8_t* data,
+                  void* data,
                   TPalette16* p16,
                   int32_t csize) NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY_OR_BASE(Bitmap816, resource)
@@ -1206,7 +1214,7 @@ NH3API_VIRTUAL_STRUCT Bitmap24Bit : public resource
 {
     public:
         NH3API_FORCEINLINE
-        Bitmap24Bit(const char* name, int32_t w, int32_t h, const uint8_t* data, int32_t size)
+        Bitmap24Bit(const char* name, int32_t w, int32_t h, const void* data, int32_t size)
         NH3API_DELEGATE_DUMMY_OR_BASE(Bitmap24Bit, resource) // resource(name, RType_bitmap24)
         { THISCALL_6(void, 0x44EA20, this, name, w, h, data, size); }
 
@@ -1239,7 +1247,7 @@ NH3API_VIRTUAL_STRUCT Bitmap24Bit : public resource
         int32_t Height;
 
         // offset: +0x2C = +44,  size = 0x4 = 4
-        uint8_t* data;
+        TRGB* data;
 
 };
 #pragma pack(pop)
@@ -1715,10 +1723,10 @@ NH3API_FORCEINLINE LODFile* PointToBitmapResource(const char* name)
 NH3API_FORCEINLINE size_t GetBitmapResourceSize(const char* name)
 { return THISCALL_1(size_t, 0x55D280, name); }
 
-NH3API_FORCEINLINE int32_t ReadFromBitmapResource(LODFile* lod, uint8_t* data, size_t numBytes)
+NH3API_FORCEINLINE int32_t ReadFromBitmapResource(LODFile* lod, void* data, size_t numBytes)
 { return FASTCALL_3(int32_t, 0x55D2E0, lod, data, numBytes); }
 
-NH3API_FORCEINLINE int32_t ReadFromSpriteResource(LODFile* lod, uint8_t* data, size_t numBytes)
+NH3API_FORCEINLINE int32_t ReadFromSpriteResource(LODFile* lod, void* data, size_t numBytes)
 { return FASTCALL_3(int32_t, 0x55D2E0, lod, data, numBytes); }
 
 NH3API_FORCEINLINE void Dispose(resource* arg)

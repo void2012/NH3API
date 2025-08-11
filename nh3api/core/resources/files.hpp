@@ -63,14 +63,14 @@ NH3API_FORCEINLINE
 // address: 0x607100
 // Compress buffer <source> of length <sourceLen> and write result to <dest> of length <destLen> /
 // Сжать область памяти <source> длиной <sourceLen> и записать результат в область памяти <dest> длиной <destLen>.
-int32_t exe_compress(uint8_t* dest, uint32_t destLen, const uint8_t* source, uint32_t sourceLen) NH3API_NOEXCEPT
+int32_t exe_compress(void* dest, uint32_t destLen, const void* source, uint32_t sourceLen) NH3API_NOEXCEPT
 { return FASTCALL_5(int32_t, 0x607100, dest, destLen, source, sourceLen, 6); }
 
 NH3API_FORCEINLINE
 // address: 0x6071A0
 // Uncompress buffer <source> of length <sourceLen> and write result to <dest> of length <destLen> /
 // Распаковать область памяти <source> длиной <sourceLen> и записать результат в область памяти <dest> длиной <destLen>.
-int32_t exe_uncompress(uint8_t* dest, uint32_t destLen, const uint8_t* source, uint32_t sourceLen) NH3API_NOEXCEPT
+int32_t exe_uncompress(void* dest, uint32_t destLen, const void* source, uint32_t sourceLen) NH3API_NOEXCEPT
 { return FASTCALL_4(int32_t, 0x6071A0, dest, destLen, source, sourceLen); }
 
 #pragma pack(push, 4)
@@ -181,12 +181,12 @@ NH3API_VIRTUAL_CLASS TGzInflateBuf : public exe_streambuf
         // Input buffer /
         // Буффер ввода.
         // offset: +0x74 = +116,  size = 0x4 = 4
-        uint8_t* m_input_buffer;
+        void* m_input_buffer;
 
         // Output buffer /
         // Буффер вывода.
         // offset: +0x78 = +120,  size = 0x4 = 4
-        uint8_t* m_output_buffer;
+        void* m_output_buffer;
 
         // offset: +0x7C = +124,  size = 0x4 = 4
         uint32_t m_crc;
@@ -342,7 +342,7 @@ class LODFile
         bool32_t opened;
 
         // offset: +0x108 = +264,  size = 0x4 = 4
-        uint8_t* dataBuffer;
+        void* dataBuffer;
 
         // offset: +0x10C = +268,  size = 0x4 = 4
         uint32_t dataBufferSize;

@@ -223,7 +223,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
                 exe_vector<ScenarioStruct*> scenarios;
 
                 // offset: +0x4C = +76,  size = 0x4 = 4
-                uint8_t* data;
+                void* data;
 
                 // offset: +0x50 = +80,  size = 0x4 = 4
                 exe_streambuf* stream;

@@ -50,7 +50,7 @@ struct __DPCAPS
 struct CDPlayMsg
 {
     // offset: +0x0 = +0,  size = 0x4 = 4
-    uint8_t* pData;
+    void* pData;
 
     // offset: +0x4 = +4,  size = 0x4 = 4
     uint32_t dataSize;
@@ -78,7 +78,7 @@ struct CDPlayConnection
     GUID guidSP;
 
     // offset: +0x10 = +16,  size = 0x4 = 4
-    uint8_t* pConnection;
+    void* pConnection;
 
     // offset: +0x14 = +20,  size = 0x80 = 128
     std::array<char, 128> sName;
@@ -129,7 +129,7 @@ struct CDPlayAddressElement
     GUID m_guid;
 
     // offset: +0x10 = +16,  size = 0x4 = 4
-    uint8_t* m_pData;
+    void* m_pData;
 
     // offset: +0x14 = +20,  size = 0x4 = 4
     uint32_t m_size;
@@ -201,7 +201,7 @@ class CDPlay
           void(__thiscall* GetErrorDesc)(CDPlay*, int, char*);
           bool(__thiscall* IsHost)(CDPlay*);
           bool(__thiscall* FlushReceiveQueue)(CDPlay*);
-          uint8_t* (__thiscall* GetPlayerAddress)(CDPlay*, uint32_t, uint32_t*);
+          void* (__thiscall* GetPlayerAddress)(CDPlay*, uint32_t, uint32_t*);
           bool(__thiscall* GetCaps)(CDPlay*, __DPCAPS*, bool);
           bool(__thiscall* GetSendQueueSize)(CDPlay*, uint32_t, uint32_t,
                                              uint32_t*, uint32_t*);
@@ -390,7 +390,7 @@ class CDPlay
         { return get_vftable(this)->FlushReceiveQueue(this); }
 
         // vftable shift: +152
-        virtual uint8_t* __thiscall GetPlayerAddress(uint32_t a1, uint32_t* a2)
+        virtual void* __thiscall GetPlayerAddress(uint32_t a1, uint32_t* a2)
         { return get_vftable(this)->GetPlayerAddress(this, a1, a2); }
 
         // vftable shift: +156
