@@ -195,6 +195,31 @@ struct MemorySampleStructure
 NH3API_VIRTUAL_STRUCT sample : public resource
 {
     public:
+        sample() NH3API_DELETED_FUNCTION;
+
+        NH3API_FORCEINLINE
+        sample(const char* name, 
+               const void* src, 
+               size_t size, 
+               int32_t channel = 0, 
+               int32_t volume = 127, 
+               bool32_t loop = true) NH3API_NOEXCEPT 
+        NH3API_DELEGATE_DUMMY_OR_BASE(sample, resource)
+        { THISCALL_7(void, 0x567050, this, name, src, size, channel, volume, loop); }
+        
+        NH3API_FORCEINLINE
+        sample(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            : resource(tag) // resource(nullptr, RType_misc)
+        {}
+
+        NH3API_FORCEINLINE
+        ~sample() NH3API_NOEXCEPT
+        { THISCALL_1(void, 0x567110, this); }
+
+    public:
+        NH3API_VIRTUAL_OVERRIDE_RESOURCE(sample)
+
+    public:
         // Sample information /
         // Информация о звуковой дорожке.
         // offset: +0x1C = +28,  size = 0x18 = 24
