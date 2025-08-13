@@ -2089,6 +2089,10 @@ struct case_insensitive_traits
         }
         return nullptr;
     }
+
+    static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED 
+    size_t length(const char* str) NH3API_NOEXCEPT
+    { return constexpr_char_traits::length(str); }
 };
 
 NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE 
