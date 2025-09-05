@@ -18,4 +18,6 @@ std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>& akArtifactSlotTraits
 
 std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>& gCombinationArtifacts
 = get_global_var_ref(0x693938, std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>);
+
+type_artifact& holding_artifact = get_global_var_ref(0x698AD8, type_artifact);
 #endif

@@ -13,6 +13,7 @@
 #include "hero.hpp" // hero, HeroExtra
 #include "campaign.hpp" // SCampaign
 #include "map.hpp" // NewfullMap
+#include "multiplayer.hpp" // eNetGameType
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -207,6 +208,9 @@ class game
         type_point get_underground_gate_exit(const NewmapCell* cell) const
         { return THISCALL_2(type_point, 0x4CDB00, this, cell); }
 
+        TCreatureType UpgradedCreatureType(TCreatureType creature) const
+        { return THISCALL_2(TCreatureType, 0x529BF0, this, creature); }
+    
     public:
         // offset: +0x0 = +0,  size = 0x4 = 4
         heroWindow* newGameWin;
@@ -437,8 +441,196 @@ class game
 
 NH3API_SIZE_ASSERT(0x4E7D0, game);
 
+#pragma pack(push, 4)
+// size = 0xD4 = 212, align = 4
+struct configStruct
+{
+    // offset: +0x0 = +0,  size = 0x8 = 8
+    std::array<int32_t, 2> walkSpeed;
+
+    // offset: +0x8 = +8,  size = 0x4 = 4
+    int32_t musicVolume;
+
+    // offset: +0xC = +12,  size = 0x4 = 4
+    int32_t soundVolume;
+
+    // offset: +0x10 = +16,  size = 0x4 = 4
+    int32_t lastMusicVolume;
+
+    // offset: +0x14 = +20,  size = 0x4 = 4
+    int32_t lastSoundVolume;
+
+    // offset: +0x18 = +24,  size = 0x4 = 4
+    int32_t AutoSave;
+
+    // offset: +0x1C = +28,  size = 0x4 = 4
+    int32_t ShowRoute;
+
+    // offset: +0x20 = +32,  size = 0x4 = 4
+    int32_t MoveReminder;
+
+    // offset: +0x24 = +36,  size = 0x4 = 4
+    int32_t QuickCombat;
+
+    // offset: +0x28 = +40,  size = 0x4 = 4
+    int32_t VideoSubtitles;
+
+    // offset: +0x2C = +44,  size = 0x4 = 4
+    int32_t TownOutlines;
+
+    // offset: +0x30 = +48,  size = 0x4 = 4
+    int32_t AnimateSpellBook;
+
+    // offset: +0x34 = +52,  size = 0x4 = 4
+    int32_t WindowScrollSpeed;
+
+    // offset: +0x38 = +56,  size = 0x4 = 4
+    int32_t BlackoutComputer;
+
+    // offset: +0x3C = +60,  size = 0x4 = 4
+    int32_t AutoCreatures;
+
+    // offset: +0x40 = +64,  size = 0x4 = 4
+    int32_t AutoSpells;
+
+    // offset: +0x44 = +68,  size = 0x4 = 4
+    int32_t AutoCatapult;
+
+    // offset: +0x48 = +72,  size = 0x4 = 4
+    int32_t AutoBallista;
+
+    // offset: +0x4C = +76,  size = 0x4 = 4
+    int32_t AutoFirstAidTent;
+
+    // offset: +0x50 = +80,  size = 0x4 = 4
+    int32_t PreferBink;
+
+    // offset: +0x54 = +84,  size = 0x4 = 4
+    int32_t MainGameShowMenu;
+
+    // offset: +0x58 = +88,  size = 0x4 = 4
+    int32_t ScreenX;
+
+    // offset: +0x5C = +92,  size = 0x4 = 4
+    int32_t ScreenY;
+
+    // offset: +0x60 = +96,  size = 0x4 = 4
+    int32_t FullScreen;
+
+    // offset: +0x64 = +100,  size = 0x4 = 4
+    int32_t bCombatShowEntireGrid;
+
+    // offset: +0x68 = +104,  size = 0x4 = 4
+    int32_t bCombatShowMouseHex;
+
+    // offset: +0x6C = +108,  size = 0x4 = 4
+    int32_t iCombatGridLevel;
+
+    // offset: +0x70 = +112,  size = 0x1C = 28
+    std::array<int32_t, 7> iCombatViewArmy;
+
+    // offset: +0x8C = +140,  size = 0x1 = 1
+    bool bDontTryRedbook;
+
+    // offset: +0x8D = +141,  size = 0x1 = 1
+    bool bFirstInstall;
+
+protected:
+    // offset: +0x8E = +142,  size = 0x2 = 2
+    byte_t gap_8E;
+
+public:
+    // offset: +0x90 = +144,  size = 0x4 = 4
+    std::array<char, 4> cUniqueSystemID;
+
+    // offset: +0x94 = +148,  size = 0x4 = 4
+    int32_t iCombatSpeed;
+
+    // offset: +0x98 = +152,  size = 0xD = 13
+    std::array<char, 13> cCurRemoteReceive;
+
+    // offset: +0xA5 = +165,  size = 0xD = 13
+    std::array<char, 13> cRemoteReceiveDiff;
+
+    // offset: +0xB2 = +178,  size = 0xD = 13
+    std::array<char, 13> cCurRemoteSend;
+
+    // offset: +0xBF = +191,  size = 0x15 = 21
+    std::array<char, 21> cNetName;
+
+};
+#pragma pack(pop)
+
 NH3API_INLINE_OR_EXTERN
 game*& gpGame
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699538, game*));
+
+NH3API_INLINE_OR_EXTERN
+// Game config / 
+// Игровые настройки.
+configStruct& gConfig
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6987A8, configStruct));
+
+NH3API_INLINE_OR_EXTERN
+int32_t& giThisGamePos
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6995A4, int32_t));
+
+NH3API_INLINE_OR_EXTERN
+bool32_t& gbThisNetGotAdventureControl
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977D8, bool32_t));
+
+NH3API_INLINE_OR_EXTERN
+bool32_t& gbInNewGameSetup
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698450, bool32_t));
+
+NH3API_INLINE_OR_EXTERN
+bool32_t& gbInReplay
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x696A54, bool32_t));
+
+NH3API_INLINE_OR_EXTERN
+bool32_t& gbGameOver
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697308, bool32_t));
+
+NH3API_INLINE_OR_EXTERN
+bool32_t& gbRemoteOn
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69959C, bool32_t));
+
+NH3API_INLINE_OR_EXTERN
+bool& bDefeatedAllPlayers
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69956C, bool));
+
+NH3API_INLINE_OR_EXTERN
+// Month creature type /
+// Тип существа месяца.
+int32_t& giMonthTypeExtra
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697798, int32_t));
+
+NH3API_INLINE_OR_EXTERN
+// Month type /
+// Тип месяца.
+int32_t& giMonthType
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698884, int32_t));
+
+NH3API_INLINE_OR_EXTERN
+// Week creature type /
+// Тип существа недели.
+int32_t& giWeekTypeExtra
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69844C, int32_t));
+
+NH3API_INLINE_OR_EXTERN
+// Week type /
+// Тип недели.
+int32_t& giWeekType
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977A0, int32_t));
+
+NH3API_INLINE_OR_EXTERN
+exe_bitset<48>& puzzlePiecesRemoved
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697738, exe_bitset<48>));
+
+NH3API_INLINE_OR_EXTERN
+// Current game type /
+// Текущий тип игры.
+eNetGameType& iMPNetProtocol
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A40, eNetGameType));
 
 NH3API_DISABLE_WARNING_END

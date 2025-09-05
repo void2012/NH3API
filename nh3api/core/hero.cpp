@@ -18,4 +18,6 @@ std::array<THeroClassTraits, kNumHeroClasses>& akHeroClassTraits
 
 std::array<THeroSpecificAbility, MAX_HEROES_SOD>& akHeroSpecificAbilities
 = get_global_var_ref(0x678420, std::array<THeroSpecificAbility, MAX_HEROES_SOD>);
+
+std::array<int32_t, 20>& move_constants = get_global_var_ref(0x698AE8, std::array<int32_t, 20>);
 #endif

@@ -134,7 +134,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
             // Scenario difficulty /
             // Сложность сценария.
             // offset: +0x39 = +57,  size = 0x1 = 1
-            uint8_t difficulty;
+            EGameDifficulty difficulty;
 
             // Scenario prologue /
             // Пролог сценария.
@@ -345,7 +345,7 @@ struct SCampaign
         {}
 
     public:
-        bool CampaignComplete()
+        bool CampaignComplete() const
         { return THISCALL_1(bool, 0x489310, this); }
 
     public:

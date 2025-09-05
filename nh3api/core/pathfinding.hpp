@@ -9,11 +9,8 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#ifndef _WINDEF_
-#include <windef.h> // windef.h is heavy... and only for the sake of RECT!!!
-#endif
-
-#include "nh3api_std/exe_vector.hpp"
+#include <windef.h> // RECT
+#include "nh3api_std/exe_vector.hpp" // exe_vector<T>
 #include "skills.hpp" // TSkillMastery
 #include "terrain.hpp" // type_point
 
@@ -101,7 +98,7 @@ enum type_search_type : uint32_t
     const_AI_allied_search    = 2, //
     const_AI_enemy_search     = 3, //
     const_AI_search           = 4, //
-    const_AI_alternate_search = 5 //
+    const_AI_alternate_search = 5  //
 };
 
 class army;

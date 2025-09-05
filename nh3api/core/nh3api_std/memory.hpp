@@ -13,6 +13,7 @@
 #include <memory> // std::allocator_traits, std::unique_ptr
 
 #include "intrin.hpp"
+#include "nh3api_std.hpp"
 #include "patcher_x86.hpp"
 #include "type_traits.hpp" // tt::has_scalar_deleting_destructor
 #include "stl_extras.hpp" 
@@ -101,7 +102,12 @@ struct exe_heap_t
     static NH3API_CONSTEXPR size_t max_size() NH3API_NOEXCEPT
     { return NH3API_MAX_HEAP_REQUEST; }
 
-} const exe_heap; // exe_heap constant / константа exe_heap
+} 
+#ifdef NH3API_FLAG_INLINE_HEADERS
+inline
+#endif
+// exe_heap constant / константа exe_heap
+const exe_heap; 
 
 // I tried to make new throw exception on invalid allocation
 // but there is simply no way to check it with VC6 runtime...

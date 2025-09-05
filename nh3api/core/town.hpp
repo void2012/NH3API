@@ -10,96 +10,30 @@
 #pragma once
 
 #include "nh3api_std/exe_bitset.hpp" // exe_bitset<N>
-#include "nh3api_std/exe_vector.hpp" // exe_vector<T>
 #include "resources/resources_include.hpp" // EGameResource
 #include "creatures.hpp" // TCreatureType, armyGroup
 #include "spells.hpp" // SpellID
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
-#if NH3API_CHECK_CPP11
-// Bit shift masks lookup table /
-// Таблица побитовых масок.
-constexpr const std::array<uint64_t, 64> bitNumber =
+struct bitNumber_impl_t
 {
-    {
-        1ULL << 0ULL,
-        1ULL << 1ULL,
-        1ULL << 2ULL,
-        1ULL << 3ULL,
-        1ULL << 4ULL,
-        1ULL << 5ULL,
-        1ULL << 6ULL,
-        1ULL << 7ULL,
-        1ULL << 8ULL,
-        1ULL << 9ULL,
-        1ULL << 10ULL,
+    #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+    static
+    #endif
+    inline NH3API_CONSTEXPR uint64_t operator[](const size_t pos) 
+    #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+    const
+    #endif
+    { return 1ULL << pos; }
 
-        1ULL << 11ULL,
-        1ULL << 12ULL,
-        1ULL << 13ULL,
-        1ULL << 14ULL,
-        1ULL << 15ULL,
-        1ULL << 16ULL,
-        1ULL << 17ULL,
-        1ULL << 18ULL,
-        1ULL << 19ULL,
-        1ULL << 20ULL,
-
-        1ULL << 21ULL,
-        1ULL << 22ULL,
-        1ULL << 23ULL,
-        1ULL << 24ULL,
-        1ULL << 25ULL,
-        1ULL << 26ULL,
-        1ULL << 27ULL,
-        1ULL << 28ULL,
-        1ULL << 29ULL,
-        1ULL << 30ULL,
-
-        1ULL << 31ULL,
-        1ULL << 32ULL,
-        1ULL << 33ULL,
-        1ULL << 34ULL,
-        1ULL << 35ULL,
-        1ULL << 36ULL,
-        1ULL << 37ULL,
-        1ULL << 38ULL,
-        1ULL << 39ULL,
-        1ULL << 40ULL,
-
-        1ULL << 41ULL,
-        1ULL << 42ULL,
-        1ULL << 43ULL,
-        1ULL << 44ULL,
-        1ULL << 45ULL,
-        1ULL << 46ULL,
-        1ULL << 47ULL,
-        1ULL << 48ULL,
-        1ULL << 49ULL,
-        1ULL << 50ULL,
-
-        1ULL << 51ULL,
-        1ULL << 52ULL,
-        1ULL << 53ULL,
-        1ULL << 54ULL,
-        1ULL << 55ULL,
-        1ULL << 56ULL,
-        1ULL << 57ULL,
-        1ULL << 58ULL,
-        1ULL << 59ULL,
-        1ULL << 60ULL,
-
-        1ULL << 61ULL,
-        1ULL << 62ULL,
-        1ULL << 63ULL,
-    }
-};
-#else
+} 
+#ifdef NH3API_FLAG_INLINE_HEADERS
+inline
+#endif
 // Bit shift masks lookup table /
 // Таблица побитовых масок.
-extern const std::array<uint64_t, 64>& bitNumber;
-#endif
+const bitNumber;
 
 // Town building IDs. /
 // Идентификаторы городских построек.
@@ -219,8 +153,7 @@ enum type_building_id : int32_t
     BUILDING_DWELLING_6_UPGRADE = 43, // Lvl. 7 upgraded creature dwelling / Улучшенное жилище существ 7 уровня
 };
 
-NH3API_FORCEINLINE
-const char* GetBuildingName(TTownType townType, type_building_id buildingId)
+NH3API_FORCEINLINE const char* GetBuildingName(TTownType townType, type_building_id buildingId)
 { return FASTCALL_2(const char*, 0x460CC0, townType, buildingId); }
 
 NH3API_INLINE_OR_EXTERN
@@ -234,8 +167,6 @@ NH3API_INLINE_OR_EXTERN
 // Маска необходимых построек для строительства каждой постройки каждой фракции.
 std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>&
 gHierarchyMask NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977E8, std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>));
-
-typedef std::array<int32_t, 7> build_cost_array_t;
 
 #pragma pack(push, 4)
 // Town /
@@ -268,8 +199,8 @@ class town
 
         // Does town has creatures in garrison? /
         // Есть ли в городе гарнизонные войска или герой с войсками?
-        bool32_t HasGarrison() const
-        { return THISCALL_1(bool32_t, 0x5BE3E0, this); }
+        bool HasGarrison() const
+        { return !!THISCALL_1(bool32_t, 0x5BE3E0, this); }
 
         // Check if town has building <buildingId> /
         // Проверка, есть ли в городе постройка <buildingId>.
@@ -323,13 +254,16 @@ class town
 
         // Fill array <resources> with the cost of the <building> /
         // Заполнить массив ресурсов <resources> стоимостью постройки <building>.
-        void get_build_cost(type_building_id building, build_cost_array_t& resources) const
+        void get_build_cost(type_building_id building, std::array<int32_t, 7>& resources) const
         { THISCALL_3(void, 0x5C14F0, this, building, resources.data()); }
 
         // Get <building> cost as pointer to array of 7 ints /
         // Получить массив ресурсов, необходимый для постройки <building>.
-        const build_cost_array_t& get_build_cost_array(type_building_id building) const
-        { return *THISCALL_2(const build_cost_array_t*, 0x5C1480, this, building); }
+        const std::array<int32_t, 7>& get_build_cost_array(type_building_id building) const
+        {   
+            typedef std::array<int32_t, 7> build_cost_array_t;
+            return *THISCALL_2(const build_cost_array_t*, 0x5C1480, this, building); 
+        }
 
         // Is building ever available in town?
         // Возможно ли построить <building> в городе?

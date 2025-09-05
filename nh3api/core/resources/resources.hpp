@@ -1598,12 +1598,20 @@ NH3API_VIRTUAL_STRUCT TTextResource : public resource
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
+std::array<char, 512>& gText
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697428, std::array<char, 512>));
+
+NH3API_INLINE_OR_EXTERN
 const TTextResource* const& GameText // genrltxt.txt, usage: GameText->GetText(42)
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6A5DC4, const TTextResource* const));
 
 NH3API_INLINE_OR_EXTERN
 const TTextResource* const& ArrayText // arraytxt.txt, usage: ArrayText->GetText(42)
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6A60AC, const TTextResource* const));
+
+NH3API_INLINE_OR_EXTERN
+const TTextResource* const& AdventureEventText // advevent.txt, usage: AdventureEventText->GetText(42)
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x696A68, const TTextResource* const));
 
 #pragma pack(push, 4)
 // Spreadsheet resource /

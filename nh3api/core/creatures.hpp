@@ -686,7 +686,7 @@ public:
                     const hero* otherHero,
                     const armyGroup* otherGroup,
                     bool on_cursed_ground = false,
-                    bool apply_limits = false)const
+                    bool apply_limits = false) const
     { return THISCALL_7(int32_t, 0x44AFA0, this, ownerHero, ownerTown, otherHero, otherGroup, on_cursed_ground, apply_limits); }
 
     // Get <index> luck /
@@ -700,7 +700,7 @@ public:
                         const hero* ownerHero,
                         const town* ownerTown,
                         EMagicTerrain ground_type,
-                        bool apply_limits = true)const
+                        bool apply_limits = true) const
     { return THISCALL_6(int32_t, 0x44B090, this, index, ownerHero, ownerTown, ground_type, apply_limits); }
 
     bool Merge(armyGroup* ag)
@@ -717,7 +717,7 @@ public:
                                       const town* ownerTown,
                                       const hero* other_hero,
                                       const armyGroup* other_group,
-                                      EMagicTerrain ground_type)const
+                                      EMagicTerrain ground_type) const
     {
         exe_string result(nh3api::dummy_tag);
         (void) THISCALL_9(exe_string*, 0x44B630, this, &result, creature, morale, ownerHero, ownerTown, other_hero, other_group, ground_type);
@@ -731,7 +731,7 @@ public:
                                     town* our_town,
                                     hero* enemy_hero,
                                     bool on_cursed_ground,
-                                    EMagicTerrain magic_terrain)const
+                                    EMagicTerrain magic_terrain) const
     {
         exe_string result(nh3api::dummy_tag);
         (void) THISCALL_9(exe_string*, 0x44BE90, this, &result, army_type, luck, our_hero, our_town, enemy_hero, on_cursed_ground, magic_terrain);
@@ -740,7 +740,7 @@ public:
 
     // Get first available unit of army native terrain /
     // Родная земля первой доступной ячейки армии(именно поэтому, например, кочевников нужно ставить в самый левый слот).
-    TTerrainType GetNativeTerrain()const
+    TTerrainType GetNativeTerrain() const
     { return THISCALL_1(TTerrainType, 0x44C260, this); }
 
 public:
@@ -756,5 +756,11 @@ public:
 
 };
 #pragma pack(pop)
+
+NH3API_FORCEINLINE void get_upgrade_cost(TCreatureType creature, int32_t amount, std::array<int32_t, 7>& cost)
+{ FASTCALL_3(void, 0x54EB50, creature, amount, cost.data()); }
+
+NH3API_FORCEINLINE void GetMonsterCost(int32_t monId, std::array<int32_t, 7>& resCost)
+{ FASTCALL_2(void, 0x54EBC0, monId, resCost.data()); }
 
 NH3API_DISABLE_WARNING_END

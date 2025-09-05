@@ -112,6 +112,7 @@ nh3api_add_files(
 	OUT
 		NH3API_SOURCES
 	FILES
+		adventure_AI.cpp
 		adventure.cpp
 		artifact.cpp
 		base_manager.cpp

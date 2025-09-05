@@ -101,3 +101,7 @@ class heroWindowManager : public baseManager
 NH3API_INLINE_OR_EXTERN
 heroWindowManager*& gpWindowManager
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992D0, heroWindowManager*));
+
+NH3API_INLINE_OR_EXTERN
+uint32_t& giDialogTimeout
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977D4, uint32_t));

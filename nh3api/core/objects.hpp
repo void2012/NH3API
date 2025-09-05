@@ -134,59 +134,59 @@ struct TObjectType
     // Index in sprite filenames tree(TUniqueSet<std::string> gImageNameSet) /
     // Индекс названия объекта в дереве названий спрайтов(TUniqueSet<std::string> gImageNameSet)
     // offset: +0x0 = +0,  size = 0x4 = 4
-    int32_t _imageNum;
+    int32_t imageNum;
     // Passable cells mask. (= 1 empty cell, = 0 unpassable cell).
     // Use PassableMask[getBitPos(x,y)] to obtain value for the cell at (x,y). /
     // Маска клеток проходимости (= 1 пустая клетка, = 0 непроходимая клетка).
     // Используйте PassableMask[getBitPos(x,y)] для получения значения для кетки в координатах (x,y).
     // offset: +0x4 = +4,  size = 0x8 = 8
-    exe_bitset<48> _passableMask;
+    exe_bitset<48> passableMask;
     // Trigger mask. (= 1 trigger cell, = 0 non-trigger cell).
     // Use TriggerMask[getBitPos(x,y)] to obtain value for the cell at (x,y). /
     // Маска триггерных(/входов) клеток. (= 1 клетка-триггер, = 0 клетка без триггера).
     // Используйте TriggerMask[getBitPos(x,y)] для получения значения для кетки в координатах (x,y).
     // offset: +0xC = +12,  size = 0x8 = 8
-    exe_bitset<48> _triggerMask;
+    exe_bitset<48> triggerMask;
     // Terrain availability mask(1 = object can be placed on that terrain) /
     // Маска доступности на почве(1 = объект можно установить на почве).
     // offset: +0x14 = +20,  size = 0x4 = 4
-    exe_bitset<10> _terrainMask;
+    exe_bitset<10> terrainMask;
     // Recommended terrain mask.
     // In the Map Editor or RMG this object will appear on terrains with value = 1 /
     // Маска родных для объекта почв. В редакторе карт и при генерации карты RMG
     // этот объект появляется на тех почвах, где значение = 1.
     // offset: +0x18 = +24,  size = 0x4 = 4
-    exe_bitset<10> _terrainRecommendedMask;
+    exe_bitset<10> terrainRecommendedMask;
     // Object type /
     // Тип объекта.
     // offset: +0x1C = +28,  size = 0x4 = 4
-    TAdventureObjectType _type;
+    TAdventureObjectType type;
     // Object subtype /
     // Подтип объекта.
     // offset: +0x20 = +32,  size = 0x4 = 4
-    int32_t _subtype;
+    int32_t subtype;
     // Slot category in map editor. /
     // Категория слота в редакторе карт.
     // offset: +0x24 = +36,  size = 0x4 = 4
-    int32_t _slotCategory;
+    int32_t slotCategory;
     // Drawn underlying? (as part of the ground, below other objects) /
     // Является ли частью земли?
     // offset: +0x28 = +40,  size = 0x1 = 1
-    bool _isUnderlay;
+    bool isUnderlay;
     // Has any trigger cells? /
     // Имеет хотя бы одну триггерную клетку?
     // offset: +0x29 = +41,  size = 0x1 = 1
-    bool _hasTrigger;
+    bool hasTrigger;
     // The first trigger cell. (Start from the lower right and iterate to the left, from bottom to top) /
     // If there are no such cells, _triggerCell = {8, 6}.
     // Самая первая триггерная клетка. (Начиная с нижней правой клетки, итерируя влево, в конце строки на верх).
     // Если такой клетки нет, _triggerCell = {8, 6}.
     // offset: +0x2C = +44,  size = 0x8 = 8
-    TPoint _triggerCell;
+    TPoint triggerCell;
     // Object image info /
     // Информация об изображении объекта.
     // offset: +0x34 = +52,  size = 0x18 = 24
-    struct _TImageInfo
+    struct TImageInfo
     {
         // Object sprite dimensions(measured in cells). (objSize.x = width, objSize.y = height) /
         // Размер изображения объекта в клетках(objSize.x = ширина, objSize.y = высота).
@@ -200,7 +200,7 @@ struct TObjectType
         // Маска тени. Аналогично CObjectType::ShadowMask
         // offset: +0x10 = +16,  size = 0x8 = 8
         exe_bitset<48> shadowMask;
-    } _imageInfo;
+    } imageInfo;
 };
 #pragma pack(pop)
 

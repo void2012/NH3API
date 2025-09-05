@@ -83,6 +83,12 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
 
         NH3API_SCALAR_DELETING_DESTRUCTOR
 
+    // static variables
+    public:
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const std::array<const POINT, 5>, 144>& iHotSpot
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x67FFA0, const std::array<const std::array<const POINT, 5>, 144>));
+
     // member variables
     public:
         // offset: +0x38 = +56,  size = 0x4 = 4

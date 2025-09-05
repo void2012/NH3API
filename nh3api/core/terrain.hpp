@@ -453,7 +453,11 @@ class type_point
         #endif
         type_point& set(uint32_t data) NH3API_NOEXCEPT
         {
-            *this = nh3api::bit_cast<type_point>(data);
+            #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
+            *this = __builtin_bit_cast(type_point, data);
+            #else
+            memcpy(this, &data, sizeof(*this));
+            #endif
             return *this;
         }
 
@@ -489,7 +493,6 @@ class type_point
         // return the underlying data
         uint32_t to_uint() const NH3API_NOEXCEPT
         { 
-            //return nh3api::bit_cast<uint32_t>(*this);
             #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
             return __builtin_bit_cast(uint32_t, *this);
             #else
@@ -511,6 +514,7 @@ class type_point
             // on the current heap settings(e.g. debug heap on UCRT fills unused bytes with either 0xFD or 0xED)
             // we fill padding bits with zeroes for predictable behavior
             // NOTE: compilers optimize this to std::bit_cast<uint32_t>(*this) & 0x3FFF03FF
+            // But for the sake of constexpr support, we have to do such manual calculations with each bit field.
             return (0x03FF & x) | (((0x03FF & y) << 16) & 0x03FF0000) | (((0xF & z) << 26) & 0x3C000000); 
         }
 

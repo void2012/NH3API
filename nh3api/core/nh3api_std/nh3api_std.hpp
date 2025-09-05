@@ -1135,6 +1135,18 @@ const omit_base_vftable_tag;
     #define NH3API_STD_RANGES_CONTAINERS (0)
 #endif
 
+#ifndef NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+    #ifdef __cpp_multidimensional_subscript
+        #if __cpp_multidimensional_subscript >= 202211L
+            #define NH3API_STD_STATIC_SUBSCRIPT_OPERATOR (1)
+        #endif
+    #endif
+#endif
+
+#ifndef NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+    #define NH3API_STD_STATIC_SUBSCRIPT_OPERATOR (0)
+#endif
+
 #ifndef NH3API_HAS_INCLUDE
     #ifdef __has_include
         #define NH3API_HAS_INCLUDE(ARG) __has_include(ARG)
@@ -1271,6 +1283,27 @@ const omit_base_vftable_tag;
         #define NH3API_INLINE_OR_EXTERN_INIT(...) = __VA_ARGS__
     #else
         #define NH3API_INLINE_OR_EXTERN_INIT(...)
+    #endif
+#endif
+
+#ifndef NH3API_INLINE_STATIC_VARIABLE
+    #ifdef NH3API_FLAG_INLINE_HEADERS
+        #if NH3API_STD_INLINE_VARIABLES
+            #define NH3API_INLINE_STATIC_VARIABLE static inline
+        #else 
+            #define NH3API_INLINE_STATIC_VARIABLE
+            #error 'NH3API_FLAG_INLINE_HEADERS' requires C++17
+        #endif
+    #else  
+        #define NH3API_INLINE_STATIC_VARIABLE static
+    #endif
+#endif
+
+#ifndef NH3API_INLINE_STATIC_VARIABLE_INIT
+    #ifdef NH3API_FLAG_INLINE_HEADERS
+        #define NH3API_INLINE_STATIC_VARIABLE_INIT(...) = __VA_ARGS__
+    #else
+        #define NH3API_INLINE_STATIC_VARIABLE_INIT(...)
     #endif
 #endif
 

@@ -994,6 +994,18 @@ NH3API_VIRTUAL_CLASS CChatEdit : public textEntryWidget
 };
 #pragma pack(pop)
 
+NH3API_FORCEINLINE
+void SetPlayerPaletteColors(uint16_t* pPalette, uint32_t whichPlayer)
+{ 
+    if ( whichPlayer >= 0 && whichPlayer < 8 )
+        FASTCALL_2(void, 0x6003E0, pPalette, whichPlayer); 
+}
 
+NH3API_FORCEINLINE
+void SetPlayerPaletteColors(TPalette24& pPalette, uint32_t whichPlayer)
+{ 
+    if ( whichPlayer >= 0 && whichPlayer < 8 )
+        FASTCALL_2(void, 0x600400, &pPalette, whichPlayer); 
+}
 
 NH3API_DISABLE_WARNING_END

@@ -10,9 +10,10 @@
 #pragma once
 
 #include "resources/resources_include.hpp" // EGameResource
-#include "skills.hpp" // TSkillMastery
+#include "artifact.hpp"  // type_artifact
+#include "skills.hpp"    // TSkillMastery
 #include "creatures.hpp" // TCreatureType
-#include "spells.hpp" // SpellID
+#include "spells.hpp"    // SpellID
 
 #pragma pack(push, 8)
 // AI Player /
@@ -20,6 +21,48 @@
 // size = 0x98 = 152, align = 8
 class type_AI_player
 {
+    public: 
+        int32_t get_magus_hut_value() const NH3API_NOEXCEPT
+        { return magus_hut_value; }
+
+        void reset_magus_hut_value() NH3API_NOEXCEPT
+        { THISCALL_1(void, 0x429AB0, this); }
+
+        int32_t get_resource_value(const std::array<int32_t, 7>& cost) const NH3API_NOEXCEPT
+        {
+            return static_cast<int32_t>(  
+                     (cost[WOOD] * this->resource_value[WOOD])
+                   + (cost[MERCURY] * this->resource_value[MERCURY])
+                   + (cost[ORE] * this->resource_value[ORE])
+                   + (cost[SULFUR] * this->resource_value[SULFUR])
+                   + (cost[CRYSTAL] * this->resource_value[CRYSTAL])
+                   + (cost[GEMS] * this->resource_value[GEMS])
+                   + (cost[GOLD] * this->resource_value[GOLD]));
+        }
+
+        int32_t get_total_value(int32_t basic_value, const std::array<int32_t, 7>& cost) NH3API_NOEXCEPT
+        { return THISCALL_3(int32_t, 0x42A150, this, basic_value, &cost); }
+
+        static float get_attack_bonus(int16_t player) NH3API_NOEXCEPT
+        { return FASTCALL_1(float, 0x428710, player); }
+
+        static void set_attack_bonuses(const float computer_bonus, const float human_bonus) NH3API_NOEXCEPT
+        {
+            attack_computer_bonus = computer_bonus;
+            attack_human_bonus    = human_bonus;
+        }
+
+    // static variables
+    public:
+        NH3API_INLINE_STATIC_VARIABLE
+        float& attack_computer_bonus
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x6604F8, float));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        float& attack_human_bonus
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x6604FC, float));
+
+    // member variables
     public:
         // Player team /
         // Команда игрока.
@@ -45,6 +88,10 @@ class type_AI_player
 
 };
 #pragma pack(pop)
+
+NH3API_INLINE_OR_EXTERN
+std::array<type_AI_player, 8>& AI_player
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6929A0, std::array<type_AI_player, 8>));
 
 #pragma pack(push, 4)
 // Artifact evaluation class for AI /
@@ -464,5 +511,90 @@ struct type_spellvalue
 };
 #pragma pack(pop)
 
+#pragma pack(push, 4)
+// size = 0xC = 12, align = 4
+struct HeroDestination
+{
+    // offset: +0x0 = +0,  size = 0x4 = 4
+    int32_t value;
+
+    // offset: +0x4 = +4,  size = 0x4 = 4
+    int32_t move_cost;
+
+    // offset: +0x8 = +8,  size = 0x1 = 1
+    bool is_nearby;
+
+    // offset: +0x9 = +9,  size = 0x1 = 1
+    bool is_critical;
+
+};
+#pragma pack(pop)
+
 NH3API_FORCEINLINE int32_t AI_get_spell_value(const hero* our_hero, SpellID spell)
 { return FASTCALL_2(int32_t, 0x527B20, our_hero, spell); }
+
+class NewmapCell;
+NH3API_FORCEINLINE int32_t AI_value_of_combat(const hero* attacking_hero, const hero* defending_hero, const armyGroup& defending_army, const town* defending_town, const NewmapCell* cell)
+{ 
+    if ( attacking_hero == nullptr || defending_hero == nullptr )
+        return -1000000000;
+    else
+        return FASTCALL_5(int32_t, 0x427330, attacking_hero, defending_hero, &defending_army, defending_town, cell); 
+}
+
+NH3API_FORCEINLINE int32_t AI_approximate_strength(const hero* current_hero)
+{ return FASTCALL_1(int32_t, 0x427650, current_hero); }
+
+NH3API_FORCEINLINE int32_t AI_approximate_strength(const hero* current_hero, const armyGroup& current_army)
+{ return FASTCALL_2(int32_t, 0x427690, current_hero, &current_army); }
+
+NH3API_FORCEINLINE bool can_take_town(const hero* attacking_hero, const town* defending_town)
+{ 
+    if ( attacking_hero == nullptr || defending_town == nullptr )
+        return false;
+    else 
+        return FASTCALL_2(bool, 0x428410, attacking_hero, defending_town); 
+}
+
+NH3API_FORCEINLINE int32_t AI_get_value_of_artifact(type_artifact artifact, const hero* owner, bool equipped, bool exact)
+{ return FASTCALL_4(int32_t, 0x4336C0, artifact, owner, equipped, exact); }
+
+NH3API_FORCEINLINE int32_t total_artifact_value(hero* candidate, int32_t player_id)
+{ 
+    if ( candidate == nullptr || (player_id >= 8 || player_id < 0) )
+        return 0;
+    else
+        return FASTCALL_2(int32_t, 0x4339E0, candidate, player_id); 
+}
+
+NH3API_FORCEINLINE int32_t AI_get_value_of_artifact(const type_artifact& artifact, int32_t player_id)
+{ 
+    if ( (player_id >= 8 || player_id < 0) )
+        return 0;
+    else
+        return FASTCALL_2(int32_t, 0x433AA0, &artifact, player_id); 
+}
+
+NH3API_FORCEINLINE double AI_value_of_morale(int32_t morale, int32_t change)
+{ return FASTCALL_2(double, 0x435480, morale, change); }
+
+NH3API_FORCEINLINE double value_of_luck_and_morale(int32_t value, int32_t change, double good_value_multiplier, double bad_value_multiplier)
+{ return FASTCALL_4(double, 0x4354A0, value, change, good_value_multiplier, bad_value_multiplier); }
+
+NH3API_FORCEINLINE double AI_value_of_luck(int32_t luck, int32_t change)
+{ return FASTCALL_2(double, 0x4355B0, luck, change); }
+
+class playerData;
+NH3API_FORCEINLINE int32_t AI_resource_cost(const playerData* player, const std::array<int32_t, 7>& resources)
+{ return (player) ? FASTCALL_2(int32_t, 0x527150, player, resources.data()) : 0; }
+
+NH3API_FORCEINLINE int32_t AI_resource_cost(int32_t player_id, const std::array<int32_t, 7>& resources)
+{ 
+    if ( (player_id >= 8 || player_id < 0) )
+        return 0;
+    else
+        return FASTCALL_2(int32_t, 0x5271A0, player_id, resources.data()); 
+}
+
+NH3API_FORCEINLINE TSecondarySkill AI_choose_secondary_skill(const hero* our_hero, TSecondarySkill first, TSecondarySkill second, bool complex_choice)
+{ return (our_hero) ? FASTCALL_4(TSecondarySkill, 0x52C0B0, our_hero, first, second, complex_choice) : SKILL_NONE; }

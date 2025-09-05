@@ -221,3 +221,15 @@ struct CNetMsgHandler
 
 };
 #pragma pack(pop)
+
+// Current game type (single, multiplayer, hotseat, etc.) /
+// Тип текущей игры(однопользовательский, многопользовательский, хотсит и др.).
+enum eNetGameType : int32_t 
+{
+    MP_SINGLE  = 0, // Однопользовательская игра.
+    MP_IPX     = 1, // 
+    MP_TCP     = 2, // TCP/IP.
+    MP_HOTSEAT = 3, // Hotseat.
+    MP_SERIAL  = 4, // 
+    MP_MODEM   = 5, // Модем
+};

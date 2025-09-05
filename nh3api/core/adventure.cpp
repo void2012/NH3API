@@ -11,4 +11,5 @@
 
 #ifndef NH3API_FLAG_INLINE_HEADERS
 advManager*& gpAdvManager = get_global_var_ref(0x6992B8, advManager*);
+bool32_t& bShowIt = get_global_var_ref(0x698A10, bool32_t);
 #endif

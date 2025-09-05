@@ -256,6 +256,12 @@ NH3API_INLINE_OR_EXTERN
 const std::array<uint8_t, 10>& giTerrainToMusicTrack
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678330, const std::array<uint8_t, 10>));
 
+NH3API_INLINE_OR_EXTERN
+// Sound is disabled /
+// Звук в игре отключен.
+bool32_t& gbNoSound
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992E0, bool32_t));
+
 #pragma pack(push, 4)
 // Sound & music manager /
 // Менеджер звуков и музыки.
@@ -280,7 +286,7 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
 
     public:
         // Stop all samples /
-        // Прекратить проигрывание звуков
+        // Прекратить проигрывание звуков.
         /// @param bStopMusicToo остановить музыку в т.ч.
         void StopAllSamples(bool bStopMusicToo = true)
         { THISCALL_2(void, 0x59A090, this, bStopMusicToo); }

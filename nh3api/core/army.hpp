@@ -203,20 +203,15 @@ class army
         {
             return ( Is(CF_IMMOBILIZED)
                     || IsIncapacitated()
-                    || isWarMachine()
+                    || IsWarMachine()
                     || armyType == CREATURE_ARROW_TOWER
                     );
         }
 
         // Is war machine? /
         // Является боевой машиной
-        bool       isWarMachine() const
-        {
-            return (   armyType == CREATURE_CATAPULT
-                    || armyType == CREATURE_BALLISTA
-                    || armyType == CREATURE_FIRST_AID_TENT
-                    || armyType == CREATURE_AMMO_CART );
-        }
+        bool       IsWarMachine() const
+        { return Is(CF_SIEGE_WEAPON); }
 
         // Get an adjacent hex from given <direction> /
         // Гекс, на который смотрит существо по <direction>

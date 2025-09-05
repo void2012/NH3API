@@ -324,7 +324,7 @@ struct TArtifactTraits
     // Artifact name /
     // Название артефакта.
     // offset: +0x0 = +0,  size = 0x4 = 4
-    char* m_name;
+    const char* m_name;
 
     // Artifact cost in gold /
     // Стоимость артефакта(в золоте).
@@ -344,7 +344,7 @@ struct TArtifactTraits
     // Artifact description
     // Описание артефакта
     // offset: +0x10 = +16,  size = 0x4 = 4
-    char* m_description;
+    const char* m_description;
 
     // Combo artifact type(COMBO_NONE if not combo) /
     // Тип сборного артефакта, если этот артефакт им является.
@@ -393,15 +393,27 @@ struct TArtifactSlotTraits
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
+// Artifact traits /
+// Свойства артефактов.
 std::array<TArtifactTraits, MAX_ARTIFACTS>& akArtifactTraits
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x693A58, std::array<TArtifactTraits, MAX_ARTIFACTS>));
 
 NH3API_INLINE_OR_EXTERN
+// Artifact slot traits /
+// Свойства слотов артефактов.
 std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>& akArtifactSlotTraits
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x694C58, std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>));
 
 NH3API_INLINE_OR_EXTERN
+// Combination artifact info /
+// Свойства сборочных артефактов.
 std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>& gCombinationArtifacts
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x693938, std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>));
+
+NH3API_INLINE_OR_EXTERN
+// Artifact currently held in mouse in the dialog /
+// Артефакт, в данный момент удерживаемый мышью в диалоге.
+type_artifact& holding_artifact
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698AD8, type_artifact));
 
 NH3API_DISABLE_WARNING_END

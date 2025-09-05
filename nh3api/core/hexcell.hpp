@@ -10,6 +10,7 @@
 #pragma once
 
 #include "nh3api_std/memory.hpp" // std::array<T, N>, THISCALL_ macros
+#include "nh3api_std/nh3api_std.hpp"
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -38,8 +39,14 @@ class army;
 struct hexcell
 {
     public:
+        NH3API_FORCEINLINE
         hexcell() NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY(hexcell)
         { THISCALL_1(void, 0x4E7210, this); }
+
+        NH3API_FORCEINLINE
+        hexcell(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
 
         bool HasArmy() const
         { return armyGrp > 0; }

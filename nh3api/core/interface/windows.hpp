@@ -257,15 +257,9 @@ NH3API_VIRTUAL_CLASS widget
 
     // static variables
     public:
-        #ifdef NH3API_FLAG_INLINE_HEADERS
-        inline
-        #endif
-        static 
+        NH3API_INLINE_STATIC_VARIABLE
         widget*& last_hover_widget 
-        #ifdef NH3API_FLAG_INLINE_HEADERS
-        = get_global_var_ref(0x6AACD0, widget*)
-        #endif
-        ;
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x6AACD0, widget*));
 
     // member variables
     public:

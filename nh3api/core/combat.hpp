@@ -98,10 +98,10 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         struct SElevationOverlay
         {
             // offset: +0x0 = +0,  size = 0x2 = 2
-            int16_t terrainMask;
+            uint16_t terrainMask;
 
             // offset: +0x2 = +2,  size = 0x2 = 2
-            int16_t specialTerrainMask;
+            uint16_t specialTerrainMask;
 
             // offset: +0x4 = +4,  size = 0x4 = 4
             int32_t x;
@@ -189,7 +189,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             CSprite* sprite;
 
             // offset: +0x4 = +4,  size = 0x4 = 4
-            TObstacleInfo* info;
+            const TObstacleInfo* info;
 
             // offset: +0x8 = +8,  size = 0x1 = 1
             uint8_t grid_index;
@@ -286,6 +286,35 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
         };
 
+        // size = 0x20 = 32, align = 4
+        struct TArcherTraits
+        {
+            // offset: +0x0 = +0,  size = 0x4 = 4
+            TCreatureType CreatureType;
+
+            // offset: +0x4 = +4,  size = 0x4 = 4
+            int32_t MainBuildingX;
+
+            // offset: +0x8 = +8,  size = 0x4 = 4
+            int32_t MainBuildingY;
+
+            // offset: +0xC = +12,  size = 0x4 = 4
+            int32_t LowerTowerX;
+
+            // offset: +0x10 = +16,  size = 0x4 = 4
+            int32_t LowerTowerY;
+
+            // offset: +0x14 = +20,  size = 0x4 = 4
+            int32_t UpperTowerX;
+
+            // offset: +0x18 = +24,  size = 0x4 = 4
+            int32_t UpperTowerY;
+
+            // offset: +0x1C = +28,  size = 0x4 = 4
+            const char* MissileName;
+
+        };
+
         enum TDoorStatus : int32_t
         {
             DOOR_BROKEN = 0, //
@@ -343,6 +372,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
     public:
         NH3API_FORCEINLINE
         combatManager() NH3API_NOEXCEPT
+        NH3API_DELEGATE_DUMMY_OR_BASE(combatManager, baseManager)
         { THISCALL_1(combatManager*, 0x462340, this); }
 
         NH3API_FORCEINLINE
@@ -544,11 +574,76 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         void CycleCombatScreen()
         { THISCALL_1(void, 0x495C50, this); }
 
+    // virtual functions
     public:
         NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(combatManager)
 
         NH3API_SCALAR_DELETING_DESTRUCTOR
 
+    // static variables
+    public:
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const uint8_t, 12>& moatCell
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63BCE8, const std::array<const uint8_t, 12>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const uint8_t, 12>& moat2Cell
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63BCF4, const std::array<const uint8_t, 12>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const uint8_t, 12>& wallCell
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63BD00, const std::array<const uint8_t, 12>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const uint8_t, 12>& leftCell
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63BD0C, const std::array<const uint8_t, 12>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const uint32_t, MAX_TOWNS>& moatDamage
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63BD18, const std::array<const uint32_t, MAX_TOWNS>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const std::array<const SCmbtHero, 2>, MAX_TOWNS>& sCmbtHero
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63BD40, const std::array<const std::array<const typename combatManager::SCmbtHero, 2>, MAX_TOWNS>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const TWallTarget, 8>& wallTargets
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63BE60, const std::array<const typename combatManager::TWallTarget, 8>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const SElevationOverlay, 34>& sElevationOverlay
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63BEC0, const std::array<const typename combatManager::SElevationOverlay, 34>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const TObstacleInfo, 91>& ObstacleInfo
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63C7C8, const std::array<const typename combatManager::TObstacleInfo, 91>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const TObstacleInfo& QuicksandInfo
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63CEE8, const typename combatManager::TObstacleInfo));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const TObstacleInfo& LandMineInfo
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63CF00, const typename combatManager::TObstacleInfo));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const TObstacleInfo, 5>& WallObstacleInfo
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63CF18, const std::array<const typename combatManager::TObstacleInfo, 5>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const float, 3>& CombatSpeedMod
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63CF7C, const std::array<const float, 3>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const TArcherTraits, MAX_TOWNS>& ArcherTraits
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x63CF88, const std::array<const typename combatManager::TArcherTraits, MAX_TOWNS>));
+
+        NH3API_INLINE_STATIC_VARIABLE
+        const std::array<const std::array<const TWallTraits, 18>, MAX_TOWNS>& akWallTraits
+        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x66D848, const std::array<const std::array<const typename combatManager::TWallTraits, 18>, MAX_TOWNS>));
+
+
+    // member variables
     public:
         // offset: +0x38 = +56,  size = 0x4 = 4
         void* netMsgHandlerPause;
@@ -938,5 +1033,21 @@ NH3API_SIZE_ASSERT(0x140EC, combatManager);
 NH3API_INLINE_OR_EXTERN
 combatManager*& gpCombatManager
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699420, combatManager*));
+
+NH3API_INLINE_OR_EXTERN
+std::array<int32_t, 2>& iCombatControlNetPos
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69778C, std::array<int32_t, 2>));
+
+NH3API_INLINE_OR_EXTERN
+bool& gbRetreatWin 
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6985F3, bool));
+
+NH3API_INLINE_OR_EXTERN
+bool& gbSurrenderWin 
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697794, bool));
+
+NH3API_INLINE_OR_EXTERN
+bool& gbInCombat 
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699590, bool));
 
 NH3API_DISABLE_WARNING_END

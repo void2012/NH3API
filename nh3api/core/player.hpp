@@ -10,7 +10,6 @@
 #pragma once
 
 #include "nh3api_std/exe_vector.hpp" // exe_vector<T>
-#include "player_enums.hpp" // EPlayerColor
 #include "hero_enums.hpp" // THeroID
 #include "artifact.hpp" // TArtifact
 
@@ -20,6 +19,10 @@ NH3API_INLINE_OR_EXTERN
 // Текущий игрок.
 int32_t& giCurPlayer
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CCF4, int32_t));
+
+NH3API_INLINE_OR_EXTERN
+int32_t& giCurWatchPlayer
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977DC, int32_t));
 
 NH3API_INLINE_OR_EXTERN
 uint8_t& giCurWatchPlayerBit
@@ -337,10 +340,14 @@ class playerData
 };
 #pragma pack(pop)
 
+NH3API_INLINE_OR_EXTERN
+// Текущий игрок.
+playerData*& gpCurPlayer
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CCFC, playerData*));
+
 NH3API_SIZE_ASSERT(0x168, playerData);
 
-NH3API_FORCEINLINE
-int32_t GetNumObelisks(int32_t whichPlayer)
+NH3API_FORCEINLINE int32_t GetNumObelisks(int32_t whichPlayer)
 { return FASTCALL_1(int32_t, 0x4BA860, whichPlayer); }
 
 NH3API_DISABLE_WARNING_END

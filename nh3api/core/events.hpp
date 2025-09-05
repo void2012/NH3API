@@ -123,7 +123,19 @@ NH3API_FORCEINLINE void DelayTil(uint32_t time) NH3API_NOEXCEPT
 NH3API_FORCEINLINE void Delay(uint32_t time) NH3API_NOEXCEPT
 { FASTCALL_1(void, 0x4F8A50, time); }
 
-}
+} // namespace GameTime
+
+NH3API_INLINE_OR_EXTERN
+HWND& hwndApp
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699650, HWND));
+
+NH3API_INLINE_OR_EXTERN
+HMENU& hmnuApp
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699654, HMENU));
+
+NH3API_INLINE_OR_EXTERN
+int32_t& gGameCommand
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697728, int32_t));
 
 NH3API_INLINE_OR_EXTERN
 HMENU& gDefaultMenu
@@ -138,11 +150,27 @@ HMENU& hmnuRecruitSave
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69D644, HMENU));
 
 NH3API_INLINE_OR_EXTERN
+HMENU& hmnuCurrent
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69960C, HMENU));
+
+NH3API_INLINE_OR_EXTERN
 bool& gbProcessingCombatAction
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A38, bool));
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A3C, bool));
 
 NH3API_INLINE_OR_EXTERN
 bool& insideProcessMessage
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699608, bool));
+
+NH3API_INLINE_OR_EXTERN
+bool32_t& gbCheatMenus
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A84, bool32_t));
+
+NH3API_INLINE_OR_EXTERN
+std::array<char, 60>& gcCommandLine
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699610, std::array<char, 60>));
+
+NH3API_INLINE_OR_EXTERN
+std::array<char, 368>& gcRegAppPath
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698614, std::array<char, 368>));
 
 NH3API_DISABLE_WARNING_END

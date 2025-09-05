@@ -17,11 +17,13 @@
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
 // Размер карты по горизонтали
-NH3API_INLINE_OR_EXTERN int32_t& MAP_WIDTH
+NH3API_INLINE_OR_EXTERN 
+int32_t& MAP_WIDTH
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783C8, int32_t));
 
 // Размер карты по вертикали
-NH3API_INLINE_OR_EXTERN int32_t& MAP_HEIGHT
+NH3API_INLINE_OR_EXTERN 
+int32_t& MAP_HEIGHT
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783CC, int32_t));
 
 #pragma pack(push, 4)
@@ -274,5 +276,73 @@ class NewfullMap
         std::array<exe_vector<CObjectType>, MAX_OBJECTS> ObjectTypeTables;
 };
 #pragma pack(pop)
+
+#pragma pack(push, 4)
+// size = 0x60 = 96, align = 4
+struct type_creature_bank_level
+{
+    // offset: +0x0 = +0,  size = 0x38 = 56
+    armyGroup guards;
+
+    // offset: +0x38 = +56,  size = 0x1C = 28
+    std::array<EGameResource, 7> resources;
+
+    // offset: +0x54 = +84,  size = 0x4 = 4
+    TCreatureType creature_type;
+
+    // offset: +0x58 = +88,  size = 0x1 = 1
+    int8_t creature_amount;
+
+    // offset: +0x59 = +89,  size = 0x1 = 1
+    int8_t chance;
+
+    // offset: +0x5A = +90,  size = 0x1 = 1
+    int8_t upg_chance;
+
+    // offset: +0x5B = +91,  size = 0x1 = 1
+    int8_t treasure_artifacts;
+
+    // offset: +0x5C = +92,  size = 0x1 = 1
+    int8_t minor_artifacts;
+
+    // offset: +0x5D = +93,  size = 0x1 = 1
+    int8_t major_artifacts;
+
+    // offset: +0x5E = +94,  size = 0x1 = 1
+    int8_t relic_artifacts;
+
+};
+#pragma pack(pop)
+
+#pragma pack(push, 4)
+// size = 0x190 = 400, align = 4
+struct type_creature_bank_traits
+{
+    // offset: +0x0 = +0,  size = 0x10 = 16
+    exe_string name;
+
+    // offset: +0x10 = +16,  size = 0x180 = 384
+    std::array<type_creature_bank_level, 4> levels;
+
+};
+#pragma pack(pop)
+
+NH3API_INLINE_OR_EXTERN
+std::array<type_creature_bank_traits, 11>& const_creature_bank_traits
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x695088, std::array<type_creature_bank_traits, 11>));
+
+NH3API_INLINE_OR_EXTERN
+// Map visibility bits for each player and 9th bit for a monster on the map /
+// Видимость карты для игроков и для монстров на карте.
+uint16_t*& mapExtra
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A48, uint16_t*));
+
+NH3API_FORCEINLINE
+uint16_t GetMapExtra(int32_t X, int32_t Y, int32_t Z)
+{ return FASTCALL_3(uint16_t, 0x4F8040, X, Y, Z); }
+
+NH3API_FORCEINLINE
+uint16_t* GetMapExtraPtr(int32_t x, int32_t y, int32_t z)
+{ return FASTCALL_3(uint16_t*, 0x4F8070, x, y, z); }
 
 NH3API_DISABLE_WARNING_END

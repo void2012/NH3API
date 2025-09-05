@@ -9,10 +9,6 @@
 //===----------------------------------------------------------------------===//
 #include "town.hpp"
 
-#if !NH3API_CHECK_CPP11
-const std::array<uint64_t, 64>& bitNumber = get_global_var_ref(0x66CD98, const std::array<uint64_t, 64>);
-#endif
-
 #ifndef NH3API_FLAG_INLINE_HEADERS
 std::array<uint64_t, kNumTowns>&
 gTownEligibleBuildMask = get_global_var_ref(0x697740, std::array<uint64_t, kNumTowns>);
