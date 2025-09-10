@@ -6,12 +6,8 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-// #include <stdexcept> // std::runtime_error
-// #include <cstring>  // string functions
-// #include <algorithm> // std::sort
-// #include <cstdio> // std::FILE
-#include "../nh3api_std/exe_vector.hpp"    // exe_vector<T>
-#include "../nh3api_std/exe_streambuf_vftables.hpp" // exe_streambuf<C>
+#include "../nh3api_std/exe_vector.hpp" 
+#include "../nh3api_std/exe_streambuf.hpp" 
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -510,5 +506,11 @@ NH3API_VIRTUAL_CLASS t_stdio_file_adapter NH3API_FINAL : public TAbstractFile
 
 };
 #pragma pack(pop)
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63DAC0, TAbstractFile)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63E74C, TGzFile)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63DACC, TStreamBufFile)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63E710, TGzInflateBuf)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x641138, t_lod_file_adapter)
 
 NH3API_DISABLE_WARNING_END

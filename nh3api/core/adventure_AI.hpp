@@ -9,7 +9,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "resources/resources_include.hpp" // EGameResource
+#include "resources/resources.hpp" // EGameResource
 #include "artifact.hpp"  // type_artifact
 #include "skills.hpp"    // TSkillMastery
 #include "creatures.hpp" // TCreatureType
@@ -93,6 +93,34 @@ NH3API_INLINE_OR_EXTERN
 std::array<type_AI_player, 8>& AI_player
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6929A0, std::array<type_AI_player, 8>));
 
+enum EArtifactEffectType
+{
+    ARTIFACT_EFFECT_MIGHT = 0,
+    ARTIFACT_EFFECT_POWER = 1,
+    ARTIFACT_EFFECT_KNOWLEDGE = 2,
+    ARTIFACT_EFFECT_MORALE = 3,
+    ARTIFACT_EFFECT_LUCK   = 4,
+    ARTIFACT_EFFECT_SCOUTING = 5,
+    ARTIFACT_EFFECT_NECROMANCY = 6,
+    ARTIFACT_EFFECT_COMBAT = 7,
+    ARTIFACT_EFFECT_MOVEMENT = 8,
+    ARTIFACT_EFFECT_SPELLCASTER = 9,
+    ARTIFACT_EFFECT_DURATION = 10,
+    ARTIFACT_EFFECT_SCHOOL   = 11,
+    ARTIFACT_EFFECT_TOME     = 12,
+    ARTIFACT_EFFECT_ANTIMAGIC = 13,
+    ARTIFACT_EFFECT_ANTIMORALE = 14,
+    ARTIFACT_EFFECT_ANTILUCK   = 15,
+    ARTIFACT_EFFECT_INCOME     = 16,
+    ARTIFACT_EFFECT_CREATURE_GROWTH = 17,
+    ARTIFACT_EFFECT_SPELL = 18,
+    ARTIFACT_EFFECT_SHOOTER_BONUS = 19,
+    ARTIFACT_EFFECT_ANGELIC_ALLIANCE = 20,
+    ARTIFACT_EFFECT_UNDEAD_KING_CLOAK = 21,
+    ARTIFACT_EFFECT_ELIXIR_OF_LIFE = 22,
+    ARTIFACT_EFFECT_STATUE_OF_LEGION = 23
+};
+
 #pragma pack(push, 4)
 // Artifact evaluation class for AI /
 // Вспомогательный класс оценки значимости артефакта для ИИ.
@@ -103,7 +131,7 @@ NH3API_VIRTUAL_CLASS type_artifact_effect
         struct vftable_t
         {
             void (__thiscall *scalar_deleting_destructor)(type_artifact_effect*, uint8_t);
-            int32_t (__thiscall* get_value)(const type_artifact_effect*, const hero*, bool, bool);
+            EArtifactEffectType (__thiscall* get_value)(const type_artifact_effect*, const hero*, bool, bool);
         };
 
     public:
@@ -122,7 +150,7 @@ NH3API_VIRTUAL_CLASS type_artifact_effect
         NH3API_SCALAR_DELETING_DESTRUCTOR
 
         // vftable shift: +4
-        virtual int32_t __thiscall get_value(const hero* owner, bool equipped, bool exact) const = 0;
+        virtual EArtifactEffectType __thiscall get_value(const hero* owner, bool equipped, bool exact) const = 0;
 
 };
 
@@ -134,23 +162,25 @@ CLASS(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT \
 { NH3API_IGNORE(__VA_ARGS__); } \
 virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override \
 { get_type_vftable(this)->scalar_deleting_destructor(this, flag); } \
-virtual int32_t __thiscall get_value(const hero* owner, bool equipped, bool exact) const override \
+virtual EArtifactEffectType __thiscall get_value(const hero* owner, bool equipped, bool exact) const override \
 { return get_type_vftable(this)->get_value(this, owner, equipped, exact); }
 #endif // NH3API_VIRTUAL_OVERRIDE_BASEMANAGER
 
 #ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT
-#define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(CLASS, ...) \
+#define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(CLASS) \
 NH3API_FORCEINLINE \
 CLASS() NH3API_NOEXCEPT \
 NH3API_DELEGATE_DUMMY(CLASS) \
 { NH3API_SET_VFTABLE(); }
 #endif
 
+#if NH3API_STD_DELEGATING_CONSTRUCTORS
+
 #ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1
 #define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(CLASS, BASE_CLASS, TYPE1, ARG1, VALUE1) \
 NH3API_FORCEINLINE \
 CLASS(TYPE1 _##ARG1) NH3API_NOEXCEPT \
-    : ARG1(_##ARG1) NH3API_DELEGATE_DUMMY_COMMA(BASE_CLASS) \
+    :  BASE_CLASS(::nh3api::dummy_tag), ARG1(_##ARG1) \
 { NH3API_SET_VFTABLE(); } \
 NH3API_FORCEINLINE \
 CLASS() NH3API_NOEXCEPT \
@@ -162,7 +192,7 @@ CLASS() NH3API_NOEXCEPT \
 #define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT2(CLASS, BASE_CLASS, TYPE1, ARG1, TYPE2, ARG2, VALUE1, VALUE2) \
 NH3API_FORCEINLINE \
 CLASS(TYPE1 _##ARG1, TYPE2 _##ARG2) NH3API_NOEXCEPT \
-    : ARG1(_##ARG1), ARG2(_##ARG2), BASE_CLASS(nh3api::dummy_tag) \
+    : BASE_CLASS(::nh3api::dummy_tag), ARG1(_##ARG1), ARG2(_##ARG2) \
 { NH3API_SET_VFTABLE(); } \
 NH3API_FORCEINLINE \
 CLASS() NH3API_NOEXCEPT \
@@ -170,13 +200,41 @@ CLASS() NH3API_NOEXCEPT \
 {}
 #endif
 
+#else // NH3API_STD_DELEGATING_CONSTRUCTORS
+
+#ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1
+#define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(CLASS, BASE_CLASS, TYPE1, ARG1, VALUE1) \
+NH3API_FORCEINLINE \
+CLASS(TYPE1 _##ARG1) NH3API_NOEXCEPT \
+    :  BASE_CLASS(::nh3api::dummy_tag), ARG1(_##ARG1) \
+{ NH3API_SET_VFTABLE(); } \
+NH3API_FORCEINLINE \
+CLASS() NH3API_NOEXCEPT \
+    :  BASE_CLASS(::nh3api::dummy_tag), ARG1(VALUE1) \
+{ NH3API_SET_VFTABLE(); } 
+#endif
+
+#ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT2
+#define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT2(CLASS, BASE_CLASS, TYPE1, ARG1, TYPE2, ARG2, VALUE1, VALUE2) \
+NH3API_FORCEINLINE \
+CLASS(TYPE1 _##ARG1, TYPE2 _##ARG2) NH3API_NOEXCEPT \
+    : BASE_CLASS(::nh3api::dummy_tag), ARG1(_##ARG1), ARG2(_##ARG2) \
+{ NH3API_SET_VFTABLE(); } \
+NH3API_FORCEINLINE \
+CLASS() NH3API_NOEXCEPT \
+    : BASE_CLASS(::nh3api::dummy_tag), ARG1(VALUE1), ARG2(VALUE2) \
+{ NH3API_SET_VFTABLE(); }
+#endif
+
+#endif // NH3API_STD_DELEGATING_CONSTRUCTORS
+
 // size = 0x8 = 8, align = 4, baseclass: type_artifact_effect
 NH3API_VIRTUAL_CLASS type_scouting_artifact : public type_artifact_effect
 {
     public:
-    NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_scouting_artifact, type_artifact_effect, bonus)
-
-    NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(type_scouting_artifact, type_artifact_effect, int32_t, bonus, 0)
+        NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_scouting_artifact, type_artifact_effect, bonus)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(type_scouting_artifact, type_artifact_effect, int32_t, bonus, 0)
+        
     public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t bonus;
@@ -188,9 +246,11 @@ NH3API_VIRTUAL_CLASS type_combat_artifact : public type_artifact_effect
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_combat_artifact, type_artifact_effect, bonus)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(type_combat_artifact, type_artifact_effect, int32_t, bonus, 0)
+    
     public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t bonus;
+
 };
 
 // size = 0x8 = 8, align = 4, baseclass: type_combat_artifact
@@ -199,6 +259,7 @@ NH3API_VIRTUAL_CLASS type_movement_artifact : public type_combat_artifact
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_movement_artifact, type_combat_artifact)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_movement_artifact)
+
 };
 
 // size = 0x8 = 8, align = 4, baseclass: type_combat_artifact
@@ -207,6 +268,7 @@ NH3API_VIRTUAL_CLASS type_spellcaster_artifact : public type_combat_artifact
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_spellcaster_artifact, type_combat_artifact)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_spellcaster_artifact)
+
 };
 
 // size = 0xC = 12, align = 4, baseclass: type_combat_artifact
@@ -241,6 +303,7 @@ NH3API_VIRTUAL_CLASS type_antimorale_artifact : public type_artifact_effect
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_antimorale_artifact, type_artifact_effect)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_antimorale_artifact)
+
 };
 
 // size = 0x4 = 4, align = 4, baseclass: type_artifact_effect
@@ -249,6 +312,7 @@ NH3API_VIRTUAL_CLASS type_antiluck_artifact : public type_artifact_effect
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_antiluck_artifact, type_artifact_effect)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_antiluck_artifact)
+
 };
 
 // size = 0xC = 12, align = 4, baseclass: type_artifact_effect
@@ -302,6 +366,7 @@ NH3API_VIRTUAL_CLASS type_shooter_bonus_artifact : public type_combat_artifact
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_shooter_bonus_artifact, type_combat_artifact)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_shooter_bonus_artifact)
+
 };
 
 // size = 0x4 = 4, align = 4, baseclass: type_artifact_effect
@@ -310,6 +375,7 @@ NH3API_VIRTUAL_CLASS type_statue_of_legion_artifact : public type_artifact_effec
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_statue_of_legion_artifact, type_artifact_effect)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_statue_of_legion_artifact)
+
 };
 
 // size = 0x4 = 4, align = 4, baseclass: type_artifact_effect
@@ -366,12 +432,25 @@ NH3API_VIRTUAL_CLASS type_luck_artifact : public type_combat_artifact
 
 };
 
+// there is no vftable for this class
 // size = 0x8 = 8, align = 4, baseclass: type_combat_artifact
 NH3API_VIRTUAL_CLASS type_base_necromancy_artifact : public type_combat_artifact
 {
     public:
-        NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_base_necromancy_artifact, type_combat_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_base_necromancy_artifact)
+        type_base_necromancy_artifact(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT 
+            : type_combat_artifact(tag) 
+        {} 
+
+        NH3API_FORCEINLINE type_base_necromancy_artifact(int32_t _bonus)
+            : type_combat_artifact(_bonus)
+        {}
+
+    public:
+        virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override 
+        { type_combat_artifact::scalar_deleting_destructor(flag); } 
+
+        virtual EArtifactEffectType __thiscall get_value(const hero* owner, bool equipped, bool exact) const override 
+        { return type_combat_artifact::get_value(owner, equipped, exact); }        
 
 };
 
@@ -412,6 +491,7 @@ NH3API_VIRTUAL_CLASS type_angelic_alliance_artifact : public type_might_artifact
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_angelic_alliance_artifact, type_might_artifact)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_angelic_alliance_artifact)
+
 };
 
 // size = 0x8 = 8, align = 4, baseclass: type_base_necromancy_artifact
@@ -419,7 +499,10 @@ NH3API_VIRTUAL_CLASS type_undead_king_cloak_artifact : public type_base_necroman
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_undead_king_cloak_artifact, type_base_necromancy_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_undead_king_cloak_artifact)
+        NH3API_FORCEINLINE type_undead_king_cloak_artifact() NH3API_NOEXCEPT
+            :  type_base_necromancy_artifact(30)
+        { NH3API_SET_VFTABLE(); }
+
 
 };
 #pragma pack(pop)
@@ -598,3 +681,29 @@ NH3API_FORCEINLINE int32_t AI_resource_cost(int32_t player_id, const std::array<
 
 NH3API_FORCEINLINE TSecondarySkill AI_choose_secondary_skill(const hero* our_hero, TSecondarySkill first, TSecondarySkill second, bool complex_choice)
 { return (our_hero) ? FASTCALL_4(TSecondarySkill, 0x52C0B0, our_hero, first, second, complex_choice) : SKILL_NONE; }
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B6B0, type_artifact_effect)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B6B8, type_scouting_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B6C0, type_combat_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B6C8, type_might_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B6D0, type_power_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B6D8, type_knowledge_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B6E4, type_necromancy_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B6EC, type_movement_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B6F4, type_spellcaster_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B6FC, type_morale_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B704, type_luck_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B70C, type_duration_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B714, type_school_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B71C, type_antimagic_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B724, type_antimorale_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B72C, type_antiluck_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B734, type_tome_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B73C, type_income_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B744, type_creature_growth_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B74C, type_spell_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B754, type_shooter_bonus_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B75C, type_angelic_alliance_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B764, type_undead_king_cloak_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B770, type_statue_of_legion_artifact)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B778, type_elixir_of_life_artifact)

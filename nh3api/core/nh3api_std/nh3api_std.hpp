@@ -1069,14 +1069,6 @@ const omit_base_vftable_tag;
     #endif
 #endif
 
-#ifndef NH3API_DELEGATE_DUMMY_COMMA
-    #if NH3API_STD_DELEGATING_CONSTRUCTORS
-        #define NH3API_DELEGATE_DUMMY_COMMA(CLASS_NAME) ,CLASS_NAME(::nh3api::dummy_tag)
-    #else
-        #define NH3API_DELEGATE_DUMMY_COMMA(CLASS_NAME)
-    #endif
-#endif
-
 // final keyword
 #ifndef NH3API_FINAL
     #if NH3API_CHECK_CPP11
@@ -1397,14 +1389,6 @@ enum : unsigned char
     #else 
         false
     #endif
-    ,
-
-    strict_std_template_conformance = 
-    #ifdef NH3API_FLAG_STRICT_STD_TEMPLATE_CONFORMANCE
-        true
-    #else 
-        false
-    #endif
 
 };
 
@@ -1518,6 +1502,113 @@ enum : unsigned char
         #define NH3API_IGNORE(...) (void)([&](){::nh3api::ignore(__VA_ARGS__);})
     #endif
 #endif
+
+// Memory shield does not let the optimizing compiler discard statements
+// like this:
+// void foo()
+// {
+// NH3API_MEMSHIELD_BEGIN
+// ... // will not be optimized away
+// NH3API_MEMSHIELD_END
+// }
+#if NH3API_CHECK_MSVC
+    #ifndef NH3API_MEMSHIELD_BEGIN
+        #define NH3API_MEMSHIELD_BEGIN _ReadWriteBarrier();
+        #define NH3API_MEMSHIELD_END   _ReadWriteBarrier();
+        #define NH3API_MEMSHIELD
+    #endif // NH3API_MEMSHIELD_BEGIN
+#else
+    #ifndef NH3API_MEMSHIELD_BEGIN
+        #define NH3API_MEMSHIELD_BEGIN __asm__ volatile("" ::: "memory");
+        #define NH3API_MEMSHIELD_END   __asm__ volatile("" ::: "memory");
+        #define NH3API_MEMSHIELD
+    #endif // NH3API_MEMSHIELD_BEGIN
+#endif
+
+// this is a hack designed to enable global variables addresses to be baked into binaries
+// rather that using global variables which is double indirection
+// whole program optimization doesn't always fix this issue though.
+#if NH3API_HAS_BUILTIN(__builtin_constant_p)
+    #define get_global_var_ptr(address,...) (__builtin_constant_p(reinterpret_cast<__VA_ARGS__*>(address)) ? reinterpret_cast<__VA_ARGS__*>(address) : reinterpret_cast<__VA_ARGS__*>(address))  // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
+    #define get_global_var_ref(address,...) *(__builtin_constant_p(reinterpret_cast<__VA_ARGS__*>(address)) ? reinterpret_cast<__VA_ARGS__*>(address) : reinterpret_cast<__VA_ARGS__*>(address)) // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
+#else
+    #define get_global_var_ptr(address,...) (reinterpret_cast<__VA_ARGS__*>(address))
+    #define get_global_var_ref(address,...) (*reinterpret_cast<__VA_ARGS__*>(address))
+#endif
+
+#ifndef NH3API_SCALAR_DELETING_DESTRUCTOR
+#define NH3API_SCALAR_DELETING_DESTRUCTOR virtual void __thiscall scalar_deleting_destructor(uint8_t flag) \
+                                          { get_vftable(this)->scalar_deleting_destructor(this, flag); }
+#endif
+
+// requires T::vftable_t
+template<class T>
+typename T::vftable_t* get_vftable(T* ptr)
+{ return *reinterpret_cast<typename T::vftable_t**>(ptr); }
+
+// requires T::vftable_t
+template<class T>
+const typename T::vftable_t* get_vftable(const T* ptr)
+{ return *reinterpret_cast<const typename T::vftable_t* const*>(ptr); }
+
+// is supposed to be specialized for each .exe-s polymorphic class
+template<class T>
+struct vftable_address
+{ static const
+#if NH3API_STD_INLINE_VARIABLES
+inline constexpr
+#endif
+ uintptr_t address = 0; 
+};
+
+template<typename T> NH3API_FORCEINLINE
+const typename T::vftable_t* get_type_vftable()
+{ return reinterpret_cast<const typename T::vftable_t*>(vftable_address<T>::address); }
+
+template<typename T> NH3API_FORCEINLINE
+const typename T::vftable_t* get_type_vftable(const T*)
+{ return reinterpret_cast<const typename T::vftable_t*>(vftable_address<T>::address); }
+
+// for constructors
+template<typename T>
+void set_vftable(T* ptr)
+{
+    NH3API_MEMSHIELD_BEGIN
+    //#ifdef __cpp_lib_launder
+    //*reinterpret_cast<void**>(std::launder(ptr)) = get_type_vftable(ptr);
+    //#else
+    *reinterpret_cast<const void**>(ptr) = get_type_vftable(ptr);
+    //#endif
+    NH3API_MEMSHIELD_END
+}
+
+#ifndef NH3API_SET_VFTABLE
+    #define NH3API_SET_VFTABLE() NH3API_MEMSHIELD_BEGIN set_vftable(this); NH3API_MEMSHIELD_END
+#endif
+
+#if NH3API_STD_INLINE_VARIABLES
+
+#ifndef NH3API_SPECIALIZE_TYPE_VFTABLE
+#define NH3API_SPECIALIZE_TYPE_VFTABLE(ADDRESS, ...) \
+template<> struct vftable_address<__VA_ARGS__> \
+{ static inline constexpr uintptr_t address = ADDRESS; };
+#endif
+
+template<typename T>
+#if __has_cpp_attribute(clang::no_specializations)
+[[clang::no_specializations("Specialize vftable_address<T> instead.")]]
+#endif
+inline constexpr uintptr_t vftable_address_v = vftable_address<T>::address;
+
+#else // NH3API_STD_INLINE_VARIABLES
+
+#ifndef NH3API_SPECIALIZE_TYPE_VFTABLE
+#define NH3API_SPECIALIZE_TYPE_VFTABLE(ADDRESS, ...) \
+template<> struct vftable_address<__VA_ARGS__> \
+{ static const uintptr_t address = ADDRESS; };
+#endif
+
+#endif // NH3API_STD_INLINE_VARIABLES
 
 #ifndef NH3API_MAJOR_VERSION
     #define NH3API_MAJOR_VERSION 1

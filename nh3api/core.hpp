@@ -9,8 +9,8 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include "core/adventure_AI.hpp"
 #include "core/adventure.hpp"
 #include "core/combat.hpp"
 #include "core/global.hpp"
 #include "core/pathfinding.hpp"
-#include "core/vftables.hpp"

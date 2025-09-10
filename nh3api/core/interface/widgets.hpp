@@ -743,7 +743,7 @@ NH3API_VIRTUAL_CLASS slider : public widget
                slider::EGraphics graphics,
                int32_t page,
                bool hotKey) NH3API_NOEXCEPT
-            : widget(nh3api::dummy_tag)
+        NH3API_DELEGATE_DUMMY_OR_BASE(slider, widget)
         { THISCALL_11(void, 0x5963C0, this, x, y, w, h, id, num, func, graphics, page, hotKey); }
 
         NH3API_FORCEINLINE
@@ -1009,3 +1009,18 @@ void SetPlayerPaletteColors(TPalette24& pPalette, uint32_t whichPlayer)
 }
 
 NH3API_DISABLE_WARNING_END
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63EC48, iconWidget)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x642DC0, textWidget)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x642D50, textEntryWidget)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63BA24, border)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63BA94, bitmapBorder)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63BA5C, coloredBorderFrame)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x642DF8, bitmapBackedTextWidget)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63BB54, button)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63BB88, textButton)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63BBBC, type_func_button)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x641D60, slider)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x642D1C, type_text_scroller)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x642CD8, type_text_slider)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x640E40, CChatEdit)

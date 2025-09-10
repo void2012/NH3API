@@ -15,7 +15,7 @@ NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 
 // Abstract structure. Similiar to WoG _Struct_ (Field<T> = get<T>). Used only as reference or a pointer!!! /
 // Examples:
-// bstruct_t* ptr = get_ptr<bstruct_t>(c->esi); // use &get_bstruct(c->esi) instead...
+// bstruct_t* ptr = &get_bstruct(c->esi); // use &get_bstruct(c->esi) instead...
 // ptr->get<int32_t>(12) = 64; // set int var at offset 12 value 64.
 //
 // const bstruct_t& win = get_const_bstruct(windowPtr); // assume 'windowPtr' of type void*; 'name' of type exe_string
@@ -47,7 +47,7 @@ bstruct_t& get_bstruct(T* ptr, int32_t offset = 0) NH3API_NOEXCEPT
 
 NH3API_FORCEINLINE
 bstruct_t& get_bstruct(uint32_t address, int32_t offset = 0) NH3API_NOEXCEPT
-{ return *(get_ptr<bstruct_t>(address) + offset); }
+{ return *(reinterpret_cast<bstruct_t*>(address) + offset); }
 
 template <typename T> NH3API_FORCEINLINE
 const bstruct_t& get_const_bstruct(const T* ptr, int32_t offset = 0) NH3API_NOEXCEPT
@@ -55,7 +55,7 @@ const bstruct_t& get_const_bstruct(const T* ptr, int32_t offset = 0) NH3API_NOEX
 
 NH3API_FORCEINLINE
 const bstruct_t& get_const_bstruct(const uint32_t address, int32_t offset = 0) NH3API_NOEXCEPT
-{ return *(get_ptr<const bstruct_t>(address) + offset); }
+{ return *(reinterpret_cast<const bstruct_t*>(address) + offset); }
 
 template<typename T> NH3API_FORCEINLINE
 T* get_ptr(bstruct_t arg, size_t pos) NH3API_NOEXCEPT

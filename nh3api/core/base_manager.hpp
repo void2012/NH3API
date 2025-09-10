@@ -138,3 +138,5 @@ executive*& gpExec
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699550, executive*));
 
 NH3API_DISABLE_WARNING_END
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B9BC, baseManager)

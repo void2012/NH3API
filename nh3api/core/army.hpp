@@ -10,8 +10,8 @@
 #pragma once
 
 #include "nh3api_std/exe_deque.hpp" // exe_deque<T>
-#include "resources/resources_include.hpp" // soundManager
 #include "hexcell.hpp" // hexcell
+#include "resources/sound.hpp" // gpSoundManager, sample
 #include "skills.hpp" // TSkillMastery
 #include "creatures.hpp" // TCreatureType, akCreatureTypeTraits, TCreatureTypeTraits
 #include "spells.hpp" // SpellID
@@ -262,7 +262,7 @@ class army
         void       WaitSample(TSampleID smpl) const
         {
             if ( !THISCALL_1(bool, 0x46A080, army_hpp_gpCombatManager) )
-                gpSoundManager->WaitSample( armySample[smpl], -1 );
+                THISCALL_3(void, 0x59A1C0, 0x699414 /*gpSoundManager*/, armySample[smpl]->memSample.memHSample, -1);
         }
 
         // Luck set depending on battle context /

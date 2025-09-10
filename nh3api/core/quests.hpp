@@ -11,7 +11,8 @@
 
 #include "nh3api_std/exe_vector.hpp" // exe_vector<T>
 #include "nh3api_std/exe_bitset.hpp" // exe_bitset<N>
-#include "resources/resources_include.hpp" // TAbstractFile
+#include "resources/resources.hpp" // EGameResource
+#include "resources/files.hpp" // TAbstractFile
 #include "random.hpp" // exe_rand()
 #include "artifact.hpp" // TArtifact
 #include "creatures.hpp" // TCreatureType, type_point
@@ -235,6 +236,8 @@ NH3API_SIZE_ASSERT(0x40, type_quest);
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_TYPE_QUEST
 #define NH3API_VIRTUAL_OVERRIDE_TYPE_QUEST(CLASS_NAME) \
+using type_quest::get_help_text; \
+using type_quest::get_quest_text; \
 virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override \
 { get_type_vftable(this)->scalar_deleting_destructor(reinterpret_cast<CLASS_NAME*>(this), flag); } \
 virtual int32_t __thiscall ai_value(int32_t player) const override \
@@ -822,6 +825,17 @@ struct QuestMonster
 
 };
 #pragma pack(pop)
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x64175C, type_quest)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x641798, type_experience_quest)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x6417D4, type_skill_quest)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x641810, type_defeat_hero_quest)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x64184C, type_monster_quest)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x641888, type_artifact_quest)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x6418C4, type_creature_quest)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x641900, type_resource_quest)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x64193C, type_be_hero_quest)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x641978, type_belong_to_player_quest)
 
 NH3API_FORCEINLINE
 type_quest* create_quest(EQuestType quest_type, bool hut) NH3API_NOEXCEPT

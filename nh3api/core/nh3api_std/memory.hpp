@@ -12,7 +12,6 @@
 #include <new> // std::nothrow_t
 #include <memory> // std::allocator_traits, std::unique_ptr
 
-#include "intrin.hpp"
 #include "nh3api_std.hpp"
 #include "patcher_x86.hpp"
 #include "type_traits.hpp" // tt::has_scalar_deleting_destructor
@@ -103,8 +102,8 @@ struct exe_heap_t
     { return NH3API_MAX_HEAP_REQUEST; }
 
 } 
-#ifdef NH3API_FLAG_INLINE_HEADERS
-inline
+#ifdef NH3API_STD_INLINE_VARIABLES
+inline constexpr
 #endif
 // exe_heap constant / константа exe_heap
 const exe_heap; 
@@ -432,53 +431,6 @@ void vector_deleting_destructor(T* ptr, uint32_t flag)
 }
 
 } // namespace nh3api
-
-#ifndef NH3API_SCALAR_DELETING_DESTRUCTOR
-#define NH3API_SCALAR_DELETING_DESTRUCTOR virtual void __thiscall scalar_deleting_destructor(uint8_t flag) \
-                                          { get_vftable(this)->scalar_deleting_destructor(this, flag); }
-#endif
-
-// requires T::vftable_t
-template<class T>
-typename T::vftable_t* get_vftable(T* ptr)
-{ return *reinterpret_cast<typename T::vftable_t**>(ptr); }
-
-// requires T::vftable_t
-template<class T>
-const typename T::vftable_t* get_vftable(const T* ptr)
-{ return *reinterpret_cast<const typename T::vftable_t* const*>(ptr); }
-
-// template specializations provided in vftables.hpp
-template<class T>
-struct vftable_address
-{
-    static const uintptr_t address = 0;
-};
-
-template<typename T> NH3API_FORCEINLINE
-const typename T::vftable_t* get_type_vftable()
-{ return reinterpret_cast<const typename T::vftable_t*>(vftable_address<T>::address); }
-
-template<typename T> NH3API_FORCEINLINE
-const typename T::vftable_t* get_type_vftable(const T*)
-{ return reinterpret_cast<const typename T::vftable_t*>(vftable_address<T>::address); }
-
-// for constructors
-template<typename T>
-void set_vftable(T* ptr)
-{
-    NH3API_MEMSHIELD_BEGIN
-    //#ifdef __cpp_lib_launder
-    //*reinterpret_cast<void**>(std::launder(ptr)) = get_type_vftable(ptr);
-    //#else
-    *reinterpret_cast<const void**>(ptr) = get_type_vftable(ptr);
-    //#endif
-    NH3API_MEMSHIELD_END
-}
-
-#ifndef NH3API_SET_VFTABLE
-    #define NH3API_SET_VFTABLE() NH3API_MEMSHIELD_BEGIN set_vftable(this); NH3API_MEMSHIELD_END
-#endif
 
 #if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
 // low-level virtual call with only shift in vftable

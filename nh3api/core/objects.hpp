@@ -9,7 +9,8 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "resources/resources_include.hpp" // EGameResource
+#include "resources/files.hpp" // TAbstractFile
+#include "resources/resources.hpp" // EGameResource
 #include "artifact.hpp" // TArtifact, type_artifact
 #include "creatures.hpp" // TCreatureType, armyGroup
 #include "player_enums.hpp" // EPlayerColor

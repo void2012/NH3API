@@ -105,3 +105,5 @@ NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992D0, heroWindowManager*));
 NH3API_INLINE_OR_EXTERN
 uint32_t& giDialogTimeout
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977D4, uint32_t));
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x643D5C, heroWindowManager)

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "nh3api_std/exe_bitset.hpp" // exe_bitset<N>
-#include "resources/resources_include.hpp" // EGameResource
+#include "resources/resources.hpp" // EGameResource
 #include "creatures.hpp" // TCreatureType, armyGroup
 #include "spells.hpp" // SpellID
 
@@ -26,10 +26,9 @@ struct bitNumber_impl_t
     const
     #endif
     { return 1ULL << pos; }
-
 } 
-#ifdef NH3API_FLAG_INLINE_HEADERS
-inline
+#ifdef NH3API_STD_INLINE_VARIABLES
+inline constexpr
 #endif
 // Bit shift masks lookup table /
 // Таблица побитовых масок.

@@ -137,4 +137,6 @@ NH3API_SIZE_ASSERT(0x90, mouseManager);
 NH3API_INLINE_OR_EXTERN
 mouseManager*& gpMouseManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992B0, mouseManager*));
 
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x640038, mouseManager)
+
 #pragma pack(pop)

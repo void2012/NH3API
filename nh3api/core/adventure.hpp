@@ -10,7 +10,7 @@
 #pragma once
 
 #include "nh3api_std/memory.hpp" // NH3API_SCALAR_DELETING_DESTRUCTOR
-#include "resources/resources_include.hpp" // e_looping_sound_id, soundNode, sample
+#include "resources/sound.hpp" // e_looping_sound_id, sample, soundNode
 #include "interface/dialogs.hpp" // TAdventureMapWindow
 #include "creatures.hpp" // armyGroup, TCreatureType, also includes "terrain.hpp": TTerrainType
 #include "hero_enums.hpp" // hero_seqid
@@ -543,5 +543,7 @@ NH3API_INLINE_OR_EXTERN
 // Показывать анимации на карте приключений.
 bool32_t& bShowIt
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A10, bool32_t));
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63A678, advManager)
 
 NH3API_DISABLE_WARNING_END

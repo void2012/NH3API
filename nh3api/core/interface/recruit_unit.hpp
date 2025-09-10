@@ -168,3 +168,5 @@ class recruitUnit : public baseManager
 
 };
 #pragma pack(pop)
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x640C80, recruitUnit)

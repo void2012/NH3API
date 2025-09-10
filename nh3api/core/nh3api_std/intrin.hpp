@@ -11,45 +11,6 @@
 
 #include "ida.hpp"
 
-template<typename T>
-T* get_ptr(uint32_t address) NH3API_NOEXCEPT
-{ return reinterpret_cast<T*>(address); }
-
-// Memory shield does not let the optimizing compiler discard statements
-// It is recommended to use it inside your init() function
-// like this:
-// void init()
-// {
-// NH3API_MEMSHIELD_BEGIN
-// ...
-// NH3API_MEMSHIELD_END
-// }
-
-#ifdef _MSC_VER
-    #ifndef NH3API_MEMSHIELD_BEGIN
-        #define NH3API_MEMSHIELD_BEGIN _ReadWriteBarrier();
-        #define NH3API_MEMSHIELD_END   _ReadWriteBarrier();
-        #define NH3API_MEMSHIELD
-    #endif // NH3API_MEMSHIELD_BEGIN
-#else
-    #ifndef NH3API_MEMSHIELD_BEGIN
-        #define NH3API_MEMSHIELD_BEGIN __asm__ volatile("" ::: "memory");
-        #define NH3API_MEMSHIELD_END   __asm__ volatile("" ::: "memory");
-        #define NH3API_MEMSHIELD
-    #endif // NH3API_MEMSHIELD_BEGIN
-#endif
-
-// this is a hack designed to enable global variables addresses to be backed into binaries
-// rather that using global variables which is double indirection
-// whole program optimization doesn't always fix this issue though.
-#if NH3API_HAS_BUILTIN(__builtin_constant_p)
-    #define get_global_var_ptr(address,...) (__builtin_constant_p(reinterpret_cast<__VA_ARGS__*>(address)) ? reinterpret_cast<__VA_ARGS__*>(address) : reinterpret_cast<__VA_ARGS__*>(address))  // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
-    #define get_global_var_ref(address,...) *(__builtin_constant_p(reinterpret_cast<__VA_ARGS__*>(address)) ? reinterpret_cast<__VA_ARGS__*>(address) : reinterpret_cast<__VA_ARGS__*>(address)) // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
-#else
-    #define get_global_var_ptr(address,...) (reinterpret_cast<__VA_ARGS__*>(address))
-    #define get_global_var_ref(address,...) (*reinterpret_cast<__VA_ARGS__*>(address))
-#endif
-
 #if NH3API_CHECK_MSVC
     #define NH3API_INTRIN_FUNCTION NH3API_FORCEINLINE
 #else

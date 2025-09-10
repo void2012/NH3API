@@ -201,7 +201,6 @@ nh3api_add_files(
 		terrain.hpp
 		town.hpp
 		utils.hpp
-		vftables.hpp
 )
 
 nh3api_add_files(

@@ -1111,6 +1111,29 @@ struct TNormalDialogInfo
 };
 #pragma pack(pop)
 
+#if NH3API_DEBUG 
+NH3API_FORCEINLINE
+// address: 0x4F6C00
+// Do default dialog /
+// Стандартный диалог.
+void NormalDialog(const char* cText,
+                  EMBType iMBType = NORMAL_DIALOG_DEFAULT,
+                  int32_t x = -1,
+                  int32_t y = -1,
+                  EGameResource iResType1 = const_no_resource,
+                  int32_t iResExtra1 = 0,
+                  EGameResource iResType2 = const_no_resource,
+                  int32_t iResExtra2 = 0,
+                  int32_t iSpecial = -1,
+                  int32_t iTimeout = 0,
+                  EGameResource iResType3 = const_no_resource,
+                  int32_t iResExtra3 = 0)
+{ 
+    assert(cText && "cText must not be a nullptr");
+    assert(strlen(cText) && "cText must not be an empty string");
+    FASTCALL_12(void, 0x4F6C00, cText, iMBType, x, y, iResType1, iResExtra1, iResType2, iResExtra2, iSpecial, iTimeout, iResType3, iResExtra3); 
+}
+#else
 // code size optimization
 struct _NormalDialog
 {
@@ -1138,7 +1161,7 @@ NH3API_FORCEINLINE
 // Do default dialog /
 // Стандартный диалог.
 void NormalDialog(const char* cText) NH3API_NOEXCEPT
-{ (_NormalDialog::show(cText)); }
+{ _NormalDialog::show(cText); }
 
 NH3API_FORCEINLINE
 // address: 0x4F6C00
@@ -1157,6 +1180,8 @@ void NormalDialog(const char* cText,
                   EGameResource iResType3 = const_no_resource,
                   int32_t iResExtra3 = 0)
 { FASTCALL_12(void, 0x4F6C00, cText, iMBType, x, y, iResType1, iResExtra1, iResType2, iResExtra2, iSpecial, iTimeout, iResType3, iResExtra3); }
+
+#endif
 
 NH3API_FORCEINLINE
 // address: 0x4F7D20
@@ -1181,5 +1206,13 @@ void extended_dialog(const char* const text,
                      int32_t timeout = 0)
 { FASTCALL_5(void, 0x4F7D20, text, &resources, x, y, timeout); }
 #endif
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x643CA0, widget)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x643CD4, heroWindow)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x643CF8, CHeroWindowEx)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63A6A8, CAdvPopup)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63DB40, TDialogBox)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63DB68, CTextDialog)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x64235C, TSubWindow)
 
 NH3API_DISABLE_WARNING_END

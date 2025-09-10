@@ -824,6 +824,10 @@ NH3API_VIRTUAL_CLASS exe_strstreambuf : public exe_streambuf
 #pragma pack(pop)
 
 typedef exe_basic_filebuf<char, std::char_traits<char> > exe_filebuf;
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x6456B8, exe_streambuf)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x645820, exe_filebuf)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x645680, exe_strstreambuf)
+
 NH3API_FORCEINLINE
 exe_streamsize read(exe_streambuf& stream, void* buf, size_t len)
 { return stream.sgetn(static_cast<char*>(buf), len); }

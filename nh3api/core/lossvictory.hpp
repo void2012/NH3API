@@ -9,7 +9,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "resources/resources_include.hpp" // EGameResource
+#include "resources/resources.hpp" // EGameResource
 #include "hero_enums.hpp" // THeroID
 #include "terrain.hpp" // type_point
 

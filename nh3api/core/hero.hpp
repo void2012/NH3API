@@ -10,7 +10,7 @@
 #pragma once
 
 #include "nh3api_std/exe_bitset.hpp" // exe_bitset<N>
-#include "resources/resources_include.hpp" // EGameResource
+#include "resources/resources.hpp" // EGameResource
 #include "hero_enums.hpp" // THeroID, TSex, TRace, THeroClass, hero_seqid
 #include "player.hpp" // playerData
 #include "objects.hpp" // type_obscuring_object

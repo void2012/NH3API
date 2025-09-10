@@ -9,7 +9,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "resources/resources_include.hpp"
+#include "resources/files.hpp" // TAbstractFile
 
 #pragma pack(push, 4)
 // Multiplayer player information /
@@ -233,3 +233,6 @@ enum eNetGameType : int32_t
     MP_SERIAL  = 4, // 
     MP_MODEM   = 5, // Модем
 };
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x640280, t_complex_net_message)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x640F24, CNetMsgHandler)

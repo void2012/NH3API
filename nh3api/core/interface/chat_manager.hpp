@@ -140,7 +140,7 @@ class CChatManager
         void UpdateWidgetText(int32_t numLines, textWidget* Widget)
         { THISCALL_3(void, 0x5542E0, this, numLines, Widget); }
 
-        bool HasOldChat()
+        bool HasOldChat() const
         { return THISCALL_1(bool, 0x5541B0, this); }
 
         void KillOldChat()
