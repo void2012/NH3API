@@ -408,6 +408,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         int32_t get_total_combat_value(int32_t side, int32_t lowest_attack, int32_t lowest_defense, bool include_cripples) const
         { return THISCALL_5(int32_t, 0x41EC40, this, side, lowest_attack, lowest_defense, include_cripples); }
 
+        int32_t compute_fire_shield_damage(int32_t damage, const army* attacker, const army* target, int32_t target_hits) const
+        { return THISCALL_5(int32_t, 0x4225C0, this, damage, attacker, target, target_hits); }
+
         // Creatures turn order /
         // Порядок хода существ.
         void find_move_order(exe_vector<army*>* order)

@@ -107,7 +107,7 @@ class hero;
 // Path finding engine in combat and adventure map /
 // Движок поиска оптимального пути в бою и на карте приключений.
 // size = 0x70 = 112, align = 4
-struct searchArray
+class searchArray
 {
     public:
         NH3API_FORCEINLINE

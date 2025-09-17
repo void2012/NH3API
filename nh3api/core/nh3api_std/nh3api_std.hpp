@@ -1530,7 +1530,7 @@ enum : unsigned char
 // whole program optimization doesn't always fix this issue though.
 #if NH3API_HAS_BUILTIN(__builtin_constant_p)
     #define get_global_var_ptr(address,...) (__builtin_constant_p(reinterpret_cast<__VA_ARGS__*>(address)) ? reinterpret_cast<__VA_ARGS__*>(address) : reinterpret_cast<__VA_ARGS__*>(address))  // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
-    #define get_global_var_ref(address,...) *(__builtin_constant_p(reinterpret_cast<__VA_ARGS__*>(address)) ? reinterpret_cast<__VA_ARGS__*>(address) : reinterpret_cast<__VA_ARGS__*>(address)) // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
+    #define get_global_var_ref(address,...) (*(__builtin_constant_p(reinterpret_cast<__VA_ARGS__*>(address)) ? reinterpret_cast<__VA_ARGS__*>(address) : reinterpret_cast<__VA_ARGS__*>(address))) // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
 #else
     #define get_global_var_ptr(address,...) (reinterpret_cast<__VA_ARGS__*>(address))
     #define get_global_var_ref(address,...) (*reinterpret_cast<__VA_ARGS__*>(address))
