@@ -406,6 +406,7 @@ enum : uint32_t
     ALIGNMENTS_MASK     = ALIGNMENTS_MASK_SOD
 };
 
+#pragma pack(push, 1)
 // Map point: X, Y, Z coordinates /
 // Точка на карте: координаты X, Y, Z.
 class type_point
@@ -417,7 +418,7 @@ class type_point
         /// @param X is in range [0;1023]
         /// @param Y is in range [0;1023]
         /// @param Z is in range [0;15]
-        type_point(int8_t X, int8_t Y, int8_t Z) NH3API_NOEXCEPT
+        type_point(int16_t X, int16_t Y, int16_t Z) NH3API_NOEXCEPT
             : x(X), y(Y), z(Z) {}
 
         NH3API_FORCEINLINE NH3API_CONSTEXPR
@@ -434,8 +435,8 @@ class type_point
         }
 
         NH3API_FORCEINLINE
-        type_point(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-        { NH3API_IGNORE(x, y, z); }
+        type_point(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
 
     // setters
     public:
@@ -475,17 +476,17 @@ class type_point
 
     // getters
     public:
-        NH3API_CONSTEXPR
+        NH3API_NODISCARD NH3API_CONSTEXPR
         int16_t get_x() const NH3API_NOEXCEPT
         { return x; }
 
-        NH3API_CONSTEXPR
+        NH3API_NODISCARD NH3API_CONSTEXPR
         int16_t get_y() const NH3API_NOEXCEPT
         { return y; }
 
-        NH3API_CONSTEXPR
+        NH3API_NODISCARD NH3API_CONSTEXPR
         int8_t get_z() const NH3API_NOEXCEPT
-        { return z; }
+        { return static_cast<int8_t>(z & 0xF); }
 
         #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
         NH3API_CONSTEXPR_CPP_14
@@ -504,10 +505,10 @@ class type_point
 
         // This point is on map
         // Точка находится на карте
-        bool is_valid() const NH3API_NOEXCEPT
+        NH3API_NODISCARD bool is_valid() const NH3API_NOEXCEPT
         { return THISCALL_1(bool, 0x4B1090, this); }
 
-        NH3API_CONSTEXPR size_t hash() const NH3API_NOEXCEPT
+        NH3API_NODISCARD NH3API_CONSTEXPR size_t hash() const NH3API_NOEXCEPT
         {
             // for hash we simply return 32-bit mask of tuple [x,y,z] but without 
             // unused bits which may be filled with different default values depending on 
@@ -519,12 +520,13 @@ class type_point
         }
 
     public:
-        signed x : 10; // +00, bytes 0..1
-        signed   : 6; // +10
-        signed y : 10; // +16
-        signed z : 4;  // +26
-        signed   : 2; // +30
+        int16_t x : 10; // +00
+        int16_t   : 6;  // +10
+        int16_t y : 10; // +16
+        int16_t z : 4;  // +26
+        int16_t   : 2;  // +30
 } NH3API_MSVC_LAYOUT;
+#pragma pack(pop)
 
 #if NH3API_STD_HASH
 // std::hash support for type_point
@@ -651,6 +653,12 @@ struct ExtraObjectProperties
         // offset: +0x2 = +2,  size = 0x1 = 1
         bool removable;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x3 = +3,  size = 0x1 = 1
+        byte_t gap_3[1];
+
+    public:
         // Object name /
         // Название объекта
         // offset: +0x4 = +4,  size = 0x4 = 4
@@ -665,6 +673,11 @@ struct ExtraObjectProperties
         // Объект является декоративным.
         // offset: +0xC = +12,  size = 0x1 = 1
         bool decorative;
+
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0xD = +13,  size = 0x3 = 3
+        byte_t gap_D[3];
 
 };
 #pragma pack(pop)

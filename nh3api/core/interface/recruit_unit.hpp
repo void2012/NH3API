@@ -10,72 +10,48 @@
 #include "../base_manager.hpp"
 
 #pragma pack(push, 4)
-//
 // size = 0xBC = 188, align = 4, baseclass: baseManager
 class recruitUnit : public baseManager
 {
-    protected:
+    public:
         recruitUnit() NH3API_DELETED_FUNCTION
 
-    public:
         recruitUnit(armyGroup* newGroup,
                     bool bGroupIsTownGarrison,
-                    TCreatureType MonType1,
+                    TCreatureType MonType1_,
                     int16_t* numMon1,
-                    TCreatureType MonType2,
+                    TCreatureType MonType2_,
                     int16_t* numMon2,
-                    TCreatureType MonType3,
+                    TCreatureType MonType3_,
                     int16_t* numMon3,
-                    TCreatureType MonType4,
+                    TCreatureType MonType4_,
                     int16_t* numMon4) NH3API_NOEXCEPT
-            : recruitUnit(nh3api::dummy_tag)
-        { THISCALL_11(void, 0x551750, this, newGroup, bGroupIsTownGarrison, MonType1, numMon1, MonType2, numMon2, MonType3, numMon3, MonType4, numMon4); }
+            : recruitUnit(::nh3api::dummy_tag)
+        { THISCALL_11(void, 0x551750, this, newGroup, bGroupIsTownGarrison, MonType1_, numMon1, MonType2_, numMon2, MonType3_, numMon3, MonType4_, numMon4); }
 
-        recruitUnit(hero* _thisHero,
-                    TCreatureType _MonType1,
+        recruitUnit(hero* thisHero_,
+                    TCreatureType MonType1_,
                     int16_t* numMon1,
-                    TCreatureType _MonType2,
+                    TCreatureType MonType2_,
                     int16_t* numMon2,
-                    TCreatureType _MonType3,
+                    TCreatureType MonType3_,
                     int16_t* numMon3,
-                    TCreatureType _MonType4,
+                    TCreatureType MonType4_,
                     int16_t* numMon4) NH3API_NOEXCEPT
-            : recruitUnit(nh3api::dummy_tag)
-        { THISCALL_10(void, 0x551860, this, _thisHero, _MonType1, numMon1, _MonType2, numMon2, _MonType3, numMon3, _MonType4, numMon4); }
+            : recruitUnit(::nh3api::dummy_tag)
+        { THISCALL_10(void, 0x551860, this, thisHero_, MonType1_, numMon1, MonType2_, numMon2, MonType3_, numMon3, MonType4_, numMon4); }
 
         recruitUnit(town* newTown,
                     int32_t newDwellingIndex,
                     int32_t bInInTownMainScreen) NH3API_NOEXCEPT
-            : recruitUnit(nh3api::dummy_tag)
+            : recruitUnit(::nh3api::dummy_tag)
         { THISCALL_4(void, 0x551960, this, newTown, newDwellingIndex, bInInTownMainScreen); }
 
-        recruitUnit(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        recruitUnit(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : baseManager(tag)
-        { NH3API_IGNORE(CurrentSpriteFrame,
-                        type,
-                        view_only,
-                        monsterType,
-                        selectedPosition,
-                        MonType1,
-                        MonType2,
-                        MonType3,
-                        MonType4,
-                        available,
-                        thisHero,
-                        availSource,
-                        goldPerTroop,
-                        altResource,
-                        resourcesPerTroop,
-                        bInTownMainScreen,
-                        errorWin,
-                        currArmyGroup,
-                        addIndex,
-                        updateNeeded,
-                        errorExit,
-                        maxAvail,
-                        totalGold,
-                        totalResources,
-                        numberToBuy); }
+        {}
+
+        NH3API_DEFAULT_DESTRUCTOR(recruitUnit)
 
     public:
         void Update(bool new_monster, int32_t slot) NH3API_NOEXCEPT

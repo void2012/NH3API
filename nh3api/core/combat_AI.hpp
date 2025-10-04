@@ -11,7 +11,7 @@
 
 #include "combat.hpp"
 
-NH3API_FORCEINLINE int32_t AI_get_attack_damage(const army& current_army, int32_t our_hits, const army& enemy, bool ranged, int32_t distance)
+NH3API_NODISCARD NH3API_FORCEINLINE int32_t AI_get_attack_damage(const army& current_army, int32_t our_hits, const army& enemy, bool ranged, int32_t distance)
 { return FASTCALL_5(int32_t, 0x4355D0, &current_army, our_hits, &enemy, ranged, distance); }
 
 #pragma pack(push, 4)
@@ -25,7 +25,7 @@ class type_AI_combat_parameters
         { THISCALL_3(void, 0x435B10, this, combatMgr, side); }
 
         NH3API_FORCEINLINE
-        type_AI_combat_parameters(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        type_AI_combat_parameters(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         { }
 
     // methods
@@ -55,16 +55,16 @@ class type_AI_combat_parameters
         void simulate_attack(const army& current_army, int32_t& our_hits, const army& enemy, int32_t& enemy_hits, bool ranged, int32_t distance)
         { THISCALL_7(void, 0x435600, this, &current_army, &our_hits, &enemy, &enemy_hits, ranged, distance); }
 
-        int32_t get_simple_attack_effect(const army& current_army, int32_t our_total, const army& enemy, int32_t enemy_total, bool ranged, int32_t distance)
+        NH3API_NODISCARD int32_t get_simple_attack_effect(const army& current_army, int32_t our_total, const army& enemy, int32_t enemy_total, bool ranged, int32_t distance)
         { return THISCALL_7(int32_t, 0x4357E0, this, &current_army, our_total, &enemy, enemy_total, ranged, distance); }
 
-        int32_t get_simple_attack_effect(const army& current_army, const army& enemy, bool ranged, int32_t distance)
+        NH3API_NODISCARD int32_t get_simple_attack_effect(const army& current_army, const army& enemy, bool ranged, int32_t distance)
         { return THISCALL_5(int32_t, 0x4358C0, this, &current_army, &enemy, ranged, distance); }
 
-        int32_t get_ranged_attack_value(const army& current_army, const army& enemy)
+        NH3API_NODISCARD int32_t get_ranged_attack_value(const army& current_army, const army& enemy)
         { return THISCALL_3(int32_t, 0x435900, this, &current_army, &enemy); }
 
-        int32_t get_exchange_effect(const army& current_army, const army& enemy, int32_t distance)
+        NH3API_NODISCARD int32_t get_exchange_effect(const army& current_army, const army& enemy, int32_t distance)
         { return THISCALL_4(int32_t, 0x435A10, this, &current_army, &enemy, distance); }
 
     // member variables
@@ -138,15 +138,15 @@ struct type_enchant_data
               check_resistance(true)
         {}
 
-        type_enchant_data(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_enchant_data(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         {}
             
     // methods
     public:
-        int32_t get_mastery_value() const 
+        NH3API_NODISCARD int32_t get_mastery_value() const 
         { return THISCALL_1(int32_t, 0x436580, this); }
 
-        bool valid() const 
+        NH3API_NODISCARD bool valid() const 
         { return !(spell == SPELL_NONE && mastery == eMasteryNone && power == 0); }
 
     // member variables
@@ -185,7 +185,7 @@ struct type_spell_choice : type_enchant_data
         { THISCALL_5(void, 0x4365D0, this, new_spell, new_mastery, new_power, new_duration); }
 
         NH3API_FORCEINLINE
-        type_spell_choice(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_spell_choice(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : type_enchant_data(tag)
         {}
 
@@ -219,11 +219,11 @@ NH3API_VIRTUAL_CLASS type_AI_spellcaster
     public:
         NH3API_FORCEINLINE
         type_AI_spellcaster(combatManager* combatMgr, int32_t side, bool creature_spell) NH3API_NOEXCEPT
-            : estimate(nh3api::dummy_tag)
+            : estimate(::nh3api::dummy_tag)
         { THISCALL_4(void, 0x436610, this, combatMgr, side, creature_spell); } 
 
         NH3API_FORCEINLINE
-        type_AI_spellcaster(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_AI_spellcaster(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : estimate(tag)
         {}
 
@@ -233,43 +233,43 @@ NH3API_VIRTUAL_CLASS type_AI_spellcaster
 
     // methods
     public:
-        bool should_attack_now(const army& enemy) const
+        NH3API_NODISCARD bool should_attack_now(const army& enemy) const
         { return THISCALL_2(bool, 0x4368B0, this, &enemy); }
 
-        int32_t get_damage_value(SpellID spell, int32_t base_damage, const hero* target_hero, const army* target) const
+        NH3API_NODISCARD int32_t get_damage_value(SpellID spell, int32_t base_damage, const hero* target_hero, const army* target) const
         { return THISCALL_5(int32_t, 0x436A80, this, spell, base_damage, target_hero, target); }
 
-        int32_t get_damage_spell_value(const army* our_army, type_enchant_data caster) const
+        NH3API_NODISCARD int32_t get_damage_spell_value(const army* our_army, type_enchant_data caster) const
         { return THISCALL_3(int32_t, 0x436BB0, this, our_army, caster); }
 
-        int32_t get_mass_damage_effect(int32_t enemy_damage, int32_t friendly_damage) const
+        NH3API_NODISCARD int32_t get_mass_damage_effect(int32_t enemy_damage, int32_t friendly_damage) const
         { return THISCALL_3(int32_t, 0x436C00, this, enemy_damage, friendly_damage); }
 
-        int32_t get_area_effect_value(SpellID spell, int32_t base_damage, TSkillMastery mastery, int32_t hex) const
+        NH3API_NODISCARD int32_t get_area_effect_value(SpellID spell, int32_t base_damage, TSkillMastery mastery, int32_t hex) const
         { return THISCALL_5(int32_t, 0x436C90, this, spell, base_damage, mastery, hex); }
 
-        int32_t get_chain_lightning_value(int32_t power, TSkillMastery mastery, army* target) const
+        NH3API_NODISCARD int32_t get_chain_lightning_value(int32_t power, TSkillMastery mastery, army* target) const
         { return THISCALL_4(int32_t, 0x436DE0, this, power, mastery, target); }
 
-        int32_t get_attack_skill_value(const army* our_army, const army* enemy, int32_t duration, int32_t bonus) const
+        NH3API_NODISCARD int32_t get_attack_skill_value(const army* our_army, const army* enemy, int32_t duration, int32_t bonus) const
         { return THISCALL_5(int32_t, 0x437450, this, our_army, enemy, duration, bonus); }
 
-        int32_t get_defense_boost_value(const army* our_army, const army* enemy, int32_t duration, double increase) const
+        NH3API_NODISCARD int32_t get_defense_boost_value(const army* our_army, const army* enemy, int32_t duration, double increase) const
         { return THISCALL_5(int32_t, 0x438410, this, our_army, enemy, duration, increase); }
 
-        int32_t get_defense_skill_value(const army* our_army, int32_t duration, int32_t bonus) const
+        NH3API_NODISCARD int32_t get_defense_skill_value(const army* our_army, int32_t duration, int32_t bonus) const
         { return THISCALL_4(int32_t, 0x438560, this, our_army, duration, bonus); }
 
-        int32_t get_speed_value(const army* our_army, int32_t increase, int32_t duration) const
+        NH3API_NODISCARD int32_t get_speed_value(const army* our_army, int32_t increase, int32_t duration) const
         { return THISCALL_4(int32_t, 0x4391A0, this, our_army, increase, duration); }
 
-        int32_t get_protection_value(const army* our_army, TSpellSchool school, int32_t level, int32_t duration, int32_t amount) const
+        NH3API_NODISCARD int32_t get_protection_value(const army* our_army, TSpellSchool school, int32_t level, int32_t duration, int32_t amount) const
         { return FASTCALL_6(int32_t, 0x439330, this, our_army, school, level, duration, amount); }
         
-        int32_t get_cancel_value(army& current_army, bool bad_spells_only) const
+        NH3API_NODISCARD int32_t get_cancel_value(army& current_army, bool bad_spells_only) const
         { return THISCALL_3(int32_t, 0x4396D0, this, &current_army, bad_spells_only); }
 
-        int32_t get_traitor_value(const army* enemy, const army* target) const
+        NH3API_NODISCARD int32_t get_traitor_value(const army* enemy, const army* target) const
         { return THISCALL_3(int32_t, 0x439F90, this, enemy, target); }
 
         void consider_single_enchantment(type_spell_choice& choice, int32_t group) const
@@ -360,10 +360,10 @@ struct type_monster_data
 {
     // methods
     public:
-        int32_t get_enchantment_value(type_spell_choice& choice, const hero* casting_hero, const hero* target_hero) const
+        NH3API_NODISCARD int32_t get_enchantment_value(type_spell_choice& choice, const hero* casting_hero, const hero* target_hero) const
         { return THISCALL_4(int32_t, 0x423C80, this, &choice, casting_hero, target_hero); }
 
-        int32_t get_resurrection_value(type_spell_choice& choice, const hero* casting_hero) const
+        NH3API_NODISCARD int32_t get_resurrection_value(type_spell_choice& choice, const hero* casting_hero) const
         { return THISCALL_3(int32_t, 0x423D00, this, &choice, casting_hero); }
 
         void cast_resurrection(type_spell_choice& choice, const hero* casting_hero)
@@ -373,7 +373,7 @@ struct type_monster_data
             this->total_value += resurrection_value * this->value;
         }
 
-        int32_t get_spell_damage(SpellID spell, const hero* casting_hero, const hero* target_hero, int32_t damage) const
+        NH3API_NODISCARD int32_t get_spell_damage(SpellID spell, const hero* casting_hero, const hero* target_hero, int32_t damage) const
         { return THISCALL_5(int32_t, 0x423DE0, this, spell, casting_hero, target_hero, damage); }
 
         int32_t take_damage(int32_t damage)
@@ -381,16 +381,16 @@ struct type_monster_data
 
     // comparison operators
     public:
-        NH3API_CONSTEXPR bool operator<(const type_monster_data& other) const NH3API_NOEXCEPT
+        NH3API_NODISCARD NH3API_CONSTEXPR bool operator<(const type_monster_data& other) const NH3API_NOEXCEPT
         { return this->value < other.value; }
 
-        NH3API_CONSTEXPR bool operator>(const type_monster_data& other) const NH3API_NOEXCEPT
+        NH3API_NODISCARD NH3API_CONSTEXPR bool operator>(const type_monster_data& other) const NH3API_NOEXCEPT
         { return this->value > other.value; }
 
-        NH3API_CONSTEXPR bool operator>=(const type_monster_data& other) const NH3API_NOEXCEPT
+        NH3API_NODISCARD NH3API_CONSTEXPR bool operator>=(const type_monster_data& other) const NH3API_NOEXCEPT
         { return !(*this < other); }
 
-        NH3API_CONSTEXPR bool operator<=(const type_monster_data& other) const NH3API_NOEXCEPT
+        NH3API_NODISCARD NH3API_CONSTEXPR bool operator<=(const type_monster_data& other) const NH3API_NOEXCEPT
         { return !(*this > other); }
 
     // member variables
@@ -447,9 +447,9 @@ class type_AI_combat_data
     // constructors and destructor
     public: 
         NH3API_FORCEINLINE
-        type_AI_combat_data(const hero* new_hero, const armyGroup* new_army, double base_modifier, const hero* enemy_hero, const town* enemy_town, NewmapCell* map_cell) NH3API_NOEXCEPT
+        type_AI_combat_data(const hero* new_hero, const armyGroup* new_army, double base_modifier, const hero* _enemy_hero, const town* enemy_town, NewmapCell* map_cell) NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY(type_AI_combat_data)
-        { THISCALL_7(void, 0x423EE0, this, new_hero, new_army, base_modifier, enemy_hero, enemy_town, map_cell); }
+        { THISCALL_7(void, 0x423EE0, this, new_hero, new_army, base_modifier, _enemy_hero, enemy_town, map_cell); }
 
         NH3API_FORCEINLINE
         type_AI_combat_data(const type_AI_combat_data& that) NH3API_NOEXCEPT
@@ -457,19 +457,23 @@ class type_AI_combat_data
         { THISCALL_2(void, 0x4276C0, this, &that); }
 
         NH3API_FORCEINLINE
-        type_AI_combat_data(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_AI_combat_data(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : creatures(tag)
         {}
+
+        NH3API_FORCEINLINE
+        ~type_AI_combat_data() NH3API_NOEXCEPT
+        { nh3api::destroy_at(&creatures); } // manually destroy 'creatures'
 
     // methods
     public:
         void adjust_army(bool dismiss_hero)
         { THISCALL_2(void, 0x424880, this, dismiss_hero); }
 
-        int32_t get_fastest_speed() const 
+        NH3API_NODISCARD int32_t get_fastest_speed() const 
         { return THISCALL_1(int32_t, 0x424960, this); }
 
-        type_speed_category get_category(TCreatureType creature, int32_t speed) const 
+        NH3API_NODISCARD type_speed_category get_category(TCreatureType creature, int32_t speed) const 
         {
             const TCreatureTypeTraits& traits = get_global_var_ref(0x6703B8, std::array<TCreatureTypeTraits, MAX_COMBAT_CREATURES>)[creature];
 
@@ -484,7 +488,7 @@ class type_AI_combat_data
             return category;
         }
 
-        int32_t get_next_chain_lightning_target(int32_t excluded, const type_AI_combat_data& defender, int32_t start, int32_t damage) const
+        NH3API_NODISCARD int32_t get_next_chain_lightning_target(int32_t excluded, const type_AI_combat_data& defender, int32_t start, int32_t damage) const
         { return THISCALL_5(int32_t, 0x4249D0, this, excluded, defender, start, damage); }
 
         void get_area_value(type_spell_choice& choice, const type_AI_combat_data& defender, int32_t damage, int32_t extra_targets) const
@@ -502,7 +506,7 @@ class type_AI_combat_data
         void cast_damage_spell(type_spell_choice& choice, type_AI_combat_data& defender) const
         { THISCALL_3(void, 0x425260, this, &choice, &defender); }
 
-        int32_t get_mass_damage_value(type_spell_choice& choice, const hero* casting_hero) const
+        NH3API_NODISCARD int32_t get_mass_damage_value(type_spell_choice& choice, const hero* casting_hero) const
         { return THISCALL_3(int32_t, 0x4253E0, this, &choice, casting_hero); }
 
         void get_enchantment_value(type_spell_choice& choice) const
@@ -540,10 +544,10 @@ class type_AI_combat_data
         void inflict_damage(int32_t damage, int32_t blocker_speed)
         { THISCALL_3(void, 0x426300, this, damage, blocker_speed); }
 
-        int32_t get_attack(type_speed_category speed_limit, bool shooters_blocked) const
+        NH3API_NODISCARD int32_t get_attack(type_speed_category speed_limit, bool shooters_blocked) const
         { return THISCALL_3(int32_t, 0x426390, this, speed_limit, shooters_blocked); }
 
-        int32_t get_final_melee_value() const 
+        NH3API_NODISCARD int32_t get_final_melee_value() const 
         { return THISCALL_1(int32_t, 0x426450, this); }
 
         void do_ranged_combat(type_AI_combat_data& defender)
@@ -576,13 +580,15 @@ class type_AI_combat_data
         void do_aftermath(type_AI_combat_data& defender, town* enemy_town)
         { THISCALL_3(void, 0x426EE0, this, &defender, enemy_town); }
 
-        int32_t get_total() const
+        NH3API_NODISCARD int32_t get_total() const
         { return THISCALL_1(int32_t, 0x427750, this); }
     
     // member variables
     public:
+        union {
         // offset: +0x0 = +0,  size = 0x10 = 16
         exe_vector<type_monster_data> creatures;
+        };
 
         // offset: +0x10 = +16,  size = 0x4 = 4
         EMagicTerrain magic_terrain;
@@ -630,21 +636,23 @@ class type_AI_attack_hex_chooser
         { THISCALL_6(void, 0x435D10, this, attack_army, enemy_army, enemy_attack_array, search_data, &data); }
 
         NH3API_FORCEINLINE
-        type_AI_attack_hex_chooser(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        type_AI_attack_hex_chooser(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         {}
+
+        NH3API_DEFAULT_DESTRUCTOR(type_AI_attack_hex_chooser)
     
     // methods
     public:
-        int32_t get_attack_time() const 
+        NH3API_NODISCARD int32_t get_attack_time() const 
         { return best_attack_time; }
 
-        int32_t get_best_hex() const 
+        NH3API_NODISCARD int32_t get_best_hex() const 
         { return best_hex; }
 
-        int32_t get_hex_value() const 
+        NH3API_NODISCARD int32_t get_hex_value() const 
         { return best_value; }
 
-        int32_t get_hex_attack_value(int32_t hex, int32_t& checked)
+        NH3API_NODISCARD int32_t get_hex_attack_value(int32_t hex, int32_t& checked)
         { return THISCALL_3(int32_t, 0x435DD0, this, hex, &checked); }
 
         void check_adjacent_hexes(int32_t enemy_hex, int32_t start_direction, int32_t stop_direction)

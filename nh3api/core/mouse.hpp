@@ -43,13 +43,17 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
     public:
         NH3API_FORCEINLINE
         mouseManager() NH3API_NOEXCEPT
-            : baseManager(nh3api::dummy_tag)
+            : baseManager(::nh3api::dummy_tag)
         { THISCALL_1(void, 0x50CD40, this); }
 
         NH3API_FORCEINLINE
-        mouseManager(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        mouseManager(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : baseManager(tag)
         {}
+
+        NH3API_FORCEINLINE
+        ~mouseManager() NH3API_NOEXCEPT
+        { DeleteCriticalSection(&this->CriticalSection); }
 
     // member functions
     public:
@@ -135,7 +139,7 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
 NH3API_SIZE_ASSERT(0x90, mouseManager);
 
 NH3API_INLINE_OR_EXTERN
-mouseManager*& gpMouseManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992B0, mouseManager*));
+mouseManager* const& gpMouseManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992B0, mouseManager*));
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x640038, mouseManager)
 

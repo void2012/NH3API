@@ -26,25 +26,19 @@ struct CTurnDuration
         {}
 
         NH3API_FORCEINLINE
-        CTurnDuration(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-        {
-            NH3API_IGNORE(m_lastWarned,
-                          m_turnStartTime,
-                          m_currDuration,
-                          m_nextWarning,
-                          m_pauseTime);
-        }
+        CTurnDuration(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
 
-        bool IsOn() const
+        NH3API_NODISCARD bool IsOn() const
         { return THISCALL_1(bool, 0x557E20, this); }
 
-        bool IsExpired() const
+        NH3API_NODISCARD bool IsExpired() const
         { return THISCALL_1(bool, 0x557E40, this); }
 
         void CheckForWarning()
         { THISCALL_1(void, 0x557E90, this); }
 
-        bool IsClose(uint32_t howClose) const
+        NH3API_NODISCARD bool IsClose(uint32_t howClose) const
         { return THISCALL_2(bool, 0x5580A0, this, howClose); }
 
         void Clear()

@@ -51,10 +51,20 @@ class advManager : public baseManager
         };
 
     public:
+        NH3API_FORCEINLINE
         advManager() NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY(baseManager)
+        NH3API_DELEGATE_DUMMY_OR_BASE(advManager, baseManager)
         { THISCALL_1(void, 0x406D80, this); }
 
+        NH3API_FORCEINLINE
+        advManager(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            : CachedGraphics(tag),
+              map_origin(tag),
+              last_map_hover(tag),
+              BottomViewText(tag)
+        {}
+
+        NH3API_FORCEINLINE
         ~advManager() NH3API_NOEXCEPT
         { THISCALL_1(void, 0x4F4080, this); }
 
@@ -66,14 +76,14 @@ class advManager : public baseManager
     public:
         // Is screen point (x, y) within the map area /
         // Находится ли точка на экране (x, y) внутри части интерфейса карты?
-        int32_t InMapArea(int32_t x, int32_t y) const
+        NH3API_NODISCARD int32_t InMapArea(int32_t x, int32_t y) const
         { return THISCALL_3(int32_t, 0x407A20, this, x, y); }
 
         // Get mouse adventure map cell coordinate /
         // Координата клетки карты, над которой наведена мышь.
-        type_point get_mouse_map_point() const
+        NH3API_NODISCARD type_point get_mouse_map_point() const
         {
-            type_point result(nh3api::dummy_tag);
+            type_point result(::nh3api::dummy_tag);
             (void) THISCALL_2(type_point, 0x407A70, this, &result);
             return result;
         }
@@ -91,12 +101,12 @@ class advManager : public baseManager
 
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
-        NewmapCell* GetCell(type_point point)
+        NH3API_NODISCARD NewmapCell* GetCell(type_point point)
         { return THISCALL_2(NewmapCell*, 0x412B30, this, point); }
 
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
-        NewmapCell* GetCell(int8_t x, int8_t y, int8_t z)
+        NH3API_NODISCARD NewmapCell* GetCell(int8_t x, int8_t y, int8_t z)
         {
             return GetCell(type_point(x, y, z));
             // removed for avoiding dependency on map.hpp
@@ -108,6 +118,16 @@ class advManager : public baseManager
             */
 
         }
+
+        // Get cell info by coordinates /
+        // Получить информацию о клетке по координатам.
+        NH3API_NODISCARD const NewmapCell* GetCell(type_point point) const
+        { return THISCALL_2(NewmapCell*, 0x412B30, this, point); }
+
+        // Get cell info by coordinates /
+        // Получить информацию о клетке по координатам.
+        NH3API_NODISCARD const NewmapCell* GetCell(int8_t x, int8_t y, int8_t z) const
+        { return GetCell(type_point(x, y, z)); }
 
         void UpdateRadar(type_point origin,
                          bool updateFlag,
@@ -157,7 +177,7 @@ class advManager : public baseManager
         void SetEnvironmentOrigin(type_point point, int32_t reset)
         { THISCALL_3(void, 0x418330, this, point, reset); }
 
-        e_looping_sound_id GetSoundId(int32_t x, int32_t y, int32_t z)
+        NH3API_NODISCARD e_looping_sound_id GetSoundId(int32_t x, int32_t y, int32_t z) const
         { return THISCALL_4(e_looping_sound_id, 0x418580, this, x, y, z); }
 
         void InsertSound(int32_t x, int32_t y, int32_t z, int32_t soundPriority, int32_t soundsType)
@@ -177,7 +197,8 @@ class advManager : public baseManager
                                  type_point excluded)
         { return THISCALL_4(bool, 0x41A3C0, this, point, &result, excluded); }
 
-        // Начать битву
+        // Begin combat /
+        // Начать битву.
         /// @param point клетка, на которой происходит битва
         /// @param leftHero герой слева
         /// @param leftArmyGroup армия слева
@@ -186,8 +207,6 @@ class advManager : public baseManager
         /// @param rightHero герой справа
         /// @param rightArmyGroup армия справа
         /// @param iSeed случайный сид
-        /// @param bFinishHeroes
-        /// @param alternate_layout
         /// @return winner side(left = 0, right = 1) / победитель(левый = 0, правый = 1)
         int32_t DoCombat(type_point point,
                          hero* leftHero,
@@ -201,17 +220,17 @@ class advManager : public baseManager
                          int32_t alternate_layout = false)
         { return THISCALL_11(int32_t,
                              0x4AD160,
-                         this,
-                         point,
-                         leftHero,
-                         leftArmyGroup,
-                         iRightPlayer,
-                         rightTown,
-                         rightHero,
-                         rightArmyGroup,
-                         iSeed,
-                        bFinishHeroes,
-                        alternate_layout); }
+                             this,
+                             point,
+                             leftHero,
+                             leftArmyGroup,
+                             iRightPlayer,
+                             rightTown,
+                             rightHero,
+                             rightArmyGroup,
+                             iSeed,
+                             bFinishHeroes,
+                             alternate_layout); }
 
         // Erase an object /
         // Стереть объект на карте.
@@ -221,13 +240,21 @@ class advManager : public baseManager
         void EraseObj(NewmapCell* thisCell, type_point point, bool record)
         { THISCALL_4(void, 0x4AA820, this, thisCell, point, record); }
 
-       // Erase an object with a sound effect /
+        // Erase an object with a sound effect /
         // Стереть объект на карте со звуковым эффектом
         /// @param eventCell клетка
         /// @param point     координаты клетки
         /// @param fizzleSound true = pickup resource sound, false = kill hero sound
         void EraseAndFizzle(NewmapCell* eventCell, type_point point, bool32_t fizzleSound)
         { THISCALL_4(void, 0x49DDE0, this, eventCell, point, fizzleSound); }
+    
+    // static functions
+    public:
+        NH3API_NODISCARD static int32_t get_like_modifier(hero* current_hero, TCreatureType creature)
+        { return FASTCALL_2(int32_t, 0x4A7230, current_hero, creature); }
+
+        NH3API_NODISCARD static int32_t get_force_modifier(float strength_ratio)
+        { return FASTCALL_1(int32_t, 0x4A7330, strength_ratio); }
 
     // public variables
     public:
@@ -244,6 +271,12 @@ class advManager : public baseManager
         // offset: +0x3D = +61,  size = 0x1 = 1
         bool DebugViewAll;
 
+    protected:
+        // offset: +0x3E = +62,  size = 0x2 = 2
+        NH3API_MAYBE_UNUSED
+        byte_t gap_3E[2];
+        
+    public:
         // offset: +0x40 = +64,  size = 0x4 = 4
         int32_t advCommand;
 
@@ -283,17 +316,17 @@ class advManager : public baseManager
         // Ground sprites /
         // Спрайты почв.
         // offset: +0x60 = +96,  size = 0x28 = 40
-        std::array<CSprite*, 10> groundTileset;
+        std::array<const CSprite*, 10> groundTileset;
 
         // River sprites /
         // Спрайты рек.
         // offset: +0x88 = +136,  size = 0x14 = 20
-        std::array<CSprite*, 5> riverTileset;
+        std::array<const CSprite*, 5> riverTileset;
 
         // Road sprites /
         // Спрайты дорог.
         // offset: +0x9C = +156,  size = 0x10 = 16
-        std::array<CSprite*, 4> roadTileset;
+        std::array<const CSprite*, 4> roadTileset;
 
         // Map edges sprite(edg.def) /
         // Спрайт кромки карты(edg.def).
@@ -307,7 +340,7 @@ class advManager : public baseManager
 
         // agemul.def, agemur.def, agemll.def, agemlr.def
         // offset: +0xB4 = +180,  size = 0x10 = 16
-        std::array<CSprite*, 4> gemIcons;
+        std::array<const CSprite*, 4> gemIcons;
 
         // Shroud fill sprite(tshrc.def) /
         // Спрайт заполнения Терры Инкогнито(tshrc.def)
@@ -324,19 +357,21 @@ class advManager : public baseManager
         // offset: +0xCC = +204,  size = 0x4 = 4
         CSprite* cloudIcons;
 
+        union {
         // Cached game resources /
         // Игровые ресурсы, хранимые в кеше(advManager-а).
         // offset: +0xD0 = +208,  size = 0x10 = 16
         exe_vector<resource*> CachedGraphics;
+        };
 
         // avwattak.def
         // offset: +0xE0 = +224,  size = 0x4 = 4
         CSprite* monAttackSprites;
-
+        
         // Map focus point /
         // Координаты клетки фокуса карты (по центру экрана).
         // offset: +0xE4 = +228,  size = 0x4 = 4
-        type_point map_origin;
+        type_point map_origin; 
 
         // Cursor cell position /
         // Координаты клетки карты, на которую наведен курсор.
@@ -377,6 +412,10 @@ class advManager : public baseManager
         bool animCtrPaused;
 
     protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x105 = +261,  size = 0x3 = 3
+        byte_t gap_105[3];
+
         // Unused, = 0 /
         // Не используется, = 0.
         // offset: +0x108 = +264,  size = 0x4 = 4
@@ -413,6 +452,12 @@ class advManager : public baseManager
         // offset: +0x1EC = +492,  size = 0x1 = 1
         bool heroVisible;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x1ED = +493,  size = 0x3 = 3
+        byte_t gap_1ED[3];
+
+    public:
         // Current hero, OBJECT_HERO or OBJECT_BOAT /
         // Тип объекта героя(герой, OBJECT_HERO или лодка, OBJECT_BOAT).
         // offset: +0x1F0 = +496,  size = 0x4 = 4
@@ -458,6 +503,10 @@ class advManager : public baseManager
         bool bCurHeroMobile;
 
     protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x20D = +525,  size = 0x3 = 3
+        byte_t gap_20D[3];
+        
         // Unused, = 0 /
         // Не используется, = 0.
         // offset: +0x210 = +528,  size = 0x4 = 4
@@ -495,7 +544,7 @@ class advManager : public baseManager
         // Looped adventure object sounds /
         // Звуки объектов.
         // offset: +0x248 = +584,  size = 0x118 = 280
-        std::array<sample*, 70> loopedSample;
+        std::array<sample*, max_environment_sounds> loopedSample;
 
         // Hero walk sounds /
         // Звуки передвижения героя
@@ -512,6 +561,12 @@ class advManager : public baseManager
         // offset: +0x390 = +912,  size = 0x1 = 1
         bool bHeroMoving;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x391 = +913,  size = 0x3 = 3
+        byte_t gap_391[3];
+        
+    public:
         // offset: +0x394 = +916,  size = 0x4 = 4
         EBottomViewType CurrentBottomView;
 
@@ -527,8 +582,10 @@ class advManager : public baseManager
         // offset: +0x3A4 = +932,  size = 0x4 = 4
         int32_t BottomViewResourceQty;
 
+        union {
         // offset: +0x3A8 = +936,  size = 0x10 = 16
         exe_string BottomViewText;
+        };
 
 };
 #pragma pack(pop)
@@ -536,7 +593,7 @@ class advManager : public baseManager
 NH3API_SIZE_ASSERT(0x3B8, advManager);
 
 NH3API_INLINE_OR_EXTERN
-advManager*& gpAdvManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992B8, advManager*));
+advManager* const& gpAdvManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992B8, advManager*));
 
 NH3API_INLINE_OR_EXTERN
 // Show adventure map animations /

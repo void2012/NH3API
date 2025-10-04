@@ -241,17 +241,17 @@ struct type_artifact
         {}
 
         NH3API_FORCEINLINE
-        type_artifact(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-        { NH3API_IGNORE(type, spell); }
+        type_artifact(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
 
     public:
         void get_rollover_text(char* buffer) const
         { THISCALL_2(void, 0x4DB5C0, this, buffer); }
 
-        NH3API_FORCEINLINE
+        NH3API_NODISCARD NH3API_FORCEINLINE
         exe_string get_description() const
         {
-            exe_string result(nh3api::dummy_tag);
+            exe_string result(::nh3api::dummy_tag);
             THISCALL_2(exe_string*, 0x4DB650, this, &result);
             return result;
         }
@@ -364,11 +364,14 @@ protected:
     bool m_disabled;
 
 public:
-
     // Artifact gives spells /
     // Артефакт даёт заклинания.
     // offset: +0x1D = +29,  size = 0x1 = 1
     bool m_givesSpells;
+
+protected:
+    NH3API_MAYBE_UNUSED
+    byte_t gap_1E[2];
 
 };
 #pragma pack(pop)

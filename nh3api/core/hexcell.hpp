@@ -45,16 +45,22 @@ struct hexcell
         { THISCALL_1(void, 0x4E7210, this); }
 
         NH3API_FORCEINLINE
-        hexcell(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        hexcell(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         {}
 
-        bool HasArmy() const
+        NH3API_NODISCARD bool HasArmy() const
         { return armyGrp > 0; }
 
-        army* get_army() const
+        NH3API_NODISCARD army* get_army()
         { return THISCALL_1(army*, 0x4E7230, this); }
 
-        army* get_dead_army(uint32_t i) const
+        NH3API_NODISCARD const army* get_army() const
+        { return THISCALL_1(army*, 0x4E7230, this); }
+
+        NH3API_NODISCARD army* get_dead_army(uint32_t i)
+        { return THISCALL_2(army*, 0x4E7270, this, i); }
+
+        NH3API_NODISCARD const army* get_dead_army(uint32_t i) const
         { return THISCALL_2(army*, 0x4E7270, this, i); }
 
     public:
@@ -79,6 +85,12 @@ struct hexcell
         // offset: +0xC = +12,  size = 0x2 = 2
         int16_t fullHexBRY;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0xD = +13,  size = 0x2 = 2
+        byte_t gap_D[2];
+
+    public:
         // offset: +0x10 = +16,  size = 0x4 = 4
         enum TAttributes : uint32_t
         {
@@ -104,6 +116,12 @@ struct hexcell
         // offset: +0x1A = +26,  size = 0x1 = 1
         int8_t partOfDouble;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x1B = +27,  size = 0x2 = 2
+        byte_t gap_1B[1];
+
+    public:
         // offset: +0x1C = +28,  size = 0x4 = 4
         int32_t iBodiesInHex;
 
@@ -128,6 +146,12 @@ struct hexcell
         // offset: +0x4D = +77,  size = 0x1 = 1
         int8_t background_offset;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x4E = +78,  size = 0x2 = 2
+        byte_t gap_4E[2];
+
+    public:
         // offset: +0x50 = +80,  size = 0x10 = 16
         SLimitData obstacleLimitData;
 

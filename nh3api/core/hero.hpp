@@ -30,11 +30,18 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 // size = 0x14 = 20, align = 4
 struct HeroIdentity
 {
+public:
     // Portrait index /
     // Номер портрета.
     // offset: +0x0 = +0,  size = 0x1 = 1
     int8_t portrait;
 
+protected:
+    NH3API_MAYBE_UNUSED
+    // offset: +0x1 = +1,  size = 0x3 = 3
+    byte_t gap_1[3];
+
+public:
     // Hero name /
     // Имя героя.
     // offset: +0x4 = +4,  size = 0x10 = 16
@@ -63,7 +70,7 @@ class boat;
 // stores information for hero on adventure map /
 // класс hero:
 // содержит информацию о герое на карте приключений.
-// size = 0x492 = 1170, align = 1, baseclass: type_obscuring_object
+// size = 0x492 = 1170, align = 2, baseclass: type_obscuring_object
 class hero : public type_obscuring_object
 {
     public:
@@ -78,18 +85,9 @@ class hero : public type_obscuring_object
         { THISCALL_2(void, 0x406410, this, &other); }
 
         NH3API_FORCEINLINE
-        hero(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        hero(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : TownSpecialGrantedMask(tag)
-        {
-            NH3API_IGNORE(SSLevel,
-                          SSOrder,
-                          equipped,
-                          blockedSlots,
-                          backpack,
-                          in_spellbook,
-                          available_spells,
-                          stats);
-        }
+        {}
 
         NH3API_FORCEINLINE
         ~hero() NH3API_NOEXCEPT
@@ -105,71 +103,76 @@ class hero : public type_obscuring_object
     public:
         // This hero belongs to human player /
         // Герой принадлежит игроку-человеку.
-        bool belongs_to_human() const
+        NH3API_NODISCARD bool belongs_to_human() const
         { return playerOwner >= 0 && THISCALL_2(bool, 0x4CE600, hero_hpp_gpGame, playerOwner); }
 
         // Count equipped artifacts /
-        // Посчитать количество надетых на героя артефактов.
-        /// @param countWarMachines включая военные машины.
-        int32_t get_equipped_artifacts(bool countWarMachines) const
+        // Посчитать количество надетых на героя артефактов (countWarMachines = включая военные машины).
+        NH3API_NODISCARD int32_t get_equipped_artifacts(bool countWarMachines) const
         { return THISCALL_2(int32_t, 0x4D92E0, this, countWarMachines); }
 
         // Count backpack artifacts /
-        // Посчитать количество артефактов в рюкзаке.
-        /// @param countWarMachines включая военные машины.
-        int32_t get_number_in_backpack(bool countWarMachines) const
+        // Посчитать количество артефактов в рюкзаке (countWarMachines = включая военные машины).
+        NH3API_NODISCARD int32_t get_number_in_backpack(bool countWarMachines) const
         { return THISCALL_2(int32_t, 0x4D9330, this, countWarMachines); }
 
         // Does hero have this artifact? /
-        // Есть ли у героя такой артефакт(в рюкзаке или на себе)?
-        /// @param artifact артефакт
-        bool HasArtifact(TArtifact artifact) const
+        // Есть ли у героя такой артефакт <artifact>(в рюкзаке или на себе)?
+        NH3API_NODISCARD bool HasArtifact(TArtifact artifact) const
         { return THISCALL_2(bool, 0x4D9420, this, artifact); }
 
-        // This artifact is equipped on hero? /
-        // Носит ли герой такой артефакт?
-        /// @param artifact артефакт
-        bool IsWieldingArtifact(TArtifact artifact) const
+        // This <artifact> is equipped on hero? /
+        // Носит ли герой такой артефакт <artifact>?
+        NH3API_NODISCARD bool IsWieldingArtifact(TArtifact artifact) const
         { return THISCALL_2(bool, 0x4D9460, this, artifact); }
 
-        // Add spell to spellbook /
-        // Добавить заклинание в книгу заклинаний.
-        /// @param spell заклинание
+        // Add <spell> to spellbook /
+        // Добавить заклинание <spell> в книгу заклинаний.
         void AddSpell(SpellID spell)
-        { in_spellbook[spell] = true; available_spells[spell] = true; }
+        { 
+            if ( spell > SPELL_NONE && spell < MAX_BOOK_SPELLS)
+            {
+                in_spellbook[static_cast<size_t>(spell)] = true; 
+                available_spells[static_cast<size_t>(spell)] = true;  
+            }
+        }
 
         void Deallocate(bool bGameLoaded, bool remote_move)
         { THISCALL_3(void, 0x4DA130, this, bGameLoaded, remote_move); }
 
         // Get experience points for <iLevel> /
         // Получить соответствующие уровню <iLevel> очки опыта
-        /// @param iLevel уровень.
-        static int32_t GetExperience(int32_t iLevel)
+        NH3API_NODISCARD static int32_t GetExperience(int32_t iLevel)
         { return FASTCALL_1(int32_t, 0x4DA610, iLevel); }
 
         // Get experience points for upgrading from <iLevel> to <iLevel>+1 /
         // Получить очки опыта для перехода от уровня <iLevel> героя до уровня <iLevel>+1.
-        /// @param iLevel уровень.
-        static int32_t GetExperienceIncrement(int32_t level)
+        NH3API_NODISCARD static int32_t GetExperienceIncrement(int32_t level)
         { return FASTCALL_1(int32_t, 0x4DA690, level); }
 
         // First not empty backpack slot /
         // Первый непустой слот рюкзака
-        int32_t get_last_backpack_index() const
-        { int32_t i = 64 /*backpack.size()*/; while ( i-- != 0 ) { if ( backpack[i].type != ARTIFACT_NONE ) return i; } return -1; }
+        NH3API_NODISCARD int32_t get_last_backpack_index() const
+        {
+            int32_t i = 64; /*backpack.size()*/
+            while ( i-- != 0 )
+                if ( backpack[static_cast<size_t>(i)].type != ARTIFACT_NONE )
+                    return i;
+            return -1;
+        }
 
-        NH3API_FORCEINLINE
+        NH3API_NODISCARD NH3API_FORCEINLINE
         exe_string get_morale_description() const
         {
-            exe_string result(nh3api::dummy_tag);
+            exe_string result(::nh3api::dummy_tag);
             (void) THISCALL_2(exe_string*, 0x4DC590, this, &result);
             return result;
         }
 
-        NH3API_FORCEINLINE
+        NH3API_NODISCARD NH3API_FORCEINLINE
         exe_string get_luck_description() const
         {
-            exe_string result(nh3api::dummy_tag);
+            exe_string result(::nh3api::dummy_tag);
             (void) THISCALL_2(exe_string*, 0x4DCD30, this, &result);
             return result;
         }
@@ -183,19 +186,19 @@ class hero : public type_obscuring_object
         int32_t GiveSS(TSecondarySkill iWhichSS, TSkillMastery iNumLevelsToGive)
         { return THISCALL_3(int32_t, 0x4E2540, this, iWhichSS, iNumLevelsToGive); }
 
-        int32_t CreatureTypeCount(TCreatureType creatureType) const
+        NH3API_NODISCARD int32_t CreatureTypeCount(TCreatureType creatureType) const
         { return THISCALL_2(int32_t, 0x4E25B0, this, creatureType); }
 
         void UpgradeCreatures(TCreatureType sourceCreatureType, TCreatureType destCreatureType)
         { THISCALL_3(void, 0x4E25E0, this, sourceCreatureType, destCreatureType); }
 
-        int32_t GetNthSS(int32_t nSS) const
+        NH3API_NODISCARD int32_t GetNthSS(int32_t nSS) const
         { return THISCALL_2(int32_t, 0x4E2610, this, nSS); }
 
         void TransferArtifacts(hero* src)
         { THISCALL_2(void, 0x4E2640, this, src); }
 
-        bool artifactAllowedInSlot(TArtifact artifact, TArtifactSlot slot)
+        NH3API_NODISCARD bool artifactAllowedInSlot(TArtifact artifact, TArtifactSlot slot)
         { return THISCALL_3(bool, 0x4E2AB0, this, artifact, slot); }
 
         bool EquipArtifact(type_artifact& artifact, TArtifactSlot slot)
@@ -210,10 +213,10 @@ class hero : public type_obscuring_object
         bool remove_artifact(TArtifact art)
         { return THISCALL_2(bool, 0x4E3040, this, art); }
 
-        NH3API_FORCEINLINE
+        NH3API_NODISCARD NH3API_FORCEINLINE
         exe_string get_backpack_error() const
         {
-            exe_string result(nh3api::dummy_tag);
+            exe_string result(::nh3api::dummy_tag);
             (void) THISCALL_2(exe_string*, 0x4E3140, this, &result);
             return result;
         }
@@ -230,112 +233,118 @@ class hero : public type_obscuring_object
         void GiveResource(EGameResource whichRes, int32_t howMuch)
         { THISCALL_3(void, 0x4E3870, this, whichRes, howMuch); }
 
-        int32_t GetLuck(const hero* otherHero, int32_t on_cursed_ground, int32_t apply_limits) const
+        NH3API_NODISCARD int32_t GetLuck(const hero* otherHero, int32_t on_cursed_ground, int32_t apply_limits) const
         { return THISCALL_4(int32_t, 0x4E3930, this, otherHero, on_cursed_ground, apply_limits); }
 
-        int32_t GetMorale(const hero* other_hero, bool on_cursed_ground, int32_t apply_limits) const
+        NH3API_NODISCARD int32_t GetMorale(const hero* other_hero, bool on_cursed_ground, int32_t apply_limits) const
         { return THISCALL_4(int32_t, 0x4E3C20, this, other_hero, on_cursed_ground, apply_limits); }
 
-        TCreatureType getNecromancyCreature() const
+        NH3API_NODISCARD TCreatureType getNecromancyCreature() const
         { return THISCALL_1(TCreatureType, 0x4E3ED0, this); }
 
-        double GetNecromancyFactor(bool apply_limit) const
+        NH3API_NODISCARD double GetNecromancyFactor(bool apply_limit) const
         { return THISCALL_2(double, 0x4E3F40, this, apply_limit); }
 
-        int32_t GetMysticismBonus() const
+        NH3API_NODISCARD int32_t GetMysticismBonus() const
         { return THISCALL_1(int32_t, 0x4E41B0, this); }
 
-        int32_t GetVisibility() const
+        NH3API_NODISCARD int32_t GetVisibility() const
         { return THISCALL_1(int32_t, 0x4E42E0, this); }
 
-        double GetArcheryFactor() const
-        { return THISCALL_1(float, 0x4E43D0, this); }
+        NH3API_NODISCARD double GetArcheryFactor() const
+        { return THISCALL_1(double, 0x4E43D0, this); }
 
-        double GetOffenseFactor() const
+        NH3API_NODISCARD double GetOffenseFactor() const
         { return THISCALL_1(double, 0x4E4520, this); }
 
-        double GetDefenseFactor() const
-        { return THISCALL_1(float, 0x4E4580, this); }
+        NH3API_NODISCARD double GetDefenseFactor() const
+        { return THISCALL_1(double, 0x4E4580, this); }
 
-        int32_t GetEstatesBonus() const
+        NH3API_NODISCARD int32_t GetEstatesBonus() const
         { return THISCALL_1(int32_t, 0x4E4600, this); }
 
-        double GetEagleEyeChance() const
+        NH3API_NODISCARD double GetEagleEyeChance() const
         { return THISCALL_1(double, 0x4E4690, this); }
 
-        double GetSurrenderCostFactor() const
+        NH3API_NODISCARD double GetSurrenderCostFactor() const
         { return THISCALL_1(double, 0x4E47F0, this); }
 
-        double GetMagicResistanceFactor() const
+        NH3API_NODISCARD double GetMagicResistanceFactor() const
         { return THISCALL_1(double, 0x4E4950, this); }
 
-        double GetExperienceBonusFactor() const
+        NH3API_NODISCARD double GetExperienceBonusFactor() const
         { return THISCALL_1(double, 0x4E4AB0, this); }
 
-        double GetManaModifier() const
+        NH3API_NODISCARD double GetManaModifier() const
         { return THISCALL_1(double, 0x4E4B20, this); }
 
-        double GetFirstAidFactor() const
+        NH3API_NODISCARD double GetFirstAidFactor() const
         { return THISCALL_1(double, 0x4E4B90, this); }
 
-        int32_t GetMobility(bool sea_movement) const
+        NH3API_NODISCARD int32_t GetMobility(bool sea_movement) const
         { return THISCALL_2(int32_t, 0x4E4C00, this, sea_movement); }
 
-        int32_t GetMobility() const
+        NH3API_NODISCARD int32_t GetMobility() const
         { return THISCALL_1(int32_t, 0x4E5000, this); }
 
-        int32_t GetSpellDurationBonus() const
+        NH3API_NODISCARD int32_t GetSpellDurationBonus() const
         { return THISCALL_1(int32_t, 0x4E5020, this); }
 
-        TAdventureObjectType GetGroundModifier() const
+        NH3API_NODISCARD TAdventureObjectType GetGroundModifier() const
         { return THISCALL_1(TAdventureObjectType, 0x4E5130, this); }
 
-        int32_t get_special_terrain() const
+        NH3API_NODISCARD int32_t get_special_terrain() const
         { return THISCALL_1(int32_t, 0x4E5210, this); }
 
-        TSkillMastery get_spell_level(SpellID spell, int32_t magic_terrain_type) const
+        NH3API_NODISCARD TSkillMastery get_spell_level(SpellID spell, int32_t magic_terrain_type) const
         { return THISCALL_3(TSkillMastery, 0x4E52F0, this, spell, magic_terrain_type); }
 
-        TSkillMastery GetSpellSchoolLevel(TSpellSchool school_mask, bool is_on_magic_plains) const
+        NH3API_NODISCARD TSkillMastery GetSpellSchoolLevel(TSpellSchool school_mask, bool is_on_magic_plains) const
         { return THISCALL_3(TSkillMastery, 0x4E5370, this, school_mask, is_on_magic_plains); }
 
-        TSpellSchool GetHighestSchool(TSpellSchool school_mask) const
+        NH3API_NODISCARD TSpellSchool GetHighestSchool(TSpellSchool school_mask) const
         { return THISCALL_2(TSpellSchool, 0x4E5430, this, school_mask); }
 
         int32_t GetManaCost(SpellID iWhichSpell, const armyGroup* enemy, int8_t magic_terrain) const
         { return THISCALL_4(int32_t, 0x4E54B0, this, iWhichSpell, enemy, magic_terrain); }
 
-        boat* find_summonable_boat() const
+        NH3API_NODISCARD boat* find_summonable_boat()
         { return THISCALL_1(boat*, 0x4E5710, this); }
 
-        bool can_summon_boat() const
+        NH3API_NODISCARD const boat* find_summonable_boat() const
+        { return THISCALL_1(const boat*, 0x4E5710, this); }
+
+        NH3API_NODISCARD bool can_summon_boat() const
         { return THISCALL_1(bool, 0x4E57C0, this); }
 
-        playerData* get_player() const
-        { return ( this->playerOwner >= 0 ) ? &hero_hpp_gpGame_get(0x20AD0, std::array<playerData, 8>)[this->playerOwner] : nullptr; }
+        playerData* get_player()
+        { return ( this->playerOwner >= 0 ) ? &hero_hpp_gpGame_get(0x20AD0, std::array<playerData, 8>)[static_cast<size_t>(this->playerOwner)] : nullptr; }
 
-        bool is_in_patrol_radius(type_point point) const
+        NH3API_NODISCARD const playerData* get_player() const
+        { return ( this->playerOwner >= 0 ) ? &hero_hpp_gpGame_get(0x20AD0, std::array<playerData, 8>)[static_cast<size_t>(this->playerOwner)] : nullptr; }
+        
+        NH3API_NODISCARD bool is_in_patrol_radius(type_point point) const
         { return THISCALL_2(bool, 0x4E5950, this, point); }
 
         int32_t modify_spell_damage(SpellID spell, int32_t damage, army* target_army) const
         { return THISCALL_4(int32_t, 0x4E59D0, this, spell, damage, target_army); }
 
-        int32_t get_combat_speed_bonus() const
+        NH3API_NODISCARD int32_t get_combat_speed_bonus() const
         { return THISCALL_1(int32_t, 0x4E5D10, this); }
 
-        int32_t get_hit_point_bonus(TCreatureType creature) const
+        NH3API_NODISCARD int32_t get_hit_point_bonus(TCreatureType creature) const
         { return THISCALL_2(int32_t, 0x4E5DF0, this, creature); }
 
-        int32_t GetRoguePower() const
+        NH3API_NODISCARD int32_t GetRoguePower() const
         { return THISCALL_1(int32_t, 0x4E6050, this); }
 
-        bool IsInIdentifyRange(const type_point& point) const
+        NH3API_NODISCARD bool IsInIdentifyRange(const type_point& point) const
         { return THISCALL_2(bool, 0x4E6080, this, &point); }
 
-        bool IsMobile() const
+        NH3API_NODISCARD bool IsMobile() const
         { return THISCALL_1(bool, 0x4E61A0, this); }
 
-        int32_t GetHeroSpellBonus(SpellID spell_id, int32_t target_level, int32_t value) const
+        NH3API_NODISCARD int32_t GetHeroSpellBonus(SpellID spell_id, int32_t target_level, int32_t value) const
         { return THISCALL_4(int32_t, 0x4E6260, this, spell_id, target_level, value); }
 
     public:
@@ -352,7 +361,7 @@ class hero : public type_obscuring_object
         // Hero relative index, 0..7 /
         // Порядковый номер(от 0 до 7) героя у игрока.
         // offset: +0x1E = +30,  size = 0x4 = 4
-        int32_t         order_ID;
+        int32_t         order;
 
         // Player this hero belongs to /
         // Игрок, которому принадлежит этот герой.
@@ -610,10 +619,12 @@ class hero : public type_obscuring_object
         // offset: +0x11D = +285,  size = 0x4 = 4
         int32_t bounty;
 
+        union {
         // Towns where special leveling up buildings are visited /
         // Города, в которых посещены специальные строения улучшения навыка героя.
         // offset: +0x121 = +289,  size = 0x8 = 8
         exe_bitset<48> TownSpecialGrantedMask;
+        };
 
         // Hero visions spell level /
         // Уровень заклинания видения героя.
@@ -650,20 +661,22 @@ class hero : public type_obscuring_object
         // offset: +0x3D9 = +985,  size = 0x1 = 1
         bool bio_customized;
 
+        union {
         // Hero's biography /
         // Биография героя.
         // offset: +0x3DA = +986,  size = 0x10 = 16
         exe_string bio;
+        };
 
         // Learned spells /
         // Выученные героем заклинания.
         // offset: +0x3EA = +1002,  size = 0x46 = 70
-        std::array<bool, 70> in_spellbook;
+        std::array<bool, MAX_BOOK_SPELLS> in_spellbook;
 
         // Available spells(including artifact spells) /
         // Доступные герою заклинания(учитывая артефакты).
         // offset: +0x430 = +1072,  size = 0x46 = 70
-        std::array<bool, 70> available_spells;
+        std::array<bool, MAX_BOOK_SPELLS> available_spells;
 
         // Primary skills /
         // Первичные навыки.
@@ -709,7 +722,7 @@ class hero : public type_obscuring_object
 struct HeroExtra
 {
     public:
-        //
+        // Player owning this hero /
         // Игрок, обладающий этим героем.
         // offset: +0x0 = +0,  size = 0x1 = 1
         int8_t Owner;
@@ -720,7 +733,6 @@ struct HeroExtra
         byte_t gap_1[3];
 
     public:
-
         // Hero ID /
         // ID Героя.
         // offset: +0x4 = +4,  size = 0x4 = 4
@@ -908,14 +920,8 @@ class boat : public type_obscuring_object
         {}
 
         NH3API_FORCEINLINE
-        boat(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-        { NH3API_IGNORE(allocated,
-                        id,
-                        type,
-                        facing,
-                        playerOwner,
-                        occupying_hero,
-                        occupied); }
+        boat(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
 
         void obscure_cell()
         { type_obscuring_object::obscure_cell(OBJECT_BOAT, id); }
@@ -934,7 +940,7 @@ class boat : public type_obscuring_object
         // Boat type(0..2) /
         // Тип лодки(0..2).
         // offset: +0x1A = +26,  size = 0x1 = 1
-        int8_t type;
+        int8_t boat_type;
 
         // Boat direction (0..7, clockwise) /
         // Направление лодки (0..7, по часовой стрелке)
@@ -946,6 +952,11 @@ class boat : public type_obscuring_object
         // offset: +0x1C = +28,  size = 0x1 = 1
         int8_t playerOwner;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_1D[3];
+
+    public:
         // Hero occupying this boat /
         // Герой, сидящий в лодке.
         // offset: +0x20 = +32,  size = 0x4 = 4
@@ -955,6 +966,10 @@ class boat : public type_obscuring_object
         // Есть герой, сидящий в лодке.
         // offset: +0x24 = +36,  size = 0x1 = 1
         bool occupied;
+
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_25[3];
 
 };
 #pragma pack(pop)
@@ -976,6 +991,12 @@ struct HeroPlaceholder
         // offset: +0x4 = +4,  size = 0x1 = 1
         int8_t player;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x5 = +5,  size = 0x3 = 3
+        byte_t gap_5[3];
+
+    public:
         // Hero ID /
         // ID героя.
         // offset: +0x8 = +8,  size = 0x4 = 4
@@ -985,6 +1006,11 @@ struct HeroPlaceholder
         // Сила героя.
         // offset: +0xC = +12,  size = 0x1 = 1
         int8_t power;
+
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0xD = +13,  size = 0x3 = 3
+        byte_t gap_D[3];
 
 };
 #pragma pack(pop)
@@ -1106,6 +1132,10 @@ struct THeroClassTraits
         // offset: +0x34 = +52,  size = 0x9 = 9
         std::array<int8_t, 9> m_foundInTownType;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_3D[3];
+
 };
 #pragma pack(pop)
 
@@ -1202,11 +1232,12 @@ struct THeroTraits
         bool m_isCampaignHero;
 
     protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_3B[1];
         // offset: +0x3C = +60,  size = 0x4 = 4
         uint32_t attributes;
 
     public:
-
         // Hero name
         // Имя героя.
         // offset: +0x40 = +64,  size = 0x4 = 4

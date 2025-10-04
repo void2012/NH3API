@@ -28,24 +28,24 @@ enum DialogReturnType : int32_t
 class heroWindowManager : public baseManager
 {
     public:
-        heroWindowManager() NH3API_NOEXCEPT
-        { THISCALL_1(void, 0x602730, this); }
+        heroWindowManager() NH3API_DELETED_FUNCTION
+        ~heroWindowManager() NH3API_DELETED_FUNCTION
 
     public:
         int32_t BroadcastMessage(int32_t command, int32_t subType, int32_t itemId, int32_t msgExtra) NH3API_NOEXCEPT
-        { return CALL_5(int32_t, __thiscall, 0x602930, this, command, subType, itemId, msgExtra); }
+        { return THISCALL_5(int32_t, 0x602930, this, command, subType, itemId, msgExtra); }
 
         int32_t DoDialog(heroWindow* dialogWindow, int32_t (__thiscall* dialogFunction)(message*), bool32_t bFadeIn) NH3API_NOEXCEPT
-        { return CALL_4(int32_t, __thiscall, 0x602AE0, this, dialogWindow, dialogFunction, bFadeIn); }
+        { return THISCALL_4(int32_t, 0x602AE0, this, dialogWindow, dialogFunction, bFadeIn); }
 
         int32_t DoDialog(heroWindow* dialogWindow, int32_t (__thiscall* dialogFunction)(message&), bool32_t bFadeIn) NH3API_NOEXCEPT
-        { return CALL_4(int32_t, __thiscall, 0x602AE0, this, dialogWindow, dialogFunction, bFadeIn); }
+        { return THISCALL_4(int32_t, 0x602AE0, this, dialogWindow, dialogFunction, bFadeIn); }
 
         void DoQuickView(heroWindow* newWindow) NH3API_NOEXCEPT
-        { CALL_2(void, __thiscall, 0x603000, this, newWindow); }
+        { THISCALL_2(void, 0x603000, this, newWindow); }
 
         void FadeScreen(int32_t inOut, int32_t speed, bool expect_fadein) NH3API_NOEXCEPT
-        { CALL_4(void, __thiscall, 0x603210, this, inOut, speed, expect_fadein); }
+        { THISCALL_4(void, 0x603210, this, inOut, speed, expect_fadein); }
 
     // virtual functions
     public:
@@ -72,12 +72,17 @@ class heroWindowManager : public baseManager
         bool32_t colorCyclingOn;
 
     public:
-
         // Waiting for fadein effect /
         // Ожидание эффекта плавного перетухания экрана.
         // offset: +0x48 = +72,  size = 0x1 = 1
         bool isWaitingForFadeIn;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x49 = +73,  size = 0x3 = 3
+        byte_t gap_49[3];
+
+    public:
         // offset: +0x4C = +76,  size = 0x4 = 4
         Bitmap16Bit* bmpFizzleSource;
 
@@ -99,11 +104,11 @@ class heroWindowManager : public baseManager
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
-heroWindowManager*& gpWindowManager
+heroWindowManager* const& gpWindowManager
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992D0, heroWindowManager*));
 
 NH3API_INLINE_OR_EXTERN
-uint32_t& giDialogTimeout
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977D4, uint32_t));
+const uint32_t& giDialogTimeout
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977D4, const uint32_t));
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x643D5C, heroWindowManager)

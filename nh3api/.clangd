@@ -1,0 +1,49 @@
+CompileFlags:
+    Add: [-Wall, -std=c++17, -DNH3API_FLAG_INLINE_HEADERS, -m32, -Wno-unused-includes]
+    Remove: [-W*]
+
+Index:
+    StandardLibrary: true
+
+Diagnostics:
+    Suppress: unused-includes
+    UnusedIncludes: None
+    ClangTidy:
+        Add: [performance*, modernize*, cppcoreguidelines*, misc*]
+        Remove: [modernize-use-trailing-return-type,
+                 modernize-avoid-c-arrays,
+                 modernize-use-auto,
+                 modernize-use-using,
+                 modernize-use-ranges,
+                 misc-non-private-member-variables-in-classes,
+                 readability*, 
+                 performance-enum-size, 
+                 cppcoreguidelines-virtual-class-destructor,
+                 cppcoreguidelines-avoid-magic-numbers,
+                 cppcoreguidelines-avoid-c-arrays,
+                 cppcoreguidelines-avoid-do-while,
+                 cppcoreguidelines-avoid-non-const-global-variables,
+                 cppcoreguidelines-pro-bounds-constant-array-index,
+                 cppcoreguidelines-pro-bounds-pointer-arithmetic,
+                 cppcoreguidelines-pro-type-member-init,
+                 cppcoreguidelines-pro-type-union-access,
+                 cppcoreguidelines-pro-type-static-cast-downcast,
+                 cppcoreguidelines-pro-type-reinterpret-cast,
+                 cppcoreguidelines-pro-type-vararg,
+                 cppcoreguidelines-non-private-member-variables-in-classes,
+                 cppcoreguidelines-macro-usage]
+
+Completion:
+    AllScopes: Yes
+    ArgumentLists: Delimiters
+    HeaderInsertion: Never
+
+InlayHints:
+    BlockEnd: true
+    ParameterNames: false 
+    DeducedTypes: false 
+    Designators: false 
+    DefaultArguments: false 
+
+Hover: 
+    ShowAKA: true

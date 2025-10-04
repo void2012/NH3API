@@ -14,7 +14,7 @@
 const std::array<const std::array<const POINT, 5>, 144>& mouseManager::iHotSpot
 = get_global_var_ref(0x67FFA0, const std::array<const std::array<const POINT, 5>, 144>);
 
-mouseManager*& gpMouseManager 
+mouseManager* const& gpMouseManager 
 = get_global_var_ref(0x6992B0, mouseManager*);
 
 #endif

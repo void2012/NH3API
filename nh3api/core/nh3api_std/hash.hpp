@@ -85,13 +85,13 @@ public:
         this->state_ = acc;
     }
 
-    NH3API_CONSTEXPR result_type digest() const NH3API_NOEXCEPT 
+    NH3API_NODISCARD NH3API_CONSTEXPR result_type digest() const NH3API_NOEXCEPT 
     { return this->state_; }
 };
 
 typedef basic_fnv1a<size_t, 2166136261u, 16777619u> default_hash;
 
-NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE 
+NH3API_NODISCARD NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE 
 size_t hash_string(const char* const str, size_t size) NH3API_NOEXCEPT 
 {
     default_hash hasher;
@@ -99,7 +99,7 @@ size_t hash_string(const char* const str, size_t size) NH3API_NOEXCEPT
     return hasher.digest();
 }
 
-NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
+NH3API_NODISCARD NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
 size_t hash_string(const wchar_t* const str, size_t size) NH3API_NOEXCEPT 
 {
     default_hash hasher;
@@ -108,21 +108,21 @@ size_t hash_string(const wchar_t* const str, size_t size) NH3API_NOEXCEPT
 }
 
 #ifdef __cpp_lib_string_view
-constexpr NH3API_FORCEINLINE size_t hash_string(::std::string_view str) noexcept 
+NH3API_NODISCARD constexpr NH3API_FORCEINLINE size_t hash_string(::std::string_view str) noexcept 
 {
     default_hash hasher;
     hasher.update(str.data(), str.size());
     return hasher.digest();
 }
 
-constexpr NH3API_FORCEINLINE size_t hash_string(::std::wstring_view str) noexcept 
+NH3API_NODISCARD constexpr NH3API_FORCEINLINE size_t hash_string(::std::wstring_view str) noexcept 
 {
     default_hash hasher;
     hasher.update(str.data(), str.size());
     return hasher.digest();
 }
 #endif
-template <size_t size>
+template <size_t size> NH3API_NODISCARD 
 NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE size_t hash_string(const char (&str)[size]) NH3API_NOEXCEPT
 {
     default_hash hasher;

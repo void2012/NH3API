@@ -14,3 +14,4 @@
 #include "core/combat.hpp"
 #include "core/global.hpp"
 #include "core/pathfinding.hpp"
+#include "core/interface/window_manager.hpp"

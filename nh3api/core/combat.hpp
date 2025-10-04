@@ -142,6 +142,12 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             // offset: +0x2 = +2,  size = 0x2 = 2
             int16_t y;
 
+        protected:
+            NH3API_MAYBE_UNUSED
+            // offset: +0x3 = +3,  size = 0x2 = 2
+            byte_t gap_3[2];
+
+        public:
             // offset: +0x4 = +4,  size = 0x2 = 2
             int16_t hex;
 
@@ -153,6 +159,11 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
             // offset: +0x20 = +32,  size = 0x2 = 2
             int16_t hitpoints;
+
+        protected:
+            NH3API_MAYBE_UNUSED
+            // offset: +0x22 = +34,  size = 0x2 = 2
+            byte_t gap_22[2];
 
         };
 
@@ -200,6 +211,12 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             // offset: +0xA = +10,  size = 0x1 = 1
             bool is_visible;
 
+        protected:
+            NH3API_MAYBE_UNUSED
+            // offset: +0xB = +11,  size = 0x1 = 1
+            byte_t gap_B[1];
+        
+        public:
             // offset: +0xC = +12,  size = 0x4 = 4
             int32_t damage;
 
@@ -373,10 +390,10 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         NH3API_FORCEINLINE
         combatManager() NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY_OR_BASE(combatManager, baseManager)
-        { THISCALL_1(combatManager*, 0x462340, this); }
+        { THISCALL_1(void, 0x462340, this); }
 
         NH3API_FORCEINLINE
-        combatManager(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        combatManager(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             :
             #if NH3API_STD_INITIALIZER_LIST
             EagleEyeSpellLearned{tag, tag},
@@ -389,6 +406,14 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             Obstacles(tag)
         {}
 
+        combatManager(const combatManager&) NH3API_DELETED_FUNCTION
+        combatManager& operator=(const combatManager&) NH3API_DELETED_FUNCTION
+
+        #if NH3API_CHECK_CPP11
+        combatManager(combatManager&&) = delete;
+        combatManager& operator=(combatManager&&) = delete;
+        #endif
+
         NH3API_FORCEINLINE
         ~combatManager() NH3API_NOEXCEPT
         { THISCALL_1(void, 0x4F3FD0, this); }
@@ -399,16 +424,16 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         static bool ValidHex(int32_t iHex)
         { return (iHex >= 0) && (iHex < MAX_COMBAT_HEXES); }
 
-        bool IsQuickCombat() const
+        NH3API_NODISCARD bool IsQuickCombat() const
         { return THISCALL_1(bool, 0x46A080, this); }
 
-        bool is_computer_action() const
+        NH3API_NODISCARD bool is_computer_action() const
         { return THISCALL_1(bool, 0x474520, this); }
 
-        int32_t get_total_combat_value(int32_t side, int32_t lowest_attack, int32_t lowest_defense, bool include_cripples) const
+        NH3API_NODISCARD int32_t get_total_combat_value(int32_t side, int32_t lowest_attack, int32_t lowest_defense, bool include_cripples) const
         { return THISCALL_5(int32_t, 0x41EC40, this, side, lowest_attack, lowest_defense, include_cripples); }
 
-        int32_t compute_fire_shield_damage(int32_t damage, const army* attacker, const army* target, int32_t target_hits) const
+        NH3API_NODISCARD int32_t compute_fire_shield_damage(int32_t damage, const army* attacker, const army* target, int32_t target_hits) const
         { return THISCALL_5(int32_t, 0x4225C0, this, damage, attacker, target, target_hits); }
 
         // Creatures turn order /
@@ -416,32 +441,32 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         void find_move_order(exe_vector<army*>* order)
         { THISCALL_2(void, 0x41F2C0, this, order); }
 
-        bool can_cast_spells(int32_t side, bool hero_spell) const
+        NH3API_NODISCARD bool can_cast_spells(int32_t side, bool hero_spell) const
         { return THISCALL_3(bool, 0x41FA10, this, side, hero_spell); }
 
         // Get hex index by screen coordinates /
         // Индекс клетки по координатам точки на экране.
-        int32_t GetGridIndex(int32_t x, int32_t y) const
+        NH3API_NODISCARD int32_t GetGridIndex(int32_t x, int32_t y) const
         { return THISCALL_3(int32_t, 0x464380, this, x, y); }
 
         // Combat is over /
         // Битва завершилась.
-        bool CombatIsOver() const
+        NH3API_NODISCARD bool CombatIsOver() const
         { return THISCALL_1(bool, 0x465410, this); }
 
         // Is <this_side> winner? /
         // Является ли <this_side> победителем в битве?
-        bool IsWinner(int32_t this_side) const
+        NH3API_NODISCARD bool IsWinner(int32_t this_side) const
         { return THISCALL_2(bool, 0x465490, this, this_side); }
 
-        static TWallTargetId GetTargetWallIndex(int32_t grid_index)
+        NH3API_NODISCARD static TWallTargetId GetTargetWallIndex(int32_t grid_index)
         { return FASTCALL_1(TWallTargetId, 0x465550, grid_index); }
 
         void ResetHitByCreature()
         { THISCALL_1(void, 0x465BC0, this); }
 
-        void PlaceObstacle(const TObstacle& obstacle, int32_t id, int32_t hex, hexcell::TAttributes attributes)
-        { THISCALL_5(void, 0x466590, this, &obstacle, id, hex, attributes); }
+        void PlaceObstacle(const TObstacle& obstacle, int32_t obstacle_index, int32_t hex, hexcell::TAttributes attributes)
+        { THISCALL_5(void, 0x466590, this, &obstacle, obstacle_index, hex, attributes); }
 
         void RemoveObstacle(int32_t index)
         { THISCALL_2(void, 0x466710, this, index); }
@@ -455,25 +480,25 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         void RaiseDoor()
         { THISCALL_1(void, 0x466EC0, this); }
 
-        static bool InCastle(int32_t index)
+        NH3API_NODISCARD static bool InCastle(int32_t index)
         { return FASTCALL_1(bool, 0x467040, index); }
 
-        static bool InCastle(const army* arg)
+        NH3API_NODISCARD static bool InCastle(const army* arg)
         { return FASTCALL_1(bool, 0x467040, arg->gridIndex); }
 
-        static bool LeftOfMoat(int32_t index)
+        NH3API_NODISCARD static bool LeftOfMoat(int32_t index)
         { return FASTCALL_1(bool, 0x467070, index); }
 
-        bool is_adjacent(int32_t first, int32_t second) const
+        NH3API_NODISCARD bool is_adjacent(int32_t first, int32_t second) const
         { return THISCALL_3(bool, 0x4670A0, this, first, second); }
 
-        bool ShotIsThroughWall(army* shooter, int32_t sourceIndex, int32_t destIndex) const
+        NH3API_NODISCARD bool ShotIsThroughWall(army* shooter, int32_t sourceIndex, int32_t destIndex) const
         { return THISCALL_4(bool, 0x4670F0, this, shooter, sourceIndex, destIndex); }
 
-        bool ShotIsNotOptimal(army* attacker, army* defender) const
+        NH3API_NODISCARD bool ShotIsNotOptimal(army* attacker, army* defender) const
         { return THISCALL_3(bool, 0x4671E0, this, attacker, defender); }
 
-        bool InLineOfSight(int32_t sourceIndex, int32_t destIndex) const
+        NH3API_NODISCARD bool InLineOfSight(int32_t sourceIndex, int32_t destIndex) const
         { return THISCALL_3(bool, 0x467420, this, sourceIndex, destIndex); }
 
         void ShootBallisticMissile(int32_t startX,
@@ -509,36 +534,36 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         void PowEffect(TSpellEffectID spellEffect, bool bResetLimitCreature)
         { THISCALL_3(void, 0x468570, this, spellEffect, static_cast<bool32_t>(bResetLimitCreature)); }
 
-        bool enemy_is_adjacent(const army* current_army, int32_t grid_index, const army* excluded)
+        NH3API_NODISCARD bool enemy_is_adjacent(const army* current_army, int32_t grid_index, const army* excluded)
         { return THISCALL_4(bool, 0x4691E0, this, current_army, grid_index, excluded); }
 
-        static int32_t get_distance(int32_t start, int32_t stop)
+        NH3API_NODISCARD static int32_t get_distance(int32_t start, int32_t stop)
         { return FASTCALL_2(int32_t, 0x469250, start, stop); }
 
-        bool HexIsBlocked(int32_t adjacent_cell) const
+        NH3API_NODISCARD bool HexIsBlocked(int32_t adjacent_cell) const
         { return THISCALL_2(bool, 0x4695F0, this, adjacent_cell); }
 
         void damage_message(const char* attacker, int32_t attacker_qty, int32_t damage, const army* defender, int32_t deaths)
         { THISCALL_6(void, 0x469670, this, attacker, attacker_qty, damage, defender, deaths); }
 
-        bool IsInMoat(int32_t hex, int32_t* index) const
+        NH3API_NODISCARD bool IsInMoat(int32_t hex, int32_t* index) const
         { return THISCALL_3(bool, 0x4699A0, this, hex, index); }
 
         void CalculateGainedExperience(int32_t side, int32_t* experience_gained)
         { THISCALL_3(void, 0x469F30, this, side, experience_gained); }
 
-        bool is_outside_placement_boundry(int32_t group, int32_t index) const
+        NH3API_NODISCARD bool is_outside_placement_boundry(int32_t group, int32_t index) const
         { return THISCALL_3(bool, 0x475D20, this, group, index); }
 
-        bool valid_wall_target(TWallTargetId wall_target) const
+        NH3API_NODISCARD bool valid_wall_target(TWallTargetId wall_target) const
         { return !!THISCALL_2(bool32_t, 0x475D70, this, wall_target); }
 
         // Current side surrender cost /
         // Стоимость откупа у текущей стороны битвы.
-        int32_t get_surrender_cost() const
+        NH3API_NODISCARD int32_t get_surrender_cost() const
         { return THISCALL_1(int32_t, 0x477330, this); }
 
-        army* AddArmy(int32_t iSide, int32_t iMonType, int32_t iMonQty, int32_t iGridIndex, int32_t iSetAttributes, int32_t bFizzleItIn)
+        army* AddArmy(int32_t iSide, int32_t iMonType, int32_t iMonQty, int32_t iGridIndex, int32_t iSetAttributes, bool32_t bFizzleItIn)
         { return THISCALL_7(army*, 0x479A30, this, iSide, iMonType, iMonQty, iGridIndex, iSetAttributes, bFizzleItIn); }
 
         int32_t ResetLimitCreature()
@@ -568,8 +593,8 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
                      static_cast<bool32_t>(bRefreshBackground),
                      static_cast<bool32_t>(bDoDelayTil)); }
 
-        void ComputeExtent(CSprite* sprite, int32_t sequence, int32_t frame, int32_t x, int32_t y, SLimitData* pLimitData, int32_t isFlipped, bool SaveBiggestExtent)
-        { THISCALL_9(void, 0x495AD0, this, sprite, sequence, frame, x, y, pLimitData, isFlipped, SaveBiggestExtent); }
+        void ComputeExtent(CSprite* sprite, int32_t sequence, int32_t frame, int32_t x, int32_t y, SLimitData* pLimitData, int32_t isFlipped, bool saveBiggestExtent)
+        { THISCALL_9(void, 0x495AD0, this, sprite, sequence, frame, x, y, pLimitData, isFlipped, saveBiggestExtent); }
 
         void ComputeMaxExtent()
         { THISCALL_1(void, 0x495770, this); }
@@ -671,8 +696,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         std::array<bool, MAX_COMBAT_HEXES> iCurDrawGridShade;
 
     protected:
+        NH3API_MAYBE_UNUSED
         // offset: +0x1C2 = +450,  size = 0x1 = 1
-        byte_t gap_1C2;
+        byte_t gap_1C2[2];
 
     public:
         // offset: +0x1C4 = +452,  size = 0x51D0 = 20944
@@ -699,6 +725,12 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x53A9 = +21417,  size = 0x1 = 1
         bool moatIsWide;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x14030 = +81968,  size = 0x1 = 1
+        byte_t gap_53AA[2];
+
+    public:
         // offset: +0x53AC = +21420,  size = 0x4 = 4
         Bitmap16Bit* SaveScreenPreGrid;
 
@@ -723,6 +755,12 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x53C5 = +21445,  size = 0x1 = 1
         bool OnBeach;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x14030 = +81968,  size = 0x1 = 1
+        byte_t gap_53C6[2];
+
+    public:
         // offset: +0x53C8 = +21448,  size = 0x4 = 4
         town* combatTown;
 
@@ -772,26 +810,44 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         std::array<SLimitData, NUM_SIDES> sCmbtHeroFlagLimitData;
 
         typedef exe_set<SpellID, 0x694FA0, 0x694FA4> TSpellSet;
+
+        union {
+        // Spells learned with eagle eye /
+        // Заклинания, изученные с помощью орлиного глаза.
         // offset: +0x545C = +21596,  size = 0x20 = 32
         std::array<TSpellSet, NUM_SIDES> EagleEyeSpellLearned;
+        };
 
         // offset: +0x547C = +21628,  size = 0x28 = 40
         std::array<std::array<bool, MAX_COMBAT_ARMIES>, NUM_SIDES> ArmyEffected;
 
+        // Is side human player /
+        // Является ли одна из сторон игроком-человеком.
         // offset: +0x54A4 = +21668,  size = 0x2 = 2
         std::array<bool, NUM_SIDES> IsHuman;
 
+        // Is side local machine player /
+        // Является ли одна из сторон игроком-человеком, играющим за текущим компьютером.
         // offset: +0x54A6 = +21670,  size = 0x2 = 2
         std::array<bool, NUM_SIDES> IsLocalHuman;
 
+        // Each side player color /
+        // Цвет игрока каждой из сторон.
         // offset: +0x54A8 = +21672,  size = 0x8 = 8
         std::array<int32_t, NUM_SIDES> iPlayer;
 
+        // Was the artifact-specific spell casted by each side / 
+        // Было ли вызвано заклинание артефактов каждой из сторон.
         // offset: +0x54B0 = +21680,  size = 0x2 = 2
         std::array<bool, NUM_SIDES> bArtifactCast;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_54B1[2];
+
+    public:
         // offset: +0x54B4 = +21684,  size = 0x8 = 8
-        std::array<int32_t, NUM_SIDES> bSpellsCast;
+        std::array<bool32_t, NUM_SIDES> bSpellsCast;
 
         // offset: +0x54BC = +21692,  size = 0x8 = 8
         std::array<int32_t, NUM_SIDES> numArmies;
@@ -801,22 +857,24 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x54C4 = +21700,  size = 0x8 = 8
         std::array<armyGroup*, NUM_SIDES> ArmyGroups;
 
+        union {
         // Combat creature stacks /
         // Стеки существ на поле боя.
         // offset: +0x54CC = +21708,  size = 0xDDD0 = 56784
         std::array<std::array<army, MAX_COMBAT_ARMIES + 1>, NUM_SIDES> Armies;
+        };
 
     protected:
+        NH3API_MAYBE_UNUSED
         // offset: +0x1329C = +78492,  size = 0x1 = 1
-        byte_t gap_1329C;
-
-        // offset: +0x1329D = +78493,  size = 0x1 = 1
-        byte_t gap_1329D;
+        byte_t gap_1329C[4];
 
     public:
         // offset: +0x132A0 = +78496,  size = 0x8 = 8
         std::array<int32_t, NUM_SIDES> turnSinceLastEnchanter;
 
+        // Native terrain of each side / 
+        // Родная земля каждой из сторон.
         // offset: +0x132A8 = +78504,  size = 0x8 = 8
         std::array<TTerrainType, NUM_SIDES> nativeTerrain;
 
@@ -825,6 +883,11 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x132B0 = +78512,  size = 0x2 = 2
         std::array<bool, NUM_SIDES> SummonedElemental;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_132B1[2];
+
+    public:
         // offset: +0x132B4 = +78516,  size = 0x4 = 4
         int32_t SideRetreated;
 
@@ -846,6 +909,11 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x132CC = +78540,  size = 0x1 = 1
         bool selectorOn;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_132CD[3];
+
+    public:
         // offset: +0x132D0 = +78544,  size = 0x4 = 4
         int32_t selectorIndex;
 
@@ -907,12 +975,18 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x13434 = +78900,  size = 0x4 = 4
         int32_t iBackgroundFrame;
 
+        // Dead creatures status /
+        // Является ли каждая из существ мертвым?
         // offset: +0x13438 = +78904,  size = 0x28 = 40
         std::array<std::array<bool, MAX_COMBAT_ARMIES>, NUM_SIDES> bCreatureIsDead;
 
         // offset: +0x13460 = +78944,  size = 0x1 = 1
         bool bSomeCreaturesVanish;
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_13461[3];
 
+    public:
         // offset: +0x13464 = +78948,  size = 0x4 = 4
         const char* cBkgName;
 
@@ -922,6 +996,11 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x13D2C = +81196,  size = 0x1 = 1
         bool SaveBiggestExtent;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_13D2D[3];
+
+    public:
         // offset: +0x13D30 = +81200,  size = 0x4 = 4
         int32_t LimitToExtent;
 
@@ -943,12 +1022,19 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x13D54 = +81236,  size = 0x4 = 4
         Bitmap816* NumberWindow;
 
+        union {
         // offset: +0x13D58 = +81240,  size = 0x10 = 16
         exe_vector<TObstacle> Obstacles;
+        };
 
         // offset: +0x13D68 = +81256,  size = 0x1 = 1
         bool InPlacementPhase;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_13D69[3];
+
+    public:
         // offset: +0x13D6C = +81260,  size = 0x4 = 4
         int32_t turn_number;
 
@@ -964,12 +1050,24 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x13D76 = +81270,  size = 0x1 = 1
         bool DebugShowBlockedHexes;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_13D77[1];
+
+    public:
+        // Besieged castle archers /
+        // Информация о стрелковых башнях обороняющегося замка.
         // offset: +0x13D78 = +81272,  size = 0x6C = 108
         std::array<TArcher, kNumArchers> Archers;
 
         // offset: +0x13DE4 = +81380,  size = 0x1 = 1
         bool in_second_phase;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_13DE5[3];
+
+    public:
         // offset: +0x13DE8 = +81384,  size = 0x4 = 4
         int32_t OriginalAttackSkill;
 
@@ -1021,8 +1119,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         bool any_action_taken;
 
     protected:
+        NH3API_MAYBE_UNUSED
         // offset: +0x14030 = +81968,  size = 0x1 = 1
-        byte_t gap_14030;
+        byte_t gap_14030[1];
 
     public:
         // offset: +0x14031 = +81969,  size = 0xBB = 187
@@ -1034,7 +1133,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 NH3API_SIZE_ASSERT(0x140EC, combatManager);
 
 NH3API_INLINE_OR_EXTERN
-combatManager*& gpCombatManager
+combatManager* const& gpCombatManager
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699420, combatManager*));
 
 NH3API_INLINE_OR_EXTERN

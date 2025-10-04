@@ -78,35 +78,32 @@ protected:
         NH3API_FORCEINLINE
         deque_iterator() NH3API_NOEXCEPT
             : _First(nullptr), _Last(nullptr), _Next(nullptr), _Map(nullptr)
-        {
-        }
+        {}
+        
         NH3API_FORCEINLINE
         deque_iterator( pointer _P, _Mapptr _M ) NH3API_NOEXCEPT
             : _First( *_M ), _Last( *_M + DEQUE_SIZE ),
             _Next( _P ), _Map( _M )
-        {
-        }
+        {}
+
         NH3API_FORCEINLINE
         deque_iterator( const iterator& other ) NH3API_NOEXCEPT
             : _First( other._First ), _Last( other._Last ), _Next( other._Next ),
             _Map( other._Map )
-        {
-        }
+        {}
+
         NH3API_FORCEINLINE
-        deque_iterator(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-        {
-            NH3API_IGNORE(_First, _Last, _Next, _Map);
-        }
+        deque_iterator(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
+
         NH3API_FORCEINLINE
         const_reference operator*() const NH3API_NOEXCEPT
-        {
-            return (*_Next);
-        }
+        { return (*_Next); }
+
         NH3API_FORCEINLINE
         const_pointer operator->() const NH3API_NOEXCEPT
-        {
-            return (&**this);
-        }
+        { return (&**this); }
+
         NH3API_FORCEINLINE
         deque_iterator& operator++() NH3API_NOEXCEPT
         {
@@ -118,7 +115,8 @@ protected:
                 _Next = _First;
             }
             return (*this);
-        }
+        } 
+
         NH3API_FORCEINLINE
         deque_iterator operator++( int ) NH3API_NOEXCEPT
         {
@@ -126,6 +124,7 @@ protected:
             ++*this;
             return (temp);
         }
+
         NH3API_FORCEINLINE
         deque_iterator& operator--() NH3API_NOEXCEPT
         {
@@ -139,6 +138,7 @@ protected:
             --_Next;
             return (*this);
         }
+
         NH3API_FORCEINLINE
         deque_iterator operator--( int ) NH3API_NOEXCEPT
         {
@@ -146,28 +146,33 @@ protected:
             --* this;
             return (temp);
         }
+
         deque_iterator& operator+=( difference_type _N ) NH3API_NOEXCEPT
         {
             _Add( _N );
             return (*this);
         }
+
         NH3API_FORCEINLINE
         deque_iterator& operator-=( difference_type _N ) NH3API_NOEXCEPT
         {
             return (*this += -_N);
         }
+
         NH3API_FORCEINLINE
         deque_iterator operator+( difference_type _N ) const NH3API_NOEXCEPT
         {
             deque_iterator temp = *this;
             return (temp += _N);
         }
+
         NH3API_FORCEINLINE
         deque_iterator operator-( difference_type _N ) const NH3API_NOEXCEPT
         {
             deque_iterator temp = *this;
             return (temp -= _N);
         }
+
         NH3API_FORCEINLINE
         difference_type operator-( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
@@ -175,37 +180,44 @@ protected:
                         : DEQUE_SIZE * (_Map - other._Map)
                         + (_Next - _First) - (other._Next - other._First));
         }
+
         NH3API_FORCEINLINE
         const_reference operator[]( difference_type _N ) const NH3API_NOEXCEPT
         {
             return (*(*this + _N));
         }
+
         NH3API_FORCEINLINE
         bool operator==( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (_Next == other._Next && _Map == other._Map);
         }
+
         NH3API_FORCEINLINE
         bool operator!=( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (!(*this == other));
         }
+
         NH3API_FORCEINLINE
         bool operator<( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (_Map < other._Map
                 || (_Map == other._Map && _Next < other._Next));
         }
+
         NH3API_FORCEINLINE
         bool operator<=( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (!(other < *this));
         }
+
         NH3API_FORCEINLINE
         bool operator>( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
             return (other < *this);
         }
+
         NH3API_FORCEINLINE
         bool operator>=( const deque_iterator& other ) const NH3API_NOEXCEPT
         {
@@ -251,7 +263,7 @@ public:
         {}
 
         NH3API_FORCEINLINE
-        iterator(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        iterator(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : base_type(tag)
         {}
 
@@ -407,12 +419,12 @@ public:
         : _Dummy(0), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     {}
 
-    explicit exe_deque(const allocator_type& a) NH3API_NOEXCEPT
+    explicit exe_deque(const allocator_type&) NH3API_NOEXCEPT
         : _Dummy(0), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     {}
 
     explicit exe_deque( size_type _N, const value_type& _V,
-                        const allocator_type& _Al = allocator_type() )
+                        const allocator_type& )
         : _Dummy(0), _First(), _Last(), _Map(nullptr), _Mapsize(0), _Size(0)
     { _Construct_n(_N, _V); }
 
@@ -426,7 +438,7 @@ public:
 
     template<class IterT
     NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-    exe_deque(IterT first, IterT last, const allocator_type& _Al = allocator_type()
+    exe_deque(IterT first, IterT last, const allocator_type&
     NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
         : _Dummy(0), _First(), _Last(), _Map( nullptr ), _Mapsize( 0 ), _Size( 0 )
     {
@@ -444,9 +456,9 @@ public:
         //std::copy( first, last, std::back_inserter( *this ) );
     }
 
-    exe_deque(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+    exe_deque(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
         : _First(tag), _Last(tag)
-    { NH3API_IGNORE(_Dummy, _Map, _Mapsize, _Size); }
+    {}
 
     ~exe_deque() NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
     {
@@ -662,7 +674,7 @@ public:
     }
 
     void push_back( value_type&& value )
-    { emplace_back(std::forward<value_type>(value)); }
+    { emplace_back(std::move(value)); }
 
     template<class ... Args>
     reference emplace_front(Args&& ... args)
@@ -786,7 +798,7 @@ public:
     void insert(const_iterator _Where, const_iterator first, const_iterator last NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
     {
         size_type _M = std::distance(first, last);
-        size_type _I;
+        size_type _I = 0;
         size_type _Off = _Where - begin();
         size_type _Rem = _Size - _Off;
         if ( _Off < _Rem )
@@ -902,9 +914,10 @@ protected:
     }
 
     void _Insert_n(const_iterator _Where, size_type _Count,
-                   const value_type &_Val) { // insert _Count * _Val at _Where
+                   const value_type &_Val) 
+    { // insert _Count * _Val at _Where
       iterator _Mid;
-      size_type _Num;
+      size_type _Num = 0;
       size_type _Off = _Where - begin();
       size_type _Rem = this->_Size - _Off;
       size_type _Oldsize = this->_Size;

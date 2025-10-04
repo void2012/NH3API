@@ -128,8 +128,8 @@ struct exe_tiddata
 protected:
     // offset: +0x10 = +16,  size = 0x4 = 4
     uintptr_t _fpds;
-public:
 
+public:
     // rand() seed value
     // offset: +0x14 = +20,  size = 0x4 = 4
     uint32_t _holdrand;

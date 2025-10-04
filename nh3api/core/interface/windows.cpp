@@ -7,5 +7,5 @@
 #include "windows.hpp"
 
 #ifndef NH3API_FLAG_INLINE_HEADERS
-widget*& widget::last_hover_widget = get_global_var_ref(0x6AACD0, widget*);
+widget* const& widget::last_hover_widget = get_global_var_ref(0x6AACD0, widget*);
 #endif

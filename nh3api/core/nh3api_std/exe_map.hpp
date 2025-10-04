@@ -43,11 +43,7 @@ struct map_key_access
 };
 } // namespace nh3api
 
-/// @brief Visual C++ 6.0 std::map implementation used by heroes3.exe
-/// @tparam _K key type
-/// @tparam _Ty stored type
-/// @tparam _Pr compare predicate
-/// @tparam _A allocator type
+// Visual C++ 6.0 std::map implementation used by heroes3.exe
 template<class _K, // key type
          class _Ty, // stored type
          uintptr_t _Nil_Address = 0, // null node address inside .exe
@@ -123,24 +119,32 @@ public:
         : base_type(other)
     {}
 
+    exe_map& operator=(const exe_map& other) 
+    { base_type::operator=(other); return *this; }
+
     exe_map(const exe_map& other, const allocator_type& allocator)
         : base_type(other, allocator)
     {}
 
     #if NH3API_STD_MOVE_SEMANTICS
     exe_map(exe_map&& other) NH3API_NOEXCEPT
-        : base_type(std::forward<exe_map>(other))
+        : base_type(std::move<exe_map>(other))
     {}
 
     exe_map(exe_map&& other, const allocator_type& allocator) NH3API_NOEXCEPT
-        : base_type(std::forward<exe_map>(other), allocator)
+        : base_type(std::move<exe_map>(other), allocator)
     {}
+
+    exe_map& operator=(exe_map&& other) NH3API_NOEXCEPT 
+    { base_type::operator=(other); return *this; }
     #endif
 
     // no-op constructor
-    exe_map(const nh3api::dummy_tag_t& tag)
+    exe_map(const ::nh3api::dummy_tag_t& tag)
         : base_type(tag)
     {}
+
+    ~exe_map(){}
 
 public:
     mapped_type& operator[](const key_type& key)

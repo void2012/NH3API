@@ -115,7 +115,7 @@ class searchArray
         { THISCALL_1(void, 0x4B10D0, this); }
 
         NH3API_FORCEINLINE
-        searchArray(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        searchArray(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : queue(tag), result(tag), visited_points(tag)
         {}
 
@@ -124,10 +124,10 @@ class searchArray
         { THISCALL_1(void, 0x4B1140, this); }
 
     public:
-        const pathCell* get_cell(type_point point, bool flying) const
+        NH3API_NODISCARD const pathCell* get_cell(type_point point, bool flying) const
         { return THISCALL_3(pathCell*, 0x42ECC0, this, point, flying); }
 
-        int32_t get_danger_value(type_point point) const
+        NH3API_NODISCARD int32_t get_danger_value(type_point point) const
         { return THISCALL_2(int32_t, 0x42ED30, this, point); }
 
         void SeedCombatPosition(const army* thisArmy,
@@ -145,10 +145,10 @@ class searchArray
                             int32_t base_speed)
         { return THISCALL_7(bool, 0x4B3160, this, current_army, current_group, destination, in_placement_phase, limit, base_speed); }
 
-        pathCell* getCellData(size_t pos)
+        NH3API_NODISCARD pathCell* getCellData(size_t pos)
         { return THISCALL_2(pathCell*, 0x4B38F0, this, pos); }
 
-        const pathCell* getCellData(size_t pos) const
+        NH3API_NODISCARD const pathCell* getCellData(size_t pos) const
         { return THISCALL_2(pathCell*, 0x4B38F0, this, pos); }
 
         int32_t get_travel_time(const army* current_army, int32_t hex) const
@@ -174,6 +174,11 @@ class searchArray
         // offset: +0x4 = +4,  size = 0x1 = 1
         uint8_t pay_transition_costs;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_5[3];
+
+    public:
         // offset: +0x8 = +8,  size = 0x4 = 4
         int32_t this_turns_movement;
 
@@ -204,20 +209,31 @@ class searchArray
         // offset: +0x20 = +32,  size = 0x1 = 1
         bool limit_reached;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_21[3];
+
+    public:
         // offset: +0x24 = +36,  size = 0x4 = 4
         pathCell* cellData;
 
         // offset: +0x28 = +40,  size = 0x10 = 16
         RECT valid_rectangle;
-
+        
+        union {
         // offset: +0x38 = +56,  size = 0x10 = 16
         exe_vector<pathCell> queue;
+        };
 
+        union {
         // offset: +0x48 = +72,  size = 0x10 = 16
         exe_vector<pathCell*> result;
+        };
 
+        union {
         // offset: +0x58 = +88,  size = 0x10 = 16
         exe_vector<pathCell*> visited_points;
+        };
 
         // offset: +0x68 = +104,  size = 0x4 = 4
         bool* bIsMoatSlowed;
@@ -231,7 +247,7 @@ class searchArray
 NH3API_SIZE_ASSERT(0x70, searchArray);
 
 NH3API_INLINE_OR_EXTERN
-searchArray*& gpSearchArray
+searchArray* const& gpSearchArray
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992D4, searchArray*));
 
 NH3API_DISABLE_WARNING_END

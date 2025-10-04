@@ -57,7 +57,7 @@ class CChatManager
               playerEnterSample(nullptr)
         { SetMaxLines(maxChatLines); }
 
-        CChatManager(const nh3api::dummy_tag_t&)
+        CChatManager(const ::nh3api::dummy_tag_t&)
         {}
 
         ~CChatManager()
@@ -68,8 +68,6 @@ class CChatManager
                 exe_invoke_array_delete(msgArray);
         }
     */
-        CChatManager();
-        ~CChatManager();
 
     public: 
         #if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
@@ -140,7 +138,7 @@ class CChatManager
         void UpdateWidgetText(int32_t numLines, textWidget* Widget)
         { THISCALL_3(void, 0x5542E0, this, numLines, Widget); }
 
-        bool HasOldChat() const
+        NH3API_NODISCARD bool HasOldChat() const
         { return THISCALL_1(bool, 0x5541B0, this); }
 
         void KillOldChat()

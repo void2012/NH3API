@@ -23,42 +23,25 @@ struct TCheatCode
     {
         const char b[] = "nopqrstuvwxyzabcdefghijklm";
 
-        size_t index = 0; 
-        const size_t inputLength = 
-        std::min<size_t>(std::size(code) - 1,
-        #if NH3API_CHECK_CPP14
-        nh3api::strlen_constexpr<char>(_code));
-        #else
-        nh3api::str_func_chooser<char>::_strlen(_code));
-        #endif 
+        size_t i = 0; 
+        const size_t inputLength = std::min<size_t>(std::size(code) - 1, nh3api::constexpr_char_traits::length(_code));
 
-        for (size_t i = 0; i < inputLength; ++i) 
+        for (; i < inputLength; ++i) 
         {
             if (nh3api::isalpha_constexpr(_code[i])) 
-            {
-                code[index] = b[nh3api::tolower_constexpr(_code[i]) - 'a'];
-                index++;
-            } 
+                code[i] = b[nh3api::tolower_constexpr(_code[i]) - 'a'];
             else 
-            {
-                code[index] = _code[i];
-                index++;
-            }
+                code[i] = _code[i];
+            
         }
         
-        code[index] = '0';
+        code[i] = '0';
     }
 
-    NH3API_CONSTEXPR_CPP_14
+    NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
     int32_t compare(const char* arg) const
-    {
-    #if NH3API_CHECK_CPP14
-        return nh3api::memcmp_constexpr<char>(code, arg, sizeof(code));
-    #else
-        return nh3api::str_func_chooser<char>::_memcmp(code, arg, sizeof(code));
-    #endif
+    { return nh3api::constexpr_char_traits::compare(code, arg, sizeof(code)); }
 
-    }
 };
 
 // encode cheat code at compile-time:

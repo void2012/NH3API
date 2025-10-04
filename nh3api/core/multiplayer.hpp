@@ -216,6 +216,11 @@ struct CNetMsgHandler
         // offset: +0x4 = +4,  size = 0x1 = 1
         bool m_inPopup;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_5[3];
+
+    public:
         // offset: +0x8 = +8,  size = 0x4 = 4
         CNetMsg* m_pAbortPopupMsg;
 

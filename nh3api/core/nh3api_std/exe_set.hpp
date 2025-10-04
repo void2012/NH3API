@@ -45,10 +45,7 @@ struct set_key_access
 };
 }
 
-/// @brief Visual C++ 6.0 std::set implementation used by heroes3.exe
-/// @tparam _K stored type
-/// @tparam _Pr compare predicate
-/// @tparam _A allocator type
+// Visual C++ 6.0 std::set implementation used by heroes3.exe
 template<class _K, // // key type
          uintptr_t _Nil_Address = 0, // null node address inside .exe
          uintptr_t _Nilrefs_Address = 0, // constructor-destructor reference counter address inside .exe
@@ -124,7 +121,7 @@ public:
     #endif
 
     // no-op constructor
-    exe_set(const nh3api::dummy_tag_t& tag)
+    exe_set(const ::nh3api::dummy_tag_t& tag)
         : base_type(tag)
     {}
 

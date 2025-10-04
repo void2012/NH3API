@@ -15,6 +15,6 @@ int32_t& giCurPlayer         = get_global_var_ref(0x69CCF4, int32_t);
 int32_t& giCurWatchPlayer    = get_global_var_ref(0x6977DC, int32_t);
 uint8_t& giCurWatchPlayerBit = get_global_var_ref(0x69CD08, uint8_t);
 uint8_t& giCurrentPlayerBit  = get_global_var_ref(0x69CD10, uint8_t);
-playerData*& gpCurPlayer     = get_global_var_ref(0x69CCFC, playerData*);
+playerData* const& gpCurPlayer     = get_global_var_ref(0x69CCFC, playerData*);
 
 #endif

@@ -59,7 +59,7 @@ struct message
         { nh3api::trivial_zero<sizeof(message)>(this); }
 
         NH3API_FORCEINLINE
-        message(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        message(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         {}
 
     public:
@@ -84,9 +84,11 @@ struct message
         // Y-Координата курсора.
         // offset: +0x14 = +20,  size = 0x4 = 4
         int32_t mouseY;
-
+        
+        // Message information /
+        // Информация, передаваемая в сообщении.
         // offset: +0x18 = +24,  size = 0x4 = 4
-        int32_t extra;
+        uint32_t extra;
 
         // A window where the event has occured /
         // Окно, в котором появилось сообщение.
@@ -114,7 +116,7 @@ NH3API_FORCEINLINE void SetNoDialogMenus(int32_t arg) NH3API_NOEXCEPT
 namespace GameTime
 {
 
-NH3API_FORCEINLINE uint32_t Get() NH3API_NOEXCEPT
+NH3API_NODISCARD NH3API_FORCEINLINE uint32_t Get() NH3API_NOEXCEPT
 { return FASTCALL_0(uint32_t, 0x4F8970); }
 
 NH3API_FORCEINLINE void DelayTil(uint32_t time) NH3API_NOEXCEPT
@@ -160,6 +162,10 @@ NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A3C, bool));
 NH3API_INLINE_OR_EXTERN
 bool& insideProcessMessage
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699608, bool));
+
+NH3API_INLINE_OR_EXTERN
+bool& WeAreActiveWindow
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783D0, bool));
 
 NH3API_INLINE_OR_EXTERN
 bool32_t& gbCheatMenus

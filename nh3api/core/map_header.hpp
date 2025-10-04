@@ -14,6 +14,9 @@
 #include "hero.hpp" // HeroIdentity, HeroPlayerInfo
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+#if !NH3API_CHECK_MSVC
+NH3API_DISABLE_WARNING("-Winvalid-offsetof")
+#endif
 
 #pragma pack(push, 4)
 // Map header /
@@ -21,6 +24,47 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 // size = 0x2C0 = 704, align = 4
 struct CMapHeaderData
 {
+public:
+    NH3API_FORCEINLINE
+    CMapHeaderData() NH3API_NOEXCEPT
+        : iVersion(28),
+          IsPlayable(true),
+          iDifficulty(DIFFICULTY_NORMAL),
+          numPlayers(MAX_PLAYERS),
+          minNumHumanPlayers(1),
+          maxNumHumanPlayers(MAX_PLAYERS),
+          lastTownNameAssigned(0),
+          mapHasNotBeenSaved(false),
+          max_hero_level(-1),
+          numTeams(0),
+          #if NH3API_STD_INITIALIZER_LIST 
+          teamInfo{{0, 0, 0, 0, 0, 0, 0, 0}},
+          #endif
+          gap_E(),
+          Size(0),
+          HasTwoLayers(false),
+          gap_1D()
+    {
+        nh3api::construct_at(&placeholders);
+        nh3api::uninitialized_default_construct_n(PlayerSlotAttributes.begin(), PlayerSlotAttributes.size());
+    }
+
+    NH3API_FORCEINLINE
+    CMapHeaderData(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        : placeholders(tag)
+        #if NH3API_STD_INITIALIZER_LIST 
+        ,
+        PlayerSlotAttributes{{tag, tag, tag, tag, tag, tag, tag, tag}}
+        #endif
+    {}
+
+    NH3API_FORCEINLINE
+    ~CMapHeaderData() NH3API_NOEXCEPT
+    {
+        nh3api::destroy_at(&placeholders);
+        nh3api::destroy(PlayerSlotAttributes.begin(), PlayerSlotAttributes.end());
+    }
+
 public:
     // Player attributes /
     // Свойства игрока.
@@ -34,13 +78,43 @@ public:
             { THISCALL_1(void, 0x45A630, this); }
 
             NH3API_FORCEINLINE
-            TPlayerSlotAttributes(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            TPlayerSlotAttributes(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
                 : heroes(tag)
             {}
 
             NH3API_FORCEINLINE
             ~TPlayerSlotAttributes() NH3API_NOEXCEPT
             { THISCALL_1(void, 0x45A860, this); }
+
+            TPlayerSlotAttributes& operator=(const TPlayerSlotAttributes& other)
+            {
+                if ( this == &other )
+                    return *this;
+
+                nh3api::trivial_copy<52/*__builtin_offsetof(TPlayerSlotAttributes, heroes)*/>(&other, this);
+
+                this->heroes = other.heroes;
+                return *this;
+            }
+
+            TPlayerSlotAttributes(const TPlayerSlotAttributes& other)
+            { *this = other; }
+            
+            #if NH3API_STD_MOVE_SEMANTICS
+            TPlayerSlotAttributes& operator=(TPlayerSlotAttributes&& other) NH3API_NOEXCEPT
+            {
+                if ( this == &other )
+                    return *this;
+
+                nh3api::trivial_move<52/*__builtin_offsetof(TPlayerSlotAttributes, heroes)*/>(&other, this);
+                
+                this->heroes = std::move(other.heroes);
+                return *this;
+            } 
+
+            TPlayerSlotAttributes(TPlayerSlotAttributes&& other) NH3API_NOEXCEPT
+            { *this = std::move(other); }
+            #endif
 
         public:
             // Can be human /
@@ -53,6 +127,11 @@ public:
             // offset: +0x1 = +1,  size = 0x1 = 1
             bool CanBeComputer;
 
+        protected:
+            NH3API_MAYBE_UNUSED
+            byte_t gap_1D[2];
+
+        public:
             // AI strategy type /
             // Тип ИИ игрока.
             // offset: +0x4 = +4,  size = 0x4 = 4
@@ -78,6 +157,11 @@ public:
             // offset: +0xC = +12,  size = 0x1 = 1
             bool has_main_town;
 
+        protected:
+            NH3API_MAYBE_UNUSED
+            byte_t gap_D[3];
+
+        public:
             // Main town type /
             // Тип главного города.
             // offset: +0x10 = +16,  size = 0x4 = 4
@@ -93,6 +177,11 @@ public:
             // offset: +0x18 = +24,  size = 0x1 = 1
             bool hasRandomHero;
 
+        protected:
+            NH3API_MAYBE_UNUSED
+            byte_t gap_19[3];
+
+        public:
             // Main hero ID /
             // ID главного героя.
             // offset: +0x1C = +28,  size = 0x4 = 4
@@ -111,9 +200,10 @@ public:
             // offset: +0x30 = +48,  size = 0x4 = 4
             int32_t default_placeholders;
 
+            union {
             // offset: +0x34 = +52,  size = 0x10 = 16
             exe_vector<HeroIdentity> heroes;
-
+            };
     };
 
 public:
@@ -140,17 +230,19 @@ public:
     // Minimal number of human players /
     // Минимальное кол-во игроков-людей.
     // offset: +0x7 = +7,  size = 0x1 = 1
-    bool minNumHumanPlayers;
+    int8_t minNumHumanPlayers;
 
     // Maximum number of human players /
     // Максимальное кол-во игроков-людей.
     // offset: +0x8 = +8,  size = 0x1 = 1
-    bool maxNumHumanPlayers;
+    int8_t maxNumHumanPlayers;
 
 protected:
+    NH3API_MAYBE_UNUSED
     // offset: +0x9 = +9,  size = 0x1 = 1
-    bool lastTownNameAssigned;
+    int8_t lastTownNameAssigned;
 
+    NH3API_MAYBE_UNUSED
     // offset: +0xA = +10,  size = 0x1 = 1
     bool mapHasNotBeenSaved;
 
@@ -170,6 +262,11 @@ public:
     // offset: +0xD = +13,  size = 0x8 = 8
     std::array<int8_t, 8> teamInfo;
 
+protected:
+    NH3API_MAYBE_UNUSED
+    byte_t gap_E[3];
+
+public:
     // Map size(width and height are the same) /
     // Размер карты(ширина и высота совпадают).
     // offset: +0x18 = +24,  size = 0x4 = 4
@@ -180,25 +277,36 @@ public:
     // offset: +0x1C = +28,  size = 0x1 = 1
     bool HasTwoLayers;
 
+protected:
+    NH3API_MAYBE_UNUSED
+    byte_t gap_1D[3];
+
+public:
+    union {
     // Hero placeholders /
     // Герои, переходящие в следующий сценарий кампании.
     // offset: +0x20 = +32,  size = 0x10 = 16
     exe_vector<int32_t> placeholders;
+    };
 
     // Victory Condition /
     // Условие победы.
     // offset: +0x30 = +48,  size = 0x4C = 76
     VictoryConditionStruct victory_condition;
+    // ^^^ trivial ^^^
 
     // Loss condition /
     // Условие поражения.
     // offset: +0x7C = +124,  size = 0x24 = 36
     LossConditionStruct loss_condition;
+    // ^^^ trivial ^^^
 
+    union {
     // Players attributes /
     // Свойства игроков.
     // offset: +0xA0 = +160,  size = 0x220 = 544
-    std::array<TPlayerSlotAttributes, 8> PlayerSlotAttributes;
+    std::array<TPlayerSlotAttributes, MAX_PLAYERS> PlayerSlotAttributes;
+    };
 
 };
 #pragma pack(pop)
@@ -216,7 +324,7 @@ struct NewSMapHeader : CMapHeaderData
         { THISCALL_1(void, 0x45A670, this); }
 
         NH3API_FORCEINLINE
-        NewSMapHeader(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        NewSMapHeader(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : heroPlayerSetups(tag),
               mapName(tag),
               mapDescription(tag),
@@ -229,30 +337,42 @@ struct NewSMapHeader : CMapHeaderData
 
         NH3API_FORCEINLINE
         NewSMapHeader& operator=(const NewSMapHeader& other) NH3API_NOEXCEPT
-        { return *THISCALL_2(NewSMapHeader*, 0x457990, this, &other); }
+        { THISCALL_2(void, 0x457990, this, &other); return *this; }
 
     public:
+        union {
         // Hero global setups /
         // Глобальные настройки героев.
         // offset: +0x2C0 = +704,  size = 0x10 = 16
         exe_map<int32_t, HeroPlayerInfo, 0x694E44, 0x694E40> heroPlayerSetups;
+        };
 
+        union {
         // Map name /
         // Название карты.
         // offset: +0x2D0 = +720,  size = 0x10 = 16
         exe_string mapName;
+        };
 
+        union {
         // Map Description /
         // Описание карты.
         // offset: +0x2E0 = +736,  size = 0x10 = 16
         exe_string mapDescription;
+        };
 
+        union {
         // Available heroes /
         // Доступные герои.
         // offset: +0x2F0 = +752,  size = 0x14 = 20
         exe_bitset<MAX_HEROES> availableHeroes;
+        };
 
 };
 #pragma pack(pop)
 
+#if !NH3API_CHECK_MSVC
 NH3API_DISABLE_WARNING_END
+#endif
+NH3API_DISABLE_WARNING_END
+

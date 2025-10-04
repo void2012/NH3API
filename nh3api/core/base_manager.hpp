@@ -32,8 +32,10 @@ NH3API_VIRTUAL_CLASS baseManager
         { THISCALL_1(void, 0x44D200, this); }
 
         NH3API_FORCEINLINE
-        baseManager(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-        { NH3API_IGNORE(nextManager, prevManager, id, priority, cMgrName, status); }
+        baseManager(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
+
+        NH3API_DEFAULT_DESTRUCTOR(baseManager)
 
     public:
         // vftable shift: +0
@@ -79,11 +81,11 @@ NH3API_VIRTUAL_CLASS baseManager
 #ifndef NH3API_VIRTUAL_OVERRIDE_BASEMANAGER
 #define NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(CLASS_NAME)\
 virtual int32_t __thiscall Open(int32_t newPriority) override \
-{ return get_type_vftable(this)->Open(reinterpret_cast<baseManager*>(this), newPriority); }\
+{ return get_type_vftable(this)->Open(static_cast<baseManager*>(this), newPriority); }\
 virtual void __thiscall Close() override \
-{ get_type_vftable(this)->Close(reinterpret_cast<baseManager*>(this)); }\
+{ get_type_vftable(this)->Close(static_cast<baseManager*>(this)); }\
 virtual int32_t __thiscall Main(message& msg) override \
-{ return get_type_vftable(this)->Main(reinterpret_cast<baseManager*>(this), &msg); }
+{ return get_type_vftable(this)->Main(static_cast<baseManager*>(this), &msg); }
 #endif // NH3API_VIRTUAL_OVERRIDE_BASEMANAGER
 
 #pragma pack(push, 4)
@@ -97,12 +99,10 @@ struct executive
         { THISCALL_1(void, 0x4B0660, this); }
 
         NH3API_FORCEINLINE
-        executive(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-        { NH3API_IGNORE(headManager, tailManager, currentManager, dialogReturn); }
-
-        NH3API_FORCEINLINE
-        ~executive() NH3API_NOEXCEPT
+        executive(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         {}
+
+        NH3API_DEFAULT_DESTRUCTOR(executive)
 
     public:
         int32_t DoDialog(baseManager* newDialog)
@@ -134,7 +134,7 @@ struct executive
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
-executive*& gpExec
+executive* const& gpExec
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699550, executive*));
 
 NH3API_DISABLE_WARNING_END

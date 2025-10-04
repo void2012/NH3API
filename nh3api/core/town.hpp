@@ -18,6 +18,7 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
 struct bitNumber_impl_t
 {
+    NH3API_CONST
     #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
     static
     #endif
@@ -27,7 +28,7 @@ struct bitNumber_impl_t
     #endif
     { return 1ULL << pos; }
 } 
-#ifdef NH3API_STD_INLINE_VARIABLES
+#if NH3API_STD_INLINE_VARIABLES
 inline constexpr
 #endif
 // Bit shift masks lookup table /
@@ -152,7 +153,7 @@ enum type_building_id : int32_t
     BUILDING_DWELLING_6_UPGRADE = 43, // Lvl. 7 upgraded creature dwelling / Улучшенное жилище существ 7 уровня
 };
 
-NH3API_FORCEINLINE const char* GetBuildingName(TTownType townType, type_building_id buildingId)
+NH3API_NODISCARD NH3API_FORCEINLINE const char* GetBuildingName(TTownType townType, type_building_id buildingId)
 { return FASTCALL_2(const char*, 0x460CC0, townType, buildingId); }
 
 NH3API_INLINE_OR_EXTERN
@@ -171,7 +172,7 @@ gHierarchyMask NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977E8, std::ar
 // Town /
 // Город.
 // size = 0x168 = 360, align = 8
-class town
+class town 
 {
     public:
         NH3API_FORCEINLINE
@@ -180,7 +181,7 @@ class town
         { THISCALL_1(void, 0x5BE280, this); }
 
         NH3API_FORCEINLINE
-        town(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        town(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : cName(tag),
               SpellDisabledMask(tag),
               town_army(tag)
@@ -193,17 +194,21 @@ class town
     public:
         // Get town location on the map /
         // Координаты города.
-        type_point get_location() const
+        NH3API_NODISCARD type_point get_location() const
+        #if NH3API_STD_MOVE_SEMANTICS
+        { return {mapX, mapY, mapZ}; }
+        #else
         { return type_point(mapX, mapY, mapZ); }
+        #endif
 
         // Does town has creatures in garrison? /
         // Есть ли в городе гарнизонные войска или герой с войсками?
-        bool HasGarrison() const
+        NH3API_NODISCARD bool HasGarrison() const
         { return !!THISCALL_1(bool32_t, 0x5BE3E0, this); }
 
         // Check if town has building <buildingId> /
         // Проверка, есть ли в городе постройка <buildingId>.
-        bool HasBuilding(type_building_id buildingId, bool check_included = true) const
+        NH3API_NODISCARD bool HasBuilding(type_building_id buildingId, bool check_included = true) const
         { return THISCALL_3(bool, 0x4305A0, this, buildingId, check_included); }
 
         // Make garrison hero a guest(move down) /
@@ -228,27 +233,27 @@ class town
 
         // Get citadel/castle growth bonus of <creature>. Returns 0 if none /
         // Бонус прироста существа <creature>. Возвращает 0, если таких построек нет.
-        int32_t get_castle_growth_bonus(TCreatureType creature) const
+        NH3API_NODISCARD int32_t get_castle_growth_bonus(TCreatureType creature) const
         { return THISCALL_2(int32_t, 0x5BF970, this, creature); }
 
         // Get town gold income /
         // Ежедневный доход в казну от города, в золоте.
-        int16_t get_gold_income(bool include_silo = true) const
+        NH3API_NODISCARD int16_t get_gold_income(bool include_silo = true) const
         { return THISCALL_2(int16_t, 0x5BFA00, this, include_silo); }
 
         // Can player build building now? /
         // Может ли игрок построить <building> сейчас?
-        bool can_build(type_building_id building) const
+        NH3API_NODISCARD bool can_build(type_building_id building) const
         { return THISCALL_2(bool, 0x5C1120, this, building); }
 
         // Can player build building ever?
         // Может ли игрок построить <building> вообще?
-        bool can_ever_build(type_building_id building_id) const
+        NH3API_NODISCARD bool can_ever_build(type_building_id building_id) const
         { return THISCALL_2(bool, 0x5C1260, this, building_id); }
 
         // Get mask of buildings that can be built /
         // Маска построек, которые можно построить.
-        uint64_t get_buildable_mask() const
+        NH3API_NODISCARD uint64_t get_buildable_mask() const
         { return THISCALL_1(uint64_t, 0x5C1320, this); }
 
         // Fill array <resources> with the cost of the <building> /
@@ -258,7 +263,7 @@ class town
 
         // Get <building> cost as pointer to array of 7 ints /
         // Получить массив ресурсов, необходимый для постройки <building>.
-        const std::array<int32_t, 7>& get_build_cost_array(type_building_id building) const
+        NH3API_NODISCARD const std::array<int32_t, 7>& get_build_cost_array(type_building_id building) const
         {   
             typedef std::array<int32_t, 7> build_cost_array_t;
             return *THISCALL_2(const build_cost_array_t*, 0x5C1480, this, building); 
@@ -266,30 +271,30 @@ class town
 
         // Is building ever available in town?
         // Возможно ли построить <building> в городе?
-        bool is_legal_building(type_building_id building) const
+        NH3API_NODISCARD bool is_legal_building(type_building_id building) const
         { return !!THISCALL_2(bool32_t, 0x5C16A0, this, building); }
 
         // Town native terrain /
         // Родная почва фракции.
-        TTerrainType GetNativeTerrain() const
+        NH3API_NODISCARD TTerrainType GetNativeTerrain() const
         { return THISCALL_1(TTerrainType, 0x5C1840, this); }
 
         // Town type(fraction) name /
         // Название типа(фракции) города.
-        const char* GetTypeName() const
+        NH3API_NODISCARD const char* GetTypeName() const
         { return THISCALL_1(const char*, 0x5C1850, this); }
 
         // Current town army. Priority is garrison army /
         // Текущая армия города. Приоритет отдаётся гарнизонной армии.
-        armyGroup& get_army()
+        NH3API_NODISCARD armyGroup& get_army()
         { return *THISCALL_1(armyGroup*, 0x5C1860, this); }
 
         // Current town army. Priority is garrison army /
         // Текущая армия города. Приоритет отдаётся гарнизонной армии.
-        const armyGroup& get_army() const
+        NH3API_NODISCARD const armyGroup& get_army() const
         { return *THISCALL_1(const armyGroup*, 0x5C1860, this); }
 
-        static type_building_id UpgradedDwellingID(type_building_id id)
+        NH3API_NODISCARD static type_building_id UpgradedDwellingID(type_building_id id)
         { return FASTCALL_1(type_building_id, 0x5C18A0, id); }
 
     public:
@@ -342,7 +347,12 @@ class town
         // X-координата позиции установки лодки портом города на карте
         // offset: +0x9 = +9,  size = 0x1 = 1
         uint8_t boatY;
+        
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_A[2];
 
+    public:
         // Garrison hero ID /
         // ID Героя в гарнизоне(сверху)
         // offset: +0xC = +12,  size = 0x4 = 4
@@ -358,6 +368,11 @@ class town
         // offset: +0x14 = +20,  size = 0x1 = 1
         int8_t mageLevel;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_15[1];
+
+    public:
         // Creature dwellings populations /
         // Ненанятые войска в городе
         // offset: +0x16 = +22,  size = 0x1C = 28
@@ -378,6 +393,11 @@ class town
         // offset: +0x34 = +52,  size = 0x1 = 1
         uint8_t pond_amount;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_35[3];
+
+    public:
         // Type of magic pound(Rampart) resource generated this week /
         // Тип ресурса, который сгенерировал магический пруд(Оплот) на этой неделе.
         // offset: +0x38 = +56,  size = 0x4 = 4
@@ -393,6 +413,11 @@ class town
         // offset: +0x40 = +64,  size = 0x2 = 2
         int16_t summoningPopulation;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_42[2];
+
+    public:
         // Spells for each level of mage guild /
         // Заклинания на каждом из 5 уровней гильдии магов.
         // offset: +0x44 = +68,  size = 0x78 = 120
@@ -403,15 +428,24 @@ class town
         // offset: +0xBC = +188,  size = 0x5 = 5
         std::array<int8_t, MAX_SPELL_LEVELS> maxTownSpellAvailable;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_C1[3];
+
+    public:
+        union {
         // Town name /
         // Название города.
         // offset: +0xC4 = +196,  size = 0x10 = 16
         exe_string cName;
+        };
 
+        union {
         // Forbidden spells in town /
         // Запрещённые в городе заклинания
-        // offset: +0xD4 = +212,  size = 0x9 = 9
+        // offset: +0xD4 = +212,  size = 0xC = 12
         exe_bitset<MAX_BOOK_SPELLS> SpellDisabledMask;
+        };
 
         // Town garrison army /
         // Гарнизон города(сверху).
@@ -449,6 +483,7 @@ NH3API_SIZE_ASSERT(0x168, town);
 // size = 0x88 = 136, align = 4
 struct TownExtra
 {
+public:
     // Map object reference index /
     // Ссылка(индекс) на объект карты приключений.
     // offset: +0x0 = +0,  size = 0x4 = 4
@@ -463,16 +498,21 @@ struct TownExtra
     // Есть настроенные строения
     // offset: +0x5 = +5,  size = 0x1 = 1
     bool bCustomBuildings;
+    
+protected:
+    NH3API_MAYBE_UNUSED
+    byte_t gap_6[2];
 
+public:
     // Built buildings mask /
     // Маска построенных построек.
     // offset: +0x8 = +8,  size = 0x8 = 8
-    int64_t BuildingBuiltMask;
+    uint64_t BuildingBuiltMask;
 
     // Disabled buildings mask /
     // Маска запрещённых построек.
     // offset: +0x10 = +16,  size = 0x8 = 8
-    int64_t BuildingDisabledMask;
+    uint64_t BuildingDisabledMask;
 
     // Town has fort /
     // У города есть форт.
@@ -483,6 +523,12 @@ struct TownExtra
     // У города настроен гарнизон.
     // offset: +0x19 = +25,  size = 0x1 = 1
     bool bCustomArmies;
+        
+protected:
+    NH3API_MAYBE_UNUSED
+    byte_t gap_1A[2];
+
+public:
 
     // Town garrison army(empty if not setup) /
     // Гарнизон города(пустой, если не настроен).
@@ -494,6 +540,11 @@ struct TownExtra
     // offset: +0x54 = +84,  size = 0x1 = 1
     bool bCustomName;
 
+protected:
+    NH3API_MAYBE_UNUSED
+    byte_t gap_55[3];
+
+public:
     // Town custom name(empty if not setup) /
     // Название города(пустое, если не настроено).
     // offset: +0x58 = +88,  size = 0x10 = 16

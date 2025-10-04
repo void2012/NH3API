@@ -13,7 +13,9 @@
 #include "hero_enums.hpp" // THero
 #include "terrain.hpp" // TTownType
 
+#if !NH3API_CHECK_CPP11
 NH3API_DISABLE_MSVC_WARNING_BEGIN(4341)
+#endif
 // Game difficulty /
 // Игровая сложность.
 enum EGameDifficulty : int8_t
@@ -27,7 +29,9 @@ enum EGameDifficulty : int8_t
     DIFFICULTY_NONE = -1,
     DIFFICULTY_MAX = 5,
 };
+#if !NH3API_CHECK_CPP11
 NH3API_DISABLE_MSVC_WARNING_END
+#endif
 
 #pragma pack(push, 1)
 // Game setup options /

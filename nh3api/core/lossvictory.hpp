@@ -15,7 +15,9 @@
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
+#if !NH3API_CHECK_CPP11
 NH3API_DISABLE_MSVC_WARNING_BEGIN(4341)
+#endif
 // Victory condition type /
 // Тип условия победы.
 enum EVictoryConditionType : int8_t
@@ -37,9 +39,13 @@ enum EVictoryConditionType : int8_t
 
     MAX_VICTORY_CONDITIONS = 13
 };
+#if !NH3API_CHECK_CPP11
 NH3API_DISABLE_MSVC_WARNING_END
+#endif
 
+#if !NH3API_CHECK_CPP11
 NH3API_DISABLE_MSVC_WARNING_BEGIN(4341)
+#endif
 // Loss condition type /
 // Тип условия поражения.
 enum ELossConditionType : int8_t
@@ -51,7 +57,9 @@ enum ELossConditionType : int8_t
 
     MAX_LOSS_CONDITIONS = 3
 };
+#if !NH3API_CHECK_CPP11
 NH3API_DISABLE_MSVC_WARNING_END
+#endif
 
 class town;
 class hero;
@@ -68,11 +76,11 @@ struct VictoryConditionStruct
         { THISCALL_1(void, 0x4BC000, this); }
 
         NH3API_FORCEINLINE
-        VictoryConditionStruct(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        VictoryConditionStruct(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         {}
 
     public:
-        bool applies_to_player(int32_t player) const
+        NH3API_NODISCARD bool applies_to_player(int32_t player) const
         { return THISCALL_2(bool, 0x5F1940, this, player); }
 
         bool CheckForArtifactWin()
@@ -127,6 +135,11 @@ struct VictoryConditionStruct
         // offset: +0x2 = +2,  size = 0x1 = 1
         bool AppliesToComputer;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_3[1];
+
+    public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t ArtifactNum;
 
@@ -157,6 +170,11 @@ struct VictoryConditionStruct
         // offset: +0x25 = +37,  size = 0x1 = 1
         int8_t CastleLevel;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_38[2];
+
+    public:
         // offset: +0x28 = +40,  size = 0x4 = 4
         int32_t HeroX;
 
@@ -186,6 +204,9 @@ struct VictoryConditionStruct
 
         // offset: +0x49 = +73,  size = 0x1 = 1
         int8_t playerWinner;
+    private:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_74[2];
 
 };
 #pragma pack(pop)
@@ -203,7 +224,7 @@ struct LossConditionStruct
         { THISCALL_1(void, 0x45B7A0, this); }
 
         NH3API_FORCEINLINE
-        LossConditionStruct(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        LossConditionStruct(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         {}
 
     public:
@@ -223,6 +244,11 @@ struct LossConditionStruct
         // offset: +0x0 = +0,  size = 0x1 = 1
         ELossConditionType Type;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_2[3];
+
+    public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t TownX;
 
@@ -251,7 +277,7 @@ struct LossConditionStruct
         uint8_t GameLost;
 
         // offset: +0x23 = +35,  size = 0x1 = 1
-        int8_t playerLoser;
+        int8_t  playerLoser;
 
 };
 #pragma pack(pop)

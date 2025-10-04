@@ -56,7 +56,7 @@ const std::array<const typename combatManager::TArcherTraits, MAX_TOWNS>& combat
 const std::array<const std::array<const typename combatManager::TWallTraits, 18>, MAX_TOWNS>& combatManager::akWallTraits
 = get_global_var_ref(0x66D848, const std::array<const std::array<const typename combatManager::TWallTraits, 18>, MAX_TOWNS>);
 
-combatManager*& gpCombatManager 
+combatManager* const& gpCombatManager 
 = get_global_var_ref(0x699420, combatManager*);
 
 std::array<int32_t, 2>& iCombatControlNetPos 

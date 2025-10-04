@@ -80,6 +80,12 @@ public:
         NH3API_CONSTEXPR_CPP_14 operator bool() const NH3API_NOEXCEPT
         { return _parent.test(_pos); }
 
+        #if NH3API_CHECK_CPP11
+        ~reference() = default;
+        #endif
+
+        NH3API_CONSTEXPR_CPP_14 reference() NH3API_NOEXCEPT NH3API_DELETED_FUNCTION
+
     private:
         NH3API_CONSTEXPR_CPP_14 reference(exe_bitset<N>& value, size_t pos) NH3API_NOEXCEPT
             : _parent(value), _pos(pos)
@@ -131,7 +137,6 @@ public:
                typename std::basic_string<T, CharTraits, Allocator>::value_type zero = typename std::basic_string<T, CharTraits, Allocator>::value_type('0'),
                typename std::basic_string<T, CharTraits, Allocator>::value_type one  = typename std::basic_string<T, CharTraits, Allocator>::value_type('1') )
     {
-        size_t i;
         if (str.size() < pos)
             _Throw_invalid_subscript();
         if (str.size() - pos < n)
@@ -140,7 +145,7 @@ public:
             n = N;
         _Tidy();
         pos += n;
-        for (i = 0; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
             if (str[--pos] == one)
                 set(i);
             else if (str[pos] != zero)
@@ -153,7 +158,6 @@ public:
                typename exe_string::value_type zero = '0',
                typename exe_string::value_type one  = '1' )
     {
-        size_t i;
         if (str.size() < pos)
             _Throw_invalid_subscript();
         if (str.size() - pos < n)
@@ -162,7 +166,7 @@ public:
             n = N;
         _Tidy();
         pos += n;
-        for (i = 0; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
             if (str[--pos] == one)
                 set(i);
             else if (str[pos] != zero)
@@ -170,8 +174,8 @@ public:
     }
 
     NH3API_FORCEINLINE
-    exe_bitset(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-    { NH3API_IGNORE(_array); }
+    exe_bitset(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+    {}
 
     NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator&=(const exe_bitset<N>& other) NH3API_NOEXCEPT
     {
@@ -298,9 +302,7 @@ public:
     exe_string to_string(char zero = '0', char one = '1') const
     {
         exe_string result(N, zero);
-        // use const_char and c_str explicitly to avoid invoking exe_string::_Freeze
-        // as an optimization
-        char* dst = const_cast<char*>(result.c_str());
+        char* dst = result.data();
         for (size_t i = N; 0 < i; ++dst )
             *dst = _At(--i) ? one : zero;
         return result;
@@ -399,7 +401,7 @@ protected:
 
     NH3API_CONSTEXPR_CPP_14 void _Trim() NH3API_NOEXCEPT
     {
-        if (N % _Bitsperword != 0)
+        NH3API_IF_CONSTEXPR (N % _Bitsperword != 0)
             _array[_Words] &= ((word_type)1 << N % _Bitsperword) - 1;
     }
 

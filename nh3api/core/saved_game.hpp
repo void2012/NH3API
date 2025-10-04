@@ -23,7 +23,7 @@ struct SavedGameHeader
         { THISCALL_1(void, 0x4BBDA0, this); }
 
         NH3API_FORCEINLINE
-        SavedGameHeader(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        SavedGameHeader(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : map_header(tag), campaign(tag), file_name(tag)
         { THISCALL_1(void, 0x4BBDA0, this); }
 
@@ -41,8 +41,10 @@ struct SavedGameHeader
         // offset: +0xC = +12,  size = 0x4 = 4
         int32_t game_version;
 
+        union {
         // offset: +0x10 = +16,  size = 0x304 = 772
-        NewSMapHeader map_header;
+        NewSMapHeader map_header;            
+        };
 
         // offset: +0x314 = +788,  size = 0x1CC = 460
         SGameSetupOptions map_setup;
@@ -56,11 +58,15 @@ struct SavedGameHeader
         byte_t gap_4E1[3];
 
     public:
+        union {
         // offset: +0x4E4 = +1252,  size = 0x7C = 124
         SCampaign campaign;
+        };
 
+        union {
         // offset: +0x560 = +1376,  size = 0x10 = 16
         exe_string file_name;
+        };
 
         // offset: +0x570 = +1392,  size = 0x2 = 2
         int16_t difficultyRating;

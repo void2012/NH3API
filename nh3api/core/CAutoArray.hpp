@@ -14,19 +14,55 @@
 template<class T>
 class CAutoArray
 {
-    protected:
+    NH3API_STATIC_ASSERT("CAutoArray<T> must have its vftable address known", vftable_address<CAutoArray>::value != 0);
     public:
-        CAutoArray()
+        struct vftable_t
         {
+            void (__thiscall *scalar_deleting_destructor)(CAutoArray*, uint8_t);
+            bool (__thiscall *Add)(CAutoArray*, T*);
+            T*   (__thiscall *Get)(CAutoArray*, size_t);
+            bool (__thiscall *Put)(CAutoArray*, size_t, T*);
+            bool (__thiscall *Delete)(CAutoArray*, size_t);
+            bool (__thiscall *Insert)(CAutoArray*, size_t, T*);
+            bool (__thiscall *GetCount)(CAutoArray*, size_t);
+        };
+
+    public:
+        CAutoArray() NH3API_NOEXCEPT
+        {
+            NH3API_SET_VFTABLE();
             step      = 25;
             size      = 0;
             allocSize = 0;
             pArray    = nullptr;
         }
-
-        //virtual ~CAutoArray()
-        //{ Destroy(); }
+        
+        // vftable shift: +0
         NH3API_SCALAR_DELETING_DESTRUCTOR
+
+        // vftable shift: +4
+        virtual bool __thiscall Add(T* element)
+        { return get_vftable(this)->Add(this, element); }
+
+        // vftable shift: +8
+        virtual void* __thiscall Get(size_t elementNbr)
+        { return get_vftable(this)->Get(this, elementNbr); }
+
+        // vftable shift: +12
+        virtual bool __thiscall Put(size_t elementNbr, T* element)
+        { return get_vftable(this)->Put(this, elementNbr, element); }
+
+        // vftable shift: +16
+        virtual bool __thiscall Delete(size_t elementNbr)
+        { return get_vftable(this)->Delete(this, elementNbr); }
+
+        // vftable shift: +20
+        virtual bool __thiscall Insert(size_t nextElementNbr, T* element)
+        { return get_vftable(this)->Insert(this, nextElementNbr, element); }
+
+        // vftable shift: +24
+        virtual int32_t __thiscall GetCount()
+        { return get_vftable(this)->GetCount(this); }
 
         void Destroy(bool deleteData = true)
         {
@@ -48,11 +84,9 @@ class CAutoArray
         }
 
         void SetStep(uint32_t newStep)
-        {
-            step = newStep;
-        }
+        { step = newStep; }
 
-        virtual bool Allocate(uint32_t newSize)
+        bool Allocate(uint32_t newSize)
         {
             allocSize = newSize;
 
@@ -67,7 +101,8 @@ class CAutoArray
 
             return true;
         }
-
+        
+        /*
         virtual bool Add(T* element)
         {
             if ( allocSize <= size )
@@ -119,10 +154,11 @@ class CAutoArray
             return true;
         }
 
-        virtual size_t GetCount()
+        virtual size_t GetCount() const 
         {
             return size;
         }
+        */
 
         T* operator[](size_t index)
         {

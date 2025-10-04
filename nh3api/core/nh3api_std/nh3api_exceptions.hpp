@@ -46,7 +46,7 @@ NH3API_NOINLINE
 void throw_exception(const char[])
 {
     RaiseException(0xE06D7363u, EXCEPTION_NONCONTINUABLE, 0, nullptr);
-    ::std::terminate();
+    ::std::abort();
 }
 #endif
 
@@ -66,7 +66,7 @@ namespace nh3api
 template<typename RollBack>
 struct exception_guard_rollback
 {
-    exception_guard_rollback() NH3API_DELETED_FUNCTION;
+    exception_guard_rollback() NH3API_DELETED_FUNCTION
    
     NH3API_CONSTEXPR_CPP_14
     explicit exception_guard_rollback(RollBack _rollback)
@@ -85,10 +85,10 @@ struct exception_guard_rollback
     { other.completed = true; }
     #endif
 
-    exception_guard_rollback(const exception_guard_rollback&) NH3API_DELETED_FUNCTION;
-    exception_guard_rollback& operator=(const exception_guard_rollback&) NH3API_DELETED_FUNCTION;
+    exception_guard_rollback(const exception_guard_rollback&) NH3API_DELETED_FUNCTION
+    exception_guard_rollback& operator=(const exception_guard_rollback&) NH3API_DELETED_FUNCTION
     #if NH3API_STD_MOVE_SEMANTICS
-    exception_guard_rollback& operator=(const exception_guard_rollback&&) NH3API_DELETED_FUNCTION;
+    exception_guard_rollback& operator=(const exception_guard_rollback&&) NH3API_DELETED_FUNCTION
     #endif 
 
     NH3API_CONSTEXPR_CPP_14 
@@ -102,6 +102,11 @@ struct exception_guard_rollback
     }
 
     protected:
+    #if NH3API_HAS_CPP_ATTRIBUTE(msvc::no_unique_address)
+    [[msvc::no_unique_address]]
+    #elif NH3API_HAS_CPP_ATTRIBUTE(no_unique_address)
+    [[no_unique_address]]
+    #endif
     RollBack rollback;
     bool completed;
 };
@@ -109,10 +114,10 @@ struct exception_guard_rollback
 template<typename RollBack>
 struct exception_guard_noop
 {
-    exception_guard_noop() NH3API_DELETED_FUNCTION;
+    exception_guard_noop() NH3API_DELETED_FUNCTION
    
     NH3API_CONSTEXPR_CPP_14
-    explicit exception_guard_noop(RollBack _rollback)
+    explicit exception_guard_noop(RollBack)
     NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<RollBack>::value)
         : completed(false)
     {}
@@ -125,10 +130,10 @@ struct exception_guard_noop
     { other.completed = true; }
     #endif
 
-    exception_guard_noop(const exception_guard_noop&) NH3API_DELETED_FUNCTION;
-    exception_guard_noop& operator=(const exception_guard_noop&) NH3API_DELETED_FUNCTION;
+    exception_guard_noop(const exception_guard_noop&) NH3API_DELETED_FUNCTION
+    exception_guard_noop& operator=(const exception_guard_noop&) NH3API_DELETED_FUNCTION
     #if NH3API_STD_MOVE_SEMANTICS
-    exception_guard_noop& operator=(const exception_guard_noop&&) NH3API_DELETED_FUNCTION;
+    exception_guard_noop& operator=(const exception_guard_noop&&) NH3API_DELETED_FUNCTION
     #endif 
 
     NH3API_CONSTEXPR_CPP_14 

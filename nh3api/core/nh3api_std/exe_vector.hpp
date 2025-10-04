@@ -43,7 +43,7 @@ class exe_vector : public nh3api::nonempty_base, public std::vector<T, allocator
     #if NH3API_CHECK_CPP11
         using std::vector<T, allocator_type >::vector;
 
-        exe_vector(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        exe_vector(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
         {}
     #else
     // TODO: inherit constructors the old way.
@@ -58,7 +58,7 @@ class exe_vector<bool> : public nh3api::nonempty_base, public std::vector<uint8_
     #if NH3API_CHECK_CPP11
         using std::vector<uint8_t, exe_allocator<uint8_t> >::vector;
 
-        exe_vector(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        exe_vector(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
         {}
     #else
     // TODO: inherit constructors the old way.
@@ -242,8 +242,8 @@ public:
     }
 
     // no-op constructor optimization for low-level code
-    exe_vector(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-    { NH3API_IGNORE(_First, _Last, _End, _Dummy); }
+    exe_vector(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+    {}
 
 #if NH3API_STD_MOVE_SEMANTICS
 protected:
@@ -266,7 +266,7 @@ protected:
     }
 
     template<class ... Args>
-    pointer _Emplace_reallocate(const pointer _Whereptr, Args&& ... _Val)
+    pointer _Emplace_reallocate(pointer _Whereptr, Args&& ... _Val)
     { // reallocate and insert by perfectly forwarding _Val at _Whereptr
         // pre: !_Has_unused_capacity()
         const size_type _Whereoff = static_cast<size_type>(_Whereptr - this->_First);
@@ -324,7 +324,7 @@ public:
         _Range_construct_or_tidy(i.begin(), i.end(), std::random_access_iterator_tag());
     }
 
-    exe_vector(std::initializer_list<value_type> i, const allocator_type& a)
+    exe_vector(std::initializer_list<value_type> i, const allocator_type&)
     {
         _Range_construct_or_tidy(i.begin(), i.end(), std::random_access_iterator_tag());
     }
@@ -377,9 +377,7 @@ public:
     }
 
     void push_back(value_type&& value)
-    {
-        emplace_back(value);
-    }
+    { emplace_back(std::move(value)); }
 
     template<class ... Args>
     #if NH3API_CHECK_CPP17
@@ -415,12 +413,12 @@ public:
     }
 
     NH3API_INLINE_LARGE
-    exe_vector& operator=(const exe_vector& _X)
+    exe_vector& operator=(const exe_vector& other)
     {
-        if ( this == &_X )
+        if ( this == &other )
             return *this;
         else
-            assign(_X._First, _X._Last);
+            assign(other._First, other._Last);
         
         return *this;
     }
@@ -438,7 +436,7 @@ public:
     }
 
     size_type capacity() const NH3API_NOEXCEPT
-    { return this->_End - this->_First; }
+    { return static_cast<size_type>(this->_End - this->_First); }
 
     void shrink_to_fit()
     {
@@ -525,7 +523,7 @@ public:
         }
         else if (_Newsize > _Oldsize)
         { // append
-            const pointer _Oldlast = this->_Last;
+            pointer _Oldlast = this->_Last;
             this->_Last = _Default_fill(_Oldlast, _Newsize - _Oldsize);
         }
         else if (_Newsize == _Oldsize)
@@ -533,7 +531,7 @@ public:
         }
         else
         { // trim
-            const pointer _Newlast = this->_First + _Newsize;
+            pointer _Newlast = this->_First + _Newsize;
             _Deallocate(_Newlast);
             this->_Last = _Newlast;
         }
@@ -576,7 +574,7 @@ public:
         }
         else if (_Newsize > _Oldsize)
         { // append
-            const pointer _Oldlast = this->_Last;
+            pointer _Oldlast = this->_Last;
             this->_Last = _Ufill(_Oldlast, _Newsize - _Oldsize, _Val);
         }
         else if (_Newsize == _Oldsize)
@@ -584,7 +582,7 @@ public:
         }
         else
         { // trim
-            const pointer _Newlast = this->_First + _Newsize;
+            pointer _Newlast = this->_First + _Newsize;
             _Deallocate(_Newlast);
             this->_Last = _Newlast;
         }
@@ -592,7 +590,7 @@ public:
 
     NH3API_FORCEINLINE
     size_type size() const NH3API_NOEXCEPT
-    { return this->_Last - this->_First; }
+    { return static_cast<size_type>(this->_Last - this->_First); }
 
     NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
     static size_type max_size() NH3API_NOEXCEPT
@@ -603,7 +601,7 @@ public:
     { return size() == 0; }
 
     NH3API_FORCEINLINE
-    allocator_type get_allocator() const NH3API_NOEXCEPT
+    static allocator_type get_allocator() NH3API_NOEXCEPT
     { return allocator_type(); }
 
     NH3API_FORCEINLINE
@@ -725,7 +723,7 @@ public:
         }
         else
         {
-            const pointer _Newlast = this->_First + _Newsize;
+            pointer _Newlast = this->_First + _Newsize;
             nh3api::fill(this->_First, _Newlast, _Val);
             _Destroy_range(_Newlast, this->_Last);
             this->_Last = _Newlast;
@@ -804,7 +802,7 @@ protected:
         }
         else
         {
-            const pointer _Newlast = this->_First + _Newsize;
+            pointer _Newlast = this->_First + _Newsize;
             nh3api::copy(first, last, this->_First);
             _Destroy_range(_Newlast, this->_Last);
             this->_Last = _Newlast;
@@ -880,7 +878,7 @@ public:
         else
         {                          // provide basic guarantee
             const T _Tmp = _Val; // handle aliasing
-            const pointer _Oldlast = this->_Last;
+            pointer _Oldlast = this->_Last;
             const size_type _Affected_elements = static_cast<size_type>(_Oldlast - _Where);
 
             if (_Count > _Affected_elements)
@@ -968,7 +966,7 @@ public:
 
         iterator _It1 = const_cast<iterator>(first);
         iterator _It2 = const_cast<iterator>(last);
-        pointer _Ptr;
+        pointer _Ptr = nullptr;
         if (_It1 != _It2)
         { // worth doing, copy down over hole
         #if NH3API_STD_MOVE_SEMANTICS
@@ -1027,7 +1025,7 @@ protected:
                           const size_type& _deallocation_size ) NH3API_NOEXCEPT
                 : vec(_vec), 
                 destroy_first(_destroy_first),
-                destroy_last(_destroy_first),
+                destroy_last(_destroy_last),
                 deallocate_at(_deallocate_at),
                 deallocation_size(_deallocation_size)
             {}
@@ -1075,7 +1073,7 @@ protected:
     void _Reallocate_exactly(const size_type _Newcapacity)
     {
         const size_type _Size = size();
-        const pointer _Newvec = _Allocate(_Newcapacity);
+        pointer _Newvec = _Allocate(_Newcapacity);
 
         NH3API_IF_CONSTEXPR ( noexcept_copy::value && noexcept_move::value )
         {
@@ -1135,10 +1133,13 @@ protected:
 
     NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
     static void _Destroy_range(pointer first, pointer last)
-    NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value)
+    NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<value_type>::value
+    || nh3api::tt::is_trivially_destructible<value_type>::value)
     { 
         nh3api::verify_range(first, last);
-        nh3api::destroy<pointer>(first, last); 
+
+        NH3API_IF_CONSTEXPR (!nh3api::tt::is_trivially_destructible<value_type>::value)
+            nh3api::destroy<pointer>(first, last); 
     }
 
     NH3API_FORCEINLINE
@@ -1345,7 +1346,7 @@ protected:
     }
 
     // discard old array, acquire new array
-    void _Change_array(const pointer _Newvec, 
+    void _Change_array(pointer _Newvec, 
                        const size_type _Newsize, 
                        const size_type _Newcapacity) NH3API_NOEXCEPT
     {
@@ -1446,7 +1447,7 @@ protected:
           // If we encounter copy/move construction/assignment failure, provide the basic guarantee.
           // (For one-at-back, this provides the strong guarantee.)
 
-            const pointer _Oldlast = this->_Last;
+            pointer _Oldlast = this->_Last;
             const size_type _Affected_elements = static_cast<size_type>(_Oldlast - _Where);
 
             if (_Count < _Affected_elements)
@@ -1487,7 +1488,7 @@ protected:
             }
             else
             { // affected elements don't overlap before/after
-                const pointer _Relocated = _Whereptr + _Count;
+                pointer _Relocated = _Whereptr + _Count;
                 this->_Last = _Umove(_Whereptr, _Oldlast, _Relocated);
                 _Destroy_range(_Whereptr, _Oldlast);
                 NH3API_IF_CONSTEXPR ( noexcept_copy::value )
@@ -1581,5 +1582,6 @@ template<class T> NH3API_FORCEINLINE
 NH3API_DISABLE_MSVC_WARNING_END
 #endif
 
+NH3API_DISABLE_WARNING_END
 NH3API_DISABLE_WARNING_END
 #endif // NH3API_FLAG_USE_NATIVE_STD_VECTOR

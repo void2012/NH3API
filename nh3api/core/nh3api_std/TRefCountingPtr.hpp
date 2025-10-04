@@ -127,13 +127,21 @@ public: // private
             : m_refCnt(nh3api::exchange(other.m_refCnt, 1)), m_object(std::move(other.m_object))
         {}
 
-        size_t refcount() const NH3API_NOEXCEPT
+        NH3API_NODISCARD size_t refcount() const NH3API_NOEXCEPT
         { return m_refCnt; }
+
+        ~_TWrapper() NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<T>::value)
+        #if NH3API_CHECK_CPP11
+        = default;
+        #else 
+        {}
+        #endif
+
+        friend class TRefCountingPtr<T>;
 
     private:
         size_t m_refCnt;
         T      m_object;
-        friend class TRefCountingPtr<T>;
     };
 
     _TWrapper*	m_pWrapper;

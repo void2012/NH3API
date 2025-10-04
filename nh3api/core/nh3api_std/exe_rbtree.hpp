@@ -58,6 +58,66 @@ class exe_rbtree
     typedef _Node* _Nodeptr;
     struct _Node
     {
+        NH3API_FORCEINLINE
+        _Node() NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_default_constructible<_Ty>::value) 
+            : _Left(nullptr), _Parent(nullptr), _Right(nullptr), _Value(), _Color() 
+        {}
+
+        NH3API_FORCEINLINE
+        _Node(_Node* left, _Node* parent, _Node* right, const _Ty& value, _Redbl color) NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<_Ty>::value)
+            : _Left(left), _Parent(parent), _Right(right), _Value(value), _Color(color)
+        {}
+
+    #if NH3API_STD_MOVE_SEMANTICS
+        NH3API_FORCEINLINE
+        _Node(_Node* left, _Node* parent, _Node* right, _Ty&& value, _Redbl color) NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_move_constructible<_Ty>::value)
+            : _Left(left), _Parent(parent), _Right(right), _Value(std::move(value)), _Color(color)
+        {}
+
+        NH3API_FORCEINLINE
+        _Node(_Node&& other) NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_move_constructible<_Ty>::value)
+            : _Left(nh3api::exchange(other._Left, nullptr)),
+              _Parent(nh3api::exchange(other._Parent, nullptr)),
+              _Right(nh3api::exchange(other._Right, nullptr)),
+              _Value(std::move(other._Value)),
+              _Color(other._Color)
+        {}
+
+        NH3API_FORCEINLINE
+        _Node& operator=(_Node&& other) 
+        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_move_assignable<_Ty>::value)
+        {
+            this->_Left   = nh3api::exchange(other._Left, nullptr);
+            this->_Parent = nh3api::exchange(other._Parent, nullptr);
+            this->_Right  = nh3api::exchange(other._Right, nullptr);
+            this->_Value  = std::move(other._Value);
+            this->_Color  = other._Color;
+            return *this;
+        }
+    #endif
+        NH3API_FORCEINLINE
+        _Node& operator=(const _Node& other) 
+        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_assignable<_Ty>::value)
+        {
+            this->_Left   = other._Left;
+            this->_Parent = other._Parent;
+            this->_Right  = other._Right;
+            this->_Value  = other._Value;
+            this->_Color  = other._Color;
+            return *this;
+        }
+
+        _Node(const _Node& other) 
+        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<_Ty>::value)
+            : _Left(other._Left, nullptr),
+              _Parent(other._Parent, nullptr),
+              _Right(other._Right, nullptr),
+              _Value(other._Value),
+              _Color(other._Color)
+        {}
+
+        ~_Node() {}
+
         _Node* _Left;
         _Node* _Parent;
         _Node* _Right;
@@ -89,11 +149,11 @@ class exe_rbtree
 
     static volatile size_t* _Getnilrefs()
     {
-        return reinterpret_cast<volatile size_t*>(_Nilrefs_Address);
+        return get_global_var_ptr(_Nilrefs_Address, volatile size_t);
     }
 
     // is node null?
-    static bool _Isnil(const _Nodeptr _P)
+    static bool _Isnil(const _Node* _P)
     { return _P == *reinterpret_cast<volatile _Nodeptr*>(_Nil_Address); }
 
     // return reference to left pointer in node
@@ -124,6 +184,7 @@ class exe_rbtree
     typedef _K  key_type;
     typedef _Ty value_type;
     typedef _Pr key_compare;
+    NH3API_STATIC_ASSERT("key_compare must be empty", nh3api::tt::is_empty<key_compare>::value);
     typedef ::exe_allocator<value_type> allocator_type;
 
     typedef size_t            size_type;
@@ -160,6 +221,21 @@ class exe_rbtree
         rbtree_iterator(const rbtree_iterator &other) NH3API_NOEXCEPT
             : _Ptr(other._Ptr)
         {}
+
+        ~rbtree_iterator() NH3API_NOEXCEPT
+        {}
+
+        #ifdef NH3API_STD_MOVE_SEMANTICS
+        rbtree_iterator(rbtree_iterator&& other) NH3API_NOEXCEPT
+            : _Ptr(nh3api::exchange(other._Ptr, nullptr))
+        {}
+
+        rbtree_iterator& operator=(rbtree_iterator&& other) NH3API_NOEXCEPT
+        { _Ptr = nh3api::exchange(other._Ptr, nullptr); return *this; }
+        #endif
+
+        rbtree_iterator& operator=(const rbtree_iterator& other) NH3API_NOEXCEPT
+        { _Ptr = other._Ptr; return *this; }
 
         // return designated value
         const_reference operator*() const NH3API_NOEXCEPT
@@ -226,7 +302,7 @@ class exe_rbtree
             }
             else
             { // climb looking for left subtree
-                node_type* _P;
+                node_type* _P = nullptr;
                 while (_Ptr == _Left(_P = _Parent(_Ptr)))
                     _Ptr = _P; // ==> parent while left subtree
                 _Ptr = _P;
@@ -239,7 +315,7 @@ class exe_rbtree
         {
             if (_Isnil(_Ptr))
             {
-                ;	// end() shouldn't be incremented, don't move
+                	// end() shouldn't be incremented, don't move
             }
             else if (!_Isnil(_Right(_Ptr)))
             {
@@ -247,7 +323,7 @@ class exe_rbtree
             }
             else
             {
-                node_type* _P;
+                node_type* _P = nullptr;
                 while (_Ptr == _Right(_P = _Parent(_Ptr)))
                     _Ptr = _P;
                 if (_Right(_Ptr) != _P)
@@ -258,7 +334,7 @@ class exe_rbtree
         node_type* _Mynode() const NH3API_NOEXCEPT
         { return _Ptr; }
 
-    #if NH3API_MSVC_DRIVER
+    #if NH3API_CHECK_MSVC_DRIVER
         bool _natvis_Isnil() const NH3API_NOEXCEPT
         { return _IsNil(this); }
     #endif
@@ -329,24 +405,24 @@ class exe_rbtree
         typedef ::std::reverse_iterator<iterator>       reverse_iterator;
         typedef ::std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-        explicit exe_rbtree(const key_compare &_OtherKeyCompare, bool _Marg = true, const allocator_type &_Allocator = allocator_type())
+        explicit exe_rbtree(const key_compare&, bool _Marg = true, const allocator_type& = allocator_type())
         NH3API_NOEXCEPT
-            : _Dummy(0), _KeyCompare(_OtherKeyCompare), _Head(nullptr), _Multi(_Marg)
+            : _Dummy(0), _Head(nullptr), _Multi(_Marg)
         {
             _Init();
         }
 
-        exe_rbtree(const_pointer first, const_pointer last, const key_compare &_OtherKeyCompare, bool _Marg = true, const allocator_type &_Allocator = allocator_type())
+        exe_rbtree(const_pointer first, const_pointer last, const key_compare&, bool _Marg = true, const allocator_type& = allocator_type())
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<value_type>::value)
-            : _Dummy(0), _KeyCompare(_OtherKeyCompare), _Head(nullptr), _Multi(_Marg)
+            : _Dummy(0), _Head(nullptr), _Multi(_Marg)
         {
             _Init();
             insert(first, last);
         }
 
-        exe_rbtree(const_iterator first, const_iterator last, const key_compare &_OtherKeyCompare, bool _Marg = true, const allocator_type &_Allocator = allocator_type())
+        exe_rbtree(const_iterator first, const_iterator last, const key_compare&, bool _Marg = true, const allocator_type& = allocator_type())
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<value_type>::value)
-            : _Dummy(0), _KeyCompare(_OtherKeyCompare), _Head(nullptr), _Multi(_Marg)
+            : _Dummy(0), _Head(nullptr), _Multi(_Marg)
         {
             _Init();
             insert(first, last);
@@ -354,15 +430,15 @@ class exe_rbtree
 
         exe_rbtree(const exe_rbtree &other)
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<value_type>::value)
-            : _Dummy(0), _KeyCompare(other._KeyCompare), _Multi(other._Multi), _Head(nullptr)
+            : _Dummy(0), _Multi(other._Multi), _Head(nullptr)
         {
             _Init();
             _Copy(other);
         }
 
-        exe_rbtree(const exe_rbtree &other, const allocator_type &_Allocator)
+        exe_rbtree(const exe_rbtree &other, const allocator_type &)
         NH3API_NOEXCEPT_EXPR(tt::is_nothrow_destructible<value_type>::value)
-            : _Dummy(0), _KeyCompare(other._KeyCompare), _Multi(other._Multi), _Head(nullptr)
+            : _Dummy(0), _Multi(other._Multi), _Head(nullptr)
         {
             _Init();
             _Copy(other);
@@ -401,11 +477,11 @@ class exe_rbtree
         { ::nh3api::trivial_move<sizeof(exe_rbtree)>(&other, this); }
 
         exe_rbtree(exe_rbtree&& other, const allocator_type&) NH3API_NOEXCEPT
-        { ::nh3api::trivial_move<sizeof(exe_rbtree)>(&other, this); }
+        { *this = std::move(other); }
         #endif
 
-        exe_rbtree(const dummy_tag_t& tag) NH3API_NOEXCEPT
-        { NH3API_IGNORE(_KeyCompare, _Multi, _Head, _Size); }
+        exe_rbtree(const dummy_tag_t&) NH3API_NOEXCEPT
+        {}
 
     // access
     public:
@@ -459,7 +535,7 @@ class exe_rbtree
         { return allocator_type();}
 
         key_compare key_comp() const NH3API_NOEXCEPT
-        { return _KeyCompare; }
+        { return key_compare(); }
 
     // inserting
     public:
@@ -472,7 +548,7 @@ class exe_rbtree
             while (!_Isnil(_Trynode))
             {
                 _Wherenode = _Trynode;
-                _Ans = _KeyCompare(_Kfn()(value), _Key(_Trynode));
+                _Ans = key_comp()(_Kfn()(value), _Key(_Trynode));
                 _Trynode = _Ans ? _Left(_Trynode) : _Right(_Trynode);
             }
             if (_Multi)
@@ -484,7 +560,7 @@ class exe_rbtree
                 return ::std::make_pair(_Insert(_Trynode, _Wherenode, value), true);
             else
                 --_Where;
-            if (_KeyCompare(_Key(_Where._Mynode()), _Kfn()(value)))
+            if (key_comp()(_Key(_Where._Mynode()), _Kfn()(value)))
                 return ::std::make_pair(_Insert(_Trynode, _Wherenode, value), true);
             return ::std::make_pair(_Where, false);
         }
@@ -495,18 +571,18 @@ class exe_rbtree
                 ;
             else if (pos == cbegin())
             {
-                if (_KeyCompare(_Kfn()(value), _Key(pos._Mynode())))
+                if (key_comp()(_Kfn()(value), _Key(pos._Mynode())))
                     return _Insert(_Head, pos._Mynode(), value);
             }
             else if (pos == cend())
             { // _Lockit Lk;
-                if (_KeyCompare(_Key(_Rmost()), _Kfn()(value)))
+                if (key_comp()(_Key(_Rmost()), _Kfn()(value)))
                     return _Insert(const_cast<node_type*>(_Getnil()), _Rmost(), value);
             }
             else
             {
                 const_iterator _Next = pos;
-                if (_KeyCompare(_Key((--_Next)._Mynode()), _Kfn()(value)) && _KeyCompare(_Kfn()(value), _Key(pos._Mynode())))
+                if (key_comp()(_Key((--_Next)._Mynode()), _Kfn()(value)) && key_comp()(_Kfn()(value), _Key(pos._Mynode())))
                 { // _Lockit _Lk;
                     if (_Isnil(_Right(_Next._Mynode())))
                         return _Insert(const_cast<node_type*>(_Getnil()), _Next._Mynode(), value);
@@ -716,12 +792,12 @@ class exe_rbtree
         iterator find(const key_type &key) NH3API_NOEXCEPT
         {
             iterator _Where = lower_bound(key);
-            return (_Where == end() || _KeyCompare(key, _Key(_Where._Mynode())) ? end() : _Where);
+            return (_Where == end() || key_comp()(key, _Key(_Where._Mynode())) ? end() : _Where);
         }
         const_iterator find(const key_type &key) const NH3API_NOEXCEPT
         {
             const_iterator _Where = lower_bound(key);
-            return (_Where == end() || _KeyCompare(key, _Key(_Where._Mynode())) ? end() : _Where);
+            return (_Where == end() || key_comp()(key, _Key(_Where._Mynode())) ? end() : _Where);
         }
         size_type count(const key_type &key) const NH3API_NOEXCEPT
         {
@@ -865,7 +941,7 @@ class exe_rbtree
         _Right(_Z) = const_cast<node_type*>(_Getnil());
         ::nh3api::construct_at(::nh3api::addressof(_Value(_Z)), value);
         ++_Size;
-        if (_Y == _Head || !_Isnil(_X) || _KeyCompare(_Kfn()(value), _Key(_Y)))
+        if (_Y == _Head || !_Isnil(_X) || key_comp()(_Kfn()(value), _Key(_Y)))
         {
             _Left(_Y) = _Z;
             if (_Y == _Head)
@@ -936,7 +1012,7 @@ class exe_rbtree
         node_type *_Y = _Head;
         while (!_Isnil(_X))
         {
-            if (_KeyCompare(_Key(_X), key))
+            if (key_comp()(_Key(_X), key))
             {
                 _X = _Right(_X);
             }
@@ -1024,7 +1100,7 @@ class exe_rbtree
         node_type* _Y = _Head;
         while (!_Isnil(_X))
         {
-            if (_KeyCompare(key, _Key(_X)))
+            if (key_comp()(key, _Key(_X)))
             {
                 _Y = _X;
                 _X = _Left(_X);
@@ -1048,10 +1124,9 @@ class exe_rbtree
     void _Freenode(node_type* node) NH3API_NOEXCEPT
     { ::operator delete(node, ::exe_heap); }
 
-    uint8_t      _Dummy;
-    key_compare  _KeyCompare;
+    uint32_t     _Dummy;
     node_type*   _Head;
-    bool         _Multi;
+    bool32_t     _Multi;
     size_type    _Size;
 };
 #pragma pack(pop)

@@ -28,24 +28,35 @@ int32_t exe_rand() NH3API_NOEXCEPT
 NH3API_FORCEINLINE
 // Generate random number using rand(). /
 // Сгенерировать случайное число используя rand().
-/// @param iMin
-/// @param iMax
-/// @return random number in range [iMin; iMax] / Случайное число в пределах [iMin; iMax]
+// returns random number in range [iMin; iMax] / Случайное число в пределах [iMin; iMax]
 int32_t Random(int32_t iMin, int32_t iMax) NH3API_NOEXCEPT
 { return FASTCALL_2(int32_t, 0x50C7C0, iMin, iMax); }
 
 NH3API_FORCEINLINE
+// Generate random number using rand(). /
+// Сгенерировать случайное число используя rand().
+// returns random number in range [iMin; iMax] / Случайное число в пределах [iMin; iMax]
+uint32_t Random(uint32_t iMin, uint32_t iMax) NH3API_NOEXCEPT
+{
+    if ( iMax == iMin )
+        return iMax;
+
+    const uint32_t randomNumber = static_cast<uint32_t>(exe_rand());
+    if ( iMax >= iMin )
+        return iMin + randomNumber % (iMax - iMin + 1);
+    else 
+        return iMax + randomNumber % (iMin - iMax + 1);
+}
+
+NH3API_FORCEINLINE
 // Same as Random(int, int) except that this one uses timeGetTime() as seed value. /
 // То же, что и Random(int, int), но используя timeGetTime() в качестве сида.
-/// @param iMin
-/// @param iMax
-/// @return random number in range [iMin; iMax] / Случайное число в пределах [iMin; iMax]
+// returns random number in range [iMin; iMax] / Случайное число в пределах [iMin; iMax]
 int32_t SafeRandom(int32_t iMin, int32_t iMax) NH3API_NOEXCEPT
 { return FASTCALL_2(int32_t, 0x50B3C0, iMin, iMax); }
 
 NH3API_FORCEINLINE
-/// @brief Set global random seed using srand()
-/// @param seed
+// Set thread-local random seed using srand()
 void SRand(int32_t seed) NH3API_NOEXCEPT
 { FASTCALL_1(void, 0x50C7B0, seed); }
 
@@ -62,9 +73,13 @@ struct TPickANumber
         { THISCALL_3(void, 0x50C8D0, this, low, high); }
 
         NH3API_FORCEINLINE
-        TPickANumber(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TPickANumber(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : Available(tag)
-        { NH3API_IGNORE(Low, Numbersleft); }
+        {}
+
+        NH3API_FORCEINLINE
+        ~TPickANumber() NH3API_NOEXCEPT
+        { nh3api::destroy_at(&Available); }
 
     public:
         // Pick a random number, make it unavailable /
@@ -83,10 +98,12 @@ struct TPickANumber
         // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t Numbersleft;
 
+        union {
         // Available numbers
         // Доступные числа.
         // offset: +0x8 = +8,  size = 0x10 = 16
         exe_vector<bool> Available;
+        };
 };
 #pragma pack(pop)
 

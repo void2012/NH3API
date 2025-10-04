@@ -28,12 +28,12 @@ struct bstruct_t
     public:
         template <typename T>
         NH3API_FORCEINLINE
-        T& get(int32_t offset = 0) NH3API_NOEXCEPT
+        T& get(size_t offset = 0) NH3API_NOEXCEPT
         { return *reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(this) + offset); }
 
         template <typename T>
         NH3API_FORCEINLINE
-        const T& get(int32_t offset = 0) const NH3API_NOEXCEPT
+        const T& get(size_t offset = 0) const NH3API_NOEXCEPT
         { return *reinterpret_cast<const T*>(reinterpret_cast<uintptr_t>(this) + offset); }
 
         bstruct_t() NH3API_DELETED_FUNCTION
@@ -42,19 +42,19 @@ struct bstruct_t
 }; // this is just a fancy wrapper for void*...
 
 template <typename T> NH3API_FORCEINLINE
-bstruct_t& get_bstruct(T* ptr, int32_t offset = 0) NH3API_NOEXCEPT
+bstruct_t& get_bstruct(T* ptr, size_t offset = 0) NH3API_NOEXCEPT
 { return *(reinterpret_cast<bstruct_t*>(ptr) + offset); }
 
 NH3API_FORCEINLINE
-bstruct_t& get_bstruct(uint32_t address, int32_t offset = 0) NH3API_NOEXCEPT
+bstruct_t& get_bstruct(uint32_t address, size_t offset = 0) NH3API_NOEXCEPT
 { return *(reinterpret_cast<bstruct_t*>(address) + offset); }
 
 template <typename T> NH3API_FORCEINLINE
-const bstruct_t& get_const_bstruct(const T* ptr, int32_t offset = 0) NH3API_NOEXCEPT
+const bstruct_t& get_const_bstruct(const T* ptr, size_t offset = 0) NH3API_NOEXCEPT
 { return *(reinterpret_cast<const bstruct_t*>(ptr) + offset); }
 
 NH3API_FORCEINLINE
-const bstruct_t& get_const_bstruct(const uint32_t address, int32_t offset = 0) NH3API_NOEXCEPT
+const bstruct_t& get_const_bstruct(const uint32_t address, size_t offset = 0) NH3API_NOEXCEPT
 { return *(reinterpret_cast<const bstruct_t*>(address) + offset); }
 
 template<typename T> NH3API_FORCEINLINE
@@ -66,10 +66,18 @@ template<size_t N>
 struct padstruct_construct_t
 {
     NH3API_CONSTEXPR_CPP_14 padstruct_construct_t() NH3API_NOEXCEPT
+    #if NH3API_CHECK_CPP11
+    = default;
+    #else
     {}
+    #endif
 
     NH3API_CONSTEXPR_CPP_14 padstruct_construct_t(const padstruct_construct_t&) NH3API_NOEXCEPT
+    #if NH3API_CHECK_CPP11
+    = default;
+    #else
     {}
+    #endif
 
     NH3API_CONSTEXPR_CPP_14 void operator()(std::array<uint8_t, N>& buf) const
     { buf.fill(0); }

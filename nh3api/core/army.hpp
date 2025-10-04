@@ -93,22 +93,26 @@ class army
         };
 
     public:
+        NH3API_FORCEINLINE
         army() NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY(army)
         { THISCALL_1(void, 0x43CF70, this); }
 
+        NH3API_FORCEINLINE
         army(const army& other) NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY(army)
         { THISCALL_2(void, 0x437650, this, &other); }
 
-        army(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        NH3API_FORCEINLINE
+        army(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : SpellInfluenceQueue(tag),
-            bound_armies(tag),
-            binders(tag),
-            aura_clients(tag),
-            aura_sources(tag)
+              bound_armies(tag),
+              binders(tag),
+              aura_clients(tag),
+              aura_sources(tag)
         {}
 
+        NH3API_FORCEINLINE
         ~army() NH3API_NOEXCEPT
         { THISCALL_1(void, 0x43D120, this); }
 
@@ -116,7 +120,7 @@ class army
         // offset to front(returns either 1 or -1) /
         // поворот вперед(возвращает 1 или -1)
         /// @param direction направление
-        int32_t    OffsetToFront(int32_t direction) const
+        NH3API_NODISCARD int32_t OffsetToFront(int32_t direction) const
         {
             if ((-1 < direction) && (direction < 3))
                 return 1;
@@ -141,47 +145,50 @@ class army
         // flag check(for example, this->Is(CF_DOUBLE_WIDE) will return true if the creature is double wide) /
         // проверка флага(напр. this->Is(CF_DOUBLE_WIDE) возвращает true, если существо является широким(2 клетки) )
         /// @param flag число-флаг(используйте | для проверки множества флагов одновременно)
-        bool       Is(uint32_t flag) const
+        NH3API_NODISCARD bool Is(uint32_t flag) const
         { return this->sMonInfo.flags && flag; }
 
-        int32_t       get_AI_expected_damage() const
+        NH3API_NODISCARD int32_t get_AI_expected_damage() const
         { return this->AI_expected_damage; }
 
-        const army*   get_AI_target() const
+        NH3API_NODISCARD army* get_AI_target()
         { return this->AI_target; }
 
-        int32_t       get_AI_target_value() const
+        NH3API_NODISCARD const army* get_AI_target() const
+        { return this->AI_target; }
+
+        NH3API_NODISCARD int32_t get_AI_target_value() const
         { return this->AI_target_value; }
 
-        int32_t       get_AI_target_time() const
+        NH3API_NODISCARD int32_t get_AI_target_time() const
         { return get_AI_target_time(GetSpeed()); }
 
-        int32_t       get_AI_possible_targets() const
+        NH3API_NODISCARD int32_t get_AI_possible_targets() const
         { return this->AI_possible_targets; }
 
         // Get initial owning side
         // Сторона, которой принадлежит отряд с начала боя
-        int32_t    get_owning_side() const
+        NH3API_NODISCARD int32_t get_owning_side() const
         { return this->group; }
 
         // Get current owning side(considering hypn. spell)
         // Сторона, который принадлежит отряд сейчас(учитывая закл. гипноз)
-        int32_t    get_controlling_side() const
+        NH3API_NODISCARD int32_t get_controlling_side() const
         { return ( spellInfluence[SPELL_HYPNOTIZE] ) ? 1 - group : group; }
 
         // Get a specific spell <spell> duration time (in rounds) /
         // Время, в течении которого работает заклинание <spell> (измеряется в раундах)
-        int32_t       get_spell_time(SpellID spell) const
-        { return spellInfluence[spell]; }
+        NH3API_NODISCARD int32_t get_spell_time(SpellID spell) const
+        { return (spell >= FIRST_COMBAT_SPELL && spell < MAX_SPELLS) ? spellInfluence[static_cast<size_t>(spell)] : 0; }
 
         // Is active?
         // Живо ли существо?
-        bool       IsActive() const
+        NH3API_NODISCARD bool IsActive() const
         { return (armyType > -1) && (numTroops > 0); }
 
         // Is incapacitated? (Has at least one active spell: Blind, Stone Gaze, Paralyze) /
         // Обездвижено ли существо(Если есть хотя бы одно из этих закл.: Слепота, Окаменение, Паралич)
-        bool       IsIncapacitated() const
+        NH3API_NODISCARD bool IsIncapacitated() const
         {
             return (spellInfluence[SPELL_BLIND] != 0)
                 || (spellInfluence[SPELL_STONE] != 0)
@@ -190,7 +197,7 @@ class army
 
         // Can Retaliate to <other> troop? /
         // Может ли существо ответить на атаку существа <other>?
-        bool       can_retaliate(army const & other) const
+        NH3API_NODISCARD bool can_retaliate(const army& other) const
         {
             return !other.Is(CF_FREE_ATTACK) &&
             this->spellInfluence[SPELL_PARALYZE] &&
@@ -199,7 +206,7 @@ class army
 
         // Can't attack? /
         // НЕ может ли существо атаковать?
-        bool       cannot_attack() const
+        NH3API_NODISCARD bool cannot_attack() const
         {
             return ( Is(CF_IMMOBILIZED)
                     || IsIncapacitated()
@@ -210,7 +217,7 @@ class army
 
         // Is war machine? /
         // Является боевой машиной
-        bool       IsWarMachine() const
+        NH3API_NODISCARD bool IsWarMachine() const
         { return Is(CF_SIEGE_WEAPON); }
 
         // Get an adjacent hex from given <direction> /
@@ -219,18 +226,18 @@ class army
 
         // Get Morale(check the limit[-3;3]: <apply_limits>) /
         // Мораль существа(проверить лимит[-3;3]: <apply_limits>)
-        int32_t    GetMorale(bool apply_limits = true) const
+        NH3API_NODISCARD int32_t GetMorale(bool apply_limits = true) const
         {	if ( !apply_limits ) return iMorale; else return nh3api::clamp(iMorale, -3, 3); }
 
         // Get Luck(check the limit[-3;3]: <apply_limits>) /
         // Удача существа(проверить лимит[-3;3]: <apply_limits>)
-        int32_t    GetLuck(bool apply_limits = true) const
+        NH3API_NODISCARD int32_t GetLuck(bool apply_limits = true) const
         { if ( !apply_limits ) return iLuck; else return nh3api::clamp(iLuck, -3, 3); }
 
         // Get a specific spell <spell> skill mastery level /
         // Получить мастерство определенного наложенного типа заклинания <spell>
-        TSkillMastery get_spell_level(SpellID spell) const
-        { return spell_level[spell]; }
+        NH3API_NODISCARD TSkillMastery get_spell_level(SpellID spell) const
+        { return (spell >= FIRST_COMBAT_SPELL && spell < MAX_SPELLS) ? spell_level[static_cast<size_t>(spell)] : eMasteryNone; }
 
         // Set retalation count in the beginning of battle /
         // Установить количество ответок на атаку в начале битвы
@@ -250,19 +257,20 @@ class army
         // Play sample <smpl> /
         // Проиграть звуковой эффект <smpl>
         void       play_sample(TSampleID smpl) const
-        { THISCALL_2(void, 0x43D260, this, smpl); }
+        { if ( smpl >= 0 && smpl < MAX_SAMPLES ) THISCALL_2(void, 0x43D260, this, smpl); }
 
         // Stop sample <smpl> /
         // Остановить звуковой эффект <smpl>
         void       stop_sample(TSampleID smpl) const
-        { THISCALL_2(void, 0x43D2A0, this, smpl); }
+        { if ( smpl >= 0 && smpl < MAX_SAMPLES ) THISCALL_2(void, 0x43D2A0, this, smpl); }
 
         // Play/Stop/Wait sample <smpl> /
         // Проиграть/остановить/подождать звуковой эффект <smpl>
         void       WaitSample(TSampleID smpl) const
-        {
-            if ( !THISCALL_1(bool, 0x46A080, army_hpp_gpCombatManager) )
-                THISCALL_3(void, 0x59A1C0, 0x699414 /*gpSoundManager*/, armySample[smpl]->memSample.memHSample, -1);
+        {   
+            if ( smpl >= 0 && smpl < MAX_SAMPLES )
+                if ( !THISCALL_1(bool, 0x46A080, army_hpp_gpCombatManager) )
+                    THISCALL_3(void, 0x59A1C0, 0x699414 /*gpSoundManager*/, armySample[static_cast<size_t>(smpl)]->memSample.memHSample, -1);
         }
 
         // Luck set depending on battle context /
@@ -341,27 +349,33 @@ class army
         void       range_attack()
         { THISCALL_1(void, 0x43FE80, this); }
 
-        int32_t    get_clockwise(int32_t direction) const
+        NH3API_NODISCARD int32_t get_clockwise(int32_t direction) const
         {
-            static const uint8_t dir_array_1[] = { 0, 1, 2, 7, 3, 4, 5, 6 };
-            static const uint8_t dir_array_2[] = { 0, 1, 2, 4, 5, 6, 7, 3 };
+            if ( direction < 0 || direction >= 8 )
+                return -1;
+
+            NH3API_CONSTEXPR_VAR uint8_t dir_array_1[8] = { 0, 1, 2, 7, 3, 4, 5, 6 };
+            NH3API_CONSTEXPR_VAR uint8_t dir_array_2[8] = { 0, 1, 2, 4, 5, 6, 7, 3 };
             if ( Is(CF_DOUBLE_WIDE) )
                 return dir_array_1[(dir_array_2[direction] + 1) % 8];
             else
                 return (direction + 1) % 6;
         }
 
-        int32_t    get_counter_clockwise(int32_t direction) const
+        NH3API_NODISCARD int32_t get_counter_clockwise(int32_t direction) const
         {
-            static const uint8_t dir_array_1[] = { 0, 1, 2, 7, 3, 4, 5, 6 };
-            static const uint8_t dir_array_2[] = { 0, 1, 2, 4, 5, 6, 7, 3 };
+            if ( direction < 0 || direction >= 8 )
+                return -1;
+
+            NH3API_CONSTEXPR_VAR uint8_t dir_array_1[8] = { 0, 1, 2, 7, 3, 4, 5, 6 };
+            NH3API_CONSTEXPR_VAR uint8_t dir_array_2[8] = { 0, 1, 2, 4, 5, 6, 7, 3 };
             if ( Is(CF_DOUBLE_WIDE) )
                 return dir_array_1[(dir_array_2[direction] + 7) % 8];
             else
                 return (direction + 5) % 6;
         }
 
-protected:
+    protected:
         // Multihead attack (called in army::do_attack(army*, int32_t)) /
         // Атака существом с более чем одной головой (вызывается только в army::do_attack(army*, int32_t))
         /// @param attackMask битовая маска атаки
@@ -374,7 +388,7 @@ protected:
         // Check special attack (Wyvern, Mummy, Basilisk, ...) (called in army::do_attack(army*, int32_t)) /
         // Проверка на особую атаку(Виверн, мумии, василиска и т.д.) (вызывается только в army::do_attack(army*, int32_t))
         /// @param target указатель на цель для атаки
-        bool       check_special_attack(army * target)
+        bool       check_special_attack(army* target)
         { return THISCALL_2(bool, 0x440220, this, target); }
 
         // Fire shield attack (called only in army::do_attack(army*, int32_t)) /
@@ -392,7 +406,7 @@ protected:
         void       do_post_attack(army* target, int32_t iDamage, int32_t iKilled, int32_t total_life)
         { THISCALL_5(void, 0x4408E0, this, target, iDamage, iKilled, total_life); }
 
-public:
+    public:
         // Attack <target> in direction <direction> /
         // Атаковать существо <target> в сторону <direction>
         bool       do_attack(army* target, int32_t direction)
@@ -419,46 +433,67 @@ public:
         // Вычисление итоговой атаки, учитывая все заклинания(Меткость, Жажда крови, Палач и др.)
         /// @param enemy указатель на цель для атаки
         /// @param ranged_attack (true/false) является выстрелом
-        int32_t    get_adjusted_attack(const army* enemy, bool ranged_attack) const
-        { return THISCALL_3(int32_t, 0x442130, this, enemy, ranged_attack); }
+        NH3API_NODISCARD int32_t get_adjusted_attack(const army* enemy, bool ranged_attack) const
+        { return (armyType > CREATURE_NONE && armyType < MAX_CREATURES) ? THISCALL_3(int32_t, 0x442130, this, enemy, ranged_attack) : 0; }
 
         // AI Attack Modifier   = get_adjusted_attack() - initial attack value /
         // Модификатор атаки ИИ = get_adjusted_attack() - начальная атака существа
         /// @param enemy указатель на цель для атаки
         /// @param ranged_attack (true/false) является выстрелом
-        int32_t    get_attack_modifier(const army* enemy, bool ranged_attack) const
-        { return get_adjusted_attack( enemy, ranged_attack ) - akCreatureTypeTraits[armyType].attackSkill; }
+        NH3API_NODISCARD int32_t get_attack_modifier(const army* enemy, bool ranged_attack) const
+        { return (armyType > CREATURE_NONE && armyType < MAX_CREATURES) ? (get_adjusted_attack( enemy, ranged_attack ) - akCreatureTypeTraits[static_cast<size_t>(armyType)].attackSkill) : 0; }
 
         // Get adjusted defense, considering all the effects(Frenzy, Behemoths etc..) /
         // Вычисление итоговой защиты, учитывая Бешенство, Чудищ, Древних Чудищ и др.
         /// @param enemy указатель на цель для атаки
         /// @param frenzy_included учитывать Бешенство
-        int32_t    get_adjusted_defense(const army* enemy, bool frenzy_included) const
-        { return THISCALL_3(int32_t, 0x4422B0, this, enemy, frenzy_included); }
+        NH3API_NODISCARD int32_t get_adjusted_defense(const army* enemy, bool frenzy_included) const
+        { return (armyType > CREATURE_NONE && armyType < MAX_CREATURES) ? THISCALL_3(int32_t, 0x4422B0, this, enemy, frenzy_included) : 0; }
 
         // AI Defense Modifier  = get_adjusted_defense() - initial attack value /
         // Модификатор атаки ИИ = get_adjusted_attack() - начальная атака существа
-        int32_t    get_defense_modifier() const
-        { return get_adjusted_defense(nullptr, true) - akCreatureTypeTraits[armyType].defenseSkill; }
+        NH3API_NODISCARD int32_t get_defense_modifier() const
+        { return (armyType > CREATURE_NONE && armyType < MAX_CREATURES) ? (get_adjusted_defense(nullptr, true) - akCreatureTypeTraits[static_cast<size_t>(armyType)].defenseSkill) : 0; }
 
         // Get current controller hero pointer (considering hypn. spell) /
         // Указатель на героя, который в данный момент контролирует это существо(учитывая гипноз)
-        hero*      get_controller() const
+        NH3API_NODISCARD const hero* get_controller() const
         {
+            if ( group > 1 || group < 0 )
+                return nullptr;
+
             return ( spellInfluence[SPELL_HYPNOTIZE] )
             ?
-            army_hpp_gpCombatManager_get(0x53CC, std::array<hero*,2>)[1 - group]
+            army_hpp_gpCombatManager_get(0x53CC, std::array<hero*,2>)[static_cast<size_t>(1 - group)]
+            : get_owner();
+        }
+
+        // Get current controller hero pointer (considering hypn. spell) /
+        // Указатель на героя, который в данный момент контролирует это существо(учитывая гипноз)
+        NH3API_NODISCARD hero* get_controller()
+        {
+            if ( group > 1 || group < 0 )
+                return nullptr;
+
+            return ( spellInfluence[SPELL_HYPNOTIZE] )
+            ?
+            army_hpp_gpCombatManager_get(0x53CC, std::array<hero*,2>)[static_cast<size_t>(1 - group)]
             : get_owner();
         }
 
         // Get initial hero pointer /
         // Указатель на героя, который контролирует существо с начала боя
-        hero*      get_owner() const
-        { return army_hpp_gpCombatManager_get(0x53CC, std::array<hero*,2>)[group]; }
+        NH3API_NODISCARD hero* get_owner()
+        { return ( group == 1 || group == 0 ) ? army_hpp_gpCombatManager_get(0x53CC, std::array<hero*,2>)[static_cast<size_t>(group)] : nullptr; }
+
+        // Get initial hero pointer /
+        // Указатель на героя, который контролирует существо с начала боя
+        NH3API_NODISCARD const hero* get_owner() const
+        { return ( group == 1 || group == 0 ) ? army_hpp_gpCombatManager_get(0x53CC, std::array<hero*,2>)[static_cast<size_t>(group)] : nullptr; }
 
         // Calculate average damage /
         // Вычислить средний урон
-        double     get_average_damage() const
+        NH3API_NODISCARD double get_average_damage() const
         { return THISCALL_1(double, 0x442410, this); }
 
         // Calculate average damage depending on context /
@@ -468,12 +503,12 @@ public:
         /// @param amount выбранное количество существ
         /// @param limit_damage (true/false) ограничение урона(?) обычно true
         /// @param distance расстояние от текущего отряда до врага
-        int32_t    get_average_damage(const army& enemy, bool ranged_attack, int32_t amount, bool limit_damage, int32_t distance) const
+        NH3API_NODISCARD int32_t get_average_damage(const army& enemy, bool ranged_attack, int32_t amount, bool limit_damage, int32_t distance) const
         { return THISCALL_6(int32_t, 0x4424A0, this, &enemy, ranged_attack, amount, limit_damage, distance); }
 
         // Is <other> an enemy? /
         // Является ли <other> врагом?
-        bool is_enemy(const army* other) const
+        NH3API_NODISCARD bool is_enemy(const army* other) const
         {
             if (!other || this == other)
                 return false;
@@ -486,39 +521,39 @@ public:
 
         // Can shoot <other>? If <other> == nullptr, checks if creature can shoot /
         // Можно ли выстрелить в <other>? Если <other> == nullptr, проверяет, может ли существо стрелять.
-        bool       can_shoot(const army* other = nullptr) const
+        NH3API_NODISCARD bool can_shoot(const army* other = nullptr) const
         { return THISCALL_2(bool, 0x442610, this, other); }
 
         // Is enemy's hex adjacent? Returns false if <other> is ally. /
         // Враг <other> стоит впритык? Возвращает false, если <other> это не враг
-        bool       enemy_is_adjacent(const army* other) const
+        NH3API_NODISCARD bool enemy_is_adjacent(const army* other) const
         { return THISCALL_2(bool, 0x442710, this, other); }
 
         // Get unit total combat value /
         // Посчитать эффективную боевую ценность существа из отряда
-        double     get_unit_combat_value(int32_t lowest_attack,
-                                         int32_t lowest_defense,
-                                         bool ranged,
-                                         const army* excluded) const
+        NH3API_NODISCARD double get_unit_combat_value(int32_t lowest_attack,
+                                                      int32_t lowest_defense,
+                                                      bool ranged,
+                                                      const army* excluded) const
         { return THISCALL_5(double, 0x442770, this, lowest_attack, lowest_defense, ranged, excluded); }
 
         // Get total combat value /
         // Посчитать эффективную боевую ценность отряда
-        int32_t    get_total_combat_value(int32_t lowest_attack, int32_t lowest_defense) const
+        NH3API_NODISCARD int32_t get_total_combat_value(int32_t lowest_attack, int32_t lowest_defense) const
         { return THISCALL_3(int32_t, 0x442B80, this, lowest_attack, lowest_defense); }
 
         // Get total combat value upon receiving damage /
         // Посчитать эффективную боевую ценность потерь при нанесении урона
-        int32_t    get_loss_combat_value(int32_t lowest_attack,
-                                         int32_t lowest_defense,
-                                         bool ranged,
-                                         int32_t damage,
-                                         bool kills_only) const
+        NH3API_NODISCARD int32_t get_loss_combat_value(int32_t lowest_attack,
+                                                       int32_t lowest_defense,
+                                                       bool ranged,
+                                                       int32_t damage,
+                                                       bool kills_only) const
         { return THISCALL_6(int32_t, 0x442CF0, this, lowest_attack, lowest_defense, ranged, damage, kills_only); }
 
         // Get total HP. <simulated> = true in AI's simulated combats /
         // Общее количество очков здоровья. <simulated> = true в боях-симуляциях ИИ
-        int32_t       get_total_hit_points(bool simulated = false) const
+        NH3API_NODISCARD int32_t get_total_hit_points(bool simulated = false) const
         { return THISCALL_2(int32_t, 0x442DA0, this, simulated); }
 
         // AI_expected_damage = arg, (AI_expected_damage = 1 if current creature is a clone) /
@@ -528,27 +563,27 @@ public:
 
         // Get Fire shield strength (= 0.2 for Efreet Sultan) /
         // Сила огненного щита (= 0.2 для Ифрита-Султана)
-        float      get_fire_shield_strength() const
+        NH3API_NODISCARD float get_fire_shield_strength() const
         { return THISCALL_1(float, 0x442E50, this); }
 
         // Compute base damage (<simulate_only> = true in AI's simulated combats) /
         // Посчитать начальный урон (<simulate_only> = true в боях-симуляциях ИИ)
-        int32_t    ComputeBaseDamage(bool simulate_only = false) const
+        NH3API_NODISCARD int32_t ComputeBaseDamage(bool simulate_only = false) const
         { return THISCALL_2(int32_t, 0x442E80, this, simulate_only); }
 
-        int32_t    ComputeAttackerDamageBonuses(int32_t base_damage, bool is_shooting, army* defender, bool simulate_only, int32_t distance) const
+        NH3API_NODISCARD int32_t ComputeAttackerDamageBonuses(int32_t base_damage, bool is_shooting, army* defender, bool simulate_only, int32_t distance) const
         { return THISCALL_6(int32_t, 0x443560, this, base_damage, is_shooting, defender, simulate_only, distance); }
 
         // Compute Attacker <enemy> damage reduction coefficent
         // Вычислить коэффицент уменьшения урона для атакующего <enemy>
         /// @param enemy указатель на цель для атаки
         /// @param ranged_attack (true/false) является выстрелом
-        double     ComputeAttackerDamageReduction(const army* enemy, bool ranged_attack) const
+        NH3API_NODISCARD double ComputeAttackerDamageReduction(const army* enemy, bool ranged_attack) const
         { return THISCALL_3(double, 0x4438B0, this, enemy, ranged_attack); }
 
         // Compute Defender(this) damage reduction coefficent. <ranged_attack> is always passed as true
         // Вычислить коэффицент уменьшения урона для текущего отряда. <ranged_attack> всегда вызывается с true
-        double     ComputeDefenderDamageReduction(bool ranged_attack) const
+        NH3API_NODISCARD double ComputeDefenderDamageReduction(bool ranged_attack) const
         { return THISCALL_2(double, 0x443AB0, this, ranged_attack); }
 
         // Calculate Adjusted Damage /
@@ -560,12 +595,12 @@ public:
         /// @param distance расстояние до врага в гексах
         /// @param fire_damage указатель на урон огненного щита(заполняется функцией)
         /// @return returns adjusted damage / возвращает итоговый урон
-        int32_t    adjust_damage(army* enemy,
-                                 int32_t base_damage,
-                                 bool bIsShot,
-                                 bool simulated,
-                                 int32_t distance,
-                                 int32_t *fire_damage) const
+        NH3API_NODISCARD int32_t adjust_damage(army* enemy,
+                                               int32_t base_damage,
+                                               bool bIsShot,
+                                               bool simulated,
+                                               int32_t distance,
+                                               int32_t *fire_damage) const
         { return THISCALL_7(int32_t, 0x443C60, this, enemy, base_damage, bIsShot, simulated, distance, fire_damage); }
 
         // Damage enemy /
@@ -605,7 +640,7 @@ public:
         // Применить урон яда Виверн
         void       adjust_hitpoints()
         {
-            sMonInfo.hitPoints = static_cast<int32_t>((spellInfluence[SPELL_AGE] ? origHitPoints * poison_penalty * 0.5 : origHitPoints * poison_penalty) + 0.95);
+            sMonInfo.hitPoints = static_cast<int32_t>((spellInfluence[SPELL_AGE] ? static_cast<float>(origHitPoints) * poison_penalty * 0.5f : static_cast<float>(origHitPoints) * poison_penalty) + 0.95f);
             residualDamage     = std::min<int32_t>(residualDamage, sMonInfo.hitPoints - 1);
         }
 
@@ -647,7 +682,7 @@ public:
                 if ( spellInfluence[i] > 0 && i != SPELL_FRENZY )
                 {
                     if ( spellInfluence[i] == 1 )
-                        CancelIndividualSpell((SpellID)i);
+                        CancelIndividualSpell(static_cast<SpellID>(i));
                     else
                         spellInfluence[i] -= 1;
                 }
@@ -672,14 +707,14 @@ public:
         /// @param our_hex гекс текущего существа
         /// @param enemy указатель на врага
         /// @param enemy_hex гекс врага
-        int32_t    get_attack_direction(int32_t our_hex, army const *enemy, int32_t enemy_hex) const
+        NH3API_NODISCARD int32_t get_attack_direction(int32_t our_hex, const army* enemy, int32_t enemy_hex) const
         { return THISCALL_4(int32_t, 0x445560, this, our_hex, enemy, enemy_hex); }
 
         // Get attack direction /
         // Сторона атаки
         /// @param hex гекс атаки
         /// @param enemy указатель на врага
-        int32_t    get_attack_direction(int32_t hex, const army* enemy) const
+        NH3API_NODISCARD int32_t get_attack_direction(int32_t hex, const army* enemy) const
         { return THISCALL_3(int32_t, 0x4455D0, this, hex, enemy); }
 
         // move to <hex> / идти до гекса <hex>
@@ -714,38 +749,42 @@ public:
         /// @param casting_hero герой, который накладывает заклинание
         void       Cure(int32_t level, int32_t iSpellPower, hero const * casting_hero);
 
-        int32_t    MidY() const
+        NH3API_NODISCARD int32_t MidY() const
         { return BottomY() - this->image_height / 2; }
-        int32_t    TopY() const
+
+        NH3API_NODISCARD int32_t TopY() const
         { return BottomY() - this->image_height; }
-        int32_t    BottomY() const
-        { return army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[this->gridIndex].refY; }
-        int32_t    MidX() const
+
+        NH3API_NODISCARD int32_t BottomY() const
+        { return (this->gridIndex > 0 && this->gridIndex < 187) ? army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[static_cast<size_t>(this->gridIndex)].refY : 0; }
+        
+        NH3API_NODISCARD int32_t MidX() const
         {
-            int32_t result = army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[this->gridIndex].refX;
+            int32_t result = (this->gridIndex > 0 && this->gridIndex < 187) ? army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[static_cast<size_t>(this->gridIndex)].refX : 0;
             if ( Is(CF_DOUBLE_WIDE) )
             {
                 result += (this->facing) ? 22 : -22 ;
             }
             return result;
         }
-        int32_t    FrontX() const
+
+        NH3API_NODISCARD int32_t FrontX() const
         {
             CSpriteFrame* standingStillFrame = stdIcon->s[cs_walk]->f[1];
             int32_t cropped = standingStillFrame->CroppedX + standingStillFrame->CroppedWidth - OFFSET_X;
-            int32_t result = army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[this->gridIndex].refX;
+            int32_t result = (this->gridIndex > 0 && this->gridIndex < 187) ? army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[static_cast<size_t>(this->gridIndex)].refX : 0;
             result += ( this->facing ) ? cropped : -cropped;
             return result;
         }
 
         // Get second grid index (Double wide creatures occupy two hexes, functions finds the second one) /
         // Индекс второго гекса(для двойных существ, которые занимают две клетки)
-        int32_t    get_second_grid_index() const
+        NH3API_NODISCARD int32_t get_second_grid_index() const
         { 	return ( !Is(CF_DOUBLE_WIDE) ) ? gridIndex : gridIndex + ( facing ? 1 : -1 ); }
 
         // Checks wether <arg> hex is adjacent(considering 8 adj. hexes for double-wide creatures ) /
         // Проверяет, лежит ли гекс <arg> прямо напротив существа(учитываются 8 гексов для двойных существа)
-        bool       is_adjacent(int32_t arg) const
+        NH3API_NODISCARD bool is_adjacent(int32_t arg) const
         { return THISCALL_2(bool, 0x4463E0, this, arg); }
 
         // Turn /
@@ -772,17 +811,17 @@ public:
         /// @param destIndex гекс-цель
         /// @param bAllowShifting всегда = false / always = false
         /// @param iNewDestIndex указатель на новый гекс(заполняется функцией)
-        bool       CanFit(int32_t destIndex, int32_t bAllowShifting, int32_t* iNewDestIndex) const
+        NH3API_NODISCARD bool CanFit(int32_t destIndex, int32_t bAllowShifting, int32_t* iNewDestIndex) const
         { return !!THISCALL_4(bool32_t, 0x446960, this, destIndex, bAllowShifting, iNewDestIndex); }
 
         // Get resurrected from <target> army size /
         // Посчитать количество возрожденных существ из <target>
-        int32_t    get_resurrection_size(const army* target) const
+        NH3API_NODISCARD int32_t get_resurrection_size(const army* target) const
         { return THISCALL_2(int32_t, 0x447050, this, target); }
 
-    // can cast resurrect? / can resurrect at least one dead ally? /
-    // может ли существо восстанавливать других существ? / восстановит ли существо хотя бы один труп?
-        bool       can_cast_resurrect(int32_t hex) const
+        // can cast resurrect? / can resurrect at least one dead ally? /
+        // может ли существо восстанавливать других существ? / восстановит ли существо хотя бы один труп?
+        NH3API_NODISCARD bool can_cast_resurrect(int32_t hex) const
         { return THISCALL_2(bool, 0x4470F0, this, hex); }
 
         // Cast Faerie dragon spell /
@@ -790,16 +829,16 @@ public:
         void       FaerieDragonSpell()
         { THISCALL_1(void, 0x447230, this); }
 
-    // Can creature cast spell on <hex>?
-    // Может ли существо колдовать на гекс <hex>?
-        bool       can_cast_spell(int32_t hex) const
+        // Can creature cast spell on <hex>?
+        // Может ли существо колдовать на гекс <hex>?
+        NH3API_NODISCARD bool can_cast_spell(int32_t hex) const
         { return THISCALL_2(bool, 0x4473E0, this, hex); }
 
         // Count valid Master Gene spells number that can be casted on <target> /
         // Посчитать количество заклинаний, которые могут быть наложены на <target> Мастер-Джином.
-        int32_t    get_valid_caliph_spells(const army* target) const
+        NH3API_NODISCARD uint32_t get_valid_caliph_spells(const army* target) const
         {
-            int32_t result = 0;
+            uint32_t result = 0;
             for ( size_t i = FIRST_COMBAT_SPELL; i < MAX_COMBAT_SPELLS; ++i )
             {
                 if ( FASTCALL_2(bool, 0x447BD0, i, target) )
@@ -810,7 +849,6 @@ public:
             return result;
         }
 
-
         // Cast creature's specific spell on <targetIndex> /
         // Наложить заклинание существа на <targetIndex>.
         void       cast_spell(int32_t targetIndex)
@@ -818,37 +856,37 @@ public:
 
         // Get Magic mirror effect(taking into account the Faerie Dragons) /
         // Эффект заклинания Магическое зеркало (учитывая Волшебных драконов).
-        int32_t       get_mirror_effect()
+        NH3API_NODISCARD int32_t get_mirror_effect() const
         { return THISCALL_1(int32_t, 0x448510, this); }
 
-        int32_t    get_multi_head_directions( int32_t our_hex,
-                                              const army* enemy,
-                                              int32_t enemy_hex ) const
+        NH3API_NODISCARD int32_t get_multi_head_directions(int32_t our_hex,
+                                                           const army* enemy,
+                                                           int32_t enemy_hex ) const
         { return THISCALL_4(int32_t, 0x4487D0, this, our_hex, enemy, enemy_hex); }
 
         // Calculate turns left to reach the AI_target given <speed> /
         // Посчитать, сколько ходов нужно, чтобы достичь AI_target со скоростью <speed>.
-        int32_t    get_AI_target_time( int32_t speed ) const
+        NH3API_NODISCARD int32_t get_AI_target_time(int32_t speed) const
         { return THISCALL_2(int32_t, 0x4488F0, this, speed); }
 
         // Calculate current creature speed /
         // Посчитать текущую скорость существа.
-        int32_t    GetSpeed() const
+        NH3API_NODISCARD int32_t GetSpeed() const
         { return THISCALL_1(int32_t, 0x4489F0, this); }
 
         // Need to turn? /
         // Нужно ли развернуться?
-        bool       NeedToTurn(int32_t direction) const
+        NH3API_NODISCARD bool NeedToTurn(int32_t direction) const
         { return direction < 6 && (this->facing == 0) != direction >= 3; }
 
         // Get creature name /
         // Получить имя существа.
-        const char* GetName() const
+        NH3API_NODISCARD const char* GetName() const
         { return GetName(numTroops); }
 
         // Get army name given amount <count> /
         // Получить имя существа в зависимости от количества <count>.
-        const char* GetName(int32_t count) const
+        NH3API_NODISCARD const char* GetName(int32_t count) const
         { return FASTCALL_2(const char*, 0x43FE20, armyType, count); }
 
         // Get attack direction /
@@ -859,18 +897,18 @@ public:
 
         // Does the creature leaves no body after death? /
         // Существо не оставляет после после смерти труп?
-        bool       LeavesNoBody() const
+        NH3API_NODISCARD bool LeavesNoBody() const
         { return Is( CF_SACRIFICED | CF_SUMMONED ); }
 
         // Creature is within highlighted area /
         // Существо находится внутри площади выделения.
-        bool       is_in_area_highlight() const
+        NH3API_NODISCARD bool is_in_area_highlight() const
         { return is_area_effect_target; }
 
         // Is Flight to <destIndex> valid? /
         // Возможен ли полет на гекс <destIndex>?
         /// @param destIndex проверяемый гекс
-        bool       ValidFlight(int32_t destIndex) const
+        NH3API_NODISCARD bool ValidFlight(int32_t destIndex) const
         { return THISCALL_3(bool, 0x4B4420, this, destIndex, false); }
 
         // Fly to <destIndex> /
@@ -900,33 +938,33 @@ public:
         // Is path to <fpTargetCellIndex> valid?
         // Возможен ли путь до <fpTargetCellIndex>?
         /// @param destIndex гекс-цель
-        bool       ValidPath(int32_t destIndex)
+        NH3API_NODISCARD bool ValidPath(int32_t destIndex)
         { return !!THISCALL_3(bool32_t, 0x523F60, this, destIndex, false); }
 
         // Get Attack mask
         // Маска атаки
-        uint32_t   GetAttackMask(int32_t currIndex, int32_t criteria, int32_t iLiteralTargetIndex) const
+        NH3API_NODISCARD uint32_t GetAttackMask(int32_t currIndex, int32_t criteria, int32_t iLiteralTargetIndex) const
         { return THISCALL_4(uint32_t, 0x524010, this, currIndex, criteria, iLiteralTargetIndex); }
 
-        int32_t    ValidAttack(int32_t currIndex, int32_t direction, int32_t criteria, int32_t iLiteralIndex, int32_t* testCellIndex) const
-        { return THISCALL_6(int32_t, 0x5240A0, this, currIndex, direction, criteria, iLiteralIndex, testCellIndex); }
+        NH3API_NODISCARD bool ValidAttack(int32_t currIndex, int32_t direction, int32_t criteria, int32_t iLiteralIndex, int32_t* testCellIndex) const
+        { return !!THISCALL_6(bool32_t, 0x5240A0, this, currIndex, direction, criteria, iLiteralIndex, testCellIndex); }
 
         // Call army::get_adjacent_hex( hex, direction ) instead /
         // Вызывайте army::get_adjacent_hex( hex, direction ).
-        int32_t    GetAdjacentCellIndex(int32_t hex, int32_t direction) const
+        NH3API_NODISCARD int32_t GetAdjacentCellIndex(int32_t hex, int32_t direction) const
         { return THISCALL_3(int32_t, 0x524280, this, hex, direction); }
 
         // Finds adjacent <hex> in <direction> /
         // Находит гекс, лежащий напротив данного гекса <hex> в сторону <direction>.
-        int32_t    get_adjacent_hex(int32_t hex, int32_t direction) const
+        NH3API_NODISCARD int32_t get_adjacent_hex(int32_t hex, int32_t direction) const
         { return THISCALL_3(int32_t, 0x5242E0, this, hex, direction); }
 
         // Is in Unicorn aura? /
         // Действует ли аура единорога?
-        bool       is_in_aura() const
-        { return !aura_sources.empty(); };
+        NH3API_NODISCARD bool is_in_aura() const
+        { return !aura_sources.empty(); }
 
-public:
+    public:
         // offset: +0x0 = +0,  size = 0x1 = 1
         bool bShowAttackFrames;
 
@@ -942,12 +980,22 @@ public:
         // offset: +0x4 = +4,  size = 0x1 = 1
         int8_t iRemainingFrames;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_5[3];
+        
+    public:
         // offset: +0x8 = +8,  size = 0x4 = 4
         int32_t iDrawPriority;
 
         // offset: +0xC = +12,  size = 0x1 = 1
         bool bShowTroopCount;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_D[3];
+        
+    public:
         // Combat side(group) to attack /
         // Сторона, которую атакует данное существо
         // offset: +0x10 = +16,  size = 0x4 = 4
@@ -967,6 +1015,11 @@ public:
         // offset: +0x20 = +32,  size = 0x1 = 1
         bool bShowPowEffect;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_21[3];
+        
+    public:
         // offset: +0x24 = +36,  size = 0x4 = 4
         int32_t iMirrorSourceIndex;
 
@@ -987,8 +1040,10 @@ public:
         // offset: +0x31 = +49,  size = 0x1 = 1
         bool LetsPretendImNotHere;
 
-    public:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_32[2];
 
+    public:
         // Creature type /
         // Тип существа
         // offset: +0x34 = +52,  size = 0x4 = 4
@@ -1046,11 +1101,13 @@ public:
 
         // offset: +0x70 = +112,  size = 0x4 = 4
         int32_t iLuckStatus;
-
+        
+        union {
         // Creature general information /
         // Информация о существе.
         // offset: +0x74 = +116,  size = 0x74 = 116
         TCreatureTypeTraits sMonInfo;
+        };
 
         // offset: +0xE8 = +232,  size = 0x1 = 1
         bool show_fire_shield;
@@ -1061,12 +1118,22 @@ public:
         // offset: +0xEA = +234,  size = 0x1 = 1
         bool bAllUnitsKilled;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_EB[1];
+        
+    public:
         // offset: +0xEC = +236,  size = 0x4 = 4
         SpellID iPostPowSpellToCast;
 
         // offset: +0xF0 = +240,  size = 0x1 = 1
         bool hitByCreature;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_F1[3];
+
+    public:
         // Creature side("group"), 0 or 1 /
         // Сторона("группа"), которой принадлежит существо(0 или 1)
         // offset: +0xF4 = +244,  size = 0x4 = 4
@@ -1091,11 +1158,13 @@ public:
 
         // offset: +0x10C = +268,  size = 0x4 = 4
         int32_t yModify;
-
+        
+        union {
         // Creature sprite information /
         // Информация о спрайте существа.
         // offset: +0x110 = +272,  size = 0x54 = 84
         SMonFrameInfo sMonFrameInfo;
+        };
 
         // Creature sprite /
         // Спрайт существа.
@@ -1137,11 +1206,14 @@ public:
         // offset: +0x2DC = +732,  size = 0x144 = 324
         std::array<TSkillMastery, MAX_SPELLS> spell_level;
 
+        union 
+        {
         // Each casted spell queue /
         // Наложенные на существо заклинания.
         // offset: +0x420 = +1056,  size = 0x30 = 48
         exe_deque<SpellID> SpellInfluenceQueue;
-
+        };
+        
         // offset: +0x450 = +1104,  size = 0x4 = 4
         float PaletteEffect;
 
@@ -1234,6 +1306,11 @@ public:
         // offset: +0x4C1 = +1217,  size = 0x1 = 1
         bool residualParalyze;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_4C2[2];
+        
+    public:
         // offset: +0x4C4 = +1220,  size = 0x4 = 4
         TSkillMastery forgetfulness_level;
 
@@ -1254,6 +1331,11 @@ public:
         // offset: +0x4D8 = +1240,  size = 0x1 = 1
         bool OnNativeTerrain;
 
+    protected:
+        NH3API_MAYBE_UNUSED 
+        byte_t gap_4D9[3];
+
+    public:
         // offset: +0x4DC = +1244,  size = 0x4 = 4
         int32_t DefendBonus;
 
@@ -1280,31 +1362,44 @@ public:
 
         // offset: +0x4F1 = +1265,  size = 0x1 = 1
         bool is_area_effect_target;
+        
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_4F2[2];
 
-        //
-        // опутанные существа данным дендроидом
+    public:
+        union {
+        // Creatures binded by the current dendroid /
+        // опутанные существа данным дендроидом.
         // offset: +0x4F4 = +1268,  size = 0x10 = 16
         exe_vector<army*> bound_armies;
+        };
 
-        //
+        union {
+        // Dendroids that bind the current creature /
         // дендроиды, которые опутали данный отряд.
         // offset: +0x504 = +1284,  size = 0x10 = 16
         exe_vector<army*> binders;
-
+        };
+        
+        union {
         // Troops influenced by the unicorn aura /
         // существа под действием ауры данного единорога.
         // offset: +0x514 = +1300,  size = 0x10 = 16
         exe_vector<army*> aura_clients;
+        };
 
+        union {
         // Unicorns that cover current troop under aura /
         // единороги, под действием ауры которых данный отряд
         // offset: +0x524 = +1316,  size: 0x10 = 16
         exe_vector<army*> aura_sources;
-
+        };
+        
         // AI expected damage /
         // Ожидаемый ИИ урон.
         // offset: +0x534 = +1332,  size = 0x4 = 4
-        uint32_t AI_expected_damage;
+        int32_t AI_expected_damage;
 
         // AI target /
         // Цель ИИ.
@@ -1314,17 +1409,17 @@ public:
         // AI target value /
         // значение(value) цели, выбранной ИИ.
         // offset: +0x53C = +1340,  size = 0x4 = 4
-        uint32_t AI_target_value;
+        int32_t AI_target_value;
 
         // AI distance to target /
         // расстояние до цели, выбранной ИИ.
         // offset: +0x540 = +1344,  size = 0x4 = 4
-        uint32_t AI_target_distance;
+        int32_t AI_target_distance;
 
         // AI possible targets /
         // возможные цели ИИ.
         // offset: +0x544 = +1348,  size = 0x4 = 4
-        uint32_t AI_possible_targets;
+        int32_t AI_possible_targets;
 
 };
 #pragma pack(pop)

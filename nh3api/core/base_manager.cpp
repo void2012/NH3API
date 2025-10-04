@@ -10,5 +10,5 @@
 #include "base_manager.hpp"
 
 #ifndef NH3API_FLAG_INLINE_HEADERS
-executive*& gpExec = get_global_var_ref(0x699550, executive*);
+executive* const& gpExec = get_global_var_ref(0x699550, executive*);
 #endif

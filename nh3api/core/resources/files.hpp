@@ -36,10 +36,10 @@ NH3API_VIRTUAL_CLASS TAbstractFile
         TAbstractFile()
         { NH3API_SET_VFTABLE(); }
 
-        TAbstractFile(const nh3api::omit_base_vftable_tag_t& tag) NH3API_NOEXCEPT
+        TAbstractFile(const ::nh3api::omit_base_vftable_tag_t&) NH3API_NOEXCEPT
         {}
 
-        TAbstractFile(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TAbstractFile(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         {}
 
     // virtual functions
@@ -76,15 +76,15 @@ int32_t exe_uncompress(void* dest, uint32_t destLen, const void* source, uint32_
 NH3API_VIRTUAL_CLASS TGzFile : public TAbstractFile
 {
     public:
-        TGzFile(const char* path, const char* mode)
+        TGzFile(const char* path, const char* mode) NH3API_NOEXCEPT
             : TAbstractFile(nh3api::omit_base_vftable_tag)
         { THISCALL_3(void, 0x4D6EB0, this, path, mode); }
 
-        TGzFile(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TGzFile(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : TAbstractFile(tag)
         {}
 
-        ~TGzFile()
+        ~TGzFile() NH3API_NOEXCEPT
         { THISCALL_1(void, 0x4D6FC0, this); }
 
     // virtual functions
@@ -109,10 +109,10 @@ NH3API_VIRTUAL_CLASS TStreamBufFile : public TAbstractFile
 {
     public:
         TStreamBufFile(exe_streambuf* src_stream)
-            : TAbstractFile(nh3api::omit_base_vftable_tag), stream(src_stream)
+            : TAbstractFile(::nh3api::omit_base_vftable_tag), stream(src_stream)
         { NH3API_SET_VFTABLE(); }
 
-        TStreamBufFile(const nh3api::dummy_tag_t& tag)
+        TStreamBufFile(const ::nh3api::dummy_tag_t& tag)
             : TAbstractFile(tag)
         {}
 
@@ -140,11 +140,11 @@ NH3API_VIRTUAL_CLASS TGzInflateBuf : public exe_streambuf
     public:
         NH3API_FORCEINLINE
         TGzInflateBuf(exe_streambuf& src) NH3API_NOEXCEPT
-            : exe_streambuf(nh3api::dummy_tag)
+            : exe_streambuf(::nh3api::dummy_tag)
         { THISCALL_2(void, 0x4D6260, this, &src); }
 
         NH3API_FORCEINLINE
-        TGzInflateBuf(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TGzInflateBuf(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : exe_streambuf(tag)
         {}
 
@@ -214,7 +214,7 @@ public:
     { nh3api::trivial_zero<sizeof(LODEntry)>(this); }
 
     NH3API_FORCEINLINE
-    LODEntry(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+    LODEntry(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
     {}
 
 public:
@@ -252,7 +252,7 @@ struct LODHeader
 {
 public:
     LODHeader()
-    : version(500), numEntries(0)
+        : version(500), numEntries(0)
     { LOD_ID.fill('\0'); }
 
 public:
@@ -284,15 +284,14 @@ class LODFile
 {
     public:
         LODFile() NH3API_NOEXCEPT
-        :
-        fileptr(nullptr),
-        opened(false),
-        dataBuffer(nullptr),
-        header(),
-        subindex()
+            :   fileptr(nullptr),
+                opened(false),
+                dataBuffer(nullptr),
+                header(),
+                subindex()
         {}
 
-        LODFile(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        LODFile(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : subindex(tag)
         {}
 
@@ -305,7 +304,7 @@ class LODFile
 
         bool      exist(char const* item_name) NH3API_NOEXCEPT
         {
-            Find( 0, numEntries, item_name );
+            Find( 0, static_cast<size_t>(numEntries), item_name );
             return matchindex >= 0;
         }
 
@@ -395,15 +394,15 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
 {
     public:
         t_lod_file_adapter(LODFile* src) NH3API_NOEXCEPT
-            : TAbstractFile(nh3api::dummy_tag), lod_file(src)
+            : TAbstractFile(::nh3api::dummy_tag), lod_file(src)
         { NH3API_SET_VFTABLE(); }
 
         t_lod_file_adapter(LODFile& src) NH3API_NOEXCEPT
-            : TAbstractFile(nh3api::dummy_tag), lod_file(&src)
+            : TAbstractFile(::nh3api::dummy_tag), lod_file(&src)
         { NH3API_SET_VFTABLE(); }
 
         t_lod_file_adapter(const char* name) NH3API_NOEXCEPT
-            : TAbstractFile(nh3api::dummy_tag), lod_file(GetLODFile(name))
+            : TAbstractFile(::nh3api::dummy_tag), lod_file(GetLODFile(name))
         { NH3API_SET_VFTABLE(); }
 
     public:
@@ -430,8 +429,8 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
         // get entry by name
         LODEntry* get_entry(const char* name) NH3API_NOEXCEPT
         {
-            if (lod_file->pointAt(name))
-                return &lod_file->subindex[lod_file->dataItemIndex];
+            if (lod_file->pointAt(name) && lod_file->dataItemIndex >= 0)
+                return &lod_file->subindex[static_cast<size_t>(lod_file->dataItemIndex)];
             else 
                 return nullptr;
         }
@@ -440,12 +439,19 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
         // read LOD File entry into buffer
         exe_vector<uint8_t> read_entry(const char* name)
         {
+            exe_vector<uint8_t> buffer;
             if (!lod_file->pointAt(name))
-                return exe_vector<uint8_t>(); // not found, empty buffer
+                return buffer; // not found, empty buffer
+            
+            if ( lod_file->dataItemIndex < 0 )
+                return buffer; 
 
-            LODEntry* entry = &lod_file->subindex[lod_file->dataItemIndex];
-            const size_t entry_size = entry->size;
-            exe_vector<uint8_t> buffer(entry_size, 0);
+            LODEntry* entry = &lod_file->subindex[static_cast<size_t>(lod_file->dataItemIndex)];
+            const size_t entry_size = static_cast<size_t>(entry->size);
+            if ( entry_size == 0 )
+                return buffer;
+            
+            buffer.resize(entry_size, 0);
             read(buffer.data(), entry_size);
             return buffer;
         }
@@ -462,7 +468,7 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter NH3API_FINAL : public TAbstractFile
         { return get_type_vftable(this)->read(this, buf, len); }
 
     protected:
-        virtual int32_t __thiscall write(const void *buf, size_t len) override 
+        virtual int32_t __thiscall write(const void*, size_t) override 
         { return 0; }
 
     // member variables
@@ -495,10 +501,10 @@ NH3API_VIRTUAL_CLASS t_stdio_file_adapter NH3API_FINAL : public TAbstractFile
         { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }
 
         virtual int32_t __thiscall read(void* buf, size_t len) override
-        { return exe_fread(buf, len, 1, file); }
+        { return static_cast<int32_t>(exe_fread(buf, len, 1, file)); }
 
         virtual int32_t __thiscall write(const void* buf, size_t len) override
-        { return exe_fwrite(buf, len, 1, file); }
+        { return static_cast<int32_t>(exe_fwrite(buf, len, 1, file)); }
 
     public:
         // offset: +0x4 = +4,  size = 0x4 = 4

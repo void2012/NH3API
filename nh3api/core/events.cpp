@@ -19,6 +19,7 @@ HMENU& hmnuRecruitSave          = get_global_var_ref(0x69D644, HMENU);
 HMENU& hmnuCurrent              = get_global_var_ref(0x69960C, HMENU);
 bool&  gbProcessingCombatAction = get_global_var_ref(0x698A3C, bool);
 bool&  insideProcessMessage     = get_global_var_ref(0x699608, bool);
+bool&  WeAreActiveWindow        = get_global_var_ref(0x6783D0, bool);
 bool32_t& gbCheatMenus          = get_global_var_ref(0x698A84, bool32_t);
 std::array<char, 60>& gcCommandLine = get_global_var_ref(0x699610, std::array<char, 60>);
 std::array<char, 368>& gcRegAppPath = get_global_var_ref(0x698614, std::array<char, 368>);

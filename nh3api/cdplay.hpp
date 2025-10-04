@@ -185,7 +185,7 @@ class CDPlay
                                             CAutoArray<CDPlayConnection>*);
           bool(__thiscall* EnumSessions)(CDPlay*, CAutoArray<CDPlaySession>*,
                                          uint32_t, uint32_t);
-          bool(__thiscall* EnumGroups)(CDPlay*, CAutoArray<CDPlayGroup>*,
+          bool(__thiscall* EnumGroups)(CDPlay*, /*CAutoArray<CDPlayGroup>*/void*,
                                        GUID*, uint32_t);
           bool(__thiscall* EnumPlayers)(CDPlay*, CAutoArray<CDPlayPlayer>*,
                                         GUID*, uint32_t);
@@ -346,7 +346,7 @@ class CDPlay
         { return get_vftable(this)->EnumSessions(this, a1, a2, a3); }
 
         // vftable shift: +108
-        virtual bool __thiscall EnumGroups(CAutoArray<CDPlayGroup>* a1, GUID* a2, uint32_t a3)
+        virtual bool __thiscall EnumGroups(/*CAutoArray<CDPlayGroup>*/ void* a1, GUID* a2, uint32_t a3)
         { return get_vftable(this)->EnumGroups(this, a1, a2, a3); }
 
         // vftable shift: +112
@@ -511,7 +511,7 @@ class CDPlay
         CAutoArray<CDPlayConnection>* m_pConnectionArray;
 
         // offset: +0x4C = +76,  size = 0x4 = 4
-        CAutoArray<CDPlayGroup>* m_pGroupArray;
+        /*CAutoArray<CDPlayGroup>*/void* m_pGroupArray;
 
         // offset: +0x50 = +80,  size = 0x4 = 4
         CAutoArray<CDPlayPlayer>* m_pPlayerArray;
@@ -547,9 +547,9 @@ class CDPlayLobby : public CDPlay
                                                        void*);
           void*(__thiscall* GetGroupConnectionSettings)(CDPlayLobby*, uint32_t);
           bool(__thiscall* EnumGroupsInGroup)(CDPlayLobby*,
-                                              CAutoArray<CDPlayGroup>*,
+                                              /*CAutoArray<CDPlayGroup>*/ void*,
                                               uint32_t, uint32_t);
-          bool(__thiscall* EnumGroupPlayers)(CDPlayLobby*,
+          bool(__thiscall* CDPlayLobby_EnumGroupPlayers)(CDPlayLobby*,
                                              CAutoArray<CDPlayPlayer>*,
                                              uint32_t, uint32_t);
           bool(__thiscall* EnumGroupPlayersRemote)(CDPlayLobby*,
@@ -582,12 +582,12 @@ class CDPlayLobby : public CDPlay
         { return get_vftable(this)->GetGroupConnectionSettings(this, a1); }
 
         // vftable shift: +264
-        virtual bool __thiscall EnumGroupsInGroup(CAutoArray<CDPlayGroup>* a1, uint32_t a2, uint32_t a3)
+        virtual bool __thiscall EnumGroupsInGroup(/*CAutoArray<CDPlayGroup>*/ void* a1, uint32_t a2, uint32_t a3)
         { return get_vftable(this)->EnumGroupsInGroup(this, a1, a2, a3); }
 
         // vftable shift: +268
-        virtual bool __thiscall EnumGroupPlayers(CAutoArray<CDPlayPlayer>* a1, uint32_t a2, uint32_t a3)
-        { return get_vftable(this)->EnumGroupPlayers(this, a1, a2, a3); }
+        virtual bool __thiscall CDPlayLobby_EnumGroupPlayers(CAutoArray<CDPlayPlayer>* a1, uint32_t a2, uint32_t a3)
+        { return get_vftable(this)->CDPlayLobby_EnumGroupPlayers(this, a1, a2, a3); }
 
         // vftable shift: +272
         virtual bool __thiscall EnumGroupPlayersRemote(CAutoArray<CDPlayPlayer>* a1, uint32_t a2, GUID* a3, uint32_t a4)
@@ -631,35 +631,26 @@ class CDPlayHeroes : public CDPlayLobby
         {};
 
     public:
+        // offset: +0x60 = +96,  size = 0x8 = 8
+        CDPlayMsg dpMsg;
 
-    //
-    //
-    // offset: +0x60 = +96,  size = 0x8 = 8
-    CDPlayMsg dpMsg;
+        // offset: +0x68 = +104,  size = 0x30 = 48
+        exe_deque<CNetMsg*> msgQueue;
 
-    //
-    //
-    // offset: +0x68 = +104,  size = 0x30 = 48
-    exe_deque<CNetMsg*> msgQueue;
+        // offset: +0x98 = +152,  size = 0x50 = 80
+        std::array<char, 80> sLocalIPAddress;
 
-    //
-    //
-    // offset: +0x98 = +152,  size = 0x50 = 80
-    std::array<char, 80> sLocalIPAddress;
+        // offset: +0xE8 = +232,  size = 0x4 = 4
+        uint32_t confirmId;
 
-    //
-    //
-    // offset: +0xE8 = +232,  size = 0x4 = 4
-    uint32_t confirmId;
+        // offset: +0xEC = +236,  size = 0x4 = 4
+        uint32_t currMessageId;
 
-    //
-    //
-    // offset: +0xEC = +236,  size = 0x4 = 4
-    uint32_t currMessageId;
-
-    //
-    //
-    // offset: +0xF0 = +240,  size = 0x4 = 4
-    CNetMsgHandler* m_pNetMsgHandler;
+        // offset: +0xF0 = +240,  size = 0x4 = 4
+        CNetMsgHandler* m_pNetMsgHandler;
 };
 #pragma pack(pop) // align 4
+
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x63DE44, CAutoArray<CDPlayAddressElement>)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x6400E8, CAutoArray<CDPlaySession>)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x640F34, CAutoArray<CDPlayPlayer>)

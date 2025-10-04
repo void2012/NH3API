@@ -215,32 +215,32 @@ NH3API_DISABLE_WARNING_END
 #define CHECK_T_CASSERT NH3API_STATIC_ASSERT("", nh3api::tt::is_integral<T>::value)
 
 // Generate a reference to pair of operands
-template<class T> NH3API_IDA_INTRIN int16_t __PAIR__ ( int8_t  high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return (( static_cast<int16_t>(high)) << sizeof(high)*8) |  static_cast<uint8_t>(low); }
-template<class T> NH3API_IDA_INTRIN int32_t __PAIR__ ( int16_t high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return (( static_cast<int32_t>(high)) << sizeof(high)*8) | static_cast<uint16_t>(low); }
-template<class T> NH3API_IDA_INTRIN int64_t __PAIR__ ( int32_t high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return (( static_cast<int64_t>(high)) << sizeof(high)*8) | static_cast<uint32_t>(low); }
-template<class T> NH3API_IDA_INTRIN uint16_t __PAIR__(uint8_t  high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return ((static_cast<uint16_t>(high)) << sizeof(high)*8) |  static_cast<uint8_t>(low); }
-template<class T> NH3API_IDA_INTRIN uint32_t __PAIR__(uint16_t high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return ((static_cast<uint32_t>(high)) << sizeof(high)*8) | static_cast<uint16_t>(low); }
-template<class T> NH3API_IDA_INTRIN uint64_t __PAIR__(uint32_t high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return ((static_cast<uint64_t>(high)) << sizeof(high)*8) | static_cast<uint32_t>(low); }
+template<class T> NH3API_IDA_INTRIN int16_t __PAIR__ ( int8_t  high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return (( static_cast<int16_t>(high)) << sizeof(high)*8) | static_cast<int16_t>(low);  }
+template<class T> NH3API_IDA_INTRIN int32_t __PAIR__ ( int16_t high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return (( static_cast<int32_t>(high)) << sizeof(high)*8) | static_cast<int32_t>(low);  }
+template<class T> NH3API_IDA_INTRIN int64_t __PAIR__ ( int32_t high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return (( static_cast<int64_t>(high)) << sizeof(high)*8) | static_cast<int64_t>(low);  }
+template<class T> NH3API_IDA_INTRIN uint16_t __PAIR__(uint8_t  high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return ((static_cast<uint16_t>(high)) << sizeof(high)*8) | static_cast<uint16_t>(low); }
+template<class T> NH3API_IDA_INTRIN uint32_t __PAIR__(uint16_t high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return ((static_cast<uint32_t>(high)) << sizeof(high)*8) | static_cast<uint32_t>(low); }
+template<class T> NH3API_IDA_INTRIN uint64_t __PAIR__(uint32_t high, T low ) NH3API_NOEXCEPT { CHECK_T_CASSERT; return ((static_cast<uint64_t>(high)) << sizeof(high)*8) | static_cast<uint64_t>(low); }
 
-NH3API_IDA_INTRIN int16_t __PAIR16__ (uint8_t  high, uint8_t  low) NH3API_NOEXCEPT { return (( static_cast<uint16_t>(high)) << 8) | low; }
-NH3API_IDA_INTRIN int32_t __PAIR32__ (uint16_t high, uint16_t low) NH3API_NOEXCEPT { return (( static_cast<uint32_t>(high)) << 16) | low; }
-NH3API_IDA_INTRIN int64_t __PAIR64__ (uint32_t high, uint32_t low) NH3API_NOEXCEPT { return (( static_cast<uint64_t>(high)) << 32) | low; }
-NH3API_IDA_INTRIN int16_t __SPAIR16__(int8_t   high, int8_t   low) NH3API_NOEXCEPT { return (( static_cast<int16_t>(high)) << 8) | low; }
-NH3API_IDA_INTRIN int32_t __SPAIR32__(int16_t  high, int16_t  low) NH3API_NOEXCEPT { return (( static_cast<int32_t>(high)) << 16) | low; }
-NH3API_IDA_INTRIN int64_t __SPAIR64__(int32_t  high, int32_t  low) NH3API_NOEXCEPT { return (( static_cast<int64_t>(high)) << 32) | low; }
+NH3API_IDA_INTRIN uint16_t __PAIR16__ (uint8_t  high, uint8_t  low) NH3API_NOEXCEPT { return static_cast<uint16_t>((( static_cast<uint16_t>(high)) << UINT16_C(8))  | static_cast<uint16_t>(low)); }
+NH3API_IDA_INTRIN uint32_t __PAIR32__ (uint16_t high, uint16_t low) NH3API_NOEXCEPT { return (( static_cast<uint32_t>(high)) << UINT32_C(16)) | static_cast<uint32_t>(low); }
+NH3API_IDA_INTRIN uint64_t __PAIR64__ (uint32_t high, uint32_t low) NH3API_NOEXCEPT { return (( static_cast<uint64_t>(high)) << UINT64_C(32)) | static_cast<uint64_t>(low); }
+NH3API_IDA_INTRIN int16_t  __SPAIR16__(int8_t   high, int8_t   low) NH3API_NOEXCEPT { return static_cast<int16_t>((( static_cast<int16_t>(high))  << INT16_C(8))   | static_cast<int16_t>(low)); }
+NH3API_IDA_INTRIN int32_t  __SPAIR32__(int16_t  high, int16_t  low) NH3API_NOEXCEPT { return (( static_cast<int32_t>(high))  << INT32_C(16))  | static_cast<int32_t>(low); }
+NH3API_IDA_INTRIN int64_t  __SPAIR64__(int32_t  high, int32_t  low) NH3API_NOEXCEPT { return (( static_cast<int64_t>(high))  << INT64_C(32))  | static_cast<int64_t>(low); }
 
 #undef CHECK_T_CASSERT
 
 #if NH3API_HAS_BUILTIN(__builtin_rotateleft8) && NH3API_HAS_BUILTIN(__builtin_rotateright8)
 
-NH3API_IDA_INTRIN uint8_t  __ROL1__(uint8_t  value, size_t count) NH3API_NOEXCEPT { return __builtin_rotateleft8(value, count); }
-NH3API_IDA_INTRIN uint16_t __ROL2__(uint16_t value, size_t count) NH3API_NOEXCEPT { return __builtin_rotateleft16(value, count); }
-NH3API_IDA_INTRIN uint32_t __ROL4__(uint32_t value, size_t count) NH3API_NOEXCEPT { return __builtin_rotateleft32(value, count); }
-NH3API_IDA_INTRIN uint64_t __ROL8__(uint64_t value, size_t count) NH3API_NOEXCEPT { return __builtin_rotateleft64(value, count); }
-NH3API_IDA_INTRIN uint8_t  __ROR1__(uint8_t  value, size_t count) NH3API_NOEXCEPT { return __builtin_rotateright8(value, count); }
-NH3API_IDA_INTRIN uint16_t __ROR2__(uint16_t value, size_t count) NH3API_NOEXCEPT { return __builtin_rotateright16(value, count); }
-NH3API_IDA_INTRIN uint32_t __ROR4__(uint32_t value, size_t count) NH3API_NOEXCEPT { return __builtin_rotateright32(value, count); }
-NH3API_IDA_INTRIN uint64_t __ROR8__(uint64_t value, size_t count) NH3API_NOEXCEPT { return __builtin_rotateright64(value, count); }
+NH3API_IDA_INTRIN uint8_t  __ROL1__(uint8_t  value, uint8_t count)  NH3API_NOEXCEPT { return __builtin_rotateleft8(value, count); }
+NH3API_IDA_INTRIN uint16_t __ROL2__(uint16_t value, uint16_t count) NH3API_NOEXCEPT { return __builtin_rotateleft16(value, count); }
+NH3API_IDA_INTRIN uint32_t __ROL4__(uint32_t value, uint32_t count) NH3API_NOEXCEPT { return __builtin_rotateleft32(value, count); }
+NH3API_IDA_INTRIN uint64_t __ROL8__(uint64_t value, uint64_t count) NH3API_NOEXCEPT { return __builtin_rotateleft64(value, count); }
+NH3API_IDA_INTRIN uint8_t  __ROR1__(uint8_t  value, uint8_t count)  NH3API_NOEXCEPT { return __builtin_rotateright8(value, count); }
+NH3API_IDA_INTRIN uint16_t __ROR2__(uint16_t value, uint16_t count) NH3API_NOEXCEPT { return __builtin_rotateright16(value, count); }
+NH3API_IDA_INTRIN uint32_t __ROR4__(uint32_t value, uint32_t count) NH3API_NOEXCEPT { return __builtin_rotateright32(value, count); }
+NH3API_IDA_INTRIN uint64_t __ROR8__(uint64_t value, uint64_t count) NH3API_NOEXCEPT { return __builtin_rotateright64(value, count); }
 
 #else
 
@@ -419,16 +419,18 @@ int8_t __CFADD__(T x, U y) NH3API_NOEXCEPT
 
 }
 
-NH3API_IDA_INTRIN int8_t  abs8 (int8_t  x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
-NH3API_IDA_INTRIN int16_t abs16(int16_t x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
+NH3API_IDA_INTRIN int8_t  abs8 (int8_t  x) NH3API_NOEXCEPT { return x >= 0 ? x : static_cast<int8_t>(-x); }
+NH3API_IDA_INTRIN int16_t abs16(int16_t x) NH3API_NOEXCEPT { return x >= 0 ? x : static_cast<int16_t>(-x); }
 NH3API_IDA_INTRIN int32_t abs32(int32_t x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
 NH3API_IDA_INTRIN int64_t abs64(int64_t x) NH3API_NOEXCEPT { return x >= 0 ? x : -x; }
 
-#define COERCE_FLOAT(v)          ::nh3api::bit_cast<float>(v)
-#define COERCE_DOUBLE(v)         ::nh3api::bit_cast<double>(v)
-#define COERCE_LONG_DOUBLE(v)    ::nh3api::bit_cast<long double>(v)
-#define COERCE_UNSIGNED_INT(v)   ::nh3api::bit_cast<unsigned int>(v)
-#define COERCE_UNSIGNED_INT64(v) ::nh3api::bit_cast<uint64_t>(v)
+#ifndef COERCE_FLOAT
+    #define COERCE_FLOAT(v)          ::nh3api::bit_cast<float>(v)
+    #define COERCE_DOUBLE(v)         ::nh3api::bit_cast<double>(v)
+    #define COERCE_LONG_DOUBLE(v)    ::nh3api::bit_cast<long double>(v)
+    #define COERCE_UNSIGNED_INT(v)   ::nh3api::bit_cast<unsigned int>(v)
+    #define COERCE_UNSIGNED_INT64(v) ::nh3api::bit_cast<uint64_t>(v)
+#endif
 
 #ifndef CONTAINING_RECORD
 #define CONTAINING_RECORD(address, type, field) ((type *)((_BYTE*)(address) - offsetof(type, field)))

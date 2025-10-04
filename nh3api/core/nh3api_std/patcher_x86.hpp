@@ -160,420 +160,11 @@
 
 #include "intrin.hpp"
 #include "array.hpp"
+#include "call_macros.hpp"
 
 NH3API_DISABLE_WARNING_BEGIN("-Wnon-virtual-dtor", 4265)
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes",       4714)
 NH3API_DISABLE_WARNING_BEGIN("-Wunused-parameter", 4100)
-
-#define CALL_0(return_type, call_type, address) \
- ((return_type (call_type *)(void))address)()
-#define CALL_1(return_type, call_type, address, a1) \
- ((return_type (call_type *)(uintptr_t))(address))((uintptr_t)(a1))
-#define CALL_2(return_type, call_type, address, a1, a2) \
- ((return_type (call_type *)(uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2))
-#define CALL_3(return_type, call_type, address, a1, a2, a3) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3))
-#define CALL_4(return_type, call_type, address, a1, a2, a3, a4) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4))
-#define CALL_5(return_type, call_type, address, a1, a2, a3, a4, a5) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5))
-#define CALL_6(return_type, call_type, address, a1, a2, a3, a4, a5, a6) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6))
-#define CALL_7(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7))
-#define CALL_8(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7, a8) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7),(uintptr_t)(a8))
-#define CALL_9(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7, a8, a9) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7),(uintptr_t)(a8),(uintptr_t)(a9))
-#define CALL_10(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7),(uintptr_t)(a8),(uintptr_t)(a9),(uintptr_t)(a10))
-#define CALL_11(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7),(uintptr_t)(a8),(uintptr_t)(a9),(uintptr_t)(a10),(uintptr_t)(a11))
-#define CALL_12(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7),(uintptr_t)(a8),(uintptr_t)(a9),(uintptr_t)(a10),(uintptr_t)(a11),(uintptr_t)(a12))
-#define CALL_13(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7),(uintptr_t)(a8),(uintptr_t)(a9),(uintptr_t)(a10),(uintptr_t)(a11),(uintptr_t)(a12),(uintptr_t)(a13))
-#define CALL_14(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7),(uintptr_t)(a8),(uintptr_t)(a9),(uintptr_t)(a10),(uintptr_t)(a11),(uintptr_t)(a12),(uintptr_t)(a13),(uintptr_t)(a14))
-#define CALL_15(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7),(uintptr_t)(a8),(uintptr_t)(a9),(uintptr_t)(a10),(uintptr_t)(a11),(uintptr_t)(a12),(uintptr_t)(a13),(uintptr_t)(a14),(uintptr_t)(a15))
-#define CALL_16(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7),(uintptr_t)(a8),(uintptr_t)(a9),(uintptr_t)(a10),(uintptr_t)(a11),(uintptr_t)(a12),(uintptr_t)(a13),(uintptr_t)(a14),(uintptr_t)(a15),(uintptr_t)(a16))
-#define CALL_17(return_type, call_type, address, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17) \
- ((return_type (call_type *)(uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t,uintptr_t))(address))((uintptr_t)(a1),(uintptr_t)(a2),(uintptr_t)(a3),(uintptr_t)(a4),(uintptr_t)(a5),(uintptr_t)(a6),(uintptr_t)(a7),(uintptr_t)(a8),(uintptr_t)(a9),(uintptr_t)(a10),(uintptr_t)(a11),(uintptr_t)(a12),(uintptr_t)(a13),(uintptr_t)(a14),(uintptr_t)(a15),(uintptr_t)(a16),(uintptr_t)(a17))
-
-#define CALL_VA(return_type, adress, a1, ...) \
- ((return_type (__cdecl *)(uint32_t, ...))(adress))((uint32_t)(a1), __VA_ARGS__)
-
-//namespace nh3api
-//{
-template<typename return_type, typename Arg1>
-inline return_type invoke_thiscall_1(uintptr_t address, Arg1 a1) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1) NH3API_NOEXCEPT>(address)(a1)); }
-template<typename return_type, typename Arg1, typename Arg2>
-inline return_type invoke_thiscall_2(uintptr_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2) NH3API_NOEXCEPT>(address)(a1, a2)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3>
-inline return_type invoke_thiscall_3(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3) NH3API_NOEXCEPT>(address)(a1, a2, a3)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-inline return_type invoke_thiscall_4(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-inline return_type invoke_thiscall_5(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-inline return_type invoke_thiscall_6(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-inline return_type invoke_thiscall_7(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-inline return_type invoke_thiscall_8(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-inline return_type invoke_thiscall_9(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-inline return_type invoke_thiscall_10(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11>
-inline return_type invoke_thiscall_11(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12>
-inline return_type invoke_thiscall_12(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13>
-inline return_type invoke_thiscall_13(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14>
-inline return_type invoke_thiscall_14(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15>
-inline return_type invoke_thiscall_15(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16>
-inline return_type invoke_thiscall_16(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17>
-inline return_type invoke_thiscall_17(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18>
-inline return_type invoke_thiscall_18(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19>
-inline return_type invoke_thiscall_19(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19, typename Arg20>
-inline return_type invoke_thiscall_20(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__thiscall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
-
-template<typename return_type>
-inline return_type invoke_fastcall_0(uintptr_t address) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)() NH3API_NOEXCEPT>(address)()); }
-template<typename return_type, typename Arg1>
-inline return_type invoke_fastcall_1(uintptr_t address, Arg1 a1) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1) NH3API_NOEXCEPT>(address)(a1)); }
-template<typename return_type, typename Arg1, typename Arg2>
-inline return_type invoke_fastcall_2(uintptr_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2) NH3API_NOEXCEPT>(address)(a1, a2)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3>
-inline return_type invoke_fastcall_3(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3) NH3API_NOEXCEPT>(address)(a1, a2, a3)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-inline return_type invoke_fastcall_4(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-inline return_type invoke_fastcall_5(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-inline return_type invoke_fastcall_6(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-inline return_type invoke_fastcall_7(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-inline return_type invoke_fastcall_8(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-inline return_type invoke_fastcall_9(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-inline return_type invoke_fastcall_10(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11>
-inline return_type invoke_fastcall_11(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12>
-inline return_type invoke_fastcall_12(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13>
-inline return_type invoke_fastcall_13(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14>
-inline return_type invoke_fastcall_14(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15>
-inline return_type invoke_fastcall_15(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16>
-inline return_type invoke_fastcall_16(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17>
-inline return_type invoke_fastcall_17(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18>
-inline return_type invoke_fastcall_18(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19>
-inline return_type invoke_fastcall_19(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19, typename Arg20>
-inline return_type invoke_fastcall_20(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__fastcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
-
-template<typename return_type>
-inline return_type invoke_cdecl_0(uintptr_t address) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)() NH3API_NOEXCEPT>(address)()); }
-template<typename return_type, typename Arg1>
-inline return_type invoke_cdecl_1(uintptr_t address, Arg1 a1) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1) NH3API_NOEXCEPT>(address)(a1)); }
-template<typename return_type, typename Arg1, typename Arg2>
-inline return_type invoke_cdecl_2(uintptr_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2) NH3API_NOEXCEPT>(address)(a1, a2)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3>
-inline return_type invoke_cdecl_3(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3) NH3API_NOEXCEPT>(address)(a1, a2, a3)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-inline return_type invoke_cdecl_4(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-inline return_type invoke_cdecl_5(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-inline return_type invoke_cdecl_6(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-inline return_type invoke_cdecl_7(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-inline return_type invoke_cdecl_8(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-inline return_type invoke_cdecl_9(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-inline return_type invoke_cdecl_10(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11>
-inline return_type invoke_cdecl_11(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12>
-inline return_type invoke_cdecl_12(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13>
-inline return_type invoke_cdecl_13(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14>
-inline return_type invoke_cdecl_14(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15>
-inline return_type invoke_cdecl_15(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16>
-inline return_type invoke_cdecl_16(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17>
-inline return_type invoke_cdecl_17(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18>
-inline return_type invoke_cdecl_18(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19>
-inline return_type invoke_cdecl_19(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19, typename Arg20>
-inline return_type invoke_cdecl_20(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__cdecl*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
-
-template<typename return_type>
-inline return_type invoke_stdcall_0(uintptr_t address) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)() NH3API_NOEXCEPT>(address)()); }
-template<typename return_type, typename Arg1>
-inline return_type invoke_stdcall_1(uintptr_t address, Arg1 a1) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1) NH3API_NOEXCEPT>(address)(a1)); }
-template<typename return_type, typename Arg1, typename Arg2>
-inline return_type invoke_stdcall_2(uintptr_t address, Arg1 a1, Arg2 a2) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2) NH3API_NOEXCEPT>(address)(a1, a2)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3>
-inline return_type invoke_stdcall_3(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3) NH3API_NOEXCEPT>(address)(a1, a2, a3)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-inline return_type invoke_stdcall_4(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-inline return_type invoke_stdcall_5(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-inline return_type invoke_stdcall_6(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-inline return_type invoke_stdcall_7(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-inline return_type invoke_stdcall_8(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-inline return_type invoke_stdcall_9(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-inline return_type invoke_stdcall_10(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11>
-inline return_type invoke_stdcall_11(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12>
-inline return_type invoke_stdcall_12(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13>
-inline return_type invoke_stdcall_13(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14>
-inline return_type invoke_stdcall_14(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15>
-inline return_type invoke_stdcall_15(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16>
-inline return_type invoke_stdcall_16(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17>
-inline return_type invoke_stdcall_17(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18>
-inline return_type invoke_stdcall_18(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19>
-inline return_type invoke_stdcall_19(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19)); }
-template<typename return_type, typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10, typename Arg11, typename Arg12, typename Arg13, typename Arg14, typename Arg15, typename Arg16, typename Arg17, typename Arg18, typename Arg19, typename Arg20>
-inline return_type invoke_stdcall_20(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a3, Arg4 a4, Arg5 a5, Arg6 a6, Arg7 a7, Arg8 a8, Arg9 a9, Arg10 a10, Arg11 a11, Arg12 a12, Arg13 a13, Arg14 a14, Arg15 a15, Arg16 a16, Arg17 a17, Arg18 a18, Arg19 a19, Arg20 a20) NH3API_NOEXCEPT
-{ return (reinterpret_cast<return_type(__stdcall*)(Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Arg9, Arg10, Arg11, Arg12, Arg13, Arg14, Arg15, Arg16, Arg17, Arg18, Arg19, Arg20) NH3API_NOEXCEPT>(address)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20)); }
-
-//} // namespace nh3api
-
-#define THISCALL_1(return_type, address, arg1) invoke_thiscall_1<return_type>(static_cast<uintptr_t>(address), arg1)
-#define THISCALL_2(return_type, address, arg1, arg2) invoke_thiscall_2<return_type>(static_cast<uintptr_t>(address), arg1, arg2)
-#define THISCALL_3(return_type, address, arg1, arg2, arg3) invoke_thiscall_3<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3)
-#define THISCALL_4(return_type, address, arg1, arg2, arg3, arg4) invoke_thiscall_4<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4)
-#define THISCALL_5(return_type, address, arg1, arg2, arg3, arg4, arg5) invoke_thiscall_5<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5)
-#define THISCALL_6(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6) invoke_thiscall_6<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6)
-#define THISCALL_7(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7) invoke_thiscall_7<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-#define THISCALL_8(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) invoke_thiscall_8<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-#define THISCALL_9(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) invoke_thiscall_9<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-#define THISCALL_10(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) invoke_thiscall_10<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
-#define THISCALL_11(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11) invoke_thiscall_11<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
-#define THISCALL_12(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12) invoke_thiscall_12<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)
-#define THISCALL_13(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13) invoke_thiscall_13<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
-#define THISCALL_14(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14) invoke_thiscall_14<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
-#define THISCALL_15(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15) invoke_thiscall_15<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
-#define THISCALL_16(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16) invoke_thiscall_16<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16)
-#define THISCALL_17(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17) invoke_thiscall_17<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17)
-#define THISCALL_18(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18) invoke_thiscall_18<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18)
-#define THISCALL_19(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19) invoke_thiscall_19<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19)
-#define THISCALL_20(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20) invoke_thiscall_20<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)
-
-#define FASTCALL_0(return_type, address) invoke_fastcall_0<return_type>(static_cast<uintptr_t>(address))
-#define FASTCALL_1(return_type, address, arg1) invoke_fastcall_1<return_type>(static_cast<uintptr_t>(address), arg1)
-#define FASTCALL_2(return_type, address, arg1, arg2) invoke_fastcall_2<return_type>(static_cast<uintptr_t>(address), arg1, arg2)
-#define FASTCALL_3(return_type, address, arg1, arg2, arg3) invoke_fastcall_3<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3)
-#define FASTCALL_4(return_type, address, arg1, arg2, arg3, arg4) invoke_fastcall_4<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4)
-#define FASTCALL_5(return_type, address, arg1, arg2, arg3, arg4, arg5) invoke_fastcall_5<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5)
-#define FASTCALL_6(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6) invoke_fastcall_6<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6)
-#define FASTCALL_7(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7) invoke_fastcall_7<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-#define FASTCALL_8(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) invoke_fastcall_8<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-#define FASTCALL_9(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) invoke_fastcall_9<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-#define FASTCALL_10(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) invoke_fastcall_10<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
-#define FASTCALL_11(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11) invoke_fastcall_11<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
-#define FASTCALL_12(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12) invoke_fastcall_12<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)
-#define FASTCALL_13(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13) invoke_fastcall_13<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
-#define FASTCALL_14(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14) invoke_fastcall_14<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
-#define FASTCALL_15(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15) invoke_fastcall_15<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
-#define FASTCALL_16(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16) invoke_fastcall_16<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16)
-#define FASTCALL_17(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17) invoke_fastcall_17<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17)
-#define FASTCALL_18(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18) invoke_fastcall_18<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18)
-#define FASTCALL_19(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19) invoke_fastcall_19<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19)
-#define FASTCALL_20(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20) invoke_fastcall_20<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)
-
-#define CDECL_0(return_type, address) invoke_cdecl_0<return_type>(static_cast<uintptr_t>(address))
-#define CDECL_1(return_type, address, arg1) invoke_cdecl_1<return_type>(static_cast<uintptr_t>(address), arg1)
-#define CDECL_2(return_type, address, arg1, arg2) invoke_cdecl_2<return_type>(static_cast<uintptr_t>(address), arg1, arg2)
-#define CDECL_3(return_type, address, arg1, arg2, arg3) invoke_cdecl_3<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3)
-#define CDECL_4(return_type, address, arg1, arg2, arg3, arg4) invoke_cdecl_4<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4)
-#define CDECL_5(return_type, address, arg1, arg2, arg3, arg4, arg5) invoke_cdecl_5<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5)
-#define CDECL_6(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6) invoke_cdecl_6<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6)
-#define CDECL_7(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7) invoke_cdecl_7<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-#define CDECL_8(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) invoke_cdecl_8<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-#define CDECL_9(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) invoke_cdecl_9<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-#define CDECL_10(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) invoke_cdecl_10<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
-#define CDECL_11(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11) invoke_cdecl_11<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
-#define CDECL_12(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12) invoke_cdecl_12<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)
-#define CDECL_13(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13) invoke_cdecl_13<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
-#define CDECL_14(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14) invoke_cdecl_14<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
-#define CDECL_15(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15) invoke_cdecl_15<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
-#define CDECL_16(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16) invoke_cdecl_16<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16)
-#define CDECL_17(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17) invoke_cdecl_17<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17)
-#define CDECL_18(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18) invoke_cdecl_18<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18)
-#define CDECL_19(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19) invoke_cdecl_19<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19)
-#define CDECL_20(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20) invoke_cdecl_20<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)
-
-#define STDCALL_0(return_type, address) invoke_stdcall_0<return_type>(static_cast<uintptr_t>(address))
-#define STDCALL_1(return_type, address, arg1) invoke_stdcall_1<return_type>(static_cast<uintptr_t>(address), arg1)
-#define STDCALL_2(return_type, address, arg1, arg2) invoke_stdcall_2<return_type>(static_cast<uintptr_t>(address), arg1, arg2)
-#define STDCALL_3(return_type, address, arg1, arg2, arg3) invoke_stdcall_3<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3)
-#define STDCALL_4(return_type, address, arg1, arg2, arg3, arg4) invoke_stdcall_4<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4)
-#define STDCALL_5(return_type, address, arg1, arg2, arg3, arg4, arg5) invoke_stdcall_5<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5)
-#define STDCALL_6(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6) invoke_stdcall_6<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6)
-#define STDCALL_7(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7) invoke_stdcall_7<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-#define STDCALL_8(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) invoke_stdcall_8<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
-#define STDCALL_9(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9) invoke_stdcall_9<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
-#define STDCALL_10(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) invoke_stdcall_10<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
-#define STDCALL_11(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11) invoke_stdcall_11<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11)
-#define STDCALL_12(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12) invoke_stdcall_12<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12)
-#define STDCALL_13(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13) invoke_stdcall_13<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
-#define STDCALL_14(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14) invoke_stdcall_14<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14)
-#define STDCALL_15(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15) invoke_stdcall_15<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15)
-#define STDCALL_16(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16) invoke_stdcall_16<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16)
-#define STDCALL_17(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17) invoke_stdcall_17<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17)
-#define STDCALL_18(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18) invoke_stdcall_18<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18)
-#define STDCALL_19(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19) invoke_stdcall_19<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19)
-#define STDCALL_20(return_type, address, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20) invoke_stdcall_20<return_type>(static_cast<uintptr_t>(address), arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20)
-
-#if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
-template<typename return_type, typename ... Args>
-inline return_type invoke_thiscall(uintptr_t address, Args&& ... args)
-{
-    NH3API_STATIC_ASSERT("__thiscall function must take at least 1 argument", sizeof...(Args) > 1);
-    return (reinterpret_cast<return_type(__thiscall*)(Args...)>(address)(std::forward<Args>(args)...));
-}
-
-template<typename return_type, typename ... Args>
-inline return_type invoke_fastcall(uintptr_t address, Args&& ... args)
-{ return (reinterpret_cast<return_type(__fastcall*)(Args...)>(address)(std::forward<Args>(args)...)); }
-
-template<typename return_type, typename ... Args>
-inline return_type invoke_cdecl(uintptr_t address, Args&& ... args)
-{ return (reinterpret_cast<return_type(__cdecl*)(Args...)>(address)(std::forward<Args>(args)...)); }
-
-template<typename return_type, typename ... Args>
-inline return_type invoke_stdcall(uintptr_t address, Args&& ... args)
-{ return (reinterpret_cast<return_type(__stdcall*)(Args...)>(address)(std::forward<Args>(args)...)); }
-
-#define THISCALL_N(return_type, address, ...) invoke_thiscall<return_type>(static_cast<uintptr_t>(address), __VA_ARGS__)
-#define FASTCALL_N(return_type, address, ...) invoke_fastcall<return_type>(static_cast<uintptr_t>(address), __VA_ARGS__)
-#define CDECL_N(return_type, address, ...)    invoke_cdecl<return_type>(static_cast<uintptr_t>(address), __VA_ARGS__)
-#define STDCALL_N(return_type, address, ...)  invoke_stdcall<return_type>(static_cast<uintptr_t>(address), __VA_ARGS__)
-#endif // C++11 variadic arguments (full support)
 
 #pragma pack(push, 4)
 // type "variable", is used for the values returned by Patcher::VarInit and Patcher::VarFind methods /
@@ -581,11 +172,25 @@ inline return_type invoke_stdcall(uintptr_t address, Args&& ... args)
 NH3API_VIRTUAL_STRUCT Variable
 {
 public:
-    Variable() NH3API_DELETED_FUNCTION;
+	#if NH3API_CHECK_CPP11
+        Variable() = delete;
+        Variable(const Variable&) = delete;
+        Variable(Variable&&) = delete;
+        Variable& operator=(const Variable&) = delete;
+        Variable& operator=(Variable&&) = delete;
+        ~Variable() = delete;
+    #else 
+        private:
+            Variable();
+            Variable(const Variable&);
+            Variable& operator=(const Variable&);
+            ~Variable();
+        public:
+    #endif
 
     // returns the value of 'variable' (thread safe handling) /
     // возвращает значение 'переменной' (потокобезопасное обращение).
-    virtual uint32_t __stdcall GetValue() = 0;
+    NH3API_NODISCARD virtual uint32_t __stdcall GetValue() const = 0;
 
     // sets the value of the 'variable' (thread safe handling) /
     // устанавливает значение 'переменной' (потокобезопасное обращение).
@@ -639,9 +244,24 @@ struct FlagsRegister
 // used in functions of Lohook hook /
 // Структура HookContext
 // используется в функциях сработавших по LoHook хуку.
-struct
-HookContext
+struct HookContext
 {
+    #if NH3API_CHECK_CPP11
+        HookContext() = delete;
+        HookContext(const HookContext&) = delete;
+        HookContext(HookContext&&) = delete;
+        HookContext& operator=(const HookContext&) = delete;
+        HookContext& operator=(HookContext&&) = delete;
+        ~HookContext() = delete;
+    #else 
+    private:
+        HookContext();
+        HookContext(const HookContext&);
+        HookContext& operator=(const HookContext&);
+        ~HookContext();
+    public:
+    #endif
+
     union
     {
         int32_t eax;
@@ -748,38 +368,45 @@ HookContext
     // размер памяти которая может быть помещена в стек с помощью этой функции ограничен 128 байтами.
     // при использовании с контекстом хука установленного с помощью WriteLoHookEx или CreateLoHookEx
     // этот размер устанавливается произвольно при вызове WriteLoHookEx или CreateLoHookEx.
-    inline void Push(int32_t v)
+    NH3API_FORCEINLINE void Push(int32_t v)
     {
         esp -= 4;
-        *(int32_t*)(esp) = v;
+        *reinterpret_cast<int32_t*>(esp) = v;
+    }
+
+    NH3API_FORCEINLINE void Push(uint32_t v)
+    {
+        esp -= 4;
+        *reinterpret_cast<uint32_t*>(esp) = v;
     }
 
     // the Pop function has a similar action to the POP command for the LoHook hook context /
     // функция Pop имеет аналогичное действие команде процессора POP для контекста LoHook хука.
-    inline int32_t Pop()
+    NH3API_FORCEINLINE int32_t Pop() NH3API_NOEXCEPT
     {
-        int32_t r = *(int32_t*)(esp);
+        int32_t r = *reinterpret_cast<int32_t*>(esp);
         esp += 4;
         return r;
     }
 
     // These getters are for the compability with the RoseKavailer's H3API...
 
-    int8_t& AL() { return al; }
-    int8_t& AH() { return ah; }
-    int16_t& AX() { return ax; }
-    int8_t& CL() { return cl; }
-    int8_t& CH() { return ch; }
-    int16_t& CX() { return cx; }
-    int8_t& DL() { return dl; }
-    int8_t& DH() { return dh; }
-    int16_t& DX() { return dx; }
-    int8_t& BL() { return bl; }
-    int8_t& BH() { return bh; }
-    int16_t& BX() { return bx; }
-    uint16_t& BP() { return bp; }
-    int16_t& SI() { return si; }
-    int16_t& DI() { return di; }
+    //
+    NH3API_FORCEINLINE int8_t& AL() NH3API_NOEXCEPT { return al; }
+    NH3API_FORCEINLINE int8_t& AH() NH3API_NOEXCEPT { return ah; }
+    NH3API_FORCEINLINE int16_t& AX() NH3API_NOEXCEPT { return ax; }
+    NH3API_FORCEINLINE int8_t& CL() NH3API_NOEXCEPT { return cl; }
+    NH3API_FORCEINLINE int8_t& CH() NH3API_NOEXCEPT { return ch; }
+    NH3API_FORCEINLINE int16_t& CX() NH3API_NOEXCEPT { return cx; }
+    NH3API_FORCEINLINE int8_t& DL() NH3API_NOEXCEPT { return dl; }
+    NH3API_FORCEINLINE int8_t& DH() NH3API_NOEXCEPT { return dh; }
+    NH3API_FORCEINLINE int16_t& DX() NH3API_NOEXCEPT { return dx; }
+    NH3API_FORCEINLINE int8_t& BL() NH3API_NOEXCEPT { return bl; }
+    NH3API_FORCEINLINE int8_t& BH() NH3API_NOEXCEPT { return bh; }
+    NH3API_FORCEINLINE int16_t& BX() NH3API_NOEXCEPT { return bx; }
+    NH3API_FORCEINLINE uint16_t& BP() NH3API_NOEXCEPT { return bp; }
+    NH3API_FORCEINLINE int16_t& SI() NH3API_NOEXCEPT { return si; }
+    NH3API_FORCEINLINE int16_t& DI() NH3API_NOEXCEPT { return di; }
 
 } NH3API_MSVC_LAYOUT;
 
@@ -793,6 +420,22 @@ HookContext
 // см. PatcherInstance::CreateSafeLoHook().
 struct SafeLoHookContext
 {
+    #if NH3API_CHECK_CPP11
+        SafeLoHookContext() = delete;
+        SafeLoHookContext(const SafeLoHookContext&) = delete;
+        SafeLoHookContext(SafeLoHookContext&&) = delete;
+        SafeLoHookContext& operator=(const SafeLoHookContext&) = delete;
+        SafeLoHookContext& operator=(SafeLoHookContext&&) = delete;
+        ~SafeLoHookContext() = delete;
+    #else 
+    private:
+        SafeLoHookContext();
+        SafeLoHookContext(const SafeLoHookContext&);
+        SafeLoHookContext& operator=(const SafeLoHookContext&);
+        ~SafeLoHookContext();
+    public:
+    #endif
+
     uintptr_t return_address;
 
     FlagsRegister flags;
@@ -886,7 +529,27 @@ struct SafeLoHookContext
     } NH3API_MSVC_LAYOUT;
 
     void Push(int32_t v) NH3API_DELETED_FUNCTION
+    void Push(uint32_t v) NH3API_DELETED_FUNCTION
     int32_t Pop() NH3API_DELETED_FUNCTION
+
+    // These getters are for the compability with the RoseKavailer's H3API...
+
+    //
+    NH3API_FORCEINLINE int8_t& AL() NH3API_NOEXCEPT { return al; }
+    NH3API_FORCEINLINE int8_t& AH() NH3API_NOEXCEPT { return ah; }
+    NH3API_FORCEINLINE int16_t& AX() NH3API_NOEXCEPT { return ax; }
+    NH3API_FORCEINLINE int8_t& CL() NH3API_NOEXCEPT { return cl; }
+    NH3API_FORCEINLINE int8_t& CH() NH3API_NOEXCEPT { return ch; }
+    NH3API_FORCEINLINE int16_t& CX() NH3API_NOEXCEPT { return cx; }
+    NH3API_FORCEINLINE int8_t& DL() NH3API_NOEXCEPT { return dl; }
+    NH3API_FORCEINLINE int8_t& DH() NH3API_NOEXCEPT { return dh; }
+    NH3API_FORCEINLINE int16_t& DX() NH3API_NOEXCEPT { return dx; }
+    NH3API_FORCEINLINE int8_t& BL() NH3API_NOEXCEPT { return bl; }
+    NH3API_FORCEINLINE int8_t& BH() NH3API_NOEXCEPT { return bh; }
+    NH3API_FORCEINLINE int16_t& BX() NH3API_NOEXCEPT { return bx; }
+    NH3API_FORCEINLINE uint16_t& BP() NH3API_NOEXCEPT { return bp; }
+    NH3API_FORCEINLINE int16_t& SI() NH3API_NOEXCEPT { return si; }
+    NH3API_FORCEINLINE int16_t& DI() NH3API_NOEXCEPT { return di; }
 
 } NH3API_MSVC_LAYOUT;
 
@@ -927,21 +590,34 @@ enum EPatcherInstanceWriteMode : int32_t
 // помощью методов класса PatcherInstance.
 NH3API_VIRTUAL_CLASS Patch
 {
-
 public:
-    Patch() NH3API_DELETED_FUNCTION;
+	#if NH3API_CHECK_CPP11
+        Patch() = delete;
+        Patch(const Patch&) = delete;
+        Patch(Patch&&) = delete;
+        Patch& operator=(const Patch&) = delete;
+        Patch& operator=(Patch&&) = delete;
+        ~Patch() = delete;
+    #else 
+    private:
+        Patch();
+        Patch(const Patch&);
+        Patch& operator=(const Patch&);
+        ~Patch();
+    public:
+    #endif
 
     // Returns the address on which to install the patch /
     // Возвращает адрес по которому устанавливается патч.
-    virtual uintptr_t __stdcall GetAddress() = 0;
+    NH3API_NODISCARD virtual uintptr_t __stdcall GetAddress() const = 0;
 
     // Returns the size of the patch /
     // Возвращает размер патча.
-    virtual uint32_t __stdcall GetSize() = 0;
+    NH3API_NODISCARD virtual uint32_t __stdcall GetSize() const = 0;
 
     // Returns the unique name of the PatcherInstance instance with which the patch was created /
     // Возвращает уникальное имя экземпляра PatcherInstance, с помощью которого был создан патч.
-    virtual const char* const __stdcall GetOwner() = 0;
+    NH3API_NODISCARD virtual const char* __stdcall GetOwner() const = 0;
 
     // Returns the type of the patch
     // for not hook always PATCH_
@@ -952,11 +628,11 @@ public:
     // для не хука всегда PATCH_
     // для LoHook всегда LOHOOK_
     // для HiHook всегда HIHOOK_
-    virtual EPatchType __stdcall GetType() = 0;
+    NH3API_NODISCARD virtual EPatchType __stdcall GetType() const = 0;
 
     // returns true if the patch is applied and false, if not /
     // возвращает true, если патч применен и false, если нет.
-    virtual bool32_t __stdcall IsApplied() = 0;
+    NH3API_NODISCARD virtual bool32_t __stdcall IsApplied() const = 0;
 
     // Apply the patch
     // returns> = 0 if the patch / hook is applied successfully
@@ -974,7 +650,6 @@ public:
     // возвращает -2, если патч уже применен
     // Результат выполнения метода распространенно пишется в лог.
     virtual int32_t __stdcall Apply() = 0;
-
 
     // ApplyInsert applies a patch specifying the sequence number in the
     // sequences of patches applied to this address.
@@ -1021,6 +696,11 @@ public:
     // Результат уничтожения распространенно пишется в лог
     virtual bool32_t __stdcall Destroy() = 0;
 
+protected:
+    virtual Patch* __stdcall xGetAppliedBefore() = 0;
+    virtual Patch* __stdcall xGetAppliedAfter() = 0;
+
+public:
     // GetAppliedBefore method
     // returns the patch applied before the data
     // returns nullptr if this patch is applied first
@@ -1028,7 +708,18 @@ public:
     // Метод GetAppliedBefore
     // возвращает патч примененный перед данным
     // возвращает nullptr если данный патч применен первым
-    virtual Patch* __stdcall GetAppliedBefore() = 0;
+    NH3API_NODISCARD Patch* GetAppliedBefore()
+    { return xGetAppliedBefore(); }
+
+    // GetAppliedBefore method
+    // returns the patch applied before the data
+    // returns nullptr if this patch is applied first
+    //////////////////////////////////////////////////////
+    // Метод GetAppliedBefore
+    // возвращает патч примененный перед данным
+    // возвращает nullptr если данный патч применен первым
+    NH3API_NODISCARD const Patch* GetAppliedBefore() const
+    { return const_cast<Patch*>(this)->xGetAppliedBefore(); }
 
     // GetAppliedAfter method
     // returns the patch applied after the given
@@ -1037,7 +728,18 @@ public:
     // Метод GetAppliedAfter
     // возвращает патч примененный после данного
     // возвращает nullptr если данный патч применен последним
-    virtual Patch* __stdcall GetAppliedAfter() = 0;
+    NH3API_NODISCARD Patch* GetAppliedAfter()
+    { return xGetAppliedAfter(); }
+
+    // GetAppliedAfter method
+    // returns the patch applied after the given
+    // returns NULL if this patch is applied last
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Метод GetAppliedAfter
+    // возвращает патч примененный после данного
+    // возвращает nullptr если данный патч применен последним
+    NH3API_NODISCARD const Patch* GetAppliedAfter() const
+    { return const_cast<Patch*>(this)->xGetAppliedAfter(); }
 
 };
 
@@ -1046,7 +748,23 @@ public:
 // помощью методов класса PatcherInstance
 NH3API_VIRTUAL_CLASS LoHook : public Patch
 {
-    LoHook() NH3API_DELETED_FUNCTION;
+    public:
+    #if NH3API_CHECK_CPP11
+        LoHook() = delete;
+        LoHook(const LoHook&) = delete;
+        LoHook(LoHook&&) = delete;
+        LoHook& operator=(const LoHook&) = delete;
+        LoHook& operator=(LoHook&&) = delete;
+        ~LoHook() = delete;
+    #else 
+    private:
+        LoHook();
+        LoHook(const LoHook&);
+        LoHook& operator=(const LoHook&);
+        ~LoHook();
+    public:
+    #endif
+
 };
 
 typedef LoHook SafeLoHook;
@@ -1094,7 +812,21 @@ enum EHiHookCallingConvention : int32_t
 NH3API_VIRTUAL_CLASS HiHook : public Patch
 {
 public:
-    HiHook() NH3API_DELETED_FUNCTION;
+    #if NH3API_CHECK_CPP11
+        HiHook() = delete;
+        HiHook(const HiHook&) = delete;
+        HiHook(HiHook&&) = delete;
+        HiHook& operator=(const HiHook&) = delete;
+        HiHook& operator=(HiHook&&) = delete;
+        ~HiHook() = delete;
+    #else 
+        private:
+            HiHook();
+            HiHook(const HiHook&);
+            HiHook& operator=(const HiHook&);
+            ~HiHook();
+        public:
+    #endif
 
     // returns a pointer to the function (on the bridge to the function in the case of SPLICE_),
     // replaced by a hook
@@ -1105,7 +837,7 @@ public:
     // замещенную хуком
     // Внимание! Вызывая функцию для не примененного хука, можно получить
     // неактуальное (но рабочее) значение.
-    virtual uintptr_t __stdcall GetDefaultFunc() = 0;
+    NH3API_NODISCARD virtual uintptr_t __stdcall GetDefaultFunc() const = 0;
 
     // returns a pointer to the original function (on the bridge to the function in the case of SPLICE_),
     // replaced by a hook (hooks) at this address
@@ -1118,7 +850,7 @@ public:
     // (т.е. возвращает GetDefaultFunc() для первого примененного хука по данному адресу)
     // Внимание! Вызывая функцию для не примененного хука, можно получить
     // неактуальное (но рабочее) значение.
-    virtual uintptr_t __stdcall GetOriginalFunc() = 0;
+    NH3API_NODISCARD virtual uintptr_t __stdcall GetOriginalFunc() const = 0;
 
     // returns the return address to the original code
     // can be used inside the hook function
@@ -1129,7 +861,7 @@ public:
     // можно использовать внутри хук-функции
     // SPLICE_ EXTENDED_ или SAFE_ хука, чтобы узнать откуда она была вызвана
     // для SPLICE_ DIRECT_ хука функция возвращает всегда 0 (т.е. для DIRECT_ хука возможности узнать адрес возврата через нее - нет)
-    virtual uintptr_t __stdcall GetReturnAddress() = 0;
+    NH3API_NODISCARD virtual uintptr_t __stdcall GetReturnAddress() const = 0;
 
     // # ver 2.1
     // sets the value of user hook data /
@@ -1157,7 +889,21 @@ public:
 NH3API_VIRTUAL_CLASS PatcherInstance
 {
 public:
-    PatcherInstance() NH3API_DELETED_FUNCTION;
+    #if NH3API_CHECK_CPP11
+        PatcherInstance() = delete;
+        PatcherInstance(const PatcherInstance&) = delete;
+        PatcherInstance(PatcherInstance&&) = delete;
+        PatcherInstance& operator=(const PatcherInstance&) = delete;
+        PatcherInstance& operator=(PatcherInstance&&) = delete;
+        ~PatcherInstance() = delete;
+    #else 
+    private:
+        PatcherInstance();
+        PatcherInstance(const PatcherInstance&);
+        PatcherInstance& operator=(const PatcherInstance&);
+        ~PatcherInstance();
+    public:
+    #endif
 
     // WriteByte method
     // write a one-byte number at address
@@ -1165,10 +911,13 @@ public:
     // Returns the pointer to the patch
     ////////////////////////////////////////////
     // Метод WriteByte
-    // пишет однбайтовое число по адресу address
+    // пишет однобайтовое число по адресу address
     // (создает и применяет DATA_ патч)
     // Возвращает указатель на патч.
-    virtual Patch* __stdcall WriteByte(uintptr_t address, int32_t value) = 0;
+    virtual Patch* __stdcall WriteByte(uintptr_t address, uint32_t value) = 0;
+
+    NH3API_FORCEINLINE Patch* WriteByte(uintptr_t address, int32_t value)
+    { return WriteByte(address, static_cast<uint32_t>(value)); }
 
     // WriteWord method
     // write a two-byte number at address
@@ -1179,7 +928,10 @@ public:
     // пишет двухбайтовое число по адресу address
     // (создает и применяет DATA_ патч)
     // Возвращает указатель на патч.
-    virtual Patch* __stdcall WriteWord(uintptr_t address, int32_t value) = 0;
+    virtual Patch* __stdcall WriteWord(uintptr_t address, uint32_t value) = 0;
+
+    NH3API_FORCEINLINE Patch* WriteWord(uintptr_t address, int32_t value)
+    { return WriteWord(address, static_cast<uint32_t>(value)); }
 
     // WriteDword method
     // write a four-byte number at address
@@ -1192,6 +944,9 @@ public:
     // Возвращает указатель на патч.
     virtual Patch* __stdcall WriteDword(uintptr_t address, uint32_t value) = 0;
 
+    NH3API_FORCEINLINE Patch* WriteDword(uintptr_t address, int32_t value)
+    { return WriteDword(address, static_cast<uint32_t>(value)); }
+
     // WriteAddressOf template
     // writes a pointer of data type (its address)
     // to the specified location
@@ -1201,7 +956,7 @@ public:
     // пишет указатель на данные (адрес)
     // по определенному адресу программы
     // Тип может быть любым, даже функция.
-    template<typename T> Patch* __stdcall WriteAddressOf(uintptr_t address, const T& data)
+    template<typename T> NH3API_FORCEINLINE Patch* WriteAddressOf(uintptr_t address, const T& data)
     #if NH3API_HAS_BUILTIN(__builtin_addressof)
     { return WriteDword(address, *reinterpret_cast<uint32_t*>(__builtin_addressof(data))); }
     #else 
@@ -1292,8 +1047,17 @@ protected:
     template<uintptr_t address>
     struct jmphook_t
     {
-        typedef void (*type)(void);
+        typedef void (*type)();
     };
+
+    template<uintptr_t address, uintptr_t backaddress, bool _generateint3> NH3API_FORCEINLINE
+    Patch* __stdcall WriteJmpHookImpl(typename jmphook_t<backaddress>::type hook)
+    {
+        NH3API_STATIC_ASSERT("<backaddress> must be after the <address>", backaddress > address);
+        const uintptr_t hookaddress = reinterpret_cast<uintptr_t>(hook) - address - static_cast<uintptr_t>(5);
+        const jmpdata_t<NH3API_MAX((signed)backaddress - (signed)address - (signed)5, 0), _generateint3> data(hookaddress);
+        return Write(address, reinterpret_cast<uintptr_t>(&data), sizeof(data));
+    }
 
 public:
     // The fastest lohook(even faster than WriteAsmHook), JmpHook
@@ -1312,22 +1076,15 @@ public:
     // CREATE_JH(JH_SeetRandomSeed1337, edi, mov eax, 1337);
     // ...
     // patcherInstance->WriteJmpHook(0x53662C, 0x536637, JH_SeetRandomSeed1337);
-    template<uintptr_t address, uintptr_t backaddress, bool _generateint3>
-    Patch* __stdcall WriteJmpHookT(typename jmphook_t<backaddress>::type hook)
-    {
-        NH3API_STATIC_ASSERT("<backaddress> must be after the <address>", backaddress > address);
-        const uintptr_t hookaddress = reinterpret_cast<uintptr_t>(hook) - address - static_cast<uintptr_t>(5);
-        const jmpdata_t<NH3API_MAX((signed)backaddress - (signed)address - (signed)5, 0), _generateint3> data(hookaddress);
-        return Write(address, reinterpret_cast<uintptr_t>(&data), sizeof(data));
-    }
+    template<uintptr_t address, uintptr_t backaddress> NH3API_FORCEINLINE
+    Patch* __stdcall WriteJmpHook(typename jmphook_t<backaddress>::type hook)
+    { return WriteJmpHookImpl<address, uintptr_t, false>(hook); }
 
-    // fill with nop-s
-    // Заполнить nop-ами.
-    #define WriteJmpHook(address, backaddress, hook) WriteJmpHookT<address,backaddress,false>(hook<backaddress>)
-
-    // fill with interrupts /
+    // fill with int 3 /
     // Заполнить int 3.
-    #define WriteJmpHookInt(address, backaddress, hook) WriteJmpHookT<address,backaddress,true>(hook<backaddress>)
+    template<uintptr_t address, uintptr_t backaddress> NH3API_FORCEINLINE
+    Patch* __stdcall WriteJmpHookInt(typename jmphook_t<backaddress>::type hook)
+    { return WriteJmpHookImpl<address, uintptr_t, true>(hook); }
 
     // WriteHexPatch method
     // writes to the address address the byte sequence,
@@ -1413,8 +1170,9 @@ public:
     #define _LHREF_(NAME) int32_t __stdcall NAME(NH3API_MAYBE_UNUSED LoHook& h, NH3API_MAYBE_UNUSED HookContext& c)
 
 protected:
+    #if NH3API_CHECK_MSVC || NH3API_CHECK_MINGW
     #if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
-    template<typename R, typename... Args> static
+    template<typename R, typename... Args> static NH3API_CONSTEXPR
     void hihook_function_condition_stdcall(R (*func)(Args...))
     {
         (void) func;
@@ -1422,33 +1180,74 @@ protected:
                              "and have the first argument of type HiHook*");
     }
 
-    template<typename R, typename Arg1, typename... Args> static
-    void hihook_function_condition_argument(R (__stdcall * func)(Arg1, Args...))
+    template<typename R, typename Arg1, typename... Args> static NH3API_CONSTEXPR
+    void hihook_function_condition_argument(R (__stdcall* func)(Arg1, Args...))
     {
         (void) func;
         static_assert(nh3api::tt::is_same<Arg1, HiHook*>::value, "HiHook function must have the first argument of type HiHook*");
     }
-    template<typename R, typename... Args> static
+
+    template<typename R, typename... Args> static NH3API_CONSTEXPR
     void hihook_function_condition_stdcall(R (__stdcall * func)(Args...))
     {
         static_assert(sizeof...(Args) > 0, "HiHook function must have at least one argument of type HiHook*.");
         hihook_function_condition_argument(func);
     }
 
-    template<typename F> static
+    template<typename F> static NH3API_CONSTEXPR
     void hihook_function_condition(F* func)
     {
         static_assert(nh3api::tt::is_function<F>::value, "HiHook must be a function.");
         hihook_function_condition_stdcall(func);
     }
+    #else // C++11
 
-    #else
     #pragma warning(push)
     #pragma warning(error: 4440)
     template<typename F> static void hihook_function_condition(F*)
     { typedef F __stdcall* T; }
     #pragma warning(pop)
+
     #endif // C++11
+
+    #else // MSVC or MinGW GCC
+
+    template<typename> 
+    struct is_stdcall_function_helper_t
+    { using type = std::false_type; };
+
+    template<typename... Args, typename R>
+    struct is_stdcall_function_helper_t<R (__stdcall *)(HiHook*, Args...)>
+    { using type = std::true_type; };
+
+    template<typename... Args, typename R>
+    struct is_stdcall_function_helper_t<R (__stdcall *)(HiHook&, Args...)>
+    { using type = std::true_type; };
+
+    template<typename... Args, typename R>
+    struct is_stdcall_function_helper_t<R (__stdcall *)(const HiHook*, Args...)>
+    { using type = std::true_type; };
+
+    template<typename... Args, typename R>
+    struct is_stdcall_function_helper_t<R (__stdcall *)(const HiHook&, Args...)>
+    { using type = std::true_type; };
+
+    template<typename F> static constexpr
+    void hihook_function_condition(F*)
+    {
+        constexpr bool is_function = std::is_function<F>::value;
+        static_assert(is_function, "HiHook must be a function.");
+
+        constexpr bool is_stdcall = is_stdcall_function_helper_t<typename std::add_pointer<F>::type>::type::value;
+        static_assert(is_stdcall, "HiHook function must have the __stdcall calling convention "
+                                  "and have the first argument of type HiHook* or HiHook&");
+    }
+
+    template<typename C, typename R> static constexpr
+    void hihook_function_condition(R C::*)
+    { static_assert(false, "HiHook function must not be a member of some class"); }
+
+    #endif // MSVC or MinGW GCC
 
     // protected
     virtual HiHook* __stdcall xWriteHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, void* new_func) = 0;
@@ -1560,7 +1359,6 @@ public:
         hihook_function_condition(new_func);
         return xWriteHiHook(address, hooktype, subtype, calltype, reinterpret_cast<void*>(new_func));
     }
-
 
     // Create Methods ...
     // create a patch / hook as well as the corresponding Write ... methods,
@@ -2108,9 +1906,22 @@ public:
 // Класс Patcher.
 NH3API_VIRTUAL_CLASS Patcher
 {
-
 public:
-    Patcher() NH3API_DELETED_FUNCTION;
+    #if NH3API_CHECK_CPP11
+        Patcher() = delete;
+        Patcher(const Patcher&) = delete;
+        Patcher(Patcher&&) = delete;
+        Patcher& operator=(const Patcher&) = delete;
+        Patcher& operator=(Patcher&&) = delete;
+        ~Patcher() = delete;
+    #else 
+        private:
+            Patcher();
+            Patcher(const Patcher&);
+            Patcher& operator=(const Patcher&);
+            ~Patcher();
+        public:
+    #endif
 
     // CreateInstance method
     // Creates an instance of the PatcherInstance class, which
@@ -2133,6 +1944,10 @@ public:
     // которого была вызвана функция.
     virtual PatcherInstance* __stdcall CreateInstance(const char* owner) = 0;
 
+protected:
+    virtual PatcherInstance* __stdcall xGetInstance(const char* owner) = 0;
+
+public:
     // GetInstance method
     // Returns a pointer to an instance of PatcherInstance
     // with the name owner.
@@ -2154,7 +1969,32 @@ public:
     // - проверки активен ли некоторый мод, использующий patcher_x86.dll
     // - получения доступа ко всем патчам и хукам некоторого мода,
     //   использующего patcher_x86.dll
-    virtual PatcherInstance*  __stdcall GetInstance(const char* owner) = 0;
+    NH3API_NODISCARD PatcherInstance* GetInstance(const char* owner)
+    { return xGetInstance(owner); }
+
+    // GetInstance method
+    // Returns a pointer to an instance of PatcherInstance
+    // with the name owner.
+    // the method returns NULL if
+    // the instance named owner does not exist (was not created)
+    // the module name can be passed as an argument.
+    // Is used for :
+    // - check if some mod is active, using patcher_x86.dll
+    // - get access to all patches and hooks of some mod,
+    // using patcher_x86.dll
+    ///////////////////////////////////////////////////
+    // Метод GetInstance
+    // Возвращает указатель на экземпляр PatcherInstance
+    // с именем owner.
+    // метод возвращает nullptr в случае, если
+    // экземпляр с именем owner не существует (не был создан)
+    // в качестве аргумента можно передавать имя модуля.
+    // Используется для :
+    // - проверки активен ли некоторый мод, использующий patcher_x86.dll
+    // - получения доступа ко всем патчам и хукам некоторого мода,
+    //   использующего patcher_x86.dll
+    NH3API_NODISCARD const PatcherInstance* GetInstance(const char* owner) const
+    { return const_cast<Patcher*>(this)->xGetInstance(owner); }
 
     // GetLastPatchAt method
     // returns nullptr if no patch / hook is applied in the vicinity of the address address
@@ -2305,6 +2145,10 @@ public:
     // возвращает указатель на "переменную" в случае успеха и nullptr в противном случае.
     virtual Variable* __stdcall VarInit(const char* name, uint32_t value) = 0;
 
+protected:
+    virtual Variable* __stdcall xVarFind(const char* name) = 0;
+
+public:
     // # ver 2.3
     // VarFind method
     // returns a pointer to a "variable" named name, if such was initialized
@@ -2313,7 +2157,19 @@ public:
     // Метод VarFind
     // возвращает указатель на "переменную" с именем name, если такая была инициализированна
     // если нет, возвращает nullptr.
-    virtual Variable* __stdcall VarFind(const char* name) = 0;
+    const Variable* VarFind(const char* name) const
+    { return const_cast<Patcher*>(this)->xVarFind(name); }
+
+    // # ver 2.3
+    // VarFind method
+    // returns a pointer to a "variable" named name, if such was initialized
+    // if not, it returns nullptr
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // Метод VarFind
+    // возвращает указатель на "переменную" с именем name, если такая была инициализированна
+    // если нет, возвращает nullptr.
+    Variable* VarFind(const char* name) 
+    { return xVarFind(name); }
 
     // # ver 2.6
     // Method PreCreateInstance
@@ -2339,8 +2195,8 @@ public:
     // if the "variable" with this name was not initialized, it returns default_value /
     // Метод VarGetValue возвращает значение "переменной" c именем name
     // если "переменная" с таким именем не была инициализированна, возвращает default_value.
-    template<typename ValueType>
-    inline ValueType VarGetValue(const char* name, ValueType default_value)
+    template<typename ValueType> NH3API_FORCEINLINE
+    ValueType VarGetValue(const char* name, ValueType default_value)
     {
         if (sizeof(ValueType) > 4)
             return default_value;
@@ -2356,7 +2212,8 @@ public:
     // Метод VarValue возвращает ссылку на значение "переменной" c именем name
     // если "переменная" с таким именем не была инициализированна, инициализирует ее и устанавливает значение равным 0
     // внимание, обращение к значению переменной по ссылке непотокобезопасно.
-    template<typename ValueType> inline ValueType& VarValue(const char* name)
+    template<typename ValueType> NH3API_FORCEINLINE
+    ValueType& VarValue(const char* name)
     {
         NH3API_STATIC_ASSERT("Patcher_x86's variables cannot be larger than 4 bytes.", sizeof(ValueType) > 4);
         Variable* v = VarFind(name);
@@ -2479,7 +2336,7 @@ NH3API_FORCEINLINE uint32_t GetPatcherVersion() NH3API_NOEXCEPT
     HMODULE patcherHandle = GetPatcherHandle();
     if ( patcherHandle )
     {
-        func_t f = reinterpret_cast<func_t>(GetProcAddress(patcherHandle, "_GetPatcherX86Version@0"));
+        func_t f = reinterpret_cast<func_t>(reinterpret_cast<void*>(GetProcAddress(patcherHandle, "_GetPatcherX86Version@0")));
         if (f)
             return f();
         else

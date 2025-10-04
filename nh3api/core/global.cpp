@@ -11,7 +11,7 @@
 
 #ifndef NH3API_FLAG_INLINE_HEADERS
 
-game*& gpGame = get_global_var_ref(0x699538, game*);
+game* const& gpGame = get_global_var_ref(0x699538, game*);
 configStruct& gConfig = get_global_var_ref(0x6987A8, configStruct);
 int32_t& giThisGamePos = get_global_var_ref(0x6995A4, int32_t);
 bool32_t& gbRemoteOn = get_global_var_ref(0x69959C, bool32_t);

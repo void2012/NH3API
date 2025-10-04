@@ -10,5 +10,5 @@
 #include "input_manager.hpp"
 
 #ifndef NH3API_FLAG_INLINE_HEADERS
-inputManager*& gpInputManager = get_global_var_ref(0x699530, inputManager*);
+inputManager* const& gpInputManager = get_global_var_ref(0x699530, inputManager*);
 #endif

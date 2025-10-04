@@ -7,14 +7,14 @@
 #include "resources.hpp"
 
 #ifndef NH3API_FLAG_INLINE_HEADERS
-TPalette24*& gPlayerPalette24 = get_global_var_ref(0x6AAD14, TPalette24*);
-TPalette16*& gPlayerPalette = get_global_var_ref(0x6AAD10, TPalette16*);
-TPalette16*& gGamePalette   = get_global_var_ref(0x6AAD18, TPalette16*);
-font*& tinyFont = get_global_var_ref(0x698A54, font*);
-font*& smallFont = get_global_var_ref(0x698A58, font*);
-font*& medFont = get_global_var_ref(0x698A5C, font*);
-font*& bigFont = get_global_var_ref(0x698A60, font*);
-font*& caligFont = get_global_var_ref(0x698A64, font*);
+TPalette24* const& gPlayerPalette24 = get_global_var_ref(0x6AAD14, TPalette24*);
+TPalette16* const& gPlayerPalette = get_global_var_ref(0x6AAD10, TPalette16*);
+TPalette16* const& gGamePalette   = get_global_var_ref(0x6AAD18, TPalette16*);
+font* const& tinyFont = get_global_var_ref(0x698A54, font*);
+font* const& smallFont = get_global_var_ref(0x698A58, font*);
+font* const& medFont = get_global_var_ref(0x698A5C, font*);
+font* const& bigFont = get_global_var_ref(0x698A60, font*);
+font* const& caligFont = get_global_var_ref(0x698A64, font*);
 std::array<char, 512>& gText = get_global_var_ref(0x697428, std::array<char, 512>);
 const TTextResource* const& GameText = get_global_var_ref(0x6A5DC4, const TTextResource* const);
 const TTextResource* const& ArrayText = get_global_var_ref(0x6A60AC, const TTextResource* const);

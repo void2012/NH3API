@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 #include "era.hpp"
 
+#ifndef NH3API_FLAG_INLINE_HEADERS
 namespace Era 
 {
 
@@ -27,3 +28,4 @@ namespace EraMemory
 {
 volatile size_t* allocatedMemorySize = nullptr;
 } // namespace EraMemory
+#endif

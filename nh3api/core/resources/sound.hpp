@@ -195,7 +195,7 @@ struct MemorySampleStructure
 NH3API_VIRTUAL_STRUCT sample : public resource
 {
     public:
-        sample() NH3API_DELETED_FUNCTION;
+        sample() NH3API_DELETED_FUNCTION
 
         NH3API_FORCEINLINE
         sample(const char* name, 
@@ -208,7 +208,7 @@ NH3API_VIRTUAL_STRUCT sample : public resource
         { THISCALL_7(void, 0x567050, this, name, src, size, channel, volume, loop); }
         
         NH3API_FORCEINLINE
-        sample(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        sample(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : resource(tag) // resource(nullptr, RType_misc)
         {}
 
@@ -253,8 +253,8 @@ inline void launch_sample(const char* sample_name, int32_t max_time = -1, int32_
 { FASTCALL_3(void, 0x59A890, sample_name, max_time, channel); }
 
 NH3API_INLINE_OR_EXTERN
-const std::array<uint8_t, 10>& giTerrainToMusicTrack
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678330, const std::array<uint8_t, 10>));
+const std::array<const uint8_t, 10>& giTerrainToMusicTrack
+NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678330, const std::array<const uint8_t, 10>));
 
 NH3API_INLINE_OR_EXTERN
 // Sound is disabled /
@@ -276,11 +276,11 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
 
     public:
         soundManager() NH3API_NOEXCEPT
-            : baseManager(nh3api::dummy_tag)
+            : baseManager(::nh3api::dummy_tag)
         { THISCALL_1(void, 0x599A60, this); }
 
         NH3API_FORCEINLINE
-        soundManager(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        soundManager(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : baseManager(tag)
         {}
 
@@ -301,13 +301,13 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
         // Прекратить проигрывание определённого звука.
         /// @param smpl звук
         void StopSample(sample* smpl)
-        { StopSample(smpl->memSample.memHSample); }
+        { if ( smpl ) StopSample(smpl->memSample.memHSample); }
 
-        void WaitSample(const HSAMPLE smpl, int32_t time = -1)
-        { THISCALL_3(void, 0x59A1C0, this, smpl, time); }
+        void WaitSample(HSAMPLE smpl, int32_t time = -1)
+        { if ( smpl) THISCALL_3(void, 0x59A1C0, this, smpl, time); }
 
         void WaitSample(const sample* smpl, int32_t time = -1)
-        { WaitSample(smpl->memSample.memHSample, time); }
+        { if ( smpl ) WaitSample(smpl->memSample.memHSample, time); }
 
         void ModifySample(HSAMPLE inSample, int16_t sFunction, int32_t value)
         { THISCALL_4(void, 0x59A240, this, inSample, sFunction, value); }
@@ -316,7 +316,7 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
         { ModifySample(smpl, 1, value); }
 
         void SetSampleVolume(sample* smpl, int value)
-        { ModifySample(smpl->memSample.memHSample, 1, value); }
+        { if ( smpl ) ModifySample(smpl->memSample.memHSample, 1, value); }
 
         void AdjustSoundVolumes()
         { THISCALL_1(void, 0x59A3C0, this); }
@@ -325,13 +325,13 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
         { THISCALL_1(void, 0x59A4B0, this); }
 
         int32_t SwitchAmbientMusic(TTerrainType terrain)
-        { return THISCALL_2(int32_t, 0x59A4E0, this, giTerrainToMusicTrack[terrain]); }
+        { return (terrain > TERRAIN_TYPE_NONE && terrain < MAX_TERRAIN_TYPES) ? THISCALL_2(int32_t, 0x59A4E0, this, giTerrainToMusicTrack[static_cast<size_t>(terrain)]) : 0; }
 
         // Play sample /
         // Проиграть звуковую дорожку.
         /// @param sPtr звуковая дорожка
         HSAMPLE MemorySample(sample* sPtr)
-        { return THISCALL_2(HSAMPLE, 0x59A510, this, sPtr); }
+        { return sPtr ? THISCALL_2(HSAMPLE, 0x59A510, this, sPtr) : nullptr; }
 
         // Is music playing? /
         // Играет ли музыка?
@@ -400,7 +400,7 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
-soundManager*& gpSoundManager
+soundManager* const& gpSoundManager
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699414, soundManager*));
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x6416E0, sample)

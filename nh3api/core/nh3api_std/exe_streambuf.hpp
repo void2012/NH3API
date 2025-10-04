@@ -171,14 +171,14 @@ NH3API_FORCEINLINE
 // address: 0x6196A4
 // Heroes3.exe internal thread-safe fread /
 // внутренний fread Heroes3.exe (thread-safe).
-size_t __cdecl exe_fread(void* destBuffer, size_t elementSize, size_t count, void* file) NH3API_NOEXCEPT
+size_t __cdecl exe_fread(void* destBuffer, size_t elementSize, size_t count, exe_FILE* file) NH3API_NOEXCEPT
 { return CDECL_4(size_t, 0x6196A4, destBuffer, elementSize, count, file); }
 
 NH3API_FORCEINLINE
 // address: 0x6212C1
 // Heroes3.exe internal thread-safe _read /
 // внутренний _read Heroes3.exe (thread-safe).
-int32_t __cdecl exe_read(int32_t fd, void* buffer, uint32_t buffer_size) NH3API_NOEXCEPT
+int32_t __cdecl exe_read(int32_t fd, void* buffer, size_t buffer_size) NH3API_NOEXCEPT
 { return CDECL_3(int32_t, 0x6212C1, fd, buffer, buffer_size); }
 
 NH3API_FORCEINLINE
@@ -204,12 +204,12 @@ enum exe_io_error_codes : uint32_t
 // feof
 NH3API_FORCEINLINE
 bool32_t exe_feof(exe_FILE* _stream) NH3API_NOEXCEPT
-{ return _stream->_flag & EXE_IOEOF; }
+{ return static_cast<uint32_t>(_stream->_flag) & EXE_IOEOF; }
 
 // ferror
 NH3API_FORCEINLINE
 bool32_t exe_ferror(exe_FILE* _stream) NH3API_NOEXCEPT
-{ return _stream->_flag & EXE_IOERR; }
+{ return static_cast<uint32_t>(_stream->_flag) & EXE_IOERR; }
 
 // _fileno
 NH3API_FORCEINLINE
@@ -255,17 +255,18 @@ NH3API_CONSTEXPR NH3API_FORCEINLINE exe_ios::seekdir operator|(exe_ios::seekdir 
 template<class _St>
 class exe_fpos
 {
+    NH3API_STATIC_ASSERT("exe_fpos<_St>: _St must be at maximum 4 bytes long", sizeof(_St) <= 4);
     public:
         exe_fpos(exe_streamoff _O = -1)
-        : _Off(_O), _Fpos(0), _State(_Stz)
+        : _Off(_O), _Dummy1(0), _Fpos(0), _State(_Stz), _Dummy2(0)
         {}
 
         exe_fpos(_St _S, exe_fpos_t _F)
-        : _Off(0), _Fpos(_F), _State(_S)
+        : _Off(0), _Dummy1(0), _Fpos(_F), _State(_S), _Dummy2(0)
         {}
 
-        exe_fpos(const nh3api::dummy_tag_t&)
-        { NH3API_IGNORE(_Off, _Fpos, _State); }
+        exe_fpos(const ::nh3api::dummy_tag_t&)
+        {}
 
         _St state() const
         { return _State; }
@@ -314,8 +315,10 @@ class exe_fpos
 
         private:
             exe_streamoff _Off;
+            uint32_t      _Dummy1;
             exe_fpos_t    _Fpos;
             _St           _State;
+            uint32_t      _Dummy2;
 };
 
 template<class _St>
@@ -392,7 +395,7 @@ protected:
         _Init();
     }
 
-    exe_basic_streambuf(const nh3api::omit_base_vftable_tag_t& tag)
+    exe_basic_streambuf(const nh3api::omit_base_vftable_tag_t&)
     {
         _Init();
     }
@@ -401,7 +404,7 @@ protected:
     { std::memcpy(this, &other, sizeof(*this)); }
 
 public:
-    exe_basic_streambuf(const nh3api::dummy_tag_t& tag)
+    exe_basic_streambuf(const ::nh3api::dummy_tag_t&)
     {}
 
 public:
@@ -413,7 +416,7 @@ public:
     pos_type __thiscall pubseekoff(off_type _O, exe_ios::seekdir _W,
         exe_ios::openmode _M /*= exe_ios::in | exe_ios::out*/)
     {
-        pos_type result(nh3api::dummy_tag);
+        pos_type result(::nh3api::dummy_tag);
         result = *seekoff(&result, _O, _W, _M);
         return result;
     } // ABI compability
@@ -421,7 +424,7 @@ public:
     pos_type __thiscall pubseekpos(pos_type _P,
         exe_ios::openmode _M /*= exe_ios::in | exe_ios::out*/)
     {
-        pos_type result(nh3api::dummy_tag);
+        pos_type result(::nh3api::dummy_tag);
         result = *seekpos(&result, _P, _M);
         return result;
     } // ABI compability
@@ -526,18 +529,24 @@ protected:
     }
     void __thiscall _Init()
     {
-        _IGbeg = &_Gbeg; _IPbeg = &_Pbeg;
-        _IGnext = &_Gnext; _IPnext = &_Pnext;
-        _IGcnt = &_Gcnt; _IPcnt = &_Pcnt;
+        _IGbeg = &_Gbeg; 
+        _IPbeg = &_Pbeg;
+        _IGnext = &_Gnext; 
+        _IPnext = &_Pnext;
+        _IGcnt = &_Gcnt; 
+        _IPcnt = &_Pcnt;
         setp(nullptr, nullptr);
         setg(nullptr, nullptr, nullptr);
     }
     void __thiscall _Init(char_type **_Gb, char_type **_Gn, int *_Gc,
         char_type **_Pb, char_type **_Pn, int *_Pc)
     {
-        _IGbeg = _Gb, _IPbeg = _Pb;
-        _IGnext = _Gn, _IPnext = _Pn;
-        _IGcnt = _Gc, _IPcnt = _Pc;
+        _IGbeg = _Gb;
+        _IPbeg = _Pb;
+        _IGnext = _Gn;
+        _IPnext = _Pn;
+        _IGcnt = _Gc;
+        _IPcnt = _Pc;
     }
 
     // vftable shift: +4
@@ -694,7 +703,7 @@ NH3API_VIRTUAL_CLASS exe_basic_filebuf : public exe_basic_streambuf<CharT, CharT
         { THISCALL_2(void, 0x60D3CF, this, _F); }
 
         NH3API_FORCEINLINE
-        exe_basic_filebuf(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        exe_basic_filebuf(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : base_type(tag)
         {}
         
@@ -708,7 +717,7 @@ NH3API_VIRTUAL_CLASS exe_basic_filebuf : public exe_basic_streambuf<CharT, CharT
 
         this_type* open(const char *_S, exe_ios::openmode _M) NH3API_NOEXCEPT
         {
-            exe_FILE* _Fp;
+            exe_FILE* _Fp = nullptr;
             if (_File != nullptr || (_Fp = CDECL_2(exe_FILE*, 0x60CA8E, _S, _M)) == nullptr)
                 return nullptr;
             THISCALL_3(void, 0x48D170, this, _Fp, _Openfl);
@@ -788,7 +797,7 @@ NH3API_VIRTUAL_CLASS exe_strstreambuf : public exe_streambuf
         { THISCALL_3(void, 0x5167C0, this, _G, _N); }
 
         NH3API_FORCEINLINE
-        exe_strstreambuf(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        exe_strstreambuf(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : base_type(tag)
         {}
            
@@ -830,10 +839,10 @@ NH3API_SPECIALIZE_TYPE_VFTABLE(0x645680, exe_strstreambuf)
 
 NH3API_FORCEINLINE
 exe_streamsize read(exe_streambuf& stream, void* buf, size_t len)
-{ return stream.sgetn(static_cast<char*>(buf), len); }
+{ return stream.sgetn(static_cast<char*>(buf), static_cast<exe_streamsize>(len)); }
 
 NH3API_FORCEINLINE
 exe_streamsize write(exe_streambuf& stream, const void* buf, size_t len)
-{ return stream.sputn(static_cast<const char*>(buf), len); }
+{ return stream.sputn(static_cast<const char*>(buf), static_cast<exe_streamsize>(len)); }
 
 NH3API_DISABLE_WARNING_END

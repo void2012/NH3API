@@ -126,8 +126,8 @@ NH3API_VIRTUAL_STRUCT resource
 
         NH3API_FORCEINLINE
         // dummy constructor
-        resource(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-        { NH3API_IGNORE(Name, resType, ReferenceCount); }
+        resource(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
 
         NH3API_FORCEINLINE
         ~resource() NH3API_NOEXCEPT
@@ -176,6 +176,11 @@ NH3API_VIRTUAL_STRUCT resource
         // offset: +0x4 = +4,  size = 0xD = 13
         std::array<char, 13> Name;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_11[3];
+
+    public:
         // Resource type /
         // Тип ресурса
         // offset: +0x14 = +20,  size = 0x4 = 4
@@ -249,13 +254,13 @@ public:
     { THISCALL_2(void, 0x5233F0, this, &other); }
 
     NH3API_FORCEINLINE
-    TPalette24(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+    TPalette24(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
         : resource(tag) // resource(nullptr, RType_misc)
-    { NH3API_IGNORE(Palette); }
+    {}
 
     NH3API_FORCEINLINE
     TPalette24& operator=(TPalette24 const& other) NH3API_NOEXCEPT
-    { return THISCALL_2(TPalette24&, 0x523420, this, &other); }
+    { THISCALL_2(void, 0x523420, this, &other); return *this; }
 
     ~TPalette24()
     { THISCALL_1(void, 0x523450, this); }
@@ -290,7 +295,7 @@ void HSVToRGB(float h, float s, float v, uint32_t& r, uint32_t& g, uint32_t& b) 
 { FASTCALL_6(void, 0x5237E0, h, s, v, r, g, b); }
 
 NH3API_INLINE_OR_EXTERN
-TPalette24*& gPlayerPalette24
+TPalette24* const& gPlayerPalette24
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6AAD14, TPalette24*));
 
 #pragma pack(push, 4)
@@ -344,25 +349,25 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
         { THISCALL_9(void, 0x522C60, this, name, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
-        TPalette16(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TPalette16(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : resource(tag) // resource(nullptr, RType_misc)
-        { NH3API_IGNORE(Palette); }
+        {}
 
         NH3API_FORCEINLINE
         TPalette16& operator=(const TPalette16& other) NH3API_NOEXCEPT
-        { return THISCALL_2(TPalette16&, 0x522E00, this, other); }
+        { THISCALL_2(void, 0x522E00, this, other); return *this; }
 
     public:
         NH3API_FORCEINLINE
-        void Convert24to16(const TRGB* p24, int32_t rbits, int32_t rshift, int32_t gbits, int32_t gshift, int32_t bbits, int32_t bshift)
+        void Convert24to16(const TRGB* p24, uint32_t rbits, uint32_t rshift, uint32_t gbits, uint32_t gshift, uint32_t bbits, uint32_t bshift)
         { for ( int32_t i = 0; i <= 0xFF; ++i ) Palette[i] = (p24[i].Blue >> (8 - bbits) << bshift) | (p24[i].Green >> (8 - gbits) << gshift) | (p24[i].Red >> (8 - rbits) << rshift); }
 
         NH3API_FORCEINLINE
-        void Convert24to16(const TPalette24& p24, int32_t rbits, int32_t rshift, int32_t gbits, int32_t gshift, int32_t bbits, int32_t bshift)
+        void Convert24to16(const TPalette24& p24, uint32_t rbits, uint32_t rshift, uint32_t gbits, uint32_t gshift, uint32_t bbits, uint32_t bshift)
         { Convert24to16(p24.Palette.data(), rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
-        void Cycle(int32_t begin, int32_t end, int32_t step)
+        void Cycle(uint32_t begin, uint32_t end, uint32_t step)
         { THISCALL_4(void, 0x522E40, this, begin, end, step); }
 
         void AdjustSaturation(float amount)
@@ -393,11 +398,11 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
-TPalette16*& gPlayerPalette
+TPalette16* const& gPlayerPalette
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6AAD10, TPalette16*));
 
 NH3API_INLINE_OR_EXTERN
-TPalette16*& gGamePalette
+TPalette16* const& gGamePalette
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6AAD18, TPalette16*));
 
 // .def file encoding method /
@@ -443,19 +448,9 @@ NH3API_VIRTUAL_STRUCT CSpriteFrame : public resource
         { THISCALL_11(void, 0x47BC80, this, name, w, h, data, csize, encoding, cw, ch, cx, cy); }
 
         NH3API_FORCEINLINE
-        CSpriteFrame(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        CSpriteFrame(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : resource(tag) // resource(nullptr, RType_misc)
-        { NH3API_IGNORE(DataSize,
-                        ImageSize,
-                        EncodingMethod,
-                        Width,
-                        Height,
-                        CroppedWidth,
-                        CroppedHeight,
-                        CroppedX,
-                        CroppedY,
-                        Pitch,
-                        map); }
+        {}
 
         NH3API_FORCEINLINE
         ~CSpriteFrame()
@@ -647,15 +642,14 @@ struct CSequence
         { THISCALL_2(void, 0x47B160, this, num); }
 
         NH3API_FORCEINLINE
-        CSequence(const nh3api::dummy_tag_t& dummy) NH3API_NOEXCEPT
-        { NH3API_IGNORE(numFrames, allocatedFrames, f); }
+        CSequence(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
 
     public:
         int32_t AddFrame(CSpriteFrame* frame) NH3API_NOEXCEPT
         { return THISCALL_2(int32_t, 0x47B1C0, this, frame); }
 
     public:
-
         // Number of frames /
         // Кол-во кадров
         // offset: +0x0 = +0,  size = 0x4 = 4
@@ -685,9 +679,9 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
         { THISCALL_5(void, 0x47B240, this, name, sprtype, w, h); }
 
         NH3API_FORCEINLINE
-        CSprite(const nh3api::dummy_tag_t& dummy) NH3API_NOEXCEPT
+        CSprite(const ::nh3api::dummy_tag_t& dummy) NH3API_NOEXCEPT
             : resource(dummy)
-        { NH3API_IGNORE(s, p16, p24, numSequences, validSeqMask, Width, Height); }
+        {}
 
     public:
         NH3API_FORCEINLINE 
@@ -719,7 +713,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
         { THISCALL_1(void, 0x47B520, this); }
 
         NH3API_FORCEINLINE
-        void ColorCycle(int32_t begin, int32_t end, int32_t step)
+        void ColorCycle(uint32_t begin, uint32_t end, uint32_t step)
         { return p16->Cycle(begin, end, step); }
 
         NH3API_FORCEINLINE
@@ -731,7 +725,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                   int32_t sy,
                   int32_t sw,
                   int32_t sh,
-                  uint16_t* dst,
+                  void* dst,
                   int32_t dx,
                   int32_t dy,
                   int32_t dw,
@@ -750,7 +744,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                           int32_t sy,
                           int32_t sw,
                           int32_t sh,
-                          uint16_t* dst,
+                          void* dst,
                           int32_t dx,
                           int32_t dy,
                           int32_t dw,
@@ -768,7 +762,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                         int32_t sy,
                         int32_t sw,
                         int32_t sh,
-                        uint16_t* dst,
+                        void* dst,
                         int32_t dx,
                         int32_t dy,
                         int32_t dw,
@@ -785,7 +779,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                                 int32_t sy,
                                 int32_t sw,
                                 int32_t sh,
-                                uint16_t* dst,
+                                void* dst,
                                 int32_t dx,
                                 int32_t dy,
                                 int32_t dw,
@@ -803,7 +797,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                               int32_t sy,
                               int32_t sw,
                               int32_t sh,
-                              uint16_t* dst,
+                              void* dst,
                               int32_t dx,
                               int32_t dy,
                               int32_t dw,
@@ -816,7 +810,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
         // Draw mouse cursor /
         // Нарисовать курсор мыши.
         void DrawPointer(int32_t framenum,
-                         uint16_t* dst,
+                         void* dst,
                          int32_t dx,
                          int32_t dy,
                          int32_t dw,
@@ -833,7 +827,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                            int32_t sy,
                            int32_t sw,
                            int32_t sh,
-                           uint16_t* dst,
+                           void* dst,
                            int32_t dx,
                            int32_t dy,
                            int32_t dw,
@@ -850,7 +844,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                       int32_t sy,
                       int32_t sw,
                       int32_t sh,
-                      uint16_t* dst,
+                      void* dst,
                       int32_t dx,
                       int32_t dy,
                       int32_t dw,
@@ -868,7 +862,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                             int32_t sy,
                             int32_t sw,
                             int32_t sh,
-                            uint16_t* dst,
+                            void* dst,
                             int32_t dx,
                             int32_t dy,
                             int32_t dw,
@@ -886,7 +880,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                             int32_t sy,
                             int32_t sw,
                             int32_t sh,
-                            uint16_t* dst,
+                            void* dst,
                             int32_t dx,
                             int32_t dy,
                             int32_t dw,
@@ -905,7 +899,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                       int32_t sy,
                       int32_t sw,
                       int32_t sh,
-                      uint16_t* dst,
+                      void* dst,
                       int32_t dx,
                       int32_t dy,
                       int32_t dw,
@@ -923,7 +917,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                             int32_t sy,
                             int32_t sw,
                             int32_t sh,
-                            uint16_t* dst,
+                            void* dst,
                             int32_t dx,
                             int32_t dy,
                             int32_t dw,
@@ -939,7 +933,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                            int32_t sy,
                            int32_t sw,
                            int32_t sh,
-                           uint16_t* dst,
+                           void* dst,
                            int32_t dx,
                            int32_t dy,
                            int32_t dw,
@@ -957,7 +951,7 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
                              int32_t sy,
                              int32_t sw,
                              int32_t sh,
-                             uint16_t* dst,
+                             void* dst,
                              int32_t dx,
                              int32_t dy,
                              int32_t dw,
@@ -1026,10 +1020,10 @@ NH3API_FORCEINLINE uint32_t color0565to8888(uint16_t arg)
 { return (8 * (arg & 0x1F)) | (32 * (arg & 0x7E0)) | ((arg & 0xF800) << 8); }
 
 NH3API_FORCEINLINE uint16_t color8888to1555(uint32_t arg)
-{ return ((arg & 0x80000000) >> 16) | ((arg & 0xF80000) >> 9) | ((uint16_t)(arg & 0xF800) >> 6) | ((uint8_t)(arg & 0xF8) >> 3); }
+{ return static_cast<uint16_t>(((arg & 0x80000000) >> 16) | ((arg & 0xF80000) >> 9) | (static_cast<uint16_t>(arg & 0xF800) >> 6) | (static_cast<uint8_t>(arg & 0xF8) >> 3)); }
 
 NH3API_FORCEINLINE uint16_t color8888to0565(uint32_t arg)
-{ return ((arg & 0xF80000) >> 8) | ((uint16_t)(arg & 0xFC00) >> 5) | ((uint8_t)(arg & 0xF8) >> 3); }
+{ return static_cast<uint16_t>(((arg & 0xF80000) >> 8) | (static_cast<uint16_t>(arg & 0xFC00) >> 5) | (static_cast<uint8_t>(arg & 0xF8) >> 3)); }
 
 struct Bitmap816;
 #pragma pack(push, 4)
@@ -1050,9 +1044,9 @@ NH3API_VIRTUAL_STRUCT Bitmap16Bit : public resource
         { THISCALL_4(void, 0x44DD20, this, name, w, h); }
 
         NH3API_FORCEINLINE
-        Bitmap16Bit(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        Bitmap16Bit(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : resource(tag)
-        { NH3API_IGNORE(DataSize, ImageSize, Width, Height, Pitch, map, keepData); }
+        {}
 
         NH3API_FORCEINLINE
         ~Bitmap16Bit()
@@ -1088,7 +1082,7 @@ NH3API_VIRTUAL_STRUCT Bitmap16Bit : public resource
         { Draw(sx, sy, sw, sh, dst->GetMap(), dx, dy, dst->GetWidth(), dst->GetHeight(), dst->GetPitch(), alpha); }
 
         NH3API_FORCEINLINE
-        void Draw(int32_t sx, int32_t sy, int32_t sw, int32_t sh, uint16_t* dst, int32_t dx, int32_t dy, int32_t dw, int32_t dh, int32_t dpitch, bool alpha)
+        void Draw(int32_t sx, int32_t sy, int32_t sw, int32_t sh, void* dst, int32_t dx, int32_t dy, int32_t dw, int32_t dh, int32_t dpitch, bool alpha)
         { THISCALL_12(void, 0x44DF80, this, sx, sy, sw, sh, dst, dx, dy, dw, dh, dpitch, alpha); }
 
         NH3API_FORCEINLINE
@@ -1146,6 +1140,10 @@ NH3API_VIRTUAL_STRUCT Bitmap16Bit : public resource
         // offset: +0x34 = +52,  size = 0x1 = 1
         bool keepData;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_35[3];
+
 };
 #pragma pack(pop)
 
@@ -1179,9 +1177,9 @@ NH3API_VIRTUAL_STRUCT Bitmap816 : public resource
         { THISCALL_9(void, 0x44F5A0, this, name, path, rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
-        Bitmap816(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        Bitmap816(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : resource(tag), Palette(tag), Palette24(tag)
-        { NH3API_IGNORE(DataSize, ImageSize, Width, Height, Pitch, map); }
+        {}
 
         NH3API_FORCEINLINE
         ~Bitmap816() NH3API_NOEXCEPT
@@ -1243,9 +1241,9 @@ NH3API_VIRTUAL_STRUCT CTextEntrySave : public Bitmap16Bit
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        CTextEntrySave(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        CTextEntrySave(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : Bitmap16Bit(tag)
-        { NH3API_IGNORE(saved); }
+        {}
 
     // virtual functions
     public:
@@ -1255,6 +1253,11 @@ NH3API_VIRTUAL_STRUCT CTextEntrySave : public Bitmap16Bit
     public:
         // offset: +0x38 = +56,  size = 0x1 = 1
         bool saved;
+
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x8E = +142,  size = 0x2 = 2
+        byte_t gap_8E[3];
 
 };
 #pragma pack(pop)
@@ -1267,9 +1270,9 @@ NH3API_VIRTUAL_STRUCT Bitmap24Bit : public resource
 {
     public:
         NH3API_FORCEINLINE
-        Bitmap24Bit(const char* name, int32_t w, int32_t h, const void* data, int32_t size)
+        Bitmap24Bit(const char* name, int32_t w, int32_t h, const void* data_, int32_t size)
         NH3API_DELEGATE_DUMMY_OR_BASE(Bitmap24Bit, resource) // resource(name, RType_bitmap24)
-        { THISCALL_6(void, 0x44EA20, this, name, w, h, data, size); }
+        { THISCALL_6(void, 0x44EA20, this, name, w, h, data_, size); }
 
         NH3API_FORCEINLINE
         Bitmap24Bit(const char* name, const char* path)
@@ -1277,7 +1280,7 @@ NH3API_VIRTUAL_STRUCT Bitmap24Bit : public resource
         { THISCALL_3(void, 0x44EAD0, this, name, path); }
 
         NH3API_FORCEINLINE
-        Bitmap24Bit(const nh3api::dummy_tag_t& tag)
+        Bitmap24Bit(const ::nh3api::dummy_tag_t& tag)
             : resource(tag)
         {}
 
@@ -1418,9 +1421,9 @@ NH3API_VIRTUAL_STRUCT font : public resource
         { THISCALL_5(void, 0x4B4DD0, this, name, &fontspec, dsize, d); }
 
         NH3API_FORCEINLINE
-        font(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        font(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : resource(tag), p16(tag)
-        { NH3API_IGNORE(Data, DataSize); }
+        {}
 
         NH3API_FORCEINLINE
         ~font()
@@ -1435,7 +1438,7 @@ NH3API_VIRTUAL_STRUCT font : public resource
         void DrawCharacter(char c, Bitmap16Bit* bmp, int32_t x, int32_t y, int32_t color)
         { THISCALL_6(void, 0x4B4F00, this, c, bmp, x, y, color); }
 
-        int32_t GetColor(TColor color_scheme, bool highlighted)
+        NH3API_NODISCARD int32_t GetColor(TColor color_scheme, bool highlighted)
         {
             if ( (color_scheme & CUSTOM_COLOR) != 0 )
                 return color_scheme & ~CUSTOM_COLOR;
@@ -1457,29 +1460,34 @@ NH3API_VIRTUAL_STRUCT font : public resource
 
         // Character width in pixels /
         // Длина символа(в пикселях).
-        int32_t GetCharacterWidth(char currChar) const
+        NH3API_NODISCARD int32_t GetCharacterWidth(char currChar) const
+        { return currChar > 0 ? (this->fr.abc[static_cast<size_t>(currChar)].abcA + this->fr.abc[static_cast<size_t>(currChar)].abcB + this->fr.abc[static_cast<size_t>(currChar)].abcC) : 0; }
+
+        // Character width in pixels /
+        // Длина символа(в пикселях).
+        NH3API_NODISCARD int32_t GetCharacterWidth(unsigned char currChar) const
         { return this->fr.abc[currChar].abcA + this->fr.abc[currChar].abcB + this->fr.abc[currChar].abcC; }
 
         // String width in pixels /
         // Длина строки(в пикселях).
-        int32_t get_string_width(const char* arg) const
-        { int32_t sum = 0; char c; while(*arg) { c = *arg++; sum += GetCharacterWidth(c); } return sum; }
+        NH3API_NODISCARD int32_t get_string_width(const char* arg) const
+        { int32_t sum = 0; char c = '\0'; while(*arg) { c = *arg++; sum += GetCharacterWidth(c); } return sum; }
 
-        int32_t LineLength(const char* str, int32_t boxWidth) const
+        NH3API_NODISCARD int32_t LineLength(const char* str, int32_t boxWidth) const
         { return THISCALL_3(int32_t, 0x4B5580, this, str, boxWidth); }
 
-        int32_t LineWidth(const char* text) const
+        NH3API_NODISCARD int32_t LineWidth(const char* text) const
         { return THISCALL_2(int32_t, 0x4B5680, this, text);}
 
-        int32_t LongestLineWidth(const char* str) const
+        NH3API_NODISCARD int32_t LongestLineWidth(const char* str) const
         { return THISCALL_2(int32_t, 0x4B56F0, this, str);}
 
         // Length of the longest word in pixels /
         // Длина самого длинного слова(в пикселях).
-        int32_t longest_word_length(const char* str) const
+        NH3API_NODISCARD int32_t longest_word_length(const char* str) const
         { return THISCALL_2(int32_t, 0x4B5770, this, str); }
 
-        int32_t LongestWrappedLineWidth(const char* str, int32_t boxWidth) const
+        NH3API_NODISCARD int32_t LongestWrappedLineWidth(const char* str, int32_t boxWidth) const
         { return THISCALL_3(int32_t, 0x4B57E0, this, str, boxWidth); }
 
         void FillLinesVector(const char* str, int32_t boxWidth, exe_vector<exe_string>& result) const
@@ -1515,23 +1523,23 @@ NH3API_VIRTUAL_STRUCT font : public resource
 #pragma pack(pop)
 
 NH3API_INLINE_OR_EXTERN
-font*& tinyFont // крошечный шрифт
+font* const &tinyFont // крошечный шрифт
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A54, font*));
 
 NH3API_INLINE_OR_EXTERN
-font*& smallFont // маленький шрифт
+font* const& smallFont // маленький шрифт
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A58, font*));
 
 NH3API_INLINE_OR_EXTERN
-font*& medFont // средний(основной для текста) шрифт
+font* const& medFont // средний(основной для текста) шрифт
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A5C, font*));
 
 NH3API_INLINE_OR_EXTERN
-font*& bigFont // большой шрифт
+font* const& bigFont // большой шрифт
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A60, font*));
 
 NH3API_INLINE_OR_EXTERN
-font*& caligFont // каллиграфический шрифт
+font* const& caligFont // каллиграфический шрифт
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A64, font*));
 
 #pragma pack(push, 4)
@@ -1565,17 +1573,17 @@ NH3API_VIRTUAL_STRUCT TTextResource : public resource
         NH3API_DELEGATE_DUMMY_OR_BASE(TTextResource, resource)
         { THISCALL_4(void,  0x5BBF90, this, name, size, data); }
 
-        TTextResource(const nh3api::dummy_tag_t& tag)
+        TTextResource(const ::nh3api::dummy_tag_t& tag)
             : resource(tag), Text(tag)
         {}
 
-        const char* GetText(size_t pos) const
+        NH3API_NODISCARD const char* GetText(size_t pos) const
         { return Text[pos]; }
 
-        const char* operator[](size_t pos) const
+        NH3API_NODISCARD const char* operator[](size_t pos) const
         { return Text[pos]; }
 
-        uint32_t GetNumberOfStrings() const
+        NH3API_NODISCARD size_t GetNumberOfStrings() const
         { return Text.size(); }
 
     // virtual functions
@@ -1624,7 +1632,7 @@ NH3API_VIRTUAL_STRUCT TSpreadsheetResource : public resource
         NH3API_DELEGATE_DUMMY_OR_BASE(TSpreadsheetResource, resource) // resource(name, RType_text)
         { THISCALL_4(void, 0x5BC260, this, name, size, data); }
 
-        TSpreadsheetResource(const nh3api::dummy_tag_t& tag)
+        TSpreadsheetResource(const ::nh3api::dummy_tag_t& tag)
             : resource(tag), SpreadSheet(tag)
         {}
 
@@ -1633,17 +1641,17 @@ NH3API_VIRTUAL_STRUCT TSpreadsheetResource : public resource
 
         // Number Of columns /
         // Количество столбцов.
-        int32_t GetNumberOfColumns(size_t r) const
+        NH3API_NODISCARD size_t GetNumberOfColumns(size_t r) const
         { return SpreadSheet[r]->size(); }
 
          // Number of rows /
         // Количество строк.
-        int32_t GetNumberOfRows() const
+        NH3API_NODISCARD size_t GetNumberOfRows() const
         { return SpreadSheet.size(); }
 
         // Get spreadsheet cell (intersection of row <r> and column <c>) /
         // Колонка таблицы на пересечении строки <r> и столбца <c>
-        char const* GetSpreadsheet(size_t r, size_t c) const
+        NH3API_NODISCARD char const* GetSpreadsheet(size_t r, size_t c) const
         { return SpreadSheet[r]->operator[](c); }
 
     // virtual functions
@@ -1685,7 +1693,7 @@ struct TCacheMapKey
         TCacheMapKey(const char * _name) NH3API_NOEXCEPT
         { ::nh3api::constexpr_char_traits::copy(name.data(), _name, 12); name.back() = '\0'; }
 
-        bool operator<(TCacheMapKey const& rhf) const NH3API_NOEXCEPT
+        NH3API_NODISCARD bool operator<(TCacheMapKey const& rhf) const NH3API_NOEXCEPT
         { return ::nh3api::case_insensitive_traits::compare(this->name.data(), rhf.name.data(), this->name.size()) < 0; }
 
     public:
@@ -1729,47 +1737,47 @@ NH3API_FORCEINLINE CSprite* GetSprite(const char* name) NH3API_NOEXCEPT
 
 // templated version for convenience
 
-template <typename T> NH3API_FORCEINLINE
-T* GetResource(const char* name)
+template <typename T> NH3API_NODISCARD NH3API_FORCEINLINE
+T* GetResource(const char*) NH3API_NOEXCEPT
 {
     NH3API_STATIC_ASSERT("ResourceManager::GetResource: Invalid resource", 0);
     return nullptr;
 }
 
-template <> NH3API_FORCEINLINE
-Bitmap816* GetResource<Bitmap816>(const char* name)
+template <> NH3API_NODISCARD NH3API_FORCEINLINE
+Bitmap816* GetResource<Bitmap816>(const char* name) NH3API_NOEXCEPT
 { return GetBitmap816(name); }
 
-template <> NH3API_FORCEINLINE
-Bitmap16Bit* GetResource<Bitmap16Bit>(const char* name)
+template <> NH3API_NODISCARD NH3API_FORCEINLINE
+Bitmap16Bit* GetResource<Bitmap16Bit>(const char* name) NH3API_NOEXCEPT
 { return GetBitmap16(name); }
 
-template <> NH3API_FORCEINLINE
-TPalette16* GetResource<TPalette16>(const char* name)
+template <> NH3API_NODISCARD NH3API_FORCEINLINE
+TPalette16* GetResource<TPalette16>(const char* name) NH3API_NOEXCEPT
 { return GetPalette(name); }
 
-template <> NH3API_FORCEINLINE
-TPalette24* GetResource<TPalette24>(const char* name)
+template <> NH3API_NODISCARD NH3API_FORCEINLINE
+TPalette24* GetResource<TPalette24>(const char* name) NH3API_NOEXCEPT
 { return GetPalette24(name); }
 
-template <> NH3API_FORCEINLINE
-font* GetResource<font>(const char* name)
+template <> NH3API_NODISCARD NH3API_FORCEINLINE
+font* GetResource<font>(const char* name) NH3API_NOEXCEPT
 { return GetFont(name); }
 
-template <> NH3API_FORCEINLINE
-TTextResource* GetResource<TTextResource>(const char* name)
+template <> NH3API_NODISCARD NH3API_FORCEINLINE
+TTextResource* GetResource<TTextResource>(const char* name) NH3API_NOEXCEPT
 { return GetText(name); }
 
-template <> NH3API_FORCEINLINE
-TSpreadsheetResource* GetResource<TSpreadsheetResource>(const char* name)
+template <> NH3API_NODISCARD NH3API_FORCEINLINE
+TSpreadsheetResource* GetResource<TSpreadsheetResource>(const char* name) NH3API_NOEXCEPT
 { return GetSpreadsheet(name); }
 
-template <> NH3API_FORCEINLINE
-sample* GetResource<sample>(const char* name)
+template <> NH3API_NODISCARD NH3API_FORCEINLINE
+sample* GetResource<sample>(const char* name) NH3API_NOEXCEPT
 { return GetSample(name); }
 
-template <> NH3API_FORCEINLINE
-CSprite* GetResource<CSprite>(const char* name)
+template <> NH3API_NODISCARD NH3API_FORCEINLINE
+CSprite* GetResource<CSprite>(const char* name) NH3API_NOEXCEPT
 { return GetSprite(name); }
 
 NH3API_FORCEINLINE void GetBackdrop(const char* resName, Bitmap16Bit* destBmap)
@@ -1781,7 +1789,7 @@ NH3API_FORCEINLINE LODFile* PointToSpriteResource(const char* name)
 NH3API_FORCEINLINE LODFile* PointToBitmapResource(const char* name)
 { return THISCALL_1(LODFile*, 0x55D1F0, name); }
 
-NH3API_FORCEINLINE size_t GetBitmapResourceSize(const char* name)
+NH3API_NODISCARD NH3API_FORCEINLINE size_t GetBitmapResourceSize(const char* name)
 { return THISCALL_1(size_t, 0x55D280, name); }
 
 NH3API_FORCEINLINE int32_t ReadFromBitmapResource(LODFile* lod, void* data, size_t numBytes)
@@ -1793,10 +1801,10 @@ NH3API_FORCEINLINE int32_t ReadFromSpriteResource(LODFile* lod, void* data, size
 NH3API_FORCEINLINE void Dispose(resource* arg)
 { arg->Dispose(); }
 
-NH3API_FORCEINLINE exe_string& GetDataPath()
+NH3API_NODISCARD NH3API_FORCEINLINE exe_string& GetDataPath()
 { return get_global_var_ref(0x69E528, exe_string); }
 
-NH3API_FORCEINLINE resource* GetFromCache(const char *name)
+NH3API_NODISCARD NH3API_FORCEINLINE resource* GetFromCache(const char *name)
 {
     TCacheMapKey key(name);
     TResourceMap::iterator it = GetResourceMap().find(key);
@@ -1858,7 +1866,7 @@ template<>
 struct std::hash< ResourceManager::TCacheMapKey >
 {
     public:
-        size_t operator()(const ResourceManager::TCacheMapKey& key) NH3API_NOEXCEPT
+        NH3API_NODISCARD size_t operator()(const ResourceManager::TCacheMapKey& key) NH3API_NOEXCEPT
         {
             return ::nh3api::hash_string(key.name.data(), ::nh3api::safe_strlen(key.name.data(), key.name.size()));
         }

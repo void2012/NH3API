@@ -200,19 +200,19 @@ extern int __builtin_popcountll(unsigned long long) noexcept;
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitrotl(uint32_t n, uint32_t c) NH3API_NOEXCEPT
-    { return _rotl(n, c); }
+    { return _rotl(n, static_cast<int32_t>(c)); }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitrotr(uint32_t n, uint32_t c) NH3API_NOEXCEPT
-    { return _rotr(n, c); }
+    { return _rotr(n, static_cast<int32_t>(c)); }
 
     NH3API_INTRIN_FUNCTION
     uint64_t bitrotl64(uint64_t n, uint32_t c) NH3API_NOEXCEPT
-    { return _rotl64(n, c); }
+    { return _rotl64(n, static_cast<int32_t>(c)); }
 
     NH3API_INTRIN_FUNCTION
     uint64_t bitrotr64(uint64_t n, uint32_t c) NH3API_NOEXCEPT
-    { return _rotr64(n, c); }
+    { return _rotr64(n, static_cast<int32_t>(c)); }
 
 #else
     NH3API_INTRIN_FUNCTION
@@ -254,25 +254,25 @@ extern int __builtin_popcountll(unsigned long long) noexcept;
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitclz(uint32_t x) NH3API_NOEXCEPT
-    { return __builtin_clz(x); }
+    { return static_cast<uint32_t>(__builtin_clz(x)); }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitclz64(uint64_t x) NH3API_NOEXCEPT
-    { return __builtin_clzll(x); }
+    { return static_cast<uint32_t>(__builtin_clzll(x)); }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitctz(uint32_t x) NH3API_NOEXCEPT
-    { return __builtin_ctz(x); }
+    { return static_cast<uint32_t>(__builtin_ctz(x)); }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitctz64(uint64_t x) NH3API_NOEXCEPT
-    { return __builtin_ctzll(x); }
+    { return static_cast<uint32_t>(__builtin_ctzll(x)); }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitffs(uint32_t x) NH3API_NOEXCEPT
     { 
     #if NH3API_HAS_BUILTIN(__builtin_ffs)
-        return __builtin_ffs(x); 
+        return static_cast<uint32_t>(__builtin_ffs(static_cast<int32_t>(x))); 
     #else 
         return bitctz(x) + 1;
     #endif
@@ -282,7 +282,7 @@ extern int __builtin_popcountll(unsigned long long) noexcept;
     uint32_t bitffs64(uint64_t x) NH3API_NOEXCEPT
     { 
     #if NH3API_HAS_BUILTIN(__builtin_ffsll)
-        return __builtin_ffsll(x); 
+        return static_cast<uint32_t>(__builtin_ffsll(static_cast<int64_t>(x))); 
     #else 
         return bitctz64(x) + 1;
     #endif
@@ -290,19 +290,19 @@ extern int __builtin_popcountll(unsigned long long) noexcept;
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitfhs(uint32_t x) NH3API_NOEXCEPT
-    { return __builtin_clz(x) ^ 31; }
+    { return static_cast<uint32_t>(__builtin_clz(x) ^ 31); }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitfhs64(uint64_t x) NH3API_NOEXCEPT
-    { return __builtin_clzll(x) ^ 63; }
+    { return static_cast<uint32_t>(__builtin_clzll(x) ^ 63); }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitpopcnt(uint32_t v) NH3API_NOEXCEPT
-    { return __builtin_popcount(v); }
+    { return static_cast<uint32_t>(__builtin_popcount(v)); }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitpopcnt64(uint64_t x) NH3API_NOEXCEPT
-    { return __builtin_popcountll(x); }
+    { return static_cast<uint32_t>(__builtin_popcountll(x)); }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitrotl(uint32_t n, uint32_t c) NH3API_NOEXCEPT

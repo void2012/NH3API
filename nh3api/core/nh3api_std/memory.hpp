@@ -15,11 +15,32 @@
 #include "nh3api_std.hpp"
 #include "patcher_x86.hpp"
 #include "type_traits.hpp" // tt::has_scalar_deleting_destructor
-#include "stl_extras.hpp" 
+#include "stl_extras.hpp"  // nh3api::exchange
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 
 // maximum allocated size per call: 520177 bytes
+
+#if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
+
+namespace nh3api 
+{
+// for allocations smaller than 1016, the returned data is aligned to 16
+NH3API_NODISCARD
+NH3API_FORCEINLINE
+NH3API_MALLOC(1)
+void* NH3API_RETURNS_ALIGNED(16) __cdecl exe_new_align_16(size_t size) NH3API_NOEXCEPT
+{ return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); }
+
+// otherwise, it's aligned to 8
+NH3API_NODISCARD
+NH3API_FORCEINLINE
+NH3API_MALLOC(1)
+void* NH3API_RETURNS_ALIGNED(8) __cdecl exe_new_align_8(size_t size) NH3API_NOEXCEPT
+{ return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8); }
+
+} // namespace nh3api
+#endif
 
 NH3API_NODISCARD
 NH3API_FORCEINLINE
@@ -27,17 +48,24 @@ NH3API_MALLOC(1)
 // address: 0x617492
 // Heroes3.exe internal operator delete /
 // Внутренняя реализация CRT-функции operator new Heroes3.exe.
-void* NH3API_RETURNS_ALIGNED(8) __cdecl exe_new(size_t size) NH3API_NOEXCEPT
+void* __cdecl exe_new(size_t size) NH3API_NOEXCEPT
 { 
     #if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
-    #ifdef NH3API_FLAG_ALIGNED_SMALL_HEAP
-    if ( size < 0x3f8 )
-        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); 
-    else 
+    #if NH3API_HAS_BUILTIN(__builtin_constant_p)
+        if ( __builtin_constant_p(size))
+        {
+            if ( size < 0x3f8 )
+                return __builtin_assume_aligned(nh3api::exe_new_align_16(size), 16);
+            else 
+                return __builtin_assume_aligned(nh3api::exe_new_align_8(size), 8);
+        }
+        else 
     #endif
-        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+        {
+            return __builtin_assume_aligned(nh3api::exe_new_align_8(size), 8);
+        }
     #else 
-    return CDECL_1(void*, 0x617492, size);
+        return CDECL_1(void*, 0x617492, size);
     #endif
 }
 
@@ -102,8 +130,11 @@ struct exe_heap_t
     { return NH3API_MAX_HEAP_REQUEST; }
 
 } 
-#ifdef NH3API_STD_INLINE_VARIABLES
-inline constexpr
+#if NH3API_STD_RELAXED_CONSTEXPR
+constexpr
+#endif
+#if NH3API_STD_INLINE_VARIABLES
+inline
 #endif
 // exe_heap constant / константа exe_heap
 const exe_heap; 
@@ -117,17 +148,24 @@ NH3API_NODISCARD
 NH3API_FORCEINLINE
 NH3API_MALLOC(1)
 // usage: new (exe_heap) new-initializer...
-void* NH3API_RETURNS_ALIGNED(8) __cdecl operator new(size_t size, const exe_heap_t&)
+void* __cdecl operator new(size_t size, const exe_heap_t&)
 { 
     #if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
-    #ifdef NH3API_FLAG_ALIGNED_SMALL_HEAP
-    if ( size < 0x3f8 )
-        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); 
-    else 
+    #if NH3API_HAS_BUILTIN(__builtin_constant_p)
+        if ( __builtin_constant_p(size))
+        {
+            if ( size < 0x3f8 )
+                return __builtin_assume_aligned(nh3api::exe_new_align_16(size), 16);
+            else 
+                return __builtin_assume_aligned(nh3api::exe_new_align_8(size), 8);
+        }
+        else 
     #endif
-        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+        {
+            return __builtin_assume_aligned(nh3api::exe_new_align_8(size), 8);
+        }
     #else 
-    return CDECL_1(void*, 0x617492, size);
+        return CDECL_1(void*, 0x617492, size);
     #endif
 }
 
@@ -135,17 +173,24 @@ NH3API_NODISCARD
 NH3API_FORCEINLINE
 NH3API_MALLOC(1)
 // usage: new (exe_heap, std::nothrow) new-initializer...
-void* NH3API_RETURNS_ALIGNED(8) __cdecl operator new(size_t size, const exe_heap_t&, const std::nothrow_t&) NH3API_NOEXCEPT
+void* __cdecl operator new(size_t size, const exe_heap_t&, const std::nothrow_t&) NH3API_NOEXCEPT
 { 
     #if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
-    #ifdef NH3API_FLAG_ALIGNED_SMALL_HEAP
-    if ( size < 0x3f8 )
-        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); 
-    else 
+    #if NH3API_HAS_BUILTIN(__builtin_constant_p)
+        if ( __builtin_constant_p(size))
+        {
+            if ( size < 0x3f8 )
+                return __builtin_assume_aligned(nh3api::exe_new_align_16(size), 16);
+            else 
+                return __builtin_assume_aligned(nh3api::exe_new_align_8(size), 8);
+        }
+        else 
     #endif
-        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+        {
+            return __builtin_assume_aligned(nh3api::exe_new_align_8(size), 8);
+        }
     #else 
-    return CDECL_1(void*, 0x617492, size);
+        return CDECL_1(void*, 0x617492, size);
     #endif
 }
 
@@ -155,17 +200,24 @@ NH3API_MALLOC(1)
 // usage: new (exe_heap) new-initializer...
 // NOTE: It appears that both Itanium ABI and MSVC ABI implicitly allocate size + 4,
 // and return exe_new(size) + 4 pointer, so we don't do manual handling
-void* NH3API_RETURNS_ALIGNED(8) __cdecl operator new[](size_t size, const exe_heap_t&)
+void* __cdecl operator new[](size_t size, const exe_heap_t&)
 { 
     #if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
-    #ifdef NH3API_FLAG_ALIGNED_SMALL_HEAP
-    if ( size < 0x3f8 )
-        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); 
-    else 
+    #if NH3API_HAS_BUILTIN(__builtin_constant_p)
+        if ( __builtin_constant_p(size))
+        {
+            if ( size < 0x3f8 )
+                return __builtin_assume_aligned(nh3api::exe_new_align_16(size), 16);
+            else 
+                return __builtin_assume_aligned(nh3api::exe_new_align_8(size), 8);
+        }
+        else 
     #endif
-        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+        {
+            return __builtin_assume_aligned(nh3api::exe_new_align_8(size), 8);
+        }
     #else 
-    return CDECL_1(void*, 0x617492, size);
+        return CDECL_1(void*, 0x617492, size);
     #endif
 }
 
@@ -175,17 +227,24 @@ NH3API_MALLOC(1)
 // usage: new (exe_heap, std::nothrow) new-initializer...
 // NOTE: It appears that both Itanium ABI and MSVC ABI implicitly allocate size + 4,
 // and return exe_new(size) + 4 pointer, so we don't do manual handling
-void* NH3API_RETURNS_ALIGNED(8) __cdecl operator new[](size_t size, const exe_heap_t&, const std::nothrow_t&) NH3API_NOEXCEPT
+void* __cdecl operator new[](size_t size, const exe_heap_t&, const std::nothrow_t&) NH3API_NOEXCEPT
 { 
     #if NH3API_HAS_BUILTIN(__builtin_assume_aligned)
-    #ifdef NH3API_FLAG_ALIGNED_SMALL_HEAP
-    if ( size < 0x3f8 )
-        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 16); 
-    else 
+    #if NH3API_HAS_BUILTIN(__builtin_constant_p)
+        if ( __builtin_constant_p(size))
+        {
+            if ( size < 0x3f8 )
+                return __builtin_assume_aligned(nh3api::exe_new_align_16(size), 16);
+            else 
+                return __builtin_assume_aligned(nh3api::exe_new_align_8(size), 8);
+        }
+        else 
     #endif
-        return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+        {
+            return __builtin_assume_aligned(nh3api::exe_new_align_8(size), 8);
+        }
     #else 
-    return CDECL_1(void*, 0x617492, size);
+        return CDECL_1(void*, 0x617492, size);
     #endif
 }
 
@@ -418,7 +477,7 @@ void vector_deleting_destructor(T* ptr, uint32_t flag)
         int32_t* pre_ptr = (reinterpret_cast<int32_t*>(ptr)) - 1;
         const int32_t allocated_size = *pre_ptr;
         // if ( allocated_size != -1 )
-            exe_vector_destructor_iterator(ptr, sizeof(T), allocated_size);
+            exe_vector_destructor_iterator(ptr, sizeof(T), allocated_size / sizeof(T));
         if ( (flag & 1 ) != 0 )
             exe_delete(pre_ptr);
     }
@@ -473,7 +532,11 @@ public:
 // constructors for standard compliance
 public:
     NH3API_CONSTEXPR exe_allocator() NH3API_NOEXCEPT
+    #if NH3API_CHECK_CPP11
+    = default;
+    #else 
     {}
+    #endif
 
     NH3API_CONSTEXPR exe_allocator(const exe_allocator&) NH3API_NOEXCEPT
     #if NH3API_CHECK_CPP11
@@ -785,6 +848,14 @@ void trivial_move(void* __restrict src, void* __restrict dst) NH3API_NOEXCEPT
         // 2. zero-fill memory at *src
         (static_cast<uint8_t* __restrict>(src))[i] = 0;
     }
+}
+
+template<size_t size> NH3API_FORCEINLINE
+void trivial_copy(const void* __restrict src, void* __restrict dst) NH3API_NOEXCEPT
+{   
+    // copy from *src to *dst
+    for (size_t i = 0; i < size; ++i)
+        (static_cast<uint8_t* __restrict>(dst))[i] = (static_cast<const uint8_t* __restrict>(src))[i];
 }
 
 } // namespace nh3api 

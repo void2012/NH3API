@@ -235,7 +235,8 @@ inline void verify_range(const IterT& _First, const _Sentinel& _Last)
     using namespace std; // to make _DEBUG_RANGE macro range work
     _DEBUG_RANGE(_First, _Last);
     #else
-    NH3API_IGNORE(_First, _Last);
+    (void) _First;
+    (void) _Last;
     #endif
 }
 
@@ -247,7 +248,8 @@ inline void verify_range_n(const IterT& _First, _Size_type _N)
     using namespace std; // to make _DEBUG_RANGE macro range work
     _DEBUG_RANGE(_First, _Last);
     #else
-    NH3API_IGNORE(_First, _N);
+    (void) _First;
+    (void) _N;
     #endif
 }
 #elif NH3API_GCC_STL
@@ -267,7 +269,8 @@ verify_range_n(_InputIterator _First, _Size_type _N)
     auto _Last = next(_First, static_cast<diff_t>(_N));
     verify_range(_First, _Last);
     #else
-    NH3API_IGNORE(_First, _N);
+    (void) _First;
+    (void) _N;
     #endif
 }
 #else

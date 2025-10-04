@@ -237,16 +237,21 @@ NH3API_FORCEINLINE
 {
     char buf[256];
     ::memset(buf, 0, sizeof(buf));
-    DWORD filePathLen = GetModuleFileNameA(hInstance, buf, sizeof(buf));
+    DWORD filePathLen = ::GetModuleFileNameA(hInstance, buf, sizeof(buf));
     if (filePathLen == 0) 
         return "";
     
     ::exe_std_string filePath(buf, ::std::min<DWORD>((DWORD)sizeof(buf) - 1, filePathLen));
     size_t lastSlashPos = filePath.find_last_of('\\');
-    if (lastSlashPos != ::exe_std_string::npos) 
-        return filePath.substr(lastSlashPos + 1);
-
-    return filePath;
+    if (lastSlashPos != ::exe_std_string::npos)
+    {
+        filePath.erase(0, lastSlashPos + 1);
+        return filePath;
+    } 
+    else
+    {
+        return filePath;
+    }
 }
 
 void __stdcall MemFree(const void* buf) NH3API_NOEXCEPT;
@@ -275,7 +280,7 @@ NH3API_FORCEINLINE void __stdcall ReloadLanguageData() NH3API_NOEXCEPT
 { STDCALL_0(void, reinterpret_cast<uintptr_t>(&::Era_imports::ReloadLanguageData)); }
 
 /** Translates given key, using pairs of (key, value) params for translation. Returns temporary buffer address, which must be immediately copied */
-NH3API_FORCEINLINE char* __stdcall trTemp(const char* const key, const char* const* const params, int32_t LastParamsIndex) NH3API_NOEXCEPT
+NH3API_FORCEINLINE char* __stdcall trTemp(const char* const key, const char* const* const params, uint32_t LastParamsIndex) NH3API_NOEXCEPT
 { return STDCALL_3(char*, reinterpret_cast<uintptr_t>(&::Era_imports::trTemp), key, params, LastParamsIndex); }
 
 #if NH3API_STD_MOVE_SEMANTICS
@@ -292,8 +297,8 @@ NH3API_FORCEINLINE
  */
 std::string tr(const char* key, std::initializer_list<const char*> params) NH3API_NOEXCEPT
 {
-   const int MAX_PARAMS = 64;
-   const int numParams = ( params.size() <= MAX_PARAMS ? params.size() : MAX_PARAMS) & ~1;
+   NH3API_CONSTEXPR_VAR int MAX_PARAMS = 64;
+   const uint32_t numParams = (params.size() <= MAX_PARAMS ? params.size() : MAX_PARAMS) & ~1u;
 
    return trTemp(key, params.begin(), numParams - 1);
 }
@@ -304,7 +309,7 @@ std::string tr(const char* key, const std::vector<std::string>& params) NH3API_N
    const int MAX_PARAMS = 64;
 
    const char* _params[MAX_PARAMS] = {};
-   const int numParams = ( params.size() <= MAX_PARAMS ? params.size() : MAX_PARAMS) & ~1;
+   const int numParams = ( params.size() <= MAX_PARAMS ? params.size() : MAX_PARAMS) & ~1u;
 
    for (int i = 0; i < numParams; i++) 
    {
@@ -464,7 +469,7 @@ NH3API_FORCEINLINE bool32_t __stdcall SaveIni(const char* const FilePath) NH3API
 // ======================= HOOKS AND PATCHES ======================= //
 
 // Removed since v3.9.16, see Hook
-NH3API_FORCEINLINE void* __stdcall HookCode(void* Addr, THookHandler HandlerFunc, void** AppliedPatch) NH3API_DELETED_FUNCTION;
+NH3API_FORCEINLINE void* __stdcall HookCode(void* Addr, THookHandler HandlerFunc, void** AppliedPatch) NH3API_DELETED_FUNCTION
 
 /**
  * Installs new hook at specified address. Returns pointer to bridge with original code if any. Optionally specify address of a pointer to write applied patch structure
@@ -501,7 +506,7 @@ NH3API_FORCEINLINE void __stdcall WriteAtCode(int32_t Count, void* Src, void* Ds
 { STDCALL_3(void, reinterpret_cast<uintptr_t>(&::Era_imports::WriteAtCode), Count, Src, Dst); }
 
 // Removed since v3.9.16
-NH3API_FORCEINLINE int32_t __stdcall CalcHookPatchSize(void* pointer) NH3API_DELETED_FUNCTION;
+NH3API_FORCEINLINE int32_t __stdcall CalcHookPatchSize(void* pointer) NH3API_DELETED_FUNCTION
 
 /** Rollback patch and free its memory. Do not use it afterwards */
 NH3API_FORCEINLINE void __stdcall RollbackAppliedPatch(void* pointer) NH3API_NOEXCEPT

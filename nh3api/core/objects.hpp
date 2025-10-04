@@ -31,159 +31,192 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 struct CObjectType
 {
     public:
-    // Sprite file name /
-    // Название файла спрайта объекта.
-    // offset: +0x0 = +0,  size = 0x10 = 16
-    exe_string ImageName;
-    // Object width(in cells). For example, hillfort has width = 3 /
-    // Ширина изображения объекта(в клетках). Например, хиллфорт имеет ширину = 3.
-    // offset: +0x10 = +16,  size = 0x1 = 1
-    int8_t Width;
-    // Object height(in cells). For example, hillfort has heigth = 3 /
-    // Высота объекта(в клетках). Например, хиллфорт имеет высоту = 3.
-    // offset: +0x11 = +17,  size = 0x1 = 1
-    int8_t Height;
-    // Draw mask. For example, hilfort(AVXhilg0.msk) has the following placement mask:
-    // 00000000
-    // 00000000
-    // 00000000
-    // 11000000
-    // 11000000
-    // 11100000
-    // Note that every 2 last bits in each byte are ignored(the last and second-to-last columns).
-    // If you write this 48-bit mask in 6 rows, omit the last and second-to-last columns and then (visually) horizontally rotate it,
-    // it will give you a 6x6 map of cells which will be drawn(= 1). There are no pixels of this object in zero cells.
-    // 000000
-    // 000000
-    // 000000
-    // 000011
-    // 000011
-    // 000111
-    // You can place any object in map editor, turn on the grid and
-    // see it yourself, zero cells has no pixels on it! /
-    /////////////////////////////////////////////////////////////////////////////////////
-    // Маска отрисовки. Например, хиллфорт(AVXhilg0.msk) имеет следующую маску отрисовки:
-    // 00000000
-    // 00000000
-    // 00000000
-    // 11000000
-    // 11000000
-    // 11100000
-    // При этом, 2 каждых бита в каждом байте игнорируются(последний и предпоследний столбцы).
-    // Если записать эту 48-битную маску в 6 строк (visually), отсеять последние два столбца и повернуть (визуально) маску горизонтально,
-    // вы увидите 6x6 карту отрисовки по каждым клеткам(= 1). В нулевых клетках пикселей (этого) объекта нет.
-    // 000000
-    // 000000
-    // 000000
-    // 000011
-    // 000011
-    // 000111
-    // Вы можете убедится в этом сами. Поставьте объект на карту, включите сетку.
-    // Там, где значение клетки = 1, есть пиксели объекта.
-    // offset: +0x14 = +20,  size = 0x8 = 8
-    exe_bitset<48> PlacementMask;
-    // Passable cells mask. (= 1 empty cell, = 0 unpassable cell).
-    // Use PassableMask[getBitPos(x,y)] to obtain value for the cell at (x,y). /
-    // Маска клеток проходимости (= 1 пустая клетка, = 0 непроходимая клетка).
-    // Используйте PassableMask[getBitPos(x,y)] для получения значения для кетки в координатах (x,y).
-    // offset: +0x1C = +28,  size = 0x8 = 8
-    exe_bitset<48> PassableMask;
-    // Shadow draw mask. Similiar to PlacementMask but for the shadow /
-    // Маска отрисовки тени. Аналогично PlacementMask, но для тени.
-    // offset: +0x24 = +36,  size = 0x8 = 8
-    exe_bitset<48> ShadowMask;
-    // Trigger mask. (= 1 trigger cell, = 0 non-trigger cell).
-    // Use TriggerMask[getBitPos(x,y)] to obtain value for the cell at (x,y). /
-    // Маска триггерных(/входов) клеток. (= 1 клетка-триггер, = 0 клетка без триггера).
-    // Используйте TriggerMask[getBitPos(x,y)] для получения значения для кетки в координатах (x,y).
-    // offset: +0x2C = +44,  size = 0x8 = 8
-    exe_bitset<48> TriggerMask;
-    // Terrain availability mask(1 = object can be placed on that terrain) /
-    // Маска доступности на почве(1 = объект можно установить на почве).
-    // offset: +0x34 = +52,  size = 0x4 = 4
-    exe_bitset<10> TerrainMask;
-    // Object type /
-    // Тип объекта.
-    // offset: +0x38 = +56,  size = 0x4 = 4
-    TAdventureObjectType Type;
-    // Object subtype /
-    // Подтип объекта.
-    // offset: +0x3C = +60,  size = 0x4 = 4
-    int32_t Subtype;
-    // Drawn underlying? (as part of the ground, below other objects) /
-    // Является ли частью земли?
-    // offset: +0x40 = +64,  size = 0x1 = 1
-    bool IsUnderlay;
-    // offset: +0x41 = +65,  size = 0x1 = 1
+        // Sprite file name /
+        // Название файла спрайта объекта.
+        // offset: +0x0 = +0,  size = 0x10 = 16
+        exe_string ImageName;
+        
+        // Object width(in cells). For example, hillfort has width = 3 /
+        // Ширина изображения объекта(в клетках). Например, хиллфорт имеет ширину = 3.
+        // offset: +0x10 = +16,  size = 0x1 = 1
+        int8_t Width;
+
+        // Object height(in cells). For example, hillfort has heigth = 3 /
+        // Высота объекта(в клетках). Например, хиллфорт имеет высоту = 3.
+        // offset: +0x11 = +17,  size = 0x1 = 1
+        int8_t Height;
+
     protected:
-    NH3API_MAYBE_UNUSED
-    byte_t gap_41;
+        NH3API_MAYBE_UNUSED
+        byte_t gap_12[2];
 
     public:
-    // offset: +0x42 = +66,  size = 0x2 = 2
-    int16_t objectTypeIndex;
+        // Draw mask. For example, hilfort(AVXhilg0.msk) has the following placement mask:
+        // 00000000
+        // 00000000
+        // 00000000
+        // 11000000
+        // 11000000
+        // 11100000
+        // Note that every 2 last bits in each byte are ignored(the last and second-to-last columns).
+        // If you write this 48-bit mask in 6 rows, omit the last and second-to-last columns and then (visually) horizontally rotate it,
+        // it will give you a 6x6 map of cells which will be drawn(= 1). There are no pixels of this object in zero cells.
+        // 000000
+        // 000000
+        // 000000
+        // 000011
+        // 000011
+        // 000111
+        // You can place any object in map editor, turn on the grid and
+        // see it yourself, zero cells has no pixels on it! /
+        /////////////////////////////////////////////////////////////////////////////////////
+        // Маска отрисовки. Например, хиллфорт(AVXhilg0.msk) имеет следующую маску отрисовки:
+        // 00000000
+        // 00000000
+        // 00000000
+        // 11000000
+        // 11000000
+        // 11100000
+        // При этом, 2 каждых бита в каждом байте игнорируются(последний и предпоследний столбцы).
+        // Если записать эту 48-битную маску в 6 строк (visually), отсеять последние два столбца и повернуть (визуально) маску горизонтально,
+        // вы увидите 6x6 карту отрисовки по каждым клеткам(= 1). В нулевых клетках пикселей (этого) объекта нет.
+        // 000000
+        // 000000
+        // 000000
+        // 000011
+        // 000011
+        // 000111
+        // Вы можете убедится в этом сами. Поставьте объект на карту, включите сетку.
+        // Там, где значение клетки = 1, есть пиксели объекта.
+        // offset: +0x14 = +20,  size = 0x8 = 8
+        exe_bitset<48> PlacementMask;
+
+        // Passable cells mask. (= 1 empty cell, = 0 unpassable cell).
+        // Use PassableMask[getBitPos(x,y)] to obtain value for the cell at (x,y). /
+        // Маска клеток проходимости (= 1 пустая клетка, = 0 непроходимая клетка).
+        // Используйте PassableMask[getBitPos(x,y)] для получения значения для кетки в координатах (x,y).
+        // offset: +0x1C = +28,  size = 0x8 = 8
+        exe_bitset<48> PassableMask;
+
+        // Shadow draw mask. Similiar to PlacementMask but for the shadow /
+        // Маска отрисовки тени. Аналогично PlacementMask, но для тени.
+        // offset: +0x24 = +36,  size = 0x8 = 8
+        exe_bitset<48> ShadowMask;
+
+        // Trigger mask. (= 1 trigger cell, = 0 non-trigger cell).
+        // Use TriggerMask[getBitPos(x,y)] to obtain value for the cell at (x,y). /
+        // Маска триггерных(/входов) клеток. (= 1 клетка-триггер, = 0 клетка без триггера).
+        // Используйте TriggerMask[getBitPos(x,y)] для получения значения для кетки в координатах (x,y).
+        // offset: +0x2C = +44,  size = 0x8 = 8
+        exe_bitset<48> TriggerMask;
+
+        // Terrain availability mask(1 = object can be placed on that terrain) /
+        // Маска доступности на почве(1 = объект можно установить на почве).
+        // offset: +0x34 = +52,  size = 0x4 = 4
+        exe_bitset<10> TerrainMask;
+
+        // Object type /
+        // Тип объекта.
+        // offset: +0x38 = +56,  size = 0x4 = 4
+        TAdventureObjectType Type;
+
+        // Object subtype /
+        // Подтип объекта.
+        // offset: +0x3C = +60,  size = 0x4 = 4
+        int32_t Subtype;
+
+        // Drawn underlying? (as part of the ground, below other objects) /
+        // Является ли частью земли?
+        // offset: +0x40 = +64,  size = 0x1 = 1
+        bool IsUnderlay;
+    
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x41 = +65,  size = 0x1 = 1
+        byte_t gap_41[1];
+
+    public:
+        // offset: +0x42 = +66,  size = 0x2 = 2
+        int16_t objectTypeIndex;
+
 };
 #pragma pack(pop)
 
 #pragma pack(push, 4)
 // Map editor struct, also used by the RMG. Object information /
-// Структура из редактора карт! Также используется RMG. Информация об объекте.
+// Структура из редактора карт. Также используется RMG. Информация об объекте.
 // size 0x4C = 76, align = 4
 struct TObjectType
 {
-    public:
+public:
     // Index in sprite filenames tree(TUniqueSet<std::string> gImageNameSet) /
     // Индекс названия объекта в дереве названий спрайтов(TUniqueSet<std::string> gImageNameSet)
     // offset: +0x0 = +0,  size = 0x4 = 4
     int32_t imageNum;
+
     // Passable cells mask. (= 1 empty cell, = 0 unpassable cell).
     // Use PassableMask[getBitPos(x,y)] to obtain value for the cell at (x,y). /
     // Маска клеток проходимости (= 1 пустая клетка, = 0 непроходимая клетка).
     // Используйте PassableMask[getBitPos(x,y)] для получения значения для кетки в координатах (x,y).
     // offset: +0x4 = +4,  size = 0x8 = 8
     exe_bitset<48> passableMask;
+
     // Trigger mask. (= 1 trigger cell, = 0 non-trigger cell).
     // Use TriggerMask[getBitPos(x,y)] to obtain value for the cell at (x,y). /
     // Маска триггерных(/входов) клеток. (= 1 клетка-триггер, = 0 клетка без триггера).
     // Используйте TriggerMask[getBitPos(x,y)] для получения значения для кетки в координатах (x,y).
     // offset: +0xC = +12,  size = 0x8 = 8
     exe_bitset<48> triggerMask;
+
     // Terrain availability mask(1 = object can be placed on that terrain) /
     // Маска доступности на почве(1 = объект можно установить на почве).
     // offset: +0x14 = +20,  size = 0x4 = 4
     exe_bitset<10> terrainMask;
+
     // Recommended terrain mask.
     // In the Map Editor or RMG this object will appear on terrains with value = 1 /
     // Маска родных для объекта почв. В редакторе карт и при генерации карты RMG
     // этот объект появляется на тех почвах, где значение = 1.
     // offset: +0x18 = +24,  size = 0x4 = 4
     exe_bitset<10> terrainRecommendedMask;
+
     // Object type /
     // Тип объекта.
     // offset: +0x1C = +28,  size = 0x4 = 4
     TAdventureObjectType type;
+
     // Object subtype /
     // Подтип объекта.
     // offset: +0x20 = +32,  size = 0x4 = 4
     int32_t subtype;
+
     // Slot category in map editor. /
     // Категория слота в редакторе карт.
     // offset: +0x24 = +36,  size = 0x4 = 4
     int32_t slotCategory;
+
     // Drawn underlying? (as part of the ground, below other objects) /
     // Является ли частью земли?
     // offset: +0x28 = +40,  size = 0x1 = 1
     bool isUnderlay;
+
     // Has any trigger cells? /
     // Имеет хотя бы одну триггерную клетку?
     // offset: +0x29 = +41,  size = 0x1 = 1
     bool hasTrigger;
+
+protected:
+    NH3API_MAYBE_UNUSED
+    byte_t gap_2A[2];
+
+public:
     // The first trigger cell. (Start from the lower right and iterate to the left, from bottom to top) /
     // If there are no such cells, _triggerCell = {8, 6}.
     // Самая первая триггерная клетка. (Начиная с нижней правой клетки, итерируя влево, в конце строки на верх).
     // Если такой клетки нет, _triggerCell = {8, 6}.
     // offset: +0x2C = +44,  size = 0x8 = 8
     TPoint triggerCell;
+
     // Object image info /
     // Информация об изображении объекта.
     // offset: +0x34 = +52,  size = 0x18 = 24
@@ -193,20 +226,23 @@ struct TObjectType
         // Размер изображения объекта в клетках(objSize.x = ширина, objSize.y = высота).
         // offset: +0x0 = +0,  size = 0x8 = 8
         TPoint objSize;
+
         // Same as CObjectType::PlacementMask /
         // Маска отрисовки. Аналогично CObjectType::PlacementMask
         // offset: +0x8 = +8,  size = 0x8 = 8
         exe_bitset<48> drawMask;
+
         // Same as CObjectType::ShadowMask /
         // Маска тени. Аналогично CObjectType::ShadowMask
         // offset: +0x10 = +16,  size = 0x8 = 8
         exe_bitset<48> shadowMask;
+
     } imageInfo;
 };
 #pragma pack(pop)
 
-NH3API_FORCEINLINE NH3API_CONSTEXPR
-uint32_t getBitPos(uint32_t x, uint32_t y)
+NH3API_CONST NH3API_FORCEINLINE NH3API_CONSTEXPR
+uint32_t getBitPos(uint32_t x, uint32_t y) NH3API_NOEXCEPT
 { return 8 * (6 - y) - x - 1; }
 
 #pragma pack(push, 4)
@@ -222,9 +258,11 @@ struct TreasureData
         {}
 
         NH3API_FORCEINLINE
-        TreasureData(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TreasureData(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : Message(tag), Guardians(tag)
-        { NH3API_IGNORE(HasCustomGuardians); }
+        {}
+
+        NH3API_DEFAULT_DESTRUCTOR(TreasureData)
 
     public:
         // Displayed message upon gathering /
@@ -236,7 +274,12 @@ struct TreasureData
         // Настроена охрана?
         // offset: +0x10 = +16,  size = 0x1 = 1
         bool HasCustomGuardians;
+        
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_11[3];
 
+    public:
         // Guards /
         // Охрана.
         // offset: +0x14 = +20,  size = 0x38 = 56
@@ -258,9 +301,11 @@ struct MonsterData
         { ResQty.fill(0); }
 
         NH3API_FORCEINLINE
-        MonsterData(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        MonsterData(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : Message(tag)
-        { NH3API_IGNORE(Artifact, ResQty); }
+        {}
+
+        NH3API_DEFAULT_DESTRUCTOR(MonsterData)
 
     public:
         // Attack message /
@@ -301,19 +346,15 @@ struct BlackBoxData : TreasureData
         }
 
         NH3API_FORCEINLINE
-        BlackBoxData(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        BlackBoxData(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : TreasureData(tag),
               SecondarySkills(tag),
               Artifacts(tag),
               Spells(tag),
               Creatures(tag)
-        { NH3API_IGNORE(HasCustomTreasure,
-                        ExperienceBonus,
-                        ManaBonus,
-                        MoraleBonus,
-                        LuckBonus,
-                        ResQty,
-                        PrimarySkillBonus); }
+        {}
+
+        NH3API_DEFAULT_DESTRUCTOR(BlackBoxData)
 
     public:
         // Has custom treasure? /
@@ -321,6 +362,11 @@ struct BlackBoxData : TreasureData
         // offset: +0x4C = +76,  size = 0x1 = 1
         bool HasCustomTreasure;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_4D[3];
+
+    public:
         // Experience Bonus(always positive) /
         // Бонус опыта(всегда положительный).
         // offset: +0x50 = +80,  size = 0x4 = 4
@@ -341,6 +387,11 @@ struct BlackBoxData : TreasureData
         // offset: +0x59 = +89,  size = 0x1 = 1
         int8_t LuckBonus;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_5A[2];
+
+    public:
         // Bonus resources(can be negative) /
         // Бонусные ресурсы(может быть отрицательным).
         // offset: +0x5C = +92,  size = 0x1C = 28
@@ -389,15 +440,17 @@ class TRandomDwelling
         TRandomDwelling() NH3API_NOEXCEPT
             : townId(-1),
               towns(0),
-              playerOwner(PLAYER_NONE),
+              playerOwner(static_cast<int8_t>(PLAYER_NONE)),
               minLVL(0),
               maxLVL(6),
               object(nullptr)
         {}
 
         NH3API_FORCEINLINE
-        TRandomDwelling(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-        { NH3API_IGNORE(townId, playerOwner, minLVL, maxLVL, object); }
+        TRandomDwelling(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
+
+        NH3API_DEFAULT_DESTRUCTOR(TRandomDwelling)
 
     public:
         // Town ID /
@@ -413,7 +466,7 @@ class TRandomDwelling
         // Player owning this dwelling /
         // Игрок, владеющий этим жилищем.
         // offset: +0x6 = +6,  size = 0x1 = 1
-        uint8_t playerOwner;
+        int8_t playerOwner;
 
         // Creature lowest level /
         // Наименьший уровень существа.
@@ -449,8 +502,8 @@ class TBlackMarket
         { artifacts.fill(ARTIFACT_NONE); }
 
         NH3API_FORCEINLINE
-        TBlackMarket(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-        { NH3API_IGNORE(artifacts); }
+        TBlackMarket(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        {}
 
     public:
         // Artifacts /
@@ -473,12 +526,12 @@ class generator
         { THISCALL_1(void, 0x4B8250, this); }
 
         NH3API_FORCEINLINE
-        generator(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        generator(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : guards(tag)
-        { NH3API_IGNORE(genClass, genType, type, population, mapX, mapY, mapZ, playerOwner, town_id); }
+        {}
 
     public:
-        int32_t get_owner() const
+        NH3API_NODISCARD int32_t get_owner() const
         { return playerOwner; }
 
         // Read from game save file /
@@ -513,6 +566,12 @@ class generator
         // offset: +0x1 = +1,  size = 0x1 = 1
         int8_t genType;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x2 = +2,  size = 0x2 = 2
+        byte_t gap_2[2];
+
+    public:
         // Creatures /
         // Существа.
         // offset: +0x4 = +4,  size = 0x10 = 16
@@ -552,6 +611,12 @@ class generator
         // ID города, от типа которого зависит тип жилища.
         // offset: +0x58 = +88,  size = 0x1 = 1
         int8_t town_id;
+
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x59 = +89,  size = 0x3 = 3
+        byte_t gap_59[3];
+
 };
 #pragma pack(pop)
 
@@ -568,13 +633,15 @@ class mine
               type(const_no_resource),
               is_abandoned(false),
               guards(),
-              mapX(-1), mapY(-1), mapZ(-1)
+              mapX(static_cast<uint8_t>(-1)), 
+              mapY(static_cast<uint8_t>(-1)), 
+              mapZ(static_cast<uint8_t>(-1))
         {}
 
         NH3API_FORCEINLINE
-        mine(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        mine(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : guards(tag)
-        { NH3API_IGNORE(playerOwner, type, is_abandoned, mapX, mapY, mapZ); }
+        {}
 
     public:
         // Player owning this object /
@@ -592,6 +659,11 @@ class mine
         // offset: +0x2 = +2,  size = 0x1 = 1
         bool is_abandoned;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_3[1];
+
+    public:
         // Mine guards /
         // Охраны шахты.
         // offset: +0x4 = +4,  size = 0x38 = 56
@@ -611,6 +683,11 @@ class mine
         // z-координата объекта.
         // offset: +0x3E = +62,  size = 0x1 = 1
         uint8_t mapZ;
+
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_3F[1];
+
 };
 #pragma pack(pop)
 
@@ -623,12 +700,12 @@ class garrison
     public:
         NH3API_FORCEINLINE
         garrison() NH3API_NOEXCEPT
-            : playerOwner(PLAYER_NONE),
+            : playerOwner(static_cast<int8_t>(PLAYER_NONE)),
               garrisonArmy()
         {}
 
         NH3API_FORCEINLINE
-        garrison(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        garrison(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : garrisonArmy(tag)
         {}
 
@@ -636,8 +713,14 @@ class garrison
         // Player owning this garrison /
         // Игрок, владеющий этим гарнизоном.
         // offset: +0x0 = +0,  size = 0x1 = 1
-        uint8_t playerOwner;
+        int8_t playerOwner;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x1 = +1,  size = 0x3 = 3
+        byte_t gap_1[3];
+
+    public:
         // Garrison army /
         // Армия гарнизона.
         // offset: +0x4 = +4,  size = 0x38 = 56
@@ -676,14 +759,14 @@ class type_university
         NH3API_FORCEINLINE
         type_university() NH3API_NOEXCEPT
         #if NH3API_STD_INITIALIZER_LIST
-            : skills{SKILL_NONE, SKILL_NONE, SKILL_NONE, SKILL_NONE}
+            : skills{{SKILL_NONE, SKILL_NONE, SKILL_NONE, SKILL_NONE}}
         {}
         #else
         { skills.fill(SKILL_NONE); }
         #endif
 
         NH3API_FORCEINLINE
-        type_university(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_university(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
         {}
 
     public:
@@ -699,6 +782,7 @@ class type_university
 // size = 0xC = 12, align = 4
 struct type_creature_source
 {
+public:
     // offset: +0x0 = +0,  size = 0x4 = 4
     TCreatureType type;
 
@@ -710,6 +794,12 @@ struct type_creature_source
 
     // offset: +0xA = +10,  size = 0x1 = 1
     bool is_free;
+    
+protected:
+    NH3API_MAYBE_UNUSED
+    byte_t gap_11[1];
+
+public:
 
 };
 #pragma pack(pop)
@@ -723,12 +813,18 @@ class type_creature_bank
     public:
         NH3API_FORCEINLINE
         type_creature_bank() NH3API_NOEXCEPT
+        #if NH3API_CHECK_CPP11
+        = default;
+        #else 
         {}
+        #endif
 
         NH3API_FORCEINLINE
-        type_creature_bank(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_creature_bank(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : guards(tag), artifacts(tag)
         {}
+
+        NH3API_DEFAULT_DESTRUCTOR(type_creature_bank)
 
     public:
         // Bank guardians /
@@ -750,6 +846,12 @@ class type_creature_bank
         // Кол-во существ, получаемых в качестве награды при зачистке банка.
         // offset: +0x58 = +88,  size = 0x1 = 1
         int8_t reward_creatures;
+        
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_59[3];
+
+    public:
 
         // Artifacts aquired on victory /
         // Артефакты, получаемых в качестве награды при зачистке банка.
@@ -772,9 +874,11 @@ class Sign
         {}
 
         NH3API_FORCEINLINE
-        Sign(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        Sign(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : signText(tag)
-        { NH3API_IGNORE(hasText); }
+        {}
+
+        NH3API_DEFAULT_DESTRUCTOR(Sign)
 
     public:
         // Has customized text /
@@ -1162,10 +1266,12 @@ struct mapCellWitchHut
     unsigned : 12;
 
 } NH3API_MSVC_LAYOUT;
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 // Map object extra info /
 // Дополнительная информация об объекте на карте.
-// size = 0x4 = 4, align = 4.
+// size = 0x4 = 4, align = 1.
 struct ExtraInfoUnion
 {
     public:
@@ -1232,7 +1338,7 @@ struct ExtraInfoUnion
             mapCellWarriorsTomb_RoE  WarriorsTomb_RoE;  // Гробница воина(RoE)
         } NH3API_MSVC_LAYOUT;
 };
-#pragma pack(pop) // 4
+#pragma pack(pop) // 1
 
 NH3API_SIZE_ASSERT(4, ExtraInfoUnion);
 
@@ -1244,42 +1350,60 @@ class CObject : public ExtraInfoUnion
 {
     public:
         NH3API_FORCEINLINE
-        CObject(uint8_t _x,
-                uint8_t _y,
-                uint8_t _z,
-                uint16_t _type,
-                uint32_t _extraInfo) NH3API_NOEXCEPT
-            : x(_x), y(_y), z(_z),
-              TypeID(_type), frameOffset(Random(0, 255))
-        {
-            this->extraInfo = _extraInfo;
-        }
+        CObject(uint8_t x_,
+                uint8_t y_,
+                uint8_t z_,
+                uint16_t type_,
+                uint32_t extraInfo_) NH3API_NOEXCEPT
+            : ExtraInfoUnion(nh3api::bit_cast<ExtraInfoUnion>(extraInfo_)), 
+              x(x_), 
+              y(y_), 
+              z(z_),
+              TypeID(type_), 
+              frameOffset(Random(0, 255) & UINT8_MAX)
+        {}
+
+        NH3API_FORCEINLINE
+        CObject(uint8_t x_,
+                uint8_t y_,
+                uint8_t z_,
+                uint16_t type_,
+                ExtraInfoUnion extraInfo_) NH3API_NOEXCEPT
+            : ExtraInfoUnion(extraInfo_), 
+              x(x_), 
+              y(y_), 
+              z(z_),
+              TypeID(type_), 
+              frameOffset(Random(0, 255) & UINT8_MAX)
+        {}
 
         NH3API_FORCEINLINE
         CObject() NH3API_NOEXCEPT
-            : x(255), y(255), z(255),
-              TypeID(OBJECT_NONE), frameOffset(Random(0, 255))
-        {
-            this->extraInfo = 0;
-        }
+            : ExtraInfoUnion(nh3api::bit_cast<ExtraInfoUnion>(0)),
+              x(255), 
+              y(255), 
+              z(255),
+              TypeID(static_cast<uint16_t>(OBJECT_NONE)), 
+              frameOffset(Random(0, 255) & UINT8_MAX)
+        {}
 
     public:
-        type_point get_trigger() const
+        NH3API_NODISCARD type_point get_trigger() const
         {
-            int32_t result_x;
-            int32_t result_y;
+            int32_t result_x = 0;
+            int32_t result_y = 0;
 
             FindTrigger(result_x, result_y);
-            return type_point(result_x, result_y, z);
+            return type_point(static_cast<uint8_t>(result_x & UINT8_MAX), static_cast<uint8_t>(result_y & UINT8_MAX), static_cast<uint8_t>(z & 0xF));
         }
 
         void FindTrigger(int32_t& result_x, int32_t& result_y) const
         { THISCALL_3(void, 0x4FF280, this, &result_x, &result_y); }
 
-        CObjectType* get_object_type_ptr()
+        NH3API_NODISCARD CObjectType* get_object_type_ptr()
         { return THISCALL_1(CObjectType*, 0x4FF260, this); }
 
-        const CObjectType* get_object_type_ptr() const
+        NH3API_NODISCARD const CObjectType* get_object_type_ptr() const
         { return THISCALL_1(CObjectType*, 0x4FF260, this); }
 
     public:
@@ -1292,6 +1416,11 @@ class CObject : public ExtraInfoUnion
         // offset: +0x6 = +6,  size = 0x1 = 1
         uint8_t z;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_7[1];
+
+    public:
         // Object type /
         // Тип объекта.
         // offset: +0x8 = +8,  size = 0x2 = 2
@@ -1302,12 +1431,17 @@ class CObject : public ExtraInfoUnion
         // Наглядный пример: если поставить несколько анимированных объектов, они не будут "двигаться" синхронно.
         // offset: +0xA = +10,  size = 0x1 = 1
         uint8_t frameOffset;
+
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_B[1];
+
 };
 #pragma pack(pop) // 2
 
 NH3API_SIZE_ASSERT(0xC, CObject);
 
-#pragma pack(push, 1)
+#pragma pack(push, 4)
 // Base class for hero and boat/
 // Базовый класс для hero(герой) и boat(лодка).
 // size = 0x18 = 24, align = 1
@@ -1320,27 +1454,33 @@ class type_obscuring_object
         { THISCALL_1(void, 0x4D76E0, this); }
 
         NH3API_FORCEINLINE
-        type_obscuring_object(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_obscuring_object(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : obscured_location(tag)
         {}
+
+        NH3API_DEFAULT_DESTRUCTOR(type_obscuring_object)
 
     public:
         void initialize() NH3API_NOEXCEPT
         { THISCALL_1(void, 0x4D7740, this); }
 
-        TAdventureObjectType get_obscured_type() const
+        NH3API_NODISCARD TAdventureObjectType get_obscured_type() const
         { return type; }
 
-        ExtraInfoUnion get_obscured_extra_info()const
+        NH3API_NODISCARD ExtraInfoUnion get_obscured_extra_info()const
         { return extra_info; }
 
-        bool is_on_map() const
+        NH3API_NODISCARD bool is_on_map() const
         { return valid; }
 
-        type_point get_location() const
-        { return type_point(mapX & 0xFF, mapY & 0xFF, mapZ & 0xFF); }
+        NH3API_NODISCARD type_point get_location() const
+        #if NH3API_CHECK_CPP11
+        { return {mapX, mapY, mapZ}; }
+        #else 
+        { return type_point(mapX, mapY, mapZ); }
+        #endif 
 
-        bool obscured_is_trigger() const
+        NH3API_NODISCARD bool obscured_is_trigger() const
         { return !!was_trigger; }
 
         //mine* get_obscured_mine() const
@@ -1355,10 +1495,10 @@ class type_obscuring_object
         void restore_cell()
         { THISCALL_1(void, 0x4D7950, this); }
 
-        bool obscures_town() const
+        NH3API_NODISCARD bool obscures_town() const
         { return ( is_on_map() ) ? was_trigger && (get_obscured_type( ) == OBJECT_TOWN) : false; }
 
-        TAdventureObjectType get_obscured_object() const
+        NH3API_NODISCARD TAdventureObjectType get_obscured_object() const
         { 
             if(is_on_map()) 
                 return get_obscured_type(); 
@@ -1390,10 +1530,9 @@ class type_obscuring_object
 
     protected:
         NH3API_MAYBE_UNUSED
-        byte_t gap_B;
+        byte_t gap_B[1];
 
     public:
-
         // type as adventure object /
         // тип объекта как объекта карты
         // offset: +0xC = +12,  size = 0x4 = 4
@@ -1408,7 +1547,7 @@ class type_obscuring_object
 };
 #pragma pack(pop) // 1
 
-#pragma pack(push, 2)
+#pragma pack(push, 1)
 // Map cell information /
 // Информация о клетке карты
 // size = 0x26 = 38, align = 2, baseclass: ExtraInfoUnion
@@ -1421,7 +1560,7 @@ class NewmapCell : public ExtraInfoUnion
         { THISCALL_1(void, 0x4FDCA0, this); }
 
         NH3API_FORCEINLINE
-        NewmapCell(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        NewmapCell(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : ObjectCellList(tag)
         {}
 
@@ -1432,42 +1571,47 @@ class NewmapCell : public ExtraInfoUnion
     public:
         // Find trigger cell /
         // Найти триггерную клетку.
-        NewmapCell* get_trigger_cell() const
+        NH3API_NODISCARD NewmapCell* get_trigger_cell()
+        { return THISCALL_1(NewmapCell*, 0x4FD0F0, this); }
+
+        // Find trigger cell /
+        // Найти триггерную клетку.
+        NH3API_NODISCARD const NewmapCell* get_trigger_cell() const
         { return THISCALL_1(NewmapCell*, 0x4FD0F0, this); }
 
         // Get cell map object(including hero or boat if present on this cell) /
         // Получить текущий объект клетки(включая героя/лодку, если он стоит на ней).
-        TAdventureObjectType get_map_object() const
+        NH3API_NODISCARD TAdventureObjectType get_map_object() const
         { return THISCALL_1(TAdventureObjectType, 0x4FD220, this); }
 
         // Get cell ExtraInfoUnion info(including hero or boat if present on this cell) /
         // Получить информацию ExtraInfoUnion о клетке(включая героя/лодку, если он стоит на ней).
-        ExtraInfoUnion get_map_extraInfo() const
+        NH3API_NODISCARD ExtraInfoUnion get_map_extraInfo() const
         { return THISCALL_1(ExtraInfoUnion, 0x4FD280, this); }
 
         // Current cell is a trigger cell /
         // Текущая клетка является триггерной?
-        bool cell_is_trigger() const
+        NH3API_NODISCARD bool cell_is_trigger() const
         { return THISCALL_1(bool, 0x4FD2D0, this); }
 
         // Current cell is diggable /
         // Можно ли копать на этой клетке?
-        bool is_diggable() const
+        NH3API_NODISCARD bool is_diggable() const
         { return THISCALL_1(bool, 0x4FD340, this); }
 
         // Current cell has active event /
         // На этой клетке можно активировать событие?
-        bool HasTriggerableEvent() const
+        NH3API_NODISCARD bool HasTriggerableEvent() const
         { return THISCALL_1(bool, 0x4FD410, this); }
 
         // Get underlying magical terrain(if present) adventure object type /
         // Получить магическую почву на клетке(если есть) как объект.
-        TAdventureObjectType get_special_terrain() const
+        NH3API_NODISCARD TAdventureObjectType get_special_terrain() const
         { return THISCALL_1(TAdventureObjectType, 0x4FD470, this); }
 
         // Get underlying magical terrain type(if present) /
         // Получить тип магической почвы на клетке(если есть).
-        EMagicTerrain get_special_terrain_type() const
+        NH3API_NODISCARD EMagicTerrain get_special_terrain_type() const
         { return THISCALL_1(EMagicTerrain, 0x4FD590, this); }
 
     public:
@@ -1500,7 +1644,6 @@ class NewmapCell : public ExtraInfoUnion
         #pragma pack(pop) // 4
 
     public:
-
         // Ground type /
         // Тип почвы.
         // offset: +0x4 = +4,  size = 0x1 = 1
@@ -1538,53 +1681,59 @@ class NewmapCell : public ExtraInfoUnion
     public:
         // Повёрнута ли почва горизонтально?
         // occupy: +0xC{00000001}
-        bool GroundFlippedHorizontal : 1;
+        uint8_t GroundFlippedHorizontal : 1;
         // Повёрнута ли почва вертикально?
         // occupy: +0xC{00000010}
-        bool GroundFlippedVertical   : 1;
+        uint8_t GroundFlippedVertical   : 1;
         // Повёрнута ли река горизонтально?
         // occupy: +0xC{00000100}
-        bool RiverFlippedHorizontal  : 1;
+        uint8_t RiverFlippedHorizontal  : 1;
         // Повёрнута ли река вертикально?
         // occupy: +0xC{00001000}
-        bool RiverFlippedVertical    : 1;
+        uint8_t RiverFlippedVertical    : 1;
         // Повёрнута ли дорога горизонтально?
         // occupy: +0xC{00010000}
-        bool RoadFlippedHorizontal   : 1;
+        uint8_t RoadFlippedHorizontal   : 1;
         // Повёрнута ли дорога вертикально?
         // occupy: +0xC{00100000}
-        bool RoadFlippedVertical     : 1;
+        uint8_t RoadFlippedVertical     : 1;
         // Проходима ли клетка?
         // occupy: +0xC{01000000}
-        bool Passable                : 1;
+        uint8_t Passable                : 1;
         // Есть ли анимированные объекты/реки/анимированная почва на клетке?
         // occupy: +0xC{01000000}
-        bool Animated                : 1;
+        uint8_t Animated                : 1;
         // Заблокирована ли клетка?
-        // occupy: +0xD{00000001}
-        bool IsBlocked               : 1;
+        // offset: +0xD = +13, size = 1 bit, mask = 00000001
+        uint8_t IsBlocked               : 1;
         // Примыкает ли клетка к воде?
-        // occupy: +0xD{00000010}
-        bool IsBeachBorder           : 1;
+        // offset: +0xD = +13, size = 1 bit, mask = 00000010
+        uint8_t IsBeachBorder           : 1;
 
     protected:
         // Неиспользуемый бит
-        // occupy: +0xD{00000100}
-        bool unused_bit              : 1;
+        // offset: +0xD = +13, size = 1 bit, mask = 00000100
+        uint8_t unused_bit              : 1;
 
     public:
         // На клетке можно построить корабль?
-        // occupy: +0xD{00001000}
-        bool can_build_ship          : 1;
+        // offset: +0xD = +13, size = 1 bit, mask = 00001000
+        uint8_t can_build_ship          : 1;
         
         // Клетка является триггером?
-        // occupy: +0xD{00010000}
-        bool is_trigger              : 1;
-
+        // offset: +0xD = +13, size = 1 bit, mask = 00010000
+        uint8_t is_trigger              : 1;
+    
+    protected:
+        uint8_t : 3;
+        
+    public:
+        union {
         // Map object cells on this cell /
         // Клетки объектов на клетке.
         // offset: +0xE = +14,  size = 0x10 = 16
         exe_vector<TObjectCell> ObjectCellList;
+        };
 
         // Type of the "highest" object(that is, one that is drawn above other objects), see TObjectCell::Height /
         // Тип самого "высокого" объекта(который отрисовывается поверх других), см. TObjectCell::Height.

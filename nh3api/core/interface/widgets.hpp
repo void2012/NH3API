@@ -23,27 +23,30 @@ NH3API_VIRTUAL_CLASS iconWidget : public widget
             bool (__thiscall* handle_click)(iconWidget*, bool, bool);
         };
 
-    protected:
         iconWidget() NH3API_DELETED_FUNCTION
 
     public:
-        iconWidget(int32_t x,
-                   int32_t y,
+        iconWidget(int32_t x_,
+                   int32_t y_,
                    int32_t w,
                    int32_t h,
-                   int32_t id,
+                   int32_t id_,
                    const char* image,
                    int32_t frame,
                    int32_t sequence,
                    bool flipped,
                    uint16_t back_color,
-                   widget::ETypes style = widget::ICON_WIDGET) NH3API_NOEXCEPT
-            : widget(nh3api::dummy_tag)
-        { THISCALL_12(void, 0x4EA800, this, x, y, w, h, id, image, frame, sequence, flipped, back_color, style); }
+                   widget::ETypes style_ = widget::ICON_WIDGET) NH3API_NOEXCEPT
+            : widget(::nh3api::dummy_tag)
+        { THISCALL_12(void, 0x4EA800, this, x_, y_, w, h, id_, image, frame, sequence, flipped, back_color, style_); }
 
-        iconWidget(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-            : widget(nh3api::dummy_tag)
+        iconWidget(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+            : widget(::nh3api::dummy_tag)
         {}
+        
+        NH3API_FORCEINLINE
+        ~iconWidget() NH3API_NOEXCEPT
+        { THISCALL_1(void, 0x4EA890, this); }
 
     // virtual functions
     public:
@@ -99,11 +102,22 @@ NH3API_VIRTUAL_CLASS iconWidget : public widget
         // offset: +0x3C = +60,  size = 0x1 = 1
         bool IsFlipped;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x3D = +61,  size = 0x3 = 3
+        byte_t gap_3D[3];
+
+    public:
         // offset: +0x40 = +64,  size = 0x4 = 4
         int32_t PostPostWalkSequence;
 
         // offset: +0x44 = +68,  size = 0x2 = 2
         uint16_t BackColor;
+
+    protected:
+        NH3API_MAYBE_UNUSED
+        // offset: +0x46 = +70,  size = 0x2 = 2
+        byte_t gap_46[2];
 
 };
 #pragma pack(pop)
@@ -125,7 +139,6 @@ NH3API_VIRTUAL_CLASS textWidget : public widget
             void (__thiscall* SetText)(textWidget*, const char*);
         };
 
-    protected:
         textWidget() NH3API_DELETED_FUNCTION
 
     public:
@@ -144,7 +157,7 @@ NH3API_VIRTUAL_CLASS textWidget : public widget
         { THISCALL_11(void, 0x5BC6A0, this, textWidgetX, textWidgetY, textWidgetWidth, textWidgetHeight, textString, textFontName, color, textWidgetId, justify, back_color); }
 
         NH3API_FORCEINLINE
-        textWidget(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        textWidget(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : widget(tag), Text(tag)
         {}
 
@@ -160,10 +173,12 @@ NH3API_VIRTUAL_CLASS textWidget : public widget
         { get_type_vftable(this)->SetText(this, new_text); }
 
     public:
+        union { 
         // Widget text /
         // Текст виджета.
-        // offset: +0x30 = +48,  size = 0x10 = 16
-        exe_string Text;
+        // offset: +0x30 = +48,  size = 0x10 = 16    
+        exe_string Text; 
+        };
 
         // Widget font /
         // Шрифт виджета.
@@ -207,7 +222,6 @@ NH3API_VIRTUAL_CLASS textEntryWidget : public textWidget
             void (__thiscall* SaveBackground)(const textEntryWidget*);
         };
 
-    protected:
         textEntryWidget() NH3API_DELETED_FUNCTION
 
     public:
@@ -227,11 +241,11 @@ NH3API_VIRTUAL_CLASS textEntryWidget : public textWidget
                         int32_t iReadType,
                         int32_t textInsetX,
                         int32_t textInsetY) NH3API_NOEXCEPT
-            : textWidget(nh3api::dummy_tag)
+            : textWidget(::nh3api::dummy_tag)
         { THISCALL_17(void, 0x5BACD0, this, textEntryWidgetX, textEntryWidgetY, textEntryWidgetWidth, textEntryWidgetHeight, textStringSize, textString, textFontName, color, justification, backgroundIconName, textBackgroundFrame, textEntryWidgetId, textEntryWidgetStyle, iReadType, textInsetX, textInsetY); }
 
-        textEntryWidget(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-            : textWidget(nh3api::dummy_tag)
+        textEntryWidget(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+            : textWidget(::nh3api::dummy_tag)
         {}
 
         NH3API_FORCEINLINE
@@ -263,7 +277,7 @@ NH3API_VIRTUAL_CLASS textEntryWidget : public textWidget
         { get_type_vftable(this)->SaveBackground(this); }
 
     public:
-        char GetCharPressed(const message& msg)
+        NH3API_NODISCARD char GetCharPressed(const message& msg)
         { return THISCALL_2(char, 0x5BAF50, this, &msg); }
 
     public:
@@ -312,6 +326,10 @@ NH3API_VIRTUAL_CLASS textEntryWidget : public textWidget
         // offset: +0x6E = +110,  size = 0x1 = 1
         bool autoDraw;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_6D[1];
+
 };
 #pragma pack(pop)
 
@@ -342,21 +360,21 @@ NH3API_VIRTUAL_CLASS border : public widget
 
     protected:
         border() NH3API_NOEXCEPT
-            : widget(nh3api::dummy_tag)
+            : widget(::nh3api::dummy_tag)
         { THISCALL_1(void, 0x5FE9D0, this); }
 
     public:
-        border(int32_t x,
-               int32_t y,
+        border(int32_t x_,
+               int32_t y_,
                int32_t w,
                int32_t h,
-               int32_t id,
-               widget::ETypes style) NH3API_NOEXCEPT
-            : widget(nh3api::dummy_tag)
-        { THISCALL_7(void, 0x44FBE0, this, x, y, w, h, id, style); }
+               int32_t id_,
+               widget::ETypes style_) NH3API_NOEXCEPT
+            : widget(::nh3api::dummy_tag)
+        { THISCALL_7(void, 0x44FBE0, this, x_, y_, w, h, id_, style_); }
 
-        border(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-            : widget(nh3api::dummy_tag)
+        border(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+            : widget(::nh3api::dummy_tag)
         {}
 
         NH3API_FORCEINLINE
@@ -393,18 +411,18 @@ NH3API_VIRTUAL_CLASS bitmapBorder : public border
         {}
 
     public:
-        bitmapBorder(int32_t x,
-                     int32_t y,
+        bitmapBorder(int32_t x_,
+                     int32_t y_,
                      int32_t w,
                      int32_t h,
-                     int32_t id,
+                     int32_t id_,
                      const char* image,
-                     widget::ETypes style) NH3API_NOEXCEPT
-            : border(nh3api::dummy_tag)
-        { THISCALL_8(void, 0x44FFA0, this, x, y, w, h, id, image, style); }
+                     widget::ETypes style_) NH3API_NOEXCEPT
+            : border(::nh3api::dummy_tag)
+        { THISCALL_8(void, 0x44FFA0, this, x_, y_, w, h, id_, image, style_); }
 
-        bitmapBorder(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-            : border(nh3api::dummy_tag)
+        bitmapBorder(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+            : border(::nh3api::dummy_tag)
         {}
 
         NH3API_FORCEINLINE
@@ -441,18 +459,18 @@ NH3API_VIRTUAL_CLASS coloredBorderFrame : public border
         {}
 
     public:
-        coloredBorderFrame(int32_t x,
-                           int32_t y,
+        coloredBorderFrame(int32_t x_,
+                           int32_t y_,
                            int32_t w,
                            int32_t h,
-                           int32_t id,
-                           int32_t color,
-                           int32_t style) NH3API_NOEXCEPT
-            : border(nh3api::dummy_tag)
-        { THISCALL_8(void, 0x44FE00, this, x, y, w, h, id, color, style); }
+                           int32_t id_,
+                           uint32_t color_,
+                           widget::ETypes style_ = widget::COLORED_BORDER) NH3API_NOEXCEPT
+            : border(::nh3api::dummy_tag)
+        { THISCALL_8(void, 0x44FE00, this, x_, y_, w, h, id_, color_, style_); }
 
-        coloredBorderFrame(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-            : border(nh3api::dummy_tag)
+        coloredBorderFrame(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+            : border(::nh3api::dummy_tag)
         {}
 
         NH3API_FORCEINLINE
@@ -475,26 +493,25 @@ NH3API_VIRTUAL_CLASS bitmapBackedTextWidget : public textWidget
     public:
         struct vftable_t : public textWidget::vftable_t {};
 
-    protected:
         bitmapBackedTextWidget() NH3API_DELETED_FUNCTION
 
     public:
-        bitmapBackedTextWidget(int32_t x,
-                               int32_t y,
+        bitmapBackedTextWidget(int32_t x_,
+                               int32_t y_,
                                int32_t w,
                                int32_t h,
                                const char* text,
                                const char* font,
                                const char* back,
                                font::TColor color,
-                               int32_t id,
+                               int32_t id_,
                                font::EJustify justify,
-                               widget::ETypes style = TEXT_WIDGET) NH3API_NOEXCEPT
-            : textWidget(nh3api::dummy_tag)
-        { THISCALL_12(void, 0x5BCB70, this, x, y, w, h, text, font, back, color, id, justify, style); }
+                               widget::ETypes style_ = widget::TEXT_WIDGET) NH3API_NOEXCEPT
+            : textWidget(::nh3api::dummy_tag)
+        { THISCALL_12(void, 0x5BCB70, this, x_, y_, w, h, text, font, back, color, id_, justify, style_); }
 
-        bitmapBackedTextWidget(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-            : textWidget(nh3api::dummy_tag)
+        bitmapBackedTextWidget(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+            : textWidget(::nh3api::dummy_tag)
         {}
 
         NH3API_FORCEINLINE
@@ -529,25 +546,24 @@ NH3API_VIRTUAL_CLASS button : public widget
             eButtonHighlighted = 3,
         };
 
-    protected:
         button() NH3API_DELETED_FUNCTION
 
     public:
-        button(int32_t x,
-               int32_t y,
+        button(int32_t x_,
+               int32_t y_,
                int32_t w,
                int32_t h,
-               int32_t id,
+               int32_t id_,
                const char* image,
                int32_t normal = 0,
                int32_t selected = 1,
                bool end = false,
                EKeyCodes hotkey = KEYCODE_NONE,
-               widget::ETypes style = widget::BUTTON) NH3API_NOEXCEPT
+               widget::ETypes style_ = widget::BUTTON) NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY(button)
-        { THISCALL_12(void, 0x455BD0, this, x, y, w, h, id, image, normal, selected, end, hotkey, style); }
+        { THISCALL_12(void, 0x455BD0, this, x_, y_, w, h, id_, image, normal, selected, end, hotkey, style_); }
 
-        button(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        button(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : widget(tag), hotKeyCodes(tag), Text(tag)
         {}
 
@@ -596,16 +612,25 @@ NH3API_VIRTUAL_CLASS button : public widget
         // offset: +0x44 = +68,  size = 0x1 = 1
         bool _end;
 
+        NH3API_MAYBE_UNUSED
+        byte_t gap_45[3];
+
     public:
+
+    public:
+        union {
         // Hotkeys that activate the button /
         // Горячие клавиши, активирующие кнопку.
         // offset: +0x48 = +72,  size = 0x10 = 16
         exe_vector<EKeyCodes> hotKeyCodes;
+        };
 
+        union {
         // Текст кнопки /
         // button caption
         // offset: +0x58 = +88,  size = 0x10 = 16
-        exe_string Text;
+        exe_string Text;    
+        };
 
 };
 #pragma pack(pop)
@@ -619,15 +644,14 @@ NH3API_VIRTUAL_CLASS textButton : public button
     public:
         struct vftable_t : public button::vftable_t {};
 
-    protected:
         textButton() NH3API_DELETED_FUNCTION
 
     public:
-        textButton(int32_t x,
-                   int32_t y,
+        textButton(int32_t x_,
+                   int32_t y_,
                    int32_t w,
                    int32_t h,
-                   int32_t id,
+                   int32_t id_,
                    const char* image,
                    const char* text_,
                    const char* font_name,
@@ -635,13 +659,13 @@ NH3API_VIRTUAL_CLASS textButton : public button
                    int32_t selected = 1,
                    bool end = false,
                    EKeyCodes hotkey = KEYCODE_NONE,
-                   widget::ETypes style = widget::TEXT_BUTTON,
+                   widget::ETypes style_ = widget::TEXT_BUTTON,
                    font::TColor new_color = font::TColor::WHITE) NH3API_NOEXCEPT
-            : button(nh3api::dummy_tag)
-        { THISCALL_15(void, 0x456730, this, x, y, w, h, id, image, text_, font_name, normal, selected, end, hotkey, style, new_color); }
+            : button(::nh3api::dummy_tag)
+        { THISCALL_15(void, 0x456730, this, x_, y_, w, h, id_, image, text_, font_name, normal, selected, end, hotkey, style_, new_color); }
 
-        textButton(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-            : button(nh3api::dummy_tag)
+        textButton(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+            : button(::nh3api::dummy_tag)
         {}
 
         NH3API_FORCEINLINE
@@ -674,24 +698,23 @@ NH3API_VIRTUAL_CLASS type_func_button : public button
     public:
         struct vftable_t : public button::vftable_t {};
 
-    protected:
         type_func_button() NH3API_DELETED_FUNCTION
 
     public:
-        type_func_button(int32_t _x,
-                         int32_t _y,
-                         int32_t _width,
-                         int32_t _height,
-                         int32_t _id,
-                         const char* _image,
-                         int32_t (__fastcall* _handler)(message*),
-                         int32_t _normal = 0,
-                         int32_t _selected = 1) NH3API_NOEXCEPT
-            : button(nh3api::dummy_tag)
-        { THISCALL_10(void, 0x456A10, this, _x, _y, _width, _height, _id, _image, _handler, _normal, _selected); }
+        type_func_button(int32_t x_,
+                         int32_t y_,
+                         int32_t width_,
+                         int32_t height_,
+                         int32_t id_,
+                         const char* image_,
+                         int32_t (__fastcall* handler_)(message*),
+                         int32_t normal_ = 0,
+                         int32_t selected_ = 1) NH3API_NOEXCEPT
+            : button(::nh3api::dummy_tag)
+        { THISCALL_10(void, 0x456A10, this, x_, y_, width_, height_, id_, image_, handler_, normal_, selected_); }
 
-        type_func_button(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-            : button(nh3api::dummy_tag)
+        type_func_button(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+            : button(::nh3api::dummy_tag)
         {}
 
         NH3API_FORCEINLINE
@@ -733,21 +756,21 @@ NH3API_VIRTUAL_CLASS slider : public widget
 
     public:
         NH3API_FORCEINLINE
-        slider(int32_t x,
-               int32_t y,
+        slider(int32_t x_,
+               int32_t y_,
                int32_t w,
                int32_t h,
-               int32_t id,
-               int32_t num,
+               int32_t id_,
+               int32_t num_,
                TSliderFunction func,
                slider::EGraphics graphics,
                int32_t page,
                bool hotKey) NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY_OR_BASE(slider, widget)
-        { THISCALL_11(void, 0x5963C0, this, x, y, w, h, id, num, func, graphics, page, hotKey); }
+        { THISCALL_11(void, 0x5963C0, this, x_, y_, w, h, id_, num_, func, graphics, page, hotKey); }
 
         NH3API_FORCEINLINE
-        slider(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        slider(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : widget(tag)
         {}
 
@@ -759,16 +782,16 @@ NH3API_VIRTUAL_CLASS slider : public widget
         NH3API_VIRTUAL_OVERRIDE_WIDGET(slider)
 
         // vftable shift: +52
-        virtual void __thiscall SetResolution(int32_t num)
-        { get_type_vftable(this)->SetResolution(this, num); }
+        virtual void __thiscall SetResolution(int32_t arg)
+        { get_type_vftable(this)->SetResolution(this, arg); }
 
         // vftable shift: +56
         virtual void __thiscall SetState(int32_t state)
         { get_type_vftable(this)->SetState(this, state); }
 
         // vftable shift: +60
-        virtual void __thiscall UpdateResolution(int32_t num)
-        { get_type_vftable(this)->UpdateResolution(this, num); }
+        virtual void __thiscall UpdateResolution(int32_t arg)
+        { get_type_vftable(this)->UpdateResolution(this, arg); }
 
         // vftable shift: +64
         virtual void __thiscall Refresh()
@@ -814,6 +837,11 @@ NH3API_VIRTUAL_CLASS slider : public widget
         // offset: +0x5D = +93,  size = 0x1 = 1
         bool scrolling;
 
+    protected:
+        NH3API_MAYBE_UNUSED
+        byte_t gap_5E[2];
+
+    public:
         // offset: +0x60 = +96,  size = 0x4 = 4
         int32_t lastFocus;
 
@@ -826,12 +854,12 @@ NH3API_VIRTUAL_CLASS slider : public widget
 #ifndef NH3API_VIRTUAL_OVERRIDE_SLIDER
 #define NH3API_VIRTUAL_OVERRIDE_SLIDER(CLASS_NAME) \
 NH3API_VIRTUAL_OVERRIDE_WIDGET(CLASS_NAME) \
-virtual void __thiscall SetResolution(int32_t num) override \
-{ get_type_vftable(this)->SetResolution(this, num); } \
+virtual void __thiscall SetResolution(int32_t arg) override \
+{ get_type_vftable(this)->SetResolution(this, arg); } \
 virtual void __thiscall SetState(int32_t state) override \
 { get_type_vftable(this)->SetState(this, state); } \
-virtual void __thiscall UpdateResolution(int32_t num) override \
-{ get_type_vftable(this)->UpdateResolution(this, num); } \
+virtual void __thiscall UpdateResolution(int32_t arg) override \
+{ get_type_vftable(this)->UpdateResolution(this, arg); } \
 virtual void __thiscall Refresh() override \
 { get_type_vftable(this)->Refresh(this); }
 #endif
@@ -844,18 +872,18 @@ NH3API_VIRTUAL_CLASS type_text_scroller : public widget
     public:
         NH3API_FORCEINLINE
         type_text_scroller(const char* text,
-                           int32_t x,
-                           int32_t y,
+                           int32_t x_,
+                           int32_t y_,
                            int32_t w,
                            int32_t h,
                            const char* font_name,
                            font::TColor color,
                            slider::EGraphics graphics) NH3API_NOEXCEPT
         NH3API_DELEGATE_DUMMY(type_text_scroller)
-        { THISCALL_9(void, 0x5BA360, this, text, x, y, w, h, font_name, color, graphics); }
+        { THISCALL_9(void, 0x5BA360, this, text, x_, y_, w, h, font_name, color, graphics); }
 
         NH3API_FORCEINLINE
-        type_text_scroller(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_text_scroller(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : widget(tag), lines(tag), line_images(tag)
         {}
 
@@ -870,11 +898,15 @@ NH3API_VIRTUAL_CLASS type_text_scroller : public widget
         // offset: +0x30 = +48,  size = 0x4 = 4
         const char* font_filename;
 
+        union {
         // offset: +0x34 = +52,  size = 0x10 = 16
-        exe_vector<exe_string> lines;
-
+        exe_vector<exe_string> lines;    
+        };
+        
+        union {
         // offset: +0x44 = +68,  size = 0x10 = 16
         exe_vector<textWidget*> line_images;
+        };
 
         // offset: +0x54 = +84,  size = 0x4 = 4
         type_text_slider* text_slider;
@@ -892,25 +924,27 @@ NH3API_VIRTUAL_CLASS type_text_slider : public slider
     public:
         NH3API_FORCEINLINE
         type_text_slider(type_text_scroller* parent,
-                         int32_t x,
-                         int32_t y,
+                         int32_t x_,
+                         int32_t y_,
                          int32_t w,
                          int32_t h,
-                         int32_t id,
-                         int32_t num,
+                         int32_t id_,
+                         int32_t num_,
                          slider::EGraphics graphics,
                          int32_t page,
                          bool hotKey) NH3API_NOEXCEPT
-            : slider(x, y, w, h, id, num, nullptr, graphics, page, hotKey),
+            : slider(x_, y_, w, h, id_, num_, nullptr, graphics, page, hotKey),
               scroller(parent)
         {
             NH3API_SET_VFTABLE();
         }
 
         NH3API_FORCEINLINE
-        type_text_slider(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_text_slider(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
             : slider(tag)
         {}
+
+        NH3API_DEFAULT_DESTRUCTOR(type_text_slider)
 
     public:
         NH3API_VIRTUAL_OVERRIDE_SLIDER(type_text_slider)
@@ -937,7 +971,6 @@ NH3API_VIRTUAL_CLASS CChatEdit : public textEntryWidget
             void (__thiscall* SendChat)(CChatEdit*, const char*, int32_t);
         };
 
-    protected:
         CChatEdit() NH3API_DELETED_FUNCTION
 
     public:
@@ -948,7 +981,7 @@ NH3API_VIRTUAL_CLASS CChatEdit : public textEntryWidget
                   int32_t textStringSize,
                   const char* textString,
                   const char* textFontName,
-                  int32_t colorIndex,
+                  font::TColor colorIndex,
                   font::EJustify justification,
                   const char* backgroundIconName,
                   int32_t backgroundFrame,
@@ -957,12 +990,14 @@ NH3API_VIRTUAL_CLASS CChatEdit : public textEntryWidget
                   int32_t iReadType,
                   int32_t textInsetX,
                   int32_t textInsetY) NH3API_NOEXCEPT
-            : textEntryWidget(nh3api::dummy_tag)
+            : textEntryWidget(::nh3api::dummy_tag)
         { THISCALL_17(void, 0x5545A0, this, textWidgetX, textWidgetY, textWidgetWidth, textWidgetHeight, textStringSize, textString, textFontName, colorIndex, justification, backgroundIconName, backgroundFrame, textWidgetId, textWidgetStyle, iReadType, textInsetX, textInsetY); }
 
-        CChatEdit(const nh3api::dummy_tag_t&) NH3API_NOEXCEPT
-            : textEntryWidget(nh3api::dummy_tag)
+        CChatEdit(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+            : textEntryWidget(::nh3api::dummy_tag)
         {}
+
+        NH3API_DEFAULT_DESTRUCTOR(CChatEdit)
 
     public:
         NH3API_VIRTUAL_OVERRIDE_TEXTENTRYWIDGET(CChatEdit)
@@ -984,7 +1019,7 @@ NH3API_VIRTUAL_CLASS CChatEdit : public textEntryWidget
         { return get_type_vftable(this)->OnFunctionKey(this, msg, toWho); }
 
         // vftable shift: +92
-        virtual bool __thiscall IsOpen() const NH3API_NOEXCEPT
+        NH3API_NODISCARD virtual bool __thiscall IsOpen() const NH3API_NOEXCEPT
         { return get_type_vftable(this)->IsOpen(this); }
 
         // vftable shift: +96
@@ -995,14 +1030,14 @@ NH3API_VIRTUAL_CLASS CChatEdit : public textEntryWidget
 #pragma pack(pop)
 
 NH3API_FORCEINLINE
-void SetPlayerPaletteColors(uint16_t* pPalette, uint32_t whichPlayer)
+void SetPlayerPaletteColors(uint16_t* pPalette, int32_t whichPlayer)
 { 
     if ( whichPlayer >= 0 && whichPlayer < 8 )
         FASTCALL_2(void, 0x6003E0, pPalette, whichPlayer); 
 }
 
 NH3API_FORCEINLINE
-void SetPlayerPaletteColors(TPalette24& pPalette, uint32_t whichPlayer)
+void SetPlayerPaletteColors(TPalette24& pPalette, int32_t whichPlayer)
 { 
     if ( whichPlayer >= 0 && whichPlayer < 8 )
         FASTCALL_2(void, 0x600400, &pPalette, whichPlayer); 

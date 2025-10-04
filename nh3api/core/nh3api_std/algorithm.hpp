@@ -247,6 +247,51 @@ swap_chars_range_constexpr(char* __restrict first1,
 }
 */
 
+#ifndef __cpp_lib_raw_memory_algorithms
+using ::std::uninitialized_default_construct_n;
+#else 
+
+template<typename IterT> NH3API_FORCEINLINE
+IterT uninitialized_default_construct_n_impl(IterT first, size_t n, nh3api::tt::false_type)
+{
+    typedef typename ::std::iterator_traits<IterT>::value_type T;
+    IterT current = first;
+    NH3API_TRY
+    {
+        for (; n > 0; (void) ++current, --n)
+            ::new (const_cast<void*>(static_cast<const volatile void*>(
+                ::nh3api::addressof(*current)))) T();
+    }
+    NH3API_CATCH(...)
+    {
+        ::nh3api::destroy(first, current);
+        NH3API_RETHROW
+    }
+    return current;
+}
+
+template<typename IterT> NH3API_FORCEINLINE
+IterT uninitialized_default_construct_n_impl(IterT first, size_t n, nh3api::tt::true_type) NH3API_NOEXCEPT
+{
+    typedef typename ::std::iterator_traits<IterT>::value_type T;
+    IterT current = first;
+        for (; n > 0; (void) ++current, --n)
+            ::new (const_cast<void*>(static_cast<const volatile void*>(
+                ::nh3api::addressof(*current)))) T();
+    return current;
+}
+
+template<typename IterT> NH3API_FORCEINLINE
+IterT uninitialized_default_construct_n(IterT first, size_t n)
+NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_default_constructible<
+    typename ::std::iterator_traits<IterT>::value_type>::value)
+{
+    return uninitialized_default_construct_n_impl<IterT>(first, n,
+    nh3api::tt::is_nothrow_default_constructible<
+    typename ::std::iterator_traits<IterT>::value_type>());
+}
+#endif
+
 } // namespace nh3api
 
 #if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
