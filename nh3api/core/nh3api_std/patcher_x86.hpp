@@ -769,11 +769,13 @@ NH3API_VIRTUAL_CLASS LoHook : public Patch
 
 typedef LoHook SafeLoHook;
 typedef int32_t(__stdcall *_LoHookFunc_)(LoHook*, HookContext*);
-typedef int(__stdcall* _LoHookReferenceFunc_)(LoHook&, HookContext&);
+typedef int32_t(__stdcall *_LoHookReferenceFunc_)(LoHook&, HookContext&);
 typedef int32_t(__stdcall *_SafeLoHookFunc_)(SafeLoHook*, SafeLoHookContext*);
+typedef int32_t(__stdcall *_SafeLoHookReferenceFunc_)(SafeLoHook&, SafeLoHookContext&);
 typedef _LoHookFunc_ lhfunc_t;
 typedef _LoHookReferenceFunc_ lhrfunc_t;
 typedef _SafeLoHookFunc_ slhfunc_t;
+typedef _SafeLoHookReferenceFunc_ slhrfunc_t;
 
 // values passed as the hooktype argument in PatcherInstance::WriteHiHook and PatcherInstance::CreateHiHook /
 // значения передаваемые как аргумент hooktype в PatcherInstance::WriteHiHook и PatcherInstance::CreateHiHook.
@@ -1173,7 +1175,7 @@ protected:
     #if NH3API_CHECK_MSVC || NH3API_CHECK_MINGW
     #if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
     template<typename R, typename... Args> static NH3API_CONSTEXPR
-    void hihook_function_condition_stdcall(R (*func)(Args...))
+    void hihook_function_condition_stdcall(R (*func)(Args...)) NH3API_NOEXCEPT
     {
         (void) func;
         static_assert(false, "HiHook function must have the __stdcall calling convention "
@@ -1181,21 +1183,21 @@ protected:
     }
 
     template<typename R, typename Arg1, typename... Args> static NH3API_CONSTEXPR
-    void hihook_function_condition_argument(R (__stdcall* func)(Arg1, Args...))
+    void hihook_function_condition_argument(R (__stdcall* func)(Arg1, Args...)) NH3API_NOEXCEPT
     {
         (void) func;
         static_assert(nh3api::tt::is_same<Arg1, HiHook*>::value, "HiHook function must have the first argument of type HiHook*");
     }
 
     template<typename R, typename... Args> static NH3API_CONSTEXPR
-    void hihook_function_condition_stdcall(R (__stdcall * func)(Args...))
+    void hihook_function_condition_stdcall(R (__stdcall * func)(Args...)) NH3API_NOEXCEPT
     {
         static_assert(sizeof...(Args) > 0, "HiHook function must have at least one argument of type HiHook*.");
         hihook_function_condition_argument(func);
     }
 
     template<typename F> static NH3API_CONSTEXPR
-    void hihook_function_condition(F* func)
+    void hihook_function_condition(F* func) NH3API_NOEXCEPT
     {
         static_assert(nh3api::tt::is_function<F>::value, "HiHook must be a function.");
         hihook_function_condition_stdcall(func);
@@ -1233,7 +1235,7 @@ protected:
     { using type = std::true_type; };
 
     template<typename F> static constexpr
-    void hihook_function_condition(F*)
+    void hihook_function_condition(F*) noexcept
     {
         constexpr bool is_function = std::is_function<F>::value;
         static_assert(is_function, "HiHook must be a function.");
@@ -1244,7 +1246,7 @@ protected:
     }
 
     template<typename C, typename R> static constexpr
-    void hihook_function_condition(R C::*)
+    void hihook_function_condition(R C::*) noexcept
     { static_assert(false, "HiHook function must not be a member of some class"); }
 
     #endif // MSVC or MinGW GCC
@@ -1380,6 +1382,8 @@ public:
     NH3API_DEPRECATED("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")
     #endif
     virtual LoHook* __stdcall CreateLoHook(uintptr_t address, lhfunc_t func) = 0;
+	NH3API_FORCEINLINE LoHook* CreateLoHook(uintptr_t address, lhrfunc_t func)
+    { return CreateLoHook(address, reinterpret_cast<lhfunc_t>(func)); }
 
 protected:
     virtual HiHook* __stdcall xCreateHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, void* new_func) = 0;
@@ -1607,6 +1611,8 @@ public:
     // Applies thread-safe lohook, see CreateSafeLoHook() /
     // Применяет потокобезопасный лоухук, см. CreateSafeLoHook().
     virtual SafeLoHook* __stdcall WriteSafeLoHook(uintptr_t address, slhfunc_t func, uint32_t = 0) = 0;
+	NH3API_FORCEINLINE SafeLoHook* WriteSafeLoHook(uintptr_t address, slhrfunc_t func)
+    { return WriteSafeLoHook(address, reinterpret_cast<slhfunc_t>(func)); }
 
     // # ver 5.0
     // Creates thread-safe lohook. The interface difference is:
@@ -1622,6 +1628,8 @@ public:
     // Эта версия лоухука не используют механизмы реализации потокобезопасности
     // и работает даже быстрее, чем старые лоухуки.
     virtual SafeLoHook* __stdcall CreateSafeLoHook(uintptr_t address, slhfunc_t func, uint32_t = 0) = 0;
+	NH3API_FORCEINLINE SafeLoHook* CreateSafeLoHook(uintptr_t address, slhrfunc_t func)
+    { return CreateSafeLoHook(address, reinterpret_cast<slhfunc_t>(func)); }
 
     // WriteAsmPatch writes a patch to the address address
     // returns pointer to patch
