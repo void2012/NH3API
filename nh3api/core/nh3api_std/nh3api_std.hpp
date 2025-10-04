@@ -1672,11 +1672,7 @@ typename T::vftable_t* get_vftable(T* ptr) NH3API_NOEXCEPT
 // requires T::vftable_t
 template<class T> NH3API_NODISCARD NH3API_FORCEINLINE
 const typename T::vftable_t* get_vftable(const T* ptr) NH3API_NOEXCEPT
-#if NH3API_HAS_BUILTIN(__builtin_get_vtable_pointer)
-{ return *reinterpret_cast<const typename T::vftable_t* const*>(__builtin_get_vtable_pointer(ptr)); }
-#else 
 { return *reinterpret_cast<const typename T::vftable_t* const*>(ptr); }
-#endif
 
 // is supposed to be specialized for each .exe-s polymorphic class
 template<class T>
@@ -1702,11 +1698,11 @@ template<typename T>
 void set_vftable(T* ptr)
 {
     NH3API_MEMSHIELD_BEGIN
-    //#ifdef __cpp_lib_launder
-    //*reinterpret_cast<void**>(std::launder(ptr)) = get_type_vftable(ptr);
-    //#else
+    #if __has_builtin(__builtin_launder)
+    *reinterpret_cast<const void**>(__builtin_launder(ptr)) = get_type_vftable(ptr);
+    #else
     *reinterpret_cast<const void**>(ptr) = get_type_vftable(ptr);
-    //#endif
+    #endif
     NH3API_MEMSHIELD_END
 }
 
