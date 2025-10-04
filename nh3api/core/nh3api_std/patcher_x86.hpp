@@ -2223,7 +2223,7 @@ public:
     template<typename ValueType> NH3API_FORCEINLINE
     ValueType& VarValue(const char* name)
     {
-        NH3API_STATIC_ASSERT("Patcher_x86's variables cannot be larger than 4 bytes.", sizeof(ValueType) > 4);
+        NH3API_STATIC_ASSERT("Patcher_x86's variables cannot be larger than 4 bytes.", sizeof(ValueType) <= 4);
         Variable* v = VarFind(name);
         if (v == nullptr)
             v = VarInit(name, 0);
