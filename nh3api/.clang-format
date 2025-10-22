@@ -31,7 +31,6 @@ AllowShortLoopsOnASingleLine: false
 AllowShortNamespacesOnASingleLine: false
 AlwaysBreakBeforeMultilineStrings: false
 AttributeMacros: [
-                  'NH3API_DEPRECATED',
                   'NH3API_FORCEINLINE',
                   'NH3API_FLATTEN',
                   'NH3API_INLINE_LARGE',
@@ -40,26 +39,12 @@ AttributeMacros: [
                   'NH3API_SELECTANY',
                   'NH3API_CONSTEXPR_CPP_23',
                   'NH3API_CONSTEXPR_CPP_20',
-                  'NH3API_CONSTEXPR_CPP_17',
-                  'NH3API_CONSTEXPR_CPP_14',
-                  'NH3API_NODISCARD',
-                  'NH3API_CONSTEXPR',
                   'NH3API_MALLOC',
                   'NH3API_MSVC_INTRIN',
-                  'NH3API_DEALLOCATOR',
                   'NH3API_MSVC_LAYOUT',
+                  'NH3API_DEALLOCATOR',
                   'NH3API_NO_VFTABLE',
                   'NH3API_CONST',
-                  'NH3API_NOEXCEPT',
-                  'NH3API_MAYBE_UNUSED',
-                  'NH3API_DELETED_FUNCTION',
-                  'NH3API_NOEXCEPT_EXPR',
-                  'NH3API_EXPLICIT_CPP11',
-                  'NH3API_FINAL',
-                  'NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED',
-                  'NH3API_NORETURN',
-                  'NH3API_INLINE',
-                  'NH3API_INLINE_OR_EXTERN',
                   'NH3API_NAKED'
                  ]
 BinPackArguments: true 
@@ -90,7 +75,6 @@ EmptyLineBeforeAccessModifier: LogicalBlock
 # EnumTrailingComma since clang-format 21
 EnumTrailingComma: Remove
 FixNamespaceComments: true
-IfMacros: [ 'NH3API_IF_CONSTEXPR' ]
 IncludeBlocks: Preserve
 IndentAccessModifiers: true
 IndentCaseBlocks: true
@@ -151,7 +135,7 @@ SpaceBeforeRangeBasedForLoopColon: true
 SpaceBeforeSquareBrackets: false 
 SpaceInEmptyBlock: false 
 # Leave spaces in templates brackets < > for conformance with C++98
-SpacesInAngles: Leave  
+SpacesInAngles: Never  
 SpacesInParens: Custom
 SpacesInParensOptions:
   ExceptDoubleParentheses: false
@@ -160,7 +144,7 @@ SpacesInParensOptions:
   InEmptyParentheses : false 
   Other: false
 SpacesInSquareBrackets: false
-Standard: c++03
+Standard: c++17
 StatementMacros: ['NH3API_MAKE_EXCEPTION_GUARD']
 TabWidth: 4
 UseTab: Never 

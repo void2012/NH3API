@@ -9,7 +9,8 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std/memory.hpp" // bit_cast, byte_t, others
+#include "nh3api_std/call_macros.hpp" // call macros
+#include "nh3api_std/stl_extras.hpp" // bit_cast, byte_t
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -412,36 +413,36 @@ enum : uint32_t
 class type_point
 {
     public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        NH3API_FORCEINLINE constexpr
         // The original game supports X, Y up to 255 and Z from 0 to 1. /
         // Оригинальная игра поддерживает X, Y до 255, а Z от 0 до 1.
         /// @param X is in range [0;1023]
         /// @param Y is in range [0;1023]
         /// @param Z is in range [0;15]
-        type_point(int16_t X, int16_t Y, int16_t Z) NH3API_NOEXCEPT
+        type_point(int16_t X, int16_t Y, int16_t Z) noexcept
             : x(X), y(Y), z(Z) {}
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        NH3API_FORCEINLINE constexpr
         // Default constructor /
         // Конструктор по умолчанию.
-        type_point() NH3API_NOEXCEPT
+        type_point() noexcept
             : x(-1), y(-1), z(-1)
         {}
 
         NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-        type_point(uint32_t data) NH3API_NOEXCEPT
+        type_point(uint32_t data) noexcept
         {
             *this = nh3api::bit_cast<type_point>(data);
         }
 
         NH3API_FORCEINLINE
-        type_point(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        type_point(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
     // setters
     public:
-        NH3API_CONSTEXPR_CPP_14
-        type_point& set(int8_t X, int8_t Y, int8_t Z) NH3API_NOEXCEPT
+        constexpr
+        type_point& set(int8_t X, int8_t Y, int8_t Z) noexcept
         {
             x = X;
             y = Y;
@@ -449,12 +450,12 @@ class type_point
             return *this;
         }
 
-        #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
-        NH3API_CONSTEXPR_CPP_14
+        #if __has_builtin(__builtin_bit_cast)
+        constexpr
         #endif
-        type_point& set(uint32_t data) NH3API_NOEXCEPT
+        type_point& set(uint32_t data) noexcept
         {
-            #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
+            #if __has_builtin(__builtin_bit_cast)
             *this = __builtin_bit_cast(type_point, data);
             #else
             memcpy(this, &data, sizeof(*this));
@@ -462,39 +463,34 @@ class type_point
             return *this;
         }
 
-        NH3API_CONSTEXPR_CPP_14
-        type_point& set_x(int8_t X) NH3API_NOEXCEPT
+        constexpr type_point& set_x(int8_t X) noexcept
         { x = X; return *this; }
 
-        NH3API_CONSTEXPR_CPP_14
-        type_point& set_y(int8_t Y) NH3API_NOEXCEPT
+        constexpr type_point& set_y(int8_t Y) noexcept
         { y = Y; return *this; }
 
-        NH3API_CONSTEXPR_CPP_14
-        type_point& set_z(int8_t Z) NH3API_NOEXCEPT
+        constexpr type_point& set_z(int8_t Z) noexcept
         { z = Z; return *this; }
 
     // getters
     public:
-        NH3API_NODISCARD NH3API_CONSTEXPR
-        int16_t get_x() const NH3API_NOEXCEPT
+        [[nodiscard]] constexpr int16_t get_x() const noexcept
         { return x; }
 
-        NH3API_NODISCARD NH3API_CONSTEXPR
-        int16_t get_y() const NH3API_NOEXCEPT
+        [[nodiscard]] constexpr int16_t get_y() const noexcept
         { return y; }
 
-        NH3API_NODISCARD NH3API_CONSTEXPR
-        int8_t get_z() const NH3API_NOEXCEPT
+        [[nodiscard]] constexpr int8_t get_z() const noexcept
         { return static_cast<int8_t>(z & 0xF); }
 
-        #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
-        NH3API_CONSTEXPR_CPP_14
+        [[nodiscard]]
+        #if __has_builtin(__builtin_bit_cast)
+        constexpr
         #endif
         // return the underlying data
-        uint32_t to_uint() const NH3API_NOEXCEPT
+        uint32_t to_uint() const noexcept
         { 
-            #if NH3API_HAS_BUILTIN(__builtin_bit_cast)
+            #if __has_builtin(__builtin_bit_cast)
             return __builtin_bit_cast(uint32_t, *this);
             #else
             uint32_t result;
@@ -505,10 +501,10 @@ class type_point
 
         // This point is on map
         // Точка находится на карте
-        NH3API_NODISCARD bool is_valid() const NH3API_NOEXCEPT
+        [[nodiscard]] bool is_valid() const noexcept
         { return THISCALL_1(bool, 0x4B1090, this); }
 
-        NH3API_NODISCARD NH3API_CONSTEXPR size_t hash() const NH3API_NOEXCEPT
+        [[nodiscard]] constexpr size_t hash() const noexcept
         {
             // for hash we simply return 32-bit mask of tuple [x,y,z] but without 
             // unused bits which may be filled with different default values depending on 
@@ -534,7 +530,7 @@ template<>
 struct std::hash<type_point>
 {
     public:
-        size_t operator()(const type_point& arg) NH3API_NOEXCEPT
+        size_t operator()(const type_point& arg) noexcept
         { return arg.hash(); }
 };
 #endif
@@ -550,7 +546,7 @@ struct tilePoint
     int8_t y;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     byte_t gap_2[2];
 
 };
@@ -561,18 +557,18 @@ protected:
 struct TPoint
 {
     public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
-        TPoint() NH3API_NOEXCEPT
+        NH3API_FORCEINLINE constexpr
+        TPoint() noexcept
             : x(-1), y(-1)
         {}
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
-        TPoint(int32_t X, int32_t Y) NH3API_NOEXCEPT
+        NH3API_FORCEINLINE constexpr
+        TPoint(int32_t X, int32_t Y) noexcept
             : x(X), y(Y)
         {}
 
     public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14
+        NH3API_FORCEINLINE constexpr
         TPoint& operator+=(const TPoint& other)
         {
             this->x += other.x;
@@ -580,7 +576,7 @@ struct TPoint
             return *this;
         }
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14
+        NH3API_FORCEINLINE constexpr
         TPoint& operator-=(const TPoint& other)
         {
             this->x -= other.x;
@@ -588,14 +584,14 @@ struct TPoint
             return *this;
         }
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14
+        NH3API_FORCEINLINE constexpr
         friend TPoint operator+(TPoint left, const TPoint& right)
         {
             left += right;
             return left;
         }
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14
+        NH3API_FORCEINLINE constexpr
         friend TPoint operator-(TPoint left, const TPoint& right)
         {
             left -= right;
@@ -615,13 +611,13 @@ struct TPoint
 struct TPoint3 : public TPoint
 {
     public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
-        TPoint3() NH3API_NOEXCEPT
+        NH3API_FORCEINLINE constexpr
+        TPoint3() noexcept
             : TPoint(), z(0)
         {}
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
-        TPoint3(int32_t X, int32_t Y, int32_t Z) NH3API_NOEXCEPT
+        NH3API_FORCEINLINE constexpr
+        TPoint3(int32_t X, int32_t Y, int32_t Z) noexcept
             : TPoint(X, Y), z(Z)
         {}
 
@@ -654,7 +650,7 @@ struct ExtraObjectProperties
         bool removable;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x3 = +3,  size = 0x1 = 1
         byte_t gap_3[1];
 
@@ -675,18 +671,18 @@ struct ExtraObjectProperties
         bool decorative;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0xD = +13,  size = 0x3 = 3
         byte_t gap_D[3];
 
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
+inline
 std::array<ExtraObjectProperties, MAX_OBJECTS>& gExtraObjectProperties
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6916E8, std::array<ExtraObjectProperties, MAX_OBJECTS>));
 
-NH3API_INLINE_OR_EXTERN
+inline
 const std::array<tilePoint, 8>& normalDirTable
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678150, const std::array<tilePoint, 8>));
 

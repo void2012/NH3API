@@ -26,7 +26,7 @@ struct CNetMsgHandler;
 // Adventure map manager /
 // Менеджер карты приключений.
 // size = 0x3B8 = 952, align = 4, baseclass: baseManager
-class advManager : public baseManager
+NH3API_VIRTUAL_CLASS advManager : public baseManager
 {
     // structures
     public: 
@@ -39,25 +39,25 @@ class advManager : public baseManager
     public:
         enum EBottomViewType
         {
-            BVTYPE_NONE = 0,
-            BVTYPE_NEW_TURN = 1,
-            BVTYPE_KINGDOM = 2,
-            BVTYPE_HERO = 3,
-            BVTYPE_TOWN = 4,
-            BVTYPE_ENEMY_TURN = 5,
+            BVTYPE_NONE             = 0,
+            BVTYPE_NEW_TURN         = 1,
+            BVTYPE_KINGDOM          = 2,
+            BVTYPE_HERO             = 3,
+            BVTYPE_TOWN             = 4,
+            BVTYPE_ENEMY_TURN       = 5,
             BVTYPE_RESOURCE_MESSAGE = 6,
-            BVTYPE_MESSAGE = 7,
-            BVTYPE_HOLD = 8,
+            BVTYPE_MESSAGE          = 7,
+            BVTYPE_HOLD             = 8
         };
 
     public:
         NH3API_FORCEINLINE
-        advManager() NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(advManager, baseManager)
+        advManager() noexcept
+        NH3API_DELEGATE_DUMMY_BASE(advManager)
         { THISCALL_1(void, 0x406D80, this); }
 
         NH3API_FORCEINLINE
-        advManager(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        advManager(const ::nh3api::dummy_tag_t& tag) noexcept
             : CachedGraphics(tag),
               map_origin(tag),
               last_map_hover(tag),
@@ -65,7 +65,7 @@ class advManager : public baseManager
         {}
 
         NH3API_FORCEINLINE
-        ~advManager() NH3API_NOEXCEPT
+        ~advManager() noexcept
         { THISCALL_1(void, 0x4F4080, this); }
 
     public:
@@ -76,12 +76,12 @@ class advManager : public baseManager
     public:
         // Is screen point (x, y) within the map area /
         // Находится ли точка на экране (x, y) внутри части интерфейса карты?
-        NH3API_NODISCARD int32_t InMapArea(int32_t x, int32_t y) const
+        [[nodiscard]] int32_t InMapArea(int32_t x, int32_t y) const
         { return THISCALL_3(int32_t, 0x407A20, this, x, y); }
 
         // Get mouse adventure map cell coordinate /
         // Координата клетки карты, над которой наведена мышь.
-        NH3API_NODISCARD type_point get_mouse_map_point() const
+        [[nodiscard]] type_point get_mouse_map_point() const
         {
             type_point result(::nh3api::dummy_tag);
             (void) THISCALL_2(type_point, 0x407A70, this, &result);
@@ -101,12 +101,12 @@ class advManager : public baseManager
 
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
-        NH3API_NODISCARD NewmapCell* GetCell(type_point point)
+        [[nodiscard]] NewmapCell* GetCell(type_point point)
         { return THISCALL_2(NewmapCell*, 0x412B30, this, point); }
 
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
-        NH3API_NODISCARD NewmapCell* GetCell(int8_t x, int8_t y, int8_t z)
+        [[nodiscard]] NewmapCell* GetCell(int8_t x, int8_t y, int8_t z)
         {
             return GetCell(type_point(x, y, z));
             // removed for avoiding dependency on map.hpp
@@ -121,12 +121,12 @@ class advManager : public baseManager
 
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
-        NH3API_NODISCARD const NewmapCell* GetCell(type_point point) const
+        [[nodiscard]] const NewmapCell* GetCell(type_point point) const
         { return THISCALL_2(NewmapCell*, 0x412B30, this, point); }
 
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
-        NH3API_NODISCARD const NewmapCell* GetCell(int8_t x, int8_t y, int8_t z) const
+        [[nodiscard]] const NewmapCell* GetCell(int8_t x, int8_t y, int8_t z) const
         { return GetCell(type_point(x, y, z)); }
 
         void UpdateRadar(type_point origin,
@@ -177,7 +177,7 @@ class advManager : public baseManager
         void SetEnvironmentOrigin(type_point point, int32_t reset)
         { THISCALL_3(void, 0x418330, this, point, reset); }
 
-        NH3API_NODISCARD e_looping_sound_id GetSoundId(int32_t x, int32_t y, int32_t z) const
+        [[nodiscard]] e_looping_sound_id GetSoundId(int32_t x, int32_t y, int32_t z) const
         { return THISCALL_4(e_looping_sound_id, 0x418580, this, x, y, z); }
 
         void InsertSound(int32_t x, int32_t y, int32_t z, int32_t soundPriority, int32_t soundsType)
@@ -250,10 +250,10 @@ class advManager : public baseManager
     
     // static functions
     public:
-        NH3API_NODISCARD static int32_t get_like_modifier(hero* current_hero, TCreatureType creature)
+        [[nodiscard]] static int32_t get_like_modifier(hero* current_hero, TCreatureType creature)
         { return FASTCALL_2(int32_t, 0x4A7230, current_hero, creature); }
 
-        NH3API_NODISCARD static int32_t get_force_modifier(float strength_ratio)
+        [[nodiscard]] static int32_t get_force_modifier(float strength_ratio)
         { return FASTCALL_1(int32_t, 0x4A7330, strength_ratio); }
 
     // public variables
@@ -273,7 +273,7 @@ class advManager : public baseManager
 
     protected:
         // offset: +0x3E = +62,  size = 0x2 = 2
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_3E[2];
         
     public:
@@ -412,7 +412,7 @@ class advManager : public baseManager
         bool animCtrPaused;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x105 = +261,  size = 0x3 = 3
         byte_t gap_105[3];
 
@@ -453,7 +453,7 @@ class advManager : public baseManager
         bool heroVisible;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x1ED = +493,  size = 0x3 = 3
         byte_t gap_1ED[3];
 
@@ -503,7 +503,7 @@ class advManager : public baseManager
         bool bCurHeroMobile;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x20D = +525,  size = 0x3 = 3
         byte_t gap_20D[3];
         
@@ -562,7 +562,7 @@ class advManager : public baseManager
         bool bHeroMoving;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x391 = +913,  size = 0x3 = 3
         byte_t gap_391[3];
         
@@ -592,14 +592,11 @@ class advManager : public baseManager
 
 NH3API_SIZE_ASSERT(0x3B8, advManager);
 
-NH3API_INLINE_OR_EXTERN
-advManager* const& gpAdvManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992B8, advManager*));
+inline advManager* const& gpAdvManager = get_global_var_ref(0x6992B8, advManager*);
 
-NH3API_INLINE_OR_EXTERN
 // Show adventure map animations /
 // Показывать анимации на карте приключений.
-bool32_t& bShowIt
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A10, bool32_t));
+inline bool32_t& bShowIt = get_global_var_ref(0x698A10, bool32_t);
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63A678, advManager)
 

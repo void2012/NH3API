@@ -21,24 +21,24 @@ struct CTurnDuration
 {
     public:
         NH3API_FORCEINLINE
-        CTurnDuration() NH3API_NOEXCEPT
+        CTurnDuration() noexcept
             : m_lastWarned(0), m_turnStartTime(0), m_currDuration(0), m_nextWarning(0), m_pauseTime(0)
         {}
 
         NH3API_FORCEINLINE
-        CTurnDuration(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        CTurnDuration(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
-        NH3API_NODISCARD bool IsOn() const
+        [[nodiscard]] bool IsOn() const
         { return THISCALL_1(bool, 0x557E20, this); }
 
-        NH3API_NODISCARD bool IsExpired() const
+        [[nodiscard]] bool IsExpired() const
         { return THISCALL_1(bool, 0x557E40, this); }
 
         void CheckForWarning()
         { THISCALL_1(void, 0x557E90, this); }
 
-        NH3API_NODISCARD bool IsClose(uint32_t howClose) const
+        [[nodiscard]] bool IsClose(uint32_t howClose) const
         { return THISCALL_2(bool, 0x5580A0, this, howClose); }
 
         void Clear()
@@ -75,7 +75,7 @@ struct CTurnDuration
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
+inline
 CTurnDuration& g_turnDuration
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69D680, CTurnDuration));
 

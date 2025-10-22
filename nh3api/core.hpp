@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include "core/nh3api_std/patcher_x86.hpp"
 #include "core/adventure_AI.hpp"
 #include "core/adventure.hpp"
 #include "core/combat.hpp"

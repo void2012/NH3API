@@ -353,19 +353,18 @@ struct TSpellTraits
 
 NH3API_SIZE_ASSERT(0x88, TSpellTraits);
 
-NH3API_NODISCARD NH3API_FORCEINLINE TCreatureType get_elemental_type(SpellID spell)
+[[nodiscard]] NH3API_FORCEINLINE TCreatureType get_elemental_type(SpellID spell)
 { return FASTCALL_1(TCreatureType, 0x5A9670, spell); }
 
-NH3API_NODISCARD NH3API_FORCEINLINE int32_t modify_spell_damage(int32_t damage, SpellID spell, TCreatureType creature)
+[[nodiscard]] NH3API_FORCEINLINE int32_t modify_spell_damage(int32_t damage, SpellID spell, TCreatureType creature)
 { return FASTCALL_3(int32_t, 0x44B180, damage, spell, creature); }
 
 // AI value of spell /
 // Ценность заклинания для ИИ.
-NH3API_NODISCARD NH3API_FORCEINLINE int32_t ValueOfSpell(const hero* current_hero, SpellID spell)
+[[nodiscard]] NH3API_FORCEINLINE int32_t ValueOfSpell(const hero* current_hero, SpellID spell)
 { return (current_hero) ? THISCALL_2(int32_t, 0x527F80, current_hero, spell) : 0; }
 
-NH3API_INLINE_OR_EXTERN
 // Spell traits array /
 // Таблица свойств заклинаний.
-std::array<TSpellTraits, MAX_SPELLS>& akSpellTraits
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6854A0, std::array<TSpellTraits,81>));
+inline std::array<TSpellTraits, MAX_SPELLS>& akSpellTraits
+= get_global_var_ref(0x6854A0, std::array<TSpellTraits, MAX_SPELLS>);

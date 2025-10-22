@@ -36,106 +36,89 @@
 
 namespace nh3api
 {
+
 template<typename T>
 struct set_key_access
 {
     NH3API_FORCEINLINE
-    const T& operator()(const T& value) const NH3API_NOEXCEPT
+    const T& operator()(const T& value) const noexcept
     { return value; }
 };
+
 }
 
 // Visual C++ 6.0 std::set implementation used by heroes3.exe
-template<class _K, // // key type
-         uintptr_t _Nil_Address = 0, // null node address inside .exe
-         uintptr_t _Nilrefs_Address = 0, // constructor-destructor reference counter address inside .exe
-         typename _Pr = std::less<_K> // compare predicate
+template<class T, // // key type
+         uintptr_t Nil_Address = 0, // null node address inside .exe
+         uintptr_t Nilrefs_Address = 0, // constructor-destructor reference counter address inside .exe
+         typename BinaryPredicate = std::less<T> // compare predicate
         >
-class exe_set : public nh3api::exe_rbtree<_K,
-                                          _K,
-                                          nh3api::set_key_access<_K>,
-                                          _Pr,
-                                          _Nil_Address,
-                                          _Nilrefs_Address>
+class exe_set : public nh3api::exe_rbtree<T,
+                                          T,
+                                          nh3api::set_key_access<T>,
+                                          BinaryPredicate,
+                                          Nil_Address,
+                                          Nilrefs_Address>
 {
 public:
-    typedef _K  value_type;
-    typedef _Pr value_compare;
-    typedef _K  key_type;
-    typedef _Pr key_compare;
-    typedef nh3api::exe_rbtree<_K,
-                               _K,
-                               nh3api::set_key_access<_K>,
-                               _Pr,
-                               _Nil_Address,
-                               _Nilrefs_Address> base_type;
+    using value_type = T;
+    using value_compare = BinaryPredicate;
+    using key_type = T;
+    using key_compare = BinaryPredicate;
+    using base_type = nh3api::exe_rbtree<T,
+                               T,
+                               nh3api::set_key_access<T>,
+                               BinaryPredicate,
+                               Nil_Address,
+                               Nilrefs_Address>;
     
-    typedef typename base_type::allocator_type         allocator_type;
-    typedef typename base_type::size_type              size_type;
-    typedef typename base_type::difference_type        difference_type;
-    typedef typename base_type::reference              reference;
-    typedef typename base_type::const_reference        const_reference;
-    typedef typename base_type::iterator               iterator;
-    typedef typename base_type::const_iterator         const_iterator;
-    typedef typename base_type::reverse_iterator       reverse_iterator;
-    typedef typename base_type::const_reverse_iterator const_reverse_iterator;
-    typedef typename base_type::node_type node_type;
+    using allocator_type = typename base_type::allocator_type;
+    using size_type = typename base_type::size_type;
+    using difference_type = typename base_type::difference_type;
+    using reference = typename base_type::reference;
+    using const_reference = typename base_type::const_reference;
+    using iterator = typename base_type::iterator;
+    using const_iterator = typename base_type::const_iterator;
+    using reverse_iterator = typename base_type::reverse_iterator;
+    using const_reverse_iterator = typename base_type::const_reverse_iterator;
+    using node_type = typename base_type::node_type;
 
 public:
-    exe_set() NH3API_NOEXCEPT
-    #if NH3API_STD_DELEGATING_CONSTRUCTORS
+    exe_set() noexcept
         : exe_set(key_compare())
     {}
-    #else 
-        : base_type(key_compare(), false, allocator_type())
-    {}
-    #endif
 
     explicit exe_set(const key_compare &keycomp, const allocator_type &allocator = allocator_type())
-    NH3API_NOEXCEPT
+    noexcept
         : base_type(keycomp, false, allocator)
     {}
 
-    exe_set(const_iterator first, const_iterator last, const key_compare &keycomp, const allocator_type &allocator = allocator_type())
+    explicit exe_set(const_iterator first, const_iterator last, const key_compare &keycomp, const allocator_type &allocator = allocator_type())
         : base_type(first, last, keycomp, false, allocator)
     {}
 
-    exe_set(const exe_set& other)
+    explicit exe_set(const exe_set& other)
         : base_type(other)
     {}
 
-    exe_set(const exe_set& other, const allocator_type &allocator)
+    explicit exe_set(const exe_set& other, const allocator_type &allocator)
         : base_type(other, allocator)
     {}
 
-    #if NH3API_STD_MOVE_SEMANTICS
-    exe_set(exe_set&& other)
-    NH3API_NOEXCEPT
-        : base_type(std::forward<exe_set>(other))
+    explicit exe_set(exe_set&& other) noexcept
+        : base_type(std::move<exe_set>(other))
     {}
 
-    exe_set(exe_set&& other, const allocator_type& allocator)
-    NH3API_NOEXCEPT
-        : base_type(std::forward<exe_set>(other), allocator)
+    explicit exe_set(exe_set&& other, const allocator_type& allocator) noexcept
+        : base_type(std::move<exe_set>(other), allocator)
     {}
-    #endif
 
     // no-op constructor
-    exe_set(const ::nh3api::dummy_tag_t& tag)
+    exe_set(const ::nh3api::dummy_tag_t& tag) noexcept
         : base_type(tag)
     {}
 
 };
-
-#if !NH3API_STD_MOVE_SEMANTICS
-template<class _K,
-         uintptr_t _Nil_Address, // null node address inside .exe
-         uintptr_t _Nilrefs_Address, // constructor-destructor reference counter address inside .exe
-         typename _Pr> NH3API_FORCEINLINE
-void swap(exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr>& lhs,
-          exe_set<_K, _Nil_Address, _Nilrefs_Address, _Pr>& rhs) // ADL Swap
-{ lhs.swap(rhs); }
-#endif
 
 #pragma pack(pop)
 // clang-format on

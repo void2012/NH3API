@@ -9,7 +9,9 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "interface/windows.hpp"
+#include <array>
+#include "nh3api_std/call_macros.hpp"
+#include "events.hpp"
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -27,12 +29,17 @@ NH3API_VIRTUAL_CLASS baseManager
 
     public:
         NH3API_FORCEINLINE
-        baseManager() NH3API_NOEXCEPT
+        baseManager() noexcept
         NH3API_DELEGATE_DUMMY(baseManager)
         { THISCALL_1(void, 0x44D200, this); }
 
+        baseManager(const baseManager&) noexcept            = default;
+        baseManager(baseManager&&) noexcept                 = default;
+        baseManager& operator=(const baseManager&) noexcept = default;
+        baseManager& operator=(baseManager&&) noexcept      = default;
+
         NH3API_FORCEINLINE
-        baseManager(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        baseManager(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
         NH3API_DEFAULT_DESTRUCTOR(baseManager)
@@ -51,29 +58,28 @@ NH3API_VIRTUAL_CLASS baseManager
         { return get_type_vftable(this)->Main(this, &msg); }
 
     public:
+        // Next manager /
+        // offset: +0x4 = +4,  size = 0x4 = 4
+        baseManager* nextManager;
 
-    // Next manager /
-    // offset: +0x4 = +4,  size = 0x4 = 4
-    baseManager* nextManager;
+        // Previous manager /
+        // offset: +0x8 = +8,  size = 0x4 = 4
+        baseManager* prevManager;
 
-    // Previous manager /
-    // offset: +0x8 = +8,  size = 0x4 = 4
-    baseManager* prevManager;
+        // Current manager ID /
+        // offset: +0xC = +12,  size = 0x4 = 4
+        int32_t id;
 
-    // Current manager ID /
-    // offset: +0xC = +12,  size = 0x4 = 4
-    int32_t id;
+        // Current manager priority /
+        // offset: +0x10 = +16,  size = 0x4 = 4
+        int32_t priority;
 
-    // Current manager priority /
-    // offset: +0x10 = +16,  size = 0x4 = 4
-    int32_t priority;
+        // Current manager name /
+        // offset: +0x14 = +20,  size = 0x20 = 32
+        std::array<char, 32> cMgrName;
 
-    // Current manager name /
-    // offset: +0x14 = +20,  size = 0x20 = 32
-    std::array<char, 32> cMgrName;
-
-    // offset: +0x34 = +52,  size = 0x4 = 4
-    int32_t status;
+        // offset: +0x34 = +52,  size = 0x4 = 4
+        int32_t status;
 
 };
 #pragma pack(pop)
@@ -94,12 +100,12 @@ struct executive
 {
     public:
         NH3API_FORCEINLINE
-        executive() NH3API_NOEXCEPT
+        executive() noexcept
         NH3API_DELEGATE_DUMMY(executive)
         { THISCALL_1(void, 0x4B0660, this); }
 
         NH3API_FORCEINLINE
-        executive(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        executive(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
         NH3API_DEFAULT_DESTRUCTOR(executive)
@@ -133,9 +139,7 @@ struct executive
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
-executive* const& gpExec
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699550, executive*));
+inline executive* const& gpExec = get_global_var_ref(0x699550, executive*);
 
 NH3API_DISABLE_WARNING_END
 

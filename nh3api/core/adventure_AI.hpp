@@ -22,13 +22,13 @@
 class type_AI_player
 {
     public: 
-        NH3API_NODISCARD int32_t get_magus_hut_value() const NH3API_NOEXCEPT
+        [[nodiscard]] int32_t get_magus_hut_value() const noexcept
         { return magus_hut_value; }
 
-        void reset_magus_hut_value() NH3API_NOEXCEPT
+        void reset_magus_hut_value() noexcept
         { THISCALL_1(void, 0x429AB0, this); }
 
-        NH3API_NODISCARD int32_t get_resource_value(const std::array<int32_t, 7>& cost) const NH3API_NOEXCEPT
+        [[nodiscard]] int32_t get_resource_value(const std::array<int32_t, 7>& cost) const noexcept
         {
             return static_cast<int32_t>(  
                      (cost[WOOD] * this->resource_value[WOOD])
@@ -40,13 +40,13 @@ class type_AI_player
                    + (cost[GOLD] * this->resource_value[GOLD]));
         }
 
-        NH3API_NODISCARD int32_t get_total_value(int32_t basic_value, const std::array<int32_t, 7>& cost) NH3API_NOEXCEPT
+        [[nodiscard]] int32_t get_total_value(int32_t basic_value, const std::array<int32_t, 7>& cost) noexcept
         { return THISCALL_3(int32_t, 0x42A150, this, basic_value, &cost); }
 
-        NH3API_NODISCARD static float get_attack_bonus(int16_t player) NH3API_NOEXCEPT
+        [[nodiscard]] static float get_attack_bonus(int16_t player) noexcept
         { return FASTCALL_1(float, 0x428710, player); }
 
-        static void set_attack_bonuses(const float computer_bonus, const float human_bonus) NH3API_NOEXCEPT
+        static void set_attack_bonuses(const float computer_bonus, const float human_bonus) noexcept
         {
             attack_computer_bonus = computer_bonus;
             attack_human_bonus    = human_bonus;
@@ -54,15 +54,10 @@ class type_AI_player
 
     // static variables
     public:
-        NH3API_INLINE_STATIC_VARIABLE
-        float& attack_computer_bonus
-        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x6604F8, float));
+        static inline float& attack_computer_bonus = get_global_var_ref(0x6604F8, float);
+        static inline float& attack_human_bonus    = get_global_var_ref(0x6604FC, float);
 
-        NH3API_INLINE_STATIC_VARIABLE
-        float& attack_human_bonus
-        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x6604FC, float));
-
-    // member variables
+        // member variables
     public:
         // Player team /
         // Команда игрока.
@@ -71,7 +66,7 @@ class type_AI_player
 
     protected:
         // offset: +0x2 = +2,  size = 0x2 = 2
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_2[2];
     
     public:
@@ -91,7 +86,7 @@ class type_AI_player
 
     protected:
         // offset: +0x5C = +92,  size = 0x4 = 4
-        NH3API_MAYBE_UNUSED 
+        [[maybe_unused]] 
         byte_t gap_5C[4];
 
     public:
@@ -101,36 +96,36 @@ class type_AI_player
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
+inline
 std::array<type_AI_player, 8>& AI_player
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6929A0, std::array<type_AI_player, 8>));
 
-enum EArtifactEffectType
+enum EArtifactEffectType : int32_t
 {
-    ARTIFACT_EFFECT_MIGHT = 0,
-    ARTIFACT_EFFECT_POWER = 1,
-    ARTIFACT_EFFECT_KNOWLEDGE = 2,
-    ARTIFACT_EFFECT_MORALE = 3,
-    ARTIFACT_EFFECT_LUCK   = 4,
-    ARTIFACT_EFFECT_SCOUTING = 5,
-    ARTIFACT_EFFECT_NECROMANCY = 6,
-    ARTIFACT_EFFECT_COMBAT = 7,
-    ARTIFACT_EFFECT_MOVEMENT = 8,
-    ARTIFACT_EFFECT_SPELLCASTER = 9,
-    ARTIFACT_EFFECT_DURATION = 10,
-    ARTIFACT_EFFECT_SCHOOL   = 11,
-    ARTIFACT_EFFECT_TOME     = 12,
-    ARTIFACT_EFFECT_ANTIMAGIC = 13,
-    ARTIFACT_EFFECT_ANTIMORALE = 14,
-    ARTIFACT_EFFECT_ANTILUCK   = 15,
-    ARTIFACT_EFFECT_INCOME     = 16,
-    ARTIFACT_EFFECT_CREATURE_GROWTH = 17,
-    ARTIFACT_EFFECT_SPELL = 18,
-    ARTIFACT_EFFECT_SHOOTER_BONUS = 19,
-    ARTIFACT_EFFECT_ANGELIC_ALLIANCE = 20,
+    ARTIFACT_EFFECT_MIGHT             = 0,
+    ARTIFACT_EFFECT_POWER             = 1,
+    ARTIFACT_EFFECT_KNOWLEDGE         = 2,
+    ARTIFACT_EFFECT_MORALE            = 3,
+    ARTIFACT_EFFECT_LUCK              = 4,
+    ARTIFACT_EFFECT_SCOUTING          = 5,
+    ARTIFACT_EFFECT_NECROMANCY        = 6,
+    ARTIFACT_EFFECT_COMBAT            = 7,
+    ARTIFACT_EFFECT_MOVEMENT          = 8,
+    ARTIFACT_EFFECT_SPELLCASTER       = 9,
+    ARTIFACT_EFFECT_DURATION          = 10,
+    ARTIFACT_EFFECT_SCHOOL            = 11,
+    ARTIFACT_EFFECT_TOME              = 12,
+    ARTIFACT_EFFECT_ANTIMAGIC         = 13,
+    ARTIFACT_EFFECT_ANTIMORALE        = 14,
+    ARTIFACT_EFFECT_ANTILUCK          = 15,
+    ARTIFACT_EFFECT_INCOME            = 16,
+    ARTIFACT_EFFECT_CREATURE_GROWTH   = 17,
+    ARTIFACT_EFFECT_SPELL             = 18,
+    ARTIFACT_EFFECT_SHOOTER_BONUS     = 19,
+    ARTIFACT_EFFECT_ANGELIC_ALLIANCE  = 20,
     ARTIFACT_EFFECT_UNDEAD_KING_CLOAK = 21,
-    ARTIFACT_EFFECT_ELIXIR_OF_LIFE = 22,
-    ARTIFACT_EFFECT_STATUE_OF_LEGION = 23
+    ARTIFACT_EFFECT_ELIXIR_OF_LIFE    = 22,
+    ARTIFACT_EFFECT_STATUE_OF_LEGION  = 23
 };
 
 #pragma pack(push, 4)
@@ -148,16 +143,16 @@ NH3API_VIRTUAL_CLASS type_artifact_effect
 
     public:
         NH3API_FORCEINLINE
-        type_artifact_effect() NH3API_NOEXCEPT
+        type_artifact_effect() noexcept
         NH3API_DELEGATE_DUMMY(type_artifact_effect)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_artifact_effect(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        type_artifact_effect(const ::nh3api::dummy_tag_t&) noexcept
         { }
 
         NH3API_FORCEINLINE
-        ~type_artifact_effect() NH3API_NOEXCEPT
+        ~type_artifact_effect() noexcept
         { THISCALL_1(void, 0x432500, this); }
 
     public:
@@ -174,7 +169,7 @@ NH3API_VIRTUAL_CLASS type_artifact_effect
 #define NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(CLASS, BASE_CLASS) \
 NH3API_DEFAULT_DESTRUCTOR(CLASS) \
 NH3API_FORCEINLINE \
-CLASS(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT \
+CLASS(const ::nh3api::dummy_tag_t& tag) noexcept \
     : BASE_CLASS(tag) \
 {} \
 virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override \
@@ -184,23 +179,21 @@ virtual EArtifactEffectType __thiscall get_value(const hero* owner, bool equippe
 #endif // NH3API_VIRTUAL_OVERRIDE_BASEMANAGER
 
 #ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT
-#define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(CLASS, BASE) \
+#define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(CLASS_NAME) \
 NH3API_FORCEINLINE \
-CLASS() NH3API_NOEXCEPT \
-NH3API_DELEGATE_DUMMY_OR_BASE(CLASS, BASE) \
+CLASS_NAME() noexcept \
+NH3API_DELEGATE_DUMMY(CLASS_NAME) \
 { NH3API_SET_VFTABLE(); }
 #endif
-
-#if NH3API_STD_DELEGATING_CONSTRUCTORS
 
 #ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1
 #define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(CLASS, BASE_CLASS, TYPE1, ARG1, VALUE1) \
 NH3API_FORCEINLINE \
-CLASS(TYPE1 _##ARG1) NH3API_NOEXCEPT \
+CLASS(TYPE1 _##ARG1) noexcept \
     :  BASE_CLASS(::nh3api::dummy_tag), ARG1(_##ARG1) \
 { NH3API_SET_VFTABLE(); } \
 NH3API_FORCEINLINE \
-CLASS() NH3API_NOEXCEPT \
+CLASS() noexcept \
     : CLASS(VALUE1) \
 {}
 #endif
@@ -208,42 +201,14 @@ CLASS() NH3API_NOEXCEPT \
 #ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT2
 #define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT2(CLASS, BASE_CLASS, TYPE1, ARG1, TYPE2, ARG2, VALUE1, VALUE2) \
 NH3API_FORCEINLINE \
-CLASS(TYPE1 _##ARG1, TYPE2 _##ARG2) NH3API_NOEXCEPT \
+CLASS(TYPE1 _##ARG1, TYPE2 _##ARG2) noexcept \
     : BASE_CLASS(::nh3api::dummy_tag), ARG1(_##ARG1), ARG2(_##ARG2) \
 { NH3API_SET_VFTABLE(); } \
 NH3API_FORCEINLINE \
-CLASS() NH3API_NOEXCEPT \
+CLASS() noexcept \
     : CLASS(VALUE1, VALUE2) \
 {}
 #endif
-
-#else // NH3API_STD_DELEGATING_CONSTRUCTORS
-
-#ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1
-#define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(CLASS, BASE_CLASS, TYPE1, ARG1, VALUE1) \
-NH3API_FORCEINLINE \
-CLASS(TYPE1 _##ARG1) NH3API_NOEXCEPT \
-    :  BASE_CLASS(::nh3api::dummy_tag), ARG1(_##ARG1) \
-{ NH3API_SET_VFTABLE(); } \
-NH3API_FORCEINLINE \
-CLASS() NH3API_NOEXCEPT \
-    :  BASE_CLASS(::nh3api::dummy_tag), ARG1(VALUE1) \
-{ NH3API_SET_VFTABLE(); } 
-#endif
-
-#ifndef NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT2
-#define NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT2(CLASS, BASE_CLASS, TYPE1, ARG1, TYPE2, ARG2, VALUE1, VALUE2) \
-NH3API_FORCEINLINE \
-CLASS(TYPE1 _##ARG1, TYPE2 _##ARG2) NH3API_NOEXCEPT \
-    : BASE_CLASS(::nh3api::dummy_tag), ARG1(_##ARG1), ARG2(_##ARG2) \
-{ NH3API_SET_VFTABLE(); } \
-NH3API_FORCEINLINE \
-CLASS() NH3API_NOEXCEPT \
-    : BASE_CLASS(::nh3api::dummy_tag), ARG1(VALUE1), ARG2(VALUE2) \
-{ NH3API_SET_VFTABLE(); }
-#endif
-
-#endif // NH3API_STD_DELEGATING_CONSTRUCTORS
 
 // size = 0x8 = 8, align = 4, baseclass: type_artifact_effect
 NH3API_VIRTUAL_CLASS type_scouting_artifact : public type_artifact_effect
@@ -275,7 +240,7 @@ NH3API_VIRTUAL_CLASS type_movement_artifact : public type_combat_artifact
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_movement_artifact, type_combat_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_movement_artifact, type_combat_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_movement_artifact)
 
 };
 
@@ -284,7 +249,7 @@ NH3API_VIRTUAL_CLASS type_spellcaster_artifact : public type_combat_artifact
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_spellcaster_artifact, type_combat_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_spellcaster_artifact, type_combat_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_spellcaster_artifact)
 
 };
 
@@ -319,7 +284,7 @@ NH3API_VIRTUAL_CLASS type_antimorale_artifact : public type_artifact_effect
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_antimorale_artifact, type_artifact_effect)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_antimorale_artifact, type_artifact_effect)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_antimorale_artifact)
 
 };
 
@@ -328,7 +293,7 @@ NH3API_VIRTUAL_CLASS type_antiluck_artifact : public type_artifact_effect
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_antiluck_artifact, type_artifact_effect)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_antiluck_artifact, type_artifact_effect)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_antiluck_artifact)
 
 };
 
@@ -382,7 +347,7 @@ NH3API_VIRTUAL_CLASS type_shooter_bonus_artifact : public type_combat_artifact
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_shooter_bonus_artifact, type_combat_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_shooter_bonus_artifact, type_combat_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_shooter_bonus_artifact)
 
 };
 
@@ -391,7 +356,7 @@ NH3API_VIRTUAL_CLASS type_statue_of_legion_artifact : public type_artifact_effec
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_statue_of_legion_artifact, type_artifact_effect)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_statue_of_legion_artifact, type_artifact_effect)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_statue_of_legion_artifact)
 
 };
 
@@ -400,7 +365,7 @@ NH3API_VIRTUAL_CLASS type_elixir_of_life_artifact : public type_artifact_effect
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_elixir_of_life_artifact, type_artifact_effect)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_elixir_of_life_artifact, type_artifact_effect)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_elixir_of_life_artifact)
 
 };
 
@@ -409,7 +374,7 @@ NH3API_VIRTUAL_CLASS type_might_artifact : public type_combat_artifact
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_might_artifact, type_combat_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_might_artifact, type_combat_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_might_artifact)
 
 };
 
@@ -418,7 +383,7 @@ NH3API_VIRTUAL_CLASS type_power_artifact : public type_combat_artifact
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_power_artifact, type_combat_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_power_artifact, type_combat_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_power_artifact)
 
 };
 
@@ -427,7 +392,7 @@ NH3API_VIRTUAL_CLASS type_knowledge_artifact : public type_combat_artifact
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_knowledge_artifact, type_combat_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_knowledge_artifact, type_combat_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_knowledge_artifact)
 
 };
 
@@ -436,7 +401,7 @@ NH3API_VIRTUAL_CLASS type_morale_artifact : public type_combat_artifact
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_morale_artifact, type_combat_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_morale_artifact, type_combat_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_morale_artifact)
 
 };
 
@@ -445,7 +410,7 @@ NH3API_VIRTUAL_CLASS type_luck_artifact : public type_combat_artifact
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_luck_artifact, type_combat_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_luck_artifact, type_combat_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_luck_artifact)
 
 };
 
@@ -454,7 +419,7 @@ NH3API_VIRTUAL_CLASS type_luck_artifact : public type_combat_artifact
 NH3API_VIRTUAL_CLASS type_base_necromancy_artifact : public type_combat_artifact
 {
     public:
-        type_base_necromancy_artifact(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT 
+        type_base_necromancy_artifact(const ::nh3api::dummy_tag_t& tag) noexcept 
             : type_combat_artifact(tag) 
         {} 
 
@@ -476,7 +441,7 @@ NH3API_VIRTUAL_CLASS type_necromancy_artifact : public type_base_necromancy_arti
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_necromancy_artifact, type_base_necromancy_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_necromancy_artifact, type_base_necromancy_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_necromancy_artifact)
 
 };
 
@@ -485,7 +450,7 @@ NH3API_VIRTUAL_CLASS type_duration_artifact : public type_power_artifact
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_duration_artifact, type_power_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_duration_artifact, type_power_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_duration_artifact)
 
 };
 
@@ -507,7 +472,7 @@ NH3API_VIRTUAL_CLASS type_angelic_alliance_artifact : public type_might_artifact
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_angelic_alliance_artifact, type_might_artifact)
-        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_angelic_alliance_artifact, type_might_artifact)
+        NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT_DEFAULT(type_angelic_alliance_artifact)
 
 };
 
@@ -516,7 +481,7 @@ NH3API_VIRTUAL_CLASS type_undead_king_cloak_artifact : public type_base_necroman
 {
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_undead_king_cloak_artifact, type_base_necromancy_artifact)
-        NH3API_FORCEINLINE type_undead_king_cloak_artifact() NH3API_NOEXCEPT
+        NH3API_FORCEINLINE type_undead_king_cloak_artifact() noexcept
             :  type_base_necromancy_artifact(30)
         { NH3API_SET_VFTABLE(); }
 
@@ -533,18 +498,18 @@ NH3API_VIRTUAL_CLASS type_undead_king_cloak_artifact : public type_base_necroman
 struct type_creature_value
 {
     public:
-        type_creature_value() NH3API_NOEXCEPT
+        type_creature_value() noexcept
             : type(CREATURE_NONE), value(0), amount(0)
         {}
 
-        type_creature_value(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        type_creature_value(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
-        bool operator<(const type_creature_value& other) const NH3API_NOEXCEPT
+        bool operator<(const type_creature_value& other) const noexcept
         { return this->value < other.value; }
 
-        bool operator>(const type_creature_value& other) const NH3API_NOEXCEPT
+        bool operator>(const type_creature_value& other) const noexcept
         { return this->value > other.value; }
 
     public:
@@ -558,7 +523,7 @@ struct type_creature_value
         int16_t amount;
         
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0xA = +10,  size = 0x2 = 2
         byte_t gap_A[2];
 
@@ -569,33 +534,59 @@ struct type_spellvalue
 {
     public:
         NH3API_FORCEINLINE
-        type_spellvalue(const hero* new_hero) NH3API_NOEXCEPT
+        type_spellvalue(const hero* new_hero) noexcept
         NH3API_DELEGATE_DUMMY(type_spellvalue)
         { THISCALL_2(void, 0x527220, this, new_hero); }
 
         NH3API_FORCEINLINE
-        type_spellvalue(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_spellvalue(const ::nh3api::dummy_tag_t& tag) noexcept
             : list(tag)
         {}
 
+        type_spellvalue(const type_spellvalue& other) 
+            : list(other.list)
+        {
+            std::memcpy(reinterpret_cast<void*>(this), &other, offsetof(type_spellvalue, list));
+        }
+
+        type_spellvalue& operator=(const type_spellvalue& other) 
+        {
+            std::memcpy(reinterpret_cast<void*>(this), &other, offsetof(type_spellvalue, list));
+            this->list = other.list;
+            return *this;
+        }
+
+        type_spellvalue(type_spellvalue&& other) noexcept
+            : list(std::move(other.list))
+        {
+            nh3api::trivial_move<20>(&other, this);
+        }
+
+        type_spellvalue& operator=(type_spellvalue&& other) noexcept
+        {
+            nh3api::trivial_move<20>(&other, this);
+            this->list = std::move(other.list);
+            return *this;
+        }
+
         NH3API_FORCEINLINE
-        ~type_spellvalue() NH3API_NOEXCEPT
-        { nh3api::destroy_at(&list); } // note that we have to manually destroy 'list'
+        ~type_spellvalue() noexcept
+        { std::destroy_at(&list); } // note that we have to manually destroy 'list'
 
     public:
-        NH3API_NODISCARD int32_t get_damage_spell_value(SpellID spell, TSkillMastery mastery, int32_t times_castable, int32_t combat_value) const
+        [[nodiscard]] int32_t get_damage_spell_value(SpellID spell, TSkillMastery mastery, int32_t times_castable, int32_t combat_value) const
         { return THISCALL_5(int32_t, 0x5275C0, this, spell, mastery, times_castable, combat_value); }
 
-        NH3API_NODISCARD int32_t get_mass_damage_spell_value(SpellID spell, TSkillMastery mastery, int32_t times_castable) const
+        [[nodiscard]] int32_t get_mass_damage_spell_value(SpellID spell, TSkillMastery mastery, int32_t times_castable) const
         { return THISCALL_4(int32_t, 0x5276A0, this, spell, mastery, times_castable); }
 
-        NH3API_NODISCARD int32_t get_enchantment_value(SpellID spell, TSkillMastery mastery, int32_t times_castable) const
+        [[nodiscard]] int32_t get_enchantment_value(SpellID spell, TSkillMastery mastery, int32_t times_castable) const
         { return THISCALL_4(int32_t, 0x527770, this, spell, mastery, times_castable); }
 
-        NH3API_NODISCARD int32_t get_raw_spell_value(SpellID spell) const
+        [[nodiscard]] int32_t get_raw_spell_value(SpellID spell) const
         { return THISCALL_2(int32_t, 0x5278B0, this, spell); }
 
-        NH3API_NODISCARD int32_t get_best_spell_value(int32_t bits) const
+        [[nodiscard]] int32_t get_best_spell_value(int32_t bits) const
         { return THISCALL_2(int32_t, 0x527A90, this, bits); }
 
     public:
@@ -640,7 +631,7 @@ public:
     bool is_critical;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     // offset: +0xA = +10,  size = 0x2 = 2
     byte_t gap_A[2];
 

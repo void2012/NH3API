@@ -7,9 +7,6 @@
 #pragma once
 
 #include "widgets.hpp"
-#if !NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
-#include <stdarg.h>
-#endif
 
 #pragma pack(push, 4)
 // size = 0x44 = 68, align = 4
@@ -70,67 +67,25 @@ class CChatManager
     */
 
     public: 
-        #if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
         template<typename... Args>
-        void __cdecl AddChat(const char* cChatMsg, Args... args)
+        void AddChat(const char* cChatMsg, Args... args)
         { CDECL_N(char, 0x553C40, this, cChatMsg, ::std::forward<Args>(args)...); }
         
         template<typename... Args>
-        void __cdecl TurnDurationMsg(const char* cChatMsg, Args... args)
+        void TurnDurationMsg(const char* cChatMsg, Args... args)
         { CDECL_N(char, 0x553D60, this, cChatMsg, ::std::forward<Args>(args)...); }
 
         template<typename... Args>
-        void __cdecl SystemMsg(const char* cChatMsg, Args... args)
+        void SystemMsg(const char* cChatMsg, Args... args)
         { CDECL_N(char, 0x553EA0, this, cChatMsg, ::std::forward<Args>(args)...); }
 
         template<typename... Args>
-        void __cdecl PlayerDropMsg(const char* cChatMsg, Args... args)
+        void PlayerDropMsg(const char* cChatMsg, Args... args)
         { CDECL_N(char, 0x553F60, this, cChatMsg, ::std::forward<Args>(args)...); }
 
         template<typename... Args>
-        void __cdecl PlayerEnterMsg(const char* cChatMsg, Args... args)
+        void PlayerEnterMsg(const char* cChatMsg, Args... args)
         { CDECL_N(char, 0x554030, this, cChatMsg, ::std::forward<Args>(args)...); }
-        #else 
-        void __cdecl AddChat(const char* cChatMsg, ...)
-        {
-            va_list args;
-            va_start(args, cChatMsg);
-            CALL_VA(void, 0x553C40, this, cChatMsg, args);
-            va_end(args);
-        }
-
-        void __cdecl TurnDurationMsg(const char* cChatMsg, ...)
-        {
-            va_list args;
-            va_start(args, cChatMsg);
-            CALL_VA(void, 0x553D60, this, cChatMsg, args);
-            va_end(args);
-        }
-
-        void __cdecl SystemMsg(const char* cChatMsg, ...)
-        {
-            va_list args;
-            va_start(args, cChatMsg);
-            CALL_VA(void, 0x553EA0, this, cChatMsg, args);
-            va_end(args);
-        }
-
-        void __cdecl PlayerDropMsg(const char* cChatMsg, ...)
-        {
-            va_list args;
-            va_start(args, cChatMsg);
-            CALL_VA(void, 0x553F60, this, cChatMsg, args);
-            va_end(args);
-        }
-
-        void __cdecl PlayerEnterMsg(const char* cChatMsg, ...)
-        {
-            va_list args;
-            va_start(args, cChatMsg);
-            CALL_VA(void, 0x554030, this, cChatMsg, args);
-            va_end(args);
-        }
-        #endif
 
         void UpdateWidget(textWidget* Widget, bool killOld, int32_t numLines)
         { THISCALL_4(void, 0x554100, this, Widget, killOld, numLines); }
@@ -138,7 +93,7 @@ class CChatManager
         void UpdateWidgetText(int32_t numLines, textWidget* Widget)
         { THISCALL_3(void, 0x5542E0, this, numLines, Widget); }
 
-        NH3API_NODISCARD bool HasOldChat() const
+        [[nodiscard]] bool HasOldChat() const
         { return THISCALL_1(bool, 0x5541B0, this); }
 
         void KillOldChat()
@@ -220,6 +175,4 @@ class CChatManager
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
-CChatManager& chatMan
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69D800, CChatManager));
+inline CChatManager& chatMan = get_global_var_ref(0x69D800, CChatManager);

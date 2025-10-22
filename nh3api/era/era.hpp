@@ -125,23 +125,23 @@ typedef int32_t TXVars[16];
 
 const bool32_t EXEC_DEF_CODE = true;
 
-NH3API_INLINE_OR_EXTERN
+inline
 int32_t*  const v NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x887664, int32_t)); // 1..10000
-NH3API_INLINE_OR_EXTERN
+inline
 TErmZVar* const z NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x9271E8, TErmZVar)); // 1..1000
-NH3API_INLINE_OR_EXTERN
+inline
 int32_t*  const y NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0xA48D7C, int32_t)); // 1..100
-NH3API_INLINE_OR_EXTERN
+inline
 int32_t*  const x NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x91DA34, int32_t)); // 1..16
-NH3API_INLINE_OR_EXTERN
+inline
 bool*     const f NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x91F2DF, bool)); // 1..1000
-NH3API_INLINE_OR_EXTERN
+inline
 float*    const e NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0xA48F14, float)); // 1..100
 
-NH3API_INLINE_OR_EXTERN
+inline
 HINSTANCE hPlugin NH3API_INLINE_OR_EXTERN_INIT(nullptr);
 typedef void* TPlugin;
-NH3API_INLINE_OR_EXTERN
+inline
 TPlugin plugin NH3API_INLINE_OR_EXTERN_INIT(nullptr);
 
 enum ECallingConvention : int32_t
@@ -254,17 +254,17 @@ NH3API_FORCEINLINE
     }
 }
 
-void __stdcall MemFree(const void* buf) NH3API_NOEXCEPT;
+void __stdcall MemFree(const void* buf) noexcept;
 
 NH3API_FORCEINLINE
 // ======================= EVENTS ======================= //
 
 /** Adds handler to be called when specific named event triggers, ex. "OnAfterWoG" or "OnSavegameWrite" */
-void __stdcall RegisterHandler(TEventHandler Handler, const char* const EventName) NH3API_NOEXCEPT
+void __stdcall RegisterHandler(TEventHandler Handler, const char* const EventName) noexcept
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::RegisterHandler), Handler, EventName); }
 
 /** Triggers named event, passing custom event data of specified length to its handlers */
-NH3API_FORCEINLINE void __stdcall FireEvent(const char* const EventName, void* EventData, int32_t DataSize) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall FireEvent(const char* const EventName, void* EventData, int32_t DataSize) noexcept
 { STDCALL_3(void, reinterpret_cast<uintptr_t>(&::Era_imports::FireEvent), EventName, EventData, DataSize); }
 
 // ===================== END EVENTS ===================== //
@@ -272,15 +272,15 @@ NH3API_FORCEINLINE void __stdcall FireEvent(const char* const EventName, void* E
 // ======================= INTERNATIONALIZATION ======================= //
 
 /** Changes current language code in memory without altering ini files or reloading already loaded data */
-NH3API_FORCEINLINE int32_t __stdcall SetLanguage(const char* const NewLanguage) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall SetLanguage(const char* const NewLanguage) noexcept
 { return STDCALL_1(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::SetLanguage), NewLanguage); }
 
 /** Reloads all json files from "Lang" directory and current language subdirectory */
-NH3API_FORCEINLINE void __stdcall ReloadLanguageData() NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall ReloadLanguageData() noexcept
 { STDCALL_0(void, reinterpret_cast<uintptr_t>(&::Era_imports::ReloadLanguageData)); }
 
 /** Translates given key, using pairs of (key, value) params for translation. Returns temporary buffer address, which must be immediately copied */
-NH3API_FORCEINLINE char* __stdcall trTemp(const char* const key, const char* const* const params, uint32_t LastParamsIndex) NH3API_NOEXCEPT
+NH3API_FORCEINLINE char* __stdcall trTemp(const char* const key, const char* const* const params, uint32_t LastParamsIndex) noexcept
 { return STDCALL_3(char*, reinterpret_cast<uintptr_t>(&::Era_imports::trTemp), key, params, LastParamsIndex); }
 
 #if NH3API_STD_MOVE_SEMANTICS
@@ -295,16 +295,16 @@ NH3API_FORCEINLINE
  * @param  params Vector of (parameter name, parameter value pairs).
  * @return        Translation string.
  */
-std::string tr(const char* key, std::initializer_list<const char*> params) NH3API_NOEXCEPT
+std::string tr(const char* key, std::initializer_list<const char*> params) noexcept
 {
-   NH3API_CONSTEXPR_VAR int MAX_PARAMS = 64;
+   constexpr int MAX_PARAMS = 64;
    const uint32_t numParams = (params.size() <= MAX_PARAMS ? params.size() : MAX_PARAMS) & ~1u;
 
    return trTemp(key, params.begin(), numParams - 1);
 }
 #else
 NH3API_FORCEINLINE
-std::string tr(const char* key, const std::vector<std::string>& params) NH3API_NOEXCEPT
+std::string tr(const char* key, const std::vector<std::string>& params) noexcept
 {
    const int MAX_PARAMS = 64;
 
@@ -322,16 +322,16 @@ std::string tr(const char* key, const std::vector<std::string>& params) NH3API_N
 #endif
 
 /** Translates given key, using pairs of (key, value) params for translation */
-NH3API_FORCEINLINE ERA_MEM(char*) __stdcall tr(const char* const key, const char* const * const params, int32_t LastParamsIndex) NH3API_NOEXCEPT
+NH3API_FORCEINLINE ERA_MEM(char*) __stdcall tr(const char* const key, const char* const * const params, int32_t LastParamsIndex) noexcept
 { return STDCALL_3(char*, reinterpret_cast<uintptr_t>(&::Era_imports::tr), key, params, LastParamsIndex); }
 
 /** Translates given key and returns persistent pointer to translation */
-NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall trStatic(const char* const key) NH3API_NOEXCEPT
+NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall trStatic(const char* const key) noexcept
 { return STDCALL_1(char*, reinterpret_cast<uintptr_t>(&::Era_imports::trStatic), key); }
 
 NH3API_FORCEINLINE
 /** Returns persisted/static translation for a given key */
-ERA_STATIC(char*) tr (const char* key) NH3API_NOEXCEPT
+ERA_STATIC(char*) tr (const char* key) noexcept
 { return trStatic(key); }
 
 // ===================== END INTERNATIONALIZATION ===================== //
@@ -339,66 +339,66 @@ ERA_STATIC(char*) tr (const char* key) NH3API_NOEXCEPT
 
 // ======================= ERM ======================= //
 
-NH3API_FORCEINLINE int32_t __stdcall AllocErmFunc(const char* const EventName, int32_t EventId) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall AllocErmFunc(const char* const EventName, int32_t EventId) noexcept
 { return STDCALL_2(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::AllocErmFunc), EventName, EventId); }
 
-NH3API_FORCEINLINE void __stdcall FireErmEvent(int32_t EventId) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall FireErmEvent(int32_t EventId) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::FireErmEvent), EventId); }
 
-NH3API_FORCEINLINE void __stdcall ExecErmCmd(const char* const CmdStr) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall ExecErmCmd(const char* const CmdStr) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::ExecErmCmd), CmdStr);  }
 
-NH3API_FORCEINLINE void __stdcall ExtractErm() NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall ExtractErm() noexcept
 { STDCALL_0(void, reinterpret_cast<uintptr_t>(&::Era_imports::ExtractErm)); }
 
-NH3API_FORCEINLINE void __stdcall ReloadErm() NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall ReloadErm() noexcept
 { STDCALL_0(void, reinterpret_cast<uintptr_t>(&::Era_imports::ReloadErm)); }
 
-NH3API_FORCEINLINE void __stdcall NameTrigger(int32_t TriggerId, const char* const Name) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall NameTrigger(int32_t TriggerId, const char* const Name) noexcept
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::NameTrigger), TriggerId, Name); }
 
 /** Displays regular ERM error dialog and can be used for ERM scripts error reporting and debugging */
-NH3API_FORCEINLINE void __stdcall ShowErmError(const char* const Error) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall ShowErmError(const char* const Error) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::ShowErmError), Error); }
 
 /** Returns pointer to array of arguments, that will be passed to ERM trigger as x-vars on ERM event generation */
-NH3API_FORCEINLINE TXVars* __stdcall GetArgXVars() NH3API_NOEXCEPT
+NH3API_FORCEINLINE TXVars* __stdcall GetArgXVars() noexcept
 { return STDCALL_0(TXVars*, reinterpret_cast<uintptr_t>(&::Era_imports::GetArgXVars)); }
 
 /** Returns pointer to array of ERM x-vars copy after ERM has been handled. Some variables may be treated as result */
-NH3API_FORCEINLINE TXVars* __stdcall GetRetXVars() NH3API_NOEXCEPT
+NH3API_FORCEINLINE TXVars* __stdcall GetRetXVars() noexcept
 { return STDCALL_0(TXVars*, reinterpret_cast<uintptr_t>(&::Era_imports::GetRetXVars)); }
 
 /** Returns human readable string for ERM event ID. Usually it's ERM trigger human readable name or ERM function name. */
-NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetTriggerReadableName(int32_t TriggerId) NH3API_NOEXCEPT
+NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetTriggerReadableName(int32_t TriggerId) noexcept
 { return STDCALL_1(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetTriggerReadableName), TriggerId); }
 
-NH3API_FORCEINLINE int32_t __stdcall GetAssocVarIntValue(const char* const VarName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall GetAssocVarIntValue(const char* const VarName) noexcept
 { return STDCALL_1(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::GetAssocVarIntValue), VarName); }
 
-NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetAssocVarStrValue(const char* const VarName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetAssocVarStrValue(const char* const VarName) noexcept
 { return STDCALL_1(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetAssocVarStrValue), VarName); }
 
-NH3API_FORCEINLINE void __stdcall SetAssocVarIntValue(const char* const VarName, int32_t NewValue) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall SetAssocVarIntValue(const char* const VarName, int32_t NewValue) noexcept
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::SetAssocVarIntValue), VarName, NewValue); }
 
-NH3API_FORCEINLINE void __stdcall SetAssocVarStrValue(const char* const VarName, const char* const NewValue) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall SetAssocVarStrValue(const char* const VarName, const char* const NewValue) noexcept
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::SetAssocVarStrValue), VarName, NewValue); }
 // ===================== END ERM ===================== //
 
 
 // ======================= SHARED GLOBAL MEMORY ======================= //
 
-NH3API_FORCEINLINE int32_t __stdcall GetEraRegistryIntValue(const char* const VarName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall GetEraRegistryIntValue(const char* const VarName) noexcept
 { return STDCALL_1(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::GetEraRegistryIntValue), VarName); }
 
-NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetEraRegistryStrValue(const char* const VarName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetEraRegistryStrValue(const char* const VarName) noexcept
 { return STDCALL_1(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetEraRegistryStrValue), VarName); }
 
-NH3API_FORCEINLINE void __stdcall SetEraRegistryIntValue(const char* const VarName, int32_t NewValue) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall SetEraRegistryIntValue(const char* const VarName, int32_t NewValue) noexcept
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::SetEraRegistryIntValue), VarName, NewValue); }
 
-NH3API_FORCEINLINE void __stdcall SetEraRegistryStrValue(const char* const VarName, const char* const NewValue) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall SetEraRegistryStrValue(const char* const VarName, const char* const NewValue) noexcept
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::SetEraRegistryStrValue), VarName, NewValue); }
 
 // ===================== END SHARED GLOBAL MEMORY ===================== //
@@ -407,37 +407,37 @@ NH3API_FORCEINLINE void __stdcall SetEraRegistryStrValue(const char* const VarNa
 // ======================= CUSTOMIZABLE API ======================= //
 
 typedef bool32_t (__stdcall *TIsCommanderId)(int32_t MonId);
-NH3API_FORCEINLINE TIsCommanderId __stdcall SetIsCommanderIdFunc(TIsCommanderId NewImpl) NH3API_NOEXCEPT
+NH3API_FORCEINLINE TIsCommanderId __stdcall SetIsCommanderIdFunc(TIsCommanderId NewImpl) noexcept
 { return STDCALL_1(TIsCommanderId, reinterpret_cast<uintptr_t>(&::Era_imports::SetIsCommanderIdFunc), NewImpl); }
 
 typedef bool32_t (__stdcall *TIsElixirOfLifeStack)(uint8_t* BattleStack);
-NH3API_FORCEINLINE TIsElixirOfLifeStack __stdcall SetIsElixirOfLifeStackFunc(TIsElixirOfLifeStack NewImpl) NH3API_NOEXCEPT
+NH3API_FORCEINLINE TIsElixirOfLifeStack __stdcall SetIsElixirOfLifeStackFunc(TIsElixirOfLifeStack NewImpl) noexcept
 { return STDCALL_1(TIsElixirOfLifeStack, reinterpret_cast<uintptr_t>(&::Era_imports::SetIsElixirOfLifeStackFunc), NewImpl); }
 
-NH3API_FORCEINLINE void __stdcall SetRegenerationAbility(int32_t MonId, int32_t Chance, int32_t HitPoints, int32_t HpPercents) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall SetRegenerationAbility(int32_t MonId, int32_t Chance, int32_t HitPoints, int32_t HpPercents) noexcept
 { STDCALL_4(void, reinterpret_cast<uintptr_t>(&::Era_imports::SetRegenerationAbility), MonId, Chance, HitPoints, HpPercents); }
 
-NH3API_FORCEINLINE void __stdcall SetStdRegenerationEffect(int32_t Level7Percents, int32_t HpPercents) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall SetStdRegenerationEffect(int32_t Level7Percents, int32_t HpPercents) noexcept
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::SetStdRegenerationEffect), Level7Percents, HpPercents); }
 // ===================== END CUSTOMIZABLE API ===================== //
 
 
 // ======================= MAP RELATED FUNCTIONS ======================= //
 
-NH3API_FORCEINLINE bool32_t __stdcall IsCampaign() NH3API_NOEXCEPT
+NH3API_FORCEINLINE bool32_t __stdcall IsCampaign() noexcept
 { return STDCALL_0(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::IsCampaign)); }
 
-NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetCampaignFileName() NH3API_NOEXCEPT
+NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetCampaignFileName() noexcept
 { return STDCALL_0(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetCampaignFileName)); }
 
-NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetMapFileName() NH3API_NOEXCEPT
+NH3API_FORCEINLINE ERA_MEM(char*) __stdcall GetMapFileName() noexcept
 { return STDCALL_0(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetMapFileName)); }
 
-NH3API_FORCEINLINE int32_t __stdcall GetCampaignMapInd() NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall GetCampaignMapInd() noexcept
 { return STDCALL_0(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::GetCampaignMapInd)); }
 
 /** Works the same as UN:U with fast search syntax, but does not raise error on no more objects, returns success flag; Direction is -1 for FORWARD and -2 for BACKWARD. */
-NH3API_FORCEINLINE bool32_t __stdcall FindNextObject(int32_t ObjType, int32_t ObjSubtype, int32_t* x, int32_t* y, int32_t* z, ESearchDirection Direction) NH3API_NOEXCEPT
+NH3API_FORCEINLINE bool32_t __stdcall FindNextObject(int32_t ObjType, int32_t ObjSubtype, int32_t* x, int32_t* y, int32_t* z, ESearchDirection Direction) noexcept
 { return STDCALL_6(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::FindNextObject), ObjType, ObjSubtype, x, y, z, Direction); }
 
 // ===================== END MAP RELATED FUNCTIONS ===================== //
@@ -445,22 +445,22 @@ NH3API_FORCEINLINE bool32_t __stdcall FindNextObject(int32_t ObjType, int32_t Ob
 
 // ======================= INI FILES ======================= //
 
-NH3API_FORCEINLINE void __stdcall ClearAllIniCache() NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall ClearAllIniCache() noexcept
 { STDCALL_0(void, reinterpret_cast<uintptr_t>(&::Era_imports::ClearAllIniCache)); }
 
-NH3API_FORCEINLINE void __stdcall ClearIniCache(const char* const FileName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall ClearIniCache(const char* const FileName) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::ClearIniCache), FileName); }
 
 /** Reads entry from ini file. The fill will be cached in memory for further fast reading */
-NH3API_FORCEINLINE bool32_t __stdcall ReadStrFromIni(const char* const Key, const char* const SectionName, const char* const FilePath, char* ResultBuffer) NH3API_NOEXCEPT
+NH3API_FORCEINLINE bool32_t __stdcall ReadStrFromIni(const char* const Key, const char* const SectionName, const char* const FilePath, char* ResultBuffer) noexcept
 { return STDCALL_4(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::ReadStrFromIni), Key, SectionName, FilePath, ResultBuffer); }
 
 /** Writes new value to ini file cache in memory. Automatically loads ini to cache if necessary */
-NH3API_FORCEINLINE bool32_t __stdcall WriteStrToIni(const char* const Key, const char* const Value, const char* const SectionName, const char* const FilePath) NH3API_NOEXCEPT
+NH3API_FORCEINLINE bool32_t __stdcall WriteStrToIni(const char* const Key, const char* const Value, const char* const SectionName, const char* const FilePath) noexcept
 { return STDCALL_4(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::WriteStrToIni), Key, Value, SectionName, FilePath); }
 
 /** Saves cached ini file data on disk */
-NH3API_FORCEINLINE bool32_t __stdcall SaveIni(const char* const FilePath) NH3API_NOEXCEPT
+NH3API_FORCEINLINE bool32_t __stdcall SaveIni(const char* const FilePath) noexcept
 { return STDCALL_1(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::SaveIni), FilePath); }
 
 // ===================== END INI FILES ===================== //
@@ -480,7 +480,7 @@ NH3API_FORCEINLINE void* __stdcall HookCode(void* Addr, THookHandler HandlerFunc
  * Change Context.RetAddr field to return to specific address after handler finishes execution with FALSE result.
  * The hook bridge code is always thread safe.
  */
-NH3API_FORCEINLINE void* __stdcall Hook(void* Addr, THookHandler HandlerFunc, void** AppliedPatch = nullptr, int32_t MinCodeSize = 0, THookType HookType = HOOKTYPE_BRIDGE) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void* __stdcall Hook(void* Addr, THookHandler HandlerFunc, void** AppliedPatch = nullptr, int32_t MinCodeSize = 0, THookType HookType = HOOKTYPE_BRIDGE) noexcept
 { return STDCALL_5(void*, reinterpret_cast<uintptr_t>(&::Era_imports::_Hook), Addr, HandlerFunc, AppliedPatch, MinCodeSize, HookType); }
 
 /**
@@ -498,22 +498,22 @@ NH3API_FORCEINLINE void* __stdcall Hook(void* Addr, THookHandler HandlerFunc, vo
  *   Splice((void*) 0x401000, (void*) MainProc, CONV_STDCALL, 2, &custom_param);
  *   int32_t __stdcall (void* orig_func, int32_t custom_param, int32_t arg1, int32_t arg2) MainProc {...}
  */
-NH3API_FORCEINLINE void* __stdcall Splice(void* OrigFunc, void* HandlerFunc, ECallingConvention CallingConv, int32_t NumArgs, int32_t* CustomParam = nullptr, void** AppliedPatch = nullptr) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void* __stdcall Splice(void* OrigFunc, void* HandlerFunc, ECallingConvention CallingConv, int32_t NumArgs, int32_t* CustomParam = nullptr, void** AppliedPatch = nullptr) noexcept
 { return STDCALL_6(void*, reinterpret_cast<uintptr_t>(&::Era_imports::_Splice), OrigFunc, HandlerFunc, CallingConv, NumArgs, CustomParam, AppliedPatch); }
 
 /** Writes Count bytes from Src buffer to Dst code block */
-NH3API_FORCEINLINE void __stdcall WriteAtCode(int32_t Count, void* Src, void* Dst) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall WriteAtCode(int32_t Count, void* Src, void* Dst) noexcept
 { STDCALL_3(void, reinterpret_cast<uintptr_t>(&::Era_imports::WriteAtCode), Count, Src, Dst); }
 
 // Removed since v3.9.16
 NH3API_FORCEINLINE int32_t __stdcall CalcHookPatchSize(void* pointer) NH3API_DELETED_FUNCTION
 
 /** Rollback patch and free its memory. Do not use it afterwards */
-NH3API_FORCEINLINE void __stdcall RollbackAppliedPatch(void* pointer) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall RollbackAppliedPatch(void* pointer) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::RollbackAppliedPatch), pointer); }
 
 /** Frees applied patch structure. Use it if you don't plan to rollback it at all */
-NH3API_FORCEINLINE void __stdcall FreeAppliedPatch(void* pointer) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall FreeAppliedPatch(void* pointer) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::FreeAppliedPatch), pointer); }
 // ===================== END HOOKS AND PATCHES ===================== //
 
@@ -521,36 +521,36 @@ NH3API_FORCEINLINE void __stdcall FreeAppliedPatch(void* pointer) NH3API_NOEXCEP
 // ======================= DEBUG AND INFO ======================= //
 
 /** Displays system message box with error and terminates application */
-NH3API_FORCEINLINE void __stdcall FatalError(const char* const Err) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall FatalError(const char* const Err) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::FatalError), Err); }
 
 /** Displays system message box with error. Terminates application only if Debug.AbortOnError = 1 in heroes3.ini */
-NH3API_FORCEINLINE void __stdcall NotifyError(const char* const error) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall NotifyError(const char* const error) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::NotifyError), error); }
 
 /** Generates full Era debug info (scripts, plugins, patches, context) and saves all the files in Debug\Era directory */
-NH3API_FORCEINLINE void __stdcall GenerateDebugInfo() NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall GenerateDebugInfo() noexcept
 { STDCALL_0(void, reinterpret_cast<uintptr_t>(&::Era_imports::GenerateDebugInfo)); }
 
 /** Returns Era version string */
-NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall GetEraVersion() NH3API_NOEXCEPT
+NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall GetEraVersion() noexcept
 { return STDCALL_0(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetEraVersion)); }
 
 /** Returns Era version number in 'X.X.XX' format. 3915 means 3.9.15 */
-NH3API_FORCEINLINE int32_t __stdcall GetVersionNum() NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall GetVersionNum() noexcept
 { return STDCALL_0(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::GetVersionNum)); }
 
 NH3API_FORCEINLINE
 /** Addes line to plugin versions message, shown on RMB on Credits button. The proposed format is: "{plugin name} vx.x.x". The function must be called in OnReportVersion event */
-void __stdcall ReportPluginVersion(const char* const VersionLine) NH3API_NOEXCEPT
+void __stdcall ReportPluginVersion(const char* const VersionLine) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::ReportPluginVersion), VersionLine); }
 
 /** Returns 32-character unique key for current game process. The ID will be unique between multiple game runs */
-NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall GetProcessGuid() NH3API_NOEXCEPT
+NH3API_FORCEINLINE ERA_STATIC(char*) __stdcall GetProcessGuid() noexcept
 { return STDCALL_0(char*, reinterpret_cast<uintptr_t>(&::Era_imports::GetProcessGuid)); }
 
 /** Returns IDs of game root dialog and current dialog. The first item in dialog class VMT tables is used as ID */
-NH3API_FORCEINLINE void __stdcall GetGameState(TGameState* GameState) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall GetGameState(TGameState* GameState) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::GetGameState), GameState); }
 
 /**
@@ -558,7 +558,7 @@ NH3API_FORCEINLINE void __stdcall GetGameState(TGameState* GameState) NH3API_NOE
  * Example: WriteLog("SaveGame", "Save monsters section", "Failed to detect monster array size")
  * Available since v3.9.16
  */
-NH3API_FORCEINLINE bool32_t __stdcall WriteLog(const char* EventSource, const char* Operation, const char* Description) NH3API_NOEXCEPT
+NH3API_FORCEINLINE bool32_t __stdcall WriteLog(const char* EventSource, const char* Operation, const char* Description) noexcept
 { return STDCALL_3(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::WriteLog), EventSource, Operation, Description); }
 
 // ===================== END DEBUG AND INFO ===================== //
@@ -567,11 +567,11 @@ NH3API_FORCEINLINE bool32_t __stdcall WriteLog(const char* EventSource, const ch
 // ======================= SAVEGAMES ======================= //
 
 /** Appends data portion to a certain named savegame section during game saving */
-NH3API_FORCEINLINE void __stdcall WriteSavegameSection(int32_t DataSize, void* Data, const char* SectionName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall WriteSavegameSection(int32_t DataSize, void* Data, const char* SectionName) noexcept
 { STDCALL_3(void, reinterpret_cast<uintptr_t>(&::Era_imports::WriteSavegameSection), DataSize, Data, SectionName); }
 
 /** Reads data portion from a certain named savegame section during game loading. Returns number of bytes actually loaded */
-NH3API_FORCEINLINE int32_t __stdcall ReadSavegameSection(int32_t DataSize, void* Data, const char* SectionName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall ReadSavegameSection(int32_t DataSize, void* Data, const char* SectionName) noexcept
 { return STDCALL_3(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::ReadSavegameSection), DataSize, Data, SectionName); }
 // ===================== END SAVEGAMES ===================== //
 
@@ -579,30 +579,30 @@ NH3API_FORCEINLINE int32_t __stdcall ReadSavegameSection(int32_t DataSize, void*
 // ======================= RESOURCES ======================= //
 
 /** Returns ID of game button by its unique name, specified in *.btn file */
-NH3API_FORCEINLINE int32_t __stdcall GetButtonID(const char* ButtonName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall GetButtonID(const char* ButtonName) noexcept
 { return STDCALL_1(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::GetButtonID), ButtonName); }
 
 /** Checks if binary patch exist. Provide full file name with extension like 'no prisons.bin' */
-NH3API_FORCEINLINE bool32_t __stdcall PatchExists(const char* PatchName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE bool32_t __stdcall PatchExists(const char* PatchName) noexcept
 { return STDCALL_1(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::PatchExists), PatchName); }
 
 /** Tries to load PNG replacement for pcx file name and returns success flag */
-NH3API_FORCEINLINE bool32_t __stdcall PcxPngExists(const char* PcxName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE bool32_t __stdcall PcxPngExists(const char* PcxName) noexcept
 { return STDCALL_1(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::PcxPngExists), PcxName); }
 
 /** Check if plugin with given name exists. Omit the extension. Era automatically searches for both deprecated 'dll' and modern 'era' extensions */
-NH3API_FORCEINLINE bool32_t __stdcall PluginExists(const char* PluginName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE bool32_t __stdcall PluginExists(const char* PluginName) noexcept
 { return STDCALL_1(bool32_t, reinterpret_cast<uintptr_t>(&::Era_imports::PluginExists), PluginName); }
 
 /** Creates resource redirection for current savegame only. Whenever an attempt to load non-cached resource with OldFileName will be made, NewFileName will be used instead */
-NH3API_FORCEINLINE void __stdcall RedirectFile(const char* OldFileName, const char* NewFileName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall RedirectFile(const char* OldFileName, const char* NewFileName) noexcept
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::RedirectFile), OldFileName, NewFileName); }
 
 /**
  * Creates global resource redirection. Whenever an attempt to load non-cached resource with OldFileName will be made, NewFileName will be used instead.
  * Can be overriden by RedirectFile.
  */
-NH3API_FORCEINLINE void __stdcall GlobalRedirectFile(const char* OldFileName, const char* NewFileName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall GlobalRedirectFile(const char* OldFileName, const char* NewFileName) noexcept
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::GlobalRedirectFile), OldFileName, NewFileName); }
 // ===================== END RESOURCES ===================== //
 
@@ -614,19 +614,19 @@ NH3API_FORCEINLINE void __stdcall GlobalRedirectFile(const char* OldFileName, co
  * The functions serves two purposes: data deduplication (only one string buffer for particular contents will be kept)
  * and pointer persistence (the pointer buffer will never be freed and thus can be safely used in dialogs and game structures).
  */
-NH3API_FORCEINLINE char* __stdcall ToStaticStr(const char* Str) NH3API_NOEXCEPT
+NH3API_FORCEINLINE char* __stdcall ToStaticStr(const char* Str) noexcept
 { return STDCALL_1(char*, reinterpret_cast<uintptr_t>(&::Era_imports::ToStaticStr), Str); }
 
 /** Releases memory, allocated by Era. Such memory blocks are marked with ERA_MEM() in API */
-NH3API_FORCEINLINE void __stdcall MemFree(const void* buf) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall MemFree(const void* buf) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::MemFree), buf); }
 
 /** Informs Era about moved game array or structure into another location. Specify old array address, old array size and new address */
-NH3API_FORCEINLINE void __stdcall RedirectMemoryBlock(void* OldAddr, int32_t BlockSize, void* NewAddr) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall RedirectMemoryBlock(void* OldAddr, int32_t BlockSize, void* NewAddr) noexcept
 { STDCALL_3(void, reinterpret_cast<uintptr_t>(&::Era_imports::RedirectMemoryBlock), OldAddr, BlockSize, NewAddr); }
 
 /** Returns final address for old known game array or structure. Uses information from all RedirectMemoryBlock calls. If nothing is found, returns address itself */
-NH3API_FORCEINLINE void* __stdcall GetRealAddr(void* Addr) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void* __stdcall GetRealAddr(void* Addr) noexcept
 { return STDCALL_1(void*, reinterpret_cast<uintptr_t>(&::Era_imports::GetRealAddr), Addr); }
 
 NH3API_FORCEINLINE
@@ -636,7 +636,7 @@ NH3API_FORCEINLINE
  * @param NewValue New string value.
  * @param BufSize  Maximal buffer size or -1 to ignore it (buffer overflow may occur).
  */
-void SetPcharValue(char *Buf, const char *NewValue, int32_t BufSize)  NH3API_NOEXCEPT
+void SetPcharValue(char *Buf, const char *NewValue, int32_t BufSize)  noexcept
 {
     if (BufSize < 0) 
     {
@@ -656,7 +656,7 @@ void SetPcharValue(char *Buf, const char *NewValue, int32_t BufSize)  NH3API_NOE
 
 /* Writes memory consumption info to main log file */
 /* Available since v3.9.16 */
-NH3API_FORCEINLINE void __stdcall LogMemoryState() NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall LogMemoryState() noexcept
 { STDCALL_0(void, reinterpret_cast<uintptr_t>(&::Era_imports::LogMemoryState)); }
 
 /**
@@ -664,7 +664,7 @@ NH3API_FORCEINLINE void __stdcall LogMemoryState() NH3API_NOEXCEPT
  * consumer should atomically increase and decrease in malloc/calloc/realloc/free operations.
  * Available since v3.9.16
  */
-NH3API_FORCEINLINE size_t* __stdcall RegisterMemoryConsumer(const char* ConsumerName) NH3API_NOEXCEPT
+NH3API_FORCEINLINE size_t* __stdcall RegisterMemoryConsumer(const char* ConsumerName) noexcept
 { return STDCALL_1(size_t*, reinterpret_cast<uintptr_t>(&::Era_imports::LogMemoryState), ConsumerName); }
 
 // ===================== END MEMORY ===================== //
@@ -673,11 +673,11 @@ NH3API_FORCEINLINE size_t* __stdcall RegisterMemoryConsumer(const char* Consumer
 // ======================= CRYPTO ======================= //
 
 /** Calculates data block hash */
-NH3API_FORCEINLINE int32_t __stdcall Hash32(const char* data, int32_t DataSize) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall Hash32(const char* data, int32_t DataSize) noexcept
 { return STDCALL_2(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::Hash32), data, DataSize); }
 
 /** Generates new random value using SplitMix32 algorithm and modifies input seed value */
-NH3API_FORCEINLINE int32_t __stdcall SplitMix32(int32_t* seed, int32_t MinValue, int32_t MaxValue) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall SplitMix32(int32_t* seed, int32_t MinValue, int32_t MaxValue) noexcept
 { return STDCALL_3(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::SplitMix32), seed, MinValue, MaxValue); }
 // ===================== END CRYPTO ===================== //
 
@@ -692,7 +692,7 @@ NH3API_FORCEINLINE int32_t __stdcall SplitMix32(int32_t* seed, int32_t MinValue,
  * to load image of desired size for sure.
  * Default image is returned in case of missing file and user is notified.
  */
-NH3API_FORCEINLINE void* __stdcall LoadImageAsPcx16(const char* FilePath, const char* PcxName, int32_t Width, int32_t Height, int32_t MaxWidth, int32_t MaxHeight, EImageResizeAlg ResizeAlg) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void* __stdcall LoadImageAsPcx16(const char* FilePath, const char* PcxName, int32_t Width, int32_t Height, int32_t MaxWidth, int32_t MaxHeight, EImageResizeAlg ResizeAlg) noexcept
 { return STDCALL_7(void*, reinterpret_cast<uintptr_t>(&::Era_imports::LoadImageAsPcx16), FilePath, PcxName, Width, Height, MaxWidth, MaxHeight, ResizeAlg); }
 
 // ===================== END GRAPHICS ===================== //
@@ -701,7 +701,7 @@ NH3API_FORCEINLINE void* __stdcall LoadImageAsPcx16(const char* FilePath, const 
 // ======================= ERA RICH TEXT SUPPORT ======================= //
 
 /** Gives a name to a certain ARGB int32 color to use in colored texts */
-NH3API_FORCEINLINE void __stdcall NameColor(int32_t Color32, const char* Name) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall NameColor(int32_t Color32, const char* Name) noexcept
 { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::NameColor), Color32, Name); }
 
 // ===================== END ERA RICH TEXT SUPPORT ===================== //
@@ -710,11 +710,11 @@ NH3API_FORCEINLINE void __stdcall NameColor(int32_t Color32, const char* Name) N
 // ======================= DIALOGS AND MENUS ======================= //
 
 /** Display in-game native message dialog with OK button */
-NH3API_FORCEINLINE void __stdcall ShowMessage(const char *Message) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void __stdcall ShowMessage(const char *Message) noexcept
 { STDCALL_1(void, reinterpret_cast<uintptr_t>(&::Era_imports::ShowMessage), Message); }
 
 /** Raises special exception, closing all dialogs and forcing the game to return to the main menu */
-NH3API_FORCEINLINE int32_t __stdcall FastQuitToGameMenu(EGameMenuTarget TargetScreen) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall FastQuitToGameMenu(EGameMenuTarget TargetScreen) noexcept
 { return STDCALL_1(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::FastQuitToGameMenu), TargetScreen); }
 // ===================== END DIALOGS AND MENUS ===================== //
 
@@ -727,17 +727,17 @@ std::string IntToStr(int32_t value)
 { return to_std_string(value); }
 
 /** Formats given positive or negative quantity to human-readable string with desired constraints on length */
-NH3API_FORCEINLINE int32_t __stdcall FormatQuantity(int32_t value, char* buffer, int32_t BufSize, int32_t MaxLen, int32_t MaxDigits) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall FormatQuantity(int32_t value, char* buffer, int32_t BufSize, int32_t MaxLen, int32_t MaxDigits) noexcept
 { return STDCALL_5(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::FormatQuantity), value, buffer, BufSize, MaxLen, MaxDigits); }
 
 /** Converts integer to string, separating each three digit group by "era.locale.thousand_separator" character. */
-NH3API_FORCEINLINE int32_t __stdcall DecorateInt(int32_t value, char* buffer, int32_t IgnoreSmallNumbers) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t __stdcall DecorateInt(int32_t value, char* buffer, int32_t IgnoreSmallNumbers) noexcept
 { return STDCALL_3(int32_t, reinterpret_cast<uintptr_t>(&::Era_imports::DecorateInt), value, buffer, IgnoreSmallNumbers); }
 
 // ===================== END UTILITIES ===================== //
 
 /** Creates new plugin API instance for particular DLL plugin. Pass real dll name with extension. Returns plugin instance or NULL is plugin is already created */
-NH3API_FORCEINLINE TPlugin __stdcall CreatePlugin(const char* Name) NH3API_NOEXCEPT
+NH3API_FORCEINLINE TPlugin __stdcall CreatePlugin(const char* Name) noexcept
 { return STDCALL_1(TPlugin, reinterpret_cast<uintptr_t>(&::Era_imports::CreatePlugin), Name); }
 
 NH3API_FORCEINLINE
@@ -760,23 +760,23 @@ void ConnectEra(HINSTANCE PluginDllHandle, const char* PluginName)
 
 namespace EraMemory
 {
-    NH3API_INLINE_OR_EXTERN
+    inline
     volatile size_t* allocatedMemorySize NH3API_INLINE_OR_EXTERN_INIT(nullptr);
 
     using ::Era::RegisterMemoryConsumer;
 
-    NH3API_FORCEINLINE void* __stdcall _ClientMemAlloc(volatile size_t* allocatedSize, size_t Size) NH3API_NOEXCEPT
+    NH3API_FORCEINLINE void* __stdcall _ClientMemAlloc(volatile size_t* allocatedSize, size_t Size) noexcept
     { return STDCALL_2(void*, reinterpret_cast<uintptr_t>(&::Era_imports::_ClientMemAlloc), allocatedSize, Size); }
 
-    NH3API_FORCEINLINE void __stdcall _ClientMemFree(volatile size_t* allocatedSize, const void* Buf) NH3API_NOEXCEPT
+    NH3API_FORCEINLINE void __stdcall _ClientMemFree(volatile size_t* allocatedSize, const void* Buf) noexcept
     { STDCALL_2(void, reinterpret_cast<uintptr_t>(&::Era_imports::_ClientMemFree), allocatedSize, Buf); }
 
-    NH3API_FORCEINLINE void* __stdcall _ClientMemRealloc(volatile size_t* allocatedSize, const void* Buf, size_t NewSize) NH3API_NOEXCEPT
+    NH3API_FORCEINLINE void* __stdcall _ClientMemRealloc(volatile size_t* allocatedSize, const void* Buf, size_t NewSize) noexcept
     { return STDCALL_3(void*, reinterpret_cast<uintptr_t>(&::Era_imports::_ClientMemRealloc), allocatedSize, Buf, NewSize); }
 
     struct CurrentModuleHandleGetter
     {
-        static NH3API_NOINLINE HMODULE Get() NH3API_NOEXCEPT
+        static NH3API_NOINLINE HMODULE Get() noexcept
         {
             HMODULE result = nullptr;
             ::GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, reinterpret_cast<LPCSTR>(&CurrentModuleHandleGetter::Get), &result);

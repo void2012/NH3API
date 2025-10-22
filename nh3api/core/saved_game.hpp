@@ -19,16 +19,16 @@ struct SavedGameHeader
 {
     public:
         NH3API_FORCEINLINE
-        SavedGameHeader() NH3API_NOEXCEPT
+        SavedGameHeader() noexcept
         { THISCALL_1(void, 0x4BBDA0, this); }
 
         NH3API_FORCEINLINE
-        SavedGameHeader(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        SavedGameHeader(const ::nh3api::dummy_tag_t& tag) noexcept
             : map_header(tag), campaign(tag), file_name(tag)
         { THISCALL_1(void, 0x4BBDA0, this); }
 
         NH3API_FORCEINLINE
-        ~SavedGameHeader() NH3API_NOEXCEPT
+        ~SavedGameHeader() noexcept
         { THISCALL_1(void, 0x4BDC40, this); }
 
     public:
@@ -53,7 +53,7 @@ struct SavedGameHeader
         bool campaign_game;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x4E1 = +1249,  size = 0x3 = 3
         byte_t gap_4E1[3];
 

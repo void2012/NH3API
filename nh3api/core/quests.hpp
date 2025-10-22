@@ -65,37 +65,37 @@ NH3API_VIRTUAL_CLASS type_quest
 
     public:
         NH3API_FORCEINLINE
-        type_quest() NH3API_NOEXCEPT
+        type_quest() noexcept
             : text_variant(exe_rand() % 3), limit(-1)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_quest(bool _seer_hut) NH3API_NOEXCEPT
+        type_quest(bool _seer_hut) noexcept
             : seer_hut(_seer_hut), text_variant(exe_rand() % 3), limit(-1)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_quest(bool _seer_hut, int32_t _text_variant) NH3API_NOEXCEPT
+        type_quest(bool _seer_hut, int32_t _text_variant) noexcept
             : seer_hut(_seer_hut), text_variant(_text_variant), limit(-1)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_quest(const nh3api::omit_base_vftable_tag_t&) NH3API_NOEXCEPT
+        type_quest(const nh3api::omit_base_vftable_tag_t&) noexcept
             : text_variant(exe_rand() % 3), limit(-1)
         {}
 
         NH3API_FORCEINLINE
-        type_quest(const nh3api::omit_base_vftable_tag_t&, bool _seer_hut) NH3API_NOEXCEPT
+        type_quest(const nh3api::omit_base_vftable_tag_t&, bool _seer_hut) noexcept
             : seer_hut(_seer_hut), text_variant(exe_rand() % 3), limit(-1)
         {}
 
         NH3API_FORCEINLINE
-        type_quest(const nh3api::omit_base_vftable_tag_t&, bool _seer_hut, int32_t _text_variant) NH3API_NOEXCEPT
+        type_quest(const nh3api::omit_base_vftable_tag_t&, bool _seer_hut, int32_t _text_variant) noexcept
             : seer_hut(_seer_hut), text_variant(_text_variant), limit(-1)
         {}
 
         NH3API_FORCEINLINE
-        type_quest(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_quest(const ::nh3api::dummy_tag_t& tag) noexcept
             : proposal_text(tag), progress_text(tag), completion_text(tag)
         {}
 
@@ -106,7 +106,7 @@ NH3API_VIRTUAL_CLASS type_quest
         NH3API_SCALAR_DELETING_DESTRUCTOR
 
         // vftable shift: +4
-        NH3API_NODISCARD virtual int32_t __thiscall ai_value(int32_t player) const
+        [[nodiscard]] virtual int32_t __thiscall ai_value(int32_t player) const
         { return get_type_vftable(this)->ai_value(this, player); }
 
         // vftable shift: +8
@@ -135,7 +135,7 @@ NH3API_VIRTUAL_CLASS type_quest
         virtual exe_string* __thiscall get_quest_text(exe_string * out_str) const
         { return get_type_vftable(this)->get_quest_text(this, out_str); } // ABI compability
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         // Quest task message /
         // Текст задания квеста.
         exe_string __thiscall get_quest_text() const
@@ -146,10 +146,10 @@ NH3API_VIRTUAL_CLASS type_quest
         } // ABI compability
 
         // vftable shift: +28
-        NH3API_NODISCARD virtual exe_string* __thiscall get_help_text(exe_string * out_str) const
+        [[nodiscard]] virtual exe_string* __thiscall get_help_text(exe_string * out_str) const
         { return get_type_vftable(this)->get_help_text(this, out_str); } // ABI compability
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         exe_string __thiscall get_help_text() const
         {
             exe_string result(::nh3api::dummy_tag);
@@ -158,7 +158,7 @@ NH3API_VIRTUAL_CLASS type_quest
         } // ABI compability
 
         // vftable shift: +32
-        NH3API_NODISCARD virtual EQuestType __thiscall get_type() const
+        [[nodiscard]] virtual EQuestType __thiscall get_type() const
         { return get_type_vftable(this)->get_type(this); }
 
         // vftable shift: +36
@@ -193,7 +193,7 @@ NH3API_VIRTUAL_CLASS type_quest
         virtual void __thiscall init()
         { get_type_vftable(this)->init(this); }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         exe_string get_completion_text() const
         {
             exe_string result(::nh3api::dummy_tag);
@@ -208,7 +208,7 @@ NH3API_VIRTUAL_CLASS type_quest
         bool seer_hut;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_5[3];
 
     public:
@@ -247,9 +247,9 @@ using type_quest::get_help_text; \
 using type_quest::get_quest_text; \
 virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override \
 { get_type_vftable(this)->scalar_deleting_destructor(reinterpret_cast<CLASS_NAME*>(this), flag); } \
-NH3API_NODISCARD virtual int32_t __thiscall ai_value(int32_t _player) const override \
+[[nodiscard]] virtual int32_t __thiscall ai_value(int32_t _player) const override \
 { return get_type_vftable(this)->ai_value(reinterpret_cast<const CLASS_NAME*>(this), _player); } \
-NH3API_NODISCARD virtual bool __thiscall can_complete(hero* h) const override \
+[[nodiscard]] virtual bool __thiscall can_complete(hero* h) const override \
 { return get_type_vftable(this)->can_complete(reinterpret_cast<const CLASS_NAME*>(this), h); } \
 virtual void __thiscall complete(hero* h) override \
 { get_type_vftable(this)->complete(reinterpret_cast<CLASS_NAME*>(this), h); } \
@@ -257,11 +257,11 @@ virtual void __thiscall do_progress_dialog(hero* h) override \
 { get_type_vftable(this)->do_progress_dialog(reinterpret_cast<CLASS_NAME*>(this), h); } \
 virtual void __thiscall do_proposal_dialog() override \
 { get_type_vftable(this)->do_proposal_dialog(reinterpret_cast<CLASS_NAME*>(this)); } \
-NH3API_NODISCARD virtual exe_string* __thiscall get_quest_text(exe_string* out_str) const override \
+[[nodiscard]] virtual exe_string* __thiscall get_quest_text(exe_string* out_str) const override \
 { return get_type_vftable(this)->get_quest_text(reinterpret_cast<const CLASS_NAME*>(this), out_str); } \
-NH3API_NODISCARD virtual exe_string* __thiscall get_help_text(exe_string* out_str) const override \
+[[nodiscard]] virtual exe_string* __thiscall get_help_text(exe_string* out_str) const override \
 { return get_type_vftable(this)->get_help_text(reinterpret_cast<const CLASS_NAME*>(this), out_str); } \
-NH3API_NODISCARD virtual EQuestType __thiscall get_type() const override \
+[[nodiscard]] virtual EQuestType __thiscall get_type() const override \
 { return get_type_vftable(this)->get_type(reinterpret_cast<const CLASS_NAME*>(this)); } \
 virtual void __thiscall hero_defeated(THeroID target, int32_t _player) override \
 { get_type_vftable(this)->hero_defeated(reinterpret_cast<CLASS_NAME*>(this), target, _player); } \
@@ -286,12 +286,12 @@ NH3API_VIRTUAL_CLASS type_belong_to_player_quest : public type_quest
 {
     public:
         NH3API_FORCEINLINE
-        type_belong_to_player_quest(bool _seer_hut) NH3API_NOEXCEPT
+        type_belong_to_player_quest(bool _seer_hut) noexcept
             : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_belong_to_player_quest(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_belong_to_player_quest(const ::nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -314,12 +314,12 @@ NH3API_VIRTUAL_CLASS type_be_hero_quest : public type_quest
 {
     public:
         NH3API_FORCEINLINE
-        type_be_hero_quest(bool _seer_hut, THeroID _id) NH3API_NOEXCEPT
+        type_be_hero_quest(bool _seer_hut, THeroID _id) noexcept
             : type_quest(nh3api::omit_base_vftable_tag, _seer_hut), id(_id)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_be_hero_quest(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_be_hero_quest(const ::nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -342,12 +342,12 @@ NH3API_VIRTUAL_CLASS type_resource_quest : public type_quest
 {
     public:
         NH3API_FORCEINLINE
-        type_resource_quest(bool _seer_hut) NH3API_NOEXCEPT
+        type_resource_quest(bool _seer_hut) noexcept
             : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_resource_quest(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_resource_quest(const ::nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -370,12 +370,12 @@ NH3API_VIRTUAL_CLASS type_creature_quest : public type_quest
 {
     public:
         NH3API_FORCEINLINE
-        type_creature_quest(bool _seer_hut) NH3API_NOEXCEPT
+        type_creature_quest(bool _seer_hut) noexcept
             : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_creature_quest(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_creature_quest(const ::nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag), amounts(tag), types(tag)
         {}
 
@@ -403,12 +403,12 @@ NH3API_VIRTUAL_CLASS type_artifact_quest : public type_quest
 {
     public:
         NH3API_FORCEINLINE
-        type_artifact_quest(bool _seer_hut) NH3API_NOEXCEPT
+        type_artifact_quest(bool _seer_hut) noexcept
             : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_artifact_quest(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_artifact_quest(const ::nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag), artifacts(tag)
         {}
 
@@ -431,12 +431,12 @@ NH3API_VIRTUAL_CLASS type_monster_quest : public type_quest
 {
     public:
         NH3API_FORCEINLINE
-        type_monster_quest(bool _seer_hut) NH3API_NOEXCEPT
+        type_monster_quest(bool _seer_hut) noexcept
             : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_monster_quest(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_monster_quest(const ::nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -475,12 +475,12 @@ NH3API_VIRTUAL_CLASS type_defeat_hero_quest : public type_quest
 {
     public:
         NH3API_FORCEINLINE
-        type_defeat_hero_quest(bool _seer_hut) NH3API_NOEXCEPT
+        type_defeat_hero_quest(bool _seer_hut) noexcept
             : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_defeat_hero_quest(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_defeat_hero_quest(const ::nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag), completed(tag)
         {}
 
@@ -514,12 +514,12 @@ NH3API_VIRTUAL_CLASS type_skill_quest : public type_quest
 {
     public:
         NH3API_FORCEINLINE
-        type_skill_quest(bool _seer_hut) NH3API_NOEXCEPT
+        type_skill_quest(bool _seer_hut) noexcept
             : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_skill_quest(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_skill_quest(const ::nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -542,12 +542,12 @@ NH3API_VIRTUAL_CLASS type_experience_quest : public type_quest
 {
     public:
         NH3API_FORCEINLINE
-        type_experience_quest(bool _seer_hut) NH3API_NOEXCEPT
+        type_experience_quest(bool _seer_hut) noexcept
             : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
         { NH3API_SET_VFTABLE(); }
 
         NH3API_FORCEINLINE
-        type_experience_quest(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_experience_quest(const ::nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -570,16 +570,16 @@ class TQuestGuard
 {
     public:
         NH3API_FORCEINLINE
-        TQuestGuard() NH3API_NOEXCEPT
+        TQuestGuard() noexcept
         NH3API_DELEGATE_DUMMY(TQuestGuard)
         { THISCALL_1(void, 0x573950, this); }
 
         NH3API_FORCEINLINE
-        TQuestGuard(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        TQuestGuard(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         exe_string getLogText() const
         {
             exe_string result(::nh3api::dummy_tag);
@@ -587,7 +587,7 @@ class TQuestGuard
             return result;
         }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         exe_string getQuickViewText(int32_t player) const
         {
             exe_string result(::nh3api::dummy_tag);
@@ -595,7 +595,7 @@ class TQuestGuard
             return result;
         }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         exe_string getRolloverText(int32_t player) const
         {
             exe_string result(::nh3api::dummy_tag);
@@ -716,18 +716,18 @@ struct TSeerReward
 {
     public:
         NH3API_FORCEINLINE
-        TSeerReward() NH3API_NOEXCEPT
+        TSeerReward() noexcept
         { nh3api::trivial_zero<sizeof(*this)>(this); }
 
         NH3API_FORCEINLINE
-        TSeerReward(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        TSeerReward(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
-        NH3API_NODISCARD int32_t getValue(const hero* current_hero)
+        [[nodiscard]] int32_t getValue(const hero* current_hero)
         { return THISCALL_2(int32_t, 0x573E40, this, current_hero); }
 
-        NH3API_NODISCARD int32_t getRewardExtra(const hero* current_hero)
+        [[nodiscard]] int32_t getRewardExtra(const hero* current_hero)
         { return THISCALL_2(int32_t, 0x5742E0, this, current_hero); }
 
         void giveReward(hero* current_hero, bool human_player)
@@ -793,12 +793,12 @@ class TSeerHut : TQuestGuard
 {
     public:
         NH3API_FORCEINLINE
-        TSeerHut() NH3API_NOEXCEPT
+        TSeerHut() noexcept
         NH3API_DELEGATE_DUMMY(TSeerHut)
         { THISCALL_1(void, 0x573950, this); }
 
         NH3API_FORCEINLINE
-        TSeerHut(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TSeerHut(const ::nh3api::dummy_tag_t& tag) noexcept
             : TQuestGuard(tag), reward(tag)
         {}
 
@@ -814,7 +814,7 @@ class TSeerHut : TQuestGuard
         int8_t      NameIndex;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x12 = +18,  size = 0x1 = 1
         int8_t unused;
 
@@ -845,8 +845,8 @@ NH3API_SPECIALIZE_TYPE_VFTABLE(0x641900, type_resource_quest)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x64193C, type_be_hero_quest)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x641978, type_belong_to_player_quest)
 
-NH3API_NODISCARD NH3API_FORCEINLINE
-type_quest* create_quest(EQuestType quest_type, bool hut) NH3API_NOEXCEPT
+[[nodiscard]] NH3API_FORCEINLINE
+type_quest* create_quest(EQuestType quest_type, bool hut) noexcept
 { return FASTCALL_2(type_quest*, 0x573610, quest_type, static_cast<bool32_t>(hut)); }
 
 NH3API_DISABLE_WARNING_END

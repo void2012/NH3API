@@ -189,7 +189,7 @@ struct is_wine_present_impl
     }
 };
 
-NH3API_NODISCARD NH3API_FORCEINLINE
+[[nodiscard]] NH3API_FORCEINLINE
 // Check for WINE /
 // Проверить наличие WINE.
 bool isWinePresent()
@@ -207,17 +207,17 @@ struct TBitmap : public ::resource
 {
     public:
         NH3API_FORCEINLINE
-        TBitmap(int32_t w, int32_t h) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TBitmap, ::resource)
+        TBitmap(int32_t w, int32_t h) noexcept
+        NH3API_DELEGATE_DUMMY_BASE(TBitmap)
         { THISCALL_3(void, 0x44DC40, this, w, h); }
 
         NH3API_FORCEINLINE
-        TBitmap(const char* name, int32_t w, int32_t h) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TBitmap, ::resource)
+        TBitmap(const char* name, int32_t w, int32_t h) noexcept
+        NH3API_DELEGATE_DUMMY_BASE(TBitmap)
         { THISCALL_4(void, 0x44DD20, this, name, w, h); }
 
         NH3API_FORCEINLINE
-        TBitmap(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TBitmap(const ::nh3api::dummy_tag_t& tag) noexcept
             : ::resource(tag)
         {}
 
@@ -226,31 +226,31 @@ struct TBitmap : public ::resource
         { THISCALL_1(void, 0x5BBF30, this); }
 
     public:
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         uint16_t* GetMap()
         { return map; }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         const uint16_t* GetMap() const
         { return map; }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         uint32_t* GetMap32()
         { return map32; }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         const uint32_t* GetMap32() const
         { return map32; }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         int32_t GetWidth() const
         { return Width; }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         int32_t GetHeight() const
         { return Width; }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
+        [[nodiscard]] NH3API_FORCEINLINE
         int32_t GetPitch() const
         { return Pitch; }
 
@@ -331,18 +331,18 @@ struct TPalette : public ::resource
 {
     public:
         NH3API_FORCEINLINE
-        TPalette() NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
+        TPalette() noexcept
+        NH3API_DELEGATE_DUMMY_BASE(TPalette)
         { THISCALL_1(void, 0x522B40, this); }
 
         NH3API_FORCEINLINE
-        TPalette(const ::TPalette24& p24) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
+        TPalette(const ::TPalette24& p24) noexcept
+        NH3API_DELEGATE_DUMMY_BASE(TPalette)
         { THISCALL_2(void, 0x522D00, this, &p24); }
 
         NH3API_FORCEINLINE
-        TPalette(const void* data) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
+        TPalette(const void* data) noexcept
+        NH3API_DELEGATE_DUMMY_BASE(TPalette)
         { THISCALL_2(void, 0x522B90, this, data); }
 
         NH3API_FORCEINLINE
@@ -352,8 +352,8 @@ struct TPalette : public ::resource
                  uint32_t gbits,
                  uint32_t gshift,
                  uint32_t bbits,
-                 uint32_t bshift) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
+                 uint32_t bshift) noexcept
+        NH3API_DELEGATE_DUMMY_BASE(TPalette)
         { THISCALL_8(void, 0x522BC0, this, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
@@ -364,42 +364,42 @@ struct TPalette : public ::resource
                  uint32_t gbits,
                  uint32_t gshift,
                  uint32_t bbits,
-                 uint32_t bshift) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
+                 uint32_t bshift) noexcept
+        NH3API_DELEGATE_DUMMY_BASE(TPalette)
         { THISCALL_9(void, 0x522C60, this, name, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
-        TPalette(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TPalette(const ::nh3api::dummy_tag_t& tag) noexcept
             : resource(tag) // resource(nullptr, RType_misc)
         {}
 
         NH3API_FORCEINLINE
-        TPalette& operator=(const TPalette& other) NH3API_NOEXCEPT
+        TPalette& operator=(const TPalette& other) noexcept
         { THISCALL_2(TPalette*, 0x522E00, this, &other); return *this; }
         
         NH3API_FORCEINLINE
-        TPalette(TPalette const& other) NH3API_NOEXCEPT
-        NH3API_DELEGATE_DUMMY_OR_BASE(TPalette, ::resource)
+        TPalette(TPalette const& other) noexcept
+        NH3API_DELEGATE_DUMMY_BASE(TPalette)
         { THISCALL_2(void, 0x522DD0, this, &other); }
 
         NH3API_FORCEINLINE
-        TPalette& operator=(const ::TPalette16& other) NH3API_NOEXCEPT
+        TPalette& operator=(const ::TPalette16& other) noexcept
         { THISCALL_2(void, 0x522E00, this, &other); return *this; }
 
     public:
         NH3API_VIRTUAL_OVERRIDE_RESOURCE(TPalette)
 
     public:
-        NH3API_NODISCARD const uint16_t* data() const 
+        [[nodiscard]] const uint16_t* data() const 
         { return Palette.data(); }
 
-        NH3API_NODISCARD uint16_t* data() 
+        [[nodiscard]] uint16_t* data() 
         { return Palette.data(); }
 
-        NH3API_NODISCARD const uint32_t* data32() const 
+        [[nodiscard]] const uint32_t* data32() const 
         { return Palette32->data(); }
 
-        NH3API_NODISCARD uint32_t* data32() 
+        [[nodiscard]] uint32_t* data32() 
         { return Palette32->data(); }
 
     union 

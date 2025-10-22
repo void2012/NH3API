@@ -15,20 +15,20 @@
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
-NH3API_INLINE_OR_EXTERN
+inline
 // Текущий игрок.
 int32_t& giCurPlayer
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CCF4, int32_t));
 
-NH3API_INLINE_OR_EXTERN
+inline
 int32_t& giCurWatchPlayer
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977DC, int32_t));
 
-NH3API_INLINE_OR_EXTERN
+inline
 uint8_t& giCurWatchPlayerBit
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CD08, uint8_t));
 
-NH3API_INLINE_OR_EXTERN
+inline
 // Текущий бит игрока.
 uint8_t& giCurrentPlayerBit
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CD10, uint8_t));
@@ -46,7 +46,7 @@ struct AI
     std::array<int32_t, 7> turnProductionResource;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     byte_t gap_38[4];
 
 public:
@@ -73,32 +73,32 @@ class playerData
 {
     public:
         NH3API_FORCEINLINE
-        playerData() NH3API_NOEXCEPT
+        playerData() noexcept
         NH3API_DELEGATE_DUMMY(playerData)
         { THISCALL_1(void, 0x4B9AB0, this); }
 
         NH3API_FORCEINLINE
-        playerData(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        playerData(const ::nh3api::dummy_tag_t& tag) noexcept
             : shipyards(tag),
               assembledCombos(tag)
         {}
 
         NH3API_FORCEINLINE
-        playerData& operator=(const playerData& other) NH3API_NOEXCEPT
+        playerData& operator=(const playerData& other) noexcept
         { THISCALL_2(void, 0x58FA40, this, other); return *this; }
 
         NH3API_FORCEINLINE 
-        playerData(const playerData& other) NH3API_NOEXCEPT
+        playerData(const playerData& other) noexcept
         { THISCALL_2(void, 0x58FA40, this, &other); }
 
         NH3API_FORCEINLINE
-        ~playerData() NH3API_NOEXCEPT
+        ~playerData() noexcept
         { THISCALL_1(void, 0x4CE230, this); }
 
     public:
         // Does the player have capitol? /
         // Есть ли у игрока город с капитолием?
-        NH3API_NODISCARD bool HasCapitol() const
+        [[nodiscard]] bool HasCapitol() const
         { return THISCALL_1(bool, 0x4B9C00, this); }
 
         // Move occupying hero to town's garrison /
@@ -123,40 +123,40 @@ class playerData
         int32_t save(TAbstractFile* outfile)
         { return THISCALL_2(int32_t, 0x4BA330, this, outfile); }
 
-        NH3API_NODISCARD int32_t FindHero(int32_t id) const
+        [[nodiscard]] int32_t FindHero(int32_t id) const
         { return THISCALL_2(int32_t, 0x4BA6A0, this, id); }
 
-        NH3API_NODISCARD int32_t FindTown(int32_t id) const
+        [[nodiscard]] int32_t FindTown(int32_t id) const
         { return THISCALL_2(int32_t, 0x4BA6D0, this, id); }
 
-        NH3API_NODISCARD int32_t NextHero() const
+        [[nodiscard]] int32_t NextHero() const
         { return THISCALL_1(THeroID, 0x4BA700, this); }
 
-        NH3API_NODISCARD int32_t NextTown() const
+        [[nodiscard]] int32_t NextTown() const
         { return THISCALL_1(int32_t, 0x4BA800, this); }
 
-        NH3API_NODISCARD bool HasMobileHero() const
+        [[nodiscard]] bool HasMobileHero() const
         { return THISCALL_1(bool, 0x4BA850, this); }
 
-        NH3API_NODISCARD int32_t NumOfGivenArtifact(TArtifact iWhichArtifact) const
+        [[nodiscard]] int32_t NumOfGivenArtifact(TArtifact iWhichArtifact) const
         { return THISCALL_2(int32_t, 0x4BA890, this, iWhichArtifact); }
 
-        NH3API_NODISCARD bool hasGivenArtifact(TArtifact artifact) const
+        [[nodiscard]] bool hasGivenArtifact(TArtifact artifact) const
         { return THISCALL_2(bool, 0x4BA970, this, artifact); }
 
-        NH3API_NODISCARD bool IsLocalHuman() const
+        [[nodiscard]] bool IsLocalHuman() const
         { return THISCALL_1(bool, 0x4BAA40, this); }
 
-        NH3API_NODISCARD bool IsHuman() const
+        [[nodiscard]] bool IsHuman() const
         { return THISCALL_1(bool, 0x4BAA60, this); }
 
-        NH3API_NODISCARD const char* GetName() const
+        [[nodiscard]] const char* GetName() const
         { return THISCALL_1(char*, 0x4BAA70, this); }
 
-        NH3API_NODISCARD bool hasAssembledCombos() const
+        [[nodiscard]] bool hasAssembledCombos() const
         { return assembledCombos.any(); }
 
-        NH3API_NODISCARD uint32_t numAssembledCombos() const
+        [[nodiscard]] uint32_t numAssembledCombos() const
         { return assembledCombos.count(); }
 
     public:
@@ -171,7 +171,7 @@ class playerData
         int8_t numHeroes;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_2[2];
 
     public:
@@ -191,12 +191,12 @@ class playerData
         std::array<THeroID, 2> recruits;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // unused / не используется
         // offset: +0x30 = +48,  size = 0x1 = 1
         uint8_t startingNumHeroes;
 
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_49[3];
 
     public:
@@ -241,7 +241,7 @@ class playerData
         bool placement_help_enabled;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_89[3];
 
     public:
@@ -298,7 +298,7 @@ class playerData
         bool isHuman;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_E3[1];
 
     public:
@@ -321,7 +321,7 @@ class playerData
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
+inline
 // Текущий игрок.
 playerData* const& gpCurPlayer
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CCFC, playerData*));

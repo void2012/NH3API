@@ -220,36 +220,31 @@ enum ArtifactClass : uint32_t
 struct type_artifact
 {
     public:
-        NH3API_CONSTEXPR
-        type_artifact() NH3API_NOEXCEPT
+        constexpr type_artifact() noexcept
             : type(ARTIFACT_NONE), spell(SPELL_NONE)
         {}
 
-        NH3API_CONSTEXPR
-        type_artifact(TArtifact _type, SpellID _spell) NH3API_NOEXCEPT
+        constexpr type_artifact(TArtifact _type, SpellID _spell) noexcept
             : type(_type), spell(_spell)
         {}
 
-        NH3API_CONSTEXPR
-        type_artifact(TArtifact _type, int32_t _spell) NH3API_NOEXCEPT
+        constexpr type_artifact(TArtifact _type, int32_t _spell) noexcept
             : type(_type), spell(static_cast<SpellID>(_spell))
         {}
 
-        NH3API_CONSTEXPR
-        type_artifact(int32_t _type, int32_t _spell) NH3API_NOEXCEPT
+        constexpr type_artifact(int32_t _type, int32_t _spell) noexcept
             : type(static_cast<TArtifact>(_type)), spell(static_cast<SpellID>(_spell))
         {}
 
         NH3API_FORCEINLINE
-        type_artifact(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        type_artifact(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
         void get_rollover_text(char* buffer) const
         { THISCALL_2(void, 0x4DB5C0, this, buffer); }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE
-        exe_string get_description() const
+        [[nodiscard]] NH3API_FORCEINLINE exe_string get_description() const
         {
             exe_string result(::nh3api::dummy_tag);
             THISCALL_2(exe_string*, 0x4DB650, this, &result);
@@ -257,12 +252,10 @@ struct type_artifact
         }
 
     public:
-        NH3API_CONSTEXPR
-        bool operator==(const type_artifact& other) const
+        constexpr bool operator==(const type_artifact& other) const noexcept
         { return (this->type == other.type) && (this->spell == other.spell); }
 
-        NH3API_CONSTEXPR
-        bool operator!=(const type_artifact& other) const
+        constexpr bool operator!=(const type_artifact& other) const noexcept
         { return !(*this == other); }
 
     public:
@@ -357,7 +350,7 @@ struct TArtifactTraits
     CombinationArtifactType m_targetCombo;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     // unused /
     // не используется.
     // offset: +0x1C = +28,  size = 0x1 = 1
@@ -370,7 +363,7 @@ public:
     bool m_givesSpells;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     byte_t gap_1E[2];
 
 };
@@ -395,28 +388,23 @@ struct TArtifactSlotTraits
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
 // Artifact traits /
 // Свойства артефактов.
-std::array<TArtifactTraits, MAX_ARTIFACTS>& akArtifactTraits
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x693A58, std::array<TArtifactTraits, MAX_ARTIFACTS>));
+inline std::array<TArtifactTraits, MAX_ARTIFACTS>& akArtifactTraits
+= get_global_var_ref(0x693A58, std::array<TArtifactTraits, MAX_ARTIFACTS>);
 
-NH3API_INLINE_OR_EXTERN
 // Artifact slot traits /
 // Свойства слотов артефактов.
-std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>& akArtifactSlotTraits
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x694C58, std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>));
+inline std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>& akArtifactSlotTraits
+= get_global_var_ref(0x694C58, std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>);
 
-NH3API_INLINE_OR_EXTERN
 // Combination artifact info /
 // Свойства сборочных артефактов.
-std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>& gCombinationArtifacts
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x693938, std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>));
+inline std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>& gCombinationArtifacts
+= get_global_var_ref(0x693938, std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>);
 
-NH3API_INLINE_OR_EXTERN
 // Artifact currently held in mouse in the dialog /
 // Артефакт, в данный момент удерживаемый мышью в диалоге.
-type_artifact& holding_artifact
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698AD8, type_artifact));
+inline type_artifact& holding_artifact = get_global_var_ref(0x698AD8, type_artifact);
 
 NH3API_DISABLE_WARNING_END

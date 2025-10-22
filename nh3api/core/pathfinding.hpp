@@ -111,23 +111,23 @@ class searchArray
 {
     public:
         NH3API_FORCEINLINE
-        searchArray() NH3API_NOEXCEPT
+        searchArray() noexcept
         { THISCALL_1(void, 0x4B10D0, this); }
 
         NH3API_FORCEINLINE
-        searchArray(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        searchArray(const ::nh3api::dummy_tag_t& tag) noexcept
             : queue(tag), result(tag), visited_points(tag)
         {}
 
         NH3API_FORCEINLINE
-        ~searchArray() NH3API_NOEXCEPT
+        ~searchArray() noexcept
         { THISCALL_1(void, 0x4B1140, this); }
 
     public:
-        NH3API_NODISCARD const pathCell* get_cell(type_point point, bool flying) const
+        [[nodiscard]] const pathCell* get_cell(type_point point, bool flying) const
         { return THISCALL_3(pathCell*, 0x42ECC0, this, point, flying); }
 
-        NH3API_NODISCARD int32_t get_danger_value(type_point point) const
+        [[nodiscard]] int32_t get_danger_value(type_point point) const
         { return THISCALL_2(int32_t, 0x42ED30, this, point); }
 
         void SeedCombatPosition(const army* thisArmy,
@@ -145,10 +145,10 @@ class searchArray
                             int32_t base_speed)
         { return THISCALL_7(bool, 0x4B3160, this, current_army, current_group, destination, in_placement_phase, limit, base_speed); }
 
-        NH3API_NODISCARD pathCell* getCellData(size_t pos)
+        [[nodiscard]] pathCell* getCellData(size_t pos)
         { return THISCALL_2(pathCell*, 0x4B38F0, this, pos); }
 
-        NH3API_NODISCARD const pathCell* getCellData(size_t pos) const
+        [[nodiscard]] const pathCell* getCellData(size_t pos) const
         { return THISCALL_2(pathCell*, 0x4B38F0, this, pos); }
 
         int32_t get_travel_time(const army* current_army, int32_t hex) const
@@ -175,7 +175,7 @@ class searchArray
         uint8_t pay_transition_costs;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_5[3];
 
     public:
@@ -210,7 +210,7 @@ class searchArray
         bool limit_reached;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_21[3];
 
     public:
@@ -246,7 +246,7 @@ class searchArray
 
 NH3API_SIZE_ASSERT(0x70, searchArray);
 
-NH3API_INLINE_OR_EXTERN
+inline
 searchArray* const& gpSearchArray
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992D4, searchArray*));
 

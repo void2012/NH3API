@@ -233,7 +233,7 @@ enum TCreatureType : int32_t
 enum creature_seqid : int32_t
 {
     cs_walk       = 0, //
-    cs_fidget     = 1, // 
+    cs_fidget     = 1, //
     cs_wait       = 2, //
     cs_wince      = 3, //
     cs_defend     = 4, //
@@ -513,17 +513,15 @@ struct SMonFrameInfo
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
 // All creature traits /
 // Свойства всех существ.
-std::array<TCreatureTypeTraits, MAX_COMBAT_CREATURES>& akCreatureTypeTraits
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6703B8, std::array<TCreatureTypeTraits, MAX_COMBAT_CREATURES>));
+inline std::array<TCreatureTypeTraits, MAX_COMBAT_CREATURES>& akCreatureTypeTraits
+= get_global_var_ref(0x6703B8, std::array<TCreatureTypeTraits, MAX_COMBAT_CREATURES>);
 
-NH3API_INLINE_OR_EXTERN
 // Creature types in each town dwelling gDwellingType[towntype][levels][upgraded] /
 // Существа в жилищах каждого типа городов gDwellingType[город][уровни][улучшенное]
-std::array<std::array<std::array<TCreatureType, 7>, 2>, kNumTowns>& gDwellingType
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6747B4, std::array<std::array<std::array<TCreatureType, 7>, 2>, kNumTowns>));
+inline std::array<std::array<std::array<TCreatureType, 7>, 2>, kNumTowns>& gDwellingType
+= get_global_var_ref(0x6747B4, std::array<std::array<std::array<TCreatureType, 7>, 2>, kNumTowns>);
 
 class town;
 class hero;
@@ -537,63 +535,95 @@ public:
     NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
     // Default constructor /
     // Конструктор по умолчанию
-    armyGroup() NH3API_NOEXCEPT
+    armyGroup() noexcept
     {
         type.fill(CREATURE_NONE);
         amount.fill(-1);
     }
 
+    armyGroup(const armyGroup& other) noexcept
+    { nh3api::trivial_copy<sizeof(*this)>(&other, this); }
+
+    armyGroup& operator=(const armyGroup& other) noexcept
+    {
+        nh3api::trivial_copy<sizeof(*this)>(&other, this);
+        return *this;
+    }
+
+    armyGroup(armyGroup&& other) noexcept
+    {
+        #if __has_builtin(__builtin_memcpy_inline) && __has_builtin(__builtin_memset_inline)
+        __builtin_memcpy_inline(reinterpret_cast<void*>(this), &other, sizeof(*this));
+        __builtin_memset_inline(&other, 0xFF, sizeof(*this));
+        #else
+        std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(*this));
+        std::memset(&other, 0xFF, sizeof(*this));
+        #endif
+    }
+
+    armyGroup& operator=(armyGroup&& other) noexcept
+    {
+        #if __has_builtin(__builtin_memcpy_inline) && __has_builtin(__builtin_memset_inline)
+        __builtin_memcpy_inline(reinterpret_cast<void*>(this), &other, sizeof(*this));
+        __builtin_memset_inline(&other, 0xFF, sizeof(*this));
+        #else
+        std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(*this));
+        std::memset(&other, 0xFF, sizeof(*this));
+        #endif
+        return *this;
+    }
+
     NH3API_FORCEINLINE
     // Distribute <amount> creature of <type> /
     // Распределить количество существ <amount> типа <type>.
-    armyGroup(TCreatureType type_, int32_t amount_) NH3API_NOEXCEPT
+    armyGroup(TCreatureType type_, int32_t amount_) noexcept
     NH3API_DELEGATE_DUMMY(armyGroup)
     { THISCALL_3(void, 0x44A770, this, type_, amount_); }
 
     NH3API_FORCEINLINE
-    armyGroup(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+    armyGroup(const ::nh3api::dummy_tag_t&) noexcept
     {}
 
 public:
     // Has creatures /
     // В армии есть существа.
-    NH3API_NODISCARD bool HasCreatures() const
+    [[nodiscard]] bool HasCreatures() const
     { return THISCALL_1(bool, 0x449370, this); }
 
     // Has all armies undead /
     // Все существа армии - нежить.
-    NH3API_NODISCARD bool HasAllUndead() const
+    [[nodiscard]] bool HasAllUndead() const
     { return THISCALL_1(bool, 0x44A7F0, this ); }
 
     // Dismiss creature at <whichIndex> /
     // Удалить существо на позиции <whichIndex>
-    NH3API_CONSTEXPR void Dismiss(size_t whichIndex)
-    { 
+    constexpr void Dismiss(size_t whichIndex)
+    {
         if ( whichIndex < 7 )
         {
-            type[whichIndex]   = CREATURE_NONE; 
-            amount[whichIndex] = 0; 
+            type[whichIndex]   = CREATURE_NONE;
+            amount[whichIndex] = 0;
         }
     }
 
     // Has creature of type <monType>  /
     // В армии есть существо типа <monType>.
-    NH3API_NODISCARD bool IsMember(TCreatureType monType) const
+    [[nodiscard]] bool IsMember(TCreatureType monType) const
     { return THISCALL_2(bool, 0x44A850, this, monType); }
 
     // Can creature of type <monType> join army? /
     // Может ли существо типа <monType> присоединится?
-    NH3API_NODISCARD bool CanJoin(TCreatureType monType) const
+    [[nodiscard]] bool CanJoin(TCreatureType monType) const
     { return !!THISCALL_2(bool32_t, 0x44A920, this, monType); }
 
     // Sum AI_value of each creature /
     // Посчитать сумму AI_value всей армии.
-    NH3API_NODISCARD int32_t get_AI_value() const
+    [[nodiscard]] int32_t get_AI_value() const
     { return THISCALL_1(int32_t, 0x44A950, this); }
 
     // Sum amount of held positions /
     // Посчитать количество непустых ячеек армии
-    NH3API_NODISCARD int32_t GetNumArmies() const
+    [[nodiscard]] int32_t GetNumArmies() const
     { return THISCALL_1(int32_t, 0x44A990, this); }
 
     // Add creature of type <armyType> and amount <newNumTroops> to <newIndex> /
@@ -614,13 +644,12 @@ public:
 
     // Sum each creature amount /
     // Посчитать сумму количества существ армии.
-    NH3API_NODISCARD int32_t get_creature_total() const
+    [[nodiscard]] int32_t get_creature_total() const
     { return THISCALL_1(int32_t,  0x44AA70, this); }
 
-    NH3API_NODISCARD NH3API_CONSTEXPR_CPP_14
     // Sum amount of creatures of type <monType> /
     // Посчитать количество существ типа <monType> в армии.
-    uint32_t get_creature_total(TCreatureType monType) const
+    [[nodiscard]] constexpr uint32_t get_creature_total(TCreatureType monType) const
     {
         uint32_t result = 0;
         for (size_t i = 0; i < 7; ++i)
@@ -634,10 +663,10 @@ public:
     // Не нужен указатель this. Получить название количества существ в армии.
     /// @param howMany количество существ
     /// @param iNameSet 0 or 2 is upper limit, 1 is interval / 0 или 2 это верхнее ограничение, 1 это интервал
-    NH3API_NODISCARD static char const * GetArmySizeName(int32_t howMany, int32_t iNameSet)
+    [[nodiscard]] static char const * GetArmySizeName(int32_t howMany, int32_t iNameSet)
     { return FASTCALL_2(const char*, 0x44AAB0, howMany, iNameSet); }
 
-    NH3API_NODISCARD 
+    [[nodiscard]]
     // Get army morale /
     // Боевой дух всей армии.
     /// @param ownerHero обладатель этой армии
@@ -654,16 +683,16 @@ public:
                       bool on_cursed_ground,
                       bool angelic_alliance,
                       bool apply_limits = true) const
-    { return THISCALL_8(int32_t, 0x44AB30, this, 
-                                           ownerHero, 
-                                           ownerTown, 
-                                           otherHero, 
-                                           otherGroup, 
-                                           on_cursed_ground, 
-                                           angelic_alliance, 
+    { return THISCALL_8(int32_t, 0x44AB30, this,
+                                           ownerHero,
+                                           ownerTown,
+                                           otherHero,
+                                           otherGroup,
+                                           on_cursed_ground,
+                                           angelic_alliance,
                                            apply_limits); }
 
-    NH3API_NODISCARD 
+    [[nodiscard]]
     // Get <index> morale /
     // Боевой дух ячейки <index> в армии
     /// @param index индекс отдельной ячейки армии
@@ -679,8 +708,8 @@ public:
                           bool angelic_alliance,
                           bool apply_limits = true) const
     { return THISCALL_7(int32_t, 0x44ADD0, this, index, ownerHero, ownerTown, ground_type, angelic_alliance, apply_limits); }
-    
-    NH3API_NODISCARD 
+
+    [[nodiscard]]
     // Get army luck /
     // Удача всей армии.
     /// @param ownerHero обладатель этой армии
@@ -696,8 +725,8 @@ public:
                     bool on_cursed_ground = false,
                     bool apply_limits = false) const
     { return THISCALL_7(int32_t, 0x44AFA0, this, ownerHero, ownerTown, otherHero, otherGroup, on_cursed_ground, apply_limits); }
-    
-    NH3API_NODISCARD 
+
+    [[nodiscard]]
     // Get <index> luck /
     // Удача ячейки <index> в армии
     /// @param index индекс отдельной ячейки армии
@@ -718,7 +747,7 @@ public:
     void merge_armies(armyGroup& source)
     { THISCALL_2(void, 0x44B4F0, this, &source); }
 
-    NH3API_NODISCARD NH3API_FORCEINLINE
+    [[nodiscard]] NH3API_FORCEINLINE
     exe_string get_morale_description(TCreatureType
                                       creature,
                                       int32_t morale,
@@ -733,7 +762,7 @@ public:
         return result;
     }
 
-    NH3API_NODISCARD NH3API_FORCEINLINE
+    [[nodiscard]] NH3API_FORCEINLINE
     exe_string get_luck_description(TCreatureType army_type,
                                     int32_t luck,
                                     hero* our_hero,
@@ -749,7 +778,7 @@ public:
 
     // Get first available unit of army native terrain /
     // Родная земля первой доступной ячейки армии(именно поэтому, например, кочевников нужно ставить в самый левый слот).
-    NH3API_NODISCARD TTerrainType GetNativeTerrain() const
+    [[nodiscard]] TTerrainType GetNativeTerrain() const
     { return THISCALL_1(TTerrainType, 0x44C260, this); }
 
 public:

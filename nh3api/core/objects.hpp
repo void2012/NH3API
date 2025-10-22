@@ -47,7 +47,7 @@ struct CObjectType
         int8_t Height;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_12[2];
 
     public:
@@ -131,7 +131,7 @@ struct CObjectType
         bool IsUnderlay;
     
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x41 = +65,  size = 0x1 = 1
         byte_t gap_41[1];
 
@@ -206,7 +206,7 @@ public:
     bool hasTrigger;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     byte_t gap_2A[2];
 
 public:
@@ -241,8 +241,8 @@ public:
 };
 #pragma pack(pop)
 
-NH3API_CONST NH3API_FORCEINLINE NH3API_CONSTEXPR
-uint32_t getBitPos(uint32_t x, uint32_t y) NH3API_NOEXCEPT
+NH3API_CONST NH3API_FORCEINLINE constexpr
+uint32_t getBitPos(uint32_t x, uint32_t y) noexcept
 { return 8 * (6 - y) - x - 1; }
 
 #pragma pack(push, 4)
@@ -253,12 +253,12 @@ struct TreasureData
 {
     public:
         NH3API_FORCEINLINE
-        TreasureData() NH3API_NOEXCEPT
+        TreasureData() noexcept
             : Message(), HasCustomGuardians(false), Guardians()
         {}
 
         NH3API_FORCEINLINE
-        TreasureData(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TreasureData(const ::nh3api::dummy_tag_t& tag) noexcept
             : Message(tag), Guardians(tag)
         {}
 
@@ -276,7 +276,7 @@ struct TreasureData
         bool HasCustomGuardians;
         
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_11[3];
 
     public:
@@ -296,12 +296,12 @@ struct MonsterData
 {
     public:
         NH3API_FORCEINLINE
-        MonsterData() NH3API_NOEXCEPT
+        MonsterData() noexcept
             : Message(), Artifact(ARTIFACT_NONE)
         { ResQty.fill(0); }
 
         NH3API_FORCEINLINE
-        MonsterData(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        MonsterData(const ::nh3api::dummy_tag_t& tag) noexcept
             : Message(tag)
         {}
 
@@ -334,7 +334,7 @@ struct BlackBoxData : TreasureData
 {
     public:
         NH3API_FORCEINLINE
-        BlackBoxData() NH3API_NOEXCEPT
+        BlackBoxData() noexcept
             : HasCustomTreasure(false),
               ExperienceBonus(0),
               ManaBonus(0),
@@ -346,7 +346,7 @@ struct BlackBoxData : TreasureData
         }
 
         NH3API_FORCEINLINE
-        BlackBoxData(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        BlackBoxData(const ::nh3api::dummy_tag_t& tag) noexcept
             : TreasureData(tag),
               SecondarySkills(tag),
               Artifacts(tag),
@@ -363,7 +363,7 @@ struct BlackBoxData : TreasureData
         bool HasCustomTreasure;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_4D[3];
 
     public:
@@ -388,7 +388,7 @@ struct BlackBoxData : TreasureData
         int8_t LuckBonus;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_5A[2];
 
     public:
@@ -437,7 +437,7 @@ class TRandomDwelling
 {
     public:
         NH3API_FORCEINLINE
-        TRandomDwelling() NH3API_NOEXCEPT
+        TRandomDwelling() noexcept
             : townId(-1),
               towns(0),
               playerOwner(static_cast<int8_t>(PLAYER_NONE)),
@@ -447,7 +447,7 @@ class TRandomDwelling
         {}
 
         NH3API_FORCEINLINE
-        TRandomDwelling(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        TRandomDwelling(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
         NH3API_DEFAULT_DESTRUCTOR(TRandomDwelling)
@@ -479,7 +479,7 @@ class TRandomDwelling
         uint8_t maxLVL;
     
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_9[3];
 
     public:
@@ -498,11 +498,11 @@ class TBlackMarket
 {
     public:
         NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-        TBlackMarket() NH3API_NOEXCEPT
+        TBlackMarket() noexcept
         { artifacts.fill(ARTIFACT_NONE); }
 
         NH3API_FORCEINLINE
-        TBlackMarket(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        TBlackMarket(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
@@ -521,17 +521,17 @@ class generator
 {
     public:
         NH3API_FORCEINLINE
-        generator() NH3API_NOEXCEPT
+        generator() noexcept
         NH3API_DELEGATE_DUMMY(generator)
         { THISCALL_1(void, 0x4B8250, this); }
 
         NH3API_FORCEINLINE
-        generator(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        generator(const ::nh3api::dummy_tag_t& tag) noexcept
             : guards(tag)
         {}
 
     public:
-        NH3API_NODISCARD int32_t get_owner() const
+        [[nodiscard]] int32_t get_owner() const
         { return playerOwner; }
 
         // Read from game save file /
@@ -567,7 +567,7 @@ class generator
         int8_t genType;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x2 = +2,  size = 0x2 = 2
         byte_t gap_2[2];
 
@@ -613,7 +613,7 @@ class generator
         int8_t town_id;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x59 = +89,  size = 0x3 = 3
         byte_t gap_59[3];
 
@@ -628,7 +628,7 @@ class mine
 {
     public:
         NH3API_CONSTEXPR_CPP_20 NH3API_FORCEINLINE
-        mine() NH3API_NOEXCEPT
+        mine() noexcept
             : playerOwner(PLAYER_NONE),
               type(const_no_resource),
               is_abandoned(false),
@@ -639,7 +639,7 @@ class mine
         {}
 
         NH3API_FORCEINLINE
-        mine(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        mine(const ::nh3api::dummy_tag_t& tag) noexcept
             : guards(tag)
         {}
 
@@ -660,7 +660,7 @@ class mine
         bool is_abandoned;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_3[1];
 
     public:
@@ -685,7 +685,7 @@ class mine
         uint8_t mapZ;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_3F[1];
 
 };
@@ -699,13 +699,13 @@ class garrison
 {
     public:
         NH3API_FORCEINLINE
-        garrison() NH3API_NOEXCEPT
+        garrison() noexcept
             : playerOwner(static_cast<int8_t>(PLAYER_NONE)),
               garrisonArmy()
         {}
 
         NH3API_FORCEINLINE
-        garrison(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        garrison(const ::nh3api::dummy_tag_t& tag) noexcept
             : garrisonArmy(tag)
         {}
 
@@ -716,7 +716,7 @@ class garrison
         int8_t playerOwner;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x1 = +1,  size = 0x3 = 3
         byte_t gap_1[3];
 
@@ -757,7 +757,7 @@ class type_university
 {
     public:
         NH3API_FORCEINLINE
-        type_university() NH3API_NOEXCEPT
+        type_university() noexcept
         #if NH3API_STD_INITIALIZER_LIST
             : skills{{SKILL_NONE, SKILL_NONE, SKILL_NONE, SKILL_NONE}}
         {}
@@ -766,7 +766,7 @@ class type_university
         #endif
 
         NH3API_FORCEINLINE
-        type_university(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        type_university(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
@@ -796,7 +796,7 @@ public:
     bool is_free;
     
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     byte_t gap_11[1];
 
 public:
@@ -812,7 +812,7 @@ class type_creature_bank
 {
     public:
         NH3API_FORCEINLINE
-        type_creature_bank() NH3API_NOEXCEPT
+        type_creature_bank() noexcept
         #if NH3API_CHECK_CPP11
         = default;
         #else 
@@ -820,7 +820,7 @@ class type_creature_bank
         #endif
 
         NH3API_FORCEINLINE
-        type_creature_bank(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_creature_bank(const ::nh3api::dummy_tag_t& tag) noexcept
             : guards(tag), artifacts(tag)
         {}
 
@@ -848,7 +848,7 @@ class type_creature_bank
         int8_t reward_creatures;
         
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_59[3];
 
     public:
@@ -869,12 +869,12 @@ class Sign
 {
     public:
         NH3API_FORCEINLINE
-        Sign() NH3API_NOEXCEPT
+        Sign() noexcept
             : hasText(false), signText()
         {}
 
         NH3API_FORCEINLINE
-        Sign(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        Sign(const ::nh3api::dummy_tag_t& tag) noexcept
             : signText(tag)
         {}
 
@@ -1354,7 +1354,7 @@ class CObject : public ExtraInfoUnion
                 uint8_t y_,
                 uint8_t z_,
                 uint16_t type_,
-                uint32_t extraInfo_) NH3API_NOEXCEPT
+                uint32_t extraInfo_) noexcept
             : ExtraInfoUnion(nh3api::bit_cast<ExtraInfoUnion>(extraInfo_)), 
               x(x_), 
               y(y_), 
@@ -1368,7 +1368,7 @@ class CObject : public ExtraInfoUnion
                 uint8_t y_,
                 uint8_t z_,
                 uint16_t type_,
-                ExtraInfoUnion extraInfo_) NH3API_NOEXCEPT
+                ExtraInfoUnion extraInfo_) noexcept
             : ExtraInfoUnion(extraInfo_), 
               x(x_), 
               y(y_), 
@@ -1378,7 +1378,7 @@ class CObject : public ExtraInfoUnion
         {}
 
         NH3API_FORCEINLINE
-        CObject() NH3API_NOEXCEPT
+        CObject() noexcept
             : ExtraInfoUnion(nh3api::bit_cast<ExtraInfoUnion>(0)),
               x(255), 
               y(255), 
@@ -1388,7 +1388,7 @@ class CObject : public ExtraInfoUnion
         {}
 
     public:
-        NH3API_NODISCARD type_point get_trigger() const
+        [[nodiscard]] type_point get_trigger() const
         {
             int32_t result_x = 0;
             int32_t result_y = 0;
@@ -1400,10 +1400,10 @@ class CObject : public ExtraInfoUnion
         void FindTrigger(int32_t& result_x, int32_t& result_y) const
         { THISCALL_3(void, 0x4FF280, this, &result_x, &result_y); }
 
-        NH3API_NODISCARD CObjectType* get_object_type_ptr()
+        [[nodiscard]] CObjectType* get_object_type_ptr()
         { return THISCALL_1(CObjectType*, 0x4FF260, this); }
 
-        NH3API_NODISCARD const CObjectType* get_object_type_ptr() const
+        [[nodiscard]] const CObjectType* get_object_type_ptr() const
         { return THISCALL_1(CObjectType*, 0x4FF260, this); }
 
     public:
@@ -1417,7 +1417,7 @@ class CObject : public ExtraInfoUnion
         uint8_t z;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_7[1];
 
     public:
@@ -1433,7 +1433,7 @@ class CObject : public ExtraInfoUnion
         uint8_t frameOffset;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_B[1];
 
 };
@@ -1449,38 +1449,34 @@ class type_obscuring_object
 {
     public:
         NH3API_FORCEINLINE
-        type_obscuring_object() NH3API_NOEXCEPT
+        type_obscuring_object() noexcept
         NH3API_DELEGATE_DUMMY(type_obscuring_object)
         { THISCALL_1(void, 0x4D76E0, this); }
 
         NH3API_FORCEINLINE
-        type_obscuring_object(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        type_obscuring_object(const ::nh3api::dummy_tag_t& tag) noexcept
             : obscured_location(tag)
         {}
 
         NH3API_DEFAULT_DESTRUCTOR(type_obscuring_object)
 
     public:
-        void initialize() NH3API_NOEXCEPT
+        void initialize() noexcept
         { THISCALL_1(void, 0x4D7740, this); }
 
-        NH3API_NODISCARD TAdventureObjectType get_obscured_type() const
+        [[nodiscard]] TAdventureObjectType get_obscured_type() const
         { return type; }
 
-        NH3API_NODISCARD ExtraInfoUnion get_obscured_extra_info()const
+        [[nodiscard]] ExtraInfoUnion get_obscured_extra_info()const
         { return extra_info; }
 
-        NH3API_NODISCARD bool is_on_map() const
+        [[nodiscard]] bool is_on_map() const
         { return valid; }
 
-        NH3API_NODISCARD type_point get_location() const
-        #if NH3API_CHECK_CPP11
+        [[nodiscard]] type_point get_location() const
         { return {mapX, mapY, mapZ}; }
-        #else 
-        { return type_point(mapX, mapY, mapZ); }
-        #endif 
 
-        NH3API_NODISCARD bool obscured_is_trigger() const
+        [[nodiscard]] bool obscured_is_trigger() const
         { return !!was_trigger; }
 
         //mine* get_obscured_mine() const
@@ -1495,10 +1491,10 @@ class type_obscuring_object
         void restore_cell()
         { THISCALL_1(void, 0x4D7950, this); }
 
-        NH3API_NODISCARD bool obscures_town() const
+        [[nodiscard]] bool obscures_town() const
         { return ( is_on_map() ) ? was_trigger && (get_obscured_type( ) == OBJECT_TOWN) : false; }
 
-        NH3API_NODISCARD TAdventureObjectType get_obscured_object() const
+        [[nodiscard]] TAdventureObjectType get_obscured_object() const
         { 
             if(is_on_map()) 
                 return get_obscured_type(); 
@@ -1529,7 +1525,7 @@ class type_obscuring_object
         type_point obscured_location;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_B[1];
 
     public:
@@ -1555,63 +1551,63 @@ class NewmapCell : public ExtraInfoUnion
 {
     public:
         NH3API_FORCEINLINE
-        NewmapCell() NH3API_NOEXCEPT
+        NewmapCell() noexcept
         NH3API_DELEGATE_DUMMY(NewmapCell)
         { THISCALL_1(void, 0x4FDCA0, this); }
 
         NH3API_FORCEINLINE
-        NewmapCell(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        NewmapCell(const ::nh3api::dummy_tag_t& tag) noexcept
             : ObjectCellList(tag)
         {}
 
         NH3API_FORCEINLINE
-        ~NewmapCell() NH3API_NOEXCEPT
+        ~NewmapCell() noexcept
         { THISCALL_1(void, 0x4FDB10, this); }
 
     public:
         // Find trigger cell /
         // Найти триггерную клетку.
-        NH3API_NODISCARD NewmapCell* get_trigger_cell()
+        [[nodiscard]] NewmapCell* get_trigger_cell()
         { return THISCALL_1(NewmapCell*, 0x4FD0F0, this); }
 
         // Find trigger cell /
         // Найти триггерную клетку.
-        NH3API_NODISCARD const NewmapCell* get_trigger_cell() const
+        [[nodiscard]] const NewmapCell* get_trigger_cell() const
         { return THISCALL_1(NewmapCell*, 0x4FD0F0, this); }
 
         // Get cell map object(including hero or boat if present on this cell) /
         // Получить текущий объект клетки(включая героя/лодку, если он стоит на ней).
-        NH3API_NODISCARD TAdventureObjectType get_map_object() const
+        [[nodiscard]] TAdventureObjectType get_map_object() const
         { return THISCALL_1(TAdventureObjectType, 0x4FD220, this); }
 
         // Get cell ExtraInfoUnion info(including hero or boat if present on this cell) /
         // Получить информацию ExtraInfoUnion о клетке(включая героя/лодку, если он стоит на ней).
-        NH3API_NODISCARD ExtraInfoUnion get_map_extraInfo() const
+        [[nodiscard]] ExtraInfoUnion get_map_extraInfo() const
         { return THISCALL_1(ExtraInfoUnion, 0x4FD280, this); }
 
         // Current cell is a trigger cell /
         // Текущая клетка является триггерной?
-        NH3API_NODISCARD bool cell_is_trigger() const
+        [[nodiscard]] bool cell_is_trigger() const
         { return THISCALL_1(bool, 0x4FD2D0, this); }
 
         // Current cell is diggable /
         // Можно ли копать на этой клетке?
-        NH3API_NODISCARD bool is_diggable() const
+        [[nodiscard]] bool is_diggable() const
         { return THISCALL_1(bool, 0x4FD340, this); }
 
         // Current cell has active event /
         // На этой клетке можно активировать событие?
-        NH3API_NODISCARD bool HasTriggerableEvent() const
+        [[nodiscard]] bool HasTriggerableEvent() const
         { return THISCALL_1(bool, 0x4FD410, this); }
 
         // Get underlying magical terrain(if present) adventure object type /
         // Получить магическую почву на клетке(если есть) как объект.
-        NH3API_NODISCARD TAdventureObjectType get_special_terrain() const
+        [[nodiscard]] TAdventureObjectType get_special_terrain() const
         { return THISCALL_1(TAdventureObjectType, 0x4FD470, this); }
 
         // Get underlying magical terrain type(if present) /
         // Получить тип магической почвы на клетке(если есть).
-        NH3API_NODISCARD EMagicTerrain get_special_terrain_type() const
+        [[nodiscard]] EMagicTerrain get_special_terrain_type() const
         { return THISCALL_1(EMagicTerrain, 0x4FD590, this); }
 
     public:
@@ -1675,7 +1671,7 @@ class NewmapCell : public ExtraInfoUnion
         int8_t RoadIndex;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_A[2];
 
     public:
@@ -1756,11 +1752,11 @@ class NewmapCell : public ExtraInfoUnion
 NH3API_SIZE_ASSERT(0x26, NewmapCell);
 
 NH3API_FORCEINLINE
-bool hasFlag(TAdventureObjectType objType) NH3API_NOEXCEPT
+bool hasFlag(TAdventureObjectType objType) noexcept
 { return FASTCALL_1(bool, 0x40FC00, objType); }
 
 NH3API_FORCEINLINE
-int32_t GetFlaggedObjectOwner(NewmapCell* thisCell) NH3API_NOEXCEPT
+int32_t GetFlaggedObjectOwner(NewmapCell* thisCell) noexcept
 { return FASTCALL_1(int32_t, 0x40FC80, thisCell); }
 
 NH3API_DISABLE_WARNING_END

@@ -16,12 +16,12 @@
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
-NH3API_INLINE_OR_EXTERN 
+inline 
 // Размер карты по горизонтали
 int32_t& MAP_WIDTH
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783C8, int32_t));
 
-NH3API_INLINE_OR_EXTERN 
+inline 
 // Размер карты по вертикали
 int32_t& MAP_HEIGHT
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783CC, int32_t));
@@ -34,7 +34,7 @@ class TTimedEvent
 {
     public:
         NH3API_FORCEINLINE
-        TTimedEvent() NH3API_NOEXCEPT
+        TTimedEvent() noexcept
             : PlayerFlags(0),
               ApplyToHuman(false),
               ApplyToComputer(false),
@@ -45,7 +45,7 @@ class TTimedEvent
         }
 
         NH3API_FORCEINLINE
-        TTimedEvent(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TTimedEvent(const ::nh3api::dummy_tag_t& tag) noexcept
             : Message(tag)
         {}
 
@@ -78,7 +78,7 @@ class TTimedEvent
         bool ApplyToComputer;
     
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_2F[1];
     
     public:
@@ -103,12 +103,12 @@ class TTownEvent : TTimedEvent
 {
     public:
         NH3API_FORCEINLINE
-        TTownEvent() NH3API_NOEXCEPT
+        TTownEvent() noexcept
             : TTimedEvent()
         { generatorBonuses.fill(0); }
 
         NH3API_FORCEINLINE
-        TTownEvent(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TTownEvent(const ::nh3api::dummy_tag_t& tag) noexcept
             : TTimedEvent(tag)
         {}
 
@@ -121,7 +121,7 @@ class TTownEvent : TTimedEvent
         int8_t TownNum;
     
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_35[3];
 
         // Building bonuses /
@@ -135,7 +135,7 @@ class TTownEvent : TTimedEvent
         std::array<uint16_t, 7> generatorBonuses;
     
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_4E[2];
 
 };
@@ -151,12 +151,12 @@ class NewfullMap
 {
     public:
         NH3API_FORCEINLINE
-        NewfullMap() NH3API_NOEXCEPT
+        NewfullMap() noexcept
         NH3API_DELEGATE_DUMMY(NewfullMap)
         { THISCALL_1(void, 0x4FD6B0, this); }
 
         NH3API_FORCEINLINE
-        NewfullMap(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        NewfullMap(const ::nh3api::dummy_tag_t& tag) noexcept
             : ObjectTypes(tag),
               Objects(tag),
               Sprites(tag),
@@ -192,14 +192,14 @@ class NewfullMap
         {}
 
         NH3API_FORCEINLINE
-        ~NewfullMap() NH3API_NOEXCEPT
+        ~NewfullMap() noexcept
         { THISCALL_1(void, 0x4FD830, this); }
 
     public:
-        NH3API_NODISCARD NewmapCell* cell(int32_t x, int32_t y, int32_t z)
+        [[nodiscard]] NewmapCell* cell(int32_t x, int32_t y, int32_t z)
         { return THISCALL_4(NewmapCell*, 0x4086D0, this, x, y, z); }
 
-        NH3API_NODISCARD const NewmapCell* cell(int32_t x, int32_t y, int32_t z) const
+        [[nodiscard]] const NewmapCell* cell(int32_t x, int32_t y, int32_t z) const
         { return THISCALL_4(NewmapCell*, 0x4086D0, this, x, y, z); }
 
         int32_t PlaceObject(int32_t ObjectIndex, bool setExtraInfo)
@@ -313,7 +313,7 @@ class NewfullMap
         bool HasTwoLevels;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_D9[3];
 
     public:
@@ -363,7 +363,7 @@ struct type_creature_bank_level
         int8_t relic_artifacts;
     
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_95[1];
 
 };
@@ -382,21 +382,21 @@ struct type_creature_bank_traits
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
+inline
 std::array<type_creature_bank_traits, 11>& const_creature_bank_traits
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x695088, std::array<type_creature_bank_traits, 11>));
 
-NH3API_INLINE_OR_EXTERN
+inline
 // Map visibility bits for each player and 9th bit for a monster on the map /
 // Видимость карты для игроков и для монстров на карте.
 uint16_t* const& mapExtra
 NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A48, uint16_t*));
 
-NH3API_NODISCARD NH3API_FORCEINLINE
+[[nodiscard]] NH3API_FORCEINLINE
 uint16_t GetMapExtra(int32_t X, int32_t Y, int32_t Z)
 { return FASTCALL_3(uint16_t, 0x4F8040, X, Y, Z); }
  
-NH3API_NODISCARD NH3API_FORCEINLINE
+[[nodiscard]] NH3API_FORCEINLINE
 uint16_t* GetMapExtraPtr(int32_t x, int32_t y, int32_t z)
 { return FASTCALL_3(uint16_t*, 0x4F8070, x, y, z); }
 

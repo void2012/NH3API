@@ -153,7 +153,7 @@ struct soundNode
 };
 #pragma pack(pop)
 
-typedef void* HSAMPLE;
+using HSAMPLE = void*;
 #pragma pack(push, 4)
 // Sound sample info /
 // Информация о звуковой дорожке.
@@ -195,7 +195,7 @@ struct MemorySampleStructure
 NH3API_VIRTUAL_STRUCT sample : public resource
 {
     public:
-        sample() NH3API_DELETED_FUNCTION
+        sample() = delete;
 
         NH3API_FORCEINLINE
         sample(const char* name, 
@@ -203,17 +203,17 @@ NH3API_VIRTUAL_STRUCT sample : public resource
                size_t size, 
                int32_t channel = 0, 
                int32_t volume = 127, 
-               bool32_t loop = true) NH3API_NOEXCEPT 
-        NH3API_DELEGATE_DUMMY_OR_BASE(sample, resource)
+               bool32_t loop = true) noexcept 
+        NH3API_DELEGATE_DUMMY_BASE(sample)
         { THISCALL_7(void, 0x567050, this, name, src, size, channel, volume, loop); }
         
         NH3API_FORCEINLINE
-        sample(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        sample(const ::nh3api::dummy_tag_t& tag) noexcept
             : resource(tag) // resource(nullptr, RType_misc)
         {}
 
         NH3API_FORCEINLINE
-        ~sample() NH3API_NOEXCEPT
+        ~sample() noexcept
         { THISCALL_1(void, 0x567110, this); }
 
     public:
@@ -240,27 +240,23 @@ struct SAMPLE2
 };
 #pragma pack(pop)
 
-inline void ClearMemSample(SAMPLE2 sample2)
-{ STDCALL_2(void, 0x59A710, sample2.resSample, sample2.playSample); }
+inline void ClearMemSample(SAMPLE2 smpl)
+{ if (smpl.resSample && smpl.playSample ) STDCALL_2(void, 0x59A710, smpl.resSample, smpl.playSample); }
 
 inline SAMPLE2 LoadPlaySample(const char* cSampleName)
-{ return FASTCALL_1(SAMPLE2, 0x59A770, cSampleName); }
+{ return cSampleName ? FASTCALL_1(SAMPLE2, 0x59A770, cSampleName) : SAMPLE2{}; }
 
 inline void WaitEndSample(SAMPLE2 smpl, int32_t iMilliWait)
-{ FASTCALL_2(void, 0x59A7C0, smpl, iMilliWait); }
+{ if (smpl.resSample && smpl.playSample ) FASTCALL_2(void, 0x59A7C0, smpl, iMilliWait); }
 
 inline void launch_sample(const char* sample_name, int32_t max_time = -1, int32_t channel = 3)
-{ FASTCALL_3(void, 0x59A890, sample_name, max_time, channel); }
+{ if ( sample_name ) FASTCALL_3(void, 0x59A890, sample_name, max_time, channel); }
 
-NH3API_INLINE_OR_EXTERN
-const std::array<const uint8_t, 10>& giTerrainToMusicTrack
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678330, const std::array<const uint8_t, 10>));
+inline const std::array<const uint8_t, 10>& giTerrainToMusicTrack = get_global_var_ref(0x678330, const std::array<const uint8_t, 10>);
 
-NH3API_INLINE_OR_EXTERN
 // Sound is disabled /
 // Звук в игре отключен.
-bool32_t& gbNoSound
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992E0, bool32_t));
+inline bool32_t& gbNoSound = get_global_var_ref(0x6992E0, bool32_t);
 
 #pragma pack(push, 4)
 // Sound & music manager /
@@ -275,12 +271,12 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
         };
 
     public:
-        soundManager() NH3API_NOEXCEPT
+        soundManager() noexcept
             : baseManager(::nh3api::dummy_tag)
         { THISCALL_1(void, 0x599A60, this); }
 
         NH3API_FORCEINLINE
-        soundManager(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        soundManager(const ::nh3api::dummy_tag_t& tag) noexcept
             : baseManager(tag)
         {}
 
@@ -399,9 +395,7 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
-soundManager* const& gpSoundManager
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699414, soundManager*));
+inline soundManager* const& gpSoundManager = get_global_var_ref(0x699414, soundManager*);
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x6416E0, sample)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63FE68, soundManager)

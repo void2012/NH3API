@@ -34,7 +34,7 @@ struct message
         };
 
     public:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR
+        NH3API_FORCEINLINE constexpr
         message(ECommandType _command,
                 int32_t _subType,
                 int32_t _itemId,
@@ -42,7 +42,7 @@ struct message
                 int32_t _mouseX,
                 int32_t _mouseY,
                 int32_t _extra,
-                heroWindow* _window ) NH3API_NOEXCEPT
+                heroWindow* _window ) noexcept
         :
             command(_command),
             subType(_subType),
@@ -55,12 +55,14 @@ struct message
         {}
 
         NH3API_FORCEINLINE
-        message() NH3API_NOEXCEPT
-        { nh3api::trivial_zero<sizeof(message)>(this); }
+        message() noexcept
+        { nh3api::trivial_zero<sizeof(*this)>(this); }
 
         NH3API_FORCEINLINE
-        message(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        message(const ::nh3api::dummy_tag_t&) noexcept
         {}
+
+        inline ~message() noexcept = default;
 
     public:
         // offset: +0x0 = +0,  size = 0x4 = 4
@@ -84,7 +86,7 @@ struct message
         // Y-Координата курсора.
         // offset: +0x14 = +20,  size = 0x4 = 4
         int32_t mouseY;
-        
+
         // Message information /
         // Информация, передаваемая в сообщении.
         // offset: +0x18 = +24,  size = 0x4 = 4
@@ -98,85 +100,47 @@ struct message
 };
 #pragma pack(pop)
 
-NH3API_FORCEINLINE void PollSound() NH3API_NOEXCEPT
+NH3API_FORCEINLINE void PollSound() noexcept
 { FASTCALL_0(void, 0x4EDB20); }
 
-NH3API_FORCEINLINE void Process1WindowsMessage() NH3API_NOEXCEPT
+NH3API_FORCEINLINE void Process1WindowsMessage() noexcept
 { CDECL_0(void, 0x4F8640); }
 
-NH3API_FORCEINLINE int32_t AppCommand(HWND hwnd, uint32_t msg, uint32_t wParam, int32_t lParam) NH3API_NOEXCEPT
+NH3API_FORCEINLINE int32_t AppCommand(HWND hwnd, uint32_t msg, uint32_t wParam, int32_t lParam) noexcept
 { return FASTCALL_4(int32_t, 0x4F86F0, hwnd, msg, wParam, lParam); }
 
-NH3API_FORCEINLINE void KBChangeMenu(HMENU menu) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void KBChangeMenu(HMENU menu) noexcept
 { FASTCALL_1(void, 0x4F8810, menu); }
 
-NH3API_FORCEINLINE void SetNoDialogMenus(int32_t arg) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void SetNoDialogMenus(int32_t arg) noexcept
 { FASTCALL_1(void, 0x4F8870, arg); }
 
 namespace GameTime
 {
 
-NH3API_NODISCARD NH3API_FORCEINLINE uint32_t Get() NH3API_NOEXCEPT
+[[nodiscard]] NH3API_FORCEINLINE uint32_t Get() noexcept
 { return FASTCALL_0(uint32_t, 0x4F8970); }
 
-NH3API_FORCEINLINE void DelayTil(uint32_t time) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void DelayTil(uint32_t time) noexcept
 { FASTCALL_1(void, 0x4F8980, time); }
 
-NH3API_FORCEINLINE void Delay(uint32_t time) NH3API_NOEXCEPT
+NH3API_FORCEINLINE void Delay(uint32_t time) noexcept
 { FASTCALL_1(void, 0x4F8A50, time); }
 
 } // namespace GameTime
 
-NH3API_INLINE_OR_EXTERN
-HWND& hwndApp
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699650, HWND));
-
-NH3API_INLINE_OR_EXTERN
-HMENU& hmnuApp
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699654, HMENU));
-
-NH3API_INLINE_OR_EXTERN
-int32_t& gGameCommand
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697728, int32_t));
-
-NH3API_INLINE_OR_EXTERN
-HMENU& gDefaultMenu
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A34, HMENU));
-
-NH3API_INLINE_OR_EXTERN
-HMENU& gCombatMenu
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A38, HMENU));
-
-NH3API_INLINE_OR_EXTERN
-HMENU& hmnuRecruitSave
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69D644, HMENU));
-
-NH3API_INLINE_OR_EXTERN
-HMENU& hmnuCurrent
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69960C, HMENU));
-
-NH3API_INLINE_OR_EXTERN
-bool& gbProcessingCombatAction
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A3C, bool));
-
-NH3API_INLINE_OR_EXTERN
-bool& insideProcessMessage
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699608, bool));
-
-NH3API_INLINE_OR_EXTERN
-bool& WeAreActiveWindow
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783D0, bool));
-
-NH3API_INLINE_OR_EXTERN
-bool32_t& gbCheatMenus
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A84, bool32_t));
-
-NH3API_INLINE_OR_EXTERN
-std::array<char, 60>& gcCommandLine
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699610, std::array<char, 60>));
-
-NH3API_INLINE_OR_EXTERN
-std::array<char, 368>& gcRegAppPath
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698614, std::array<char, 368>));
+inline HWND&     hwndApp                    = get_global_var_ref(0x699650, HWND);
+inline HMENU&    hmnuApp                    = get_global_var_ref(0x699654, HMENU);
+inline int32_t&  gGameCommand               = get_global_var_ref(0x697728, int32_t);
+inline HMENU&    gDefaultMenu               = get_global_var_ref(0x698A34, HMENU);
+inline HMENU&    gCombatMenu                = get_global_var_ref(0x698A38, HMENU);
+inline HMENU&    hmnuRecruitSave            = get_global_var_ref(0x69D644, HMENU);
+inline HMENU&    hmnuCurrent                = get_global_var_ref(0x69960C, HMENU);
+inline bool&     gbProcessingCombatAction   = get_global_var_ref(0x698A3C, bool);
+inline bool&     insideProcessMessage       = get_global_var_ref(0x699608, bool);
+inline bool&     WeAreActiveWindow          = get_global_var_ref(0x6783D0, bool);
+inline bool32_t& gbCheatMenus               = get_global_var_ref(0x698A84, bool32_t);
+inline std::array<char, 60>&  gcCommandLine = get_global_var_ref(0x699610, std::array<char, 60>);
+inline std::array<char, 368>& gcRegAppPath  = get_global_var_ref(0x698614, std::array<char, 368>);
 
 NH3API_DISABLE_WARNING_END

@@ -94,17 +94,40 @@ class army
 
     public:
         NH3API_FORCEINLINE
-        army() NH3API_NOEXCEPT
+        army() noexcept
         NH3API_DELEGATE_DUMMY(army)
         { THISCALL_1(void, 0x43CF70, this); }
 
         NH3API_FORCEINLINE
-        army(const army& other) NH3API_NOEXCEPT
+        army(const army& other)
         NH3API_DELEGATE_DUMMY(army)
         { THISCALL_2(void, 0x437650, this, &other); }
 
         NH3API_FORCEINLINE
-        army(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        army& operator=(const army& other)
+        { THISCALL_2(void, 0x437650, this, &other); return *this; }
+
+        army(army&& other) noexcept
+        // since exe_deque and exe_vector move constructors are trivial, we trivially move the whole thing
+        { nh3api::trivial_move<sizeof(*this)>(&other, this); }
+
+        army& operator=(army&& other) noexcept
+        {
+            nh3api::trivial_move<1056>(&other, this);
+            nh3api::trivial_move<164>(reinterpret_cast<uint8_t*>(&other) + 1104,
+                                      reinterpret_cast<uint8_t*>(this) + 1104);
+            nh3api::trivial_move<20>(reinterpret_cast<uint8_t*>(&other) + 1332,
+                                     reinterpret_cast<uint8_t*>(this) + 1332);
+            this->SpellInfluenceQueue = std::move(other.SpellInfluenceQueue);
+            this->bound_armies        = std::move(other.bound_armies);
+            this->binders             = std::move(other.binders);
+            this->aura_clients        = std::move(other.aura_clients);
+            this->aura_sources        = std::move(other.aura_sources);
+            return *this;
+        }
+
+        NH3API_FORCEINLINE
+        army(const ::nh3api::dummy_tag_t& tag) noexcept
             : SpellInfluenceQueue(tag),
               bound_armies(tag),
               binders(tag),
@@ -113,14 +136,14 @@ class army
         {}
 
         NH3API_FORCEINLINE
-        ~army() NH3API_NOEXCEPT
+        ~army() noexcept
         { THISCALL_1(void, 0x43D120, this); }
 
     public:
         // offset to front(returns either 1 or -1) /
         // поворот вперед(возвращает 1 или -1)
         /// @param direction направление
-        NH3API_NODISCARD int32_t OffsetToFront(int32_t direction) const
+        [[nodiscard]] int32_t OffsetToFront(int32_t direction) const
         {
             if ((-1 < direction) && (direction < 3))
                 return 1;
@@ -145,50 +168,50 @@ class army
         // flag check(for example, this->Is(CF_DOUBLE_WIDE) will return true if the creature is double wide) /
         // проверка флага(напр. this->Is(CF_DOUBLE_WIDE) возвращает true, если существо является широким(2 клетки) )
         /// @param flag число-флаг(используйте | для проверки множества флагов одновременно)
-        NH3API_NODISCARD bool Is(uint32_t flag) const
+        [[nodiscard]] bool Is(uint32_t flag) const
         { return this->sMonInfo.flags && flag; }
 
-        NH3API_NODISCARD int32_t get_AI_expected_damage() const
+        [[nodiscard]] int32_t get_AI_expected_damage() const
         { return this->AI_expected_damage; }
 
-        NH3API_NODISCARD army* get_AI_target()
+        [[nodiscard]] army* get_AI_target()
         { return this->AI_target; }
 
-        NH3API_NODISCARD const army* get_AI_target() const
+        [[nodiscard]] const army* get_AI_target() const
         { return this->AI_target; }
 
-        NH3API_NODISCARD int32_t get_AI_target_value() const
+        [[nodiscard]] int32_t get_AI_target_value() const
         { return this->AI_target_value; }
 
-        NH3API_NODISCARD int32_t get_AI_target_time() const
+        [[nodiscard]] int32_t get_AI_target_time() const
         { return get_AI_target_time(GetSpeed()); }
 
-        NH3API_NODISCARD int32_t get_AI_possible_targets() const
+        [[nodiscard]] int32_t get_AI_possible_targets() const
         { return this->AI_possible_targets; }
 
         // Get initial owning side
         // Сторона, которой принадлежит отряд с начала боя
-        NH3API_NODISCARD int32_t get_owning_side() const
+        [[nodiscard]] int32_t get_owning_side() const
         { return this->group; }
 
         // Get current owning side(considering hypn. spell)
         // Сторона, который принадлежит отряд сейчас(учитывая закл. гипноз)
-        NH3API_NODISCARD int32_t get_controlling_side() const
+        [[nodiscard]] int32_t get_controlling_side() const
         { return ( spellInfluence[SPELL_HYPNOTIZE] ) ? 1 - group : group; }
 
         // Get a specific spell <spell> duration time (in rounds) /
         // Время, в течении которого работает заклинание <spell> (измеряется в раундах)
-        NH3API_NODISCARD int32_t get_spell_time(SpellID spell) const
+        [[nodiscard]] int32_t get_spell_time(SpellID spell) const
         { return (spell >= FIRST_COMBAT_SPELL && spell < MAX_SPELLS) ? spellInfluence[static_cast<size_t>(spell)] : 0; }
 
         // Is active?
         // Живо ли существо?
-        NH3API_NODISCARD bool IsActive() const
+        [[nodiscard]] bool IsActive() const
         { return (armyType > -1) && (numTroops > 0); }
 
         // Is incapacitated? (Has at least one active spell: Blind, Stone Gaze, Paralyze) /
         // Обездвижено ли существо(Если есть хотя бы одно из этих закл.: Слепота, Окаменение, Паралич)
-        NH3API_NODISCARD bool IsIncapacitated() const
+        [[nodiscard]] bool IsIncapacitated() const
         {
             return (spellInfluence[SPELL_BLIND] != 0)
                 || (spellInfluence[SPELL_STONE] != 0)
@@ -197,7 +220,7 @@ class army
 
         // Can Retaliate to <other> troop? /
         // Может ли существо ответить на атаку существа <other>?
-        NH3API_NODISCARD bool can_retaliate(const army& other) const
+        [[nodiscard]] bool can_retaliate(const army& other) const
         {
             return !other.Is(CF_FREE_ATTACK) &&
             this->spellInfluence[SPELL_PARALYZE] &&
@@ -206,7 +229,7 @@ class army
 
         // Can't attack? /
         // НЕ может ли существо атаковать?
-        NH3API_NODISCARD bool cannot_attack() const
+        [[nodiscard]] bool cannot_attack() const
         {
             return ( Is(CF_IMMOBILIZED)
                     || IsIncapacitated()
@@ -217,7 +240,7 @@ class army
 
         // Is war machine? /
         // Является боевой машиной
-        NH3API_NODISCARD bool IsWarMachine() const
+        [[nodiscard]] bool IsWarMachine() const
         { return Is(CF_SIEGE_WEAPON); }
 
         // Get an adjacent hex from given <direction> /
@@ -226,17 +249,17 @@ class army
 
         // Get Morale(check the limit[-3;3]: <apply_limits>) /
         // Мораль существа(проверить лимит[-3;3]: <apply_limits>)
-        NH3API_NODISCARD int32_t GetMorale(bool apply_limits = true) const
+        [[nodiscard]] int32_t GetMorale(bool apply_limits = true) const
         {	if ( !apply_limits ) return iMorale; else return nh3api::clamp(iMorale, -3, 3); }
 
         // Get Luck(check the limit[-3;3]: <apply_limits>) /
         // Удача существа(проверить лимит[-3;3]: <apply_limits>)
-        NH3API_NODISCARD int32_t GetLuck(bool apply_limits = true) const
+        [[nodiscard]] int32_t GetLuck(bool apply_limits = true) const
         { if ( !apply_limits ) return iLuck; else return nh3api::clamp(iLuck, -3, 3); }
 
         // Get a specific spell <spell> skill mastery level /
         // Получить мастерство определенного наложенного типа заклинания <spell>
-        NH3API_NODISCARD TSkillMastery get_spell_level(SpellID spell) const
+        [[nodiscard]] TSkillMastery get_spell_level(SpellID spell) const
         { return (spell >= FIRST_COMBAT_SPELL && spell < MAX_SPELLS) ? spell_level[static_cast<size_t>(spell)] : eMasteryNone; }
 
         // Set retalation count in the beginning of battle /
@@ -267,7 +290,7 @@ class army
         // Play/Stop/Wait sample <smpl> /
         // Проиграть/остановить/подождать звуковой эффект <smpl>
         void       WaitSample(TSampleID smpl) const
-        {   
+        {
             if ( smpl >= 0 && smpl < MAX_SAMPLES )
                 if ( !THISCALL_1(bool, 0x46A080, army_hpp_gpCombatManager) )
                     THISCALL_3(void, 0x59A1C0, 0x699414 /*gpSoundManager*/, armySample[static_cast<size_t>(smpl)]->memSample.memHSample, -1);
@@ -349,26 +372,26 @@ class army
         void       range_attack()
         { THISCALL_1(void, 0x43FE80, this); }
 
-        NH3API_NODISCARD int32_t get_clockwise(int32_t direction) const
+        [[nodiscard]] int32_t get_clockwise(int32_t direction) const
         {
             if ( direction < 0 || direction >= 8 )
                 return -1;
 
-            NH3API_CONSTEXPR_VAR uint8_t dir_array_1[8] = { 0, 1, 2, 7, 3, 4, 5, 6 };
-            NH3API_CONSTEXPR_VAR uint8_t dir_array_2[8] = { 0, 1, 2, 4, 5, 6, 7, 3 };
+            constexpr uint8_t dir_array_1[8] = { 0, 1, 2, 7, 3, 4, 5, 6 };
+            constexpr uint8_t dir_array_2[8] = { 0, 1, 2, 4, 5, 6, 7, 3 };
             if ( Is(CF_DOUBLE_WIDE) )
                 return dir_array_1[(dir_array_2[direction] + 1) % 8];
             else
                 return (direction + 1) % 6;
         }
 
-        NH3API_NODISCARD int32_t get_counter_clockwise(int32_t direction) const
+        [[nodiscard]] int32_t get_counter_clockwise(int32_t direction) const
         {
             if ( direction < 0 || direction >= 8 )
                 return -1;
 
-            NH3API_CONSTEXPR_VAR uint8_t dir_array_1[8] = { 0, 1, 2, 7, 3, 4, 5, 6 };
-            NH3API_CONSTEXPR_VAR uint8_t dir_array_2[8] = { 0, 1, 2, 4, 5, 6, 7, 3 };
+            constexpr uint8_t dir_array_1[8] = { 0, 1, 2, 7, 3, 4, 5, 6 };
+            constexpr uint8_t dir_array_2[8] = { 0, 1, 2, 4, 5, 6, 7, 3 };
             if ( Is(CF_DOUBLE_WIDE) )
                 return dir_array_1[(dir_array_2[direction] + 7) % 8];
             else
@@ -433,31 +456,31 @@ class army
         // Вычисление итоговой атаки, учитывая все заклинания(Меткость, Жажда крови, Палач и др.)
         /// @param enemy указатель на цель для атаки
         /// @param ranged_attack (true/false) является выстрелом
-        NH3API_NODISCARD int32_t get_adjusted_attack(const army* enemy, bool ranged_attack) const
+        [[nodiscard]] int32_t get_adjusted_attack(const army* enemy, bool ranged_attack) const
         { return (armyType > CREATURE_NONE && armyType < MAX_CREATURES) ? THISCALL_3(int32_t, 0x442130, this, enemy, ranged_attack) : 0; }
 
         // AI Attack Modifier   = get_adjusted_attack() - initial attack value /
         // Модификатор атаки ИИ = get_adjusted_attack() - начальная атака существа
         /// @param enemy указатель на цель для атаки
         /// @param ranged_attack (true/false) является выстрелом
-        NH3API_NODISCARD int32_t get_attack_modifier(const army* enemy, bool ranged_attack) const
+        [[nodiscard]] int32_t get_attack_modifier(const army* enemy, bool ranged_attack) const
         { return (armyType > CREATURE_NONE && armyType < MAX_CREATURES) ? (get_adjusted_attack( enemy, ranged_attack ) - akCreatureTypeTraits[static_cast<size_t>(armyType)].attackSkill) : 0; }
 
         // Get adjusted defense, considering all the effects(Frenzy, Behemoths etc..) /
         // Вычисление итоговой защиты, учитывая Бешенство, Чудищ, Древних Чудищ и др.
         /// @param enemy указатель на цель для атаки
         /// @param frenzy_included учитывать Бешенство
-        NH3API_NODISCARD int32_t get_adjusted_defense(const army* enemy, bool frenzy_included) const
+        [[nodiscard]] int32_t get_adjusted_defense(const army* enemy, bool frenzy_included) const
         { return (armyType > CREATURE_NONE && armyType < MAX_CREATURES) ? THISCALL_3(int32_t, 0x4422B0, this, enemy, frenzy_included) : 0; }
 
         // AI Defense Modifier  = get_adjusted_defense() - initial attack value /
         // Модификатор атаки ИИ = get_adjusted_attack() - начальная атака существа
-        NH3API_NODISCARD int32_t get_defense_modifier() const
+        [[nodiscard]] int32_t get_defense_modifier() const
         { return (armyType > CREATURE_NONE && armyType < MAX_CREATURES) ? (get_adjusted_defense(nullptr, true) - akCreatureTypeTraits[static_cast<size_t>(armyType)].defenseSkill) : 0; }
 
         // Get current controller hero pointer (considering hypn. spell) /
         // Указатель на героя, который в данный момент контролирует это существо(учитывая гипноз)
-        NH3API_NODISCARD const hero* get_controller() const
+        [[nodiscard]] const hero* get_controller() const
         {
             if ( group > 1 || group < 0 )
                 return nullptr;
@@ -470,7 +493,7 @@ class army
 
         // Get current controller hero pointer (considering hypn. spell) /
         // Указатель на героя, который в данный момент контролирует это существо(учитывая гипноз)
-        NH3API_NODISCARD hero* get_controller()
+        [[nodiscard]] hero* get_controller()
         {
             if ( group > 1 || group < 0 )
                 return nullptr;
@@ -483,17 +506,17 @@ class army
 
         // Get initial hero pointer /
         // Указатель на героя, который контролирует существо с начала боя
-        NH3API_NODISCARD hero* get_owner()
+        [[nodiscard]] hero* get_owner()
         { return ( group == 1 || group == 0 ) ? army_hpp_gpCombatManager_get(0x53CC, std::array<hero*,2>)[static_cast<size_t>(group)] : nullptr; }
 
         // Get initial hero pointer /
         // Указатель на героя, который контролирует существо с начала боя
-        NH3API_NODISCARD const hero* get_owner() const
+        [[nodiscard]] const hero* get_owner() const
         { return ( group == 1 || group == 0 ) ? army_hpp_gpCombatManager_get(0x53CC, std::array<hero*,2>)[static_cast<size_t>(group)] : nullptr; }
 
         // Calculate average damage /
         // Вычислить средний урон
-        NH3API_NODISCARD double get_average_damage() const
+        [[nodiscard]] double get_average_damage() const
         { return THISCALL_1(double, 0x442410, this); }
 
         // Calculate average damage depending on context /
@@ -503,12 +526,12 @@ class army
         /// @param amount выбранное количество существ
         /// @param limit_damage (true/false) ограничение урона(?) обычно true
         /// @param distance расстояние от текущего отряда до врага
-        NH3API_NODISCARD int32_t get_average_damage(const army& enemy, bool ranged_attack, int32_t amount, bool limit_damage, int32_t distance) const
+        [[nodiscard]] int32_t get_average_damage(const army& enemy, bool ranged_attack, int32_t amount, bool limit_damage, int32_t distance) const
         { return THISCALL_6(int32_t, 0x4424A0, this, &enemy, ranged_attack, amount, limit_damage, distance); }
 
         // Is <other> an enemy? /
         // Является ли <other> врагом?
-        NH3API_NODISCARD bool is_enemy(const army* other) const
+        [[nodiscard]] bool is_enemy(const army* other) const
         {
             if (!other || this == other)
                 return false;
@@ -521,17 +544,17 @@ class army
 
         // Can shoot <other>? If <other> == nullptr, checks if creature can shoot /
         // Можно ли выстрелить в <other>? Если <other> == nullptr, проверяет, может ли существо стрелять.
-        NH3API_NODISCARD bool can_shoot(const army* other = nullptr) const
+        [[nodiscard]] bool can_shoot(const army* other = nullptr) const
         { return THISCALL_2(bool, 0x442610, this, other); }
 
         // Is enemy's hex adjacent? Returns false if <other> is ally. /
         // Враг <other> стоит впритык? Возвращает false, если <other> это не враг
-        NH3API_NODISCARD bool enemy_is_adjacent(const army* other) const
+        [[nodiscard]] bool enemy_is_adjacent(const army* other) const
         { return THISCALL_2(bool, 0x442710, this, other); }
 
         // Get unit total combat value /
         // Посчитать эффективную боевую ценность существа из отряда
-        NH3API_NODISCARD double get_unit_combat_value(int32_t lowest_attack,
+        [[nodiscard]] double get_unit_combat_value(int32_t lowest_attack,
                                                       int32_t lowest_defense,
                                                       bool ranged,
                                                       const army* excluded) const
@@ -539,12 +562,12 @@ class army
 
         // Get total combat value /
         // Посчитать эффективную боевую ценность отряда
-        NH3API_NODISCARD int32_t get_total_combat_value(int32_t lowest_attack, int32_t lowest_defense) const
+        [[nodiscard]] int32_t get_total_combat_value(int32_t lowest_attack, int32_t lowest_defense) const
         { return THISCALL_3(int32_t, 0x442B80, this, lowest_attack, lowest_defense); }
 
         // Get total combat value upon receiving damage /
         // Посчитать эффективную боевую ценность потерь при нанесении урона
-        NH3API_NODISCARD int32_t get_loss_combat_value(int32_t lowest_attack,
+        [[nodiscard]] int32_t get_loss_combat_value(int32_t lowest_attack,
                                                        int32_t lowest_defense,
                                                        bool ranged,
                                                        int32_t damage,
@@ -553,7 +576,7 @@ class army
 
         // Get total HP. <simulated> = true in AI's simulated combats /
         // Общее количество очков здоровья. <simulated> = true в боях-симуляциях ИИ
-        NH3API_NODISCARD int32_t get_total_hit_points(bool simulated = false) const
+        [[nodiscard]] int32_t get_total_hit_points(bool simulated = false) const
         { return THISCALL_2(int32_t, 0x442DA0, this, simulated); }
 
         // AI_expected_damage = arg, (AI_expected_damage = 1 if current creature is a clone) /
@@ -563,27 +586,27 @@ class army
 
         // Get Fire shield strength (= 0.2 for Efreet Sultan) /
         // Сила огненного щита (= 0.2 для Ифрита-Султана)
-        NH3API_NODISCARD float get_fire_shield_strength() const
+        [[nodiscard]] float get_fire_shield_strength() const
         { return THISCALL_1(float, 0x442E50, this); }
 
         // Compute base damage (<simulate_only> = true in AI's simulated combats) /
         // Посчитать начальный урон (<simulate_only> = true в боях-симуляциях ИИ)
-        NH3API_NODISCARD int32_t ComputeBaseDamage(bool simulate_only = false) const
+        [[nodiscard]] int32_t ComputeBaseDamage(bool simulate_only = false) const
         { return THISCALL_2(int32_t, 0x442E80, this, simulate_only); }
 
-        NH3API_NODISCARD int32_t ComputeAttackerDamageBonuses(int32_t base_damage, bool is_shooting, army* defender, bool simulate_only, int32_t distance) const
+        [[nodiscard]] int32_t ComputeAttackerDamageBonuses(int32_t base_damage, bool is_shooting, army* defender, bool simulate_only, int32_t distance) const
         { return THISCALL_6(int32_t, 0x443560, this, base_damage, is_shooting, defender, simulate_only, distance); }
 
         // Compute Attacker <enemy> damage reduction coefficent
         // Вычислить коэффицент уменьшения урона для атакующего <enemy>
         /// @param enemy указатель на цель для атаки
         /// @param ranged_attack (true/false) является выстрелом
-        NH3API_NODISCARD double ComputeAttackerDamageReduction(const army* enemy, bool ranged_attack) const
+        [[nodiscard]] double ComputeAttackerDamageReduction(const army* enemy, bool ranged_attack) const
         { return THISCALL_3(double, 0x4438B0, this, enemy, ranged_attack); }
 
         // Compute Defender(this) damage reduction coefficent. <ranged_attack> is always passed as true
         // Вычислить коэффицент уменьшения урона для текущего отряда. <ranged_attack> всегда вызывается с true
-        NH3API_NODISCARD double ComputeDefenderDamageReduction(bool ranged_attack) const
+        [[nodiscard]] double ComputeDefenderDamageReduction(bool ranged_attack) const
         { return THISCALL_2(double, 0x443AB0, this, ranged_attack); }
 
         // Calculate Adjusted Damage /
@@ -595,7 +618,7 @@ class army
         /// @param distance расстояние до врага в гексах
         /// @param fire_damage указатель на урон огненного щита(заполняется функцией)
         /// @return returns adjusted damage / возвращает итоговый урон
-        NH3API_NODISCARD int32_t adjust_damage(army* enemy,
+        [[nodiscard]] int32_t adjust_damage(army* enemy,
                                                int32_t base_damage,
                                                bool bIsShot,
                                                bool simulated,
@@ -707,14 +730,14 @@ class army
         /// @param our_hex гекс текущего существа
         /// @param enemy указатель на врага
         /// @param enemy_hex гекс врага
-        NH3API_NODISCARD int32_t get_attack_direction(int32_t our_hex, const army* enemy, int32_t enemy_hex) const
+        [[nodiscard]] int32_t get_attack_direction(int32_t our_hex, const army* enemy, int32_t enemy_hex) const
         { return THISCALL_4(int32_t, 0x445560, this, our_hex, enemy, enemy_hex); }
 
         // Get attack direction /
         // Сторона атаки
         /// @param hex гекс атаки
         /// @param enemy указатель на врага
-        NH3API_NODISCARD int32_t get_attack_direction(int32_t hex, const army* enemy) const
+        [[nodiscard]] int32_t get_attack_direction(int32_t hex, const army* enemy) const
         { return THISCALL_3(int32_t, 0x4455D0, this, hex, enemy); }
 
         // move to <hex> / идти до гекса <hex>
@@ -749,16 +772,16 @@ class army
         /// @param casting_hero герой, который накладывает заклинание
         void       Cure(int32_t level, int32_t iSpellPower, hero const * casting_hero);
 
-        NH3API_NODISCARD int32_t MidY() const
+        [[nodiscard]] int32_t MidY() const
         { return BottomY() - this->image_height / 2; }
 
-        NH3API_NODISCARD int32_t TopY() const
+        [[nodiscard]] int32_t TopY() const
         { return BottomY() - this->image_height; }
 
-        NH3API_NODISCARD int32_t BottomY() const
+        [[nodiscard]] int32_t BottomY() const
         { return (this->gridIndex > 0 && this->gridIndex < 187) ? army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[static_cast<size_t>(this->gridIndex)].refY : 0; }
-        
-        NH3API_NODISCARD int32_t MidX() const
+
+        [[nodiscard]] int32_t MidX() const
         {
             int32_t result = (this->gridIndex > 0 && this->gridIndex < 187) ? army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[static_cast<size_t>(this->gridIndex)].refX : 0;
             if ( Is(CF_DOUBLE_WIDE) )
@@ -768,7 +791,7 @@ class army
             return result;
         }
 
-        NH3API_NODISCARD int32_t FrontX() const
+        [[nodiscard]] int32_t FrontX() const
         {
             CSpriteFrame* standingStillFrame = stdIcon->s[cs_walk]->f[1];
             int32_t cropped = standingStillFrame->CroppedX + standingStillFrame->CroppedWidth - OFFSET_X;
@@ -779,12 +802,12 @@ class army
 
         // Get second grid index (Double wide creatures occupy two hexes, functions finds the second one) /
         // Индекс второго гекса(для двойных существ, которые занимают две клетки)
-        NH3API_NODISCARD int32_t get_second_grid_index() const
+        [[nodiscard]] int32_t get_second_grid_index() const
         { 	return ( !Is(CF_DOUBLE_WIDE) ) ? gridIndex : gridIndex + ( facing ? 1 : -1 ); }
 
         // Checks wether <arg> hex is adjacent(considering 8 adj. hexes for double-wide creatures ) /
         // Проверяет, лежит ли гекс <arg> прямо напротив существа(учитываются 8 гексов для двойных существа)
-        NH3API_NODISCARD bool is_adjacent(int32_t arg) const
+        [[nodiscard]] bool is_adjacent(int32_t arg) const
         { return THISCALL_2(bool, 0x4463E0, this, arg); }
 
         // Turn /
@@ -811,17 +834,17 @@ class army
         /// @param destIndex гекс-цель
         /// @param bAllowShifting всегда = false / always = false
         /// @param iNewDestIndex указатель на новый гекс(заполняется функцией)
-        NH3API_NODISCARD bool CanFit(int32_t destIndex, int32_t bAllowShifting, int32_t* iNewDestIndex) const
+        [[nodiscard]] bool CanFit(int32_t destIndex, int32_t bAllowShifting, int32_t* iNewDestIndex) const
         { return !!THISCALL_4(bool32_t, 0x446960, this, destIndex, bAllowShifting, iNewDestIndex); }
 
         // Get resurrected from <target> army size /
         // Посчитать количество возрожденных существ из <target>
-        NH3API_NODISCARD int32_t get_resurrection_size(const army* target) const
+        [[nodiscard]] int32_t get_resurrection_size(const army* target) const
         { return THISCALL_2(int32_t, 0x447050, this, target); }
 
         // can cast resurrect? / can resurrect at least one dead ally? /
         // может ли существо восстанавливать других существ? / восстановит ли существо хотя бы один труп?
-        NH3API_NODISCARD bool can_cast_resurrect(int32_t hex) const
+        [[nodiscard]] bool can_cast_resurrect(int32_t hex) const
         { return THISCALL_2(bool, 0x4470F0, this, hex); }
 
         // Cast Faerie dragon spell /
@@ -831,12 +854,12 @@ class army
 
         // Can creature cast spell on <hex>?
         // Может ли существо колдовать на гекс <hex>?
-        NH3API_NODISCARD bool can_cast_spell(int32_t hex) const
+        [[nodiscard]] bool can_cast_spell(int32_t hex) const
         { return THISCALL_2(bool, 0x4473E0, this, hex); }
 
         // Count valid Master Gene spells number that can be casted on <target> /
         // Посчитать количество заклинаний, которые могут быть наложены на <target> Мастер-Джином.
-        NH3API_NODISCARD uint32_t get_valid_caliph_spells(const army* target) const
+        [[nodiscard]] uint32_t get_valid_caliph_spells(const army* target) const
         {
             uint32_t result = 0;
             for ( size_t i = FIRST_COMBAT_SPELL; i < MAX_COMBAT_SPELLS; ++i )
@@ -856,37 +879,37 @@ class army
 
         // Get Magic mirror effect(taking into account the Faerie Dragons) /
         // Эффект заклинания Магическое зеркало (учитывая Волшебных драконов).
-        NH3API_NODISCARD int32_t get_mirror_effect() const
+        [[nodiscard]] int32_t get_mirror_effect() const
         { return THISCALL_1(int32_t, 0x448510, this); }
 
-        NH3API_NODISCARD int32_t get_multi_head_directions(int32_t our_hex,
+        [[nodiscard]] int32_t get_multi_head_directions(int32_t our_hex,
                                                            const army* enemy,
                                                            int32_t enemy_hex ) const
         { return THISCALL_4(int32_t, 0x4487D0, this, our_hex, enemy, enemy_hex); }
 
         // Calculate turns left to reach the AI_target given <speed> /
         // Посчитать, сколько ходов нужно, чтобы достичь AI_target со скоростью <speed>.
-        NH3API_NODISCARD int32_t get_AI_target_time(int32_t speed) const
+        [[nodiscard]] int32_t get_AI_target_time(int32_t speed) const
         { return THISCALL_2(int32_t, 0x4488F0, this, speed); }
 
         // Calculate current creature speed /
         // Посчитать текущую скорость существа.
-        NH3API_NODISCARD int32_t GetSpeed() const
+        [[nodiscard]] int32_t GetSpeed() const
         { return THISCALL_1(int32_t, 0x4489F0, this); }
 
         // Need to turn? /
         // Нужно ли развернуться?
-        NH3API_NODISCARD bool NeedToTurn(int32_t direction) const
+        [[nodiscard]] bool NeedToTurn(int32_t direction) const
         { return direction < 6 && (this->facing == 0) != direction >= 3; }
 
         // Get creature name /
         // Получить имя существа.
-        NH3API_NODISCARD const char* GetName() const
+        [[nodiscard]] const char* GetName() const
         { return GetName(numTroops); }
 
         // Get army name given amount <count> /
         // Получить имя существа в зависимости от количества <count>.
-        NH3API_NODISCARD const char* GetName(int32_t count) const
+        [[nodiscard]] const char* GetName(int32_t count) const
         { return FASTCALL_2(const char*, 0x43FE20, armyType, count); }
 
         // Get attack direction /
@@ -897,18 +920,18 @@ class army
 
         // Does the creature leaves no body after death? /
         // Существо не оставляет после после смерти труп?
-        NH3API_NODISCARD bool LeavesNoBody() const
+        [[nodiscard]] bool LeavesNoBody() const
         { return Is( CF_SACRIFICED | CF_SUMMONED ); }
 
         // Creature is within highlighted area /
         // Существо находится внутри площади выделения.
-        NH3API_NODISCARD bool is_in_area_highlight() const
+        [[nodiscard]] bool is_in_area_highlight() const
         { return is_area_effect_target; }
 
         // Is Flight to <destIndex> valid? /
         // Возможен ли полет на гекс <destIndex>?
         /// @param destIndex проверяемый гекс
-        NH3API_NODISCARD bool ValidFlight(int32_t destIndex) const
+        [[nodiscard]] bool ValidFlight(int32_t destIndex) const
         { return THISCALL_3(bool, 0x4B4420, this, destIndex, false); }
 
         // Fly to <destIndex> /
@@ -938,30 +961,30 @@ class army
         // Is path to <fpTargetCellIndex> valid?
         // Возможен ли путь до <fpTargetCellIndex>?
         /// @param destIndex гекс-цель
-        NH3API_NODISCARD bool ValidPath(int32_t destIndex)
+        [[nodiscard]] bool ValidPath(int32_t destIndex)
         { return !!THISCALL_3(bool32_t, 0x523F60, this, destIndex, false); }
 
         // Get Attack mask
         // Маска атаки
-        NH3API_NODISCARD uint32_t GetAttackMask(int32_t currIndex, int32_t criteria, int32_t iLiteralTargetIndex) const
+        [[nodiscard]] uint32_t GetAttackMask(int32_t currIndex, int32_t criteria, int32_t iLiteralTargetIndex) const
         { return THISCALL_4(uint32_t, 0x524010, this, currIndex, criteria, iLiteralTargetIndex); }
 
-        NH3API_NODISCARD bool ValidAttack(int32_t currIndex, int32_t direction, int32_t criteria, int32_t iLiteralIndex, int32_t* testCellIndex) const
+        [[nodiscard]] bool ValidAttack(int32_t currIndex, int32_t direction, int32_t criteria, int32_t iLiteralIndex, int32_t* testCellIndex) const
         { return !!THISCALL_6(bool32_t, 0x5240A0, this, currIndex, direction, criteria, iLiteralIndex, testCellIndex); }
 
         // Call army::get_adjacent_hex( hex, direction ) instead /
         // Вызывайте army::get_adjacent_hex( hex, direction ).
-        NH3API_NODISCARD int32_t GetAdjacentCellIndex(int32_t hex, int32_t direction) const
+        [[nodiscard]] int32_t GetAdjacentCellIndex(int32_t hex, int32_t direction) const
         { return THISCALL_3(int32_t, 0x524280, this, hex, direction); }
 
         // Finds adjacent <hex> in <direction> /
         // Находит гекс, лежащий напротив данного гекса <hex> в сторону <direction>.
-        NH3API_NODISCARD int32_t get_adjacent_hex(int32_t hex, int32_t direction) const
+        [[nodiscard]] int32_t get_adjacent_hex(int32_t hex, int32_t direction) const
         { return THISCALL_3(int32_t, 0x5242E0, this, hex, direction); }
 
         // Is in Unicorn aura? /
         // Действует ли аура единорога?
-        NH3API_NODISCARD bool is_in_aura() const
+        [[nodiscard]] bool is_in_aura() const
         { return !aura_sources.empty(); }
 
     public:
@@ -981,9 +1004,9 @@ class army
         int8_t iRemainingFrames;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_5[3];
-        
+
     public:
         // offset: +0x8 = +8,  size = 0x4 = 4
         int32_t iDrawPriority;
@@ -992,9 +1015,9 @@ class army
         bool bShowTroopCount;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_D[3];
-        
+
     public:
         // Combat side(group) to attack /
         // Сторона, которую атакует данное существо
@@ -1016,9 +1039,9 @@ class army
         bool bShowPowEffect;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_21[3];
-        
+
     public:
         // offset: +0x24 = +36,  size = 0x4 = 4
         int32_t iMirrorSourceIndex;
@@ -1040,7 +1063,7 @@ class army
         // offset: +0x31 = +49,  size = 0x1 = 1
         bool LetsPretendImNotHere;
 
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_32[2];
 
     public:
@@ -1101,7 +1124,7 @@ class army
 
         // offset: +0x70 = +112,  size = 0x4 = 4
         int32_t iLuckStatus;
-        
+
         union {
         // Creature general information /
         // Информация о существе.
@@ -1119,9 +1142,9 @@ class army
         bool bAllUnitsKilled;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_EB[1];
-        
+
     public:
         // offset: +0xEC = +236,  size = 0x4 = 4
         SpellID iPostPowSpellToCast;
@@ -1130,7 +1153,7 @@ class army
         bool hitByCreature;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_F1[3];
 
     public:
@@ -1158,7 +1181,7 @@ class army
 
         // offset: +0x10C = +268,  size = 0x4 = 4
         int32_t yModify;
-        
+
         union {
         // Creature sprite information /
         // Информация о спрайте существа.
@@ -1206,14 +1229,14 @@ class army
         // offset: +0x2DC = +732,  size = 0x144 = 324
         std::array<TSkillMastery, MAX_SPELLS> spell_level;
 
-        union 
+        union
         {
         // Each casted spell queue /
         // Наложенные на существо заклинания.
         // offset: +0x420 = +1056,  size = 0x30 = 48
         exe_deque<SpellID> SpellInfluenceQueue;
         };
-        
+
         // offset: +0x450 = +1104,  size = 0x4 = 4
         float PaletteEffect;
 
@@ -1307,9 +1330,9 @@ class army
         bool residualParalyze;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_4C2[2];
-        
+
     public:
         // offset: +0x4C4 = +1220,  size = 0x4 = 4
         TSkillMastery forgetfulness_level;
@@ -1332,7 +1355,7 @@ class army
         bool OnNativeTerrain;
 
     protected:
-        NH3API_MAYBE_UNUSED 
+        [[maybe_unused]]
         byte_t gap_4D9[3];
 
     public:
@@ -1362,9 +1385,9 @@ class army
 
         // offset: +0x4F1 = +1265,  size = 0x1 = 1
         bool is_area_effect_target;
-        
+
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_4F2[2];
 
     public:
@@ -1381,7 +1404,7 @@ class army
         // offset: +0x504 = +1284,  size = 0x10 = 16
         exe_vector<army*> binders;
         };
-        
+
         union {
         // Troops influenced by the unicorn aura /
         // существа под действием ауры данного единорога.
@@ -1395,7 +1418,7 @@ class army
         // offset: +0x524 = +1316,  size: 0x10 = 16
         exe_vector<army*> aura_sources;
         };
-        
+
         // AI expected damage /
         // Ожидаемый ИИ урон.
         // offset: +0x534 = +1332,  size = 0x4 = 4

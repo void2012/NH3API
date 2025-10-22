@@ -16,366 +16,305 @@
 // std::underlying_type implemented by void_17
 
 #pragma once
-#include "nh3api_std.hpp"
-#include "type_traits/type_traits_cxx98.hpp"
+
 #include <utility>
+#include <type_traits>
+#include "nh3api_std.hpp"
 
-#if NH3API_CHECK_MSVC
-#pragma component(mintypeinfo, on)
-#endif
-
-#if NH3API_CHECK_CPP11 || NH3API_MSVC_STL_VERSION >= NH3API_MSVC_STL_VERSION_2010
-#include <type_traits> // something works since vs2010
-#endif
-
-#if NH3API_MSVC_STL_VERSION == NH3API_MSVC_STL_VERSION_2010
-namespace nh3api
-{
-
-template<class T>
-typename add_rvalue_reference<T>::type declval() throw()
-{ static_assert(false, "declval not allowed in an evaluated context"); }
-
-namespace tt
-{
-namespace details
-{
-struct is_default_constructible_impl
-{
-   template<typename _Tp, typename>
-   static yes_type test(int);
-
-   template<typename>
-   static no_type test(...);
-};
-
-struct is_constructible_impl
-{
-   template<typename T, typename Arg, typename>
-   static yes_type test1(int);
-   template<typename, typename>
-   static no_type test1(...);
-
-   template <typename T>
-   static yes_type ref_test(T);
-   template <typename T>
-   static no_type ref_test(...);
-};
-
-struct is_destructible_impl
-{
-   template<typename T, typename>
-   static yes_type test(int);
-   template<typename>
-   static no_type test(...);
-};
-
-struct is_assignable_impl
-{
-   template<typename T, typename U, typename>
-   static yes_type test(int);
-
-   template<typename, typename>
-   static no_type test(...);
-};
-
-} // namespace details
-
-template <class T, class U> struct is_assignable : public integral_constant<bool, sizeof(details::is_assignable_impl::test<T, U, decltype(declval<T>() = declval<U>())>(0)) == sizeof(details::yes_type)>{};
-template <class T, size_t N, class U> struct is_assignable<T[N], U> : public is_assignable<T, U>{};
-template <class T, size_t N, class U> struct is_assignable<T(&)[N], U> : public is_assignable<T&, U>{};
-template <class T, class U> struct is_assignable<T[], U> : public is_assignable<T, U>{};
-template <class T, class U> struct is_assignable<T(&)[], U> : public is_assignable<T&, U>{};
-template <class U> struct is_assignable<void, U> : public integral_constant<bool, false>{};
-template <class U> struct is_assignable<void const, U> : public integral_constant<bool, false>{};
-template <class U> struct is_assignable<void volatile, U> : public integral_constant<bool, false>{};
-template <class U> struct is_assignable<void const volatile, U> : public integral_constant<bool, false>{};
-
-template <class T> struct is_destructible
-: public integral_constant<bool, sizeof(details::is_destructible_impl::test<T, decltype(declval<T&>().~T())>(0)) == sizeof(details::yes_type)>{};
-
-template <class T> struct is_default_constructible
-: public integral_constant<bool, sizeof(details::is_default_constructible_impl::test<T, decltype(T())>(0)) == sizeof(details::yes_type)>{};
-template <class T, size_t N> struct is_default_constructible<T[N]> : public is_default_constructible<T>{};
-template <class T> struct is_default_constructible<T[]> : public is_default_constructible<T>{};
-template <class T> struct is_default_constructible<T&> : public integral_constant<bool, false>{};
-template <class T> struct is_default_constructible<T&&> : public integral_constant<bool, false>{};
-template <> struct is_default_constructible<void> : public integral_constant<bool, false>{};
-template <> struct is_default_constructible<void const> : public integral_constant<bool, false>{};
-template <> struct is_default_constructible<void volatile> : public integral_constant<bool, false>{};
-template <> struct is_default_constructible<void const volatile> : public integral_constant<bool, false>{};
-
-template <class T, class Arg> struct is_constructible<T, Arg> : public integral_constant<bool, is_destructible<T>::value && sizeof(details::is_constructible_impl::test1<T, Arg, decltype(::new T(declval<Arg>()))>(0)) == sizeof(details::yes_type)>{};
-template <class Ref, class Arg> struct is_constructible<Ref&, Arg> : public integral_constant<bool, sizeof(details::is_constructible_impl::ref_test<Ref&>(declval<Arg>())) == sizeof(details::yes_type)>{};
-template <class Ref, class Arg> struct is_constructible<Ref&&, Arg> : public integral_constant<bool, sizeof(details::is_constructible_impl::ref_test<Ref&&>(declval<Arg>())) == sizeof(details::yes_type)>{};
-
-template <> struct is_constructible<void> : public false_type{};
-template <> struct is_constructible<void const> : public false_type{};
-template <> struct is_constructible<void const volatile> : public false_type{};
-template <> struct is_constructible<void volatile> : public false_type{};
-
-template <class T> struct is_constructible<T> : public is_default_constructible<T>{};
-
-template<class T>
-struct is_move_constructible :
-    is_constructible<T, typename add_rvalue_reference<T>::type> {};
-
-template<class T>
-struct is_trivially_move_constructible :
-    is_trivially_constructible<T, typename add_rvalue_reference<T>::type> {};
-
-template<class T>
-struct is_nothrow_move_constructible :
-    is_nothrow_constructible<T, typename add_rvalue_reference<T>::type> {};
-
-} // namespace tt
-} // namespace nh3api
-
-#elif NH3API_CHECK_CPP11 || NH3API_MSVC_STL_VERSION > NH3API_MSVC_STL_VERSION_2010
 namespace nh3api
 {
 using ::std::declval;
 
 namespace tt
 {
+using ::std::integral_constant;
+using ::std::true_type;
+using ::std::false_type;
+using ::std::add_volatile;
+using ::std::add_const;
+using ::std::add_cv;
+using ::std::add_lvalue_reference;
+using ::std::add_pointer;
+using ::std::is_signed;
+using ::std::is_unsigned;
+using ::std::make_signed;
+using ::std::make_unsigned;
+using ::std::underlying_type;
+using ::std::enable_if;
+using ::std::is_base_of;
+using ::std::is_same;
+using ::std::alignment_of;
+#ifdef __cpp_lib_type_identity
+using ::std::type_identity;
+#else
+template<class T> struct type_identity
+{ using type = T; };
+#endif
+using ::std::conditional;
+using ::std::is_convertible;
+using ::std::is_void;
+using ::std::is_lvalue_reference;
+using ::std::is_rvalue_reference;
+using ::std::is_reference;
+using ::std::is_pointer;
+using ::std::negation;
+template<typename T1, typename T2>
+struct conjunction_2
+    : ::std::conjunction<T1, T2>
+{};
+
+template<typename T1, typename T2>
+struct disjunction_2
+    : ::std::disjunction<T1, T2>
+{};
 using ::std::is_move_constructible;
 using ::std::is_trivially_move_constructible;
 using ::std::is_trivially_move_assignable;
 using ::std::is_nothrow_move_constructible;
 using ::std::is_copy_constructible;
 using ::std::is_nothrow_constructible;
-} // namespace tt
-} // namespace nh3api
+using ::std::is_const;
+using ::std::is_volatile;
+using ::std::is_enum;
+using ::std::is_class;
+using ::std::is_union;
+// using ::std::is_pod; // we're not using is_pod currently
+using ::std::is_empty;
+using ::std::is_polymorphic;
+using ::std::is_abstract;
+using ::std::has_virtual_destructor;
+using ::std::is_unsigned;
+using ::std::is_signed;
+using ::std::is_integral;
+using ::std::is_floating_point;
+using ::std::is_arithmetic;
+using ::std::is_function;
+using ::std::is_fundamental;
+using ::std::is_scalar;
+using ::std::is_compound;
+using ::std::is_object;
+using ::std::is_trivially_copyable;
+using ::std::is_trivially_copy_assignable;
+using ::std::is_trivially_default_constructible;
+using ::std::is_trivially_destructible;
+using ::std::is_nothrow_assignable;
+using ::std::is_nothrow_default_constructible;
+using ::std::is_nothrow_copy_constructible;
+using ::std::is_trivial;
+using ::std::is_trivially_copy_constructible;
+using ::std::is_nothrow_destructible;
+using ::std::is_array;
+using ::std::is_move_assignable;
+using ::std::is_nothrow_move_assignable;
+using ::std::is_nothrow_move_constructible;
+using ::std::is_copy_assignable;
+using ::std::is_nothrow_copy_assignable;
+using ::std::remove_const;
+using ::std::remove_volatile;
+using ::std::remove_cv;
+using ::std::remove_reference;
+#ifdef __cpp_lib_remove_cvref
+using ::std::remove_cvref;
+#else
+template <class T>
+struct remove_cvref
+: ::std::remove_cv<::std::remove_reference_t<T>>
+{};
 #endif
-
-
-namespace nh3api
-{
-namespace tt
-{
-
-#if NH3API_CHECK_CPP11
-template<class...>
-using void_t = void;
-#endif  
+using ::std::remove_pointer;
+using ::std::decay;
+using ::std::void_t;
 template<typename T>
-struct void_1 { typedef void type; };
+struct void_1 { using type = void; };
 
-} // namespace tt
-} // namespace nh3api
-
-
-namespace nh3api
-{
-namespace tt
-{
 #if !defined(__cpp_lib_bounded_array_traits)
 template<class T>
 struct is_unbounded_array
-    : false_type { };
+    : ::std::false_type { };
 
 template<class T>
 struct is_unbounded_array<T[]>
-    : true_type { };
+    : ::std::true_type { };
 
 template<class T>
 struct is_unbounded_array<const T[]>
-    : true_type { };
+    : ::std::true_type { };
 
 template<class T>
 struct is_unbounded_array<volatile T[]>
-    : true_type { };
+    : ::std::true_type { };
 
 template<class T>
 struct is_unbounded_array<const volatile T[]>
-    : true_type { };
+    : ::std::true_type { };
 
 template<class T>
 struct is_bounded_array
-    : false_type { };
+    : ::std::false_type { };
 
 template<class T, size_t N>
 struct is_bounded_array<T[N]>
-    : true_type { };
+    : ::std::true_type { };
 
 template<class T, size_t N>
 struct is_bounded_array<const T[N]>
-    : true_type { };
+    : ::std::true_type { };
 
 template<class T, size_t N>
 struct is_bounded_array<volatile T[N]>
-    : true_type { };
+    : ::std::true_type { };
 
 template<class T, size_t N>
 struct is_bounded_array<const volatile T[N]>
-    : true_type { };
+    : ::std::true_type { };
 #else
 using ::std::is_unbounded_array;
 using ::std::is_bounded_array;
 #endif
-} // namespace tt
 
-#ifdef __cpp_lib_as_const
-using ::std::as_const;
-#else
-template<class T> NH3API_NODISCARD NH3API_MSVC_INTRIN NH3API_CONSTEXPR
-typename tt::add_const<T>::type& as_const(T& t) NH3API_NOEXCEPT
-{ return t; }
-#endif
-
-#ifdef __cpp_lib_to_underlying
-using ::std::to_underlying;
-#else
-template<class Enum> NH3API_NODISCARD NH3API_MSVC_INTRIN NH3API_CONSTEXPR
-typename tt::underlying_type<Enum>::type to_underlying(Enum arg) NH3API_NOEXCEPT
-{ return static_cast<typename tt::underlying_type<Enum>::type>(arg); }
-#endif
-
-} // namespace nh3api
-
-
-namespace nh3api
-{
-namespace tt
-{
-#if NH3API_CHECK_CPP11
 template <class T, class = void>
 struct has_scalar_deleting_destructor
-    : false_type {};
+    : ::std::false_type {};
 
 template <class T>
 struct has_scalar_deleting_destructor<T,
 decltype((void)declval<T>().scalar_deleting_destructor(declval<uint8_t>()))>
-    : true_type {};
+    : ::std::true_type {};
+
+template <class T>
+inline constexpr bool has_scalar_deleting_destructor_v = has_scalar_deleting_destructor<T>::value;
+
+template<class T, class... Args>
+constexpr bool is_any_of_v = (::std::is_same_v<T, Args> || ...);
+
+#ifdef __cpp_lib_concepts 
+template <typename F, typename ArgT, typename ResultT>
+concept unary_functor = std::invocable<F, ArgT> &&
+                        std::same_as<std::invoke_result_t<F, ArgT>, ResultT>;
+
+#endif
+
+} // namespace tt
+
+using ::std::as_const;
+
+#ifdef __cpp_lib_to_underlying
+using ::std::to_underlying;
 #else
-template <typename type>
-class scalar_deleting_destructor_test
+template<class Enum> [[nodiscard]] NH3API_MSVC_INTRIN constexpr
+std::underlying_type_t<Enum> to_underlying(Enum arg) noexcept
+{ return static_cast<std::underlying_type_t<Enum>>(arg); }
+#endif
+
+#ifdef __cpp_lib_integer_comparison_functions
+using ::std::cmp_equal;
+using ::std::cmp_not_equal;
+using ::std::cmp_less;
+using ::std::cmp_greater;
+using ::std::cmp_less_equal;
+using ::std::cmp_greater_equal;
+#else 
+template<class T, class U> NH3API_PURE
+inline constexpr bool cmp_equal(T t, U u) noexcept
 {
-class yes { char m;};
-class no { yes m[2];};
-
-struct base_mixin
+    if constexpr (::std::is_signed_v<T> == ::std::is_signed_v<U>)
+        return t == u;
+    else if constexpr (::std::is_signed_v<T>)
+        return t >= 0 && ::std::make_unsigned_t<T>(t) == u;
+    else
+        return u >= 0 && ::std::make_unsigned_t<U>(u) == t;
+}
+ 
+template<class T, class U> NH3API_PURE
+inline constexpr bool cmp_not_equal(T t, U u) noexcept
+{ return !cmp_equal(t, u); }
+ 
+template<class T, class U> NH3API_PURE
+inline constexpr bool cmp_less(T t, U u) noexcept
 {
-    void scalar_deleting_destructor(){}
-};
-
-struct base : public type, public base_mixin {};
-
-template <typename T, T t>  class helper{};
-
-template <typename U>
-static no deduce(U*, helper<void (base_mixin::*)(), &U::scalar_deleting_destructor>*
-= 0);
-static yes deduce(...);
-
-public:
-static const bool result = sizeof(yes) == sizeof(deduce((base*)
-(0)));
-
-};
-
-namespace details
+    if constexpr (::std::is_signed_v<T> == ::std::is_signed_v<U>)
+        return t < u;
+    else if constexpr (std::is_signed_v<T>)
+        return t < 0 || ::std::make_unsigned_t<T>(t) < u;
+    else
+        return u >= 0 && t < ::std::make_unsigned_t<U>(u);
+}
+ 
+template<class T, class U> NH3API_PURE
+inline constexpr bool cmp_greater(T t, U u) noexcept
+{ return cmp_less(u, t); }
+ 
+template<class T, class U> NH3API_PURE
+constexpr bool cmp_less_equal(T t, U u) noexcept
 {
-template <typename type>
-class void_exp_result
-{};
-
-template <typename type, typename U>
-U const& operator,(U const&, void_exp_result<type>);
-
-template <typename type, typename U>
-U& operator,(U&, void_exp_result<type>);
-
-template <typename src_type, typename dest_type>
-struct clone_constness
+    return !cmp_less(u, t);
+}
+ 
+template<class T, class U> NH3API_PURE
+constexpr bool cmp_greater_equal(T t, U u) noexcept
 {
-    typedef dest_type type;
-};
+    return !cmp_less(t, u);
+}
+#endif
 
-template <typename src_type, typename dest_type>
-struct clone_constness<const src_type, dest_type>
+#ifdef __cpp_lib_concepts
+template<::std::integral T>
+#else 
+template<typename T>
+#endif
+[[nodiscard]] NH3API_PURE inline constexpr T min_limit() noexcept 
 {
-    typedef const dest_type type;
-};
-
+    if constexpr (::std::is_signed_v<T>)
+    {
+        constexpr auto unsigned_max = static_cast<::std::make_unsigned_t<T>>(-1);
+        return static_cast<T>((unsigned_max >> 1) + 1);
+    }
+    else  
+    {
+        return 0;
+    }
 }
 
-template <typename type, typename call_details>
-struct scalar_deleting_destructor_impl_helper
-{
-private:
-class yes {};
-class no { yes m[2]; };
-
-struct derived : public type
-{
-    using type::scalar_deleting_destructor;
-    no scalar_deleting_destructor(...) const;
-};
-
-typedef typename details::clone_constness<type, derived>::type
-derived_type;
-
-template <typename T, typename due_type>
-struct return_value_check
-{
-    static yes deduce(due_type);
-    static no deduce(...);
-    static no deduce(no);
-    static no deduce(details::void_exp_result<type>);
-};
-
-template <typename T>
-struct return_value_check<T, void>
-{
-    static yes deduce(...);
-    static no deduce(no);
-};
-
-template <bool has, typename F>
-struct deduce_impl
-{
-    static const bool value = false;
-};
-
-template <typename arg1, typename r>
-struct deduce_impl<true, r(arg1)>
-{
-    static const bool value =
-    sizeof(
-            return_value_check<type, r>::deduce(
-            (((derived_type*)0)->scalar_deleting_destructor(*(arg1*)0),
-details::void_exp_result<type>())
-                        )
-            ) == sizeof(yes);
-
-};
-public:
-static const bool value = deduce_impl<scalar_deleting_destructor_test<type>::result,
-call_details>::value;
-
-};
-
-template <class T, bool = is_class<T>::value>
-struct has_scalar_deleting_destructor_impl
-    : false_type
-{
-};
-
-template <class T>
-struct has_scalar_deleting_destructor_impl<T, true>
-    : integral_constant<bool, scalar_deleting_destructor_impl_helper<T, void(unsigned char)>::value>
-{
-};
-
-template <class T>
-struct has_scalar_deleting_destructor
-    : integral_constant<bool, has_scalar_deleting_destructor_impl<T>::value>
-{};
+#ifdef __cpp_lib_concepts
+template<::std::integral T>
+#else 
+template<typename T>
 #endif
-} // namespace tt
+[[nodiscard]] NH3API_PURE inline constexpr T max_limit() noexcept 
+{
+    if constexpr (::std::is_signed_v<T>)
+    {
+        constexpr auto unsigned_max = static_cast<::std::make_unsigned_t<T>>(-1);
+        return static_cast<T>(unsigned_max >> 1);
+    }
+    else  
+    {
+        return static_cast<T>(-1);
+    }
+}
+
+#ifdef __cpp_lib_concepts
+template<typename Rx, ::std::integral T>
+#else 
+template<typename Rx, typename T>
+#endif
+[[nodiscard]] NH3API_PURE inline constexpr bool in_range(const T value) noexcept 
+{
+    constexpr T  t_min  = min_limit<T>();
+    constexpr Rx rx_min = min_limit<Rx>();
+
+    if constexpr ( cmp_less(t_min, rx_min) )
+        if ( value < T{rx_min} )
+            return false;
+    
+    constexpr T  t_max = max_limit<T>();
+    constexpr Rx rx_max = max_limit<Rx>();
+
+    if constexpr ( cmp_greater(t_max, rx_max) )
+        if ( value > T{rx_max})
+            return false;
+    
+    return true;
+}
+
 } // namespace nh3api
-
-#if NH3API_CHECK_MSVC
-#pragma component(mintypeinfo, off)
-#endif

@@ -14,18 +14,22 @@
 class recruitUnit : public baseManager
 {
     public:
-        recruitUnit() NH3API_DELETED_FUNCTION
+        recruitUnit() = delete;
+        recruitUnit(const recruitUnit&)            = default;
+        recruitUnit(recruitUnit&&)                 = delete;
+        recruitUnit& operator=(const recruitUnit&) = default;
+        recruitUnit& operator=(recruitUnit&&)      = delete;
 
-        recruitUnit(armyGroup* newGroup,
-                    bool bGroupIsTownGarrison,
+        recruitUnit(armyGroup*    newGroup,
+                    bool          bGroupIsTownGarrison,
                     TCreatureType MonType1_,
-                    int16_t* numMon1,
+                    int16_t*      numMon1,
                     TCreatureType MonType2_,
-                    int16_t* numMon2,
+                    int16_t*      numMon2,
                     TCreatureType MonType3_,
-                    int16_t* numMon3,
+                    int16_t*      numMon3,
                     TCreatureType MonType4_,
-                    int16_t* numMon4) NH3API_NOEXCEPT
+                    int16_t*      numMon4) noexcept
             : recruitUnit(::nh3api::dummy_tag)
         { THISCALL_11(void, 0x551750, this, newGroup, bGroupIsTownGarrison, MonType1_, numMon1, MonType2_, numMon2, MonType3_, numMon3, MonType4_, numMon4); }
 
@@ -37,24 +41,24 @@ class recruitUnit : public baseManager
                     TCreatureType MonType3_,
                     int16_t* numMon3,
                     TCreatureType MonType4_,
-                    int16_t* numMon4) NH3API_NOEXCEPT
+                    int16_t* numMon4) noexcept
             : recruitUnit(::nh3api::dummy_tag)
         { THISCALL_10(void, 0x551860, this, thisHero_, MonType1_, numMon1, MonType2_, numMon2, MonType3_, numMon3, MonType4_, numMon4); }
 
         recruitUnit(town* newTown,
                     int32_t newDwellingIndex,
-                    int32_t bInInTownMainScreen) NH3API_NOEXCEPT
+                    int32_t bInInTownMainScreen) noexcept
             : recruitUnit(::nh3api::dummy_tag)
         { THISCALL_4(void, 0x551960, this, newTown, newDwellingIndex, bInInTownMainScreen); }
 
-        recruitUnit(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        recruitUnit(const ::nh3api::dummy_tag_t& tag) noexcept
             : baseManager(tag)
         {}
 
         NH3API_DEFAULT_DESTRUCTOR(recruitUnit)
 
     public:
-        void Update(bool new_monster, int32_t slot) NH3API_NOEXCEPT
+        void Update(bool new_monster, int32_t slot) noexcept
         { THISCALL_3(void, 0x5507A0, this, new_monster, slot); }
 
     public:

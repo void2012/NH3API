@@ -28,99 +28,90 @@ struct bstruct_t
     public:
         template <typename T>
         NH3API_FORCEINLINE
-        T& get(size_t offset = 0) NH3API_NOEXCEPT
-        { return *reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(this) + offset); }
+        T& get(ptrdiff_t offset = 0) noexcept
+        { return *reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(__builtin_launder(this)) + offset); }
 
         template <typename T>
         NH3API_FORCEINLINE
-        const T& get(size_t offset = 0) const NH3API_NOEXCEPT
-        { return *reinterpret_cast<const T*>(reinterpret_cast<uintptr_t>(this) + offset); }
+        const T& get(ptrdiff_t offset = 0) const noexcept
+        { return *reinterpret_cast<const T*>(reinterpret_cast<uintptr_t>(__builtin_launder(this)) + offset); }
 
-        bstruct_t() NH3API_DELETED_FUNCTION
-        bstruct_t(const bstruct_t&) NH3API_DELETED_FUNCTION
-        bstruct_t& operator=(const bstruct_t&) NH3API_DELETED_FUNCTION
+        bstruct_t()                            = delete;
+        bstruct_t(bstruct_t&&)                 = delete;
+        bstruct_t& operator=(bstruct_t&&)      = delete;
+        bstruct_t(const bstruct_t&)            = delete;
+        bstruct_t& operator=(const bstruct_t&) = delete;
 }; // this is just a fancy wrapper for void*...
 
 template <typename T> NH3API_FORCEINLINE
-bstruct_t& get_bstruct(T* ptr, size_t offset = 0) NH3API_NOEXCEPT
+bstruct_t& get_bstruct(T* ptr, ptrdiff_t offset = 0) noexcept
 { return *(reinterpret_cast<bstruct_t*>(ptr) + offset); }
 
-NH3API_FORCEINLINE
-bstruct_t& get_bstruct(uint32_t address, size_t offset = 0) NH3API_NOEXCEPT
+NH3API_FORCEINLINE bstruct_t& get_bstruct(uint32_t address, ptrdiff_t offset = 0) noexcept
 { return *(reinterpret_cast<bstruct_t*>(address) + offset); }
 
 template <typename T> NH3API_FORCEINLINE
-const bstruct_t& get_const_bstruct(const T* ptr, size_t offset = 0) NH3API_NOEXCEPT
+const bstruct_t& get_const_bstruct(const T* ptr, ptrdiff_t offset = 0) noexcept
 { return *(reinterpret_cast<const bstruct_t*>(ptr) + offset); }
 
-NH3API_FORCEINLINE
-const bstruct_t& get_const_bstruct(const uint32_t address, size_t offset = 0) NH3API_NOEXCEPT
+NH3API_FORCEINLINE const bstruct_t& get_const_bstruct(const uint32_t address, ptrdiff_t offset = 0) noexcept
 { return *(reinterpret_cast<const bstruct_t*>(address) + offset); }
 
 template<typename T> NH3API_FORCEINLINE
-T* get_ptr(bstruct_t arg, size_t pos) NH3API_NOEXCEPT
+T* get_ptr(bstruct_t arg, ptrdiff_t pos) noexcept
 { return arg.get<T*>(pos); }
 
 // default construction policy for the padstruct_t
-template<size_t N>
+template<ptrdiff_t N>
 struct padstruct_construct_t
 {
-    NH3API_CONSTEXPR_CPP_14 padstruct_construct_t() NH3API_NOEXCEPT
-    #if NH3API_CHECK_CPP11
-    = default;
-    #else
-    {}
-    #endif
-
-    NH3API_CONSTEXPR_CPP_14 padstruct_construct_t(const padstruct_construct_t&) NH3API_NOEXCEPT
-    #if NH3API_CHECK_CPP11
-    = default;
-    #else
-    {}
-    #endif
-
-    NH3API_CONSTEXPR_CPP_14 void operator()(std::array<uint8_t, N>& buf) const
+    constexpr padstruct_construct_t() noexcept = default;
+    padstruct_construct_t(padstruct_construct_t&&)                         = delete;
+    padstruct_construct_t& operator=(const padstruct_construct_t&)         = delete;
+    padstruct_construct_t& operator=(padstruct_construct_t&&)              = delete;
+    constexpr padstruct_construct_t(const padstruct_construct_t&) noexcept = default;
+    ~padstruct_construct_t() = default;
+    constexpr void operator()(std::array<uint8_t, N>& buf) const noexcept
     { buf.fill(0); }
+
 };
 
 // default destruction policy for the padstruct_t
-template<size_t N>
+template<ptrdiff_t N>
 struct padstruct_destruct_t
 {
-    NH3API_CONSTEXPR_CPP_14 padstruct_destruct_t() NH3API_NOEXCEPT
-    {}
+    constexpr padstruct_destruct_t() noexcept = default;
+    padstruct_destruct_t(padstruct_destruct_t&&)                         = delete;
+    padstruct_destruct_t& operator=(const padstruct_destruct_t&)         = delete;
+    padstruct_destruct_t& operator=(padstruct_destruct_t&&)              = delete;
+    constexpr padstruct_destruct_t(const padstruct_destruct_t&) noexcept = default;
+    ~padstruct_destruct_t() = default;
 
-    NH3API_CONSTEXPR_CPP_14 padstruct_destruct_t(const padstruct_destruct_t&) NH3API_NOEXCEPT
-    {}
-
-    NH3API_CONSTEXPR_CPP_14 void operator()(std::array<uint8_t, N>&) const NH3API_NOEXCEPT
+    constexpr void operator()(std::array<uint8_t, N>&) const noexcept
     {}
 };
 
 // struct of known size but unknown fields. Sized equivalent of bstruct_t /
 //
-template<size_t N,
+template<ptrdiff_t N,
          typename ConstructorT = padstruct_construct_t<N>,
          typename DestructorT  = padstruct_destruct_t<N>>
 struct padstruct_t
 {
     public:
-        typedef ConstructorT     constructor_type;
-        typedef DestructorT      destructor_type;
-        typedef size_t           size_type;
-        typedef uint8_t          value_type;
+        using constructor_type = ConstructorT;
+        using destructor_type  = DestructorT;
+        using size_type        = ptrdiff_t;
+        using value_type       = uint8_t;
 
     public:
-
         // C++23's std::start_lifetime_as is ideal for such a task,
         // sadly it cannot be implemented in C++11..20 without compiler magic.
-        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE padstruct_t()
-        NH3API_NOEXCEPT_EXPR(nh3api::declval<constructor_type>().operator())
+        constexpr NH3API_FORCEINLINE padstruct_t()
+        noexcept(noexcept(std::declval<constructor_type>().operator()))
         { constructor_type()(buf); }
 
-        NH3API_FORCEINLINE
-        ~padstruct_t()
-        NH3API_NOEXCEPT_EXPR(nh3api::declval<destructor_type>().operator())
+        NH3API_FORCEINLINE ~padstruct_t() noexcept(noexcept(std::declval<destructor_type>().operator()))
         {
             #if NH3API_CHECK_CPP11
             static_assert(noexcept(nh3api::declval<destructor_type>().operator()),
@@ -129,29 +120,29 @@ struct padstruct_t
             destructor_type()(buf);
         }
 
-        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE uint8_t* data() NH3API_NOEXCEPT
+        constexpr NH3API_FORCEINLINE uint8_t* data() noexcept
         { return buf.data(); }
 
-        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE const uint8_t* data() const NH3API_NOEXCEPT
+        [[nodiscard]] constexpr NH3API_FORCEINLINE const uint8_t* data() const noexcept
         { return buf.data(); }
 
-        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE size_t size() const NH3API_NOEXCEPT
+        [[nodiscard]] constexpr NH3API_FORCEINLINE ptrdiff_t size() const noexcept
         { return buf.size(); }
 
-        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE std::array<uint8_t, N>& get() NH3API_NOEXCEPT
+        constexpr NH3API_FORCEINLINE std::array<uint8_t, N>& get() noexcept
         { return buf; }
 
-        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE const std::array<uint8_t, N>& get() const NH3API_NOEXCEPT
+        constexpr NH3API_FORCEINLINE const std::array<uint8_t, N>& get() const noexcept
         { return buf; }
 
         template <typename T>
-        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
-        T& get(int32_t offset) NH3API_NOEXCEPT
+        constexpr NH3API_FORCEINLINE
+        T& get(int32_t offset) noexcept
         { return *(T*)((uintptr_t)data() + offset); }
 
         template <typename T>
-        NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
-        const T& get(int32_t offset) const NH3API_NOEXCEPT
+        constexpr NH3API_FORCEINLINE
+        const T& get(int32_t offset) const noexcept
         { return *(const T*)((uintptr_t)data() + offset); }
 
     public:
@@ -159,10 +150,10 @@ struct padstruct_t
 };
 
 template<typename T,
-         size_t N,
+         ptrdiff_t N,
          typename ConstructPolicyT,
          typename DestructPolicyT> NH3API_FORCEINLINE
-T* get_ptr(padstruct_t<N, ConstructPolicyT, DestructPolicyT>& arg, size_t pos) NH3API_NOEXCEPT
+T* get_ptr(padstruct_t<N, ConstructPolicyT, DestructPolicyT>& arg, ptrdiff_t pos) noexcept
 { return arg.template get<T*>(pos); }
 
 NH3API_DISABLE_WARNING_END

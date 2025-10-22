@@ -26,7 +26,7 @@ struct CMapHeaderData
 {
 public:
     NH3API_FORCEINLINE
-    CMapHeaderData() NH3API_NOEXCEPT
+    CMapHeaderData() noexcept
         : iVersion(28),
           IsPlayable(true),
           iDifficulty(DIFFICULTY_NORMAL),
@@ -37,32 +37,27 @@ public:
           mapHasNotBeenSaved(false),
           max_hero_level(-1),
           numTeams(0),
-          #if NH3API_STD_INITIALIZER_LIST 
           teamInfo{{0, 0, 0, 0, 0, 0, 0, 0}},
-          #endif
           gap_E(),
           Size(0),
           HasTwoLayers(false),
           gap_1D()
     {
         nh3api::construct_at(&placeholders);
-        nh3api::uninitialized_default_construct_n(PlayerSlotAttributes.begin(), PlayerSlotAttributes.size());
+        std::uninitialized_default_construct_n(PlayerSlotAttributes.begin(), PlayerSlotAttributes.size());
     }
 
     NH3API_FORCEINLINE
-    CMapHeaderData(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
-        : placeholders(tag)
-        #if NH3API_STD_INITIALIZER_LIST 
-        ,
-        PlayerSlotAttributes{{tag, tag, tag, tag, tag, tag, tag, tag}}
-        #endif
+    CMapHeaderData(const ::nh3api::dummy_tag_t& tag) noexcept
+        : placeholders(tag),
+          PlayerSlotAttributes{{tag, tag, tag, tag, tag, tag, tag, tag}}
     {}
 
     NH3API_FORCEINLINE
-    ~CMapHeaderData() NH3API_NOEXCEPT
+    ~CMapHeaderData() noexcept
     {
-        nh3api::destroy_at(&placeholders);
-        nh3api::destroy(PlayerSlotAttributes.begin(), PlayerSlotAttributes.end());
+        std::destroy_at(&placeholders);
+        std::destroy(PlayerSlotAttributes.begin(), PlayerSlotAttributes.end());
     }
 
 public:
@@ -73,17 +68,17 @@ public:
     {
         public:
             NH3API_FORCEINLINE
-            TPlayerSlotAttributes() NH3API_NOEXCEPT
+            TPlayerSlotAttributes() noexcept
             NH3API_DELEGATE_DUMMY(TPlayerSlotAttributes)
             { THISCALL_1(void, 0x45A630, this); }
 
             NH3API_FORCEINLINE
-            TPlayerSlotAttributes(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+            TPlayerSlotAttributes(const ::nh3api::dummy_tag_t& tag) noexcept
                 : heroes(tag)
             {}
 
             NH3API_FORCEINLINE
-            ~TPlayerSlotAttributes() NH3API_NOEXCEPT
+            ~TPlayerSlotAttributes() noexcept
             { THISCALL_1(void, 0x45A860, this); }
 
             TPlayerSlotAttributes& operator=(const TPlayerSlotAttributes& other)
@@ -101,7 +96,7 @@ public:
             { *this = other; }
             
             #if NH3API_STD_MOVE_SEMANTICS
-            TPlayerSlotAttributes& operator=(TPlayerSlotAttributes&& other) NH3API_NOEXCEPT
+            TPlayerSlotAttributes& operator=(TPlayerSlotAttributes&& other) noexcept
             {
                 if ( this == &other )
                     return *this;
@@ -112,7 +107,7 @@ public:
                 return *this;
             } 
 
-            TPlayerSlotAttributes(TPlayerSlotAttributes&& other) NH3API_NOEXCEPT
+            TPlayerSlotAttributes(TPlayerSlotAttributes&& other) noexcept
             { *this = std::move(other); }
             #endif
 
@@ -128,7 +123,7 @@ public:
             bool CanBeComputer;
 
         protected:
-            NH3API_MAYBE_UNUSED
+            [[maybe_unused]]
             byte_t gap_1D[2];
 
         public:
@@ -158,7 +153,7 @@ public:
             bool has_main_town;
 
         protected:
-            NH3API_MAYBE_UNUSED
+            [[maybe_unused]]
             byte_t gap_D[3];
 
         public:
@@ -178,7 +173,7 @@ public:
             bool hasRandomHero;
 
         protected:
-            NH3API_MAYBE_UNUSED
+            [[maybe_unused]]
             byte_t gap_19[3];
 
         public:
@@ -238,11 +233,11 @@ public:
     int8_t maxNumHumanPlayers;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     // offset: +0x9 = +9,  size = 0x1 = 1
     int8_t lastTownNameAssigned;
 
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     // offset: +0xA = +10,  size = 0x1 = 1
     bool mapHasNotBeenSaved;
 
@@ -263,7 +258,7 @@ public:
     std::array<int8_t, 8> teamInfo;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     byte_t gap_E[3];
 
 public:
@@ -278,7 +273,7 @@ public:
     bool HasTwoLayers;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     byte_t gap_1D[3];
 
 public:
@@ -319,12 +314,12 @@ struct NewSMapHeader : CMapHeaderData
 {
     public:
         NH3API_FORCEINLINE
-        NewSMapHeader() NH3API_NOEXCEPT
+        NewSMapHeader() noexcept
         NH3API_DELEGATE_DUMMY(NewSMapHeader)
         { THISCALL_1(void, 0x45A670, this); }
 
         NH3API_FORCEINLINE
-        NewSMapHeader(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        NewSMapHeader(const ::nh3api::dummy_tag_t& tag) noexcept
             : heroPlayerSetups(tag),
               mapName(tag),
               mapDescription(tag),
@@ -332,11 +327,11 @@ struct NewSMapHeader : CMapHeaderData
         {}
 
         NH3API_FORCEINLINE
-        ~NewSMapHeader() NH3API_NOEXCEPT
+        ~NewSMapHeader() noexcept
         { THISCALL_1(void, 0x45A9E0, this); }
 
         NH3API_FORCEINLINE
-        NewSMapHeader& operator=(const NewSMapHeader& other) NH3API_NOEXCEPT
+        NewSMapHeader& operator=(const NewSMapHeader& other) noexcept
         { THISCALL_2(void, 0x457990, this, &other); return *this; }
 
     public:

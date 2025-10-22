@@ -20,7 +20,7 @@
 // you can specify your own behaviour using template specialization
 /*
 template<>
-NH3API_NORETURN
+[[noreturn]]
 NH3API_NOINLINE
 void throw_exception<MyException>(const char what[])
 {
@@ -28,20 +28,20 @@ void throw_exception<MyException>(const char what[])
 }
 */
 
-namespace nh3api 
+namespace nh3api
 {
 #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
 template<typename T>
-NH3API_NORETURN
+[[noreturn]]
 NH3API_NOINLINE
 void throw_exception(const char what[])
 {
     throw T(what);
 }
-#else 
+#else
 
 template<typename>
-NH3API_NORETURN
+[[noreturn]]
 NH3API_NOINLINE
 void throw_exception(const char[])
 {
@@ -50,7 +50,7 @@ void throw_exception(const char[])
 }
 #endif
 
-} // namespace nh3api 
+} // namespace nh3api
 
 #ifndef NH3API_THROW
     #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
@@ -60,39 +60,29 @@ void throw_exception(const char[])
     #endif
 #endif // NH3API_THROW
 
-namespace nh3api 
+namespace nh3api
 {
 
 template<typename RollBack>
 struct exception_guard_rollback
 {
-    exception_guard_rollback() NH3API_DELETED_FUNCTION
-   
-    NH3API_CONSTEXPR_CPP_14
-    explicit exception_guard_rollback(RollBack _rollback)
-    NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<RollBack>::value)
-    #if NH3API_STD_MOVE_SEMANTICS
-        : rollback(::std::move(_rollback)), completed(false) {}
-    #else 
-        : rollback(_rollback), completed(false) {}
-    #endif
-    
-    #if NH3API_STD_MOVE_SEMANTICS
-    NH3API_CONSTEXPR_CPP_14
-    exception_guard_rollback(exception_guard_rollback&& other)
-    NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<RollBack>::value)
+    exception_guard_rollback() = delete;
+
+    constexpr explicit exception_guard_rollback(RollBack _rollback)
+    noexcept(noexcept(std::is_nothrow_move_constructible_v<RollBack>))
+        : rollback(::std::move(_rollback)), completed(false)
+    {}
+
+    constexpr exception_guard_rollback(exception_guard_rollback&& other)
+    noexcept(noexcept(std::is_nothrow_move_constructible_v<RollBack>))
         : rollback(::std::move(other.rollback)), completed(other.completed)
     { other.completed = true; }
-    #endif
 
-    exception_guard_rollback(const exception_guard_rollback&) NH3API_DELETED_FUNCTION
-    exception_guard_rollback& operator=(const exception_guard_rollback&) NH3API_DELETED_FUNCTION
-    #if NH3API_STD_MOVE_SEMANTICS
-    exception_guard_rollback& operator=(const exception_guard_rollback&&) NH3API_DELETED_FUNCTION
-    #endif 
+    exception_guard_rollback(const exception_guard_rollback&) = delete;
+    exception_guard_rollback& operator=(const exception_guard_rollback&) = delete;
+    exception_guard_rollback& operator=(const exception_guard_rollback&&) = delete;
 
-    NH3API_CONSTEXPR_CPP_14 
-    void complete() NH3API_NOEXCEPT 
+    constexpr void complete() noexcept
     { completed = true; }
 
     ~exception_guard_rollback()
@@ -102,9 +92,9 @@ struct exception_guard_rollback
     }
 
     protected:
-    #if NH3API_HAS_CPP_ATTRIBUTE(msvc::no_unique_address)
+    #if __has_cpp_attribute(msvc::no_unique_address)
     [[msvc::no_unique_address]]
-    #elif NH3API_HAS_CPP_ATTRIBUTE(no_unique_address)
+    #elif __has_cpp_attribute(no_unique_address)
     [[no_unique_address]]
     #endif
     RollBack rollback;
@@ -114,33 +104,24 @@ struct exception_guard_rollback
 template<typename RollBack>
 struct exception_guard_noop
 {
-    exception_guard_noop() NH3API_DELETED_FUNCTION
-   
-    NH3API_CONSTEXPR_CPP_14
-    explicit exception_guard_noop(RollBack)
-    NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<RollBack>::value)
+    exception_guard_noop() noexcept = delete;
+
+    constexpr explicit exception_guard_noop(RollBack) noexcept
         : completed(false)
     {}
-    
-    #if NH3API_STD_MOVE_SEMANTICS
-    NH3API_CONSTEXPR_CPP_14
-    exception_guard_noop(exception_guard_noop&& other)
-    NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<RollBack>::value)
+
+    constexpr exception_guard_noop(exception_guard_noop&& other) noexcept
         : completed(other.completed)
     { other.completed = true; }
-    #endif
 
-    exception_guard_noop(const exception_guard_noop&) NH3API_DELETED_FUNCTION
-    exception_guard_noop& operator=(const exception_guard_noop&) NH3API_DELETED_FUNCTION
-    #if NH3API_STD_MOVE_SEMANTICS
-    exception_guard_noop& operator=(const exception_guard_noop&&) NH3API_DELETED_FUNCTION
-    #endif 
+    exception_guard_noop(const exception_guard_noop&) noexcept = delete;
+    exception_guard_noop& operator=(const exception_guard_noop&) noexcept = delete;
+    exception_guard_noop& operator=(const exception_guard_noop&&) noexcept = delete;
 
-    NH3API_CONSTEXPR_CPP_14 
-    void complete() NH3API_NOEXCEPT 
+    constexpr void complete() noexcept
     { completed = true; }
 
-    ~exception_guard_noop()
+    ~exception_guard_noop() noexcept
     { assert(completed); }
 
     protected:
@@ -148,12 +129,11 @@ struct exception_guard_noop
 };
 
 template<bool IsNoexcept, typename RollBack>
-struct exception_guard_factory 
+struct exception_guard_factory
 {
-    typedef exception_guard_noop<RollBack> type;
+    using type = exception_guard_noop<RollBack>;
 
-    NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
-    static type get(RollBack rollback) NH3API_NOEXCEPT
+    inline constexpr static type get(RollBack rollback) noexcept
     { return type(rollback); }
 };
 
@@ -163,32 +143,23 @@ struct exception_guard_factory
 template<typename RollBack>
 struct exception_guard_factory<false, RollBack>
 {
-    typedef exception_guard_rollback<RollBack> type;
+    using type = exception_guard_rollback<RollBack>;
 
-    NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
-    static type get(RollBack rollback) 
-    NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<RollBack>::value)
-    #if NH3API_STD_MOVE_SEMANTICS
-    { return type(::std::move(rollback)); } 
-    #else 
-    { return type(rollback); }
-    #endif
+    constexpr NH3API_FORCEINLINE static type get(RollBack rollback)
+    noexcept(noexcept(std::is_nothrow_move_constructible_v<RollBack>))
+    { return type(::std::move(rollback)); }
 };
 #endif
 
 #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-template<bool IsNoexcept, typename RollBack> NH3API_FORCEINLINE
-NH3API_CONSTEXPR_CPP_14 typename exception_guard_factory<IsNoexcept, RollBack>::type make_exception_guard(RollBack rollback)
-NH3API_NOEXCEPT_EXPR(tt::is_nothrow_move_constructible<RollBack>::value)
-#if NH3API_STD_MOVE_SEMANTICS
-{ return exception_guard_factory<IsNoexcept, RollBack>::get(::std::move(rollback)); } 
-#else 
-{ return exception_guard_factory<IsNoexcept, RollBack>::get(rollback); } 
-#endif // NH3API_STD_MOVE_SEMANTICS
+template<bool IsNoexcept, typename RollBack>
+NH3API_FORCEINLINE constexpr typename exception_guard_factory<IsNoexcept, RollBack>::type make_exception_guard(RollBack rollback)
+noexcept(noexcept(std::is_nothrow_move_constructible_v<RollBack>))
+{ return exception_guard_factory<IsNoexcept, RollBack>::get(::std::move(rollback)); }
 
 #else
 template<bool IsNoexcept, typename RollBack> NH3API_FORCEINLINE
-NH3API_CONSTEXPR_CPP_14 exception_guard_noop<RollBack> make_exception_guard(RollBack rollback) NH3API_NOEXCEPT
+constexpr exception_guard_noop<RollBack> make_exception_guard(RollBack rollback) noexcept
 { return exception_guard_noop<RollBack>(rollback); }
 #endif // NH3API_FLAG_NO_CPP_EXCEPTIONS
 

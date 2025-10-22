@@ -270,7 +270,7 @@ enum hero_seqid : uint32_t
 
 // Hero state flags /
 // Флаги состояния героя.
-enum hero_flags : uint32_t
+NH3API_FLAG_ENUM hero_flags : uint32_t
 {
     HF_WELL                = 0x1,
     HF_STABLES             = 0x2,

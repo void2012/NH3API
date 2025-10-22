@@ -16,27 +16,27 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 NH3API_FORCEINLINE
 // Heroes3.exe internal srand /
 // Внутренний srand Heroes3.exe.
-void exe_srand(uint32_t seed) NH3API_NOEXCEPT
+void exe_srand(uint32_t seed) noexcept
 { CDECL_1(void, 0x61841F, seed); }
 
 NH3API_FORCEINLINE
 // Heroes3.exe internal rand /
 // Внутренний rand Heroes3.exe.
-int32_t exe_rand() NH3API_NOEXCEPT
+int32_t exe_rand() noexcept
 { return CDECL_0(int32_t, 0x61842C); }
 
 NH3API_FORCEINLINE
 // Generate random number using rand(). /
 // Сгенерировать случайное число используя rand().
 // returns random number in range [iMin; iMax] / Случайное число в пределах [iMin; iMax]
-int32_t Random(int32_t iMin, int32_t iMax) NH3API_NOEXCEPT
+int32_t Random(int32_t iMin, int32_t iMax) noexcept
 { return FASTCALL_2(int32_t, 0x50C7C0, iMin, iMax); }
 
 NH3API_FORCEINLINE
 // Generate random number using rand(). /
 // Сгенерировать случайное число используя rand().
 // returns random number in range [iMin; iMax] / Случайное число в пределах [iMin; iMax]
-uint32_t Random(uint32_t iMin, uint32_t iMax) NH3API_NOEXCEPT
+uint32_t Random(uint32_t iMin, uint32_t iMax) noexcept
 {
     if ( iMax == iMin )
         return iMax;
@@ -52,12 +52,12 @@ NH3API_FORCEINLINE
 // Same as Random(int, int) except that this one uses timeGetTime() as seed value. /
 // То же, что и Random(int, int), но используя timeGetTime() в качестве сида.
 // returns random number in range [iMin; iMax] / Случайное число в пределах [iMin; iMax]
-int32_t SafeRandom(int32_t iMin, int32_t iMax) NH3API_NOEXCEPT
+int32_t SafeRandom(int32_t iMin, int32_t iMax) noexcept
 { return FASTCALL_2(int32_t, 0x50B3C0, iMin, iMax); }
 
 NH3API_FORCEINLINE
 // Set thread-local random seed using srand()
-void SRand(int32_t seed) NH3API_NOEXCEPT
+void SRand(int32_t seed) noexcept
 { FASTCALL_1(void, 0x50C7B0, seed); }
 
 #pragma pack(push, 4)
@@ -68,18 +68,18 @@ struct TPickANumber
 {
     public:
         NH3API_FORCEINLINE
-        TPickANumber(int32_t low, int32_t high) NH3API_NOEXCEPT
+        TPickANumber(int32_t low, int32_t high) noexcept
         NH3API_DELEGATE_DUMMY(TPickANumber)
         { THISCALL_3(void, 0x50C8D0, this, low, high); }
 
         NH3API_FORCEINLINE
-        TPickANumber(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TPickANumber(const ::nh3api::dummy_tag_t& tag) noexcept
             : Available(tag)
         {}
 
         NH3API_FORCEINLINE
-        ~TPickANumber() NH3API_NOEXCEPT
-        { nh3api::destroy_at(&Available); }
+        ~TPickANumber() noexcept
+        { std::destroy_at(&Available); }
 
     public:
         // Pick a random number, make it unavailable /

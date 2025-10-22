@@ -38,76 +38,71 @@ template<typename K, typename T>
 struct map_key_access
 {
     NH3API_FORCEINLINE
-    const K& operator()(const ::std::pair<const K, T>& value) const NH3API_NOEXCEPT
+    const K& operator()(const ::std::pair<const K, T>& value) const noexcept
     { return value.first; }
 };
 } // namespace nh3api
 
 // Visual C++ 6.0 std::map implementation used by heroes3.exe
-template<class _K, // key type
-         class _Ty, // stored type
-         uintptr_t _Nil_Address = 0, // null node address inside .exe
-         uintptr_t _Nilrefs_Address = 0, // constructor-destructor reference counter address inside .exe
-         typename _Pr = std::less<_K> // compare predicate
+template<class K, // key type
+         class T, // stored type
+         uintptr_t Nil_Address = 0, // null node address inside .exe
+         uintptr_t Nilrefs_Address = 0, // constructor-destructor reference counter address inside .exe
+         typename BinaryPredicate = std::less<K> // compare predicate
          > 
-class exe_map : public nh3api::exe_rbtree<_K,
-                                          std::pair<const _K, _Ty>,
-                                          nh3api::map_key_access<_K, _Ty>,
-                                          _Pr,
-                                          _Nil_Address,
-                                          _Nilrefs_Address>
+class exe_map : public nh3api::exe_rbtree<K,
+                                          std::pair<const K, T>,
+                                          nh3api::map_key_access<K, T>,
+                                          BinaryPredicate,
+                                          Nil_Address,
+                                          Nilrefs_Address>
 {
 public:
-    typedef std::pair<const _K, _Ty> value_type;
-    typedef nh3api::exe_rbtree<_K,
-                               std::pair<const _K, _Ty>,
-                               nh3api::map_key_access<_K, _Ty>,
-                               _Pr,
-                               _Nil_Address,
-                               _Nilrefs_Address> base_type;
+    using value_type = std::pair<const K, T>;
+    using base_type  = nh3api::exe_rbtree<K,
+                               std::pair<const K, T>,
+                               nh3api::map_key_access<K, T>,
+                               BinaryPredicate,
+                               Nil_Address,
+                               Nilrefs_Address>;
 protected:
     class value_compare
     {
         public:
             NH3API_FORCEINLINE
-            bool operator()(const value_type& lhs, const value_type& rhs) const NH3API_NOEXCEPT
+            bool operator()(const value_type& lhs, const value_type& rhs) const noexcept
             { return comp(lhs.first, rhs.first); }
 
         public:
-            value_compare(_Pr pred) NH3API_NOEXCEPT
+            value_compare(BinaryPredicate pred) noexcept
                 : comp(pred) {}
 
         public:
-            _Pr comp;
+            BinaryPredicate comp;
     };
 
 public:
-    typedef _K  key_type;
-    typedef _Ty mapped_type;
-    typedef _Pr key_compare;
-    typedef typename base_type::allocator_type         allocator_type;
-    typedef typename base_type::size_type              size_type;
-    typedef typename base_type::difference_type        difference_type;
-    typedef typename base_type::reference              reference;
-    typedef typename base_type::const_reference        const_reference;
-    typedef typename base_type::iterator               iterator;
-    typedef typename base_type::const_iterator         const_iterator;
-    typedef typename base_type::reverse_iterator       reverse_iterator;
-    typedef typename base_type::const_reverse_iterator const_reverse_iterator;
-    typedef typename base_type::node_type              node_type;
+    using key_type = K;
+    using mapped_type = T;
+    using key_compare = BinaryPredicate;
+    using allocator_type = typename base_type::allocator_type;
+    using size_type = typename base_type::size_type;
+    using difference_type = typename base_type::difference_type;
+    using reference = typename base_type::reference;
+    using const_reference = typename base_type::const_reference;
+    using iterator = typename base_type::iterator;
+    using const_iterator = typename base_type::const_iterator;
+    using reverse_iterator = typename base_type::reverse_iterator;
+    using const_reverse_iterator = typename base_type::const_reverse_iterator;
+    using node_type = typename base_type::node_type;
 
 public:
-    exe_map() NH3API_NOEXCEPT
-    #if NH3API_STD_DELEGATING_CONSTRUCTORS
+    exe_map() noexcept
         : exe_map(key_compare())
     {}
-    #else 
-        : base_type(key_compare(), true, allocator_type())
-    {}
-    #endif
 
     explicit exe_map(const key_compare &keycomp, const allocator_type& allocator = allocator_type())
-    NH3API_NOEXCEPT
+    noexcept
         : base_type(keycomp, true, allocator)
     {}
 
@@ -126,25 +121,23 @@ public:
         : base_type(other, allocator)
     {}
 
-    #if NH3API_STD_MOVE_SEMANTICS
-    exe_map(exe_map&& other) NH3API_NOEXCEPT
+    exe_map(exe_map&& other) noexcept
         : base_type(std::move<exe_map>(other))
     {}
 
-    exe_map(exe_map&& other, const allocator_type& allocator) NH3API_NOEXCEPT
+    exe_map(exe_map&& other, const allocator_type& allocator) noexcept
         : base_type(std::move<exe_map>(other), allocator)
     {}
 
-    exe_map& operator=(exe_map&& other) NH3API_NOEXCEPT 
+    exe_map& operator=(exe_map&& other) noexcept 
     { base_type::operator=(other); return *this; }
-    #endif
 
     // no-op constructor
     exe_map(const ::nh3api::dummy_tag_t& tag)
         : base_type(tag)
     {}
 
-    ~exe_map(){}
+    ~exe_map() = default;
 
 public:
     mapped_type& operator[](const key_type& key)
@@ -154,21 +147,10 @@ public:
     }
 
     value_compare value_comp() const
-    { return (value_compare(this->key_comp())); }
+    { return value_compare(this->key_comp()); }
 
 };
 
 #pragma pack(pop)
-
-#if !NH3API_STD_MOVE_SEMANTICS
-template<class _K,
-         class _Ty,
-         uintptr_t _Nil_Address, // null node address inside .exe
-         uintptr_t _Nilrefs_Address, // constructor-destructor reference counter address inside .exe
-         typename _Pr> NH3API_FORCEINLINE
-void swap(exe_map<_K, _Ty, _Nil_Address, _Nilrefs_Address, _Pr>& lhs,
-          exe_map<_K, _Ty, _Nil_Address, _Nilrefs_Address, _Pr>& rhs) // ADL Swap
-{ lhs.swap(rhs); }
-#endif
 
 // clang-format on

@@ -28,7 +28,7 @@ class CAutoArray
         };
 
     public:
-        CAutoArray() NH3API_NOEXCEPT
+        CAutoArray() noexcept
         {
             NH3API_SET_VFTABLE();
             step      = 25;

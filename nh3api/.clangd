@@ -1,5 +1,5 @@
 CompileFlags:
-    Add: [-Wall, -std=c++17, -DNH3API_FLAG_INLINE_HEADERS, -m32, -Wno-unused-includes]
+    Add: [-Wall, -std=c++23, -DNH3API_FLAG_INLINE_HEADERS, -m32, -Wno-unused-includes]
     Remove: [-W*]
 
 Index:
@@ -13,7 +13,6 @@ Diagnostics:
         Remove: [modernize-use-trailing-return-type,
                  modernize-avoid-c-arrays,
                  modernize-use-auto,
-                 modernize-use-using,
                  modernize-use-ranges,
                  misc-non-private-member-variables-in-classes,
                  readability*, 

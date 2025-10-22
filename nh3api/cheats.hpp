@@ -18,8 +18,8 @@ struct TCheatCode
     {}
     #endif
     ;
-    NH3API_CONSTEXPR_CPP_14
-    TCheatCode(const char* _code) NH3API_NOEXCEPT
+    constexpr
+    TCheatCode(const char* _code) noexcept
     {
         const char b[] = "nopqrstuvwxyzabcdefghijklm";
 
@@ -38,7 +38,7 @@ struct TCheatCode
         code[i] = '0';
     }
 
-    NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
+    constexpr NH3API_FORCEINLINE
     int32_t compare(const char* arg) const
     { return nh3api::constexpr_char_traits::compare(code, arg, sizeof(code)); }
 

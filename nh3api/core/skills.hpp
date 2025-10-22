@@ -9,27 +9,27 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <array>
 #include "nh3api_std/intrin.hpp"
-#include "nh3api_std/array.hpp"
 
 // Secondary skill mastery /
 // Ступень вторичного
 enum TSkillMastery : int32_t
 {
-    eMasteryInvalid  = -1, // Пустое (используется для проверок)
-    eMasteryNone     = 0,  // Нет навыка
-    eMasteryBasic    = 1,  // Базовый (1 ступень)
-    eMasteryAdvanced = 2,  // Продвинутый (2 ступень)
-    eMasteryExpert   = 3,  // Эксперт (3 ступень)
-    kNumMasteries    = 4,  // Количество возможных ступеней навыков
+    eMasteryInvalid  = -1,                     // Пустое (используется для проверок)
+    eMasteryNone     = 0,                      // Нет навыка
+    eMasteryBasic    = 1,                      // Базовый (1 ступень)
+    eMasteryAdvanced = 2,                      // Продвинутый (2 ступень)
+    eMasteryExpert   = 3,                      // Эксперт (3 ступень)
+    kNumMasteries    = 4,                      // Количество возможных ступеней навыков
 
-    SKILL_MASTERY_INVALID  = eMasteryInvalid, // Пустое (используется для проверок)
-    SKILL_MASTERY_NONE     = eMasteryNone, // Нет навыка
-    SKILL_MASTERY_BASIC    = eMasteryBasic, // Базовый (1 ступень)
+    SKILL_MASTERY_INVALID  = eMasteryInvalid,  // Пустое (используется для проверок)
+    SKILL_MASTERY_NONE     = eMasteryNone,     // Нет навыка
+    SKILL_MASTERY_BASIC    = eMasteryBasic,    // Базовый (1 ступень)
     SKILL_MASTERY_ADVANCED = eMasteryAdvanced, // Продвинутый (2 ступень)
-    SKILL_MASTERY_EXPERT   = eMasteryExpert, // Эксперт (3 ступень)
-    MAX_SKILL_MASTERIES    = kNumMasteries // Количество возможных ступеней навыков
-    
+    SKILL_MASTERY_EXPERT   = eMasteryExpert,   // Эксперт (3 ступень)
+    MAX_SKILL_MASTERIES    = kNumMasteries     // Количество возможных ступеней навыков
+
 };
 
 // Hero's secondary skill /
@@ -128,110 +128,92 @@ struct SecondarySkillData
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
 // Secondary Skill traits table. Filled by game from "SSTRAITS.TXT" /
 // Таблица свойств вторичных навыков. Заполняется игрой из файла "SSTRAITS.TXT"
-std::array<TSSkillTraits, MAX_SECONDARY_SKILLS>& akSSkillTraits
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698D88, std::array<TSSkillTraits, MAX_SECONDARY_SKILLS>));
+inline std::array<TSSkillTraits, MAX_SECONDARY_SKILLS>& akSSkillTraits
+= get_global_var_ref(0x698D88, std::array<TSSkillTraits, MAX_SECONDARY_SKILLS>);
 
-NH3API_INLINE_OR_EXTERN
 // Luck secondary skill bonus /
 // Бонус навыка "Удача"
-const std::array<int32_t, MAX_SKILL_MASTERIES>& luck_bonus
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63E998, std::array<int32_t, MAX_SKILL_MASTERIES>));
+inline const std::array<int32_t, MAX_SKILL_MASTERIES>& luck_bonus
+= get_global_var_ref(0x63E998, std::array<int32_t, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Leadership secondary skill bonus /
 // Бонус навыка "Лидерство"
-const std::array<int32_t, MAX_SKILL_MASTERIES>& leadership_bonus
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63E9A8, std::array<int32_t, MAX_SKILL_MASTERIES>));
+inline const std::array<int32_t, MAX_SKILL_MASTERIES>& leadership_bonus
+= get_global_var_ref(0x63E9A8, std::array<int32_t, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Leadership secondary skill factor /
 // Множитель Некромантии
-const std::array<float, MAX_SKILL_MASTERIES>& SSNecromancyFactor
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63E9B8, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& SSNecromancyFactor
+= get_global_var_ref(0x63E9B8, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Mysticism secondary skill bonus /
 // Бонус навыка "Мистицизм"
-const std::array<int32_t, MAX_SKILL_MASTERIES>& mysticism_bonus
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63E9C8, std::array<int32_t, MAX_SKILL_MASTERIES>));
+inline const std::array<int32_t, MAX_SKILL_MASTERIES>& mysticism_bonus
+= get_global_var_ref(0x63E9C8, std::array<int32_t, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Scouting secondary skill bonus /
 // Бонус навыка "Разведка"
-const std::array<int32_t, MAX_SKILL_MASTERIES>& SSScoutingRange
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63E9D8, std::array<int32_t, MAX_SKILL_MASTERIES>));
+inline const std::array<int32_t, MAX_SKILL_MASTERIES>& SSScoutingRange
+= get_global_var_ref(0x63E9D8, std::array<int32_t, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Archery secondary skill factor /
 // Множитель навыка "Стрельба"
-const std::array<float, MAX_SKILL_MASTERIES>& SSArcheryMod
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63E9E8, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& SSArcheryMod
+= get_global_var_ref(0x63E9E8, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Offense secondary skill factor /
 // Множитель навыка "Нападение"
-const std::array<float, MAX_SKILL_MASTERIES>& offense_factor
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63E9F8, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& offense_factor
+= get_global_var_ref(0x63E9F8, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Defense secondary skill factor /
 // Множитель навыка "Доспехи"
-const std::array<float, MAX_SKILL_MASTERIES>& defense_factor
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63EA08, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& defense_factor
+= get_global_var_ref(0x63EA08, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Estates secondary skill bonus /
 // Бонус навыка "Казначей"
-const std::array<int32_t, MAX_SKILL_MASTERIES>& estates_bonus
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63EA18, std::array<int32_t, MAX_SKILL_MASTERIES>));
+inline const std::array<int32_t, MAX_SKILL_MASTERIES>& estates_bonus
+= get_global_var_ref(0x63EA18, std::array<int32_t, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Eagle eye skill chance /
 // Шанс навыка "Орлиный взор"
-const std::array<float, MAX_SKILL_MASTERIES>& SSEagleEyeChance
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63EA28, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& SSEagleEyeChance
+= get_global_var_ref(0x63EA28, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Diplomacy secondary skill factor /
 // Множитель навыка "Дипломатия"
-const std::array<float, MAX_SKILL_MASTERIES>& SSDiplomacyFactor
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63EA38, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& SSDiplomacyFactor
+= get_global_var_ref(0x63EA38, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Diplomacy secondary skill factor /
 // Множитель навыка "Сопротивление"
-const std::array<float, MAX_SKILL_MASTERIES>& resistance_factor
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63EA48, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& resistance_factor
+= get_global_var_ref(0x63EA48, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Diplomacy secondary skill factor /
 // Множитель навыка "Обучение"
-const std::array<float, MAX_SKILL_MASTERIES>& learning_factor
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63EA58, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& learning_factor
+= get_global_var_ref(0x63EA58, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Logitics secondary skill factor /
 // Множитель навыка "Логистика"
-const std::array<float, MAX_SKILL_MASTERIES>& logistics_factor
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63EA68, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& logistics_factor
+= get_global_var_ref(0x63EA68, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Sorcery secondary skill factor /
 // Множитель навыка "Волшебство"
-const std::array<float, MAX_SKILL_MASTERIES>& sorcery_factor
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63EA78, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& sorcery_factor
+= get_global_var_ref(0x63EA78, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // Intelligence secondary skill factor /
 // Множитель навыка "Интеллект"
-const std::array<float, MAX_SKILL_MASTERIES>& intelligence_factor
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63EA88, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& intelligence_factor
+= get_global_var_ref(0x63EA88, std::array<float, MAX_SKILL_MASTERIES>);
 
-NH3API_INLINE_OR_EXTERN
 // First Aid secondary skill factor /
 // Множитель навыка "Первая помощь"
-const std::array<float, MAX_SKILL_MASTERIES>& firstaid_factor
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x63EA98, std::array<float, MAX_SKILL_MASTERIES>));
+inline const std::array<float, MAX_SKILL_MASTERIES>& firstaid_factor
+= get_global_var_ref(0x63EA98, std::array<float, MAX_SKILL_MASTERIES>);

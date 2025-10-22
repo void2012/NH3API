@@ -71,16 +71,16 @@ struct VictoryConditionStruct
 {
     public:
         NH3API_FORCEINLINE
-        VictoryConditionStruct() NH3API_NOEXCEPT
+        VictoryConditionStruct() noexcept
         NH3API_DELEGATE_DUMMY(VictoryConditionStruct)
         { THISCALL_1(void, 0x4BC000, this); }
 
         NH3API_FORCEINLINE
-        VictoryConditionStruct(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        VictoryConditionStruct(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
-        NH3API_NODISCARD bool applies_to_player(int32_t player) const
+        [[nodiscard]] bool applies_to_player(int32_t player) const
         { return THISCALL_2(bool, 0x5F1940, this, player); }
 
         bool CheckForArtifactWin()
@@ -136,7 +136,7 @@ struct VictoryConditionStruct
         bool AppliesToComputer;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_3[1];
 
     public:
@@ -171,7 +171,7 @@ struct VictoryConditionStruct
         int8_t CastleLevel;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_38[2];
 
     public:
@@ -205,7 +205,7 @@ struct VictoryConditionStruct
         // offset: +0x49 = +73,  size = 0x1 = 1
         int8_t playerWinner;
     private:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_74[2];
 
 };
@@ -219,12 +219,12 @@ struct LossConditionStruct
 {
     public:
         NH3API_FORCEINLINE
-        LossConditionStruct() NH3API_NOEXCEPT
+        LossConditionStruct() noexcept
         NH3API_DELEGATE_DUMMY(LossConditionStruct)
         { THISCALL_1(void, 0x45B7A0, this); }
 
         NH3API_FORCEINLINE
-        LossConditionStruct(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        LossConditionStruct(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
@@ -245,7 +245,7 @@ struct LossConditionStruct
         ELossConditionType Type;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_2[3];
 
     public:

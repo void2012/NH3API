@@ -19,7 +19,7 @@
 // 5. Added JmpHook for CreateInstance
 // 6. Added SafeLoHook for CreateInstance (v5.0)
 // 7. Added GetPatcherVersion (v5.0)
-// 8. LoHooks are deprecated(define 'NH3API_IGNORE_DEPRECATED' to suppress the warning)
+// 8. LoHooks are deprecated
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,9 +158,10 @@
 
 #pragma once
 
+#include <array>
 #include "intrin.hpp"
-#include "array.hpp"
 #include "call_macros.hpp"
+#include "stl_extras.hpp"
 
 NH3API_DISABLE_WARNING_BEGIN("-Wnon-virtual-dtor", 4265)
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes",       4714)
@@ -172,25 +173,16 @@ NH3API_DISABLE_WARNING_BEGIN("-Wunused-parameter", 4100)
 NH3API_VIRTUAL_STRUCT Variable
 {
 public:
-	#if NH3API_CHECK_CPP11
-        Variable() = delete;
-        Variable(const Variable&) = delete;
-        Variable(Variable&&) = delete;
-        Variable& operator=(const Variable&) = delete;
-        Variable& operator=(Variable&&) = delete;
-        ~Variable() = delete;
-    #else 
-        private:
-            Variable();
-            Variable(const Variable&);
-            Variable& operator=(const Variable&);
-            ~Variable();
-        public:
-    #endif
+    Variable() = delete;
+    Variable(const Variable&) = delete;
+    Variable(Variable&&) = delete;
+    Variable& operator=(const Variable&) = delete;
+    Variable& operator=(Variable&&) = delete;
+    ~Variable() = delete;
 
     // returns the value of 'variable' (thread safe handling) /
     // возвращает значение 'переменной' (потокобезопасное обращение).
-    NH3API_NODISCARD virtual uint32_t __stdcall GetValue() const = 0;
+    [[nodiscard]] virtual uint32_t __stdcall GetValue() const = 0;
 
     // sets the value of the 'variable' (thread safe handling) /
     // устанавливает значение 'переменной' (потокобезопасное обращение).
@@ -198,7 +190,7 @@ public:
 
     // returns a pointer to a value (accessing the value through the pointer is not secure) /
     // возвращает указатель на значение (обращение к значению через указатель непотокобезопасно).
-    virtual uint32_t* __stdcall GetPValue() = 0;
+    [[nodiscard]] virtual uint32_t* __stdcall GetPValue() = 0;
 };
 
 // тип 'регистр флагов', размер - 32 бита
@@ -246,21 +238,12 @@ struct FlagsRegister
 // используется в функциях сработавших по LoHook хуку.
 struct HookContext
 {
-    #if NH3API_CHECK_CPP11
-        HookContext() = delete;
-        HookContext(const HookContext&) = delete;
-        HookContext(HookContext&&) = delete;
-        HookContext& operator=(const HookContext&) = delete;
-        HookContext& operator=(HookContext&&) = delete;
-        ~HookContext() = delete;
-    #else 
-    private:
-        HookContext();
-        HookContext(const HookContext&);
-        HookContext& operator=(const HookContext&);
-        ~HookContext();
-    public:
-    #endif
+    HookContext() = delete;
+    HookContext(const HookContext&) = delete;
+    HookContext(HookContext&&) = delete;
+    HookContext& operator=(const HookContext&) = delete;
+    HookContext& operator=(HookContext&&) = delete;
+    ~HookContext() = delete;
 
     union
     {
@@ -382,7 +365,7 @@ struct HookContext
 
     // the Pop function has a similar action to the POP command for the LoHook hook context /
     // функция Pop имеет аналогичное действие команде процессора POP для контекста LoHook хука.
-    NH3API_FORCEINLINE int32_t Pop() NH3API_NOEXCEPT
+    NH3API_FORCEINLINE int32_t Pop() noexcept
     {
         int32_t r = *reinterpret_cast<int32_t*>(esp);
         esp += 4;
@@ -392,21 +375,21 @@ struct HookContext
     // These getters are for the compability with the RoseKavailer's H3API...
 
     //
-    NH3API_FORCEINLINE int8_t& AL() NH3API_NOEXCEPT { return al; }
-    NH3API_FORCEINLINE int8_t& AH() NH3API_NOEXCEPT { return ah; }
-    NH3API_FORCEINLINE int16_t& AX() NH3API_NOEXCEPT { return ax; }
-    NH3API_FORCEINLINE int8_t& CL() NH3API_NOEXCEPT { return cl; }
-    NH3API_FORCEINLINE int8_t& CH() NH3API_NOEXCEPT { return ch; }
-    NH3API_FORCEINLINE int16_t& CX() NH3API_NOEXCEPT { return cx; }
-    NH3API_FORCEINLINE int8_t& DL() NH3API_NOEXCEPT { return dl; }
-    NH3API_FORCEINLINE int8_t& DH() NH3API_NOEXCEPT { return dh; }
-    NH3API_FORCEINLINE int16_t& DX() NH3API_NOEXCEPT { return dx; }
-    NH3API_FORCEINLINE int8_t& BL() NH3API_NOEXCEPT { return bl; }
-    NH3API_FORCEINLINE int8_t& BH() NH3API_NOEXCEPT { return bh; }
-    NH3API_FORCEINLINE int16_t& BX() NH3API_NOEXCEPT { return bx; }
-    NH3API_FORCEINLINE uint16_t& BP() NH3API_NOEXCEPT { return bp; }
-    NH3API_FORCEINLINE int16_t& SI() NH3API_NOEXCEPT { return si; }
-    NH3API_FORCEINLINE int16_t& DI() NH3API_NOEXCEPT { return di; }
+    NH3API_FORCEINLINE int8_t& AL() noexcept { return al; }
+    NH3API_FORCEINLINE int8_t& AH() noexcept { return ah; }
+    NH3API_FORCEINLINE int16_t& AX() noexcept { return ax; }
+    NH3API_FORCEINLINE int8_t& CL() noexcept { return cl; }
+    NH3API_FORCEINLINE int8_t& CH() noexcept { return ch; }
+    NH3API_FORCEINLINE int16_t& CX() noexcept { return cx; }
+    NH3API_FORCEINLINE int8_t& DL() noexcept { return dl; }
+    NH3API_FORCEINLINE int8_t& DH() noexcept { return dh; }
+    NH3API_FORCEINLINE int16_t& DX() noexcept { return dx; }
+    NH3API_FORCEINLINE int8_t& BL() noexcept { return bl; }
+    NH3API_FORCEINLINE int8_t& BH() noexcept { return bh; }
+    NH3API_FORCEINLINE int16_t& BX() noexcept { return bx; }
+    NH3API_FORCEINLINE uint16_t& BP() noexcept { return bp; }
+    NH3API_FORCEINLINE int16_t& SI() noexcept { return si; }
+    NH3API_FORCEINLINE int16_t& DI() noexcept { return di; }
 
 } NH3API_MSVC_LAYOUT;
 
@@ -420,21 +403,12 @@ struct HookContext
 // см. PatcherInstance::CreateSafeLoHook().
 struct SafeLoHookContext
 {
-    #if NH3API_CHECK_CPP11
-        SafeLoHookContext() = delete;
-        SafeLoHookContext(const SafeLoHookContext&) = delete;
-        SafeLoHookContext(SafeLoHookContext&&) = delete;
-        SafeLoHookContext& operator=(const SafeLoHookContext&) = delete;
-        SafeLoHookContext& operator=(SafeLoHookContext&&) = delete;
-        ~SafeLoHookContext() = delete;
-    #else 
-    private:
-        SafeLoHookContext();
-        SafeLoHookContext(const SafeLoHookContext&);
-        SafeLoHookContext& operator=(const SafeLoHookContext&);
-        ~SafeLoHookContext();
-    public:
-    #endif
+    SafeLoHookContext() = delete;
+    SafeLoHookContext(const SafeLoHookContext&) = delete;
+    SafeLoHookContext(SafeLoHookContext&&) = delete;
+    SafeLoHookContext& operator=(const SafeLoHookContext&) = delete;
+    SafeLoHookContext& operator=(SafeLoHookContext&&) = delete;
+    ~SafeLoHookContext() = delete;
 
     uintptr_t return_address;
 
@@ -535,25 +509,25 @@ struct SafeLoHookContext
     // These getters are for the compability with the RoseKavailer's H3API...
 
     //
-    NH3API_FORCEINLINE int8_t& AL() NH3API_NOEXCEPT { return al; }
-    NH3API_FORCEINLINE int8_t& AH() NH3API_NOEXCEPT { return ah; }
-    NH3API_FORCEINLINE int16_t& AX() NH3API_NOEXCEPT { return ax; }
-    NH3API_FORCEINLINE int8_t& CL() NH3API_NOEXCEPT { return cl; }
-    NH3API_FORCEINLINE int8_t& CH() NH3API_NOEXCEPT { return ch; }
-    NH3API_FORCEINLINE int16_t& CX() NH3API_NOEXCEPT { return cx; }
-    NH3API_FORCEINLINE int8_t& DL() NH3API_NOEXCEPT { return dl; }
-    NH3API_FORCEINLINE int8_t& DH() NH3API_NOEXCEPT { return dh; }
-    NH3API_FORCEINLINE int16_t& DX() NH3API_NOEXCEPT { return dx; }
-    NH3API_FORCEINLINE int8_t& BL() NH3API_NOEXCEPT { return bl; }
-    NH3API_FORCEINLINE int8_t& BH() NH3API_NOEXCEPT { return bh; }
-    NH3API_FORCEINLINE int16_t& BX() NH3API_NOEXCEPT { return bx; }
-    NH3API_FORCEINLINE uint16_t& BP() NH3API_NOEXCEPT { return bp; }
-    NH3API_FORCEINLINE int16_t& SI() NH3API_NOEXCEPT { return si; }
-    NH3API_FORCEINLINE int16_t& DI() NH3API_NOEXCEPT { return di; }
+    NH3API_FORCEINLINE int8_t& AL() noexcept { return al; }
+    NH3API_FORCEINLINE int8_t& AH() noexcept { return ah; }
+    NH3API_FORCEINLINE int16_t& AX() noexcept { return ax; }
+    NH3API_FORCEINLINE int8_t& CL() noexcept { return cl; }
+    NH3API_FORCEINLINE int8_t& CH() noexcept { return ch; }
+    NH3API_FORCEINLINE int16_t& CX() noexcept { return cx; }
+    NH3API_FORCEINLINE int8_t& DL() noexcept { return dl; }
+    NH3API_FORCEINLINE int8_t& DH() noexcept { return dh; }
+    NH3API_FORCEINLINE int16_t& DX() noexcept { return dx; }
+    NH3API_FORCEINLINE int8_t& BL() noexcept { return bl; }
+    NH3API_FORCEINLINE int8_t& BH() noexcept { return bh; }
+    NH3API_FORCEINLINE int16_t& BX() noexcept { return bx; }
+    NH3API_FORCEINLINE uint16_t& BP() noexcept { return bp; }
+    NH3API_FORCEINLINE int16_t& SI() noexcept { return si; }
+    NH3API_FORCEINLINE int16_t& DI() noexcept { return di; }
 
 } NH3API_MSVC_LAYOUT;
 
-typedef SafeLoHookContext SafeHookContext;
+using SafeHookContext = SafeLoHookContext;
 
 // values returned by a LoHook function /
 // значения возвращаемые функцией срабатываемой по LoHook хуку.
@@ -591,33 +565,24 @@ enum EPatcherInstanceWriteMode : int32_t
 NH3API_VIRTUAL_CLASS Patch
 {
 public:
-	#if NH3API_CHECK_CPP11
-        Patch() = delete;
-        Patch(const Patch&) = delete;
-        Patch(Patch&&) = delete;
-        Patch& operator=(const Patch&) = delete;
-        Patch& operator=(Patch&&) = delete;
-        ~Patch() = delete;
-    #else 
-    private:
-        Patch();
-        Patch(const Patch&);
-        Patch& operator=(const Patch&);
-        ~Patch();
-    public:
-    #endif
+    Patch() = delete;
+    Patch(const Patch&) = delete;
+    Patch(Patch&&) = delete;
+    Patch& operator=(const Patch&) = delete;
+    Patch& operator=(Patch&&) = delete;
+    ~Patch() = delete;
 
     // Returns the address on which to install the patch /
     // Возвращает адрес по которому устанавливается патч.
-    NH3API_NODISCARD virtual uintptr_t __stdcall GetAddress() const = 0;
+    [[nodiscard]] virtual uintptr_t __stdcall GetAddress() const = 0;
 
     // Returns the size of the patch /
     // Возвращает размер патча.
-    NH3API_NODISCARD virtual uint32_t __stdcall GetSize() const = 0;
+    [[nodiscard]] virtual uint32_t __stdcall GetSize() const = 0;
 
     // Returns the unique name of the PatcherInstance instance with which the patch was created /
     // Возвращает уникальное имя экземпляра PatcherInstance, с помощью которого был создан патч.
-    NH3API_NODISCARD virtual const char* __stdcall GetOwner() const = 0;
+    [[nodiscard]] virtual const char* __stdcall GetOwner() const = 0;
 
     // Returns the type of the patch
     // for not hook always PATCH_
@@ -628,11 +593,11 @@ public:
     // для не хука всегда PATCH_
     // для LoHook всегда LOHOOK_
     // для HiHook всегда HIHOOK_
-    NH3API_NODISCARD virtual EPatchType __stdcall GetType() const = 0;
+    [[nodiscard]] virtual EPatchType __stdcall GetType() const = 0;
 
     // returns true if the patch is applied and false, if not /
     // возвращает true, если патч применен и false, если нет.
-    NH3API_NODISCARD virtual bool32_t __stdcall IsApplied() const = 0;
+    [[nodiscard]] virtual bool32_t __stdcall IsApplied() const = 0;
 
     // Apply the patch
     // returns> = 0 if the patch / hook is applied successfully
@@ -708,7 +673,7 @@ public:
     // Метод GetAppliedBefore
     // возвращает патч примененный перед данным
     // возвращает nullptr если данный патч применен первым
-    NH3API_NODISCARD Patch* GetAppliedBefore()
+    [[nodiscard]] Patch* GetAppliedBefore()
     { return xGetAppliedBefore(); }
 
     // GetAppliedBefore method
@@ -718,7 +683,7 @@ public:
     // Метод GetAppliedBefore
     // возвращает патч примененный перед данным
     // возвращает nullptr если данный патч применен первым
-    NH3API_NODISCARD const Patch* GetAppliedBefore() const
+    [[nodiscard]] const Patch* GetAppliedBefore() const
     { return const_cast<Patch*>(this)->xGetAppliedBefore(); }
 
     // GetAppliedAfter method
@@ -728,7 +693,7 @@ public:
     // Метод GetAppliedAfter
     // возвращает патч примененный после данного
     // возвращает nullptr если данный патч применен последним
-    NH3API_NODISCARD Patch* GetAppliedAfter()
+    [[nodiscard]] Patch* GetAppliedAfter()
     { return xGetAppliedAfter(); }
 
     // GetAppliedAfter method
@@ -738,7 +703,7 @@ public:
     // Метод GetAppliedAfter
     // возвращает патч примененный после данного
     // возвращает nullptr если данный патч применен последним
-    NH3API_NODISCARD const Patch* GetAppliedAfter() const
+    [[nodiscard]] const Patch* GetAppliedAfter() const
     { return const_cast<Patch*>(this)->xGetAppliedAfter(); }
 
 };
@@ -749,31 +714,24 @@ public:
 NH3API_VIRTUAL_CLASS LoHook : public Patch
 {
     public:
-    #if NH3API_CHECK_CPP11
         LoHook() = delete;
         LoHook(const LoHook&) = delete;
         LoHook(LoHook&&) = delete;
         LoHook& operator=(const LoHook&) = delete;
         LoHook& operator=(LoHook&&) = delete;
         ~LoHook() = delete;
-    #else 
-    private:
-        LoHook();
-        LoHook(const LoHook&);
-        LoHook& operator=(const LoHook&);
-        ~LoHook();
-    public:
-    #endif
 
 };
 
-typedef LoHook SafeLoHook;
-typedef int32_t(__stdcall *_LoHookFunc_)(LoHook*, HookContext*);
-typedef int(__stdcall* _LoHookReferenceFunc_)(LoHook&, HookContext&);
-typedef int32_t(__stdcall *_SafeLoHookFunc_)(SafeLoHook*, SafeLoHookContext*);
-typedef _LoHookFunc_ lhfunc_t;
-typedef _LoHookReferenceFunc_ lhrfunc_t;
-typedef _SafeLoHookFunc_ slhfunc_t;
+using SafeLoHook                = LoHook;
+using _LoHookFunc_              = int32_t(__stdcall*)(LoHook*, HookContext*);
+using _LoHookReferenceFunc_     = int32_t(__stdcall*)(LoHook&, HookContext&);
+using _SafeLoHookFunc_          = int32_t(__stdcall*)(SafeLoHook*, SafeLoHookContext*);
+using _SafeLoHookReferenceFunc_ = int32_t(__stdcall*)(SafeLoHook&, SafeLoHookContext&);
+using lhfunc_t   = _LoHookFunc_;
+using lhrfunc_t  = _LoHookReferenceFunc_;
+using slhfunc_t  = _SafeLoHookFunc_;
+using slhrfunc_t = _SafeLoHookReferenceFunc_;
 
 // values passed as the hooktype argument in PatcherInstance::WriteHiHook and PatcherInstance::CreateHiHook /
 // значения передаваемые как аргумент hooktype в PatcherInstance::WriteHiHook и PatcherInstance::CreateHiHook.
@@ -812,21 +770,12 @@ enum EHiHookCallingConvention : int32_t
 NH3API_VIRTUAL_CLASS HiHook : public Patch
 {
 public:
-    #if NH3API_CHECK_CPP11
-        HiHook() = delete;
-        HiHook(const HiHook&) = delete;
-        HiHook(HiHook&&) = delete;
-        HiHook& operator=(const HiHook&) = delete;
-        HiHook& operator=(HiHook&&) = delete;
-        ~HiHook() = delete;
-    #else 
-        private:
-            HiHook();
-            HiHook(const HiHook&);
-            HiHook& operator=(const HiHook&);
-            ~HiHook();
-        public:
-    #endif
+    HiHook() = delete;
+    HiHook(const HiHook&) = delete;
+    HiHook(HiHook&&) = delete;
+    HiHook& operator=(const HiHook&) = delete;
+    HiHook& operator=(HiHook&&) = delete;
+    ~HiHook() = delete;
 
     // returns a pointer to the function (on the bridge to the function in the case of SPLICE_),
     // replaced by a hook
@@ -837,7 +786,7 @@ public:
     // замещенную хуком
     // Внимание! Вызывая функцию для не примененного хука, можно получить
     // неактуальное (но рабочее) значение.
-    NH3API_NODISCARD virtual uintptr_t __stdcall GetDefaultFunc() const = 0;
+    [[nodiscard]] virtual uintptr_t __stdcall GetDefaultFunc() const = 0;
 
     // returns a pointer to the original function (on the bridge to the function in the case of SPLICE_),
     // replaced by a hook (hooks) at this address
@@ -850,7 +799,7 @@ public:
     // (т.е. возвращает GetDefaultFunc() для первого примененного хука по данному адресу)
     // Внимание! Вызывая функцию для не примененного хука, можно получить
     // неактуальное (но рабочее) значение.
-    NH3API_NODISCARD virtual uintptr_t __stdcall GetOriginalFunc() const = 0;
+    [[nodiscard]] virtual uintptr_t __stdcall GetOriginalFunc() const = 0;
 
     // returns the return address to the original code
     // can be used inside the hook function
@@ -861,7 +810,7 @@ public:
     // можно использовать внутри хук-функции
     // SPLICE_ EXTENDED_ или SAFE_ хука, чтобы узнать откуда она была вызвана
     // для SPLICE_ DIRECT_ хука функция возвращает всегда 0 (т.е. для DIRECT_ хука возможности узнать адрес возврата через нее - нет)
-    NH3API_NODISCARD virtual uintptr_t __stdcall GetReturnAddress() const = 0;
+    [[nodiscard]] virtual uintptr_t __stdcall GetReturnAddress() const = 0;
 
     // # ver 2.1
     // sets the value of user hook data /
@@ -873,7 +822,7 @@ public:
     // if not specified by the user, then 0 /
     // возвращает значение пользовательских данных хука
     // если не задано пользователем, то равно 0
-    virtual uint32_t __stdcall GetUserData() = 0;
+    [[nodiscard]] virtual uint32_t __stdcall GetUserData() = 0;
 
 };
 
@@ -889,21 +838,12 @@ public:
 NH3API_VIRTUAL_CLASS PatcherInstance
 {
 public:
-    #if NH3API_CHECK_CPP11
-        PatcherInstance() = delete;
-        PatcherInstance(const PatcherInstance&) = delete;
-        PatcherInstance(PatcherInstance&&) = delete;
-        PatcherInstance& operator=(const PatcherInstance&) = delete;
-        PatcherInstance& operator=(PatcherInstance&&) = delete;
-        ~PatcherInstance() = delete;
-    #else 
-    private:
-        PatcherInstance();
-        PatcherInstance(const PatcherInstance&);
-        PatcherInstance& operator=(const PatcherInstance&);
-        ~PatcherInstance();
-    public:
-    #endif
+    PatcherInstance() = delete;
+    PatcherInstance(const PatcherInstance&) = delete;
+    PatcherInstance(PatcherInstance&&) = delete;
+    PatcherInstance& operator=(const PatcherInstance&) = delete;
+    PatcherInstance& operator=(PatcherInstance&&) = delete;
+    ~PatcherInstance() = delete;
 
     // WriteByte method
     // write a one-byte number at address
@@ -957,12 +897,8 @@ public:
     // по определенному адресу программы
     // Тип может быть любым, даже функция.
     template<typename T> NH3API_FORCEINLINE Patch* WriteAddressOf(uintptr_t address, const T& data)
-    #if NH3API_HAS_BUILTIN(__builtin_addressof)
     { return WriteDword(address, *reinterpret_cast<uint32_t*>(__builtin_addressof(data))); }
-    #else 
-    { return WriteDword(address, *reinterpret_cast<uint32_t*>(reinterpret_cast<T*>(&const_cast<char&>(reinterpret_cast<const volatile char&>(data))))); }
-    #endif
-    
+
     // WriteJmp method
     // writes jmp to opcode at address
     // (creates and applies a CODE_ patch)
@@ -1016,30 +952,22 @@ protected:
     template<uint32_t _NFillInstructions, bool _generateint3>
     struct jmpdata_t
     {
-        jmpdata_t(uintptr_t addr) : opcode(0xE9), address(addr)
-
-        #if NH3API_STD_ARRAY
+        jmpdata_t(uintptr_t addr) : address(addr)
         { fillInstructions.fill((_generateint3) ? 0xCC : 0x90); }
-        #else 
-        { ::memset(fillInstructions, (_generateint3) ? 0xCC : 0x90, _NFillInstructions); }
-        #endif
 
-        uint8_t opcode;
+        uint8_t opcode{0xE9};
         uintptr_t address;
-        
-        #if NH3API_STD_ARRAY
+
         std::array<uint8_t, _NFillInstructions> fillInstructions;
-        #else 
-        uint8_t fillInstructions[_NFillInstructions];
-        #endif
     };
 
     template<bool _generateint3>
     struct jmpdata_t<0, _generateint3>
     {
-        jmpdata_t(uintptr_t addr) : opcode(0xE9), address(addr)
+        jmpdata_t(uintptr_t addr) : address(addr)
         {}
-        uint8_t opcode;
+
+        uint8_t opcode{0xE9};
         uintptr_t address;
     };
     #pragma pack(pop)
@@ -1047,7 +975,7 @@ protected:
     template<uintptr_t address>
     struct jmphook_t
     {
-        typedef void (*type)();
+        using type = void (*)();
     };
 
     template<uintptr_t address, uintptr_t backaddress, bool _generateint3> NH3API_FORCEINLINE
@@ -1120,9 +1048,7 @@ public:
     // смотрите (ниже) описание метода-оболочки WriteCodePatch.
     virtual Patch* __stdcall WriteCodePatchVA(uintptr_t address, const char* format, uint32_t* va_args) = 0;
 
-    #if !defined(NH3API_IGNORE_DEPRECATED)
-    NH3API_DEPRECATED("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")
-    #endif
+    [[deprecated("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")]]
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Method WriteLoHook
     // (upd. v5.0: It is not recommended to use WriteLoHook anymore. Use WriteSafeLoHook instead.)
@@ -1159,60 +1085,54 @@ public:
     // если требуется иное ограничение используйте метод WriteLoHookEx или CreateLoHookEx.
     virtual LoHook* __stdcall WriteLoHook(uintptr_t address, lhfunc_t func) = 0;
 
-    // declare lohook function
-    #define DECLARE_LH(NAME) int32_t __stdcall NAME(NH3API_MAYBE_UNUSED LoHook* h, NH3API_MAYBE_UNUSED HookContext* c)
-    // declare safelohook function
-    #define DECLARE_SLH(NAME) int32_t __stdcall NAME(NH3API_MAYBE_UNUSED SafeLoHook* h, NH3API_MAYBE_UNUSED SafeHookContext* c)
+    #ifndef DECLARE_LH
+        // declare lohook function
+        #define DECLARE_LH(NAME)   int32_t __stdcall NAME([[maybe_unused]] LoHook* h, [[maybe_unused]] HookContext* c)
+        #define DECLARE_LHR(NAME)  int32_t __stdcall NAME([[maybe_unused]] LoHook* h, [[maybe_unused]] HookContext& c)
+        // declare safelohook function
+        #define DECLARE_SLH(NAME)  int32_t __stdcall NAME([[maybe_unused]] SafeLoHook* h, [[maybe_unused]] SafeHookContext* c)
+        #define DECLARE_SLHR(NAME) int32_t __stdcall NAME([[maybe_unused]] SafeLoHook* h, [[maybe_unused]] SafeHookContext& c)
 
-    // These define-s are for the compability with RoseKavalier's H3API
+        // These define-s are for the compability with RoseKavalier's H3API
 
-    #define _LHF_(NAME) int32_t __stdcall NAME(NH3API_MAYBE_UNUSED LoHook* h, NH3API_MAYBE_UNUSED HookContext* c)
-    #define _LHREF_(NAME) int32_t __stdcall NAME(NH3API_MAYBE_UNUSED LoHook& h, NH3API_MAYBE_UNUSED HookContext& c)
+        #define _LHF_(NAME)   int32_t __stdcall NAME([[maybe_unused]] LoHook* h, [[maybe_unused]] HookContext* c)
+        #define _LHREF_(NAME) int32_t __stdcall NAME([[maybe_unused]] LoHook& h, [[maybe_unused]] HookContext& c)
+    #endif
 
 protected:
     #if NH3API_CHECK_MSVC || NH3API_CHECK_MINGW
-    #if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
-    template<typename R, typename... Args> static NH3API_CONSTEXPR
-    void hihook_function_condition_stdcall(R (*func)(Args...))
+    template<typename R, typename... Args> static constexpr
+    void hihook_function_condition_stdcall(R (*func)(Args...)) noexcept
     {
         (void) func;
         static_assert(false, "HiHook function must have the __stdcall calling convention "
                              "and have the first argument of type HiHook*");
     }
 
-    template<typename R, typename Arg1, typename... Args> static NH3API_CONSTEXPR
-    void hihook_function_condition_argument(R (__stdcall* func)(Arg1, Args...))
+    template<typename R, typename Arg1, typename... Args> static constexpr
+    void hihook_function_condition_argument(R (__stdcall* func)(Arg1, Args...)) noexcept
     {
         (void) func;
         static_assert(nh3api::tt::is_same<Arg1, HiHook*>::value, "HiHook function must have the first argument of type HiHook*");
     }
 
-    template<typename R, typename... Args> static NH3API_CONSTEXPR
-    void hihook_function_condition_stdcall(R (__stdcall * func)(Args...))
+    template<typename R, typename... Args> static constexpr
+    void hihook_function_condition_stdcall(R (__stdcall * func)(Args...)) noexcept
     {
         static_assert(sizeof...(Args) > 0, "HiHook function must have at least one argument of type HiHook*.");
         hihook_function_condition_argument(func);
     }
 
-    template<typename F> static NH3API_CONSTEXPR
-    void hihook_function_condition(F* func)
+    template<typename F> static constexpr
+    void hihook_function_condition(F* func) noexcept
     {
         static_assert(nh3api::tt::is_function<F>::value, "HiHook must be a function.");
         hihook_function_condition_stdcall(func);
     }
-    #else // C++11
-
-    #pragma warning(push)
-    #pragma warning(error: 4440)
-    template<typename F> static void hihook_function_condition(F*)
-    { typedef F __stdcall* T; }
-    #pragma warning(pop)
-
-    #endif // C++11
 
     #else // MSVC or MinGW GCC
 
-    template<typename> 
+    template<typename>
     struct is_stdcall_function_helper_t
     { using type = std::false_type; };
 
@@ -1233,18 +1153,17 @@ protected:
     { using type = std::true_type; };
 
     template<typename F> static constexpr
-    void hihook_function_condition(F*)
+    void hihook_function_condition(F*) noexcept
     {
-        constexpr bool is_function = std::is_function<F>::value;
-        static_assert(is_function, "HiHook must be a function.");
+        static_assert(std::is_function_v<F>, "HiHook must be a function.");
 
-        constexpr bool is_stdcall = is_stdcall_function_helper_t<typename std::add_pointer<F>::type>::type::value;
+        constexpr bool is_stdcall = is_stdcall_function_helper_t<std::add_pointer_t<F>>::type::value;
         static_assert(is_stdcall, "HiHook function must have the __stdcall calling convention "
                                   "and have the first argument of type HiHook* or HiHook&");
     }
 
     template<typename C, typename R> static constexpr
-    void hihook_function_condition(R C::*)
+    void hihook_function_condition(R C::*) noexcept
     { static_assert(false, "HiHook function must not be a member of some class"); }
 
     #endif // MSVC or MinGW GCC
@@ -1376,21 +1295,24 @@ public:
     virtual Patch* __stdcall CreateJmpPatch(uintptr_t address, uintptr_t to) = 0;
     virtual Patch* __stdcall CreateHexPatch(uintptr_t address, const char* hex_str) = 0;
     virtual Patch* __stdcall CreateCodePatchVA(uintptr_t address, const char* format, uint32_t* va_args) = 0;
-    #ifndef NH3API_IGNORE_DEPRECATED
-    NH3API_DEPRECATED("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")
-    #endif
+
+    [[deprecated("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")]]
     virtual LoHook* __stdcall CreateLoHook(uintptr_t address, lhfunc_t func) = 0;
+
+    [[deprecated("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")]]
+    NH3API_FORCEINLINE LoHook* CreateLoHook(uintptr_t address, lhrfunc_t func)
+    { return CreateLoHook(address, reinterpret_cast<lhfunc_t>(func)); }
 
 protected:
     virtual HiHook* __stdcall xCreateHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, void* new_func) = 0;
 
 public:
     template<typename F>
-    HiHook* __stdcall CreateHiHook(uintptr_t address,
-                                   EHiHookSetupPolicy hooktype,
-                                   EHiHookType subtype,
-                                   EHiHookCallingConvention calltype,
-                                   F* new_func)
+    HiHook* CreateHiHook(uintptr_t address,
+                         EHiHookSetupPolicy hooktype,
+                         EHiHookType subtype,
+                         EHiHookCallingConvention calltype,
+                         F* new_func)
     {
         hihook_function_condition(new_func);
         return xCreateHiHook(address, hooktype, subtype, calltype, reinterpret_cast<void*>(new_func));
@@ -1505,10 +1427,8 @@ public:
     // возвращают указатель на патч.
     virtual Patch* __stdcall CreatePatch(uintptr_t address, uintptr_t data, size_t size, EPatcherInstanceWriteMode mode = DATA_) = 0;
 
-    #if !defined(NH3API_IGNORE_DEPRECATED)
-    NH3API_DEPRECATED("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")
-    #endif
-    // # ver 2.1
+    [[deprecated("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")]]
+    // # ver 2.1, deprecated since version v5.0
     // Method WriteLoHookEx
     // is similar to the WriteLoHook method, but has an additional argument
     // stack_delta - the size of the memory that can be placed in the context stack
@@ -1522,11 +1442,8 @@ public:
     // Возвращают указатель на LoHook хук.
     virtual LoHook* __stdcall WriteLoHookEx(uintptr_t address, void* func, uint32_t stack_delta) = 0;
 
-    #if !defined(NH3API_IGNORE_DEPRECATED)
-    NH3API_DEPRECATED("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")
-    #endif
-
-    // # ver 2.1
+    [[deprecated("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")]]
+    // # ver 2.1, deprecated since version v5.0
     // The CreateLoHookEx Method
     // creates a hook just like WriteLoHookEx,
     // but DO NOT apply it.
@@ -1607,6 +1524,8 @@ public:
     // Applies thread-safe lohook, see CreateSafeLoHook() /
     // Применяет потокобезопасный лоухук, см. CreateSafeLoHook().
     virtual SafeLoHook* __stdcall WriteSafeLoHook(uintptr_t address, slhfunc_t func, uint32_t = 0) = 0;
+    NH3API_FORCEINLINE SafeLoHook* WriteSafeLoHook(uintptr_t address, slhrfunc_t func)
+    { return WriteSafeLoHook(address, reinterpret_cast<slhfunc_t>(func)); }
 
     // # ver 5.0
     // Creates thread-safe lohook. The interface difference is:
@@ -1622,6 +1541,8 @@ public:
     // Эта версия лоухука не используют механизмы реализации потокобезопасности
     // и работает даже быстрее, чем старые лоухуки.
     virtual SafeLoHook* __stdcall CreateSafeLoHook(uintptr_t address, slhfunc_t func, uint32_t = 0) = 0;
+    NH3API_FORCEINLINE SafeLoHook* CreateSafeLoHook(uintptr_t address, slhrfunc_t func)
+    { return CreateSafeLoHook(address, reinterpret_cast<slhfunc_t>(func)); }
 
     // WriteAsmPatch writes a patch to the address address
     // returns pointer to patch
@@ -1907,21 +1828,12 @@ public:
 NH3API_VIRTUAL_CLASS Patcher
 {
 public:
-    #if NH3API_CHECK_CPP11
-        Patcher() = delete;
-        Patcher(const Patcher&) = delete;
-        Patcher(Patcher&&) = delete;
-        Patcher& operator=(const Patcher&) = delete;
-        Patcher& operator=(Patcher&&) = delete;
-        ~Patcher() = delete;
-    #else 
-        private:
-            Patcher();
-            Patcher(const Patcher&);
-            Patcher& operator=(const Patcher&);
-            ~Patcher();
-        public:
-    #endif
+    Patcher() = delete;
+    Patcher(const Patcher&) = delete;
+    Patcher(Patcher&&) = delete;
+    Patcher& operator=(const Patcher&) = delete;
+    Patcher& operator=(Patcher&&) = delete;
+    ~Patcher() = delete;
 
     // CreateInstance method
     // Creates an instance of the PatcherInstance class, which
@@ -1969,7 +1881,7 @@ public:
     // - проверки активен ли некоторый мод, использующий patcher_x86.dll
     // - получения доступа ко всем патчам и хукам некоторого мода,
     //   использующего patcher_x86.dll
-    NH3API_NODISCARD PatcherInstance* GetInstance(const char* owner)
+    [[nodiscard]] PatcherInstance* GetInstance(const char* owner)
     { return xGetInstance(owner); }
 
     // GetInstance method
@@ -1993,7 +1905,7 @@ public:
     // - проверки активен ли некоторый мод, использующий patcher_x86.dll
     // - получения доступа ко всем патчам и хукам некоторого мода,
     //   использующего patcher_x86.dll
-    NH3API_NODISCARD const PatcherInstance* GetInstance(const char* owner) const
+    [[nodiscard]] const PatcherInstance* GetInstance(const char* owner) const
     { return const_cast<Patcher*>(this)->xGetInstance(owner); }
 
     // GetLastPatchAt method
@@ -2057,7 +1969,7 @@ public:
     // на максимальный размер патча,
     // какой - можно узнать с помощью метода GetMaxPatchSize
     // (на данный момент это 262144 байт, чего вполне достаточно).
-    virtual int32_t __stdcall GetMaxPatchSize() = 0;
+    [[nodiscard]] virtual int32_t __stdcall GetMaxPatchSize() const = 0;
 
     // Method WriteComplexDataVA
     // in the original form, the method is not supposed to be used,
@@ -2077,7 +1989,7 @@ public:
     // т.н. дизассемблер длин опкодов
     // возвращает длину в байтах опкода по адресу p_opcode
     // возвращает 0, если опкод неизвестен.
-    virtual int32_t __stdcall GetOpcodeLength(uintptr_t p_opcode) = 0;
+    [[nodiscard]] virtual int32_t __stdcall GetOpcodeLength(uintptr_t p_opcode) const = 0;
 
     // Method MemCopyCode
     // copies the code from memory to src address in memory at dst
@@ -2109,7 +2021,7 @@ public:
     // иначе возвращает первый примененый патч/хук в окрестности адреса <address>
     // последовательно пройтись по всем патчам в заданной окрестности
     // используя этот метод и Patch::GetAppliedAfter.
-    virtual Patch* __stdcall GetFirstPatchAt(uintptr_t address) = 0;
+    [[nodiscard]] virtual Patch* __stdcall GetFirstPatchAt(uintptr_t address) = 0;
 
     // MemCopyCodeEx method
     // copies the code from memory to src address in memory at dst
@@ -2168,7 +2080,7 @@ public:
     // Метод VarFind
     // возвращает указатель на "переменную" с именем name, если такая была инициализированна
     // если нет, возвращает nullptr.
-    Variable* VarFind(const char* name) 
+    Variable* VarFind(const char* name)
     { return xVarFind(name); }
 
     // # ver 2.6
@@ -2198,12 +2110,18 @@ public:
     template<typename ValueType> NH3API_FORCEINLINE
     ValueType VarGetValue(const char* name, ValueType default_value)
     {
-        if (sizeof(ValueType) > 4)
+        if constexpr (sizeof(ValueType) > 4)
             return default_value;
         Variable* v = VarFind(name);
         if (v == nullptr)
             return default_value;
-        return (ValueType)v->GetValue();
+
+        if constexpr (std::is_pointer_v<ValueType>)
+            return reinterpret_cast<ValueType>(v->GetValue());
+        else if constexpr (std::is_arithmetic_v<ValueType>)
+            return static_cast<ValueType>(v->GetValue());
+        else
+            return ::nh3api::bit_cast<ValueType>(v->GetValue());
     }
 
     // The VarValue method returns a reference to the value of the "variable" named name
@@ -2215,7 +2133,7 @@ public:
     template<typename ValueType> NH3API_FORCEINLINE
     ValueType& VarValue(const char* name)
     {
-        NH3API_STATIC_ASSERT("Patcher_x86's variables cannot be larger than 4 bytes.", sizeof(ValueType) > 4);
+        static_assert(sizeof(ValueType) <= 4, "Patcher_x86's variables cannot be larger than 4 bytes.");
         Variable* v = VarFind(name);
         if (v == nullptr)
             v = VarInit(name, 0);
@@ -2223,7 +2141,7 @@ public:
         if (v == nullptr)
             __debugbreak();
 
-        return (ValueType&)*v->GetPValue();
+        return *reinterpret_cast<ValueType*>(v->GetPValue());
     }
 
     // method WriteComplexData
@@ -2294,7 +2212,7 @@ public:
 #pragma pack(pop)
 
 //////////////////////////////////////////////////////////////////
-NH3API_FORCEINLINE HMODULE GetPatcherHandle() NH3API_NOEXCEPT
+NH3API_FORCEINLINE HMODULE GetPatcherHandle() noexcept
 { return LoadLibraryW(L"patcher_x86.dll"); }
 
 // Function GetPatcher
@@ -2310,13 +2228,13 @@ NH3API_FORCEINLINE HMODULE GetPatcherHandle() NH3API_NOEXCEPT
 // посредством которого доступен весь функционал библиотеки patcher_x86.dll
 // возвращает nullptr при неудаче
 // функцию вызывать 1 раз, что очевидно из ее определения
-NH3API_FORCEINLINE Patcher* GetPatcher() NH3API_NOEXCEPT
+NH3API_FORCEINLINE Patcher* GetPatcher() noexcept
 {
-    typedef Patcher* (__stdcall* func_t)();
+    using GetPatcher_f = Patcher* (__stdcall*)();
     HMODULE patcherHandle = GetPatcherHandle();
     if ( patcherHandle )
     {
-        func_t f = reinterpret_cast<func_t>((void*)(GetProcAddress(patcherHandle, "_GetPatcherX86@0")));
+        GetPatcher_f f = reinterpret_cast<GetPatcher_f>(reinterpret_cast<void*>(GetProcAddress(patcherHandle, "_GetPatcherX86@0")));
         if (f)
             return f();
         else
@@ -2330,13 +2248,13 @@ NH3API_FORCEINLINE Patcher* GetPatcher() NH3API_NOEXCEPT
 
 // Функция GetPatcherVersion возвращает версию патчера /
 // GetPatcherVersion function returns the version of patcher_x86.
-NH3API_FORCEINLINE uint32_t GetPatcherVersion() NH3API_NOEXCEPT
+NH3API_FORCEINLINE uint32_t GetPatcherVersion() noexcept
 {
-    typedef uint32_t (__stdcall* func_t)();
+    using GetPatcherX86Version_f = uint32_t (__stdcall*)();
     HMODULE patcherHandle = GetPatcherHandle();
     if ( patcherHandle )
     {
-        func_t f = reinterpret_cast<func_t>(reinterpret_cast<void*>(GetProcAddress(patcherHandle, "_GetPatcherX86Version@0")));
+        GetPatcherX86Version_f f = reinterpret_cast<GetPatcherX86Version_f>(reinterpret_cast<void*>(GetProcAddress(patcherHandle, "_GetPatcherX86Version@0")));
         if (f)
             return f();
         else

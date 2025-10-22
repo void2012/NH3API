@@ -22,7 +22,7 @@ enum type_action_type : int32_t
     const_initialization_action = 0, //
     const_normal_action         = 1, //
     const_remote_action         = 2, //
-    const_recorded_action       = 3 //
+    const_recorded_action       = 3  //
 };
 
 #pragma pack(push, 1)
@@ -41,7 +41,7 @@ class game
             bool Unavailable;
 
         protected:
-            NH3API_MAYBE_UNUSED
+            [[maybe_unused]]
             // offset: +0x11 = +17,  size = 0x3 = 3
             byte_t gap_11[3];
         };
@@ -49,19 +49,17 @@ class game
 
     public:
         NH3API_FORCEINLINE
-        game() NH3API_NOEXCEPT
+        game() noexcept
         { THISCALL_1(void, 0x4CDBE0, this); }
 
         NH3API_FORCEINLINE
-        game(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        game(const ::nh3api::dummy_tag_t& tag) noexcept
             : townExtraPool(tag),
               sCampaign(tag),
               BlackMarkets(tag),
               sMapHeader(tag),
               worldMap(tag),
-              #if NH3API_STD_INITIALIZER_LIST
               player{{tag, tag, tag, tag, tag, tag, tag, tag}},
-              #endif
               townPool(tag),
               signPool(tag),
               minePool(tag),
@@ -78,90 +76,95 @@ class game
               quest_monsters(tag)
         { THISCALL_1(void, 0x4CDBE0, this); }
 
+        game(const game& other) = delete;
+        game(game&& other) = delete;
+        game& operator=(const game& other) = delete;
+        game& operator=(game&& other) = delete;
+
         NH3API_FORCEINLINE
-        ~game() NH3API_NOEXCEPT
+        ~game() noexcept
         { THISCALL_1(void, 0x4CE270, this); }
 
     public:
-        NH3API_NODISCARD bool IsMultiplayer() const
+        [[nodiscard]] bool IsMultiplayer() const
         { return THISCALL_1(bool, 0x4CE950, this); }
 
-        NH3API_NODISCARD bool OnSameTeam(int32_t player1, int32_t player2) const
+        [[nodiscard]] bool OnSameTeam(int32_t player1, int32_t player2) const
         { return THISCALL_3(bool, 0x529BB0, this, player1, player2); }
 
-        NH3API_NODISCARD bool IsHuman(int32_t gamePos) const
+        [[nodiscard]] bool IsHuman(int32_t gamePos) const
         { return THISCALL_2(bool, 0x4CE600, this, gamePos); }
 
-        NH3API_NODISCARD bool IsLocalHuman(int32_t cur_player) const
+        [[nodiscard]] bool IsLocalHuman(int32_t cur_player) const
         { return THISCALL_2(bool, 0x4CE630, this, cur_player); }
 
-        NH3API_NODISCARD playerData* GetLocalPlayer()
+        [[nodiscard]] playerData* GetLocalPlayer()
         { return THISCALL_1(playerData*, 0x4CE670, this); }
 
-        NH3API_NODISCARD const playerData* GetLocalPlayer() const
+        [[nodiscard]] const playerData* GetLocalPlayer() const
         { return THISCALL_1(playerData*, 0x4CE670, this); }
 
-        NH3API_NODISCARD int32_t GetLocalPlayerGamePos() const
+        [[nodiscard]] int32_t GetLocalPlayerGamePos() const
         { return THISCALL_1(int32_t, 0x4CE6E0, this); }
 
-        NH3API_NODISCARD bool is_human_ally(int32_t player_number) const
+        [[nodiscard]] bool is_human_ally(int32_t player_number) const
         { return THISCALL_2(bool, 0x42B9E0, this, player_number); }
 
-        const char* GetPlayerName(int32_t player_id)
+        [[nodiscard]] const char* GetPlayerName(int32_t player_id)
         { return THISCALL_2(char*, 0x4CE820, this, player_id); }
 
-        NH3API_NODISCARD int32_t GetTeam(int32_t player_id) const
+        [[nodiscard]] int32_t GetTeam(int32_t player_id) const
         { return THISCALL_2(int32_t, 0x4A55D0, this, player_id); }
 
-        NH3API_NODISCARD town* GetTown(int32_t whichTown)
+        [[nodiscard]] town* GetTown(int32_t whichTown)
         { return THISCALL_2(town*, 0x42BA30, this, whichTown); }
 
-        NH3API_NODISCARD const town* GetTown(int32_t whichTown) const
+        [[nodiscard]] const town* GetTown(int32_t whichTown) const
         { return THISCALL_2(town*, 0x42BA30, this, whichTown); }
 
-        NH3API_NODISCARD NewmapCell* get_cell(type_point point)
+        [[nodiscard]] NewmapCell* get_cell(type_point point)
         { return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
 
-        NH3API_NODISCARD const NewmapCell* get_cell(type_point point) const
+        [[nodiscard]] const NewmapCell* get_cell(type_point point) const
         { return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
 
-        NH3API_NODISCARD NewmapCell* get_cell(uint8_t x, uint8_t y, uint8_t z)
+        [[nodiscard]] NewmapCell* get_cell(uint8_t x, uint8_t y, uint8_t z)
         { return &this->worldMap.cellData[x + this->worldMap.Size * (y + z * this->worldMap.Size)]; }
 
-        NH3API_NODISCARD const NewmapCell* get_cell(uint8_t x, uint8_t y, uint8_t z) const
+        [[nodiscard]] const NewmapCell* get_cell(uint8_t x, uint8_t y, uint8_t z) const
         { return &this->worldMap.cellData[x + this->worldMap.Size * (y + z * this->worldMap.Size)]; }
 
-        NH3API_NODISCARD hero* GetHero(int32_t which)
+        [[nodiscard]] hero* GetHero(int32_t which)
         { return THISCALL_2(hero*, 0x4317D0, this, which); }
 
-        NH3API_NODISCARD const hero* GetHero(int32_t which) const
+        [[nodiscard]] const hero* GetHero(int32_t which) const
         { return THISCALL_2(hero*, 0x4317D0, this, which); }
 
-        NH3API_NODISCARD int32_t get_new_boat_id()
+        [[nodiscard]] int32_t get_new_boat_id()
         { return THISCALL_1(int32_t, 0x4BAE30, this); }
 
         int32_t CreateBoat(int32_t x, int32_t y, int32_t z, int32_t owner, bool bIsRemoteMove, int8_t type)
         { return THISCALL_7(int32_t, 0x4BAF10, this, x, y, z, owner, bIsRemoteMove, type); }
 
-        NH3API_NODISCARD boat* GetHeroBoat(int32_t id, bool occupied)
+        [[nodiscard]] boat* GetHeroBoat(int32_t id, bool occupied)
         { return THISCALL_3(boat*, 0x4CE5C0, this, id, occupied); }
 
-        NH3API_NODISCARD boat* GetBoat(int32_t id)
+        [[nodiscard]] boat* GetBoat(int32_t id)
         { return id > 0 ? &boatPool[static_cast<size_t>(id)] : nullptr; }
 
-        NH3API_NODISCARD const boat* GetBoat(int32_t id) const
+        [[nodiscard]] const boat* GetBoat(int32_t id) const
         { return id > 0 ? &boatPool[static_cast<size_t>(id)] : nullptr; }
 
-        NH3API_NODISCARD THeroID GetStartingHeroId(TTownType alignment, int32_t playerPos, type_point mapPosition)
+        [[nodiscard]] THeroID GetStartingHeroId(TTownType alignment, int32_t playerPos, type_point mapPosition)
         { return THISCALL_4(THeroID, 0x4BB0C0, this, alignment, playerPos, mapPosition); }
 
-        NH3API_NODISCARD THeroID GetNewHeroId(TTownType alignment, THeroClass excluded, bool prefer_alignment, THeroClass target)
+        [[nodiscard]] THeroID GetNewHeroId(TTownType alignment, THeroClass excluded, bool prefer_alignment, THeroClass target)
         { return THISCALL_5(THeroID, 0x4BB2A0, this, alignment, excluded, prefer_alignment, target); }
 
-        NH3API_NODISCARD int32_t GetTownId(int32_t x, int32_t y, int32_t z)
+        [[nodiscard]] int32_t GetTownId(int32_t x, int32_t y, int32_t z)
         { return THISCALL_4(int32_t, 0x4BB530, this, x, y, z); }
 
-        NH3API_NODISCARD int32_t GetGeneratorId(int32_t x, int32_t y, int32_t z)
+        [[nodiscard]] int32_t GetGeneratorId(int32_t x, int32_t y, int32_t z)
         { return THISCALL_4(int32_t, 0x4BB5C0, this, x, y, z); }
 
         void SetVisibility(int32_t startX, int32_t startY, int32_t z, int32_t whichPlayer, int32_t range, int32_t remote_move)
@@ -170,13 +173,13 @@ class game
         void ResetVisibility(int32_t start_x, int32_t start_y, int32_t z, int32_t whichPlayer, int32_t range)
         { THISCALL_6(void, 0x49D040, this, start_x, start_y, z, whichPlayer, range); }
 
-        NH3API_NODISCARD TCreatureType GetRandomMonster(int32_t minLevel, int32_t maxLevel)
+        [[nodiscard]] TCreatureType GetRandomMonster(int32_t minLevel, int32_t maxLevel)
         { return THISCALL_3(TCreatureType, 0x4C8F80, this, minLevel, maxLevel); }
 
-        NH3API_NODISCARD TArtifact GetRandomArtifactId(int32_t ArtifactClass)
+        [[nodiscard]] TArtifact GetRandomArtifactId(int32_t ArtifactClass)
         { return THISCALL_2(TArtifact, 0x4C9190, this, ArtifactClass); }
 
-        NH3API_NODISCARD SpellID GetRandomSpell(const exe_bitset<5>& spell_level)
+        [[nodiscard]] SpellID GetRandomSpell(const exe_bitset<5>& spell_level)
         { return THISCALL_2(SpellID, 0x4C9260, this, &spell_level); }
 
         void InsertObject(int32_t x, int32_t y, int32_t z, TAdventureObjectType objType, int32_t objectIndex, int32_t extraInfo)
@@ -215,10 +218,10 @@ class game
         bool get_random_whirlpool(int32_t excluded, type_point& result) const
         { return THISCALL_3(bool, 0x4CDAE0, this, excluded, &result); }
 
-        NH3API_NODISCARD type_point get_underground_gate_exit(const NewmapCell* cell) const
+        [[nodiscard]] type_point get_underground_gate_exit(const NewmapCell* cell) const
         { return THISCALL_2(type_point, 0x4CDB00, this, cell); }
 
-        NH3API_NODISCARD TCreatureType UpgradedCreatureType(TCreatureType creature) const
+        [[nodiscard]] TCreatureType UpgradedCreatureType(TCreatureType creature) const
         { return THISCALL_2(TCreatureType, 0x529BF0, this, creature); }
     
     public:
@@ -303,7 +306,7 @@ class game
         uint8_t ultimateValid;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x1F697 = +128663,  size = 0x1 = 1
         byte_t gap_1F697[1];
 
@@ -318,7 +321,7 @@ class game
         bool is_tutorial;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x1F69E = +128670,  size = 0x2 = 2
         byte_t gap_1F69E[2];
 
@@ -338,7 +341,7 @@ class game
         };
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x20ACC = +133836,  size = 0x4 = 4
         byte_t gap_20ACC[4];
 
@@ -385,7 +388,7 @@ class game
         std::array<uint8_t, 3> cartographerFlags;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_4E375[3];
 
     public:
@@ -437,7 +440,7 @@ class game
         std::array<bool, 256> rumourAllocInfo;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x4E646 = +321094,  size = 0x2 = 2
         byte_t gap_4E646[2];
 
@@ -454,7 +457,7 @@ class game
         heroWindow* armyWindow;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x4E678 = +321144,  size = 0x4 = 4
         byte_t gap_4E678[4];
 
@@ -496,7 +499,7 @@ class game
         };
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x4E7CC = +321484,  size = 0x4 = 4
         byte_t gap_4E7CC[4];
 };
@@ -600,7 +603,7 @@ public:
     bool bFirstInstall;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     // offset: +0x8E = +142,  size = 0x2 = 2
     byte_t gap_8E[2];
 
@@ -626,76 +629,40 @@ public:
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
-game* const& gpGame
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699538, game*));
+inline game* const& gpGame = get_global_var_ref(0x699538, game*);
 
-NH3API_INLINE_OR_EXTERN
 // Game config / 
 // Игровые настройки.
-configStruct& gConfig
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6987A8, configStruct));
+inline configStruct& gConfig = get_global_var_ref(0x6987A8, configStruct);
 
-NH3API_INLINE_OR_EXTERN
-int32_t& giThisGamePos
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6995A4, int32_t));
+inline int32_t& giThisGamePos = get_global_var_ref(0x6995A4, int32_t);
+inline bool32_t& gbThisNetGotAdventureControl = get_global_var_ref(0x6977D8, bool32_t);
+inline bool32_t& gbInNewGameSetup = get_global_var_ref(0x698450, bool32_t);
+inline bool32_t& gbInReplay = get_global_var_ref(0x696A54, bool32_t);
+inline bool32_t& gbGameOver = get_global_var_ref(0x697308, bool32_t);
+inline bool32_t& gbRemoteOn = get_global_var_ref(0x69959C, bool32_t);
+inline bool& bDefeatedAllPlayers = get_global_var_ref(0x69956C, bool);
 
-NH3API_INLINE_OR_EXTERN
-bool32_t& gbThisNetGotAdventureControl
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977D8, bool32_t));
-
-NH3API_INLINE_OR_EXTERN
-bool32_t& gbInNewGameSetup
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698450, bool32_t));
-
-NH3API_INLINE_OR_EXTERN
-bool32_t& gbInReplay
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x696A54, bool32_t));
-
-NH3API_INLINE_OR_EXTERN
-bool32_t& gbGameOver
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697308, bool32_t));
-
-NH3API_INLINE_OR_EXTERN
-bool32_t& gbRemoteOn
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69959C, bool32_t));
-
-NH3API_INLINE_OR_EXTERN
-bool& bDefeatedAllPlayers
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69956C, bool));
-
-NH3API_INLINE_OR_EXTERN
 // Month creature type /
 // Тип существа месяца.
-int32_t& giMonthTypeExtra
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697798, int32_t));
+inline int32_t& giMonthTypeExtra = get_global_var_ref(0x697798, int32_t);
 
-NH3API_INLINE_OR_EXTERN
 // Month type /
 // Тип месяца.
-int32_t& giMonthType
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698884, int32_t));
+inline int32_t& giMonthType = get_global_var_ref(0x698884, int32_t);
 
-NH3API_INLINE_OR_EXTERN
 // Week creature type /
 // Тип существа недели.
-int32_t& giWeekTypeExtra
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69844C, int32_t));
+inline int32_t& giWeekTypeExtra = get_global_var_ref(0x69844C, int32_t);
 
-NH3API_INLINE_OR_EXTERN
 // Week type /
 // Тип недели.
-int32_t& giWeekType
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977A0, int32_t));
+inline int32_t& giWeekType = get_global_var_ref(0x6977A0, int32_t);
 
-NH3API_INLINE_OR_EXTERN
-exe_bitset<48>& puzzlePiecesRemoved
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x697738, exe_bitset<48>));
+inline exe_bitset<48>& puzzlePiecesRemoved = get_global_var_ref(0x697738, exe_bitset<48>);
 
-NH3API_INLINE_OR_EXTERN
 // Current game type /
 // Текущий тип игры.
-eNetGameType& iMPNetProtocol
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A40, eNetGameType));
+inline eNetGameType& iMPNetProtocol = get_global_var_ref(0x698A40, eNetGameType);
 
 NH3API_DISABLE_WARNING_END

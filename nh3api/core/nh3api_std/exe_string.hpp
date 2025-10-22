@@ -26,15 +26,14 @@
  */
 #pragma once
 
-#include <string>        // std::char_traits, and optionally std::basic_string
-#include <limits>        // std::numeric_limits
+#include <array> // std::array
+#include <cmath> // std::fpclassify
 #include <utility>       // std::swap, std::forward
 //#ifdef __cpp_lib_ranges 
 //#include <ranges> // std::ranges::enable_view, std::ranges::enable_borrowed_range
 //#endif
-#include "algorithm.hpp" // constexpr algorithms
-#include "intrin.hpp"    // constexpr string functions
-#include "math.hpp"      // nh3api::fpclassify, nh3api::count_digits, float classification macros
+#include "char_traits.hpp" // std::char_traits, constexpr_char_traits
+#include "intrin.hpp"    // constexpr string functions, std::fpclassify, nh3api::count_digits, float classification macros
 #include "memory.hpp"    // allocators
 #include "iterator.hpp"  // std::reverse_iterator, tt::is_iterator
 #include "nh3api_exceptions.hpp" // exceptions
@@ -45,506 +44,6 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
 struct exe_string_equal_accessor;
 
-namespace nh3api 
-{
-
-struct constexpr_char_traits
-{
-    public:
-        typedef char char_type;
-        typedef int  int_type;
-        typedef ::std::streamoff off_type;
-        typedef ::std::streampos pos_type;
-        typedef ::std::mbstate_t state_type;
-        #ifdef __cpp_lib_three_way_comparison
-        using comparison_category = ::std::strong_ordering;
-        #endif
-
-    private:
-        enum : uint32_t { npos = (uint32_t)(-1) };
-
-    public:
-        static NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
-        void assign(char& c1, const char& c2) NH3API_NOEXCEPT
-        { c1 = c2; }
-
-        static NH3API_CONSTEXPR NH3API_FORCEINLINE
-        bool eq(char c1, char c2) NH3API_NOEXCEPT
-        { return c1 == c2; }
-
-        static NH3API_CONSTEXPR NH3API_FORCEINLINE
-        bool lt(char c1, char c2) NH3API_NOEXCEPT
-        { return (uint8_t)c1 < (uint8_t)c2; }
-
-        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
-        size_t length(const char* str) NH3API_NOEXCEPT
-        {
-            if ( str == nullptr )
-                return 0;
-
-            #if NH3API_HAS_BUILTIN(__builtin_strlen)
-            return __builtin_strlen(str);
-            #else // __has_builtin(__builtin_strlen)
-                #if NH3API_STD_RELAXED_CONSTEXPR
-                #if NH3API_HAS_IS_CONSTANT_EVALUATED
-                if (is_constant_evaluated())
-                {
-                    const char* ptr = str;
-                    while (*ptr != '\0')
-                        ++ptr;
-                    return ptr - str;
-
-                    return 0;
-                }
-                else  
-                {
-                #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-                    return ::strlen(str);
-                #if NH3API_HAS_IS_CONSTANT_EVALUATED
-                }
-                #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-                #else // NH3API_STD_RELAXED_CONSTEXPR
-                return ::strlen(str);
-                #endif // NH3API_STD_RELAXED_CONSTEXPR
-            #endif // __has_builtin(__builtin_strlen)
-        }
-
-        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
-        int compare(const char* left, const char* right, size_t count) NH3API_NOEXCEPT
-        {
-            if ( left == nullptr || right == nullptr || count == 0 )
-                return 0;
-            
-            #if NH3API_HAS_BUILTIN(__builtin_memcmp)
-            return __builtin_memcmp(left, right, count);
-            #else // __has_builtin(__builtin_memcmp)
-            #if NH3API_STD_RELAXED_CONSTEXPR
-            #if NH3API_HAS_IS_CONSTANT_EVALUATED
-            if (is_constant_evaluated())
-            {
-                while ( count-- != 0 )
-                {
-                    if ( *left < *right )
-                        return -1;
-                    if ( *left > *right )
-                        return +1;
-                    ++left;
-                    ++right;
-                }
-                return 0;
-            }
-            else
-            {
-            #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-                return ::memcmp(left, right, count);
-            #if NH3API_HAS_IS_CONSTANT_EVALUATED
-            }
-            #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-            #else // NH3API_STD_RELAXED_CONSTEXPR
-            return ::memcmp(left, right, count);
-            #endif // NH3API_STD_RELAXED_CONSTEXPR
-            #endif // __has_builtin(__builtin_memcmp)
-        }
-
-        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
-        char* move(char* dst, const char* src, size_t count) NH3API_NOEXCEPT
-        {
-            #if NH3API_HAS_BUILTIN(__builtin_memmove)
-            __builtin_memmove(dst, src, count);
-            return dst;
-            #else
-            #if NH3API_STD_RELAXED_CONSTEXPR
-            #if NH3API_HAS_IS_CONSTANT_EVALUATED
-            if (is_constant_evaluated())
-            {
-                if ( dst == src )
-                    return dst;
-                bool loop_forward = true;
-
-                for (const char* ptr = src; ptr != src + count; ++ptr)
-                {
-                    if (dst == ptr)
-                    {
-                        loop_forward = false;
-                        break;
-                    }
-                }
-                if (loop_forward)
-                {
-                    for (size_t i = 0; i < count; ++i)
-                    {
-                        dst[i] = src[i];
-                    }
-                }
-                else
-                {
-                    for (size_t i = 0; i < count; ++i)
-                    {
-                        dst[count - 1 - i] = src[count - 1 - i];
-                    }
-                }
-                return dst;
-            }
-            else
-            {
-            #endif
-                ::memmove(dst, src, count);
-                return dst;
-            #if NH3API_HAS_IS_CONSTANT_EVALUATED
-            }
-            #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-            #else // NH3API_STD_RELAXED_CONSTEXPR
-            ::memmove(dst, src, count);
-            return dst;
-            #endif // NH3API_STD_RELAXED_CONSTEXPR
-            #endif // __has_builtin(__builtin_memmove)
-        }
-
-        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
-        char* copy(char* dst, const char* src, size_t count) NH3API_NOEXCEPT
-        {
-            if ( dst == nullptr || src == nullptr )
-                return nullptr;
-            #if NH3API_HAS_BUILTIN(__builtin_memcpy)
-            __builtin_memcpy(dst, src, count);
-            return dst;
-            #else
-            #if NH3API_STD_RELAXED_CONSTEXPR
-            #if NH3API_HAS_IS_CONSTANT_EVALUATED
-            if (is_constant_evaluated())
-            {
-                if ( dst == src )
-                    return dst;
-                bool loop_forward = true;
-
-                for (const char* ptr = src; ptr != src + count; ++ptr)
-                {
-                    if (dst == ptr)
-                    {
-                        loop_forward = false;
-                        break;
-                    }
-                }
-                if (loop_forward)
-                {
-                    for (size_t i = 0; i < count; ++i)
-                    {
-                        dst[i] = src[i];
-                    }
-                }
-                else
-                {
-                    for (size_t i = 0; i < count; ++i)
-                    {
-                        dst[count - 1 - i] = src[count - 1 - i];
-                    }
-                }
-                return dst;
-            }
-            else
-            {
-            #endif
-                ::memcpy(dst, src, count);
-                return dst;
-            #if NH3API_HAS_IS_CONSTANT_EVALUATED
-            }
-            #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-            #else // NH3API_STD_RELAXED_CONSTEXPR
-            ::memcpy(dst, src, count);
-            return dst;
-            #endif // NH3API_STD_RELAXED_CONSTEXPR
-            #endif // __has_builtin(__builtin_memcpy)
-        }
-
-        static NH3API_CONSTEXPR_CPP_14
-        char* assign(char* str, size_t count, char value) NH3API_NOEXCEPT
-        {
-            if ( str == nullptr )
-                return nullptr;
-            #if NH3API_STD_RELAXED_CONSTEXPR
-            #if NH3API_HAS_IS_CONSTANT_EVALUATED
-            if (is_constant_evaluated())
-            {
-                for (size_t i = 0; i < count; i++)
-                    *str++ = value;
-                return str;
-            }
-            else
-            {
-            #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-                ::memset(str, value, count);
-                return str;
-            #if NH3API_HAS_IS_CONSTANT_EVALUATED
-            }
-            #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-            #else 
-            ::memset(str, value, count);
-            return str;
-            #endif // NH3API_STD_RELAXED_CONSTEXPR
-        }
-
-        static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
-        const char* find(const char* str, size_t count, const char& ch)
-        {
-            if ( count == 0 || str == nullptr)
-                return nullptr;
-            #if NH3API_HAS_BUILTIN(__builtin_char_memchr)
-            return __builtin_char_memchr(str, ch, count);
-            #else // __has_builtin(__builtin_char_memchr)
-            #if NH3API_STD_RELAXED_CONSTEXPR
-            #if NH3API_HAS_IS_CONSTANT_EVALUATED
-            if (is_constant_evaluated())
-            {
-                for ( ; count; --count )
-                {
-                    if ( *str == ch )
-                    {
-                        return str;
-                    }
-                    ++str;
-                }
-                return nullptr;
-            }
-            else 
-            {
-            #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-                return static_cast<const char*>(::memchr(str, ch, count));
-            #if NH3API_HAS_IS_CONSTANT_EVALUATED
-            }
-            #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-            #else // NH3API_STD_RELAXED_CONSTEXPR
-            return static_cast<const char*>(::memchr(str, ch, count));
-            #endif // NH3API_STD_RELAXED_CONSTEXPR
-            #endif // __has_builtin(__builtin_char_memchr)
-        }
-
-        NH3API_FORCEINLINE size_t NH3API_CONSTEXPR_CPP_14 
-        static str_find(const char* str, size_t size, char c, size_t pos) NH3API_NOEXCEPT
-        {
-            if ( pos >= size )
-                return npos;
-            const char* found = find(str + pos, size - pos, c);
-            if ( found == nullptr )
-                return npos;
-            return static_cast<size_t>(found - str);
-        }
-
-        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14
-        static const char* search_substring(const char* first1, 
-                                            const char* last1, 
-                                            const char* first2, 
-                                            const char* last2) NH3API_NOEXCEPT 
-        {
-            // Take advantage of knowing source and pattern lengths.
-            // Stop short when source is smaller than pattern.
-            const ptrdiff_t len2 = last2 - first2;
-            if (len2 == 0)
-                return first1;
-
-            ptrdiff_t len1 = last1 - first1;
-            if (len1 < len2)
-                return last1;
-
-            // First element of first2 is loop invariant.
-            const char f2 = *first2;
-            while (true) 
-            {
-                len1 = last1 - first1;
-                // Check whether first1 still has at least len2 bytes.
-                if (len1 < len2)
-                    return last1;
-
-                // Find f2 the first byte matching in first1.
-                first1 = find(first1, static_cast<size_t>(len1 - len2 + 1), f2);
-                if (first1 == nullptr)
-                    return last1;
-
-                // It is faster to compare from the first byte of first1 even if we
-                // already know that it matches the first byte of first2: this is because
-                // first2 is most likely aligned, as it is user's "pattern" string, and
-                // first1 + 1 is most likely not aligned, as the match is in the middle of
-                // the string.
-                if (compare(first1, first2, static_cast<const size_t>(len2)) == 0)
-                    return first1;
-
-                ++first1;
-            }
-        }
-
-        NH3API_FORCEINLINE size_t NH3API_CONSTEXPR_CPP_14 
-        static str_find(const char* str, size_t size, const char* needle, size_t pos, size_t n) NH3API_NOEXCEPT 
-        {
-            if (pos > size)
-                return npos;
-
-            if (n == 0) // There is nothing to search, just return pos.
-                return pos;
-
-            const char* found = search_substring(str + pos, str + size, needle, needle + n);
-
-            if (found == str + size)
-                return npos;
-            return static_cast<size_t>(found - str);
-        }
-
-        NH3API_FORCEINLINE size_t NH3API_CONSTEXPR_CPP_14 
-        static str_rfind(const char* str, size_t size, char c, size_t pos) NH3API_NOEXCEPT 
-        {
-            if (size < 1)
-                return npos;
-
-            if (pos < size)
-                ++pos;
-            else
-                pos = size;
-
-            for (const char* i = str + pos; i != str;) 
-            {
-                if (eq(*--i, c))
-                    return static_cast<size_t>(i - str);
-            }
-            return npos;
-        }
-
-        NH3API_FORCEINLINE size_t NH3API_CONSTEXPR_CPP_14 
-        static str_rfind(const char* str, size_t size, const char* needle, size_t pos, size_t n) NH3API_NOEXCEPT 
-        {
-            pos = ::std::min<size_t>(pos, size);
-            if (n < size - pos)
-                pos += n;
-            else
-                pos = size;
-        
-            if (n == 0) 
-                return (pos <= size) ? pos : size;
-
-            if (size == 0 || n > size)
-                return npos;
-
-            for (size_t i = pos - n; ; --i) 
-            {
-                bool match = true;
-                for (size_t j = 0; j < n; ++j) 
-                {
-                    if ( !eq(str[i + j], needle[j]) ) 
-                    {
-                        match = false;
-                        break;
-                    }
-                }
-                if (match) 
-                    return i; 
-                
-                if (i == 0) 
-                    break; 
-            }
-            return npos; 
-        }
-
-    protected:
-        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14
-        static const char* find_first_of_impl(const char* first1,
-                                              const char* last1,
-                                              const char* first2,
-                                              const char* last2) NH3API_NOEXCEPT
-        {
-            for (; first1 != last1; ++first1)
-                for (const char* i = first2; i != last2; ++i)
-                    if (eq(*first1, *i))
-                        return first1;
-            return last1;
-        }
-
-    public:
-        NH3API_FORCEINLINE size_t NH3API_CONSTEXPR_CPP_14 
-        static str_find_first_of(const char* str, 
-                          size_t size, 
-                          const char* needle, 
-                          size_t pos, 
-                          size_t n) NH3API_NOEXCEPT 
-        {
-            if (pos >= size || n == 0)
-                return npos;
-            const char* found = find_first_of_impl(str + pos, str + size, needle, needle + n);
-            if (found == str + size)
-                return npos;
-            return static_cast<size_t>(found - str);
-        }
-
-        NH3API_FORCEINLINE size_t NH3API_CONSTEXPR_CPP_14 
-        static str_find_last_of(const char* str, size_t size, const char* needle, size_t pos, size_t n) NH3API_NOEXCEPT 
-        {
-            if (n != 0) 
-            {
-                if (pos < size)
-                    ++pos;
-                else
-                    pos = size;
-                for (const char* curr = str + pos; curr != str;) 
-                {
-                    const char* const found = find(needle, n, *--curr);
-                    if (found)
-                        return static_cast<size_t>(curr - str);
-                }
-            }
-            return npos;
-        }
-
-        NH3API_FORCEINLINE size_t NH3API_CONSTEXPR_CPP_14 
-        static str_find_first_not_of(const char* str, size_t size, const char* needle, size_t pos, size_t n) NH3API_NOEXCEPT 
-        {
-            if (pos < size) 
-            {
-                const char* shifted = str + size;
-                for (const char* curr = str + pos; curr != shifted; ++curr)
-                    if (find(needle, n, *curr) == nullptr)
-                        return static_cast<size_t>(curr - str);
-            }
-            return npos;
-        }
-
-        NH3API_FORCEINLINE size_t NH3API_CONSTEXPR_CPP_14 
-        static str_find_first_not_of(const char* str, size_t size, char c, size_t pos) NH3API_NOEXCEPT 
-        {
-            if (pos < size) 
-            {
-                const char* const shifted = str + size;
-                for (const char* curr = str + pos; curr != shifted; ++curr)
-                    if (!eq(*curr, c))
-                        return static_cast<size_t>(curr - str);
-            }
-            return npos;
-        }
-
-        NH3API_FORCEINLINE size_t NH3API_CONSTEXPR_CPP_14 
-        static str_find_last_not_of(const char* str, size_t size, const char* needle, size_t pos, size_t n) NH3API_NOEXCEPT 
-        {
-            if (pos < size)
-                ++pos;
-            else
-                pos = size;
-            for (const char* curr = str + pos; curr != str;)
-                if (find(needle, n, *--curr) == nullptr)
-                    return static_cast<size_t>(curr - str);
-            return npos;
-        }
-
-        NH3API_FORCEINLINE size_t NH3API_CONSTEXPR_CPP_14 
-        static str_find_last_not_of(const char* str, size_t size, char c, size_t pos) NH3API_NOEXCEPT 
-        {
-            if (pos < size)
-                ++pos;
-            else
-                pos = size;
-            for (const char* curr = str + pos; curr != str;)
-                if (!eq(*--curr, c))
-                    return static_cast<size_t>(curr - str);
-            return npos;
-        }
-};
-
-} // namespace nh3api
-
 #pragma pack(push, 4)
 // Visual C++ 6.0 implementation of std::basic_string, 
 // which uses unsafe copy-on-write semantics with 8-bit reference counting.
@@ -552,42 +51,40 @@ struct constexpr_char_traits
 // Consider using std::basic_string or exe_std_string/exe_std_wstring which use .exe allocator
 class exe_string
 {
-    protected:
-        template<class IterT>
-            struct is_cptr : public nh3api::tt::integral_constant<bool,
-                nh3api::tt::is_same<IterT, const char* const>::value
-                || nh3api::tt::is_same<IterT, char* const>::value
-                || nh3api::tt::is_same<IterT, const char*>::value
-                || nh3api::tt::is_same<IterT, char*>::value>
-            {};
-
     // external typedefs
     public:
-        typedef char value_type;
-        typedef exe_allocator<char>    allocator_type;
-        typedef std::char_traits<char> traits_type;
-        typedef size_t            size_type;
-        typedef ptrdiff_t         difference_type;
-        typedef value_type*       pointer;
-        typedef const value_type* const_pointer;
-        typedef value_type&       reference;
-        typedef const value_type& const_reference;
+        using value_type = char;
+        using allocator_type = exe_allocator<char>;
+        using traits_type = std::char_traits<char>;
+        using size_type = size_t;
+        using difference_type = ptrdiff_t;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using reference = value_type&;
+        using const_reference = const value_type&;
 
-        typedef pointer iterator;
-        typedef const_pointer const_iterator;
-        typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-        typedef std::reverse_iterator<iterator>       reverse_iterator;
+        using iterator = pointer;
+        using const_iterator = const_pointer;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
 
     // exceptions
     protected:
+        #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container IterT>
+        #else 
+        template<typename IterT>
+        #endif
+        using is_elem_cptr = std::bool_constant<nh3api::tt::is_any_of_v<IterT, const char* const, char* const, const char*, char*>>;
+
         #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-        NH3API_FORCEINLINE NH3API_NORETURN
+        [[noreturn]] NH3API_FORCEINLINE
         static void _Throw_length_exception()
         {
             NH3API_THROW(std::length_error, "string too long");
         }
         #else
-        NH3API_FORCEINLINE NH3API_NORETURN
+        [[noreturn]] NH3API_FORCEINLINE
         static void _Throw_length_exception()
         {
             NH3API_THROW(0, 0);
@@ -595,13 +92,13 @@ class exe_string
         #endif
 
         #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS 
-        NH3API_FORCEINLINE NH3API_NORETURN
+        [[noreturn]] NH3API_FORCEINLINE
         static void _Throw_out_of_range_exception()
         {
             NH3API_THROW(std::out_of_range, "invalid string position");
         }
         #else
-        NH3API_FORCEINLINE NH3API_NORETURN
+        [[noreturn]] NH3API_FORCEINLINE
         static void _Throw_out_of_range_exception()
         {
             NH3API_THROW(0, 0);
@@ -613,11 +110,11 @@ class exe_string
         // to help compiler optimize branches
 
     public:
-        exe_string() NH3API_NOEXCEPT
+        exe_string() noexcept
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {}
 
-        explicit exe_string(const allocator_type&) NH3API_NOEXCEPT
+        explicit exe_string(const allocator_type&) noexcept
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {}
 
@@ -675,10 +172,12 @@ class exe_string
             assign(_N, c);
         }
 
-        template <class IterT
-        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-        exe_string( IterT _F, IterT _L
-        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+        #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container IterT>
+        #else
+        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
+        #endif
+        exe_string(IterT _F, IterT _L)
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {
             nh3api::verify_range(_F, _L);
@@ -687,10 +186,12 @@ class exe_string
                        nh3api::iter_category<IterT>());
         }
 
-        template <class IterT
-        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-        exe_string( IterT _F, IterT _L, const allocator_type& = allocator_type()
-        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+        #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container IterT>
+        #else
+        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
+        #endif
+        exe_string( IterT _F, IterT _L, const allocator_type&)
             : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
         {
             nh3api::verify_range(_F, _L);
@@ -700,7 +201,7 @@ class exe_string
         }
 
         protected:
-        NH3API_FORCEINLINE void _Move_nullify(exe_string* other) NH3API_NOEXCEPT
+        NH3API_FORCEINLINE void _Move_nullify(exe_string* other) noexcept
         { nh3api::trivial_move<sizeof(exe_string)>(other, this); }
 
         template <class IterT>
@@ -739,11 +240,10 @@ class exe_string
         }
 
         public:
-        #if NH3API_STD_MOVE_SEMANTICS
-        exe_string(exe_string&& other) NH3API_NOEXCEPT
+        exe_string(exe_string&& other) noexcept
         {
             if (this == &other)
-            { // arguments are same, do nothing
+            { // arguments are the same, do nothing
                 return;
             }
             else
@@ -752,14 +252,14 @@ class exe_string
             }
         }
 
-        exe_string& operator=(exe_string&& other) NH3API_NOEXCEPT
+        exe_string& operator=(exe_string&& other) noexcept
         { assign(std::forward<exe_string>(other)); return *this; }
 
         NH3API_INLINE_LARGE
-        exe_string& assign(exe_string&& other) NH3API_NOEXCEPT
+        exe_string& assign(exe_string&& other) noexcept
         {
             if (this == &other)
-            { // arguments are same, do nothing
+            { // arguments are the same, do nothing
                 return *this;
             }
             else
@@ -770,26 +270,18 @@ class exe_string
             return *this;
         }
 
-        #endif
-
-        exe_string(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        exe_string(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
         NH3API_FLATTEN
-        ~exe_string() NH3API_NOEXCEPT
+        ~exe_string() noexcept
         { _Tidy_deallocate(); }
 
     protected:
         enum _Mref : uint8_t { _FROZEN = 255 };
 
     public:
-        #if NH3API_STD_RELAXED_CONSTEXPR
-        constexpr
-        #endif
-        #if NH3API_STD_INLINE_VARIABLES
-        inline
-        #endif
-        static const size_type npos = size_type(-1);
+        inline constexpr static size_type npos = size_type(-1);
     
     public:
         exe_string& operator=( const exe_string& other )
@@ -885,10 +377,12 @@ class exe_string
             return *this;
         }
 
-        template<class IterT
-        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-        exe_string& append(IterT _F, IterT _L
-        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+        #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container IterT>
+        #else
+        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
+        #endif
+        exe_string& append(IterT _F, IterT _L)
         {
             return replace(end(), end(), _F, _L);
         }
@@ -959,10 +453,12 @@ class exe_string
             return *this;
         }
 
-        template<typename IterT
-        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-        exe_string& assign( IterT _F, IterT _L
-        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+        #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container IterT>
+        #else
+        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
+        #endif
+        exe_string& assign( IterT _F, IterT _L)
         { return replace( begin(), end(), _F, _L ); }
 
         exe_string& insert( size_type pos1, const exe_string& other )
@@ -1055,10 +551,12 @@ class exe_string
             return begin() + offset;
         }
 
-        template<class IterT
-        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
-        iterator insert( const const_iterator pos, IterT _F, IterT _L
-        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+        #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container IterT>
+        #else
+        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
+        #endif
+        iterator insert( const const_iterator pos, IterT _F, IterT _L)
         {
             const size_type offset = (_Inside(pos)) ? static_cast<size_type>(pos - begin()) : 0;
             if ( offset )
@@ -1092,6 +590,7 @@ class exe_string
             }
             return *this;
         }
+
         iterator erase( const const_iterator pos )
         {
             const size_type offset = (_Inside(pos)) ? static_cast<size_type>(pos - begin()) : 0;
@@ -1108,7 +607,7 @@ class exe_string
             return _Ptr + offset;
         }
 
-        void clear() NH3API_NOEXCEPT
+        void clear() noexcept
         { _Eos(0); }
 
         exe_string& replace(const size_type pos1, const size_type n1, const exe_string& other )
@@ -1257,15 +756,16 @@ class exe_string
                 return *this;
         }
 
-        template<typename IterT
-        NH3API_SFINAE_BEGIN(nh3api::tt::is_iterator<IterT>::value)>
+        #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container IterT>
+        #else
+        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
+        #endif
         exe_string& replace(const const_iterator _F1,
                             const const_iterator _L1,
                             const IterT _F2,
-                            const IterT _L2
-        NH3API_SFINAE_END(nh3api::tt::is_iterator<IterT>::value))
+                            const IterT _L2)
         {
-            #if NH3API_STD_MOVE_SEMANTICS
             if ( !_Inside(_F1) || !_Inside(_L1) )
                 return *this;
 
@@ -1276,20 +776,15 @@ class exe_string
                                 _L1,
                                 _UF2,
                                 _UL2,
-                                is_cptr<decltype(_UF2)>());
-            #else // Visual Studio 2005..2008 have no decltype()
-            typedef typename _STD _Checked_iterator_base_helper<IterT>::_Checked_iterator_base_type
-            unchecked_iterator_type;
-            return _ReplaceRange(_F1,
-                                _L1,
-                                nh3api::unfancy(_F2),
-                                nh3api::unfancy(_L2),
-                                is_cptr<unchecked_iterator_type>());
-            #endif
+                                is_elem_cptr<decltype(_UF2)>());
         }
 
         protected:
-        template<class IterT>
+        #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container IterT>
+        #else
+        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
+        #endif
         exe_string& _ReplaceRange(const const_iterator _F1,
                                 const const_iterator _L1,
                                 const IterT _F2,
@@ -1305,7 +800,11 @@ class exe_string
                 return *this;
         }
 
-        template<class IterT>
+        #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container IterT>
+        #else
+        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
+        #endif
         exe_string& _ReplaceRange(const const_iterator _F1,
                                 const const_iterator _L1,
                                 const IterT _F2,
@@ -1318,71 +817,71 @@ class exe_string
         }
 
     public:
-        reference front() NH3API_NOEXCEPT
+        reference front() noexcept
         {
             _Freeze();
             return _Ptr[0];
         }
 
-        const_reference front() const NH3API_NOEXCEPT
+        [[nodiscard]] const_reference front() const noexcept
         { return _Ptr[0]; }
 
-        reference back() NH3API_NOEXCEPT
+        reference back() noexcept
         {
             _Freeze();
             return _Ptr[_Len - 1];
         }
 
-        const_reference back() const NH3API_NOEXCEPT
+        [[nodiscard]] const_reference back() const noexcept
         { return _Ptr[_Len - 1]; }
 
-        iterator begin() NH3API_NOEXCEPT
+        iterator begin() noexcept
         {
             _Freeze();
             return (_Ptr);
         }
-        const_iterator begin() const NH3API_NOEXCEPT
+        [[nodiscard]] const_iterator begin() const noexcept
         {
             return (_Ptr);
         }
-        const_iterator cbegin() const NH3API_NOEXCEPT
+        [[nodiscard]] const_iterator cbegin() const noexcept
         {
             return (_Ptr);
         }
-        iterator end() NH3API_NOEXCEPT
+        iterator end() noexcept
         {
             _Freeze();
             return (iterator)(_Ptr + _Len);
         }
-        const_iterator end() const NH3API_NOEXCEPT
+        [[nodiscard]] const_iterator end() const noexcept
         {
             return (const_iterator)(_Ptr + _Len);
         }
-        const_iterator cend() const NH3API_NOEXCEPT
+        [[nodiscard]] const_iterator cend() const noexcept
         {
             return (const_iterator)(_Ptr + _Len);
         }
-        reverse_iterator rbegin() NH3API_NOEXCEPT
+        reverse_iterator rbegin() noexcept
         {
             return (reverse_iterator( end() ));
         }
-        const_reverse_iterator rbegin() const NH3API_NOEXCEPT
+        [[nodiscard]] const_reverse_iterator rbegin() const noexcept
         {
             return (const_reverse_iterator( end() ));
         }
-        const_reverse_iterator crbegin() const NH3API_NOEXCEPT
+        [[nodiscard]] const_reverse_iterator crbegin() const noexcept
         {
             return (const_reverse_iterator( end() ));
         }
-        reverse_iterator rend() NH3API_NOEXCEPT
+        reverse_iterator rend() noexcept
         {
             return (reverse_iterator( begin() ));
         }
-        const_reverse_iterator rend() const NH3API_NOEXCEPT
+        [[nodiscard]] const_reverse_iterator rend() const noexcept
         {
             return (const_reverse_iterator( begin() ));
         }
-        const_reverse_iterator crend() const NH3API_NOEXCEPT
+        [[nodiscard]] const_reverse_iterator crend() const noexcept
         {
             return (const_reverse_iterator( begin() ));
         }
@@ -1395,7 +894,7 @@ class exe_string
             _Freeze();
             return _Ptr[pos1];
         }
-        const_reference at( size_type pos1 ) const
+        [[nodiscard]] const_reference at( size_type pos1 ) const
         {
             if ( _Len <= pos1 )
             {
@@ -1405,7 +904,7 @@ class exe_string
         }
         reference operator[]( size_type pos1 )
         #if !NH3API_DEBUG
-        NH3API_NOEXCEPT
+        noexcept
         #endif
         {
         #if !NH3API_DEBUG
@@ -1417,7 +916,7 @@ class exe_string
         }
         const_reference operator[]( size_type pos1 ) const
         #if !NH3API_DEBUG
-        NH3API_NOEXCEPT
+        noexcept
         #endif
         {
         #if !NH3API_DEBUG
@@ -1426,32 +925,32 @@ class exe_string
             return at(pos1);
         #endif
         }
-        const value_type* c_str() const NH3API_NOEXCEPT
+        [[nodiscard]] const value_type* c_str() const noexcept
         {
             return _Ptr;
         }
-        const value_type* data() const NH3API_NOEXCEPT
+        [[nodiscard]] const value_type* data() const noexcept
         {
             return _Ptr;
         }
-        value_type* data() NH3API_NOEXCEPT
+        value_type* data() noexcept
         {
             _Freeze();
             return _Ptr;
         }
 
-        size_type length() const NH3API_NOEXCEPT
+        [[nodiscard]] size_type length() const noexcept
         {
             return (_Len);
         }
 
-        size_type size() const NH3API_NOEXCEPT
+        [[nodiscard]] size_type size() const noexcept
         {
             return (_Len);
         }
 
-        NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR
-        static size_type max_size() NH3API_NOEXCEPT
+        [[nodiscard]] NH3API_FORCEINLINE constexpr
+        static size_type max_size() noexcept
         { return NH3API_MAX_HEAP_REQUEST; }
 
         void resize(const size_type _N, const value_type c = value_type())
@@ -1467,7 +966,7 @@ class exe_string
             }
         }
 
-        size_type capacity() const NH3API_NOEXCEPT
+        [[nodiscard]] size_type capacity() const noexcept
         {
             return _Res;
         }
@@ -1478,7 +977,7 @@ class exe_string
                 _Grow<false>( _N );
         }
 
-        bool empty() const
+        [[nodiscard]] bool empty() const
         {
             return (_Len == 0);
         }
@@ -1496,146 +995,146 @@ class exe_string
             return (_N);
         }
 
-        void swap( exe_string& other ) NH3API_NOEXCEPT
+        void swap( exe_string& other ) noexcept
         {
             nh3api::trivial_swap<sizeof(exe_string)>(this, &other);
         }
 
-        bool contains(value_type c) const NH3API_NOEXCEPT
+        [[nodiscard]] bool contains(value_type c) const noexcept
         { return std::find(cbegin(), cend(), c) != cend(); }
 
         bool contains(const_pointer str) const 
         { return find(str) != npos; }
 
-        bool starts_with(value_type c) const 
+        [[nodiscard]] bool starts_with(value_type c) const 
         { return !empty() && nh3api::constexpr_char_traits::eq(front(), c); }
 
-        bool ends_with(value_type c) const 
+        [[nodiscard]] bool ends_with(value_type c) const 
         { return !empty() && nh3api::constexpr_char_traits::eq(back(), c); }
 
-        size_type find(const exe_string& other, size_type pos = 0 ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type find(const exe_string& other, size_type pos = 0 ) const noexcept
         {
             assert( other.data() != nullptr && other.size() != 0 );
             return nh3api::constexpr_char_traits::str_find(data(), size(), other.data(), pos, other.size());
         }
 
-        size_type find( char c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type find( char c, size_type pos = 0 ) const noexcept
         {
             return nh3api::constexpr_char_traits::str_find(data(), size(), c, pos);
         }
 
-        size_type find( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        size_type find( const char* str, size_type pos, size_type n ) const noexcept
         {
             assert( str != nullptr && n != 0 );
             return nh3api::constexpr_char_traits::str_find(data(), size(), str, pos, n);
         }
 
-        size_type find( const char* str, size_type pos = 0 ) const NH3API_NOEXCEPT
+        size_type find( const char* str, size_type pos = 0 ) const noexcept
         {
             assert( str != nullptr );
             return nh3api::constexpr_char_traits::str_find(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
 
-        size_type rfind(const exe_string& other, size_type pos = npos ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type rfind(const exe_string& other, size_type pos = npos ) const noexcept
         {
             assert( other.data() != nullptr && other.size() != 0 );
             return nh3api::constexpr_char_traits::str_rfind(data(), size(), other.data(), pos, other.size());
         }
 
-        size_type rfind( char c, size_type pos = npos ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type rfind( char c, size_type pos = npos ) const noexcept
         { return nh3api::constexpr_char_traits::str_rfind(data(), size(), c, pos); }
 
-        size_type rfind( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        size_type rfind( const char* str, size_type pos, size_type n ) const noexcept
         {
             assert( str != nullptr && n != 0 );
             return nh3api::constexpr_char_traits::str_rfind(data(), size(), str, pos, n);
         }
 
-        size_type rfind( const char* str, size_type pos = npos ) const NH3API_NOEXCEPT
+        size_type rfind( const char* str, size_type pos = npos ) const noexcept
         {
             assert( str != nullptr );
             return nh3api::constexpr_char_traits::str_rfind(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
 
-        size_type find_first_of(const exe_string& other, size_type pos = 0 ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type find_first_of(const exe_string& other, size_type pos = 0 ) const noexcept
         {
             assert( other.data() != nullptr && other.size() != 0 );
             return nh3api::constexpr_char_traits::str_find_first_of(data(), size(), other.data(), pos, other.size());
         }
 
-        size_type find_first_of( char c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type find_first_of( char c, size_type pos = 0 ) const noexcept
         { return find(c, pos); }
 
-        size_type find_first_of( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        size_type find_first_of( const char* str, size_type pos, size_type n ) const noexcept
         {
             assert( str != nullptr && n != 0 );
             return nh3api::constexpr_char_traits::str_find_first_of(data(), size(), str, pos, n);
         }
 
-        size_type find_first_of( const char* str, size_type pos = 0 ) const NH3API_NOEXCEPT
+        size_type find_first_of( const char* str, size_type pos = 0 ) const noexcept
         {
             assert( str != nullptr );
             return nh3api::constexpr_char_traits::str_find_first_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
 
-        size_type find_last_of(const exe_string& other, size_type pos = npos ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type find_last_of(const exe_string& other, size_type pos = npos ) const noexcept
         {
             assert( other.data() != nullptr && other.size() != 0 );
             return nh3api::constexpr_char_traits::str_find_last_of(data(), size(), other.data(), pos, other.size());
         }
 
-        size_type find_last_of( char c, size_type pos = npos ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type find_last_of( char c, size_type pos = npos ) const noexcept
         { return rfind(c, pos); }
 
-        size_type find_last_of( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        size_type find_last_of( const char* str, size_type pos, size_type n ) const noexcept
         {
             assert( str != nullptr && n != 0 );
             return nh3api::constexpr_char_traits::str_find_last_of(data(), size(), str, pos, n);
         }
 
-        size_type find_last_of( const char* str, size_type pos = npos ) const NH3API_NOEXCEPT
+        size_type find_last_of( const char* str, size_type pos = npos ) const noexcept
         {
             assert( str != nullptr );
             return nh3api::constexpr_char_traits::str_find_last_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
 
-        size_type find_first_not_of(const exe_string& other, size_type pos = 0 ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type find_first_not_of(const exe_string& other, size_type pos = 0 ) const noexcept
         {
             assert( other.data() != nullptr && other.size() != 0 );
             return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), other.data(), pos, other.size());
         }
 
-        size_type find_first_not_of( char c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type find_first_not_of( char c, size_type pos = 0 ) const noexcept
         { return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), c, pos); }
 
-        size_type find_first_not_of( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        size_type find_first_not_of( const char* str, size_type pos, size_type n ) const noexcept
         {
             assert( str != nullptr && n != 0 );
             return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), str, pos, n);
         }
 
-        size_type find_first_not_of( const char* str, size_type pos = 0 ) const NH3API_NOEXCEPT
+        size_type find_first_not_of( const char* str, size_type pos = 0 ) const noexcept
         {
             assert( str != nullptr );
             return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
 
-        size_type find_last_not_of(const exe_string& other, size_type pos = npos ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type find_last_not_of(const exe_string& other, size_type pos = npos ) const noexcept
         {
             assert( other.data() != nullptr && other.size() != 0 );
             return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), other.data(), pos, other.size());
         }
 
-        size_type find_last_not_of( char c, size_type pos = 0 ) const NH3API_NOEXCEPT
+        [[nodiscard]] size_type find_last_not_of( char c, size_type pos = 0 ) const noexcept
         { return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), c, pos); }
 
-        size_type find_last_not_of( const char* str, size_type pos, size_type n ) const NH3API_NOEXCEPT
+        size_type find_last_not_of( const char* str, size_type pos, size_type n ) const noexcept
         {
             assert( str != nullptr && n != 0 );
             return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), str, pos, n);
         }
 
-        size_type find_last_not_of( const char* str, size_type pos = npos ) const NH3API_NOEXCEPT
+        size_type find_last_not_of( const char* str, size_type pos = npos ) const noexcept
         {
             assert( str != nullptr );
             return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
@@ -1643,11 +1142,11 @@ class exe_string
         
         #if NH3API_CHECK_CPP23
 
-        exe_string substr( size_type pos = 0, size_type n = npos ) const&
-        { return exe_string( *this, pos, n ); }
+        [[nodiscard]] exe_string substr( size_type pos = 0, size_type n = npos ) const&
+        { return {*this, pos, n}; }
 
         exe_string substr( size_type pos = 0, size_type n = npos ) &&
-        { return exe_string( std::move(*this), pos, n ); }
+        { return {*this, pos, n}; }
 
         #else
 
@@ -1656,18 +1155,19 @@ class exe_string
 
         #endif
 
-        int compare( const exe_string& other ) const NH3API_NOEXCEPT
+        [[nodiscard]] int compare( const exe_string& other ) const noexcept
         {
             return _Compare(this->c_str(), this->size(), other.c_str(), other.size());
         }
-        int compare( size_type pos, size_type count,
-                    const exe_string& other ) const
+
+        [[nodiscard]] int compare( size_type pos, size_type count, const exe_string& other ) const
         {
             _Check_offset(pos);
             return _Compare(this->c_str() + pos, this->_Clamp_suffix_size(pos, count), other.c_str(), other.size());
         }
-        int compare(const size_type pos1, const size_type n, const exe_string& other,
-                    const size_type pos2, const size_type count = npos ) const
+
+        [[nodiscard]] int compare(const size_type pos1, const size_type n, const exe_string& other,
+                                  const size_type pos2, const size_type count = npos ) const
         {
             this->_Check_offset(pos1);
             other._Check_offset(pos2);
@@ -1678,7 +1178,7 @@ class exe_string
                             other._Clamp_suffix_size(pos2, count));
         }
 
-        int compare(const value_type* const str) const NH3API_NOEXCEPT
+        int compare(const value_type* const str) const noexcept
         { return _Compare(this->c_str(), this->size(), str, ::nh3api::constexpr_char_traits::length(str)); }
 
         int compare(const size_type pos, const size_type count, const value_type* const str ) const
@@ -1696,15 +1196,15 @@ class exe_string
             return _Compare(this->c_str() + pos, _Clamp_suffix_size(pos, count1), str, count2);
         }
 
-        allocator_type get_allocator() const NH3API_NOEXCEPT
-        { return allocator_type(); }
+        [[nodiscard]] allocator_type get_allocator() const noexcept
+        { return {}; }
 
     private:
         enum : uint32_t { _MIN_SIZE = 31 };
 
         // copy _Oldlen elements to newly allocated buffer
         NH3API_INLINE_LARGE
-        void _Copy( size_type _Newsize ) NH3API_NOEXCEPT
+        void _Copy( size_type _Newsize ) noexcept
         {
             size_type _Clamped_newsize = _Newsize | _MIN_SIZE;
             if ( max_size() < _Clamped_newsize )
@@ -1716,21 +1216,19 @@ class exe_string
             size_type _Old_length = _Len;
             _Tidy_deallocate();
             _Ptr = str + 1;
-            _Refcnt( _Ptr ) = 0;
+            _Refcnt(_Ptr) = 0;
             _Res = _Clamped_newsize;
             _Eos( _Old_length > _Clamped_newsize ? _Clamped_newsize : _Old_length );
         }
 
         // set new length and null terminator
-        NH3API_FORCEINLINE void _Eos( size_type _N ) NH3API_NOEXCEPT
-        {
-            nh3api::constexpr_char_traits::assign( _Ptr[_Len = _N], value_type(0) );
-        }
+        NH3API_FORCEINLINE void _Eos( size_type _N ) noexcept
+        { _Ptr[_Len = _N] = '\0'; }
 
-        NH3API_FORCEINLINE bool _Inside(const_pointer ptr) NH3API_NOEXCEPT 
+        NH3API_FORCEINLINE bool _Inside(const_pointer ptr) noexcept 
         { return begin() <= ptr && ptr < end(); }
 
-        void _Freeze() NH3API_NOEXCEPT
+        void _Freeze() noexcept
         {
             if ( _Ptr != nullptr
                 && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
@@ -1742,10 +1240,10 @@ class exe_string
         template<bool is_noexcept>
         NH3API_INLINE_LARGE
         // ensure buffer is big enough, trim to size if _Trim is true
-        bool _Grow( size_type _N, bool _Trim = false )
-        NH3API_NOEXCEPT_EXPR(is_noexcept)
+        bool _Grow(size_type _N, bool _Trim = false)
+        noexcept(noexcept(is_noexcept))
         {
-            NH3API_IF_CONSTEXPR (!is_noexcept)
+            if constexpr (!is_noexcept)
             {
             if ( max_size() < _N )
             {
@@ -1789,8 +1287,7 @@ class exe_string
             }
         }
 
-        NH3API_FORCEINLINE
-        uint8_t& _Refcnt( const value_type* ptr ) NH3API_NOEXCEPT
+        NH3API_FORCEINLINE uint8_t& _Refcnt(const value_type* ptr) noexcept
         { return reinterpret_cast<uint8_t*>(const_cast<value_type*>(ptr))[-1]; }
 
         void _Split()
@@ -1805,7 +1302,7 @@ class exe_string
 
         NH3API_FLATTEN
         // initialize buffer, deallocating any storage
-        void _Tidy( bool _Built = false) NH3API_NOEXCEPT
+        void _Tidy( bool _Built = false) noexcept
         {
             if ( !_Built || _Ptr == nullptr )
                 ;
@@ -1817,8 +1314,7 @@ class exe_string
             nh3api::trivial_zero<sizeof(exe_string)>(this);
         }
 
-        NH3API_FORCEINLINE
-        void _Tidy_deallocate() NH3API_NOEXCEPT
+        NH3API_FORCEINLINE void _Tidy_deallocate() noexcept
         {
             if ( _Ptr == nullptr )
                 ;
@@ -1828,11 +1324,11 @@ class exe_string
                 --_Refcnt( _Ptr );
         }
 
-        NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED NH3API_FORCEINLINE
+        constexpr NH3API_FORCEINLINE
         static bool _Equal(const char* _Left, 
                            const size_t _Left_size, 
                            const char* _Right,
-                           const size_t _Right_size) NH3API_NOEXCEPT 
+                           const size_t _Right_size) noexcept 
         {
             if (_Left_size != _Right_size) 
                 return false;
@@ -1845,11 +1341,11 @@ class exe_string
 
         friend exe_string_equal_accessor;
 
-        NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED NH3API_FORCEINLINE
+        constexpr NH3API_FORCEINLINE
         static int _Compare(const char* _Left, 
                             const size_t _Left_size, 
                             const char* _Right,
-                            const size_t _Right_size) NH3API_NOEXCEPT 
+                            const size_t _Right_size) noexcept 
         {
             const int _Ans = nh3api::constexpr_char_traits::compare(_Left, _Right, std::min<size_t>(_Left_size, _Right_size));
             if (_Ans != 0) 
@@ -1879,7 +1375,7 @@ class exe_string
         }
         
         // trims _Size to the longest it can be assuming a string at/after _Off
-        NH3API_NODISCARD NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_14 size_type _Clamp_suffix_size(const size_type _Off, const size_type _Size) const NH3API_NOEXCEPT
+        [[nodiscard]] NH3API_FORCEINLINE constexpr size_type _Clamp_suffix_size(const size_type _Off, const size_type _Size) const noexcept
         { return std::min<size_type>(_Size, size() - _Off); }
 
     protected:
@@ -1892,30 +1388,23 @@ class exe_string
 
 struct exe_string_equal_accessor
 {
-    NH3API_FORCEINLINE static bool equal(const exe_string& lhs, const exe_string& rhs) NH3API_NOEXCEPT 
+    NH3API_FORCEINLINE static bool equal(const exe_string& lhs, const exe_string& rhs) noexcept 
     {
         return exe_string::_Equal(lhs.c_str(), lhs.size(), rhs.c_str(), rhs.size());
     }
 
-    NH3API_FORCEINLINE static bool equal(const exe_string& lhs, const char* const rhs) NH3API_NOEXCEPT
+    NH3API_FORCEINLINE static bool equal(const exe_string& lhs, const char* const rhs) noexcept
     {
         return exe_string::_Equal(lhs.c_str(), lhs.size(), rhs, ::nh3api::constexpr_char_traits::length(rhs));
     }
 
-    NH3API_FORCEINLINE static bool equal(const char* const lhs, const exe_string& rhs) NH3API_NOEXCEPT
+    NH3API_FORCEINLINE static bool equal(const char* const lhs, const exe_string& rhs) noexcept
     {
         return exe_string::_Equal(lhs, ::nh3api::constexpr_char_traits::length(lhs), rhs.c_str(), rhs.size());
     }
 };
 
 //} // namespace nh3api
-
-#if !NH3API_STD_MOVE_SEMANTICS
-NH3API_FORCEINLINE
-void swap(exe_string& lhs,
-          exe_string& rhs) // ADL swap
-{ lhs.swap(rhs); }
-#endif
 
 NH3API_SIZE_ASSERT(0x10, exe_string);
 
@@ -1971,8 +1460,6 @@ exe_string operator+(const exe_string& lhs, const char rhs)
     return result;
 }
 
-#if NH3API_STD_MOVE_SEMANTICS
-
 NH3API_FORCEINLINE exe_string
 operator+(const exe_string &lhs, exe_string&& rhs)
 { return std::move(rhs.insert(0, lhs)); }
@@ -2011,20 +1498,18 @@ exe_string operator+(exe_string&& lhs, const char rhs)
     return std::move(lhs);
 }
 
-#endif
-
 // relational operators
 
 NH3API_FORCEINLINE
-bool operator==(const exe_string& lhs, const exe_string& rhs) NH3API_NOEXCEPT
+bool operator==(const exe_string& lhs, const exe_string& rhs) noexcept
 { return exe_string_equal_accessor::equal(lhs, rhs); }
 
 NH3API_FORCEINLINE
-bool operator==(const char* const lhs, const exe_string& rhs) NH3API_NOEXCEPT
+bool operator==(const char* const lhs, const exe_string& rhs) noexcept
 { return exe_string_equal_accessor::equal(lhs, rhs); }
 
 NH3API_FORCEINLINE
-bool operator==(const exe_string& lhs, const char* const rhs) NH3API_NOEXCEPT
+bool operator==(const exe_string& lhs, const char* const rhs) noexcept
 { return exe_string_equal_accessor::equal(lhs, rhs); }
 
 NH3API_FORCEINLINE
@@ -2101,179 +1586,28 @@ namespace nh3api
 
 // get exe_string reference count
 // if you need it for whatever reason
-NH3API_FORCEINLINE uint8_t refcount(const ::exe_string& str) NH3API_NOEXCEPT
+NH3API_FORCEINLINE uint8_t refcount(const ::exe_string& str) noexcept
 { return *(const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(str.c_str())) - 1); }
-
-NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
-// safe strlen which is bound to max_size
-size_t safe_strlen(const char* str, const size_t max_size) NH3API_NOEXCEPT
-{
-    size_t len = 0;
-    while (len < max_size && str[len] != '\0') 
-        ++len;
-    
-    return len;
-}
-
-NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
-// safe strlen which is bound to max_size
-size_t safe_strlen(const wchar_t* str, const size_t max_size) NH3API_NOEXCEPT
-{
-    size_t len = 0;
-    while (len < max_size && str[len] != L'\0') 
-        ++len;
-    
-    return len;
-}
-
-NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
-// constexpr atoi that uses no locale
-int32_t fast_atoi(const char* p) NH3API_NOEXCEPT
-{
-    int32_t x = 0;
-    bool neg = false;
-    if ( *p == '-' )
-    {
-        neg = true;
-        ++p;
-    }
-    while ( *p >= '0' && *p <= '9' )
-    {
-        x = (x * 10) + (*p - '0');
-        ++p;
-    }
-    if ( neg )
-    {
-        x = -x;
-    }
-    return x;
-}
-
-// convert single digit to char
-NH3API_FORCEINLINE NH3API_CONSTEXPR
-char digit_to_char(uint32_t digit, char) NH3API_NOEXCEPT
-{ return '0' + static_cast<char>(digit); }
-
-// convert single digit to wide char
-NH3API_FORCEINLINE NH3API_CONSTEXPR
-wchar_t digit_to_char(uint32_t digit, wchar_t) NH3API_NOEXCEPT
-{ return L'0' + static_cast<wchar_t>(digit); }
-
-// convert letter character to lowercase
-NH3API_CONST NH3API_FORCEINLINE NH3API_CONSTEXPR 
-char tolower_constexpr(const char c) NH3API_NOEXCEPT
-{ return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; }
-
-struct case_insensitive_traits
-{
-    typedef char char_type;
-    typedef int  int_type;
-    typedef ::std::streamoff off_type;
-    typedef ::std::streampos pos_type;
-    typedef ::std::mbstate_t state_type;
-    #ifdef __cpp_lib_three_way_comparison
-    using comparison_category = ::std::strong_ordering;
-    #endif
-
-    static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
-    char* move(char* dst, const char* src, size_t count) NH3API_NOEXCEPT
-    { return constexpr_char_traits::move(dst, src, count); }
-
-    NH3API_CONST static NH3API_CONSTEXPR bool eq(char c1, char c2) NH3API_NOEXCEPT
-    { return tolower_constexpr(c1) == tolower_constexpr(c2); }
-
-    NH3API_CONST static NH3API_CONSTEXPR bool ne(char c1, char c2) NH3API_NOEXCEPT
-    { return tolower_constexpr(c1) != tolower_constexpr(c2); }
-
-    NH3API_CONST static NH3API_CONSTEXPR bool lt(char c1, char c2) NH3API_NOEXCEPT
-    { return tolower_constexpr(c1) < tolower_constexpr(c2); }
-
-    static NH3API_CONSTEXPR_CPP_14 int compare(const char* s1, const char* s2, size_t n) NH3API_NOEXCEPT
-    {
-        while (n-- != 0)
-        {
-            if (tolower_constexpr(*s1) < tolower_constexpr(*s2))
-                return -1;
-            if (tolower_constexpr(*s1) > tolower_constexpr(*s2))
-                return 1;
-            ++s1; 
-            ++s2;
-        }
-        return 0;
-    }
-
-    static NH3API_CONSTEXPR_CPP_14 const char* find(const char* s, int n, char a) NH3API_NOEXCEPT
-    {
-        while ( n-- > 0)
-        {
-            if (tolower_constexpr(*s) == tolower_constexpr(a))
-            {
-                return s;
-            }
-            ++s;
-        }
-        return nullptr;
-    }
-
-    static NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE
-    void assign(char& c1, const char& c2) NH3API_NOEXCEPT
-    { c1 = tolower_constexpr(c2); }
-
-    static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED
-    char* copy(char* dst, const char* src, size_t count) NH3API_NOEXCEPT
-    { return constexpr_char_traits::copy(dst, src, count); }
-
-    static NH3API_CONSTEXPR_CPP_14
-    char* assign(char* str, size_t count, char value) NH3API_NOEXCEPT
-    {
-        if ( str == nullptr )
-            return nullptr;
-        value = tolower_constexpr(value);
-        #if NH3API_STD_RELAXED_CONSTEXPR
-        #if NH3API_HAS_IS_CONSTANT_EVALUATED
-        if (is_constant_evaluated())
-        {
-            for (size_t i = 0; i < count; i++)
-                *str++ = value;
-            return str;
-        }
-        else
-        {
-        #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-            ::memset(str, value, count);
-            return str;
-        #if NH3API_HAS_IS_CONSTANT_EVALUATED
-        }
-        #endif // NH3API_HAS_IS_CONSTANT_EVALUATED
-        #else 
-        ::memset(str, value, count);
-        return str;
-        #endif // NH3API_STD_RELAXED_CONSTEXPR
-    }
-
-    static NH3API_CONSTEXPR_IF_HAS_IF_CONSTANT_EVALUATED 
-    size_t length(const char* str) NH3API_NOEXCEPT
-    { return constexpr_char_traits::length(str); }
-};
-
-NH3API_CONSTEXPR_CPP_14 NH3API_FORCEINLINE 
-bool isalpha_constexpr(const char c) NH3API_NOEXCEPT
-{
-    const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                            "abcdefghijklmnopqrstuvwxyz";
-    const char* letter = ::std::begin(alphabet);
-    while(*letter != '\0' && *letter != c)
-        ++letter;
-    if (*letter)
-        return true;
-    return false;
-}
 
 // fast algorithm by void_17
 template<class StringT>
-static StringT print_int(int32_t x)
+static StringT int_to_string(int32_t x)
 {
-    typedef typename StringT::value_type CharT;
+    using CharT = typename StringT::value_type;
+
+    const auto digit_to_char = [] NH3API_INLINE_LAMBDA (const uint8_t digit) 
+    {
+        if constexpr ( std::is_same_v<CharT, char> )
+        {
+            return '0' + digit;
+        }
+        else if ( std::is_same_v<CharT, char> )
+        {
+            return L'0' + digit;
+        }
+        else  
+        { return 0; }
+    };
     if ( x == 0 )
         return StringT(1, CharT('0'));
     bool32_t minusSymbol = (x < 0);
@@ -2287,8 +1621,8 @@ static StringT print_int(int32_t x)
     CharT* ptr = const_cast<CharT*>(str.c_str()) + str.size()-1;
     while (x > 0)
     {
-        uint32_t digit = static_cast<uint32_t>(x % 10);
-        *ptr-- = digit_to_char(digit, CharT());
+        uint8_t digit = static_cast<uint8_t>(x % 10);
+        *ptr-- = digit_to_char(digit);
         x /= 10;
     }
     return str;
@@ -2296,9 +1630,22 @@ static StringT print_int(int32_t x)
 
 // fast algorithm by void_17
 template<class StringT>
-static StringT print_uint(uint32_t x)
+static StringT uint_to_string(uint32_t x)
 {
-    typedef typename StringT::value_type CharT;
+    using CharT = typename StringT::value_type;
+    const auto digit_to_char = [] NH3API_INLINE_LAMBDA (const uint8_t digit) 
+    {
+        if constexpr ( std::is_same_v<CharT, char> )
+        {
+            return '0' + digit;
+        }
+        else if ( std::is_same_v<CharT, char> )
+        {
+            return L'0' + digit;
+        }
+        else  
+        { return 0; }
+    };
     if ( x == 0 )
         return StringT(1, CharT('0'));
     const size_t numSymbols = nh3api::count_digits(x);
@@ -2308,89 +1655,40 @@ static StringT print_uint(uint32_t x)
     CharT* ptr = const_cast<CharT*>(str.c_str()) + str.size()-1;
     while (x > 0)
     {
-        uint32_t digit = x % 10;
-        *ptr-- = digit_to_char(digit, CharT());
+        uint8_t digit = static_cast<uint8_t>(x % 10);
+        *ptr-- = digit_to_char(digit);
         x /= 10;
     }
     return str;
 }
 
-NH3API_FORCEINLINE NH3API_CONSTEXPR
-const char* get_inf_string(char) NH3API_NOEXCEPT
+NH3API_FORCEINLINE constexpr const char* get_inf_string(char) noexcept
 { return "INF"; }
 
-NH3API_FORCEINLINE NH3API_CONSTEXPR
-const wchar_t* get_inf_string(wchar_t) NH3API_NOEXCEPT
+NH3API_FORCEINLINE constexpr const wchar_t* get_inf_string(wchar_t) noexcept
 { return L"INF"; }
 
-NH3API_FORCEINLINE NH3API_CONSTEXPR
-const char* get_nan_string(char) NH3API_NOEXCEPT
+NH3API_FORCEINLINE constexpr
+const char* get_nan_string(char) noexcept
 { return "NaN"; }
 
-NH3API_FORCEINLINE NH3API_CONSTEXPR
-const wchar_t* get_nan_string(wchar_t) NH3API_NOEXCEPT
+NH3API_FORCEINLINE constexpr const wchar_t* get_nan_string(wchar_t) noexcept
 { return L"NaN"; }
 
-NH3API_FORCEINLINE NH3API_CONSTEXPR
-const char* get_error_fp_string(char) NH3API_NOEXCEPT
+NH3API_FORCEINLINE constexpr const char* get_error_fp_string(char) noexcept
 { return "ERROR"; }
 
-NH3API_FORCEINLINE NH3API_CONSTEXPR
-const wchar_t* get_error_fp_string(wchar_t) NH3API_NOEXCEPT
+NH3API_FORCEINLINE constexpr const wchar_t* get_error_fp_string(wchar_t) noexcept
 { return L"ERROR"; }
 
-template<class StringT, typename CharT = typename StringT::value_type>
-struct float_printer; // undefined
-
-// I HAVE to repeat the same code again
-// and put it in the struct
-// to make it compile under C++98...
-
 template<class StringT>
-struct float_printer<StringT, char>
+static StringT double_to_string(double x, int32_t precision)
 {
-    static StringT print(float x, int32_t precision)
-    {
-        const size_t buffer_size = static_cast<size_t>(_scprintf("%.*f", precision, static_cast<double>(x)));
-        StringT result(buffer_size, '\0');
-        sprintf_s(const_cast<char*>(result.c_str()), buffer_size + 1, "%.*f", precision, static_cast<double>(x));
-        return result;
-    }
+    using CharT = typename StringT::value_type;
+    if ( precision < 1 || precision > 18 )
+        return StringT(get_error_fp_string(CharT()), 5);
 
-    static StringT print(double x, int32_t precision)
-    {
-        const size_t buffer_size = static_cast<size_t>(_scprintf("%.*f", precision, x));
-        StringT result(buffer_size, '\0');
-        sprintf_s(const_cast<char*>(result.c_str()), buffer_size + 1, "%.*f", precision, x);
-        return result;
-    }
-};
-
-template<class StringT>
-struct float_printer<StringT, wchar_t>
-{
-    static StringT print(float x, int32_t precision)
-    {
-        const size_t buffer_size = static_cast<size_t>(_scwprintf(L"%.*f", precision, static_cast<double>(x)));
-        StringT result(buffer_size, L'\0');
-        swprintf_s(const_cast<wchar_t*>(result.c_str()), buffer_size + 1, L"%.*f", precision, static_cast<double>(x));
-        return result;
-    }
-
-    static StringT print(double x, int32_t precision)
-    {
-        const size_t buffer_size = static_cast<size_t>(_scwprintf(L"%.*f", precision, x));
-        StringT result(buffer_size, L'\0');
-        swprintf_s(const_cast<wchar_t*>(result.c_str()), buffer_size + 1, L"%.*f", precision, x);
-        return result;
-    }
-};
-
-template<class StringT>
-static StringT print_float(float x, int32_t precision)
-{
-    typedef typename StringT::value_type CharT;
-    switch (::nh3api::fpclassify(x))
+    switch (::std::fpclassify(x))
     {
         case FP_INFINITE:
         {
@@ -2405,33 +1703,21 @@ static StringT print_float(float x, int32_t precision)
         case FP_SUBNORMAL:
         case FP_ZERO:
         {
-            return float_printer<StringT>::print(x, precision);
-        }
-        default:
-            return StringT(get_error_fp_string(CharT()), 5);
-    }
-}
+            // 32 is more than enough.
+            std::array<CharT, 32> buffer{};
 
-template<class StringT>
-static StringT print_double(double x, int32_t precision)
-{
-    typedef typename StringT::value_type CharT;
-    switch (::nh3api::fpclassify(x))
-    {
-        case FP_INFINITE:
-        {
-            return StringT(get_inf_string(CharT()), 3);
-        }
-        case FP_NAN:
-        {
-            return StringT(get_nan_string(CharT()), 3);
-        }
-        // isfinite
-        case FP_NORMAL:
-        case FP_SUBNORMAL:
-        case FP_ZERO:
-        {
-            return float_printer<StringT>::print(x, precision);
+            if constexpr (::std::is_same_v<CharT, char>)
+            {
+                sprintf_s(const_cast<char*>(buffer.data()), buffer.size(), "%.*f", precision, x);
+            }
+            else if (::std::is_same_v<CharT, wchar_t>)
+            {
+                swprintf_s(const_cast<wchar_t*>(buffer.data()), buffer.size(), L"%.*f", precision, x);
+            }
+            else 
+            {}
+
+            return {buffer.data()};
         }
         default:
             return StringT(get_error_fp_string(CharT()), 5);
@@ -2443,81 +1729,81 @@ static StringT print_double(double x, int32_t precision)
 NH3API_FORCEINLINE
 // write signed integer as string
 exe_string to_exe_string(int32_t x)
-{ return nh3api::print_int<exe_string>(x); }
+{ return nh3api::int_to_string<exe_string>(x); }
 
 NH3API_FORCEINLINE
 // write unsigned integer as string
 exe_string to_exe_string(uint32_t x)
-{ return nh3api::print_uint<exe_string>(x); }
+{ return nh3api::uint_to_string<exe_string>(x); }
 
 NH3API_FORCEINLINE
 // write double as string
 exe_string to_exe_string(double x, int32_t precision = 8)
-{ return nh3api::print_double<exe_string>(x, precision); }
+{ return nh3api::double_to_string<exe_string>(x, precision); }
 
 NH3API_FORCEINLINE
 // write float as string
 exe_string to_exe_string(float x, int32_t precision = 4)
-{ return nh3api::print_float<exe_string>(x, precision); }
+{ return nh3api::double_to_string<exe_string>(static_cast<double>(x), precision); }
 
 NH3API_FORCEINLINE
 // write signed integer as string
 std::string to_std_string(int32_t x)
-{ return nh3api::print_int<std::string>(x); }
+{ return nh3api::int_to_string<std::string>(x); }
 
 NH3API_FORCEINLINE
 // write unsigned integer as string
 std::string to_std_string(uint32_t x)
-{ return nh3api::print_uint<std::string>(x); }
+{ return nh3api::uint_to_string<std::string>(x); }
 
 NH3API_FORCEINLINE
 // write double as string
 std::string to_std_string(double x, int32_t precision = 8)
-{ return nh3api::print_double<std::string>(x, precision); }
+{ return nh3api::double_to_string<std::string>(x, precision); }
 
 NH3API_FORCEINLINE
 // write float as string
 std::string to_std_string(float x, int32_t precision = 4)
-{ return nh3api::print_float<std::string>(x, precision); }
+{ return nh3api::double_to_string<std::string>(static_cast<double>(x), precision); }
 
 NH3API_FORCEINLINE
 // write signed integer as wide string
 std::wstring to_std_wstring(int32_t x)
-{ return nh3api::print_int<std::wstring>(x); }
+{ return nh3api::int_to_string<std::wstring>(x); }
 
 NH3API_FORCEINLINE
 // write unsigned integer as wide string
 std::wstring to_std_wstring(uint32_t x)
-{ return nh3api::print_uint<std::wstring>(x); }
+{ return nh3api::uint_to_string<std::wstring>(x); }
 
 NH3API_FORCEINLINE
 // write double as wide string
 std::wstring to_std_wstring(double x, int32_t precision = 8)
-{ return nh3api::print_double<std::wstring>(x, precision); }
+{ return nh3api::double_to_string<std::wstring>(x, precision); }
 
 NH3API_FORCEINLINE
 // write float as wide string
 std::wstring to_std_wstring(float x, int32_t precision = 4)
-{ return nh3api::print_float<std::wstring>(x, precision); }
+{ return nh3api::double_to_string<std::wstring>(static_cast<double>(x), precision); }
 
 namespace nh3api 
 {
 
-NH3API_FORCEINLINE size_t hash_string(const ::exe_string& str) NH3API_NOEXCEPT 
+NH3API_FORCEINLINE size_t hash_string(const ::exe_string& str) noexcept 
 {
     default_hash hasher;
     hasher.update(str.c_str(), str.size());
     return hasher.digest();
 } 
 
-NH3API_FORCEINLINE size_t hash_string(const ::std::string& str) NH3API_NOEXCEPT 
+NH3API_FORCEINLINE size_t hash_string(const ::std::string& str) noexcept 
 {
     default_hash hasher;
     hasher.update(str.c_str(), str.size());
     return hasher.digest();
 } 
 
-NH3API_FORCEINLINE size_t hash_string(const ::std::wstring& str) NH3API_NOEXCEPT 
+NH3API_FORCEINLINE size_t hash_string(const ::std::wstring& str) noexcept 
 {
     default_hash hasher;
     hasher.update(str.c_str(), str.size());
@@ -2526,25 +1812,23 @@ NH3API_FORCEINLINE size_t hash_string(const ::std::wstring& str) NH3API_NOEXCEPT
 
 } // namespace nh3api
 
-#if NH3API_STD_HASH
 // std::hash support for exe_string
 template<>
 struct std::hash<exe_string>
 {
     public:
-        size_t operator()(const exe_string& str) NH3API_NOEXCEPT
+        size_t operator()(const exe_string& str) noexcept
         {
             nh3api::default_hash hasher;
             hasher.update(str.data(), str.size());
             return hasher.digest();
         }
 };
-#endif
 
 // std::string which uses exe_allocator<char>
-typedef std::basic_string<char, std::char_traits<char>, exe_allocator<char> > exe_std_string;
+using exe_std_string = std::basic_string<char, std::char_traits<char>, exe_allocator<char> >;
 // std::wstring which uses exe_allocator<wchar_t>
-typedef std::basic_string<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar_t> > exe_std_wstring;
+using exe_std_wstring = std::basic_string<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar_t> >;
 
 NH3API_DISABLE_WARNING_END
 NH3API_DISABLE_WARNING_END

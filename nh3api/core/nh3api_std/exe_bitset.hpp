@@ -32,421 +32,637 @@
 template<size_t N>
 struct exe_bitset_to_string_helper;
 
-#if NH3API_STD_HASH 
 template<size_t N>
 class exe_bitset;
 template<size_t N>
-struct std::hash< exe_bitset<N> >;
-#endif
+struct std::hash<exe_bitset<N>>;
 
 #pragma pack(push, 8)
-/// @brief Visual C++ 6.0 std::bitset implementation used by heroes3.exe
-/// @tparam N number of bits to store
-template<size_t N>
-class exe_bitset
+// Visual C++ 6.0 std::bitset implementation used by heroes3.exe
+template<size_t _Bits>
+class NH3API_CLANG_TRIVIAL_ABI exe_bitset
 {
 protected:
-    typedef uint32_t word_type;
+    using word_type = uint32_t;
 
 public:
-    typedef bool element_type;
+    using element_type = bool;
 
-    /// @brief proxy class representing a reference to a bit
-    class reference
+    // proxy class representing a reference to a bit inside bitset
+    class NH3API_CLANG_TRIVIAL_ABI reference
     {
-    friend class exe_bitset<N>;
+    friend class exe_bitset<_Bits>;
     public:
-        NH3API_CONSTEXPR_CPP_14 reference& operator=(bool value) NH3API_NOEXCEPT
+        reference(const reference&) = default;
+
+        constexpr reference& operator=(bool value) noexcept
         {
-            _parent.set(_pos, value);
+            _parent->_Set_unchecked(_pos, value);
             return *this;
         }
 
-        NH3API_CONSTEXPR_CPP_14 reference& operator=(const reference& other) NH3API_NOEXCEPT
+        constexpr reference& operator=(const reference& other) noexcept
         {
-            _parent.set(_pos, static_cast<bool>(other));
+            _parent->_Set_unchecked(_pos, static_cast<bool>(other));
             return *this;
         }
 
-        NH3API_CONSTEXPR_CPP_14 reference& flip()  NH3API_NOEXCEPT
+        constexpr reference& flip() noexcept
         {
-            _parent.flip(_pos);
+            _parent->_Flip_unchecked(_pos);
             return *this;
         }
 
-        NH3API_CONSTEXPR_CPP_14 bool operator~() const NH3API_NOEXCEPT
-        { return !_parent.test(_pos); }
+        constexpr bool operator~() const noexcept
+        { return !_parent->_Subscript(_pos); }
 
-        NH3API_CONSTEXPR_CPP_14 operator bool() const NH3API_NOEXCEPT
-        { return _parent.test(_pos); }
+        [[nodiscard]] constexpr operator bool() const noexcept
+        { return _parent->_Subscript(_pos); }
 
-        #if NH3API_CHECK_CPP11
         ~reference() = default;
-        #endif
 
-        NH3API_CONSTEXPR_CPP_14 reference() NH3API_NOEXCEPT NH3API_DELETED_FUNCTION
+        constexpr reference() noexcept NH3API_DELETED_FUNCTION
 
     private:
-        NH3API_CONSTEXPR_CPP_14 reference(exe_bitset<N>& value, size_t pos) NH3API_NOEXCEPT
+        constexpr reference(exe_bitset<_Bits>* value, size_t pos) noexcept
             : _parent(value), _pos(pos)
-            {}
+        {}
 
-        exe_bitset<N>& _parent;
+        exe_bitset<_Bits>* _parent;
         size_t _pos;
     };
 
-    bool at(size_t pos) const
+public:
+    [[nodiscard]] constexpr bool operator[](size_t pos) const noexcept(nh3api::flags::nodebug)
     {
-        if (N <= pos)
+        #if NH3API_DEBUG
+        if ( pos >= _Bits )
             _Throw_invalid_subscript();
-        return test(pos);
+        #endif
+
+        return _Subscript(pos);
     }
 
-    reference at(size_t pos)
+    constexpr reference operator[](size_t pos) noexcept(nh3api::flags::nodebug)
     {
-        if (N <= pos)
+        #if NH3API_DEBUG
+        if ( pos >= _Bits )
             _Throw_invalid_subscript();
+        #endif
+
         return reference(*this, pos);
     }
 
-public:
-    NH3API_CONSTEXPR_CPP_14 bool operator[](size_t pos) const
-    { return test(pos); }
+    // construct with all false values
+    constexpr exe_bitset() noexcept
+        : _Array()
+    {}
 
-    NH3API_CONSTEXPR_CPP_14 reference operator[](size_t pos)
-    NH3API_NOEXCEPT
-    { return reference(*this, pos); }
+    explicit constexpr exe_bitset(unsigned long long value) noexcept
+        : _Array{static_cast<word_type>(_Need_mask ? value & _Mask : value)}
+    {}
 
-    NH3API_CONSTEXPR_CPP_14 exe_bitset()
-    NH3API_NOEXCEPT
-    { _Tidy(); }
-
-    explicit NH3API_CONSTEXPR_CPP_14 exe_bitset(unsigned long value)
-    NH3API_NOEXCEPT
+    template<class CharT, class CharTraits, class Allocator> explicit
+    exe_bitset(const std::basic_string<CharT, CharTraits, Allocator>& str,
+               typename std::basic_string<CharT, CharTraits, Allocator>::size_type pos = 0,
+               typename std::basic_string<CharT, CharTraits, Allocator>::size_type count = std::basic_string<CharT, CharTraits, Allocator>::npos,
+               CharT zero = CharT('0'),
+               CharT one  = CharT('1'))
     {
-        _Tidy();
-        for ( size_t i = 0; value != 0 && i < N; value >>= 1, ++i )
-            if ( value & 1 )
-                _array[i / _Bitsperword] |= (word_type)1 << i % _Bitsperword;
-    }
+        if (str.empty())
+            return;
 
-    template<class T, class CharTraits, class Allocator>
-    exe_bitset(const std::basic_string<T, CharTraits, Allocator>& str,
-               size_t pos = 0,
-               size_t n = std::basic_string<T, CharTraits, Allocator>::npos,
-               typename std::basic_string<T, CharTraits, Allocator>::value_type zero = typename std::basic_string<T, CharTraits, Allocator>::value_type('0'),
-               typename std::basic_string<T, CharTraits, Allocator>::value_type one  = typename std::basic_string<T, CharTraits, Allocator>::value_type('1') )
-    {
         if (str.size() < pos)
             _Throw_invalid_subscript();
-        if (str.size() - pos < n)
-            n = str.size() - pos;
-        if (N < n)
-            n = N;
-        _Tidy();
-        pos += n;
-        for (size_t i = 0; i < n; ++i)
-            if (str[--pos] == one)
-                set(i);
-            else if (str[pos] != zero)
-                _Throw_invalid_char();
+
+        if (str.size() - pos < count)
+            count = str.size() - pos;
+
+        _Construct<CharTraits>(str.data() + pos, count, zero, one);
     }
 
-    exe_bitset(const exe_string& str,
-               size_t pos = 0,
-               size_t n = exe_string::npos,
-               typename exe_string::value_type zero = '0',
-               typename exe_string::value_type one  = '1' )
+    template<class CharT, class CharTraits> explicit
+    exe_bitset(const std::basic_string_view<CharT, CharTraits>& str,
+               typename std::basic_string_view<CharT, CharTraits>::size_type pos = 0,
+               typename std::basic_string_view<CharT, CharTraits>::size_type count = std::basic_string_view<CharT, CharTraits>::npos,
+               CharT zero = CharT('0'),
+               CharT one  = CharT('1'))
     {
-        if (str.size() < pos)
+        if ( pos > str.size() )
             _Throw_invalid_subscript();
-        if (str.size() - pos < n)
-            n = str.size() - pos;
-        if (N < n)
-            n = N;
-        _Tidy();
-        pos += n;
-        for (size_t i = 0; i < n; ++i)
-            if (str[--pos] == one)
-                set(i);
-            else if (str[pos] != zero)
-                _Throw_invalid_char();
+
+        const size_t length = (std::min)(count, str.size() - pos);
+        _Construct<CharTraits>(str.data() + pos, length, zero, one);
+    }
+
+    template<typename = char> explicit
+    exe_bitset(const char* str,
+               typename std::string_view::size_type count = std::string_view::npos,
+               char zero = '0',
+               char one  = '1')
+    {
+        if ( str == nullptr )
+            return;
+
+        if ( count == std::string::npos )
+        #if __has_builtin(__builtin_strlen)
+            count = __builtin_strlen(str);
+        #else
+            count = ::std::strlen(str);
+        #endif
+
+        _Construct<
+        #ifdef __cpp_lib_constexpr_string
+        std::char_traits<char>
+        #else
+        nh3api::constexpr_char_traits
+        #endif
+        >(str, count, zero, one);
+    }
+
+    template<typename = wchar_t> explicit
+    exe_bitset(const wchar_t* str,
+               typename std::wstring_view::size_type count = std::wstring_view::npos,
+               wchar_t zero = L'0',
+               wchar_t one  = L'1')
+    {
+        if ( str == nullptr )
+            return;
+
+        if ( count == std::string::npos )
+        #if __has_builtin(__builtin_wcslen)
+            count = __builtin_wcslen(str);
+        #else
+            count = ::std::wcslen(str);
+        #endif
+
+        _Construct<std::char_traits<wchar_t>>(str, count, zero, one);
     }
 
     NH3API_FORCEINLINE
-    exe_bitset(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+    exe_bitset(const ::nh3api::dummy_tag_t&) noexcept
     {}
 
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator&=(const exe_bitset<N>& other) NH3API_NOEXCEPT
+    constexpr exe_bitset<_Bits>& operator&=(const exe_bitset<_Bits>& other) noexcept
     {
         for (int i = _Words; 0 <= i; --i)
-            _array[i] &= other._array[i];
+            _Array[i] &= other._Array[i];
+
         return *this;
     }
 
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator|=(const exe_bitset<N>& other) NH3API_NOEXCEPT
+    constexpr exe_bitset<_Bits>& operator|=(const exe_bitset<_Bits>& other) noexcept
     {
         for (int i = _Words; 0 <= i; --i)
-            _array[i] |= other._array[i];
+            _Array[i] |= other._Array[i];
+
         return *this;
     }
 
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator^=(const exe_bitset<N>& other) NH3API_NOEXCEPT
+    constexpr exe_bitset<_Bits>& operator^=(const exe_bitset<_Bits>& other) noexcept
     {
         for (int i = _Words; 0 <= i; --i)
-            _array[i] ^= other._array[i];
+            _Array[i] ^= other._Array[i];
+
         return *this;
     }
 
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator<<=(size_t pos) NH3API_NOEXCEPT
+    // shift left by pos, first by words then by bits
+    constexpr exe_bitset<_Bits>& operator<<=(size_t pos) noexcept
     {
-        const size_t _D = pos / _Bitsperword;
-        if (_D != 0)
-            for (int i = _Words; 0 <= i; --i)
-                _array[i] = _D <= i ? _array[i - _D] : 0;
+        const auto _Wordshift = static_cast<ptrdiff_t>(pos / _Bitsperword);
+        if (_Wordshift != 0)
+            for (ptrdiff_t _Wpos = _Words; 0 <= _Wpos; --_Wpos)
+                _Array[_Wpos] = _Wordshift <= _Wpos ? _Array[_Wpos - _Wordshift] : 0;
+
+        // 0 < pos < _Bitsperword, shift by bits
         if ((pos %= _Bitsperword) != 0)
         {
-            for (int i = _Words; 0 < i; --i)
-                _array[i] = (_array[i] << pos) | (_array[i - 1] >> (_Bitsperword - pos));
-            _array[0] <<= pos;
-            _Trim();
+            for (ptrdiff_t _Wpos = _Words; 0 < _Wpos; --_Wpos)
+                _Array[_Wpos] = (_Array[_Wpos] << pos) | (_Array[_Wpos - 1] >> (_Bitsperword - pos));
+
+            _Array[0] <<= pos;
         }
-        return *this;
-    }
 
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& operator>>=(size_t pos) NH3API_NOEXCEPT
-    {
-        const size_t _D = pos / _Bitsperword;
-        if (_D != 0)
-            for (size_t i = 0; i <= _Words; ++i)
-                _array[i] = _D <= _Words - i ? _array[i + _D] : 0;
-        if ((pos %= _Bitsperword) != 0)
-            {for (size_t i = 0; i < _Words; ++i)
-                _array[i] = (_array[i] >> pos)
-                    | (_array[i + 1] << (_Bitsperword - pos));
-            _array[_Words] >>= pos; }
-        return *this;
-    }
-
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& set() NH3API_NOEXCEPT
-    {
-        _Tidy(~(word_type)0);
-        return (*this);
-    }
-
-    exe_bitset<N>& set(size_t pos, bool value = true)
-    {
-        if (N <= pos)
-            _Throw_invalid_subscript();
-        if (value)
-            _array[pos / _Bitsperword] |= (word_type)1 << pos % _Bitsperword;
-        else
-            _array[pos / _Bitsperword] &= ~((word_type)1 << pos % _Bitsperword);
-        return *this;
-    }
-
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& reset() NH3API_NOEXCEPT
-    {
-        _Tidy();
-        return *this;
-    }
-
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& reset(size_t pos)
-    { return set(pos, 0); }
-
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N> operator~() const NH3API_NOEXCEPT
-    { return exe_bitset<N>(*this).flip(); }
-
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N>& flip() NH3API_NOEXCEPT
-    {
-        for (int i = _Words; 0 <= i; --i)
-            _array[i] = ~_array[i];
         _Trim();
         return *this;
     }
 
-    exe_bitset<N>& flip(size_t pos)
+    // shift right by pos, first by words then by bits
+    constexpr exe_bitset<_Bits>& operator>>=(size_t pos) noexcept
     {
-        if (N <= pos)
-            _Throw_invalid_subscript();
-        _array[pos / _Bitsperword] ^= (word_type)1 << pos % _Bitsperword;
-        return (*this);
+        const auto _Wordshift = static_cast<ptrdiff_t>(pos / _Bitsperword);
+        if (_Wordshift != 0)
+            for (ptrdiff_t _Wpos = 0; _Wpos <= _Words; ++_Wpos)
+                _Array[_Wpos] = _Wordshift <= _Words - _Wpos ? _Array[_Wpos + _Wordshift] : 0;
+
+        // 0 < pos < _Bitsperword, shift by bits
+        if ((pos %= _Bitsperword) != 0)
+        {
+            for (ptrdiff_t _Wpos = 0; _Wpos < _Words; ++_Wpos)
+                _Array[_Wpos] = (_Array[_Wpos] >> pos) | (_Array[_Wpos + 1] << (_Bitsperword - pos));
+
+            _Array[_Words] >>= pos;
+        }
+
+        return *this;
     }
 
-    unsigned long to_ulong() const
+    // set all bits true
+    constexpr exe_bitset<_Bits>& set() noexcept
     {
-        NH3API_STATIC_ASSERT("", (sizeof (unsigned long) % sizeof (word_type) == 0));
-        int i = _Words;
-        for (; sizeof (unsigned long) / sizeof (word_type) <= i; --i)
-            if (_array[i] != 0)
+        NH3API_IF_CONSTEVAL
+        {
+            for ( word_type& word : _Array )
+                word = static_cast<word_type>(-1);
+        }
+        else
+        {
+            #if __has_builtin(__builtin_memset_inline)
+            __builtin_memset_inline(&_Array, 0xFF, sizeof(_Array));
+            #else
+            ::std::memset(&_Array, 0xFF, sizeof(_Array));
+            #endif
+        }
+        _Trim();
+        return *this;
+    }
+
+    // set bit at pos to value
+    constexpr exe_bitset<_Bits>& set(size_t pos, bool value = true)
+    {
+        if (_Bits <= pos)
+            _Throw_invalid_subscript();
+        return _Set_unchecked(pos, value);
+    }
+
+    // set all bits false
+    constexpr exe_bitset<_Bits>& reset() noexcept
+    {
+        NH3API_IF_CONSTEVAL
+        {
+            for ( word_type& word : _Array )
+                word = 0;
+        }
+        else
+        {
+            #if __has_builtin(__builtin_memset_inline)
+            __builtin_memset_inline(&_Array, 0, sizeof(_Array));
+            #else
+            ::std::memset(&_Array, 0, sizeof(_Array));
+            #endif
+        }
+        return *this;
+    }
+
+    // set bit at pos to false
+    constexpr exe_bitset<_Bits>& reset(size_t pos)
+    { return set(pos, 0); }
+
+    // flip all bits
+    constexpr exe_bitset<_Bits> operator~() const noexcept
+    {
+        exe_bitset<_Bits> result = *this;
+        result.flip();
+        return result;
+    }
+
+    // flip all bits
+    constexpr exe_bitset<_Bits>& flip() noexcept
+    {
+        for (size_t _Wpos = 0; _Wpos <= _Words; ++_Wpos)
+            _Array[_Wpos] = ~_Array[_Wpos];
+
+        _Trim();
+        return *this;
+    }
+
+    // flip bit at pos
+    constexpr exe_bitset<_Bits>& flip(size_t pos)
+    {
+        if (_Bits <= pos)
+            _Throw_invalid_subscript();
+
+        return _Flip_unchecked(pos);
+    }
+
+    // extract underlying unsigned long integer from the bitset
+    [[nodiscard]] constexpr unsigned long to_ulong() const noexcept(_Bits <= 32)
+    {
+        static_assert(sizeof(unsigned long) % sizeof(word_type) == 0);
+        constexpr bool _Bits_zero  = _Bits == 0;
+        constexpr bool _Bits_small = _Bits <= 32;
+        constexpr bool _Bits_large = _Bits > 64;
+        if constexpr (_Bits_zero)
+        {
+            return 0;
+        }
+        else if constexpr (_Bits_small)
+        {
+            return static_cast<unsigned long>(_Array[0]);
+        }
+        else
+        {
+            if constexpr (_Bits_large)
+                for (size_t _Idx = 1; _Idx <= _Words; ++_Idx)
+                    if (_Array[_Idx] != 0)
+                        _Throw_ulong_conversion_overflow(); // fail if any high-order words are nonzero
+
+            if (!nh3api::in_range<unsigned long>(_Array[0]))
                 _Throw_ulong_conversion_overflow();
-        unsigned long result = _array[i];
-        for (; 0 <= --i; )
-            result = ((result << (_Bitsperword - 1)) << 1) | _array[i];
-        return (result);
+
+            return static_cast<unsigned long>(_Array[0]);
+        }
     }
 
-    unsigned long long to_ullong() const
+    // extract underlying unsigned long long integer from the bitset
+    [[nodiscard]] constexpr unsigned long long to_ullong() const noexcept(_Bits <= 64)
     {
-        NH3API_STATIC_ASSERT("", (sizeof (unsigned long long) % sizeof (word_type) == 0));
-        int i = _Words;
-        for (; sizeof (unsigned long long) / sizeof (word_type) <= i; --i)
-            if (_array[i] != 0)
-                _Throw_ullong_conversion_overflow();
-        unsigned long long result = _array[i];
-        for (; 0 <= --i; )
-            result = ((result << (_Bitsperword - 1)) << 1) | _array[i];
-        return (result);
+        constexpr bool _Bits_zero  = _Bits == 0;
+        constexpr bool _Bits_large = _Bits > 64;
+        if constexpr (_Bits_zero)
+        {
+            return 0;
+        }
+        else
+        {
+            if constexpr (_Bits_large)
+                for (size_t _Idx = 1; _Idx <= _Words; ++_Idx)
+                    if (_Array[_Idx] != 0)
+                        _Throw_ullong_conversion_overflow(); // fail if any high-order words are nonzero
+
+            return _Array[0];
+        }
     }
 
-    exe_string to_string(char zero = '0', char one = '1') const
+    [[nodiscard]] exe_string to_string(char zero = '0', char one = '1') const
     {
-        exe_string result(N, zero);
+        exe_string result(_Bits, zero);
         char* dst = result.data();
-        for (size_t i = N; 0 < i; ++dst )
-            *dst = _At(--i) ? one : zero;
+        for (size_t i = _Bits; 0 < i; ++dst )
+            *dst = _Subscript(--i) ? one : zero;
         return result;
     }
 
-    /*
-    NH3API_CONSTEXPR size_t count() const NH3API_NOEXCEPT
+    [[nodiscard]] constexpr size_t count() const noexcept
     {
-        size_t result = 0;
-        for (int i = _Words; 0 <= i; --i)
-            for (word_type value = _array[i]; value != 0; value >>= 4)
-                result += "\0\1\1\2\1\2\2\3"
-                    "\1\2\2\3\2\3\3\4"[value & 0xF];
-        return (result);
-    }
-    */
+        if constexpr ( _Bits == 0 )
+        {
+            return 0;
+        }
+        else if constexpr (_Bits <= _Bitsperword)
+        {
+            #if defined (__BITINT_MAXWIDTH__) && __has_builtin(__builtin_popcountg)
+                return __builtin_popcountg(static_cast<unsigned _BitInt(_Bits)>(_Array[0]));
+            #elif __has_builtin(__builtin_popcount)
+                return __builtin_popcount(_Array[0]);
+            #else
+                return bitpopcnt(_Array[0]);
+            #endif
+        }
+        else
+        {
+            size_t result = 0;
+            for (size_t i = 0; i < _Words + 1; ++i)
+            #if __has_builtin(__builtin_popcount)
+                result += __builtin_popcount(_Array[i]);
+            #else
+                result += bitpopcnt(_Array[i]);
+            #endif
 
-    NH3API_CONSTEXPR_CPP_14 size_t count() const NH3API_NOEXCEPT
-    {
-        size_t result = 0;
-        for (size_t i = 0; i < _Words + 1; ++i)
-            result += bitpopcnt(_array[i]);
-
-        return result;
-    }
-
-    NH3API_CONSTEXPR_CPP_14 size_t size() const NH3API_NOEXCEPT
-    { return N; }
-
-    NH3API_CONSTEXPR_CPP_14 bool operator==(const exe_bitset<N>& other) const NH3API_NOEXCEPT
-    {
-        for (int i = _Words; 0 <= i; --i)
-            if (_array[i] != other._array[i])
-                return false;
-        return true;
+            return result;
+        }
     }
 
-    NH3API_CONSTEXPR_CPP_14 bool operator!=(const exe_bitset<N>& other) const NH3API_NOEXCEPT
-    { return (!(*this == other)); }
+    [[nodiscard]] constexpr size_t size() const noexcept
+    { return _Bits; }
 
-    bool test(size_t pos) const
+    constexpr bool operator==(const exe_bitset<_Bits>& other) const noexcept
     {
-        if (N <= pos)
+        NH3API_IF_CONSTEVAL
+        {
+            for (int i = _Words; 0 <= i; --i)
+                if (_Array[i] != other._Array[i])
+                    return false;
+            return true;
+        }
+        else
+        {
+            #if __has_builtin(__builtin_memcmp)
+            return __builtin_memcmp(&_Array[0], &other._Array[0], sizeof(_Array)) == 0;
+            #else
+            return ::std::memcmp(&_Array[0], &other._Array[0], sizeof(_Array)) == 0;
+            #endif
+        }
+    }
+
+    constexpr bool operator!=(const exe_bitset<_Bits>& other) const noexcept
+    { return !(*this == other); }
+
+    [[nodiscard]] bool test(size_t pos) const
+    {
+        if (_Bits <= pos)
             _Throw_invalid_subscript();
-        return ((_array[pos / _Bitsperword] & ((word_type)1 << pos % _Bitsperword)) != 0);
+        return _Subscript(pos);
     }
 
-    NH3API_CONSTEXPR_CPP_14 bool any() const NH3API_NOEXCEPT
+    [[nodiscard]] constexpr bool any() const noexcept
     {
         for (int i = _Words; 0 <= i; --i)
-            if (_array[i] != 0)
+            if (_Array[i] != 0)
                 return true;
         return false;
     }
 
-    NH3API_CONSTEXPR_CPP_14 bool none() const NH3API_NOEXCEPT
+    [[nodiscard]] constexpr bool all() const noexcept
+    {
+        constexpr bool _Zero_length = _Bits == 0;
+
+        // must test for this, otherwise would count one full word
+        if constexpr (_Zero_length)
+            return true;
+
+        constexpr bool _No_padding = _Bits % _Bitsperword == 0;
+        for (size_t _Wpos = 0; _Wpos < _Words + _No_padding; ++_Wpos)
+            if (_Array[_Wpos] != ~static_cast<word_type>(0))
+                return false;
+
+        return _No_padding || _Array[_Words] == (static_cast<word_type>(1) << (_Bits % _Bitsperword)) - 1;
+    }
+
+    [[nodiscard]] constexpr bool none() const noexcept
     { return !any(); }
 
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N> operator<<(size_t other) const NH3API_NOEXCEPT
-    { return exe_bitset<N>(*this) <<= other; }
+    constexpr exe_bitset<_Bits> operator<<(size_t n) const noexcept
+    {
+        exe_bitset<_Bits> result = *this;
+        result <<= n;
+        return result;
+    }
 
-    NH3API_CONSTEXPR_CPP_14 exe_bitset<N> operator>>(size_t other) const NH3API_NOEXCEPT
-    { return exe_bitset<N>(*this) >>= other; }
-
-    NH3API_CONSTEXPR_CPP_14 friend exe_bitset<N> operator&(const exe_bitset<N>& lhs,
-        const exe_bitset<N>& other) NH3API_NOEXCEPT
-    { return exe_bitset<N>(lhs) &= other; }
-
-    NH3API_CONSTEXPR_CPP_14 friend exe_bitset<N> operator|(const exe_bitset<N>& lhs,
-        const exe_bitset<N>& other) NH3API_NOEXCEPT
-    { return exe_bitset<N>(lhs) |= other; }
-
-    NH3API_CONSTEXPR_CPP_14 friend exe_bitset<N> operator^(const exe_bitset<N>& lhs,
-        const exe_bitset<N>& other) NH3API_NOEXCEPT
-    { return exe_bitset<N>(lhs) ^= other; }
+    constexpr exe_bitset<_Bits> operator>>(size_t n) const noexcept
+    {
+        exe_bitset<_Bits> result = *this;
+        result >>= n;
+        return result;
+    }
 
 protected:
     // used for iterations inside the bitset.
     // no need to check for bounds.
-    NH3API_CONSTEXPR_CPP_14 bool _At(size_t pos) const NH3API_NOEXCEPT
-    { return ((_array[pos / _Bitsperword] & ((word_type)1 << pos % _Bitsperword)) != 0); }
+    [[nodiscard]] constexpr bool _Subscript(size_t pos) const noexcept
+    { return (_Array[pos / _Bitsperword] & (word_type{1} << pos % _Bitsperword)) != 0; }
 
-    enum : uint32_t
-    {
-        _Bitsperword = CHAR_BIT * sizeof (word_type),
-        _Words = N == 0 ? 0 : (N - 1) / _Bitsperword
-    };
+    static constexpr ptrdiff_t _Bitsperword   = CHAR_BIT * sizeof(word_type);
+    static constexpr ptrdiff_t _Words         = _Bits == 0 ? 0 : (_Bits - 1) / _Bitsperword; // NB: number of words - 1
+    static constexpr bool _Need_mask          = _Bits < CHAR_BIT * sizeof(unsigned long long);
+    static constexpr unsigned long long _Mask = (1ULL << (_Need_mask ? _Bits : 0)) - 1ULL;
 
-    NH3API_CONSTEXPR_CPP_14 void _Tidy(word_type value = 0) NH3API_NOEXCEPT
+    template<class TraitsType, class CharType> NH3API_FORCEINLINE
+    void _Construct(const CharType* ptr,
+                    typename std::basic_string_view<CharType, TraitsType>::size_type count,
+                    const CharType zero,
+                    const CharType one)
     {
-        for (int i = _Words; 0 <= i; --i)
-            _array[i] = value;
-        if (value != 0)
-            _Trim();
+        if ( count > _Bits )
+        {
+            for ( size_t _Idx = _Bits; _Idx < count; ++_Idx )
+            {
+                const auto _Ch = ptr[_Idx];
+                if ( !TraitsType::eq(one, _Ch) && !TraitsType::eq(zero, _Ch) )
+                    _Throw_invalid_char();
+            }
+
+            count = _Bits;
+        }
+
+        size_t _Wpos = 0;
+        if ( count != 0 )
+        {
+            size_t    _Bits_used_in_word = 0;
+            auto      _Last              = ptr + count;
+            word_type _This_word         = 0;
+            do
+            {
+                --_Last;
+                const auto _Ch  = *_Last;
+                _This_word     |= static_cast<word_type>(TraitsType::eq(one, _Ch)) << _Bits_used_in_word;
+                if ( !TraitsType::eq(one, _Ch) && !TraitsType::eq(zero, _Ch) )
+                    _Throw_invalid_char();
+
+                if ( ++_Bits_used_in_word == _Bitsperword )
+                {
+                    _Array[_Wpos] = _This_word;
+                    ++_Wpos;
+                    _This_word         = 0;
+                    _Bits_used_in_word = 0;
+                }
+            }
+            while ( ptr != _Last );
+
+            if ( _Bits_used_in_word != 0 )
+            {
+                _Array[_Wpos] = _This_word;
+                ++_Wpos;
+            }
+        }
+
+        for ( ; _Wpos <= _Words; ++_Wpos )
+            _Array[_Wpos] = 0;
     }
 
-    NH3API_CONSTEXPR_CPP_14 void _Trim() NH3API_NOEXCEPT
+    // clear any trailing bits in last word
+    constexpr void _Trim() noexcept
     {
-        NH3API_IF_CONSTEXPR (N % _Bitsperword != 0)
-            _array[_Words] &= ((word_type)1 << N % _Bitsperword) - 1;
+        constexpr bool _Work_to_do = _Bits == 0 || _Bits % _Bitsperword != 0;
+        if constexpr (_Work_to_do)
+            _Array[_Words] &= (word_type{1} << _Bits % _Bitsperword) - 1;
     }
 
-    NH3API_FORCEINLINE static void _Throw_invalid_char() 
+    // set bit at _Pos to _Val, no checking
+    constexpr exe_bitset& _Set_unchecked(const size_t _Pos, const bool _Val) noexcept
+    {
+        auto& _Selected_word = _Array[_Pos / _Bitsperword];
+        const auto _Bit      = word_type{1} << _Pos % _Bitsperword;
+        if (_Val)
+            _Selected_word |= _Bit;
+        else
+            _Selected_word &= ~_Bit;
+
+        return *this;
+    }
+
+    // flip bit at _Pos, no checking
+    constexpr exe_bitset& _Flip_unchecked(const size_t _Pos) noexcept
+    {
+        _Array[_Pos / _Bitsperword] ^= word_type{1} << _Pos % _Bitsperword;
+        return *this;
+    }
+
+    [[noreturn]] NH3API_FORCEINLINE static void _Throw_invalid_char() noexcept(false)
     { NH3API_THROW(std::invalid_argument, "bitset construction failure: invalid bitset char"); }
 
-    NH3API_FORCEINLINE static void _Throw_ulong_conversion_overflow()
+    [[noreturn]] NH3API_FORCEINLINE static void _Throw_ulong_conversion_overflow() noexcept(false)
     { NH3API_THROW(std::overflow_error, "bitset::to_ulong conversion overflow"); }
 
-    NH3API_FORCEINLINE static void _Throw_ullong_conversion_overflow()
+    [[noreturn]] NH3API_FORCEINLINE static void _Throw_ullong_conversion_overflow() noexcept(false)
     { NH3API_THROW(std::overflow_error, "bitset::to_ullong conversion overflow"); }
 
-    NH3API_FORCEINLINE static void _Throw_invalid_subscript()
+    [[noreturn]] NH3API_FORCEINLINE static void _Throw_invalid_subscript() noexcept(false)
     { NH3API_THROW(std::out_of_range, "invalid bitset position"); }
 
-    #if NH3API_STD_HASH
-    NH3API_CONSTEXPR_CPP_14 size_t _Hash_code() NH3API_NOEXCEPT 
-    { 
+    [[nodiscard]] constexpr size_t _Hash_code() noexcept
+    {
         nh3api::default_hash hasher;
-        hasher.update(&_array[0], _Words + 1);
+        hasher.update(&_Array[0], _Words + 1);
         return hasher.digest();
     }
 
     // allow access to _Hash_code() for std::hash
-    friend std::hash< exe_bitset<N> >;
-    #endif
+    friend std::hash< exe_bitset<_Bits> >;
 
     template<typename StringT> NH3API_FORCEINLINE
     StringT _To_std_string(
-        typename StringT::value_type zero = typename StringT::value_type('0'), 
+        typename StringT::value_type zero = typename StringT::value_type('0'),
         typename StringT::value_type one = typename StringT::value_type('1')) const
     {
-        StringT result(N, zero);
+        StringT result(_Bits, zero);
         typename StringT::value_type* dst = const_cast<typename StringT::value_type*>(result.c_str());
-        for (size_t i = N; 0 < i; ++dst )
-            *dst = _At(--i) ? one : zero;
+        for (size_t i = _Bits; 0 < i; ++dst )
+            *dst = _Subscript(--i) ? one : zero;
         return result;
     }
 
-    friend exe_bitset_to_string_helper<N>;
+    friend exe_bitset_to_string_helper<_Bits>;
 
     // bit array
-    word_type _array[_Words + 1];
+    word_type _Array[_Words + 1];
 };
 #pragma pack(pop)
+
+template<size_t N>
+inline constexpr exe_bitset<N> operator&(const exe_bitset<N>& lhs, const exe_bitset<N>& rhs) noexcept
+{
+    exe_bitset<N> result = lhs;
+    result &= rhs;
+    return result;
+}
+
+template<size_t N>
+inline constexpr exe_bitset<N> operator|(const exe_bitset<N>& lhs, const exe_bitset<N>& rhs) noexcept
+{
+    exe_bitset<N> result = lhs;
+    result |= rhs;
+    return result;
+}
+
+template<size_t N>
+inline constexpr exe_bitset<N> operator^(const exe_bitset<N>& lhs, const exe_bitset<N>& rhs) noexcept
+{
+    exe_bitset<N> result = lhs;
+    result ^= rhs;
+    return result;
+}
 
 #if NH3API_STD_HASH
 // std::hash support for exe_bitset
@@ -454,7 +670,7 @@ template<size_t N>
 struct std::hash< exe_bitset<N> >
 {
     public:
-        size_t operator()(const exe_bitset<N>& arg) NH3API_NOEXCEPT
+        size_t operator()(const exe_bitset<N>& arg) noexcept
         { return arg._Hash_code(); }
 };
 #endif

@@ -18,48 +18,53 @@ template <typename T>
 class TRefCountingPtr
 {
 protected:
-    NH3API_STATIC_ASSERT("TRefCountingPtr<T> can't store const element", !nh3api::tt::is_const<T>::value);
-    NH3API_STATIC_ASSERT("TRefCountingPtr<T> can't store non-objects", nh3api::tt::is_object<T>::value);
+    static_assert(!std::is_const_v<T>, "TRefCountingPtr<T> can't store const element");
+    static_assert(std::is_object_v<T>, "TRefCountingPtr<T> can't store non-objects");
 
 public:
-    TRefCountingPtr() 
-    NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_default_constructible<T>::value)
-        : m_pWrapper(new (exe_heap) _TWrapper)
+    using pointer = T*;
+    using element_type = T;
+
+    TRefCountingPtr() noexcept
+        : m_pWrapper(nullptr)
     {}
 
-    explicit TRefCountingPtr(T const& value) 
-    NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<T>::value)
-        : m_pWrapper(new (exe_heap) _TWrapper(value) )
+    TRefCountingPtr(std::nullptr_t) noexcept
+        : m_pWrapper(nullptr)
     {}
 
-    TRefCountingPtr(TRefCountingPtr const& other) 
-    NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<T>::value)
+    explicit TRefCountingPtr(const T& value)
+    noexcept(noexcept(std::is_nothrow_copy_constructible_v<T>))
+        : m_pWrapper(new (exe_heap) _TWrapper(value))
+    {}
+
+    explicit TRefCountingPtr(const TRefCountingPtr& other)
+    noexcept(noexcept(std::is_nothrow_copy_constructible_v<T>))
         : m_pWrapper(other.m_pWrapper)
+    {
+        ++this->m_pWrapper->m_refCnt;
+    }
+
+    explicit TRefCountingPtr(TRefCountingPtr&& other) noexcept
+        : m_pWrapper(std::exchange(other.m_pWrapper, nullptr))
     {}
 
-    #if NH3API_STD_MOVE_SEMANTICS
-    TRefCountingPtr(TRefCountingPtr&& other) NH3API_NOEXCEPT
-        : m_pWrapper(nh3api::exchange(other.m_pWrapper, nullptr))
-    {}
-
-    TRefCountingPtr& operator=(TRefCountingPtr&& other) NH3API_NOEXCEPT
+    TRefCountingPtr& operator=(TRefCountingPtr&& other)
+    noexcept(noexcept(std::is_nothrow_destructible_v<T>))
     {
         if (this != &other)
         {
-            release();
-            this->m_pWrapper = nh3api::exchange(other.m_pWrapper, nullptr);
+            reset();
+            this->m_pWrapper = std::exchange(other.m_pWrapper, nullptr);
         }
         return *this;
     }
-    #endif
 
-    ~TRefCountingPtr() NH3API_NOEXCEPT
-    {
-        release();
-    }
+    ~TRefCountingPtr()
+    noexcept(noexcept(std::is_nothrow_destructible_v<T>))
+    { reset(); }
 
-public:
-    T* get() NH3API_NOEXCEPT
+    [[nodiscard]] T* get() noexcept
     {
         if ( m_pWrapper == nullptr )
             return nullptr;
@@ -73,124 +78,181 @@ public:
         return &m_pWrapper->m_object;
     }
 
-    T const* get() const NH3API_NOEXCEPT
+    [[nodiscard]] T const* get() const noexcept
     { return m_pWrapper ? &m_pWrapper->m_object : nullptr; }
 
-    TRefCountingPtr& operator=(TRefCountingPtr const& other) NH3API_NOEXCEPT
+    TRefCountingPtr& operator=(TRefCountingPtr const& other)
+    noexcept(noexcept(std::is_nothrow_destructible_v<T>))
     {
-        if (this != &other)
+        if (this != &other && this->m_pWrapper && other.m_pWrapper)
         {
-            _TWrapper* oldWrapper = m_pWrapper;
             if (other.m_pWrapper)
                 ++other.m_pWrapper->m_refCnt;
-            
-            m_pWrapper = other.m_pWrapper;
-            if (oldWrapper)
-                release(oldWrapper);
+
+            reset();
+            this->m_pWrapper = other.m_pWrapper;
         }
         return *this;
     }
 
-    T&	operator*() NH3API_NOEXCEPT
+    [[nodiscard]] T& operator*() noexcept
     { return *get(); }
 
-    const T& operator*() const NH3API_NOEXCEPT
+    [[nodiscard]] const T& operator*() const noexcept
     { return *get(); }
 
-    T*	operator->()  NH3API_NOEXCEPT
+    [[nodiscard]] T* operator->()  noexcept
     { return get(); }
 
-    const T* operator->() const NH3API_NOEXCEPT
+    [[nodiscard]] const T* operator->() const noexcept
     { return get(); }
 
-    #if NH3API_CHECK_CPP11
-    explicit
-    #endif
-    operator bool() const NH3API_NOEXCEPT
+    [[nodiscard]] explicit operator bool() const noexcept
     { return get(); }
+
+    inline void swap(TRefCountingPtr& other) noexcept
+    { std::swap(this->m_pWrapper, other.m_pWrapper); }
 
 public: // private
     struct _TWrapper
     {
         _TWrapper()
-        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_default_constructible<T>::value)
+        noexcept(noexcept(std::is_nothrow_default_constructible_v<T>))
             : m_refCnt(1), m_object()
         {}
 
-        _TWrapper(const T& value)
-        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_copy_constructible<T>::value)
+        explicit _TWrapper(const T& value)
+        noexcept(noexcept(std::is_nothrow_copy_constructible_v<T>))
             : m_refCnt(1), m_object(value)
         {}
 
-        _TWrapper(_TWrapper&& other)
-        NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_move_constructible<T>::value)
-            : m_refCnt(nh3api::exchange(other.m_refCnt, 1)), m_object(std::move(other.m_object))
+        explicit _TWrapper(_TWrapper&& other)
+        noexcept(noexcept(std::is_nothrow_move_constructible_v<T>))
+            : m_refCnt(std::exchange(other.m_refCnt, 1)), m_object(std::move(other.m_object))
         {}
 
-        NH3API_NODISCARD size_t refcount() const NH3API_NOEXCEPT
+        // Warning! Does not affect reference counting
+        explicit _TWrapper(const _TWrapper& other)
+        noexcept(noexcept(std::is_nothrow_copy_constructible_v<T>))
+            : m_refCnt(other.m_refCnt), m_object(other.m_object)
+        {}
+
+        // Warning! Does not affect reference counting
+        _TWrapper& operator=(const _TWrapper& other)
+        noexcept(noexcept(std::is_nothrow_copy_assignable_v<T>))
+        {
+            this->m_refCnt = other.m_refCnt;
+            this->m_object = other.m_object;
+        }
+
+        _TWrapper& operator=(_TWrapper&& other)
+        noexcept(noexcept(std::is_nothrow_move_assignable_v<T>))
+        {
+            this->m_refCnt = std::exchange(other.m_refCnt, 1);
+            this->m_object = std::move(other.m_object);
+        }
+
+        [[nodiscard]] size_t refcount() const noexcept
         { return m_refCnt; }
 
-        ~_TWrapper() NH3API_NOEXCEPT_EXPR(nh3api::tt::is_nothrow_destructible<T>::value)
-        #if NH3API_CHECK_CPP11
-        = default;
-        #else 
-        {}
-        #endif
+        ~_TWrapper() noexcept(noexcept(std::is_nothrow_destructible_v<T>)) = default;
 
         friend class TRefCountingPtr<T>;
 
     private:
         size_t m_refCnt;
         T      m_object;
-    };
+    }; // _TWrapper
 
-    _TWrapper*	m_pWrapper;
+    _TWrapper* m_pWrapper;
 
-public: 
-    void release() NH3API_NOEXCEPT 
+public:
+    pointer release()
+    noexcept(noexcept(std::is_nothrow_destructible_v<T>))
     {
-        if (m_pWrapper)
+        if ( m_pWrapper == nullptr )
+            return nullptr;
+
+        if ( m_pWrapper->m_refCnt > 1 )
+            split();
+
+        return std::exchange(m_pWrapper, nullptr);
+    }
+
+    void reset(const T& value)
+    noexcept(noexcept(
+        std::is_nothrow_copy_assignable_v<T>
+        && std::is_nothrow_copy_constructible_v<T>
+    ))
+    {
+        if (this->m_pWrapper == nullptr)
+            return;
+
+        if ( this->m_pWrapper->m_refCnt > 1 )
         {
-            release(m_pWrapper);
-            m_pWrapper = nullptr;
+            _TWrapper* pNewWrapper = new (exe_heap) _TWrapper(value);
+            if ( pNewWrapper == nullptr )
+                return;
+            --this->m_pWrapper->m_refCnt;
+            this->m_pWrapper = pNewWrapper;
+        }
+        else
+        {
+            this->m_pWrapper->m_object = value;
         }
     }
 
-    void release(_TWrapper* wrapper) NH3API_NOEXCEPT
+    void reset() noexcept
     {
-        if (--wrapper->m_refCnt == 0)
-        {
-            nh3api::destroy_at(&wrapper->m_object);
-            exe_delete(wrapper);
-        }
-    }
+        if ( m_pWrapper == nullptr )
+            return;
 
-    bool split() NH3API_NOEXCEPT
-    {
-        if (!m_pWrapper)
-            return false; 
-
-        _TWrapper* pNewWrapper = new (exe_heap) _TWrapper(m_pWrapper->m_object);
-        if ( pNewWrapper == nullptr )
-            return false;
-        
-        pNewWrapper->m_refCnt = 1;
-        
-        if ( --m_pWrapper->m_refCnt == 0)
+        if ( --this->m_pWrapper->m_refCnt == 0 )
         {
-            nh3api::destroy_at(&m_pWrapper->m_object);
+            std::destroy_at(&m_pWrapper->m_object);
             exe_delete(m_pWrapper);
         }
+    }
 
-        m_pWrapper = pNewWrapper;
+    bool split() noexcept
+    {
+        if (this->m_pWrapper == nullptr)
+            return false;
+
+        _TWrapper* pNewWrapper = new (exe_heap) _TWrapper(this->m_pWrapper->m_object);
+        if ( pNewWrapper == nullptr )
+            return false;
+
+        --this->m_pWrapper->m_refCnt;
+        this->m_pWrapper = pNewWrapper;
         return true;
     }
 };
 
 template <typename T>
-bool operator==(const TRefCountingPtr<T>& left, const TRefCountingPtr<T>& right)
+inline void swap(TRefCountingPtr<T>& lhs, TRefCountingPtr<T>& rhs) noexcept
+{ lhs.swap(rhs); }
+
+template <typename T>
+bool operator==(const TRefCountingPtr<T>& left, const TRefCountingPtr<T>& right) noexcept
 { return left.get() == right.get(); }
 
 template <typename T>
-bool operator!=(const TRefCountingPtr<T>& left, const TRefCountingPtr<T>& right)
+bool operator!=(const TRefCountingPtr<T>& left, const TRefCountingPtr<T>& right) noexcept
 { return left.get() != right.get(); }
+
+template <typename T>
+bool operator<(const TRefCountingPtr<T>& left, const TRefCountingPtr<T>& right) noexcept
+{ return left.get() < right.get(); }
+
+template <typename T>
+bool operator<=(const TRefCountingPtr<T>& left, const TRefCountingPtr<T>& right) noexcept
+{ return left.get() <= right.get(); }
+
+template <typename T>
+bool operator>(const TRefCountingPtr<T>& left, const TRefCountingPtr<T>& right) noexcept
+{ return left.get() > right.get(); }
+
+template <typename T>
+bool operator>=(const TRefCountingPtr<T>& left, const TRefCountingPtr<T>& right) noexcept
+{ return left.get() >= right.get(); }

@@ -217,7 +217,7 @@ struct CNetMsgHandler
         bool m_inPopup;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_5[3];
 
     public:

@@ -13,41 +13,41 @@
 
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 
-typedef void (__cdecl* exe_PHNDLR)(int32_t);
-typedef void (__cdecl* exe_new_handler)();
-typedef void (__cdecl* exe_se_translator)(uint32_t, EXCEPTION_POINTERS*);
-typedef void (__cdecl* exe_atexit_func_t)(void);
-typedef void (__cdecl* exe_beginthread_func_t)(void);
-typedef uint32_t (__stdcall* exe_beginthreadex_func_t)(void);
+using exe_PHNDLR = void (__cdecl*)(int32_t);
+using exe_new_handler = void (__cdecl*)();
+using exe_se_translator = void (__cdecl*)(uint32_t, EXCEPTION_POINTERS*);
+using exe_atexit_func_t = void (__cdecl*)(void);
+using exe_beginthread_func_t = void (__cdecl*)(void);
+using exe_beginthreadex_func_t = uint32_t (__stdcall*)(void);
 
 NH3API_FORCEINLINE
 // address: 0x6193EA
 // Heroes3.exe internal exit
-void __cdecl exe_exit(int32_t code) NH3API_NOEXCEPT
+void __cdecl exe_exit(int32_t code) noexcept
 { CDECL_1(void,  0x6193EA, code); }
 
 NH3API_FORCEINLINE
 // address: 0x617F03
 // Heroes3.exe internal atexit
-int __cdecl exe_atexit(exe_atexit_func_t func) NH3API_NOEXCEPT
+int __cdecl exe_atexit(exe_atexit_func_t func) noexcept
 { return CDECL_1(int, 0x617F03, func); }
 
 NH3API_FORCEINLINE
 // address: 0x61D9CA
 // Heroes3.exe internal terminate
-void __cdecl /*__noreturn*/ exe_terminate() NH3API_NOEXCEPT
+void __cdecl /*__noreturn*/ exe_terminate() noexcept
 { CDECL_0(void, 0x61D9CA); }
 
 NH3API_FORCEINLINE
 // address: 0x624F26
 // Heroes3.exe internal abort
-void __cdecl exe_abort() NH3API_NOEXCEPT
+void __cdecl exe_abort() noexcept
 { CDECL_0(void, 0x624F26); }
 
 NH3API_FORCEINLINE
 // address: 0x618370
 // Heroes3.exe internal __purecall
-void __cdecl exe_purecall() NH3API_NOEXCEPT
+void __cdecl exe_purecall() noexcept
 { CDECL_0(void, 0x618370); }
 
 NH3API_FORCEINLINE
@@ -58,7 +58,7 @@ uintptr_t __cdecl exe_beginthreadex(SECURITY_ATTRIBUTES* security,
                                     exe_beginthreadex_func_t start_address,
                                     void* arglist,
                                     uint32_t initflag,
-                                    uint32_t* thrdaddr) NH3API_NOEXCEPT
+                                    uint32_t* thrdaddr) noexcept
 { return CDECL_6(uintptr_t, 0x61A433, security, stack_size, start_address, arglist, initflag, thrdaddr); }
 
 NH3API_FORCEINLINE
@@ -252,5 +252,29 @@ exe_se_translator exe_set_se_translator(exe_tiddata* curr, exe_se_translator tra
     curr->_translator = translator;
     return old_translator;
 }
+
+NH3API_FORCEINLINE
+// address: 0x61B15C
+// Heroes3.exe internal setlocale
+char* exe_setlocale(int category, const char* locale) noexcept
+{ return CDECL_2(char*, 0x61B15C, category, locale); }
+
+NH3API_FORCEINLINE
+// address: 0x619E9E
+// Heroes3.exe internal _errno
+int32_t* exe_errno() noexcept
+{ return CDECL_0(int32_t*, 0x619E9E); }
+
+NH3API_FORCEINLINE
+// address: 0x620429
+// Heroes3.exe internal _set_errno
+errno_t exe_set_errno(int32_t error_value) noexcept
+{ return CDECL_1(int32_t, 0x620429, error_value); }
+
+NH3API_FORCEINLINE
+// address: 0x626267
+// Heroes3.exe internal __crtMessageBoxA
+int32_t exe_crtMessageBoxA(const char* lpText, const char* lpCaption, uint32_t uType) noexcept
+{ return CDECL_3(int32_t, 0x626267, lpText, lpCaption, uType); }
 
 NH3API_DISABLE_WARNING_END

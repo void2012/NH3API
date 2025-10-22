@@ -71,7 +71,7 @@ public:
     bool available;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     byte_t gap_4D1[3];
 
 };
@@ -89,16 +89,21 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
         NH3API_FORCEINLINE
         TCampaignBrief(bool newCampaign, int32_t bViewFromGame) 
         NH3API_NOEXCEPT_EXPR(false) // TGzInflateBuf may throw TGzInflateBuf::TDataError, std::filebuf::_Initcvt may throw std::bad_cast
-        NH3API_DELEGATE_DUMMY_OR_BASE(TCampaignBrief, heroWindow)
+        NH3API_DELEGATE_DUMMY_BASE(TCampaignBrief)
         { THISCALL_3(void, 0x458DA0, this, newCampaign, bViewFromGame); }
 
         NH3API_FORCEINLINE
-        TCampaignBrief(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TCampaignBrief(const ::nh3api::dummy_tag_t& tag) noexcept
             : heroWindow(tag), scenarios(tag)
         {}
 
+        TCampaignBrief(const TCampaignBrief&) = delete;
+        TCampaignBrief& operator=(const TCampaignBrief&) = delete;
+        TCampaignBrief(TCampaignBrief&&) = delete;
+        TCampaignBrief& operator=(TCampaignBrief&&) = delete;
+
         NH3API_FORCEINLINE
-        ~TCampaignBrief() NH3API_NOEXCEPT
+        ~TCampaignBrief() noexcept
         { THISCALL_1(void, 0x45AC90, this); }
     
     public:
@@ -168,7 +173,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
             EGameDifficulty difficulty;
 
         protected:
-            NH3API_MAYBE_UNUSED
+            [[maybe_unused]]
             byte_t gap_3A[2];
 
         public:
@@ -208,7 +213,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
             bool retain_artifacts;
 
         protected:
-            NH3API_MAYBE_UNUSED
+            [[maybe_unused]]
             byte_t gap_49[3];
 
         public:
@@ -249,7 +254,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
                 { THISCALL_1(void, 0x4883C0, this); }
 
                 NH3API_FORCEINLINE
-                CampaignHeaderStruct(const nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+                CampaignHeaderStruct(const nh3api::dummy_tag_t& tag) noexcept
                     : file_name(tag),
                       campaign_name(tag),
                       campaign_desc(tag),
@@ -257,7 +262,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
                 {} 
 
                 NH3API_FORCEINLINE
-                ~CampaignHeaderStruct() NH3API_NOEXCEPT 
+                ~CampaignHeaderStruct() noexcept 
                 { THISCALL_1(void, 0x4881E0, this); }
                 
             public:
@@ -300,13 +305,12 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
                 bool variable_difficulty;
 
             protected:
-                NH3API_MAYBE_UNUSED
+                [[maybe_unused]]
                 byte_t gap_55[3];
 
             public:
                 // offset: +0x58 = +88,  size = 0x4 = 4
                 int32_t campaign_music;
-
         };
 
     public:
@@ -329,7 +333,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
         CampaignHeaderStruct* campaign;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x68 = +104,  size = 0x4 = 4
         int32_t unknown;
 
@@ -378,7 +382,7 @@ public:
     bool completed;
 
 protected:
-    NH3API_MAYBE_UNUSED
+    [[maybe_unused]]
     byte_t gap_1[3];
 
 public:
@@ -413,12 +417,12 @@ struct SCampaign
 {
     public:
         NH3API_FORCEINLINE
-        SCampaign() NH3API_NOEXCEPT
+        SCampaign() noexcept
         NH3API_DELEGATE_DUMMY(SCampaign)
         { THISCALL_1(void, 0x489040, this); }
 
         NH3API_FORCEINLINE
-        SCampaign(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        SCampaign(const ::nh3api::dummy_tag_t& tag) noexcept
             : CampaignFilename(tag),
               carryover_pool(tag),
               carryover_artifact(tag),
@@ -426,12 +430,17 @@ struct SCampaign
               assigned_carryover(tag)
         {}
 
+        SCampaign(const SCampaign&)                = default;
+        SCampaign& operator=(const SCampaign&)     = default;
+        SCampaign(SCampaign&&) noexcept            = default;
+        SCampaign& operator=(SCampaign&&) noexcept = default;
+
         // we don't wrap non-trivial members in union because there is no destructor 
         // available in the game as a standalone function, as it was inlined inside of game::game()
         NH3API_DEFAULT_DESTRUCTOR(SCampaign)
 
     public:
-        NH3API_NODISCARD bool CampaignComplete() const
+        [[nodiscard]] bool CampaignComplete() const
         { return THISCALL_1(bool, 0x489310, this); }
 
     public:
@@ -451,7 +460,7 @@ struct SCampaign
         int8_t iCurMap;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x3 = +3,  size = 0x1 = 1
         byte_t gap_3[1];
 
@@ -462,7 +471,7 @@ struct SCampaign
         ECampaignType iCurrentCampaign;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // Number of campaign regions(unused) /
         // Кол-во регионов кампании(не используется).
         // offset: +0x8 = +8,  size = 0x4 = 4
@@ -473,7 +482,7 @@ struct SCampaign
         int8_t iCrossoverArrayIndex;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_D[3];
 
     public:
@@ -493,7 +502,7 @@ struct SCampaign
         std::array<bool, 21> bCampaignCompleted;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x39 = +57,  size = 0x3 = 3
         byte_t gap_39[3];
 
@@ -501,12 +510,12 @@ struct SCampaign
         // Crossover heroes /
         // Переходящие в другой сценарий герои.
         // offset: +0x3C = +60,  size = 0x10 = 16
-        exe_vector< exe_vector<hero> > carryover_pool;
+        exe_vector<exe_vector<hero>> carryover_pool;
 
         // Crossover artifacts /
         // Переходящие в другой сценарий артефакты.
         // offset: +0x4C = +76,  size = 0x10 = 16
-        exe_vector< exe_vector<type_artifact> > carryover_artifact;
+        exe_vector<exe_vector<type_artifact>> carryover_artifact;
 
         // Campaign scenarios /
         // Сценарии кампании.
@@ -514,7 +523,7 @@ struct SCampaign
         exe_vector<CampaignScenarioInfo> scenarios;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x6C = +108,  size = 0x10 = 16
         exe_vector<int32_t> assigned_carryover;
 

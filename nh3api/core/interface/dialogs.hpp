@@ -18,21 +18,25 @@ NH3API_VIRTUAL_CLASS TResourceDisplay : public TSubWindow
     public:
         struct vftable_t : public TSubWindow::vftable_t {};
 
-        TResourceDisplay() NH3API_DELETED_FUNCTION
+        TResourceDisplay() = delete;
+        TResourceDisplay(const TResourceDisplay&)            = delete;
+        TResourceDisplay(TResourceDisplay&&)                 = delete;
+        TResourceDisplay& operator=(const TResourceDisplay&) = delete;
+        TResourceDisplay& operator=(TResourceDisplay&&)      = delete;
 
     public:
         NH3API_FORCEINLINE
-        TResourceDisplay(heroWindow* parent, bool is_small) NH3API_NOEXCEPT
+        TResourceDisplay(heroWindow* parent, bool is_small) noexcept
             : TSubWindow(::nh3api::dummy_tag)
         { THISCALL_3(void, 0x558DF0, this, parent, is_small); }
 
         NH3API_FORCEINLINE
-        TResourceDisplay(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TResourceDisplay(const ::nh3api::dummy_tag_t& tag) noexcept
             : TSubWindow(tag)
         {}
 
         NH3API_FORCEINLINE
-        ~TResourceDisplay() NH3API_NOEXCEPT 
+        ~TResourceDisplay() noexcept 
         { THISCALL_1(void, 0x5590D0, this); }
 
     public:
@@ -52,7 +56,7 @@ NH3API_VIRTUAL_CLASS TResourceDisplay : public TSubWindow
         bool IsSmall;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_35[3];
 
     public:
@@ -82,20 +86,24 @@ NH3API_VIRTUAL_CLASS type_bottom_view_window : public TSubWindow
             void (__thiscall* animate)(type_bottom_view_window* );
         };
 
-        type_bottom_view_window() NH3API_DELETED_FUNCTION
+        type_bottom_view_window() = delete;
+        type_bottom_view_window(const type_bottom_view_window&)            = delete;
+        type_bottom_view_window(type_bottom_view_window&&)                 = delete;
+        type_bottom_view_window& operator=(const type_bottom_view_window&) = delete;
+        type_bottom_view_window& operator=(type_bottom_view_window&&)      = delete;
 
     public:
         NH3API_FORCEINLINE
-        type_bottom_view_window(heroWindow* parent_window) NH3API_NOEXCEPT
+        type_bottom_view_window(heroWindow* parent_window) noexcept
         { THISCALL_2(void, 0x451EC0, this, parent_window); }
 
         NH3API_FORCEINLINE
-        type_bottom_view_window(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        type_bottom_view_window(const ::nh3api::dummy_tag_t&) noexcept
             : TSubWindow(::nh3api::dummy_tag)
         {}
 
         NH3API_FORCEINLINE
-        ~type_bottom_view_window() NH3API_NOEXCEPT 
+        ~type_bottom_view_window() noexcept 
         { THISCALL_1(void, 0x450A20, this); }
 
     public:
@@ -120,17 +128,17 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
 
     public:
         NH3API_FORCEINLINE
-        TAdventureMapWindow() NH3API_NOEXCEPT
+        TAdventureMapWindow() noexcept
             : heroWindow(::nh3api::dummy_tag)
         { THISCALL_1(TAdventureMapWindow*, 0x401510, this); }
 
         NH3API_FORCEINLINE
-        TAdventureMapWindow(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        TAdventureMapWindow(const ::nh3api::dummy_tag_t& tag) noexcept
             : heroWindow(tag)
         {}
 
         NH3API_FORCEINLINE
-        ~TAdventureMapWindow() NH3API_NOEXCEPT 
+        ~TAdventureMapWindow() noexcept 
         { THISCALL_1(void, 0x402B10, this); }
 
     public:
@@ -232,7 +240,7 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
         bool animate_in_background;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         byte_t gap_6D[3];
 
     public:

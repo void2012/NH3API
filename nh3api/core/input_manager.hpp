@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <array>
 #include "base_manager.hpp" // baseManager
 #include "events.hpp" // message
 
@@ -116,12 +117,12 @@ NH3API_VIRTUAL_CLASS inputManager : public baseManager
 {
     public:
         NH3API_FORCEINLINE
-        inputManager() NH3API_NOEXCEPT
+        inputManager() noexcept
             : baseManager(::nh3api::dummy_tag)
         { THISCALL_1(void, 0x4EC540, this); }
 
         NH3API_FORCEINLINE
-        inputManager(const ::nh3api::dummy_tag_t& tag) NH3API_NOEXCEPT
+        inputManager(const ::nh3api::dummy_tag_t& tag) noexcept
             : baseManager(tag)
         {}
 
@@ -129,7 +130,7 @@ NH3API_VIRTUAL_CLASS inputManager : public baseManager
         void Flush()
         { THISCALL_1(void, 0x4EC640, this); }
 
-        NH3API_NODISCARD message GetEvent()
+        [[nodiscard]] message GetEvent()
         {
             message result(::nh3api::dummy_tag);
             THISCALL_2(void, 0x4EC660, this, &result);
@@ -207,7 +208,7 @@ NH3API_VIRTUAL_CLASS inputManager : public baseManager
 
 NH3API_SIZE_ASSERT(0x960, inputManager);
 
-NH3API_INLINE_OR_EXTERN
+inline
 inputManager* const& gpInputManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x699530, inputManager*));
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63FE10, inputManager)

@@ -9,8 +9,9 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <array>
 #include "nh3api_std/memory.hpp" // std::array<T, N>, THISCALL_ macros
-#include "nh3api_std/nh3api_std.hpp"
+#include "nh3api_std/stl_extras.hpp" // byte_t
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -40,27 +41,28 @@ struct hexcell
 {
     public:
         NH3API_FORCEINLINE
-        hexcell() NH3API_NOEXCEPT
+        hexcell() noexcept
         NH3API_DELEGATE_DUMMY(hexcell)
         { THISCALL_1(void, 0x4E7210, this); }
 
         NH3API_FORCEINLINE
-        hexcell(const ::nh3api::dummy_tag_t&) NH3API_NOEXCEPT
+        hexcell(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
-        NH3API_NODISCARD bool HasArmy() const
+    public:
+        [[nodiscard]] bool HasArmy() const
         { return armyGrp > 0; }
 
-        NH3API_NODISCARD army* get_army()
+        [[nodiscard]] army* get_army()
         { return THISCALL_1(army*, 0x4E7230, this); }
 
-        NH3API_NODISCARD const army* get_army() const
+        [[nodiscard]] const army* get_army() const
         { return THISCALL_1(army*, 0x4E7230, this); }
 
-        NH3API_NODISCARD army* get_dead_army(uint32_t i)
+        [[nodiscard]] army* get_dead_army(uint32_t i)
         { return THISCALL_2(army*, 0x4E7270, this, i); }
 
-        NH3API_NODISCARD const army* get_dead_army(uint32_t i) const
+        [[nodiscard]] const army* get_dead_army(uint32_t i) const
         { return THISCALL_2(army*, 0x4E7270, this, i); }
 
     public:
@@ -86,7 +88,7 @@ struct hexcell
         int16_t fullHexBRY;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0xD = +13,  size = 0x2 = 2
         byte_t gap_D[2];
 
@@ -117,7 +119,7 @@ struct hexcell
         int8_t partOfDouble;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x1B = +27,  size = 0x2 = 2
         byte_t gap_1B[1];
 
@@ -147,7 +149,7 @@ struct hexcell
         int8_t background_offset;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x4E = +78,  size = 0x2 = 2
         byte_t gap_4E[2];
 

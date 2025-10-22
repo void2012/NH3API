@@ -28,23 +28,27 @@ enum DialogReturnType : int32_t
 class heroWindowManager : public baseManager
 {
     public:
-        heroWindowManager() NH3API_DELETED_FUNCTION
-        ~heroWindowManager() NH3API_DELETED_FUNCTION
+        heroWindowManager() = delete;
+        heroWindowManager(const heroWindowManager&) = delete;
+        heroWindowManager(heroWindowManager&&)                 = delete;
+        heroWindowManager& operator=(const heroWindowManager&) = delete;
+        heroWindowManager& operator=(heroWindowManager&&)      = delete;
+        ~heroWindowManager() = delete;
 
     public:
-        int32_t BroadcastMessage(int32_t command, int32_t subType, int32_t itemId, int32_t msgExtra) NH3API_NOEXCEPT
+        int32_t BroadcastMessage(int32_t command, int32_t subType, int32_t itemId, int32_t msgExtra) noexcept
         { return THISCALL_5(int32_t, 0x602930, this, command, subType, itemId, msgExtra); }
 
-        int32_t DoDialog(heroWindow* dialogWindow, int32_t (__thiscall* dialogFunction)(message*), bool32_t bFadeIn) NH3API_NOEXCEPT
+        int32_t DoDialog(heroWindow* dialogWindow, int32_t (__thiscall* dialogFunction)(message*), bool32_t bFadeIn) noexcept
         { return THISCALL_4(int32_t, 0x602AE0, this, dialogWindow, dialogFunction, bFadeIn); }
 
-        int32_t DoDialog(heroWindow* dialogWindow, int32_t (__thiscall* dialogFunction)(message&), bool32_t bFadeIn) NH3API_NOEXCEPT
+        int32_t DoDialog(heroWindow* dialogWindow, int32_t (__thiscall* dialogFunction)(message&), bool32_t bFadeIn) noexcept
         { return THISCALL_4(int32_t, 0x602AE0, this, dialogWindow, dialogFunction, bFadeIn); }
 
-        void DoQuickView(heroWindow* newWindow) NH3API_NOEXCEPT
+        void DoQuickView(heroWindow* newWindow) noexcept
         { THISCALL_2(void, 0x603000, this, newWindow); }
 
-        void FadeScreen(int32_t inOut, int32_t speed, bool expect_fadein) NH3API_NOEXCEPT
+        void FadeScreen(int32_t inOut, int32_t speed, bool expect_fadein) noexcept
         { THISCALL_4(void, 0x603210, this, inOut, speed, expect_fadein); }
 
     // virtual functions
@@ -78,7 +82,7 @@ class heroWindowManager : public baseManager
         bool isWaitingForFadeIn;
 
     protected:
-        NH3API_MAYBE_UNUSED
+        [[maybe_unused]]
         // offset: +0x49 = +73,  size = 0x3 = 3
         byte_t gap_49[3];
 
@@ -103,12 +107,8 @@ class heroWindowManager : public baseManager
 };
 #pragma pack(pop)
 
-NH3API_INLINE_OR_EXTERN
-heroWindowManager* const& gpWindowManager
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992D0, heroWindowManager*));
+inline heroWindowManager* const& gpWindowManager = get_global_var_ref(0x6992D0, heroWindowManager*);
 
-NH3API_INLINE_OR_EXTERN
-const uint32_t& giDialogTimeout
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977D4, const uint32_t));
+inline const uint32_t& giDialogTimeout = get_global_var_ref(0x6977D4, const uint32_t);
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x643D5C, heroWindowManager)
