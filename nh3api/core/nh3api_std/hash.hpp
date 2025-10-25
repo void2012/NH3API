@@ -10,7 +10,7 @@
 #pragma once
 
 #include <string_view>
-#ifdef __cpp_lib_ranges 
+#ifdef __cpp_lib_ranges
 #include <ranges>
 #endif
 #include "type_traits.hpp" // is_unsigned
@@ -136,11 +136,12 @@ constexpr NH3API_FORCEINLINE size_t hash_string(const wchar_t (&str)[size]) noex
     return hasher.digest();
 }
 
+/*
 #ifdef __cpp_lib_ranges
 template<::std::ranges::range Range>
 size_t hash_range(const Range& range)
 {
-    /*
+
     TODO: implement it
     using value_t = ::std::ranges::range_value_t<Range>;
     ::std::hash<value_t> hasher;
@@ -153,8 +154,9 @@ size_t hash_range(const Range& range)
         ++index;
     }
     return result;
-    */
+
 }
 #endif
+*/
 
 } // namespace nh3api

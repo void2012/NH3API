@@ -139,11 +139,11 @@ constexpr inline void verify_range_n(const IterT& _First, const _Size_type _N)
 #ifdef _MSVC_STL_UPDATE
 
 template<class IterT>
-_NODISCARD inline constexpr decltype(auto) unfancy(const IterT& _It) noexcept
+[[nodiscard]] inline constexpr decltype(auto) unfancy(const IterT& _It) noexcept
 { return ::std::_Get_unwrapped(_It); }
 
 template<class IterT>
-_NODISCARD inline constexpr decltype(auto) unfancy(const IterT&& _It) noexcept
+[[nodiscard]] inline constexpr decltype(auto) unfancy(const IterT&& _It) noexcept
 { return ::std::_Get_unwrapped(::std::forward<const IterT&&>(_It)); }
 
 #elif NH3API_CLANG_STL
@@ -151,8 +151,8 @@ _NODISCARD inline constexpr decltype(auto) unfancy(const IterT&& _It) noexcept
 template <class IterT,
           class _Impl = ::std::__unwrap_iter_impl<IterT>,
           ::std::__enable_if_t<::std::is_copy_constructible<IterT>::value, int> = 0>
-inline _LIBCPP_CONSTEXPR_SINCE_CXX14 decltype(_Impl::__unwrap(::std::declval<IterT>()))
-unfancy(IterT __i) _NOEXCEPT
+inline constexpr decltype(_Impl::__unwrap(::std::declval<IterT>()))
+unfancy(IterT __i) noexcept
 { return _Impl::__unwrap(__i); }
 
 #elif NH3API_GCC_STL
@@ -174,7 +174,7 @@ IterT unfancy(const IterT& iter) noexcept
 
 #ifdef __cpp_concepts
 template<tt::iterator_for_container PtrOrIterator>
-#else 
+#else
 template<typename PtrOrIterator, std::enable_if_t<tt::is_iterator_v<PtrOrIterator>, int> = 0>
 #endif
 [[nodiscard]] void* voidify(PtrOrIterator arg) noexcept
@@ -183,7 +183,7 @@ template<typename PtrOrIterator, std::enable_if_t<tt::is_iterator_v<PtrOrIterato
     {
         return arg;
     }
-    else  
+    else
     {
         return __builtin_addressof(*arg);
     }

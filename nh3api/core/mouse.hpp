@@ -10,7 +10,7 @@
 #pragma once
 
 #include "base_manager.hpp" // baseManager
-#include "nh3api_std/memory.hpp" // NH3API_SCALAR_DELETING_DESTRUCTOR
+#include "resources/resources.hpp" // CSprite
 
 #pragma pack(push, 4)
 // Mouse manager /
@@ -27,7 +27,7 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
 
     // enums
     public:
-        enum EPointerSet : int32_t 
+        enum EPointerSet : int32_t
         {
             SAME_SET         = -1, //
             INVALID_SET      = -1, //
@@ -53,7 +53,7 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
 
         NH3API_FORCEINLINE
         ~mouseManager() noexcept
-        { DeleteCriticalSection(&this->CriticalSection); }
+        { ::DeleteCriticalSection(&this->CriticalSection); }
 
     // member functions
     public:
@@ -89,9 +89,8 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
 
     // static variables
     public:
-        NH3API_INLINE_STATIC_VARIABLE
-        const std::array<const std::array<const POINT, 5>, 144>& iHotSpot
-        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x67FFA0, const std::array<const std::array<const POINT, 5>, 144>));
+        inline static const std::array<const std::array<const POINT, 5>, 144>& iHotSpot
+        = get_global_var_ref(0x67FFA0, const std::array<const std::array<const POINT, 5>, 144>);
 
     // member variables
     public:
@@ -135,12 +134,10 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
         CRITICAL_SECTION CriticalSection;
 
 };
+#pragma pack(pop)
 
 NH3API_SIZE_ASSERT(0x90, mouseManager);
 
-inline
-mouseManager* const& gpMouseManager NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992B0, mouseManager*));
+inline mouseManager* const& gpMouseManager = get_global_var_ref(0x6992B0, mouseManager*);
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x640038, mouseManager)
-
-#pragma pack(pop)

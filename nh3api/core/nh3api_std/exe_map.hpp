@@ -49,7 +49,7 @@ template<class K, // key type
          uintptr_t Nil_Address = 0, // null node address inside .exe
          uintptr_t Nilrefs_Address = 0, // constructor-destructor reference counter address inside .exe
          typename BinaryPredicate = std::less<K> // compare predicate
-         > 
+         >
 class exe_map : public nh3api::exe_rbtree<K,
                                           std::pair<const K, T>,
                                           nh3api::map_key_access<K, T>,
@@ -114,7 +114,7 @@ public:
         : base_type(other)
     {}
 
-    exe_map& operator=(const exe_map& other) 
+    exe_map& operator=(const exe_map& other)
     { base_type::operator=(other); return *this; }
 
     exe_map(const exe_map& other, const allocator_type& allocator)
@@ -129,7 +129,7 @@ public:
         : base_type(std::move<exe_map>(other), allocator)
     {}
 
-    exe_map& operator=(exe_map&& other) noexcept 
+    exe_map& operator=(exe_map&& other) noexcept
     { base_type::operator=(other); return *this; }
 
     // no-op constructor

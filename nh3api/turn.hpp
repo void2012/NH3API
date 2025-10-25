@@ -75,8 +75,6 @@ struct CTurnDuration
 };
 #pragma pack(pop)
 
-inline
-CTurnDuration& g_turnDuration
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69D680, CTurnDuration));
+inline CTurnDuration& g_turnDuration = get_global_var_ref(0x69D680, CTurnDuration);
 
 NH3API_DISABLE_WARNING_END

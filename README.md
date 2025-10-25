@@ -1,5 +1,5 @@
 ## Welcome to the NH3API GitHub repository!
-NH3API by void_17 is an open source C++ library for modding Heroes of Might and Magic III. The library is primarly targeted at the latest version of the game(Complete edition) with [HD Mod by baratorch](https://sites.google.com/site/heroes3hd/ "HD Mod official page")
+NH3API by void_17 is an open source C++17 library for modding Heroes of Might and Magic III. The library is primarly targeted at the latest version of the game(Complete edition) with [HD Mod by baratorch](https://sites.google.com/site/heroes3hd/ "HD Mod official page")
 
 See our [wiki](https://github.com/void2012/NH3API/wiki) page for core guidelines on installing and usage of the library
 
@@ -10,40 +10,36 @@ More than 80% of the functions, variables and types names are from the original 
 
 ![database_screenshot](https://github.com/user-attachments/assets/450b394e-d511-4985-8939-62ed014d5683)
 
-## Wide support of compilers 
+## Wide support of compilers
 
-NH3API supports three most popular compilers and has C++98 support for older versions Visual Studio.
+NH3API v1.2 supports three major compilers(including clang-cl in Visual Studio) and requires at least C++17 to work.
+For C++98/11/14 support, see [v1.1 branch](https://github.com/void2012/NH3API/tree/v1.1)
 
 <table>
     <tr>
         <td></td>
         <td>Minimum supported version</td>
-        <td>Recommended version</td>
         <td>Version compatible with Windows XP</td>
     </tr>
     <tr>
         <td>MSVC</td>
-        <td>14.0, Visual Studio 2005 (C++98)</td>
         <td>19.14, Visual Studio 2017 (C++17) or higher</td>
         <td>19.14, Visual Studio 2017 (C++17) with v141_xp build tools.</td>
     </tr>
     <tr>
         <td>MinGW GCC</td>
-        <td>5.0 (C++11)</td>
-        <td>7.1 (C++17) or higher</td>
+        <td>9.0 (C++17)</td>
         <td>Any version since 5.0 with posix threads, preferably with msvcrt runtime.<br>
             <a href="https://github.com/skeeto/w64devkit" target="_blank" rel="noopener noreferrer">w64devkit</a> is the best choice
         </td>
     </tr>
     <tr>
         <td>MinGW Clang</td>
-        <td>3.3 (C++11)</td>
-        <td>5.0 (C++17) or higher</td>
+        <td>9.0 (C++17)</td>
         <td>Requires custom hacky standard library build to support Windows XP. See <a href="https://github.com/void2012/llvm-mingw-winxp" target="_blank" rel="noopener noreferrer">llvm-mingw-winxp</a></td>
     </tr>
     <tr>
         <td>Clang-CL</td>
-        <td>8.0, Visual Studio 2019 (C++17)</td>
         <td>15.0.0, Visual Studio 2019 (C++17) or higher</td>
         <td>See Windows XP compatible build tools in <a href="https://github.com/zufuliu/llvm-utils" target="_blank" rel="noopener noreferrer">llvm-utils</a></td>
     </tr>
@@ -57,16 +53,21 @@ A single header for almost everything you need to mod the game
 ```
 
 ## Easy CMake integration
-NH3API can be very easily used in your CMake C++ project, it takes only two CMake commands to include NH3API in your project
+NH3API can be used without CMake(except for Era III), however the CMake integration is very straightforward. It takes only two CMake commands to include NH3API in your project
 
 ```cmake
 add_subdirectory(nh3api)
 target_link_libraries(MyProject PRIVATE nh3api)
 ```
 
-> [!TIP]
-> If your compiler supports C++17, you should use inline mode of the library which requires no CMake integration and compiling the static library. 
-> Define the NH3API_FLAG_INLINE_HEADERS globally and you can use NH3API without any build system! It makes things way faster.
+## Era III modding platform support
+NH3API supports Era III modding platform(just include `<nh3api/era/era.hpp>`) but requires CMake support. The integration is still pretty easy:
+
+```cmake
+SET(NH3API_CMAKE_USE_ERA ON CACHE BOOL "Build ERA support module")
+add_subdirectory(nh3api)
+target_link_libraries(NH3APIHelloWorld PRIVATE nh3api)
+```
 
 ## Build
 Simple Hello, World in a single dllmain.cpp file:
@@ -81,7 +82,7 @@ void __stdcall HelloWorld(HiHook* hook, void* _this)
 }
 
 extern "C" NH3API_DLLEXPORT
-BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+BOOL APIENTRY DllMain(HINSTANCE, DWORD fdwReason, LPVOID)
 {
     if ( fdwReason == DLL_PROCESS_ATTACH  )
     {
@@ -96,33 +97,29 @@ BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     }
     return true;
 }
+
 ```
 
-Build with CMake and Ninja:
-```shell
-cmake -G "Ninja" -B bin  && cmake --build bin
-```
-
-Build without CMake(requries C++17):
+Build the example:
 
 MSVC:
-```shell
-cl /std:c++17 -I./nh3api -DNH3API_FLAG_INLINE_HEADERS /LD dllmain.cpp /Fe:hello-world.dll
+```
+cl /std:c++17 -I./nh3api /LD dllmain.cpp /Fe:hello-world.dll
 ```
 GCC MinGW:
-```shell
-g++ -m32 -std=c++17 -I./nh3api -DNH3API_FLAG_INLINE_HEADERS -mdll -o hello-world.dll dllmain.cpp
+```
+g++ -m32 -std=c++17 -I./nh3api -mdll -o hello-world.dll dllmain.cpp
 ```
 Clang MinGW:
 ```
-clang++ -m32 -std=c++17 -I./nh3api -DNH3API_FLAG_INLINE_HEADERS -mdll -o hello-world.dll dllmain.cpp
+clang++ -m32 -std=c++17 -I./nh3api -mdll -o hello-world.dll dllmain.cpp
 ```
 
 ## Examples
 See [Awesome-NH3API](https://github.com/void2012/Awesome-NH3API) for a curated list of plugins that use NH3API. Feel free to contribute and suggest your own plugin!
 
 ## Debugging
-> [!NOTE]  
+> [!NOTE]
 > The NH3API contains a pretty printer for Visual Studio debugger. Add [nh3api_std.natvis](https://github.com/void2012/NH3API/blob/main/debugging/nh3api_std.natvis) to your C++ project in Visual Studio and enjoy the visualized debugging of NH3API containers which are fully binary compatible with the game.
 
 ## Contact the author

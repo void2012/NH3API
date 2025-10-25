@@ -234,7 +234,7 @@ NH3API_VIRTUAL_CLASS widget
         void set_width(int32_t new_width)
         { send_message(WIDGET_SET_WIDTH, new_width); }
 
-        [[nodiscard]] const char* get_rclick_text() const 
+        [[nodiscard]] const char* get_rclick_text() const
         { return freeText ? RightClick : nullptr; }
 
         void hide()
@@ -245,9 +245,7 @@ NH3API_VIRTUAL_CLASS widget
 
     // static variables
     public:
-        NH3API_INLINE_STATIC_VARIABLE
-        widget* const& last_hover_widget 
-        NH3API_INLINE_STATIC_VARIABLE_INIT(get_global_var_ref(0x6AACD0, widget*));
+        static inline widget* const& last_hover_widget = get_global_var_ref(0x6AACD0, widget*);
 
     // member variables
     public:
@@ -323,7 +321,7 @@ NH3API_VIRTUAL_CLASS widget
 
     protected:
         [[maybe_unused]]
-        byte_t gap_29[3];
+        std::byte gap_29[3];
 
     public:
         // offset: +0x2C = +44,  size = 0x4 = 4
@@ -334,31 +332,31 @@ NH3API_VIRTUAL_CLASS widget
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_WIDGET
 #define NH3API_VIRTUAL_OVERRIDE_WIDGET(CLASS_NAME) \
-virtual void __thiscall scalar_deleting_destructor(uint8_t flag)  override\
+void __thiscall scalar_deleting_destructor(uint8_t flag)  override\
 { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }\
-virtual int32_t __thiscall Open(int32_t newPriority, heroWindow* parent)  override\
+int32_t __thiscall Open(int32_t newPriority, heroWindow* parent)  override\
 { return get_type_vftable(this)->Open(this, newPriority, parent); }\
-virtual int32_t __thiscall Main(message* msg)  override\
+int32_t __thiscall Main(message* msg)  override\
 { return get_type_vftable(this)->Main(this, msg); }\
-virtual void __thiscall zBufferDraw(uint16_t* zBuffer, uint32_t fill_color) const  override\
+void __thiscall zBufferDraw(uint16_t* zBuffer, uint32_t fill_color) const  override\
 { get_type_vftable(this)->zBufferDraw(this, zBuffer, fill_color); }\
-virtual void __thiscall Draw() const  override\
+void __thiscall Draw() const  override\
 { get_type_vftable(this)->Draw(this); }\
-[[nodiscard]] virtual int32_t __thiscall GetRealHeight() const  override\
+[[nodiscard]] int32_t __thiscall GetRealHeight() const  override\
 { return get_type_vftable(this)->GetRealHeight(this); }\
-[[nodiscard]] virtual int32_t __thiscall GetRealWidth() const  override\
+[[nodiscard]] int32_t __thiscall GetRealWidth() const  override\
 { return get_type_vftable(this)->GetRealWidth(this); }\
-virtual void __thiscall process_hover()  override\
+void __thiscall process_hover()  override\
 { get_type_vftable(this)->process_hover(this); }\
-virtual void __thiscall Dim() const  override\
+void __thiscall Dim() const  override\
 { get_type_vftable(this)->Dim(this); }\
-virtual void __thiscall enable(bool arg)  override\
+void __thiscall enable(bool arg)  override\
 { get_type_vftable(this)->enable(this, arg); }\
-virtual void __thiscall OnSetFocus()  override\
+void __thiscall OnSetFocus()  override\
 { get_type_vftable(this)->OnSetFocus(this); }\
-virtual void __thiscall OnKillFocus()  override\
+void __thiscall OnKillFocus()  override\
 { get_type_vftable(this)->OnKillFocus(this); }\
-virtual void __thiscall sleep(bool arg)  override\
+void __thiscall sleep(bool arg)  override\
 { get_type_vftable(this)->sleep(this, arg); }
 #endif
 
@@ -425,7 +423,7 @@ NH3API_VIRTUAL_CLASS heroWindow
                    int32_t winHeight,
                    TAttribute winType) noexcept
         { THISCALL_6(void, 0x5FEFB0, this, winX, winY, winWidth, winHeight, winType); }
-        
+
         NH3API_FORCEINLINE
         heroWindow(const ::nh3api::dummy_tag_t& tag) noexcept
             : Widgets(tag)
@@ -496,10 +494,10 @@ NH3API_VIRTUAL_CLASS heroWindow
         // Set widget position /
         // Установить позицию виджета.
         void WidgetSetPos(int32_t id, int32_t new_x, int32_t new_y)
-        { 
+        {
             widget* w = GetWidget(id);
             if (w)
-                w->set_pos(new_x, new_y); 
+                w->set_pos(new_x, new_y);
         }
 
         // Set widget height /
@@ -508,7 +506,7 @@ NH3API_VIRTUAL_CLASS heroWindow
         {
             widget* w = GetWidget(id);
             if (w)
-                w->set_height(new_height); 
+                w->set_height(new_height);
         }
 
         // Set widget width /
@@ -517,7 +515,7 @@ NH3API_VIRTUAL_CLASS heroWindow
         {
             widget* w = GetWidget(id);
             if (w)
-                w->set_width(new_width); 
+                w->set_width(new_width);
         }
 
         void CenterWindow(int32_t centerX, int32_t centerY)
@@ -604,7 +602,7 @@ NH3API_VIRTUAL_CLASS heroWindow
 
         // offset: +0x2C = +44,  size = 0x4 = 4
         widget* tailWidget;
-        
+
         union {
         // offset: +0x30 = +48,  size = 0x10 = 16
         TWidgetVector Widgets;
@@ -624,23 +622,23 @@ NH3API_VIRTUAL_CLASS heroWindow
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_HEROWINDOW
 #define NH3API_VIRTUAL_OVERRIDE_HEROWINDOW(CLASS_NAME) \
-virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override\
+void __thiscall scalar_deleting_destructor(uint8_t flag) override\
 { get_type_vftable(this)->scalar_deleting_destructor(static_cast<heroWindow*>(this), flag); }\
-virtual int32_t __thiscall Open(int32_t newPriority, bool update) override\
+int32_t __thiscall Open(int32_t newPriority, bool update) override\
 { return get_type_vftable(this)->Open(static_cast<heroWindow*>(this), newPriority, update); }\
-virtual void __thiscall Close(bool update) override\
+void __thiscall Close(bool update) override\
 { get_type_vftable(this)->Close(static_cast<heroWindow*>(this), update); }\
-virtual int32_t __thiscall handle_message(message& msg) override\
+int32_t __thiscall handle_message(message& msg) override\
 { return get_type_vftable(this)->handle_message(static_cast<heroWindow*>(this), &msg); }\
-virtual void __thiscall handle_widget_hover(widget* current_widget) override\
+void __thiscall handle_widget_hover(widget* current_widget) override\
 { get_type_vftable(this)->handle_widget_hover(static_cast<heroWindow*>(this), current_widget); }\
-virtual void __thiscall DrawWindow(bool update, int32_t iLowID = heroWindow::MIN_WIDGET_ID, int32_t iHighID = heroWindow::MAX_WIDGET_ID) override\
+void __thiscall DrawWindow(bool update, int32_t iLowID = heroWindow::MIN_WIDGET_ID, int32_t iHighID = heroWindow::MAX_WIDGET_ID) override\
 { get_type_vftable(this)->DrawWindow(static_cast<heroWindow*>(this), update, iLowID, iHighID); }\
-virtual void __thiscall DoModal(bool fadeIn) override\
+void __thiscall DoModal(bool fadeIn) override\
 { get_type_vftable(this)->DoModal(static_cast<heroWindow*>(this), fadeIn); }\
-virtual void __thiscall AddWidgetsToMessageStream() override\
+void __thiscall AddWidgetsToMessageStream() override\
 { get_type_vftable(this)->AddWidgetsToMessageStream(static_cast<heroWindow*>(this)); }\
-virtual void __thiscall sleep(bool arg) override\
+void __thiscall sleep(bool arg) override\
 { get_type_vftable(this)->sleep(static_cast<heroWindow*>(this), arg); }
 #endif
 
@@ -674,7 +672,7 @@ class CHeroWindowEx : public heroWindow
                       heroWindow::TAttribute winType) noexcept
             : heroWindow(::nh3api::dummy_tag)
         { THISCALL_6(void, 0x5FFC00, this, winX, winY, winWidth, winHeight, winType); }
-        
+
         NH3API_FORCEINLINE
         CHeroWindowEx(const ::nh3api::dummy_tag_t& tag) noexcept
             : heroWindow(tag)
@@ -722,15 +720,15 @@ class CHeroWindowEx : public heroWindow
 #ifndef NH3API_VIRTUAL_OVERRIDE_CHEROWINDOWEX
 #define NH3API_VIRTUAL_OVERRIDE_CHEROWINDOWEX(CLASS_NAME)\
 NH3API_VIRTUAL_OVERRIDE_HEROWINDOW(CLASS_NAME)\
-virtual int32_t __thiscall WindowHandler(message& msg) override\
+int32_t __thiscall WindowHandler(message& msg) override\
 { return get_type_vftable(this)->WindowHandler(this, &msg); }\
-virtual bool __thiscall ProcessHover(int32_t mouseX, int32_t mouseY) override\
+bool __thiscall ProcessHover(int32_t mouseX, int32_t mouseY) override\
 { return get_type_vftable(this)->ProcessHover(this, mouseX, mouseY); }\
-virtual bool __thiscall ProcessRightSelect(int32_t id) override\
+bool __thiscall ProcessRightSelect(int32_t id) override\
 { return get_type_vftable(this)->ProcessRightSelect(this, id); }\
-virtual int32_t __thiscall OnWidgetDeselect(int32_t id, bool& bExitFlag) override\
+int32_t __thiscall OnWidgetDeselect(int32_t id, bool& bExitFlag) override\
 { return get_type_vftable(this)->OnWidgetDeselect(this, id, &bExitFlag); }\
-virtual textWidget* __thiscall GetRolloverWidget() override\
+textWidget* __thiscall GetRolloverWidget() override\
 { return get_type_vftable(this)->GetRolloverWidget(this); }
 #endif
 
@@ -760,7 +758,7 @@ class CAdvPopup : public CHeroWindowEx
                   heroWindow::TAttribute winType) noexcept
             : CHeroWindowEx(::nh3api::dummy_tag)
         { THISCALL_6(void, 0x41AFA0, this, winX, winY, winWidth, winHeight, winType); }
-        
+
         NH3API_FORCEINLINE
         CAdvPopup(const ::nh3api::dummy_tag_t& tag) noexcept
             : CHeroWindowEx(tag)
@@ -792,7 +790,7 @@ class CAdvPopup : public CHeroWindowEx
 
     protected:
         [[maybe_unused]]
-        byte_t gap_5D[3];
+        std::byte gap_5D[3];
 
 };
 #pragma pack(pop)
@@ -800,7 +798,7 @@ class CAdvPopup : public CHeroWindowEx
 #define NH3API_VIRTUAL_OVERRIDE_CADVPOPUP(CLASS_NAME)\
 NH3API_VIRTUAL_OVERRIDE_HEROWINDOW(CLASS_NAME)\
 NH3API_VIRTUAL_OVERRIDE_CHEROWINDOWEX(CLASS_NAME)\
-virtual int32_t __thiscall ExitDialog(message& msg) override\
+int32_t __thiscall ExitDialog(message& msg) override\
 { return get_type_vftable(this)->ExitDialog(this, &msg); }
 #endif
 
@@ -863,7 +861,7 @@ class TDialogBox : public heroWindow
 #ifndef NH3API_VIRTUAL_OVERRIDE_TDIALOGBOX
 #define NH3API_VIRTUAL_OVERRIDE_TDIALOGBOX(CLASS_NAME)\
 NH3API_VIRTUAL_OVERRIDE_HEROWINDOW(CLASS_NAME)\
-virtual bool __thiscall Setup(int32_t winX, int32_t winY, int32_t winWidth, int32_t winHeight) override\
+bool __thiscall Setup(int32_t winX, int32_t winY, int32_t winWidth, int32_t winHeight) override\
 { return get_type_vftable(this)->TDialogBox_Setup(this, winX, winY, winWidth, winHeight); }
 #endif
 
@@ -1020,7 +1018,7 @@ class TSubWindow
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_TSUBWINDOW
 #define NH3API_VIRTUAL_OVERRIDE_TSUBWINDOW(CLASS_NAME) \
-virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override\
+void __thiscall scalar_deleting_destructor(uint8_t flag) override\
 { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }
 #endif
 
@@ -1131,7 +1129,7 @@ public:
 
 protected:
     [[maybe_unused]]
-    byte_t gap_31[3];
+    std::byte gap_31[3];
 
 public:
     // offset: +0x34 = +52,  size = 0x260 = 608
@@ -1149,7 +1147,7 @@ public:
 };
 #pragma pack(pop)
 
-#if NH3API_DEBUG 
+#if NH3API_DEBUG
 NH3API_FORCEINLINE
 // address: 0x4F6C00
 // Do default dialog /
@@ -1166,10 +1164,10 @@ void NormalDialog(const char* cText,
                   int32_t iTimeout = 0,
                   EGameResource iResType3 = const_no_resource,
                   int32_t iResExtra3 = 0)
-{ 
+{
     assert(cText && "cText must not be a nullptr");
     assert(strlen(cText) && "cText must not be an empty string");
-    FASTCALL_12(void, 0x4F6C00, cText, iMBType, x, y, iResType1, iResExtra1, iResType2, iResExtra2, iSpecial, iTimeout, iResType3, iResExtra3); 
+    FASTCALL_12(void, 0x4F6C00, cText, iMBType, x, y, iResType1, iResExtra1, iResType2, iResExtra2, iSpecial, iTimeout, iResType3, iResExtra3);
 }
 #else
 // code size optimization
@@ -1178,19 +1176,19 @@ struct _NormalDialog
     public:
     NH3API_NOINLINE
     static void __fastcall show(const char* cText) noexcept
-    { FASTCALL_12(void, 
-                  0x4F6C00, 
-                  cText, 
-                  NORMAL_DIALOG_DEFAULT, 
-                  -1, 
-                  -1, 
-                  const_no_resource, 
-                  0, 
-                  const_no_resource, 
-                  0, 
-                  -1, 
-                  0, 
-                  const_no_resource, 
+    { FASTCALL_12(void,
+                  0x4F6C00,
+                  cText,
+                  NORMAL_DIALOG_DEFAULT,
+                  -1,
+                  -1,
+                  const_no_resource,
+                  0,
+                  const_no_resource,
+                  0,
+                  -1,
+                  0,
+                  const_no_resource,
                   0); }
 };
 

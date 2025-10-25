@@ -36,7 +36,7 @@ NH3API_VIRTUAL_CLASS TResourceDisplay : public TSubWindow
         {}
 
         NH3API_FORCEINLINE
-        ~TResourceDisplay() noexcept 
+        ~TResourceDisplay() noexcept
         { THISCALL_1(void, 0x5590D0, this); }
 
     public:
@@ -57,7 +57,7 @@ NH3API_VIRTUAL_CLASS TResourceDisplay : public TSubWindow
 
     protected:
         [[maybe_unused]]
-        byte_t gap_35[3];
+        std::byte gap_35[3];
 
     public:
         // offset: +0x38 = +56,  size = 0x1C = 28
@@ -103,7 +103,7 @@ NH3API_VIRTUAL_CLASS type_bottom_view_window : public TSubWindow
         {}
 
         NH3API_FORCEINLINE
-        ~type_bottom_view_window() noexcept 
+        ~type_bottom_view_window() noexcept
         { THISCALL_1(void, 0x450A20, this); }
 
     public:
@@ -138,7 +138,7 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
         {}
 
         NH3API_FORCEINLINE
-        ~TAdventureMapWindow() noexcept 
+        ~TAdventureMapWindow() noexcept
         { THISCALL_1(void, 0x402B10, this); }
 
     public:
@@ -241,7 +241,7 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
 
     protected:
         [[maybe_unused]]
-        byte_t gap_6D[3];
+        std::byte gap_6D[3];
 
     public:
         // offset: +0x70 = +112,  size = 0x14 = 20

@@ -17,8 +17,8 @@ using exe_PHNDLR = void (__cdecl*)(int32_t);
 using exe_new_handler = void (__cdecl*)();
 using exe_se_translator = void (__cdecl*)(uint32_t, EXCEPTION_POINTERS*);
 using exe_atexit_func_t = void (__cdecl*)(void);
-using exe_beginthread_func_t = void (__cdecl*)(void);
-using exe_beginthreadex_func_t = uint32_t (__stdcall*)(void);
+using exe_beginthread_func_t = void (__cdecl*)(void*);
+using exe_beginthreadex_func_t = uint32_t (__stdcall*)(void*);
 
 NH3API_FORCEINLINE
 // address: 0x6193EA
@@ -50,6 +50,7 @@ NH3API_FORCEINLINE
 void __cdecl exe_purecall() noexcept
 { CDECL_0(void, 0x618370); }
 
+NH3API_CALLBACK(start_address, arglist)
 NH3API_FORCEINLINE
 // address: 0x61A433
 // Heroes3.exe internal _beginthreadex. Use this function to avoid memory leaks related to CreateThread
@@ -67,6 +68,7 @@ NH3API_FORCEINLINE
 void __cdecl exe_endthreadex(uint32_t exit_code)
 { CDECL_1(void, 0x61A53A, exit_code); }
 
+NH3API_CALLBACK(start_address, args)
 NH3API_FORCEINLINE
 // address: 0x61A56C
 // Heroes3.exe internal _beginthread

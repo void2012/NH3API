@@ -116,12 +116,15 @@ NH3API_VIRTUAL_STRUCT resource
 
         resource() = delete;
         resource(const resource&)            = delete;
+
         resource(resource&& other) noexcept
         { nh3api::trivial_move<sizeof(resource)>(&other, this); }
+
         resource& operator=(const resource&) = delete;
-        resource& operator=(resource&& other) noexcept 
+
+        resource& operator=(resource&& other) noexcept
         {
-            nh3api::trivial_move<sizeof(resource)>(&other, this); 
+            nh3api::trivial_move<sizeof(resource)>(&other, this);
             return *this;
         }
 
@@ -186,7 +189,7 @@ NH3API_VIRTUAL_STRUCT resource
 
     protected:
         [[maybe_unused]]
-        byte_t gap_11[3];
+        std::byte gap_11[3];
 
     public:
         // Resource type /
@@ -257,7 +260,7 @@ public:
     { THISCALL_2(void, 0x5233A0, this, rgba); }
 
     NH3API_FORCEINLINE
-    TPalette24(const TPalette24& other) noexcept 
+    TPalette24(const TPalette24& other) noexcept
     NH3API_DELEGATE_DUMMY_BASE(TPalette24)
     { THISCALL_2(void, 0x5233F0, this, &other); }
 
@@ -276,9 +279,15 @@ public:
 public:
     NH3API_VIRTUAL_OVERRIDE_RESOURCE(TPalette24)
 
-public: 
+public:
     void AdjustHSV(float hue, float hue_adjust, float saturation_adjust, float value_adjust)
     { THISCALL_5(void, 0x523470, this, hue, hue_adjust, saturation_adjust, value_adjust); }
+
+    TRGB* data() noexcept
+    { return Palette.data(); }
+
+    [[nodiscard]] const TRGB* data() const noexcept
+    { return Palette.data(); }
 
 public:
 
@@ -372,7 +381,7 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
     public:
         NH3API_FORCEINLINE
         void Convert24to16(const TRGB* p24, uint32_t rbits, uint32_t rshift, uint32_t gbits, uint32_t gshift, uint32_t bbits, uint32_t bshift) noexcept
-        { for ( int32_t i = 0; i <= 0xFF; ++i ) Palette[i] = (p24[i].Blue >> (8 - bbits) << bshift) | (p24[i].Green >> (8 - gbits) << gshift) | (p24[i].Red >> (8 - rbits) << rshift); }
+        { for ( size_t i = 0; i <= 0xFFu; ++i ) Palette[i] = static_cast<uint16_t>(((p24[i].Blue >> (8u - bbits) << bshift) | (p24[i].Green >> (8u - gbits) << gshift) | (p24[i].Red >> (8u - rbits) << rshift)) & UINT16_MAX); }
 
         NH3API_FORCEINLINE
         void Convert24to16(const TPalette24& p24, uint32_t rbits, uint32_t rshift, uint32_t gbits, uint32_t gshift, uint32_t bbits, uint32_t bshift) noexcept
@@ -391,10 +400,10 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
         void Gray()
         { THISCALL_1(void, 0x523240, this); }
 
-        [[nodiscard]] const uint16_t* data() const 
+        [[nodiscard]] const uint16_t* data() const
         { return Palette.data(); }
 
-        uint16_t* data() 
+        uint16_t* data()
         { return Palette.data(); }
 
     public:
@@ -691,12 +700,12 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
         {}
 
     public:
-        NH3API_FORCEINLINE 
+        NH3API_FORCEINLINE
         int32_t AddFrame(int32_t seqnum, CSpriteFrame* frame)
         { return THISCALL_3(int32_t, 0x47B480, this, seqnum, frame); }
 
         NH3API_FORCEINLINE
-        void AllocateSeq(int32_t seqnum, int32_t numFrames) 
+        void AllocateSeq(int32_t seqnum, int32_t numFrames)
         { THISCALL_3(void, 0x47B410, this, seqnum, numFrames); }
 
         [[nodiscard]] NH3API_FORCEINLINE int32_t GetWidth() const
@@ -1015,25 +1024,25 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
 };
 #pragma pack(pop)
 
-[[nodiscard]] NH3API_PURE NH3API_FORCEINLINE 
+[[nodiscard]] NH3API_PURE NH3API_FORCEINLINE
 uint16_t convert555to565(uint16_t arg) noexcept
-{ return (arg & 31) | (2 * (arg & 0x7FE0)); }
+{ return (arg & 31u) | (2u * (arg & 0x7FE0u)); }
 
-[[nodiscard]] NH3API_PURE NH3API_FORCEINLINE 
+[[nodiscard]] NH3API_PURE NH3API_FORCEINLINE
 uint32_t color1555to8888(uint16_t arg) noexcept
-{ return (8 * (arg & 0x1F)) | ((arg & 0x3E0) << 6) | ((arg & 0x7C00) << 9) | ((arg & 0x8000) << 16); }
+{ return (8u * (arg & 0x1Fu)) | ((arg & 0x3E0u) << 6u) | ((arg & 0x7C00u) << 9u) | ((arg & 0x8000u) << 16u); }
 
-[[nodiscard]] NH3API_PURE NH3API_FORCEINLINE 
+[[nodiscard]] NH3API_PURE NH3API_FORCEINLINE
 uint32_t color0565to8888(uint16_t arg) noexcept
-{ return (8 * (arg & 0x1F)) | (32 * (arg & 0x7E0)) | ((arg & 0xF800) << 8); }
+{ return (8u * (arg & 0x1Fu)) | (32u * (arg & 0x7E0)) | ((arg & 0xF800u) << 8u); }
 
-[[nodiscard]] NH3API_PURE NH3API_FORCEINLINE 
+[[nodiscard]] NH3API_PURE NH3API_FORCEINLINE
 uint16_t color8888to1555(uint32_t arg) noexcept
-{ return static_cast<uint16_t>(((arg & 0x80000000) >> 16) | ((arg & 0xF80000) >> 9) | (static_cast<uint16_t>(arg & 0xF800) >> 6) | (static_cast<uint8_t>(arg & 0xF8) >> 3)); }
+{ return static_cast<uint16_t>(((arg & 0x80000000u) >> 16u) | ((arg & 0xF80000u) >> 9u) | (static_cast<uint16_t>(arg & 0xF800u) >> 6u) | (static_cast<uint8_t>(arg & 0xF8u) >> 3u)); }
 
-[[nodiscard]] NH3API_PURE NH3API_FORCEINLINE 
+[[nodiscard]] NH3API_PURE NH3API_FORCEINLINE
 uint16_t color8888to0565(uint32_t arg) noexcept
-{ return static_cast<uint16_t>(((arg & 0xF80000) >> 8) | (static_cast<uint16_t>(arg & 0xFC00) >> 5) | (static_cast<uint8_t>(arg & 0xF8) >> 3)); }
+{ return static_cast<uint16_t>(((arg & 0xF80000u) >> 8u) | (static_cast<uint16_t>(arg & 0xFC00u) >> 5u) | (static_cast<uint8_t>(arg & 0xF8u) >> 3u)); }
 
 struct Bitmap816;
 #pragma pack(push, 4)
@@ -1148,7 +1157,7 @@ NH3API_VIRTUAL_STRUCT Bitmap16Bit : public resource
 
     protected:
         [[maybe_unused]]
-        byte_t gap_35[3];
+        std::byte gap_35[3];
 
 };
 #pragma pack(pop)
@@ -1263,7 +1272,7 @@ NH3API_VIRTUAL_STRUCT CTextEntrySave : public Bitmap16Bit
     protected:
         [[maybe_unused]]
         // offset: +0x8E = +142,  size = 0x2 = 2
-        byte_t gap_8E[3];
+        std::byte gap_8E[3];
 
 };
 #pragma pack(pop)
@@ -1579,13 +1588,13 @@ NH3API_VIRTUAL_STRUCT TTextResource : public resource
             : resource(tag), Text(tag)
         {}
 
-        TTextResource(TTextResource&& other) noexcept 
+        TTextResource(TTextResource&& other) noexcept
             : resource(std::move(other)),
               Text(std::move(other.Text)),
               Data(std::exchange(other.Data, nullptr))
         {}
 
-        TTextResource& operator=(TTextResource&& other) noexcept 
+        TTextResource& operator=(TTextResource&& other) noexcept
         {
             resource::operator=(static_cast<resource&&>(other));
             this->Text = std::move(other.Text);
@@ -1623,7 +1632,7 @@ NH3API_VIRTUAL_STRUCT TTextResource : public resource
         // offset: +0x1C = +28,  size = 0x10 = 16
         exe_vector<char*> Text;
         };
-        
+
         // Source data /
         // Оригинальные данные.
         // offset: +0x2C = +44,  size = 0x4 = 4
@@ -1658,14 +1667,14 @@ NH3API_VIRTUAL_STRUCT TSpreadsheetResource : public resource
             : resource(tag), SpreadSheet(tag)
         {}
 
-        TSpreadsheetResource(TSpreadsheetResource&& other) noexcept 
+        TSpreadsheetResource(TSpreadsheetResource&& other) noexcept
             : resource(std::move(other)),
               SpreadSheet(std::move(other.SpreadSheet)),
               Data(std::exchange(other.Data, nullptr)),
               DataSize(std::exchange(other.DataSize, 0))
         {}
 
-        TSpreadsheetResource& operator=(TSpreadsheetResource&& other) noexcept 
+        TSpreadsheetResource& operator=(TSpreadsheetResource&& other) noexcept
         {
             resource::operator=(static_cast<resource&&>(other));
             this->SpreadSheet = std::move(other.SpreadSheet);
@@ -1704,7 +1713,7 @@ NH3API_VIRTUAL_STRUCT TSpreadsheetResource : public resource
         // offset: +0x1C = +28,  size = 0x10 = 16
         exe_vector<exe_vector<char*>*> SpreadSheet;
         };
-        
+
         // Source data /
         // Оригинальные данные.
         // offset: +0x2C = +44,  size = 0x4 = 4
@@ -1853,7 +1862,7 @@ NH3API_FORCEINLINE void Dispose(resource* arg)
     {
         return nullptr;
     }
-    else  
+    else
     {
         it->second->AddRef();
         return it->second;
@@ -1875,7 +1884,6 @@ inline uint32_t& BlueMask   = get_global_var_ref(0x69E5D4, uint32_t);
 
 } // namespace ResourceManager
 
-#if NH3API_STD_HASH
 // std::hash support for ResourceManager::TCacheMapKey
 template<>
 struct std::hash< ResourceManager::TCacheMapKey >
@@ -1886,7 +1894,6 @@ struct std::hash< ResourceManager::TCacheMapKey >
             return ::nh3api::hash_string(key.name.data(), ::nh3api::safe_strlen(key.name.data(), key.name.size()));
         }
 };
-#endif
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x64100C, resource)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B9C8, Bitmap16Bit)

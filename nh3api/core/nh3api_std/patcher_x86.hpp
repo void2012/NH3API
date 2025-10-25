@@ -166,6 +166,8 @@
 NH3API_DISABLE_WARNING_BEGIN("-Wnon-virtual-dtor", 4265)
 NH3API_DISABLE_WARNING_BEGIN("-Wattributes",       4714)
 NH3API_DISABLE_WARNING_BEGIN("-Wunused-parameter", 4100)
+NH3API_DISABLE_WARNING_BEGIN("-Wcast-function-type-strict", 4191)
+NH3API_DISABLE_GCC_CLANG_WARNING_BEGIN("-Wcast-function-type-mismatch")
 
 #pragma pack(push, 4)
 // type "variable", is used for the values returned by Patcher::VarInit and Patcher::VarFind methods /
@@ -1113,7 +1115,7 @@ protected:
     void hihook_function_condition_argument(R (__stdcall* func)(Arg1, Args...)) noexcept
     {
         (void) func;
-        static_assert(nh3api::tt::is_same<Arg1, HiHook*>::value, "HiHook function must have the first argument of type HiHook*");
+        static_assert(std::is_same_v<Arg1, HiHook*>, "HiHook function must have the first argument of type HiHook*");
     }
 
     template<typename R, typename... Args> static constexpr
@@ -1126,7 +1128,7 @@ protected:
     template<typename F> static constexpr
     void hihook_function_condition(F* func) noexcept
     {
-        static_assert(nh3api::tt::is_function<F>::value, "HiHook must be a function.");
+        static_assert(std::is_function_v<F>, "HiHook must be a function.");
         hihook_function_condition_stdcall(func);
     }
 
@@ -2108,20 +2110,15 @@ public:
     // Метод VarGetValue возвращает значение "переменной" c именем name
     // если "переменная" с таким именем не была инициализированна, возвращает default_value.
     template<typename ValueType> NH3API_FORCEINLINE
-    ValueType VarGetValue(const char* name, ValueType default_value)
+    ValueType VarGetValue(const char* name, ValueType default_value = ValueType{}) const
     {
         if constexpr (sizeof(ValueType) > 4)
             return default_value;
-        Variable* v = VarFind(name);
+        const Variable* const v = VarFind(name);
         if (v == nullptr)
             return default_value;
 
-        if constexpr (std::is_pointer_v<ValueType>)
-            return reinterpret_cast<ValueType>(v->GetValue());
-        else if constexpr (std::is_arithmetic_v<ValueType>)
-            return static_cast<ValueType>(v->GetValue());
-        else
-            return ::nh3api::bit_cast<ValueType>(v->GetValue());
+        return nh3api::cast<ValueType>(v->GetValue());
     }
 
     // The VarValue method returns a reference to the value of the "variable" named name
@@ -2176,7 +2173,7 @@ public:
     // кода, т.е. пишите этим методом только в свою память,
     // а в код модифицируемой программы только с помощью
     // PatcherInstance::WriteCodePatch.
-    inline uintptr_t WriteComplexData(uintptr_t address, const char* format, ...)
+    inline int32_t WriteComplexData(uintptr_t address, const char* format, ...)
     { return WriteComplexDataVA(address, format, (uint32_t*)((uintptr_t)&format + 4)); }
 
     inline HiHook* GetFirstHiHookAt(uintptr_t address)
@@ -2266,6 +2263,8 @@ NH3API_FORCEINLINE uint32_t GetPatcherVersion() noexcept
     }
 }
 
+NH3API_DISABLE_GCC_CLANG_WARNING_END // -Wcast-function-type-mismatch
+NH3API_DISABLE_WARNING_END
 NH3API_DISABLE_WARNING_END
 NH3API_DISABLE_WARNING_END
 NH3API_DISABLE_WARNING_END

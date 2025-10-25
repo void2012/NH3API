@@ -404,13 +404,9 @@ inline return_type invoke_stdcall_20(uintptr_t address, Arg1 a1, Arg2 a2, Arg3 a
     #define STDCALL_20(return_type, address, ...) invoke_stdcall_20<return_type>(static_cast<uintptr_t>(address), __VA_ARGS__)
 #endif // #ifndef STDCALL_20
 
-#if NH3API_STD_VARIADIC_ARGUMENTS_FULL_SUPPORT
-template<typename return_type, typename ... Args>
-inline return_type invoke_thiscall(uintptr_t address, Args&& ... args)
-{
-    NH3API_STATIC_ASSERT("__thiscall function must take at least 1 argument", sizeof...(Args) > 1);
-    return (reinterpret_cast<return_type(__thiscall*)(Args...)>(address)(std::forward<Args>(args)...));
-}
+template<typename return_type, typename this_type, typename ... Args>
+inline return_type invoke_thiscall(uintptr_t address, this_type* _this, Args&& ... args)
+{ return (reinterpret_cast<return_type(__thiscall*)(this_type*, Args...)>(address)(_this, std::forward<Args>(args)...)); }
 
 template<typename return_type, typename ... Args>
 inline return_type invoke_fastcall(uintptr_t address, Args&& ... args)
@@ -426,7 +422,7 @@ inline return_type invoke_stdcall(uintptr_t address, Args&& ... args)
 
 #ifndef THISCALL_N
     #define THISCALL_N(return_type, address, ...) invoke_thiscall<return_type>(static_cast<uintptr_t>(address), __VA_ARGS__)
-#endif 
+#endif
 
 #ifndef FASTCALL_N
     #define FASTCALL_N(return_type, address, ...) invoke_fastcall<return_type>(static_cast<uintptr_t>(address), __VA_ARGS__)
@@ -438,6 +434,11 @@ inline return_type invoke_stdcall(uintptr_t address, Args&& ... args)
 
 #ifndef STDCALL_N
     #define STDCALL_N(return_type, address, ...)  invoke_stdcall<return_type>(static_cast<uintptr_t>(address), __VA_ARGS__)
+#endif
+
+#if NH3API_CHECK_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4229)
 #endif
 
 template<typename R, typename ThisPtr, typename ...Args>
@@ -452,4 +453,6 @@ using cdecl_function_t = R(*__cdecl)(Args...);
 template<typename R, typename ...Args>
 using stdcall_function_t = R(*__stdcall)(Args...);
 
-#endif // C++11 variadic arguments (full support)
+#if NH3API_CHECK_MSVC
+#pragma warning(pop)
+#endif

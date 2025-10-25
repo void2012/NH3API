@@ -92,9 +92,9 @@ struct exception_guard_rollback
     }
 
     protected:
-    #if __has_cpp_attribute(msvc::no_unique_address)
+    #if NH3API_HAS_CPP_ATTRIBUTE(msvc::no_unique_address)
     [[msvc::no_unique_address]]
-    #elif __has_cpp_attribute(no_unique_address)
+    #elif NH3API_HAS_CPP_ATTRIBUTE(no_unique_address)
     [[no_unique_address]]
     #endif
     RollBack rollback;

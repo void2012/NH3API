@@ -39,7 +39,7 @@ public:
 protected:
     [[maybe_unused]]
     // offset: +0x1 = +1,  size = 0x3 = 3
-    byte_t gap_1[3];
+    std::byte gap_1[3];
 
 public:
     // Hero name /
@@ -751,7 +751,7 @@ struct HeroExtra
     protected:
         [[maybe_unused]]
         // offset: +0x1 = +1,  size = 0x3 = 3
-        byte_t gap_1[3];
+        std::byte gap_1[3];
 
     public:
         // Hero ID /
@@ -775,7 +775,7 @@ struct HeroExtra
     protected:
         [[maybe_unused]]
         // offset: +0x1A = +26,  size = 0x2 = 2
-        byte_t gap_1A[2];
+        std::byte gap_1A[2];
 
     public:
         // Hero experience in XP /
@@ -801,7 +801,7 @@ struct HeroExtra
     protected:
         [[maybe_unused]]
         // offset: +0x23 = +35,  size = 0x1 = 1
-        byte_t gap_23[1];
+        std::byte gap_23[1];
 
     public:
         // Number of hero secondary skills /
@@ -827,7 +827,7 @@ struct HeroExtra
     protected:
         [[maybe_unused]]
         // offset: +0x39 = +57,  size = 0x3 = 3
-        byte_t gap_39[3];
+        std::byte gap_39[3];
 
     public:
         // Creature types edited via map editor /
@@ -883,7 +883,7 @@ struct HeroExtra
     protected:
         [[maybe_unused]]
         // offset: +0x307 = +775,  size = 0x1 = 1
-        byte_t gap_307[1];
+        std::byte gap_307[1];
 
     public:
         // Hero biography /
@@ -904,7 +904,7 @@ struct HeroExtra
     protected:
         [[maybe_unused]]
         // offset: +0x31D = +797,  size = 0x3 = 3
-        byte_t gap_31D[3];
+        std::byte gap_31D[3];
 
     public:
         // Customized spells /
@@ -924,7 +924,7 @@ struct HeroExtra
 
     protected:
         [[maybe_unused]]
-        byte_t gap_32E[3];
+        std::byte gap_32E[3];
 };
 #pragma pack(pop)
 
@@ -975,7 +975,7 @@ class boat : public type_obscuring_object
 
     protected:
         [[maybe_unused]]
-        byte_t gap_1D[3];
+        std::byte gap_1D[3];
 
     public:
         // Hero occupying this boat /
@@ -990,7 +990,7 @@ class boat : public type_obscuring_object
 
     protected:
         [[maybe_unused]]
-        byte_t gap_25[3];
+        std::byte gap_25[3];
 
 };
 #pragma pack(pop)
@@ -1015,7 +1015,7 @@ struct HeroPlaceholder
     protected:
         [[maybe_unused]]
         // offset: +0x5 = +5,  size = 0x3 = 3
-        byte_t gap_5[3];
+        std::byte gap_5[3];
 
     public:
         // Hero ID /
@@ -1031,7 +1031,7 @@ struct HeroPlaceholder
     protected:
         [[maybe_unused]]
         // offset: +0xD = +13,  size = 0x3 = 3
-        byte_t gap_D[3];
+        std::byte gap_D[3];
 
 };
 #pragma pack(pop)
@@ -1155,7 +1155,7 @@ struct THeroClassTraits
 
     protected:
         [[maybe_unused]]
-        byte_t gap_3D[3];
+        std::byte gap_3D[3];
 
 };
 #pragma pack(pop)
@@ -1254,7 +1254,7 @@ struct THeroTraits
 
     protected:
         [[maybe_unused]]
-        byte_t gap_3B[1];
+        std::byte gap_3B[1];
         // offset: +0x3C = +60,  size = 0x4 = 4
         uint32_t attributes;
 
@@ -1297,26 +1297,22 @@ struct THeroTraits
 };
 #pragma pack(pop)
 
-inline
 // Heroes traits /
 // Свойства героев.
-std::array<THeroTraits, MAX_HEROES_SOD>& akHeroTraits
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x679DD0, std::array<THeroTraits, MAX_HEROES_SOD>));
+inline std::array<THeroTraits, MAX_HEROES_SOD>& akHeroTraits
+= get_global_var_ref(0x679DD0, std::array<THeroTraits, MAX_HEROES_SOD>);
 
-inline
 // Heroes classes traits /
 // Свойства классов героев.
-std::array<THeroClassTraits, kNumHeroClasses>& akHeroClassTraits
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x67D868, std::array<THeroClassTraits, kNumHeroClasses>));
+inline std::array<THeroClassTraits, kNumHeroClasses>& akHeroClassTraits
+= get_global_var_ref(0x67D868, std::array<THeroClassTraits, kNumHeroClasses>);
 
-inline
 // Heroes specific abilities /
 // Специализации героев.
-std::array<THeroSpecificAbility, MAX_HEROES_SOD>& akHeroSpecificAbilities
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678420, std::array<THeroSpecificAbility, MAX_HEROES_SOD>));
+inline std::array<THeroSpecificAbility, MAX_HEROES_SOD>& akHeroSpecificAbilities
+= get_global_var_ref(0x678420, std::array<THeroSpecificAbility, MAX_HEROES_SOD>);
 
-inline
-std::array<int32_t, 20>& move_constants
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698AE8, std::array<int32_t, 20>));
+inline std::array<int32_t, 20>& move_constants
+= get_global_var_ref(0x698AE8, std::array<int32_t, 20>);
 
 NH3API_DISABLE_WARNING_END

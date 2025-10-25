@@ -29,12 +29,12 @@ struct bstruct_t
         template <typename T>
         NH3API_FORCEINLINE
         T& get(ptrdiff_t offset = 0) noexcept
-        { return *reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(__builtin_launder(this)) + offset); }
+        { return *reinterpret_cast<T*>(reinterpret_cast<ptrdiff_t>(__builtin_launder(this)) + offset); }
 
         template <typename T>
         NH3API_FORCEINLINE
         const T& get(ptrdiff_t offset = 0) const noexcept
-        { return *reinterpret_cast<const T*>(reinterpret_cast<uintptr_t>(__builtin_launder(this)) + offset); }
+        { return *reinterpret_cast<const T*>(reinterpret_cast<ptrdiff_t>(__builtin_launder(this)) + offset); }
 
         bstruct_t()                            = delete;
         bstruct_t(bstruct_t&&)                 = delete;
@@ -47,14 +47,14 @@ template <typename T> NH3API_FORCEINLINE
 bstruct_t& get_bstruct(T* ptr, ptrdiff_t offset = 0) noexcept
 { return *(reinterpret_cast<bstruct_t*>(ptr) + offset); }
 
-NH3API_FORCEINLINE bstruct_t& get_bstruct(uint32_t address, ptrdiff_t offset = 0) noexcept
+NH3API_FORCEINLINE bstruct_t& get_bstruct(uintptr_t address, ptrdiff_t offset = 0) noexcept
 { return *(reinterpret_cast<bstruct_t*>(address) + offset); }
 
 template <typename T> NH3API_FORCEINLINE
 const bstruct_t& get_const_bstruct(const T* ptr, ptrdiff_t offset = 0) noexcept
 { return *(reinterpret_cast<const bstruct_t*>(ptr) + offset); }
 
-NH3API_FORCEINLINE const bstruct_t& get_const_bstruct(const uint32_t address, ptrdiff_t offset = 0) noexcept
+NH3API_FORCEINLINE const bstruct_t& get_const_bstruct(const uintptr_t address, ptrdiff_t offset = 0) noexcept
 { return *(reinterpret_cast<const bstruct_t*>(address) + offset); }
 
 template<typename T> NH3API_FORCEINLINE
@@ -113,10 +113,8 @@ struct padstruct_t
 
         NH3API_FORCEINLINE ~padstruct_t() noexcept(noexcept(std::declval<destructor_type>().operator()))
         {
-            #if NH3API_CHECK_CPP11
-            static_assert(noexcept(nh3api::declval<destructor_type>().operator()),
+            static_assert(noexcept(std::declval<destructor_type>().operator()),
             "destructor must not throw");
-            #endif
             destructor_type()(buf);
         }
 

@@ -9,6 +9,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include "nh3api_std/stl_extras.hpp"
 #include "nh3api_std/memory.hpp"
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
@@ -35,34 +36,47 @@ struct message
 
     public:
         NH3API_FORCEINLINE constexpr
-        message(ECommandType _command,
-                int32_t _subType,
-                int32_t _itemId,
-                int32_t _qualifier,
-                int32_t _mouseX,
-                int32_t _mouseY,
-                int32_t _extra,
+        message(ECommandType command_,
+                int32_t subType_,
+                int32_t itemId_,
+                int32_t qualifier_,
+                int32_t mouseX_,
+                int32_t mouseY_,
+                uint32_t extra_,
                 heroWindow* _window ) noexcept
         :
-            command(_command),
-            subType(_subType),
-            itemId(_itemId),
-            qualifier(_qualifier),
-            mouseX(_mouseX),
-            mouseY(_mouseY),
-            extra(_extra),
+            command(command_),
+            subType(subType_),
+            itemId(itemId_),
+            qualifier(qualifier_),
+            mouseX(mouseX_),
+            mouseY(mouseY_),
+            extra(extra_),
             window(_window)
         {}
 
-        NH3API_FORCEINLINE
-        message() noexcept
-        { nh3api::trivial_zero<sizeof(*this)>(this); }
+        message() noexcept = default;
+        message(const message&) noexcept = default;
+        message& operator=(const message&) noexcept = default;
+        message(message&&) noexcept = default;
+        message& operator=(message&&) noexcept = default;
 
-        NH3API_FORCEINLINE
         message(const ::nh3api::dummy_tag_t&) noexcept
         {}
 
         inline ~message() noexcept = default;
+
+    public:
+        template<typename T = uint32_t
+        #ifndef __cpp_lib_concepts
+        , std::enable_if_t<std::is_trivially_copyable_v<T> || std::is_scalar_v<T>, bool> = false
+        #endif
+        >
+        [[nodiscard]] T getExtra() const noexcept
+        #ifdef __cpp_lib_concepts
+        requires(std::is_trivially_copyable_v<T> || std::is_scalar_v<T>)
+        #endif
+        { return nh3api::cast<T>(extra); }
 
     public:
         // offset: +0x0 = +0,  size = 0x4 = 4

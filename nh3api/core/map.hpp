@@ -16,15 +16,11 @@
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
-inline 
 // Размер карты по горизонтали
-int32_t& MAP_WIDTH
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783C8, int32_t));
+inline int32_t& MAP_WIDTH = get_global_var_ref(0x6783C8, int32_t);
 
-inline 
 // Размер карты по вертикали
-int32_t& MAP_HEIGHT
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6783CC, int32_t));
+inline int32_t& MAP_HEIGHT = get_global_var_ref(0x6783CC, int32_t);
 
 #pragma pack(push, 4)
 // Global timed event /
@@ -76,11 +72,11 @@ class TTimedEvent
         // Событие работает на компьютера.
         // offset: +0x2E = +46,  size = 0x1 = 1
         bool ApplyToComputer;
-    
+
     protected:
         [[maybe_unused]]
-        byte_t gap_2F[1];
-    
+        std::byte gap_2F[1];
+
     public:
         // First day /
         // Первый день события.
@@ -113,16 +109,16 @@ class TTownEvent : TTimedEvent
         {}
 
         NH3API_DEFAULT_DESTRUCTOR(TTownEvent)
-        
+
     public:
         // Town ID /
         // ID города, к которому применяется это событие.
         // offset: +0x34 = +52,  size = 0x1 = 1
         int8_t TownNum;
-    
+
     protected:
         [[maybe_unused]]
-        byte_t gap_35[3];
+        std::byte gap_35[3];
 
         // Building bonuses /
         // Бонусы построек.
@@ -133,10 +129,10 @@ class TTownEvent : TTimedEvent
         // Бонусы существ.
         // offset: +0x40 = +64,  size = 0xE = 14
         std::array<uint16_t, 7> generatorBonuses;
-    
+
     protected:
         [[maybe_unused]]
-        byte_t gap_4E[2];
+        std::byte gap_4E[2];
 
 };
 #pragma pack(pop)
@@ -170,8 +166,7 @@ class NewfullMap
               PlaceHolderList(tag),
               QuestList(tag),
               RandomDwellingList(tag)
-            #if NH3API_STD_INITIALIZER_LIST
-            , 
+            ,
             ObjectTypeTables{{tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
                         tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
                         tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
@@ -188,7 +183,6 @@ class NewfullMap
                         tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
                         tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
                         tag, tag, tag, tag, tag, tag, tag}}
-            #endif
         {}
 
         NH3API_FORCEINLINE
@@ -314,7 +308,7 @@ class NewfullMap
 
     protected:
         [[maybe_unused]]
-        byte_t gap_D9[3];
+        std::byte gap_D9[3];
 
     public:
     union {
@@ -361,10 +355,10 @@ struct type_creature_bank_level
 
         // offset: +0x5E = +94,  size = 0x1 = 1
         int8_t relic_artifacts;
-    
+
     protected:
         [[maybe_unused]]
-        byte_t gap_95[1];
+        std::byte gap_95[1];
 
 };
 #pragma pack(pop)
@@ -382,20 +376,17 @@ struct type_creature_bank_traits
 };
 #pragma pack(pop)
 
-inline
-std::array<type_creature_bank_traits, 11>& const_creature_bank_traits
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x695088, std::array<type_creature_bank_traits, 11>));
+inline std::array<type_creature_bank_traits, 11>& const_creature_bank_traits
+= get_global_var_ref(0x695088, std::array<type_creature_bank_traits, 11>);
 
-inline
 // Map visibility bits for each player and 9th bit for a monster on the map /
 // Видимость карты для игроков и для монстров на карте.
-uint16_t* const& mapExtra
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x698A48, uint16_t*));
+inline uint16_t* const& mapExtra = get_global_var_ref(0x698A48, uint16_t*);
 
 [[nodiscard]] NH3API_FORCEINLINE
 uint16_t GetMapExtra(int32_t X, int32_t Y, int32_t Z)
 { return FASTCALL_3(uint16_t, 0x4F8040, X, Y, Z); }
- 
+
 [[nodiscard]] NH3API_FORCEINLINE
 uint16_t* GetMapExtraPtr(int32_t x, int32_t y, int32_t z)
 { return FASTCALL_3(uint16_t*, 0x4F8070, x, y, z); }

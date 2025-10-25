@@ -39,9 +39,11 @@ class heroWindowManager : public baseManager
         int32_t BroadcastMessage(int32_t command, int32_t subType, int32_t itemId, int32_t msgExtra) noexcept
         { return THISCALL_5(int32_t, 0x602930, this, command, subType, itemId, msgExtra); }
 
+        NH3API_CALLBACK(dialogFunction, -1)
         int32_t DoDialog(heroWindow* dialogWindow, int32_t (__thiscall* dialogFunction)(message*), bool32_t bFadeIn) noexcept
         { return THISCALL_4(int32_t, 0x602AE0, this, dialogWindow, dialogFunction, bFadeIn); }
 
+        NH3API_CALLBACK(dialogFunction, -1)
         int32_t DoDialog(heroWindow* dialogWindow, int32_t (__thiscall* dialogFunction)(message&), bool32_t bFadeIn) noexcept
         { return THISCALL_4(int32_t, 0x602AE0, this, dialogWindow, dialogFunction, bFadeIn); }
 
@@ -84,7 +86,7 @@ class heroWindowManager : public baseManager
     protected:
         [[maybe_unused]]
         // offset: +0x49 = +73,  size = 0x3 = 3
-        byte_t gap_49[3];
+        std::byte gap_49[3];
 
     public:
         // offset: +0x4C = +76,  size = 0x4 = 4
@@ -108,7 +110,6 @@ class heroWindowManager : public baseManager
 #pragma pack(pop)
 
 inline heroWindowManager* const& gpWindowManager = get_global_var_ref(0x6992D0, heroWindowManager*);
-
 inline const uint32_t& giDialogTimeout = get_global_var_ref(0x6977D4, const uint32_t);
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x643D5C, heroWindowManager)

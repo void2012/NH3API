@@ -11,7 +11,6 @@
 
 #include "nh3api_std/exe_set.hpp" // exe_set<T>
 #include "interface/widgets.hpp" // widgets
-#include "nh3api_std/memory.hpp" // byte_t
 #include "objects.hpp" // hero, town, etc.
 #include "army.hpp" // army, TCreatureType
 #include "hexcell.hpp" // hexcell
@@ -145,7 +144,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         protected:
             [[maybe_unused]]
             // offset: +0x3 = +3,  size = 0x2 = 2
-            byte_t gap_3[2];
+            std::byte gap_3[2];
 
         public:
             // offset: +0x4 = +4,  size = 0x2 = 2
@@ -163,7 +162,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         protected:
             [[maybe_unused]]
             // offset: +0x22 = +34,  size = 0x2 = 2
-            byte_t gap_22[2];
+            std::byte gap_22[2];
 
         };
 
@@ -214,7 +213,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         protected:
             [[maybe_unused]]
             // offset: +0xB = +11,  size = 0x1 = 1
-            byte_t gap_B[1];
+            std::byte gap_B[1];
 
         public:
             // offset: +0xC = +12,  size = 0x4 = 4
@@ -395,14 +394,12 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         NH3API_FORCEINLINE
         combatManager(const ::nh3api::dummy_tag_t& tag) noexcept
             :
-            #if NH3API_STD_INITIALIZER_LIST
             EagleEyeSpellLearned{tag, tag},
             Armies
             {{
             {tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag},
             {tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag}
             }},
-            #endif
             Obstacles(tag)
         {}
 
@@ -680,7 +677,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
     protected:
         [[maybe_unused]]
         // offset: +0x1C2 = +450,  size = 0x1 = 1
-        byte_t gap_1C2[2];
+        std::byte gap_1C2[2];
 
     public:
         // offset: +0x1C4 = +452,  size = 0x51D0 = 20944
@@ -710,7 +707,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
     protected:
         [[maybe_unused]]
         // offset: +0x14030 = +81968,  size = 0x1 = 1
-        byte_t gap_53AA[2];
+        std::byte gap_53AA[2];
 
     public:
         // offset: +0x53AC = +21420,  size = 0x4 = 4
@@ -740,7 +737,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
     protected:
         [[maybe_unused]]
         // offset: +0x14030 = +81968,  size = 0x1 = 1
-        byte_t gap_53C6[2];
+        std::byte gap_53C6[2];
 
     public:
         // offset: +0x53C8 = +21448,  size = 0x4 = 4
@@ -825,7 +822,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
     protected:
         [[maybe_unused]]
-        byte_t gap_54B1[2];
+        std::byte gap_54B1[2];
 
     public:
         // offset: +0x54B4 = +21684,  size = 0x8 = 8
@@ -849,7 +846,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
     protected:
         [[maybe_unused]]
         // offset: +0x1329C = +78492,  size = 0x1 = 1
-        byte_t gap_1329C[4];
+        std::byte gap_1329C[4];
 
     public:
         // offset: +0x132A0 = +78496,  size = 0x8 = 8
@@ -867,7 +864,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
     protected:
         [[maybe_unused]]
-        byte_t gap_132B1[2];
+        std::byte gap_132B1[2];
 
     public:
         // offset: +0x132B4 = +78516,  size = 0x4 = 4
@@ -893,7 +890,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
     protected:
         [[maybe_unused]]
-        byte_t gap_132CD[3];
+        std::byte gap_132CD[3];
 
     public:
         // offset: +0x132D0 = +78544,  size = 0x4 = 4
@@ -966,7 +963,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         bool bSomeCreaturesVanish;
     protected:
         [[maybe_unused]]
-        byte_t gap_13461[3];
+        std::byte gap_13461[3];
 
     public:
         // offset: +0x13464 = +78948,  size = 0x4 = 4
@@ -980,7 +977,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
     protected:
         [[maybe_unused]]
-        byte_t gap_13D2D[3];
+        std::byte gap_13D2D[3];
 
     public:
         // offset: +0x13D30 = +81200,  size = 0x4 = 4
@@ -1014,7 +1011,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
     protected:
         [[maybe_unused]]
-        byte_t gap_13D69[3];
+        std::byte gap_13D69[3];
 
     public:
         // offset: +0x13D6C = +81260,  size = 0x4 = 4
@@ -1034,7 +1031,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
     protected:
         [[maybe_unused]]
-        byte_t gap_13D77[1];
+        std::byte gap_13D77[1];
 
     public:
         // Besieged castle archers /
@@ -1047,7 +1044,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
     protected:
         [[maybe_unused]]
-        byte_t gap_13DE5[3];
+        std::byte gap_13DE5[3];
 
     public:
         // offset: +0x13DE8 = +81384,  size = 0x4 = 4
@@ -1103,7 +1100,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
     protected:
         [[maybe_unused]]
         // offset: +0x14030 = +81968,  size = 0x1 = 1
-        byte_t gap_14030[1];
+        std::byte gap_14030[1];
 
     public:
         // offset: +0x14031 = +81969,  size = 0xBB = 187
@@ -1114,15 +1111,11 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
 NH3API_SIZE_ASSERT(0x140EC, combatManager);
 
-inline combatManager* const& gpCombatManager = get_global_var_ref(0x699420, combatManager*);
-
+inline combatManager* const&   gpCombatManager      = get_global_var_ref(0x699420, combatManager*);
 inline std::array<int32_t, 2>& iCombatControlNetPos = get_global_var_ref(0x69778C, std::array<int32_t, 2>);
-
-inline bool& gbRetreatWin = get_global_var_ref(0x6985F3, bool);
-
-inline bool& gbSurrenderWin = get_global_var_ref(0x697794, bool);
-
-inline bool& gbInCombat = get_global_var_ref(0x699590, bool);
+inline bool&                   gbRetreatWin         = get_global_var_ref(0x6985F3, bool);
+inline bool&                   gbSurrenderWin       = get_global_var_ref(0x697794, bool);
+inline bool&                   gbInCombat           = get_global_var_ref(0x699590, bool);
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63D3E8, combatManager)
 

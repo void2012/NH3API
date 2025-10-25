@@ -19,17 +19,17 @@
 #include "memory.hpp"
 #include "stl_extras.hpp"
 
-// Three major STL implementations(MSVC STL, libc++, libstdc++) 
-// Implement std::vector<T> in the same layout as exe_vector, so we can use the native 
+// Three major STL implementations(MSVC STL, libc++, libstdc++)
+// Implement std::vector<T> in the same layout as exe_vector, so we can use the native
 // std::vector<T> implementation. Note that the sizeof(std::vector<T>) must be = 12
 // So for example in Visual Studio, you should disable iterator debugging.
 #ifdef NH3API_FLAG_USE_NATIVE_STD_VECTOR
 #include <vector>
 
-namespace nh3api 
+namespace nh3api
 {
-struct nonempty_base   
-{ 
+struct nonempty_base
+{
     uint32_t dummy = 0;
 };
 }
@@ -57,7 +57,7 @@ class exe_vector<bool> : public nh3api::nonempty_base, public std::vector<uint8_
 };
 
 static_assert(sizeof(exe_vector<int>) == 16, "sizeof(std::vector<T>) should be 12. Disable debugging iterators if you're on MSVC.");
-#else 
+#else
 
 #include "iterator.hpp" // nh3api::is_iterator
 #include "nh3api_exceptions.hpp" // std::length_error, std::out_of_range, std::runtime_error
@@ -91,19 +91,19 @@ protected:
     true;
     #endif
 
-    inline static constexpr bool noexcept_move = 
+    inline static constexpr bool noexcept_move =
     #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
     std::is_nothrow_move_constructible_v<T>;
     #else
     true;
     #endif
 
-    inline static constexpr bool noexcept_default_construct = 
+    inline static constexpr bool noexcept_default_construct =
     #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
     std::is_nothrow_default_constructible_v<T>;
-    #else 
+    #else
     true;
-    #endif 
+    #endif
 
 // external typedefs
 public:
@@ -126,8 +126,8 @@ protected:
     #define NH3API_MAKE_EXCEPTION_GUARD(NO_UNWIND_CONDITION, FUNCTOR, ...) \
     typename nh3api::exception_guard_factory<NO_UNWIND_CONDITION, FUNCTOR>::type \
     guard = nh3api::make_exception_guard<NO_UNWIND_CONDITION>(FUNCTOR(__VA_ARGS__))
-    #endif 
-    
+    #endif
+
     #ifdef __cpp_concepts
     template<nh3api::tt::iterator_for_container IterT>
     #else
@@ -243,7 +243,7 @@ public:
     {}
 
 protected:
-    template<class ... Args> 
+    template<class ... Args>
     reference _Emplace_back_with_unused_capacity(Args&& ... args)
     {
         nh3api::construct_at(_Last, std::forward<Args>(args) ...);
@@ -290,7 +290,7 @@ protected:
             _Umove(_Whereptr, this->_Last, _Newvec + _Whereoff + 1);
         }
 
-        guard.complete(); 
+        guard.complete();
         } // scope for exception guard
 
         _Change_array(_Newvec, _Newsize, _Newcapacity);
@@ -390,7 +390,7 @@ public:
             return *this;
         else
             assign(other._First, other._Last);
-        
+
         return *this;
     }
 
@@ -480,14 +480,14 @@ public:
             pointer _Appended_last = _Appended_first;
             { // scope for exception guard
                 NH3API_MAKE_EXCEPTION_GUARD(
-                noexcept_default_construct 
-                && noexcept_copy 
-                && noexcept_move, 
+                noexcept_default_construct
+                && noexcept_copy
+                && noexcept_move,
                 range_cleanup, *this, _Appended_first, _Appended_last, _Newvec, _Newcapacity);
-                
+
                 _Appended_last = _Default_fill(_Appended_first, _Newsize - _Oldsize);
                 _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
-                
+
                 guard.complete();
             } // scope for exception guard
             _Change_array(_Newvec, _Newsize, _Newcapacity);
@@ -530,14 +530,14 @@ public:
 
             { // scope for exception guard
                 NH3API_MAKE_EXCEPTION_GUARD(
-                noexcept_default_construct 
-                && noexcept_copy 
-                && noexcept_move, 
+                noexcept_default_construct
+                && noexcept_copy
+                && noexcept_move,
                 range_cleanup, *this, _Appended_first, _Appended_last, _Newvec, _Newcapacity);
-                
+
                 _Appended_last = _Ufill(_Appended_first, _Newsize - _Oldsize, _Val);
                 _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
-                
+
                 guard.complete();
             } // scope for exception guard
 
@@ -801,7 +801,7 @@ public:
                 NH3API_MAKE_EXCEPTION_GUARD(
                     noexcept_copy && noexcept_move,
                     range_cleanup, *this, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity);
-                
+
                 _Ufill(_Newvec + _Whereoff, _Count, _Val);
                 _Constructed_first = _Newvec + _Whereoff;
 
@@ -943,11 +943,11 @@ protected:
         public:
             constexpr
             vector_cleanup(exe_vector& _vec) noexcept
-                : vec(_vec) 
+                : vec(_vec)
             {}
 
-            void operator()() 
-            { 
+            void operator()()
+            {
                 vec._Tidy();
                 NH3API_RETHROW
             }
@@ -961,25 +961,25 @@ protected:
     {
         public:
             constexpr
-            range_cleanup(exe_vector& _vec, 
-                          pointer& _destroy_first, 
-                          pointer& _destroy_last, 
-                          pointer& _deallocate_at, 
+            range_cleanup(exe_vector& _vec,
+                          pointer& _destroy_first,
+                          pointer& _destroy_last,
+                          pointer& _deallocate_at,
                           const size_type& _deallocation_size ) noexcept
-                : vec(_vec), 
+                : vec(_vec),
                 destroy_first(_destroy_first),
                 destroy_last(_destroy_last),
                 deallocate_at(_deallocate_at),
                 deallocation_size(_deallocation_size)
             {}
 
-            void operator()() 
-            { 
+            void operator()()
+            {
                 exe_vector::_Destroy_range(destroy_first, destroy_last);
                 vec._Deallocate(deallocate_at);
                 NH3API_RETHROW
             }
-            
+
         private:
             exe_vector& vec;
             pointer& destroy_first;
@@ -987,7 +987,7 @@ protected:
             pointer& deallocate_at;
             const size_type& deallocation_size;
     };
-    #else 
+    #else
     struct vector_cleanup
     {
         constexpr
@@ -1000,10 +1000,10 @@ protected:
 
     struct range_cleanup
     {
-        constexpr range_cleanup(exe_vector&, 
-                                        pointer, 
+        constexpr range_cleanup(exe_vector&,
                                         pointer,
-                                        pointer, 
+                                        pointer,
+                                        pointer,
                                         const size_type) noexcept
         {}
 
@@ -1071,11 +1071,11 @@ protected:
 
     NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20 static void _Destroy_range(pointer first, pointer last)
     noexcept(noexcept(std::is_nothrow_destructible_v<value_type> || std::is_trivially_destructible_v<value_type>))
-    { 
+    {
         nh3api::verify_range(first, last);
 
         if constexpr (!std::is_trivially_destructible_v<value_type>)
-            std::destroy<pointer>(first, last); 
+            std::destroy<pointer>(first, last);
     }
 
     NH3API_FORCEINLINE static pointer _Umove(pointer first, pointer last, pointer ptr)
@@ -1086,7 +1086,7 @@ protected:
 
         return std::uninitialized_move<pointer, pointer>(first, last, ptr);
     }
-    
+
     NH3API_FORCEINLINE static pointer _Move_backward(pointer first, pointer last, pointer ptr)
     {
         nh3api::verify_range(first, last);
@@ -1115,7 +1115,7 @@ protected:
     NH3API_FORCEINLINE static pointer _Allocate(size_type num) noexcept
     { return static_cast<pointer>(::operator new(num * sizeof(value_type), exe_heap, std::nothrow)); }
 
-    NH3API_FORCEINLINE static void _Deallocate(void* ptr) noexcept 
+    NH3API_FORCEINLINE static void _Deallocate(void* ptr) noexcept
     { ::operator delete(ptr, exe_heap); }
 
     // allocate array with _Capacity elements
@@ -1152,8 +1152,8 @@ protected:
     }
 
     // discard old array, acquire new array
-    void _Change_array(pointer _Newvec, 
-                       const size_type _Newsize, 
+    void _Change_array(pointer _Newvec,
+                       const size_type _Newsize,
                        const size_type _Newcapacity) noexcept
     {
         _Tidy();
@@ -1227,7 +1227,7 @@ protected:
             NH3API_MAKE_EXCEPTION_GUARD(
                 noexcept_copy && noexcept_move,
                 range_cleanup, *this, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity);
-            
+
             std::uninitialized_copy(first, last, _Newvec + _Whereoff);
             _Constructed_first = _Newvec + _Whereoff;
             if (_One_at_back)
@@ -1242,7 +1242,7 @@ protected:
             }
 
             guard.complete();
-            
+
             } // scope for exception guard
 
             _Change_array(_Newvec, _Newsize, _Newcapacity);

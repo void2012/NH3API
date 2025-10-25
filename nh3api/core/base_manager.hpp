@@ -86,11 +86,11 @@ NH3API_VIRTUAL_CLASS baseManager
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_BASEMANAGER
 #define NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(CLASS_NAME)\
-virtual int32_t __thiscall Open(int32_t newPriority) override \
+int32_t __thiscall Open(int32_t newPriority) override \
 { return get_type_vftable(this)->Open(static_cast<baseManager*>(this), newPriority); }\
-virtual void __thiscall Close() override \
+void __thiscall Close() override \
 { get_type_vftable(this)->Close(static_cast<baseManager*>(this)); }\
-virtual int32_t __thiscall Main(message& msg) override \
+int32_t __thiscall Main(message& msg) override \
 { return get_type_vftable(this)->Main(static_cast<baseManager*>(this), &msg); }
 #endif // NH3API_VIRTUAL_OVERRIDE_BASEMANAGER
 

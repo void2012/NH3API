@@ -552,7 +552,7 @@ public:
 
     armyGroup(armyGroup&& other) noexcept
     {
-        #if __has_builtin(__builtin_memcpy_inline) && __has_builtin(__builtin_memset_inline)
+        #if NH3API_HAS_BUILTIN(__builtin_memcpy_inline) && NH3API_HAS_BUILTIN(__builtin_memset_inline)
         __builtin_memcpy_inline(reinterpret_cast<void*>(this), &other, sizeof(*this));
         __builtin_memset_inline(&other, 0xFF, sizeof(*this));
         #else
@@ -563,7 +563,7 @@ public:
 
     armyGroup& operator=(armyGroup&& other) noexcept
     {
-        #if __has_builtin(__builtin_memcpy_inline) && __has_builtin(__builtin_memset_inline)
+        #if NH3API_HAS_BUILTIN(__builtin_memcpy_inline) && NH3API_HAS_BUILTIN(__builtin_memset_inline)
         __builtin_memcpy_inline(reinterpret_cast<void*>(this), &other, sizeof(*this));
         __builtin_memset_inline(&other, 0xFF, sizeof(*this));
         #else

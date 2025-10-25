@@ -20,7 +20,7 @@ NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
 
 // maximum allocated size per call: 520177 bytes
 
-#if __has_builtin(__builtin_assume_aligned)
+#if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
 
 namespace nh3api
 {
@@ -49,9 +49,9 @@ NH3API_MALLOC(1)
 // Внутренняя реализация CRT-функции operator new Heroes3.exe.
 void* __cdecl exe_new(size_t size) noexcept
 {
-    #if __has_builtin(__builtin_assume_aligned)
-    #if __has_builtin(__builtin_constant_p)
-        if ( __builtin_constant_p(size))
+    #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
+    #if NH3API_HAS_BUILTIN_CONSTANT_P
+        if ( __builtin_constant_p(size) )
         {
             if ( size < 0x3f8 )
                 return __builtin_assume_aligned(nh3api::exe_new_align_16(size), 16);
@@ -143,9 +143,9 @@ NH3API_MALLOC(1)
 // usage: new (exe_heap) new-initializer...
 void* __cdecl operator new(size_t size, const exe_heap_t&)
 {
-    #if __has_builtin(__builtin_assume_aligned)
-    #if __has_builtin(__builtin_constant_p)
-        if ( __builtin_constant_p(size))
+    #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
+    #if NH3API_HAS_BUILTIN_CONSTANT_P
+        if ( __builtin_constant_p(size) )
         {
             if ( size < 0x3f8 )
                 return __builtin_assume_aligned(nh3api::exe_new_align_16(size), 16);
@@ -168,9 +168,9 @@ NH3API_MALLOC(1)
 // usage: new (exe_heap, std::nothrow) new-initializer...
 void* __cdecl operator new(size_t size, const exe_heap_t&, const std::nothrow_t&) noexcept
 {
-    #if __has_builtin(__builtin_assume_aligned)
-    #if __has_builtin(__builtin_constant_p)
-        if ( __builtin_constant_p(size))
+    #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
+    #if NH3API_HAS_BUILTIN_CONSTANT_P
+        if ( __builtin_constant_p(size) )
         {
             if ( size < 0x3f8 )
                 return __builtin_assume_aligned(nh3api::exe_new_align_16(size), 16);
@@ -195,9 +195,9 @@ NH3API_MALLOC(1)
 // and return exe_new(size) + 4 pointer, so we don't do manual handling
 void* __cdecl operator new[](size_t size, const exe_heap_t&)
 {
-    #if __has_builtin(__builtin_assume_aligned)
-    #if __has_builtin(__builtin_constant_p)
-        if ( __builtin_constant_p(size))
+    #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
+    #if NH3API_HAS_BUILTIN_CONSTANT_P
+        if ( __builtin_constant_p(size) )
         {
             if ( size < 0x3f8 )
                 return __builtin_assume_aligned(nh3api::exe_new_align_16(size), 16);
@@ -222,9 +222,9 @@ NH3API_MALLOC(1)
 // and return exe_new(size) + 4 pointer, so we don't do manual handling
 void* __cdecl operator new[](size_t size, const exe_heap_t&, const std::nothrow_t&) noexcept
 {
-    #if __has_builtin(__builtin_assume_aligned)
-    #if __has_builtin(__builtin_constant_p)
-        if ( __builtin_constant_p(size))
+    #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
+    #if NH3API_HAS_BUILTIN_CONSTANT_P
+        if ( __builtin_constant_p(size) )
         {
             if ( size < 0x3f8 )
                 return __builtin_assume_aligned(nh3api::exe_new_align_16(size), 16);
@@ -718,7 +718,7 @@ namespace nh3api
 template<size_t size> NH3API_FORCEINLINE
 void trivial_zero(void* ptr) noexcept
 {
-    #if __has_builtin(__builtin_memset_inline)
+    #if NH3API_HAS_BUILTIN(__builtin_memset_inline)
     __builtin_memset_inline(ptr, 0, size);
     #else
     for (size_t i = 0; i < size; ++i )
@@ -754,7 +754,7 @@ void trivial_swap<16>(void* __restrict left, void* __restrict right) noexcept
 template<size_t size> NH3API_FORCEINLINE
 void trivial_move(void* __restrict src, void* __restrict dst) noexcept
 {
-    #if __has_builtin(__builtin_memcpy_inline) && __has_builtin(__builtin_memset_inline)
+    #if NH3API_HAS_BUILTIN(__builtin_memcpy_inline) && NH3API_HAS_BUILTIN(__builtin_memset_inline)
     // 1. copy from *src to *dst
     __builtin_memcpy_inline(dst, src, size);
 
@@ -774,7 +774,7 @@ void trivial_move(void* __restrict src, void* __restrict dst) noexcept
 template<size_t size> NH3API_FORCEINLINE
 void trivial_copy(const void* __restrict src, void* __restrict dst) noexcept
 {
-    #if __has_builtin(__builtin_memcpy_inline)
+    #if NH3API_HAS_BUILTIN(__builtin_memcpy_inline)
     __builtin_memcpy_inline(dst, src, size);
     #else
     // copy from *src to *dst

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "nh3api_std/call_macros.hpp" // call macros
-#include "nh3api_std/stl_extras.hpp" // bit_cast, byte_t
+#include "nh3api_std/stl_extras.hpp" // bit_cast
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -48,7 +48,7 @@ enum TTerrainType : int32_t
 
 // Road type /
 // Тип дороги.
-enum TRoadType : uint32_t 
+enum TRoadType : uint32_t
 {
     eRoadNone        = 0, // Нет дороги
     eRoadDirt        = 1, // Дорога по грязи
@@ -65,7 +65,7 @@ enum TRoadType : uint32_t
 
 // River type /
 // Тип реки.
-enum TRiverType : uint32_t 
+enum TRiverType : uint32_t
 {
     eRiverNone     = 0, // Нет реки
     eRiverClear    = 1, // Чистая река
@@ -237,7 +237,7 @@ enum TAdventureObjectType : int32_t
     TERRAIN_ROCK                   = 147, // Камни
     TERRAIN_SAND_DUNE              = 148, // Песчаная дюна
     TERRAIN_SAND_PIT               = 149, // Песчаная яма
-    TERRAIN_SHRUB                  = 150, // Куст 
+    TERRAIN_SHRUB                  = 150, // Куст
     TERRAIN_SKULL                  = 151, // Череп
     TERRAIN_STALAGMITE             = 152, // Сталагмит
     TERRAIN_STUMP                  = 153, // Пень
@@ -392,12 +392,12 @@ enum TTownType : int32_t
     MAX_TOWNS       = MAX_TOWNS_SOD // Количество городов в SoD
 };
 
-// Allowed alignments bitmasks / 
+// Allowed alignments bitmasks /
 // Маски разрешенных фракций.
-enum : uint32_t 
+enum : uint32_t
 {
     kAlignmentsMaskRoE = 0xFF,
-    kAlignmentsMaskAB  = 0x1FF, 
+    kAlignmentsMaskAB  = 0x1FF,
     kAlignmentsMaskSoD = kAlignmentsMaskAB,
     kAlignmentsMask    = kAlignmentsMaskSoD,
 
@@ -450,12 +450,12 @@ class type_point
             return *this;
         }
 
-        #if __has_builtin(__builtin_bit_cast)
+        #if NH3API_HAS_BUILTIN_BIT_CAST
         constexpr
         #endif
         type_point& set(uint32_t data) noexcept
         {
-            #if __has_builtin(__builtin_bit_cast)
+            #if NH3API_HAS_BUILTIN_BIT_CAST
             *this = __builtin_bit_cast(type_point, data);
             #else
             memcpy(this, &data, sizeof(*this));
@@ -484,13 +484,13 @@ class type_point
         { return static_cast<int8_t>(z & 0xF); }
 
         [[nodiscard]]
-        #if __has_builtin(__builtin_bit_cast)
+        #if NH3API_HAS_BUILTIN_BIT_CAST
         constexpr
         #endif
         // return the underlying data
         uint32_t to_uint() const noexcept
-        { 
-            #if __has_builtin(__builtin_bit_cast)
+        {
+            #if NH3API_HAS_BUILTIN_BIT_CAST
             return __builtin_bit_cast(uint32_t, *this);
             #else
             uint32_t result;
@@ -506,13 +506,13 @@ class type_point
 
         [[nodiscard]] constexpr size_t hash() const noexcept
         {
-            // for hash we simply return 32-bit mask of tuple [x,y,z] but without 
-            // unused bits which may be filled with different default values depending on 
+            // for hash we simply return 32-bit mask of tuple [x,y,z] but without
+            // unused bits which may be filled with different default values depending on
             // on the current heap settings(e.g. debug heap on UCRT fills unused bytes with either 0xFD or 0xED)
             // we fill padding bits with zeroes for predictable behavior
             // NOTE: compilers optimize this to std::bit_cast<uint32_t>(*this) & 0x3FFF03FF
             // But for the sake of constexpr support, we have to do such manual calculations with each bit field.
-            return (0x03FF & x) | (((0x03FF & y) << 16) & 0x03FF0000) | (((0xF & z) << 26) & 0x3C000000); 
+            return (0x03FF & x) | (((0x03FF & y) << 16) & 0x03FF0000) | (((0xF & z) << 26) & 0x3C000000);
         }
 
     public:
@@ -524,7 +524,6 @@ class type_point
 } NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
-#if NH3API_STD_HASH
 // std::hash support for type_point
 template<>
 struct std::hash<type_point>
@@ -533,7 +532,6 @@ struct std::hash<type_point>
         size_t operator()(const type_point& arg) noexcept
         { return arg.hash(); }
 };
-#endif
 
 #pragma pack(push, 1)
 // size = 0x4 = 4, align = 1
@@ -547,7 +545,7 @@ struct tilePoint
 
 protected:
     [[maybe_unused]]
-    byte_t gap_2[2];
+    std::byte gap_2[2];
 
 };
 #pragma pack(pop)
@@ -652,7 +650,7 @@ struct ExtraObjectProperties
     protected:
         [[maybe_unused]]
         // offset: +0x3 = +3,  size = 0x1 = 1
-        byte_t gap_3[1];
+        std::byte gap_3[1];
 
     public:
         // Object name /
@@ -673,17 +671,15 @@ struct ExtraObjectProperties
     protected:
         [[maybe_unused]]
         // offset: +0xD = +13,  size = 0x3 = 3
-        byte_t gap_D[3];
+        std::byte gap_D[3];
 
 };
 #pragma pack(pop)
 
-inline
-std::array<ExtraObjectProperties, MAX_OBJECTS>& gExtraObjectProperties
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6916E8, std::array<ExtraObjectProperties, MAX_OBJECTS>));
+inline std::array<ExtraObjectProperties, MAX_OBJECTS>& gExtraObjectProperties
+= get_global_var_ref(0x6916E8, std::array<ExtraObjectProperties, MAX_OBJECTS>);
 
-inline
-const std::array<tilePoint, 8>& normalDirTable
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x678150, const std::array<tilePoint, 8>));
+inline const std::array<tilePoint, 8>& normalDirTable
+= get_global_var_ref(0x678150, const std::array<tilePoint, 8>);
 
 NH3API_DISABLE_WARNING_END

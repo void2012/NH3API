@@ -9,38 +9,33 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <array>
 #include "core/nh3api_std/exe_string.hpp"
 
 struct TCheatCode
 {
-    char code[200]
-    #if NH3API_CHECK_CPP11
-    {}
-    #endif
-    ;
-    constexpr
-    TCheatCode(const char* _code) noexcept
+    std::array<char, 200> code{};
+    constexpr TCheatCode(const char* _code) noexcept
     {
         const char b[] = "nopqrstuvwxyzabcdefghijklm";
 
-        size_t i = 0; 
+        size_t i = 0;
         const size_t inputLength = std::min<size_t>(std::size(code) - 1, nh3api::constexpr_char_traits::length(_code));
 
-        for (; i < inputLength; ++i) 
+        for (; i < inputLength; ++i)
         {
-            if (nh3api::isalpha_constexpr(_code[i])) 
+            if (nh3api::isalpha_constexpr(_code[i]))
                 code[i] = b[nh3api::tolower_constexpr(_code[i]) - 'a'];
-            else 
+            else
                 code[i] = _code[i];
-            
         }
-        
+
         code[i] = '0';
     }
 
     constexpr NH3API_FORCEINLINE
     int32_t compare(const char* arg) const
-    { return nh3api::constexpr_char_traits::compare(code, arg, sizeof(code)); }
+    { return nh3api::constexpr_char_traits::compare(code.data(), arg, sizeof(code)); }
 
 };
 

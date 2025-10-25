@@ -44,7 +44,7 @@ uint32_t Random(uint32_t iMin, uint32_t iMax) noexcept
     const uint32_t randomNumber = static_cast<uint32_t>(exe_rand());
     if ( iMax >= iMin )
         return iMin + randomNumber % (iMax - iMin + 1);
-    else 
+    else
         return iMax + randomNumber % (iMin - iMax + 1);
 }
 

@@ -62,7 +62,7 @@ public:
     // Game setup options /
     // Начальные условия игры.
     // offset: +0x304 = +772,  size = 0x1CC = 460
-    SGameSetupOptions game_setup; 
+    SGameSetupOptions game_setup;
     // ^^^ trivial ^^^
 
     // Scenario is available /
@@ -72,7 +72,7 @@ public:
 
 protected:
     [[maybe_unused]]
-    byte_t gap_4D1[3];
+    std::byte gap_4D1[3];
 
 };
 #pragma pack(pop)
@@ -87,7 +87,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
 {
     public:
         NH3API_FORCEINLINE
-        TCampaignBrief(bool newCampaign, int32_t bViewFromGame) 
+        TCampaignBrief(bool newCampaign, int32_t bViewFromGame)
         NH3API_NOEXCEPT_EXPR(false) // TGzInflateBuf may throw TGzInflateBuf::TDataError, std::filebuf::_Initcvt may throw std::bad_cast
         NH3API_DELEGATE_DUMMY_BASE(TCampaignBrief)
         { THISCALL_3(void, 0x458DA0, this, newCampaign, bViewFromGame); }
@@ -105,7 +105,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
         NH3API_FORCEINLINE
         ~TCampaignBrief() noexcept
         { THISCALL_1(void, 0x45AC90, this); }
-    
+
     public:
         NH3API_VIRTUAL_OVERRIDE_HEROWINDOW(TCampaignBrief)
 
@@ -174,7 +174,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
 
         protected:
             [[maybe_unused]]
-            byte_t gap_3A[2];
+            std::byte gap_3A[2];
 
         public:
             // Scenario prologue /
@@ -214,7 +214,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
 
         protected:
             [[maybe_unused]]
-            byte_t gap_49[3];
+            std::byte gap_49[3];
 
         public:
             // offset: +0x4C = +76,  size = 0x20 = 32
@@ -248,7 +248,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
         {
             public:
                 NH3API_FORCEINLINE
-                CampaignHeaderStruct() 
+                CampaignHeaderStruct()
                 NH3API_NOEXCEPT_EXPR(false) // TGzInflateBuf may throw TGzInflateBuf::TDataError, std::filebuf::_Initcvt may throw std::bad_cast
                 NH3API_DELEGATE_DUMMY(CampaignHeaderStruct)
                 { THISCALL_1(void, 0x4883C0, this); }
@@ -259,12 +259,12 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
                       campaign_name(tag),
                       campaign_desc(tag),
                       scenarios(tag)
-                {} 
+                {}
 
                 NH3API_FORCEINLINE
-                ~CampaignHeaderStruct() noexcept 
+                ~CampaignHeaderStruct() noexcept
                 { THISCALL_1(void, 0x4881E0, this); }
-                
+
             public:
                 // offset: +0x0 = +0,  size = 0x4 = 4
                 int32_t file_error;
@@ -284,12 +284,12 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
                 // offset: +0x1C = +28,  size = 0x10 = 16
                 exe_string campaign_name;
                 };
-                
+
                 union {
                 // offset: +0x2C = +44,  size = 0x10 = 16
                 exe_string campaign_desc;
                 };
-                
+
                 union {
                 // offset: +0x3C = +60,  size = 0x10 = 16
                 exe_vector<ScenarioStruct*> scenarios;
@@ -306,7 +306,7 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
 
             protected:
                 [[maybe_unused]]
-                byte_t gap_55[3];
+                std::byte gap_55[3];
 
             public:
                 // offset: +0x58 = +88,  size = 0x4 = 4
@@ -383,7 +383,7 @@ public:
 
 protected:
     [[maybe_unused]]
-    byte_t gap_1[3];
+    std::byte gap_1[3];
 
 public:
     // Days completed /
@@ -435,7 +435,7 @@ struct SCampaign
         SCampaign(SCampaign&&) noexcept            = default;
         SCampaign& operator=(SCampaign&&) noexcept = default;
 
-        // we don't wrap non-trivial members in union because there is no destructor 
+        // we don't wrap non-trivial members in union because there is no destructor
         // available in the game as a standalone function, as it was inlined inside of game::game()
         NH3API_DEFAULT_DESTRUCTOR(SCampaign)
 
@@ -462,7 +462,7 @@ struct SCampaign
     protected:
         [[maybe_unused]]
         // offset: +0x3 = +3,  size = 0x1 = 1
-        byte_t gap_3[1];
+        std::byte gap_3[1];
 
     public:
         // Current campaign /
@@ -483,7 +483,7 @@ struct SCampaign
 
     protected:
         [[maybe_unused]]
-        byte_t gap_D[3];
+        std::byte gap_D[3];
 
     public:
         // Scenario chosen bonus /
@@ -504,7 +504,7 @@ struct SCampaign
     protected:
         [[maybe_unused]]
         // offset: +0x39 = +57,  size = 0x3 = 3
-        byte_t gap_39[3];
+        std::byte gap_39[3];
 
     public:
         // Crossover heroes /

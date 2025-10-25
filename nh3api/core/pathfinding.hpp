@@ -176,7 +176,7 @@ class searchArray
 
     protected:
         [[maybe_unused]]
-        byte_t gap_5[3];
+        std::byte gap_5[3];
 
     public:
         // offset: +0x8 = +8,  size = 0x4 = 4
@@ -211,7 +211,7 @@ class searchArray
 
     protected:
         [[maybe_unused]]
-        byte_t gap_21[3];
+        std::byte gap_21[3];
 
     public:
         // offset: +0x24 = +36,  size = 0x4 = 4
@@ -219,7 +219,7 @@ class searchArray
 
         // offset: +0x28 = +40,  size = 0x10 = 16
         RECT valid_rectangle;
-        
+
         union {
         // offset: +0x38 = +56,  size = 0x10 = 16
         exe_vector<pathCell> queue;
@@ -246,8 +246,6 @@ class searchArray
 
 NH3API_SIZE_ASSERT(0x70, searchArray);
 
-inline
-searchArray* const& gpSearchArray
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6992D4, searchArray*));
+inline searchArray* const& gpSearchArray = get_global_var_ref(0x6992D4, searchArray*);
 
 NH3API_DISABLE_WARNING_END

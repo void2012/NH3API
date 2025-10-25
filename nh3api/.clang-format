@@ -13,8 +13,8 @@ AlignConsecutiveShortCaseStatements:
   AcrossEmptyLines: true
   AcrossComments: true
   AlignCaseColons: false
-AlignEscapedNewlines: LeftWithLastLine 
-AlignOperands: AlignAfterOperator 
+AlignEscapedNewlines: LeftWithLastLine
+AlignOperands: AlignAfterOperator
 AlignTrailingComments:
   Kind: Always
   OverEmptyLines: 2
@@ -24,7 +24,7 @@ AllowBreakBeforeNoexceptSpecifier: Always
 AllowShortBlocksOnASingleLine: Always
 AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: true
-AllowShortFunctionsOnASingleLine: None
+AllowShortFunctionsOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: Inline
 AllowShortLoopsOnASingleLine: false
@@ -47,32 +47,48 @@ AttributeMacros: [
                   'NH3API_CONST',
                   'NH3API_NAKED'
                  ]
-BinPackArguments: true 
-# BinPackLongBracedList since clang-format 21
+BinPackArguments: true
 BinPackLongBracedList: true
 BinPackParameters: OnePerLine
 BitFieldColonSpacing: Both
-BreakBeforeBraces: GNU
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: Always
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: false
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: true
+  BeforeWhile: true
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: true
+BracedInitializerIndentWidth: 4
 BreakAdjacentStringLiterals: true
-BreakAfterAttributes: Leave
-BreakAfterReturnType: ExceptShortType
+BreakAfterAttributes: Never
+BreakAfterReturnType: Automatic
 BreakBeforeBinaryOperators: All
 BreakBeforeConceptDeclarations: Always
-# BreakBeforeTemplateCloser since clang-format 21
 BreakBeforeTemplateCloser: true
 BreakBeforeTernaryOperators: true
 BreakBinaryOperations: Never
 BreakConstructorInitializers: BeforeColon
-BreakFunctionDefinitionParameters: false 
+BreakFunctionDefinitionParameters: false
 BreakInheritanceList: AfterComma
 BreakStringLiterals: true
 BreakTemplateDeclarations: Yes
 CompactNamespaces: false
 ContinuationIndentWidth: 4
-Cpp11BracedListStyle: false 
+Cpp11BracedListStyle: false
 EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock
-# EnumTrailingComma since clang-format 21
 EnumTrailingComma: Remove
 FixNamespaceComments: true
 IncludeBlocks: Preserve
@@ -98,7 +114,7 @@ NamespaceIndentation: None
 PackConstructorInitializers: NextLineOnly
 PointerAlignment: Left
 # QualifierAlignmentStyle: Custom
-# QualifierOrder: [ 'static', 'inline', 'constexpr', 'const', 'volatile', 'friend', 'type' ]
+# QualifierOrder: [ 'static', 'inline', 'constexpr', 'const', 'volatile', 'friend', 'restrict', 'type' ]
 ReferenceAlignment: Left
 ReflowComments: Never
 RemoveBracesLLVM: true
@@ -110,8 +126,7 @@ RequiresExpressionIndentation: OuterScope
 SeparateDefinitionBlocks: Always
 SortUsingDeclarations: Lexicographic
 SpaceAfterCStyleCast: false
-SpaceAfterLogicalNot: false 
-# SpaceAfterOperatorKeyword since clang-format 21
+SpaceAfterLogicalNot: false
 SpaceAfterOperatorKeyword: false
 SpaceAfterTemplateKeyword: false
 SpaceAroundPointerQualifiers: Default
@@ -132,21 +147,20 @@ SpaceBeforeParensOptions:
   AfterRequiresInExpression: true
   BeforeNonEmptyParentheses: false
 SpaceBeforeRangeBasedForLoopColon: true
-SpaceBeforeSquareBrackets: false 
-SpaceInEmptyBlock: false 
-# Leave spaces in templates brackets < > for conformance with C++98
-SpacesInAngles: Never  
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
+SpacesInAngles: Never
 SpacesInParens: Custom
 SpacesInParensOptions:
   ExceptDoubleParentheses: false
   InConditionalStatements: true
   InCStyleCasts: false
-  InEmptyParentheses : false 
+  InEmptyParentheses : false
   Other: false
 SpacesInSquareBrackets: false
 Standard: c++17
 StatementMacros: ['NH3API_MAKE_EXCEPTION_GUARD']
 TabWidth: 4
-UseTab: Never 
+UseTab: Never
 WhitespaceSensitiveMacros: [ 'NH3API_STRINGIFY' ]
 ColumnLimit: 0

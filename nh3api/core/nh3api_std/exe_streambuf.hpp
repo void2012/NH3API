@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "memory.hpp"     // get_type_vftable 
+#include "memory.hpp"     // get_type_vftable
 #include "exe_string.hpp" // exe_string
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
@@ -348,31 +348,31 @@ using exe_streampos = exe_fpos<exe_mbstate_t>;
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_STREAMBUF
 #define NH3API_VIRTUAL_OVERRIDE_STREAMBUF(CLASS_NAME) \
-virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override\
+void __thiscall scalar_deleting_destructor(uint8_t flag) override\
 { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }\
-virtual int_type __thiscall overflow(int_type ch = traits_type::eof()) override\
+int_type __thiscall overflow(int_type ch = traits_type::eof()) override\
 { return get_type_vftable(this)->overflow(this, ch); }\
-virtual int_type __thiscall pbackfail(int_type ch = traits_type::eof()) override\
+int_type __thiscall pbackfail(int_type ch = traits_type::eof()) override\
 { return get_type_vftable(this)->pbackfail(this, ch); }\
-virtual exe_streamsize __thiscall showmanyc() override\
+exe_streamsize __thiscall showmanyc() override\
 { return get_type_vftable(this)->showmanyc(this); }\
-virtual int_type __thiscall underflow() override\
+int_type __thiscall underflow() override\
 { return get_type_vftable(this)->underflow(this); }\
-virtual int_type __thiscall uflow() override\
+int_type __thiscall uflow() override\
 { return get_type_vftable(this)->uflow(this); }\
-virtual exe_streamsize __thiscall xsgetn(char_type * _S, exe_streamsize _N) override\
+exe_streamsize __thiscall xsgetn(char_type * _S, exe_streamsize _N) override\
 { return get_type_vftable(this)->xsgetn(this, _S, _N); }\
-virtual exe_streamsize __thiscall xsputn(const char_type *_S, exe_streamsize _N) override\
+exe_streamsize __thiscall xsputn(const char_type *_S, exe_streamsize _N) override\
 { return get_type_vftable(this)->xsputn(this, _S, _N); }\
-virtual pos_type* __thiscall seekoff(pos_type* result, off_type off, exe_ios::seekdir seek, exe_ios::openmode mode) override\
+pos_type* __thiscall seekoff(pos_type* result, off_type off, exe_ios::seekdir seek, exe_ios::openmode mode) override\
 { return get_type_vftable(this)->seekoff(this, result, off, seek, mode); }\
-virtual pos_type* __thiscall seekpos(pos_type* result, pos_type pos, exe_ios::openmode mode) override\
+pos_type* __thiscall seekpos(pos_type* result, pos_type pos, exe_ios::openmode mode) override\
 { return get_type_vftable(this)->seekpos(this, result, pos, mode); }\
-virtual CLASS_NAME* __thiscall setbuf(char_type* buf, exe_streamsize size) override\
+CLASS_NAME* __thiscall setbuf(char_type* buf, exe_streamsize size) override\
 { return static_cast<CLASS_NAME*>(get_type_vftable(this)->setbuf(this, buf, size)); }\
-virtual int32_t __thiscall sync() override\
+int32_t __thiscall sync() override\
 { return get_type_vftable(this)->sync(this); }\
-virtual void __thiscall imbue(void* ptr) override\
+void __thiscall imbue(void* ptr) override\
 { get_type_vftable(this)->imbue(this, ptr); }
 #endif
 
@@ -515,7 +515,7 @@ public:
 protected:
     [[nodiscard]] char_type* __thiscall eback() const noexcept
     { return (*_IGbeg); }
-    
+
     [[nodiscard]] char_type* __thiscall gptr() const noexcept
     { return (*_IGnext); }
 
@@ -534,7 +534,7 @@ protected:
         *_IGnext += _N;
     }
 
-    void __thiscall setg(char_type *_B, char_type *_N, char_type *_L) noexcept 
+    void __thiscall setg(char_type *_B, char_type *_N, char_type *_L) noexcept
     { *_IGbeg = _B, *_IGnext = _N, *_IGcnt = _L - _N; }
 
     [[nodiscard]] char_type* __thiscall epptr() const noexcept
@@ -572,11 +572,11 @@ protected:
 
     void __thiscall _Init() noexcept
     {
-        _IGbeg = &_Gbeg; 
+        _IGbeg = &_Gbeg;
         _IPbeg = &_Pbeg;
-        _IGnext = &_Gnext; 
+        _IGnext = &_Gnext;
         _IPnext = &_Pnext;
-        _IGcnt = &_Gcnt; 
+        _IGcnt = &_Gcnt;
         _IPcnt = &_Pcnt;
         setp(nullptr, nullptr);
         setg(nullptr, nullptr, nullptr);
@@ -761,7 +761,7 @@ NH3API_VIRTUAL_CLASS exe_basic_filebuf : public exe_basic_streambuf<CharT, CharT
         exe_basic_filebuf(const ::nh3api::dummy_tag_t& tag) noexcept
             : base_type(tag)
         {}
-        
+
         NH3API_FORCEINLINE
         ~exe_basic_filebuf() noexcept
         { get_type_vftable(this)->scalar_deleting_destructor(this, 0); }
@@ -860,7 +860,7 @@ NH3API_VIRTUAL_CLASS exe_strstreambuf : public exe_streambuf
         exe_strstreambuf(const ::nh3api::dummy_tag_t& tag) noexcept
             : base_type(tag)
         {}
-           
+
         NH3API_FORCEINLINE
         ~exe_strstreambuf() noexcept
         { get_type_vftable(this)->scalar_deleting_destructor(this, 0); }

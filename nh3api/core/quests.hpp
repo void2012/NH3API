@@ -45,7 +45,7 @@ NH3API_VIRTUAL_CLASS type_quest
     public:
         struct vftable_t
         {
-            public: 
+            public:
                 void (__thiscall *scalar_deleting_destructor)(type_quest*, uint8_t);
                 int32_t (__thiscall *ai_value)(const type_quest*, int32_t);
                 bool (__thiscall *can_complete)(const type_quest*, hero*);
@@ -209,7 +209,7 @@ NH3API_VIRTUAL_CLASS type_quest
 
     protected:
         [[maybe_unused]]
-        byte_t gap_5[3];
+        std::byte gap_5[3];
 
     public:
         // Initial proposal text /
@@ -245,35 +245,35 @@ NH3API_SIZE_ASSERT(0x40, type_quest);
 #define NH3API_VIRTUAL_OVERRIDE_TYPE_QUEST(CLASS_NAME) \
 using type_quest::get_help_text; \
 using type_quest::get_quest_text; \
-virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override \
+void __thiscall scalar_deleting_destructor(uint8_t flag) override \
 { get_type_vftable(this)->scalar_deleting_destructor(reinterpret_cast<CLASS_NAME*>(this), flag); } \
-[[nodiscard]] virtual int32_t __thiscall ai_value(int32_t _player) const override \
+[[nodiscard]] int32_t __thiscall ai_value(int32_t _player) const override \
 { return get_type_vftable(this)->ai_value(reinterpret_cast<const CLASS_NAME*>(this), _player); } \
-[[nodiscard]] virtual bool __thiscall can_complete(hero* h) const override \
+[[nodiscard]] bool __thiscall can_complete(hero* h) const override \
 { return get_type_vftable(this)->can_complete(reinterpret_cast<const CLASS_NAME*>(this), h); } \
-virtual void __thiscall complete(hero* h) override \
+void __thiscall complete(hero* h) override \
 { get_type_vftable(this)->complete(reinterpret_cast<CLASS_NAME*>(this), h); } \
-virtual void __thiscall do_progress_dialog(hero* h) override \
+void __thiscall do_progress_dialog(hero* h) override \
 { get_type_vftable(this)->do_progress_dialog(reinterpret_cast<CLASS_NAME*>(this), h); } \
-virtual void __thiscall do_proposal_dialog() override \
+void __thiscall do_proposal_dialog() override \
 { get_type_vftable(this)->do_proposal_dialog(reinterpret_cast<CLASS_NAME*>(this)); } \
-[[nodiscard]] virtual exe_string* __thiscall get_quest_text(exe_string* out_str) const override \
+[[nodiscard]] exe_string* __thiscall get_quest_text(exe_string* out_str) const override \
 { return get_type_vftable(this)->get_quest_text(reinterpret_cast<const CLASS_NAME*>(this), out_str); } \
-[[nodiscard]] virtual exe_string* __thiscall get_help_text(exe_string* out_str) const override \
+[[nodiscard]] exe_string* __thiscall get_help_text(exe_string* out_str) const override \
 { return get_type_vftable(this)->get_help_text(reinterpret_cast<const CLASS_NAME*>(this), out_str); } \
-[[nodiscard]] virtual EQuestType __thiscall get_type() const override \
+[[nodiscard]] EQuestType __thiscall get_type() const override \
 { return get_type_vftable(this)->get_type(reinterpret_cast<const CLASS_NAME*>(this)); } \
-virtual void __thiscall hero_defeated(THeroID target, int32_t _player) override \
+void __thiscall hero_defeated(THeroID target, int32_t _player) override \
 { get_type_vftable(this)->hero_defeated(reinterpret_cast<CLASS_NAME*>(this), target, _player); } \
-virtual void __thiscall monster_defeated(type_point target, int32_t _player) override \
+void __thiscall monster_defeated(type_point target, int32_t _player) override \
 { get_type_vftable(this)->monster_defeated(reinterpret_cast<CLASS_NAME*>(this), target, _player); } \
-virtual void __thiscall load(TAbstractFile* file, int32_t version) override \
+void __thiscall load(TAbstractFile* file, int32_t version) override \
 { get_type_vftable(this)->load(reinterpret_cast<CLASS_NAME*>(this), file, version); } \
-virtual void __thiscall read(TAbstractFile* file) override \
+void __thiscall read(TAbstractFile* file) override \
 { get_type_vftable(this)->read(reinterpret_cast<CLASS_NAME*>(this), file); } \
-virtual void __thiscall save(TAbstractFile* file) const override \
+void __thiscall save(TAbstractFile* file) const override \
 { get_type_vftable(this)->save(reinterpret_cast<const CLASS_NAME*>(this), file); } \
-virtual void __thiscall init() override \
+void __thiscall init() override \
 { get_type_vftable(this)->init(reinterpret_cast<CLASS_NAME*>(this)); } \
 NH3API_DEFAULT_DESTRUCTOR(CLASS_NAME)
 #endif // NH3API_VIRTUAL_OVERRIDE_TYPE_QUEST
@@ -647,7 +647,7 @@ enum TSeerRewardType : uint32_t
 // Seer hut quest completion reward as a creature /
 // Награда хижины провидца - существо.
 // size = 0x8 = 8, align = 4
-struct TCreatureStack 
+struct TCreatureStack
 {
 public:
     // Creature type /
@@ -661,16 +661,16 @@ public:
     int16_t numTroops;
 
 protected:
-    byte_t gap6[2];
+    std::byte gap6[2];
 
 };
-#pragma pack(pop) 
+#pragma pack(pop)
 
 #pragma pack(push, 4)
 // Seer hut quest completion reward as a game resource /
 // Награда хижины провидца - игровой ресурс.
 // size = 0x8 = 8, align = 4
-struct TSeerResourceReward 
+struct TSeerResourceReward
 {
 public:
     // Resource type /
@@ -684,13 +684,13 @@ public:
     uint32_t resQty;
 
 };
-#pragma pack(pop) 
+#pragma pack(pop)
 
 #pragma pack(push, 4)
 // Seer hut quest completion reward as a primary skill /
 // Награда хижины провидца - первичный навык.
 // size = 0x8 = 8, align = 4
-struct TSeerPrimarySkillReward 
+struct TSeerPrimarySkillReward
 {
 public:
     // Primary skill type /
@@ -703,10 +703,10 @@ public:
     // offset: +0x4 = +4,  size = 0x1 = 1
     uint8_t bonus;
 protected:
-    byte_t gap5[3];
-    
+    std::byte gap5[3];
+
 };
-#pragma pack(pop) 
+#pragma pack(pop)
 
 #pragma pack(push, 4)
 // Seerhut reward /
@@ -739,7 +739,7 @@ struct TSeerReward
         // offset: +0x0 = +5,  size = 0x4 = 4
         TSeerRewardType rewardType;
 
-        union 
+        union
         {
             // Experience increment reward /
             // Кол-во опыта в виде вознаграждения.

@@ -26,8 +26,9 @@
  */
 #pragma once
 
+#include "stl_extras.hpp" // in_range
 #include "exe_string.hpp" // exe_string, exceptions
-#include "intrin.hpp" // bitpopcnt
+#include "intrin.hpp"     // bitpopcnt
 
 template<size_t N>
 struct exe_bitset_to_string_helper;
@@ -165,11 +166,7 @@ public:
             return;
 
         if ( count == std::string::npos )
-        #if __has_builtin(__builtin_strlen)
             count = __builtin_strlen(str);
-        #else
-            count = ::std::strlen(str);
-        #endif
 
         _Construct<
         #ifdef __cpp_lib_constexpr_string
@@ -190,11 +187,7 @@ public:
             return;
 
         if ( count == std::string::npos )
-        #if __has_builtin(__builtin_wcslen)
             count = __builtin_wcslen(str);
-        #else
-            count = ::std::wcslen(str);
-        #endif
 
         _Construct<std::char_traits<wchar_t>>(str, count, zero, one);
     }
@@ -278,7 +271,7 @@ public:
         }
         else
         {
-            #if __has_builtin(__builtin_memset_inline)
+            #if NH3API_HAS_BUILTIN(__builtin_memset_inline)
             __builtin_memset_inline(&_Array, 0xFF, sizeof(_Array));
             #else
             ::std::memset(&_Array, 0xFF, sizeof(_Array));
@@ -306,7 +299,7 @@ public:
         }
         else
         {
-            #if __has_builtin(__builtin_memset_inline)
+            #if NH3API_HAS_BUILTIN(__builtin_memset_inline)
             __builtin_memset_inline(&_Array, 0, sizeof(_Array));
             #else
             ::std::memset(&_Array, 0, sizeof(_Array));
@@ -404,6 +397,9 @@ public:
         return result;
     }
 
+    #if NH3API_HAS_WARNING("-Wbit-int-extension")
+    NH3API_DISABLE_WARNING_BEGIN("-Wbit-int-extension", 0)
+    #endif
     [[nodiscard]] constexpr size_t count() const noexcept
     {
         if constexpr ( _Bits == 0 )
@@ -412,27 +408,30 @@ public:
         }
         else if constexpr (_Bits <= _Bitsperword)
         {
-            #if defined (__BITINT_MAXWIDTH__) && __has_builtin(__builtin_popcountg)
-                return __builtin_popcountg(static_cast<unsigned _BitInt(_Bits)>(_Array[0]));
-            #elif __has_builtin(__builtin_popcount)
-                return __builtin_popcount(_Array[0]);
+            #if defined(__BITINT_MAXWIDTH__) && NH3API_HAS_BUILTIN(__builtin_popcountg)
+                return static_cast<size_t>(__builtin_popcountg(static_cast<unsigned _BitInt(_Bits)>(_Array[0])));
+            #elif NH3API_HAS_BUILTIN(__builtin_popcount)
+                return static_cast<size_t>(__builtin_popcount(_Array[0]));
             #else
-                return bitpopcnt(_Array[0]);
+                return static_cast<size_t>(bitpopcnt(_Array[0]));
             #endif
         }
         else
         {
             size_t result = 0;
             for (size_t i = 0; i < _Words + 1; ++i)
-            #if __has_builtin(__builtin_popcount)
-                result += __builtin_popcount(_Array[i]);
+            #if NH3API_HAS_BUILTIN(__builtin_popcount)
+                result += static_cast<size_t>(__builtin_popcount(_Array[i]));
             #else
-                result += bitpopcnt(_Array[i]);
+                result += static_cast<size_t>(bitpopcnt(_Array[i]));
             #endif
 
             return result;
         }
     }
+    #if NH3API_HAS_WARNING("-Wbit-int-extension")
+    NH3API_DISABLE_WARNING_END
+    #endif
 
     [[nodiscard]] constexpr size_t size() const noexcept
     { return _Bits; }
@@ -448,11 +447,7 @@ public:
         }
         else
         {
-            #if __has_builtin(__builtin_memcmp)
             return __builtin_memcmp(&_Array[0], &other._Array[0], sizeof(_Array)) == 0;
-            #else
-            return ::std::memcmp(&_Array[0], &other._Array[0], sizeof(_Array)) == 0;
-            #endif
         }
     }
 
@@ -663,8 +658,6 @@ inline constexpr exe_bitset<N> operator^(const exe_bitset<N>& lhs, const exe_bit
     result ^= rhs;
     return result;
 }
-
-#if NH3API_STD_HASH
 // std::hash support for exe_bitset
 template<size_t N>
 struct std::hash< exe_bitset<N> >
@@ -673,7 +666,6 @@ struct std::hash< exe_bitset<N> >
         size_t operator()(const exe_bitset<N>& arg) noexcept
         { return arg._Hash_code(); }
 };
-#endif
 
 template<size_t N>
 struct exe_bitset_to_string_helper

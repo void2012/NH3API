@@ -108,6 +108,7 @@ extern "C" const char* __thiscall std_type_info_name(const void* typeinfo_ptr
     , __type_info_node* node)
     asm("\"?name@type_info@@QBEPBDPAU__type_info_node@@@Z\"");
     #else
+    )
     asm("\"?name@type_info@@QBEPBDXZ\"");
     #endif
 #endif
@@ -220,7 +221,7 @@ struct exe_type_info_address
 { static inline constexpr uintptr_t address = 0; };
 
 template<typename T>
-#if __has_cpp_attribute(clang::no_specializations)
+#if NH3API_HAS_CPP_ATTRIBUTE(clang::no_specializations)
 [[clang::no_specializations("Specialize exe_type_info_address<T> instead.")]]
 #endif
 inline constexpr uintptr_t exe_type_info_address_v = exe_type_info_address<T>::address;

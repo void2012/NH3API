@@ -36,7 +36,7 @@ class CAutoArray
             allocSize = 0;
             pArray    = nullptr;
         }
-        
+
         // vftable shift: +0
         NH3API_SCALAR_DELETING_DESTRUCTOR
 
@@ -101,7 +101,7 @@ class CAutoArray
 
             return true;
         }
-        
+
         /*
         virtual bool Add(T* element)
         {
@@ -154,7 +154,7 @@ class CAutoArray
             return true;
         }
 
-        virtual size_t GetCount() const 
+        virtual size_t GetCount() const
         {
             return size;
         }

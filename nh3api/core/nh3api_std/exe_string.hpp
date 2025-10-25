@@ -29,7 +29,7 @@
 #include <array> // std::array
 #include <cmath> // std::fpclassify
 #include <utility>       // std::swap, std::forward
-//#ifdef __cpp_lib_ranges 
+//#ifdef __cpp_lib_ranges
 //#include <ranges> // std::ranges::enable_view, std::ranges::enable_borrowed_range
 //#endif
 #include "char_traits.hpp" // std::char_traits, constexpr_char_traits
@@ -45,9 +45,9 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 struct exe_string_equal_accessor;
 
 #pragma pack(push, 4)
-// Visual C++ 6.0 implementation of std::basic_string, 
+// Visual C++ 6.0 implementation of std::basic_string,
 // which uses unsafe copy-on-write semantics with 8-bit reference counting.
-// Use only for binary compatibility with the program. 
+// Use only for binary compatibility with the program.
 // Consider using std::basic_string or exe_std_string/exe_std_wstring which use .exe allocator
 class exe_string
 {
@@ -72,7 +72,7 @@ class exe_string
     protected:
         #ifdef __cpp_concepts
         template<nh3api::tt::iterator_for_container IterT>
-        #else 
+        #else
         template<typename IterT>
         #endif
         using is_elem_cptr = std::bool_constant<nh3api::tt::is_any_of_v<IterT, const char* const, char* const, const char*, char*>>;
@@ -91,7 +91,7 @@ class exe_string
         }
         #endif
 
-        #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS 
+        #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
         [[noreturn]] NH3API_FORCEINLINE
         static void _Throw_out_of_range_exception()
         {
@@ -282,7 +282,7 @@ class exe_string
 
     public:
         inline constexpr static size_type npos = size_type(-1);
-    
+
     public:
         exe_string& operator=( const exe_string& other )
         { assign(other); return *this; }
@@ -306,7 +306,7 @@ class exe_string
         {
             return append( str );
         }
-        
+
         NH3API_INLINE_LARGE
         exe_string& operator+=( value_type c )
         {
@@ -343,10 +343,10 @@ class exe_string
         {
             if (_Inside(str))
                 return append(*this, static_cast<size_type>(str - begin()), n);
-            
+
             if (npos - _Len <= n)
                 _Throw_out_of_range_exception();
-            
+
             size_type _N = _Len + n;
             // we use noexcept version of _Grow because it is nearly impossible to get the string literal to overflow
             if ( 0 < n && _Grow<true>(_N) )
@@ -396,10 +396,10 @@ class exe_string
         {
             return (assign( other, 0, npos ));
         }
-        
+
         NH3API_INLINE_LARGE
         exe_string& assign( const exe_string& other, size_type pos, size_type n )
-        {          
+        {
             if ( other.size() < pos )
             {
                 _Throw_out_of_range_exception();
@@ -496,10 +496,10 @@ class exe_string
 
             if ( _Len < pos1 )
                 _Throw_out_of_range_exception();
-            
+
             if (npos - _Len <= n)
                 _Throw_out_of_range_exception();
-            
+
             size_type _N = 0;
             if ( 0 < n && _Grow<false>( _N = _Len + n ) )
             {
@@ -598,7 +598,7 @@ class exe_string
                 erase( offset, 1 );
             return _Ptr + offset;
         }
-        
+
         iterator erase( const const_iterator _F, const const_iterator _L )
         {
             const size_type difference = (_F < _L) ? static_cast<size_type>(_L - _F) : 0;
@@ -651,10 +651,10 @@ class exe_string
         {
             if ( _Inside(str) )
                 return replace(pos1, n1, *this, static_cast<size_type>(str - cbegin()), n);
-            
+
             if (_Len < pos1)
                 _Throw_out_of_range_exception();
-            
+
             if (_Len - pos1 < n1)
                 n1 = _Len - pos1;
             if (npos - n <= _Len - n1)
@@ -716,7 +716,7 @@ class exe_string
             const size_type offset     = (_Inside(_F)) ? static_cast<size_type>(_F - begin()) : 0;
             if ( offset && difference )
                 return replace(offset, difference, other );
-            else  
+            else
                 return *this;
         }
 
@@ -729,7 +729,7 @@ class exe_string
             const size_type offset     = (_Inside(_F)) ? static_cast<size_type>(_F - begin()) : 0;
             if ( offset && difference && str)
                 return replace( offset, difference, str, n );
-            else 
+            else
                 return *this;
         }
 
@@ -739,7 +739,7 @@ class exe_string
             const size_type offset     = (_Inside(_F)) ? static_cast<size_type>(_F - begin()) : 0;
             if ( offset && difference && str)
                 return replace(offset, difference, str );
-            else 
+            else
                 return *this;
         }
 
@@ -752,7 +752,7 @@ class exe_string
             const size_type offset     = (_Inside(_F)) ? static_cast<size_type>(_F - begin()) : 0;
             if ( offset && difference)
                 return replace(offset, difference, n, c );
-            else  
+            else
                 return *this;
         }
 
@@ -796,7 +796,7 @@ class exe_string
 
             if ( offset && difference)
                 return replace(offset, _L1 - nh3api::unfancy(_F2), _F2, std::distance(_L2, _F2));
-            else 
+            else
                 return *this;
         }
 
@@ -981,7 +981,7 @@ class exe_string
         {
             return (_Len == 0);
         }
-        
+
         size_type copy( value_type* str, size_type _N, size_type pos1 = 0 ) const
         {
             if ( _Len < pos1 )
@@ -1003,13 +1003,13 @@ class exe_string
         [[nodiscard]] bool contains(value_type c) const noexcept
         { return std::find(cbegin(), cend(), c) != cend(); }
 
-        bool contains(const_pointer str) const 
+        bool contains(const_pointer str) const
         { return find(str) != npos; }
 
-        [[nodiscard]] bool starts_with(value_type c) const 
+        [[nodiscard]] bool starts_with(value_type c) const
         { return !empty() && nh3api::constexpr_char_traits::eq(front(), c); }
 
-        [[nodiscard]] bool ends_with(value_type c) const 
+        [[nodiscard]] bool ends_with(value_type c) const
         { return !empty() && nh3api::constexpr_char_traits::eq(back(), c); }
 
         [[nodiscard]] size_type find(const exe_string& other, size_type pos = 0 ) const noexcept
@@ -1139,7 +1139,7 @@ class exe_string
             assert( str != nullptr );
             return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
         }
-        
+
         #if NH3API_CHECK_CPP23
 
         [[nodiscard]] exe_string substr( size_type pos = 0, size_type n = npos ) const&
@@ -1172,9 +1172,9 @@ class exe_string
             this->_Check_offset(pos1);
             other._Check_offset(pos2);
 
-            return _Compare(this->c_str() + pos1, 
-                            this->_Clamp_suffix_size(pos1, n), 
-                            other.c_str() + pos2, 
+            return _Compare(this->c_str() + pos1,
+                            this->_Clamp_suffix_size(pos1, n),
+                            other.c_str() + pos2,
                             other._Clamp_suffix_size(pos2, count));
         }
 
@@ -1187,8 +1187,8 @@ class exe_string
             return _Compare(this->c_str() + pos, _Clamp_suffix_size(pos, count), str, ::nh3api::constexpr_char_traits::length(str));
         }
 
-        int compare(const size_type pos, 
-                    const size_type count1, 
+        int compare(const size_type pos,
+                    const size_type count1,
                     const value_type* const str,
                     const size_type count2) const
         {
@@ -1225,7 +1225,7 @@ class exe_string
         NH3API_FORCEINLINE void _Eos( size_type _N ) noexcept
         { _Ptr[_Len = _N] = '\0'; }
 
-        NH3API_FORCEINLINE bool _Inside(const_pointer ptr) noexcept 
+        NH3API_FORCEINLINE bool _Inside(const_pointer ptr) noexcept
         { return begin() <= ptr && ptr < end(); }
 
         void _Freeze() noexcept
@@ -1248,7 +1248,7 @@ class exe_string
             if ( max_size() < _N )
             {
                 return _Throw_out_of_range_exception(), false;
-            }    
+            }
             }
             if ( _Ptr != nullptr
                 && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
@@ -1325,15 +1325,15 @@ class exe_string
         }
 
         constexpr NH3API_FORCEINLINE
-        static bool _Equal(const char* _Left, 
-                           const size_t _Left_size, 
+        static bool _Equal(const char* _Left,
+                           const size_t _Left_size,
                            const char* _Right,
-                           const size_t _Right_size) noexcept 
+                           const size_t _Right_size) noexcept
         {
-            if (_Left_size != _Right_size) 
+            if (_Left_size != _Right_size)
                 return false;
 
-            if (_Left_size == 0u) 
+            if (_Left_size == 0u)
                 return true;
 
             return nh3api::constexpr_char_traits::compare(_Left, _Right, _Left_size) == 0;
@@ -1342,38 +1342,38 @@ class exe_string
         friend exe_string_equal_accessor;
 
         constexpr NH3API_FORCEINLINE
-        static int _Compare(const char* _Left, 
-                            const size_t _Left_size, 
+        static int _Compare(const char* _Left,
+                            const size_t _Left_size,
                             const char* _Right,
-                            const size_t _Right_size) noexcept 
+                            const size_t _Right_size) noexcept
         {
             const int _Ans = nh3api::constexpr_char_traits::compare(_Left, _Right, std::min<size_t>(_Left_size, _Right_size));
-            if (_Ans != 0) 
+            if (_Ans != 0)
                 return _Ans;
 
-            if (_Left_size < _Right_size) 
+            if (_Left_size < _Right_size)
                 return -1;
 
-            if (_Left_size > _Right_size) 
+            if (_Left_size > _Right_size)
                 return 1;
 
             return 0;
         }
 
         // checks whether _Off is in the bounds of [0, size()]
-        NH3API_FORCEINLINE void _Check_offset(const size_type _Off) const 
+        NH3API_FORCEINLINE void _Check_offset(const size_type _Off) const
         {
-            if (size() < _Off) 
+            if (size() < _Off)
                 _Throw_out_of_range_exception();
         }
-        
+
         // checks whether _Off is in the bounds of [0, size())
-        NH3API_FORCEINLINE void _Check_offset_exclusive(const size_type _Off) const 
+        NH3API_FORCEINLINE void _Check_offset_exclusive(const size_type _Off) const
         {
-            if (size() <= _Off) 
+            if (size() <= _Off)
                 _Throw_out_of_range_exception();
         }
-        
+
         // trims _Size to the longest it can be assuming a string at/after _Off
         [[nodiscard]] NH3API_FORCEINLINE constexpr size_type _Clamp_suffix_size(const size_type _Off, const size_type _Size) const noexcept
         { return std::min<size_type>(_Size, size() - _Off); }
@@ -1388,7 +1388,7 @@ class exe_string
 
 struct exe_string_equal_accessor
 {
-    NH3API_FORCEINLINE static bool equal(const exe_string& lhs, const exe_string& rhs) noexcept 
+    NH3API_FORCEINLINE static bool equal(const exe_string& lhs, const exe_string& rhs) noexcept
     {
         return exe_string::_Equal(lhs.c_str(), lhs.size(), rhs.c_str(), rhs.size());
     }
@@ -1545,19 +1545,19 @@ bool operator<=(const char* const lhs, const exe_string& rhs)
 { return !(rhs < lhs); }
 
 NH3API_FORCEINLINE
-bool operator<=(const exe_string& lhs, const char* const rhs) 
+bool operator<=(const exe_string& lhs, const char* const rhs)
 { return !(rhs < lhs); }
 
 NH3API_FORCEINLINE
-bool operator>=(const exe_string& lhs, const exe_string& rhs) 
+bool operator>=(const exe_string& lhs, const exe_string& rhs)
 { return !(lhs < rhs); }
 
 NH3API_FORCEINLINE
-bool operator>=(const char* const lhs, const exe_string& rhs) 
+bool operator>=(const char* const lhs, const exe_string& rhs)
 { return !(lhs < rhs); }
 
 NH3API_FORCEINLINE
-bool operator>=(const exe_string& lhs, const char* const rhs) 
+bool operator>=(const exe_string& lhs, const char* const rhs)
 { return !(lhs < rhs); }
 
 NH3API_FORCEINLINE
@@ -1595,24 +1595,11 @@ static StringT int_to_string(int32_t x)
 {
     using CharT = typename StringT::value_type;
 
-    const auto digit_to_char = [] NH3API_INLINE_LAMBDA (const uint8_t digit) 
-    {
-        if constexpr ( std::is_same_v<CharT, char> )
-        {
-            return '0' + digit;
-        }
-        else if ( std::is_same_v<CharT, char> )
-        {
-            return L'0' + digit;
-        }
-        else  
-        { return 0; }
-    };
     if ( x == 0 )
         return StringT(1, CharT('0'));
     bool32_t minusSymbol = (x < 0);
-    x = ::std::abs(x);
-    const size_t numSymbols = minusSymbol + nh3api::count_digits(static_cast<uint32_t>(x));
+    x = ::abs32(x);
+    const size_t numSymbols = minusSymbol + count_digits(static_cast<uint32_t>(x));
     // hint the compiler for small string optimization for std::basic_string
     NH3API_ASSUME(numSymbols <= 10);
     StringT str(numSymbols, CharT('\0'));
@@ -1622,7 +1609,10 @@ static StringT int_to_string(int32_t x)
     while (x > 0)
     {
         uint8_t digit = static_cast<uint8_t>(x % 10);
-        *ptr-- = digit_to_char(digit);
+        if constexpr ( ::std::is_same_v<CharT, char> )
+            *ptr-- = static_cast<char>(('0' + digit) & INT8_MAX);
+        else if constexpr ( ::std::is_same_v<CharT, wchar_t> )
+            *ptr-- = static_cast<wchar_t>((L'0' + digit) & INT16_MAX);
         x /= 10;
     }
     return str;
@@ -1633,22 +1623,9 @@ template<class StringT>
 static StringT uint_to_string(uint32_t x)
 {
     using CharT = typename StringT::value_type;
-    const auto digit_to_char = [] NH3API_INLINE_LAMBDA (const uint8_t digit) 
-    {
-        if constexpr ( std::is_same_v<CharT, char> )
-        {
-            return '0' + digit;
-        }
-        else if ( std::is_same_v<CharT, char> )
-        {
-            return L'0' + digit;
-        }
-        else  
-        { return 0; }
-    };
     if ( x == 0 )
         return StringT(1, CharT('0'));
-    const size_t numSymbols = nh3api::count_digits(x);
+    const size_t numSymbols = count_digits(x);
     // hint the compiler for small string optimization for std::basic_string
     NH3API_ASSUME(numSymbols <= 11);
     StringT str(numSymbols, CharT('\0'));
@@ -1656,7 +1633,10 @@ static StringT uint_to_string(uint32_t x)
     while (x > 0)
     {
         uint8_t digit = static_cast<uint8_t>(x % 10);
-        *ptr-- = digit_to_char(digit);
+        if constexpr ( ::std::is_same_v<CharT, char> )
+            *ptr-- = static_cast<char>(('0' + digit) & INT8_MAX);
+        else if constexpr ( ::std::is_same_v<CharT, wchar_t> )
+            *ptr-- = static_cast<wchar_t>((L'0' + digit) & INT16_MAX);
         x /= 10;
     }
     return str;
@@ -1714,7 +1694,7 @@ static StringT double_to_string(double x, int32_t precision)
             {
                 swprintf_s(const_cast<wchar_t*>(buffer.data()), buffer.size(), L"%.*f", precision, x);
             }
-            else 
+            else
             {}
 
             return {buffer.data()};
@@ -1786,29 +1766,29 @@ NH3API_FORCEINLINE
 std::wstring to_std_wstring(float x, int32_t precision = 4)
 { return nh3api::double_to_string<std::wstring>(static_cast<double>(x), precision); }
 
-namespace nh3api 
+namespace nh3api
 {
 
-NH3API_FORCEINLINE size_t hash_string(const ::exe_string& str) noexcept 
+NH3API_FORCEINLINE size_t hash_string(const ::exe_string& str) noexcept
 {
     default_hash hasher;
     hasher.update(str.c_str(), str.size());
     return hasher.digest();
-} 
+}
 
-NH3API_FORCEINLINE size_t hash_string(const ::std::string& str) noexcept 
+NH3API_FORCEINLINE size_t hash_string(const ::std::string& str) noexcept
 {
     default_hash hasher;
     hasher.update(str.c_str(), str.size());
     return hasher.digest();
-} 
+}
 
-NH3API_FORCEINLINE size_t hash_string(const ::std::wstring& str) noexcept 
+NH3API_FORCEINLINE size_t hash_string(const ::std::wstring& str) noexcept
 {
     default_hash hasher;
     hasher.update(str.c_str(), str.size());
     return hasher.digest();
-} 
+}
 
 } // namespace nh3api
 

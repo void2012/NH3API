@@ -45,7 +45,7 @@ template<typename T> NH3API_FORCEINLINE
 uint32_t DwordAt(const T* ptr) noexcept
 { return *const_cast<uint32_t*>(reinterpret_cast<const uint32_t*>(ptr)); }
 
-NH3API_FORCEINLINE 
+NH3API_FORCEINLINE
 uint32_t DwordAt(uintptr_t address) noexcept
 { return get_global_var_ref(address, uint32_t); }
 
@@ -140,12 +140,12 @@ inline size_t MemSize(T* ptr) noexcept
 template<typename StringT>
 NH3API_FORCEINLINE
 StringT IntToStr(int32_t x)
-{ return nh3api::print_int<StringT>(x); }
+{ return nh3api::int_to_string<StringT>(x); }
 
 template<typename StringT>
 NH3API_FORCEINLINE
 StringT IntToStr(uint32_t x)
-{ return nh3api::print_uint<StringT>(x); }
+{ return nh3api::uint_to_string<StringT>(x); }
 
 template<>
 NH3API_FORCEINLINE

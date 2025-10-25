@@ -18,6 +18,8 @@
 #include "utils.hpp" // bstruct_t, get_bstruct
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_DISABLE_MSVC_WARNING_BEGIN(4583)
+NH3API_DISABLE_MSVC_WARNING_BEGIN(4582)
 
 class army;
 #define army_hpp_gpCombatManager reinterpret_cast<void*>(0x699420)
@@ -1005,7 +1007,7 @@ class army
 
     protected:
         [[maybe_unused]]
-        byte_t gap_5[3];
+        std::byte gap_5[3];
 
     public:
         // offset: +0x8 = +8,  size = 0x4 = 4
@@ -1016,7 +1018,7 @@ class army
 
     protected:
         [[maybe_unused]]
-        byte_t gap_D[3];
+        std::byte gap_D[3];
 
     public:
         // Combat side(group) to attack /
@@ -1040,7 +1042,7 @@ class army
 
     protected:
         [[maybe_unused]]
-        byte_t gap_21[3];
+        std::byte gap_21[3];
 
     public:
         // offset: +0x24 = +36,  size = 0x4 = 4
@@ -1064,7 +1066,7 @@ class army
         bool LetsPretendImNotHere;
 
         [[maybe_unused]]
-        byte_t gap_32[2];
+        std::byte gap_32[2];
 
     public:
         // Creature type /
@@ -1143,7 +1145,7 @@ class army
 
     protected:
         [[maybe_unused]]
-        byte_t gap_EB[1];
+        std::byte gap_EB[1];
 
     public:
         // offset: +0xEC = +236,  size = 0x4 = 4
@@ -1154,7 +1156,7 @@ class army
 
     protected:
         [[maybe_unused]]
-        byte_t gap_F1[3];
+        std::byte gap_F1[3];
 
     public:
         // Creature side("group"), 0 or 1 /
@@ -1331,7 +1333,7 @@ class army
 
     protected:
         [[maybe_unused]]
-        byte_t gap_4C2[2];
+        std::byte gap_4C2[2];
 
     public:
         // offset: +0x4C4 = +1220,  size = 0x4 = 4
@@ -1356,7 +1358,7 @@ class army
 
     protected:
         [[maybe_unused]]
-        byte_t gap_4D9[3];
+        std::byte gap_4D9[3];
 
     public:
         // offset: +0x4DC = +1244,  size = 0x4 = 4
@@ -1388,7 +1390,7 @@ class army
 
     protected:
         [[maybe_unused]]
-        byte_t gap_4F2[2];
+        std::byte gap_4F2[2];
 
     public:
         union {
@@ -1452,4 +1454,6 @@ NH3API_SIZE_ASSERT(0x548, army);
 #undef army_hpp_gpCombatManager
 #undef army_hpp_gpCombatManager_get
 
+NH3API_DISABLE_MSVC_WARNING_END
+NH3API_DISABLE_MSVC_WARNING_END
 NH3API_DISABLE_WARNING_END

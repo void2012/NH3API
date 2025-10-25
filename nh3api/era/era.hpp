@@ -12,13 +12,8 @@
 * The API was updated for ERA 3.9.16.
 */
 
-#include "../core.hpp"
-#if NH3API_STD_MOVE_SEMANTICS
 #include <initializer_list>
-#else 
-#include <vector>
-#include <string>	
-#endif
+#include "../core.hpp"
 
 // Means that returned pointer memory was allocated in era.dll and must be freed via MemFree after using
 #define ERA_MEM(var) var NH3API_DEALLOCATOR(::Era::MemFree, 1)
@@ -112,37 +107,29 @@ namespace Era_imports
     ERA_IMPORT_DUMMY(_ClientMemRealloc); // since v3.9.16
     ERA_IMPORT_DUMMY(WriteLog); // since v3.9.16
     ERA_IMPORT_DUMMY(CreatePlugin); // since v3.9.16
-    
-}
+
+} // namespace Era_imports
 
 namespace Era
 {
 
-typedef char TErmZVar[512];
-typedef int32_t TXVars[16];
+using TErmZVar = ::std::array<char, 512>;
+using TXVars   = ::std::array<int32_t, 16>;
 
 #pragma pack(push, 1)
 
 const bool32_t EXEC_DEF_CODE = true;
 
-inline
-int32_t*  const v NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x887664, int32_t)); // 1..10000
-inline
-TErmZVar* const z NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x9271E8, TErmZVar)); // 1..1000
-inline
-int32_t*  const y NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0xA48D7C, int32_t)); // 1..100
-inline
-int32_t*  const x NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x91DA34, int32_t)); // 1..16
-inline
-bool*     const f NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0x91F2DF, bool)); // 1..1000
-inline
-float*    const e NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ptr(0xA48F14, float)); // 1..100
+inline int32_t* const  v = get_global_var_ptr(0x887664, int32_t);  // 1..10000
+inline TErmZVar* const z = get_global_var_ptr(0x9271E8, TErmZVar); // 1..1000
+inline int32_t* const  y = get_global_var_ptr(0xA48D7C, int32_t);  // 1..100
+inline int32_t* const  x = get_global_var_ptr(0x91DA34, int32_t);  // 1..16
+inline bool* const     f = get_global_var_ptr(0x91F2DF, bool);     // 1..1000
+inline float* const    e = get_global_var_ptr(0xA48F14, float);    // 1..100
 
-inline
-HINSTANCE hPlugin NH3API_INLINE_OR_EXTERN_INIT(nullptr);
-typedef void* TPlugin;
-inline
-TPlugin plugin NH3API_INLINE_OR_EXTERN_INIT(nullptr);
+inline HINSTANCE hPlugin = nullptr;
+using TPlugin            = void*;
+inline TPlugin plugin    = nullptr;
 
 enum ECallingConvention : int32_t
 {
@@ -204,18 +191,18 @@ enum THookType : int32_t
 
 struct THookContext
 {
-    int32_t EDI; 
-    int32_t ESI; 
-    int32_t EBP; 
-    int32_t ESP; 
-    int32_t EBX; 
-    int32_t EDX; 
-    int32_t ECX; 
+    int32_t EDI;
+    int32_t ESI;
+    int32_t EBP;
+    int32_t ESP;
+    int32_t EBX;
+    int32_t EDX;
+    int32_t ECX;
     int32_t EAX;
     int32_t RetAddr;
 };
 
-typedef bool32_t (__stdcall *THookHandler)(THookContext* Context);
+using THookHandler = bool32_t (__stdcall *)(THookContext* Context);
 
 struct TEvent
 {
@@ -224,7 +211,7 @@ struct TEvent
     int32_t DataSize;
 };
 
-typedef void __stdcall TEventHandler(TEvent* Event);
+using TEventHandler = void (__stdcall*)(TEvent* Event);
 
 struct TGameState
 {
@@ -235,19 +222,18 @@ struct TGameState
 NH3API_FORCEINLINE
 ::exe_std_string era_GetModuleFileName (HINSTANCE hInstance)
 {
-    char buf[256];
-    ::memset(buf, 0, sizeof(buf));
-    DWORD filePathLen = ::GetModuleFileNameA(hInstance, buf, sizeof(buf));
-    if (filePathLen == 0) 
+    ::std::array<char, 256> buf{};
+    DWORD filePathLen = ::GetModuleFileNameA(hInstance, buf.data(), sizeof(buf));
+    if (filePathLen == 0)
         return "";
-    
-    ::exe_std_string filePath(buf, ::std::min<DWORD>((DWORD)sizeof(buf) - 1, filePathLen));
+
+    ::exe_std_string filePath(buf.data(), ::std::min<DWORD>((DWORD)sizeof(buf) - 1, filePathLen));
     size_t lastSlashPos = filePath.find_last_of('\\');
     if (lastSlashPos != ::exe_std_string::npos)
     {
         filePath.erase(0, lastSlashPos + 1);
         return filePath;
-    } 
+    }
     else
     {
         return filePath;
@@ -283,7 +269,6 @@ NH3API_FORCEINLINE void __stdcall ReloadLanguageData() noexcept
 NH3API_FORCEINLINE char* __stdcall trTemp(const char* const key, const char* const* const params, uint32_t LastParamsIndex) noexcept
 { return STDCALL_3(char*, reinterpret_cast<uintptr_t>(&::Era_imports::trTemp), key, params, LastParamsIndex); }
 
-#if NH3API_STD_MOVE_SEMANTICS
 NH3API_FORCEINLINE
 /**
  * Returns translation for given complex key ('xxx.yyy.zzz') with substituted parameters.
@@ -302,24 +287,6 @@ std::string tr(const char* key, std::initializer_list<const char*> params) noexc
 
    return trTemp(key, params.begin(), numParams - 1);
 }
-#else
-NH3API_FORCEINLINE
-std::string tr(const char* key, const std::vector<std::string>& params) noexcept
-{
-   const int MAX_PARAMS = 64;
-
-   const char* _params[MAX_PARAMS] = {};
-   const int numParams = ( params.size() <= MAX_PARAMS ? params.size() : MAX_PARAMS) & ~1u;
-
-   for (int i = 0; i < numParams; i++) 
-   {
-     _params[i] = params[i].c_str();
-   }
-
-   return trTemp(key, _params, numParams - 1);
-}
-
-#endif
 
 /** Translates given key, using pairs of (key, value) params for translation */
 NH3API_FORCEINLINE ERA_MEM(char*) __stdcall tr(const char* const key, const char* const * const params, int32_t LastParamsIndex) noexcept
@@ -406,11 +373,11 @@ NH3API_FORCEINLINE void __stdcall SetEraRegistryStrValue(const char* const VarNa
 
 // ======================= CUSTOMIZABLE API ======================= //
 
-typedef bool32_t (__stdcall *TIsCommanderId)(int32_t MonId);
+using TIsCommanderId = bool32_t (__stdcall *)(int32_t MonId);
 NH3API_FORCEINLINE TIsCommanderId __stdcall SetIsCommanderIdFunc(TIsCommanderId NewImpl) noexcept
 { return STDCALL_1(TIsCommanderId, reinterpret_cast<uintptr_t>(&::Era_imports::SetIsCommanderIdFunc), NewImpl); }
 
-typedef bool32_t (__stdcall *TIsElixirOfLifeStack)(uint8_t* BattleStack);
+using TIsElixirOfLifeStack = bool32_t (__stdcall *)(uint8_t* BattleStack);
 NH3API_FORCEINLINE TIsElixirOfLifeStack __stdcall SetIsElixirOfLifeStackFunc(TIsElixirOfLifeStack NewImpl) noexcept
 { return STDCALL_1(TIsElixirOfLifeStack, reinterpret_cast<uintptr_t>(&::Era_imports::SetIsElixirOfLifeStackFunc), NewImpl); }
 
@@ -636,17 +603,17 @@ NH3API_FORCEINLINE
  * @param NewValue New string value.
  * @param BufSize  Maximal buffer size or -1 to ignore it (buffer overflow may occur).
  */
-void SetPcharValue(char *Buf, const char *NewValue, int32_t BufSize)  noexcept
+void SetPcharValue(char * __restrict Buf, const char * __restrict NewValue, int32_t BufSize)  noexcept
 {
-    if (BufSize < 0) 
+    if (BufSize < 0)
     {
-        lstrcpyA(Buf, NewValue);
-    } 
-    else if (BufSize > 0) 
+        ::lstrcpyA(Buf, NewValue);
+    }
+    else if (BufSize > 0)
     {
-        int32_t NumBytesToCopy = lstrlenA(NewValue);
+        int32_t NumBytesToCopy = ::lstrlenA(NewValue);
 
-        if (NumBytesToCopy >= BufSize) 
+        if (NumBytesToCopy >= BufSize)
             NumBytesToCopy = BufSize - 1;
 
         ::std::memcpy(Buf, NewValue, NumBytesToCopy);
@@ -751,7 +718,7 @@ void ConnectEra(HINSTANCE PluginDllHandle, const char* PluginName)
 
     plugin = CreatePlugin(finalPluginName.c_str());
 
-    if (!plugin) 
+    if (!plugin)
         FatalError((::exe_std_string("Duplicate registered plugin: ") + era_GetModuleFileName(PluginDllHandle)).c_str());
 }
 
@@ -760,8 +727,7 @@ void ConnectEra(HINSTANCE PluginDllHandle, const char* PluginName)
 
 namespace EraMemory
 {
-    inline
-    volatile size_t* allocatedMemorySize NH3API_INLINE_OR_EXTERN_INIT(nullptr);
+    inline volatile size_t* allocatedMemorySize = nullptr;
 
     using ::Era::RegisterMemoryConsumer;
 
@@ -784,20 +750,19 @@ namespace EraMemory
         }
     };
 
-    static bool _MemoryManagerInitialized = false;
-
     NH3API_FORCEINLINE
-    void InitMemoryManager() 
+    void InitMemoryManager()
     {
-        if (!_MemoryManagerInitialized) 
+        static bool _MemoryManagerInitialized = false;
+        if (!_MemoryManagerInitialized)
         {
-            char pluginLibraryPath[MAX_PATH];
-            const size_t filePathLen = ::GetModuleFileNameA(CurrentModuleHandleGetter::Get(), pluginLibraryPath, sizeof(pluginLibraryPath));
+            ::std::array<char, MAX_PATH> pluginLibraryPath{};
+            const size_t filePathLen = ::GetModuleFileNameA(CurrentModuleHandleGetter::Get(), pluginLibraryPath.data(), sizeof(pluginLibraryPath));
 
-            if (filePathLen > 0) 
+            if (filePathLen > 0)
             {
-                const char* pluginLibraryName = ::strrchr(pluginLibraryPath, '\\');
-                pluginLibraryName = (pluginLibraryName) ? pluginLibraryName + 1 : pluginLibraryPath;
+                const char* pluginLibraryName = ::strrchr(pluginLibraryPath.data(), '\\');
+                pluginLibraryName = (pluginLibraryName) ? pluginLibraryName + 1 : pluginLibraryPath.data();
                 allocatedMemorySize = RegisterMemoryConsumer(pluginLibraryName);
             }
             _MemoryManagerInitialized = true;

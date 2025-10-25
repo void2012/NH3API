@@ -11,7 +11,6 @@
 
 #include <array>
 #include "nh3api_std/memory.hpp" // std::array<T, N>, THISCALL_ macros
-#include "nh3api_std/stl_extras.hpp" // byte_t
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
@@ -50,7 +49,7 @@ struct hexcell
         {}
 
     public:
-        [[nodiscard]] bool HasArmy() const
+        [[nodiscard]] bool HasArmy() const noexcept
         { return armyGrp > 0; }
 
         [[nodiscard]] army* get_army()
@@ -90,7 +89,7 @@ struct hexcell
     protected:
         [[maybe_unused]]
         // offset: +0xD = +13,  size = 0x2 = 2
-        byte_t gap_D[2];
+        std::byte gap_D[2];
 
     public:
         // offset: +0x10 = +16,  size = 0x4 = 4
@@ -121,7 +120,7 @@ struct hexcell
     protected:
         [[maybe_unused]]
         // offset: +0x1B = +27,  size = 0x2 = 2
-        byte_t gap_1B[1];
+        std::byte gap_1B[1];
 
     public:
         // offset: +0x1C = +28,  size = 0x4 = 4
@@ -151,7 +150,7 @@ struct hexcell
     protected:
         [[maybe_unused]]
         // offset: +0x4E = +78,  size = 0x2 = 2
-        byte_t gap_4E[2];
+        std::byte gap_4E[2];
 
     public:
         // offset: +0x50 = +80,  size = 0x10 = 16

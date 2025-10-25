@@ -15,7 +15,7 @@
 // Маска школы магии.
 enum TSpellSchool : uint32_t
 {
-    const_invalid_school = 0,  
+    const_invalid_school = 0,
     eSchoolAir           = 1,  // Школа магии воздуха
     eSchoolFire          = 2,  // Школа магии огня
     eSchoolWater         = 4,  // Школа магии воды

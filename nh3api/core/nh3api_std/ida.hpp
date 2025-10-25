@@ -16,7 +16,12 @@
 #pragma once
 
 #include <intrin.h>
+#include <limits>
 #include <type_traits>
+#ifdef __cpp_lib_concepts
+#include <concepts>
+#endif
+
 #include "nh3api_std.hpp"
 
 // Partially defined types. They are used when the decompiler does not know
@@ -41,27 +46,33 @@ using _OWORD = __m128i;
 using _BOOL1 = int8_t;
 // 16 bits
 using _BOOL2 = int16_t;
-
+// 32 bits
 using _BOOL4 = int32_t;
 
 #ifndef __pure
     #if NH3API_CHECK_MSVC_DRIVER
-        #define __pure  __declspec(noalias) // not quite the same but similiar
+        #define __pure __declspec(noalias) // not quite the same but similiar
     #else
-        #define __pure  __attribute__((__pure__))
+        #define __pure __attribute__((__pure__))
     #endif
 #endif
 
 #ifndef __noreturn
     #if NH3API_CHECK_MSVC_DRIVER
-        #define __noreturn  __declspec(noreturn)
+        #define __noreturn __declspec(noreturn)
     #else
-        #define __noreturn  __attribute__((__noreturn__))
+        #define __noreturn __attribute__((__noreturn__))
     #endif
 #endif
 
 #ifndef __cppobj
     #define __cppobj
+    #define __hidden
+    #define __return_ptr
+    #define __struct_ptr
+    #define __array_ptr
+    #define __unused
+    #define __high
 #endif
 
 #ifndef LAST_IND
@@ -166,22 +177,45 @@ using _BOOL4 = int32_t;
     #define NH3API_IDA_INTRIN constexpr NH3API_FORCEINLINE __pure
 #endif
 
-template<typename T>
-NH3API_IDA_INTRIN
-bool is_mul_ok(T count, T elsize) noexcept
+#ifndef NH3API_IDA_INTEGRAL_TEMPLATE
+    #ifdef __cpp_lib_concepts
+        #define NH3API_IDA_INTEGRAL_TEMPLATE(T) std::integral T
+        #define NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U) std::integral T, std::integral U
+    #else
+        #define NH3API_IDA_INTEGRAL_TEMPLATE(T) typename T,std::enable_if_t<std::is_integral_v<T>,bool> =false
+        #define NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U) typename T, typename U, std::enable_if_t<std::is_integral_v<T> && std::is_integral_v<U>,bool> =false
+    #endif
+#endif
+
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
+NH3API_IDA_INTRIN bool is_mul_ok(T count, T elsize) noexcept
 {
-    static_assert(std::is_unsigned_v<T>, "is_mul_ok<T>: T must be unsigned");
-    if ( elsize  == 0 || count == 0 )
+    if ( elsize == 0 || count == 0 )
         return true;
-    return count <= ((T)(-1)) / elsize;
+
+    #if NH3API_HAS_BUILTIN(__builtin_mul_overflow)
+    T result;
+    return !__builtin_mul_overflow(count, elsize, &result);
+    #else
+    return count <= (std::numeric_limits<T>::max)() / elsize;
+    #endif
 }
 
 // multiplication that saturates (yields the biggest value) instead of overflowing
 // such a construct is useful in "operator new[]"
-template<class T>
-NH3API_IDA_INTRIN
-bool saturated_mul(T count, T elsize) noexcept
-{ return is_mul_ok(count, elsize) ? count * elsize : T(-1); }
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
+NH3API_IDA_INTRIN T saturated_mul(T count, T elsize) noexcept
+{
+    #if NH3API_HAS_BUILTIN(__builtin_mul_overflow)
+    T result;
+    if ( __builtin_mul_overflow(count, elsize, &result) )
+        return (std::numeric_limits<T>::max)();
+    else
+        return result;
+    #else
+    return is_mul_ok(count, elsize) ? count * elsize : (std::numeric_limits<T>::max)();
+    #endif
+}
 
 #if NH3API_CHECK_MSVC
 #pragma intrinsic(__movsb)
@@ -214,15 +248,30 @@ NH3API_FORCEINLINE void memset_0(T* ptr) noexcept
 
 NH3API_DISABLE_WARNING_END
 
-#define CHECK_T_CASSERT static_assert(std::is_integral_v<T>, "T must be an integral")
-
 // Generate a reference to pair of operands
-template<class T> NH3API_IDA_INTRIN int16_t __PAIR__ ( int8_t  high, T low ) noexcept { CHECK_T_CASSERT; return (( static_cast<int16_t>(high)) << sizeof(high)*8) | static_cast<int16_t>(low);  }
-template<class T> NH3API_IDA_INTRIN int32_t __PAIR__ ( int16_t high, T low ) noexcept { CHECK_T_CASSERT; return (( static_cast<int32_t>(high)) << sizeof(high)*8) | static_cast<int32_t>(low);  }
-template<class T> NH3API_IDA_INTRIN int64_t __PAIR__ ( int32_t high, T low ) noexcept { CHECK_T_CASSERT; return (( static_cast<int64_t>(high)) << sizeof(high)*8) | static_cast<int64_t>(low);  }
-template<class T> NH3API_IDA_INTRIN uint16_t __PAIR__(uint8_t  high, T low ) noexcept { CHECK_T_CASSERT; return ((static_cast<uint16_t>(high)) << sizeof(high)*8) | static_cast<uint16_t>(low); }
-template<class T> NH3API_IDA_INTRIN uint32_t __PAIR__(uint16_t high, T low ) noexcept { CHECK_T_CASSERT; return ((static_cast<uint32_t>(high)) << sizeof(high)*8) | static_cast<uint32_t>(low); }
-template<class T> NH3API_IDA_INTRIN uint64_t __PAIR__(uint32_t high, T low ) noexcept { CHECK_T_CASSERT; return ((static_cast<uint64_t>(high)) << sizeof(high)*8) | static_cast<uint64_t>(low); }
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
+NH3API_IDA_INTRIN int16_t __PAIR__(int8_t  high, T low) noexcept
+{ return ((static_cast<int16_t>(high)) << sizeof(high) * 8) | static_cast<int16_t>(low); }
+
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
+NH3API_IDA_INTRIN int32_t __PAIR__(int16_t high, T low) noexcept
+{ return ((static_cast<int32_t>(high)) << sizeof(high) * 8) | static_cast<int32_t>(low); }
+
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
+NH3API_IDA_INTRIN int64_t __PAIR__(int32_t high, T low) noexcept
+{ return ((static_cast<int64_t>(high)) << sizeof(high) * 8) | static_cast<int64_t>(low); }
+
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
+NH3API_IDA_INTRIN uint16_t __PAIR__(uint8_t high, T low) noexcept
+{ return ((static_cast<uint16_t>(high)) << sizeof(high) * 8) | static_cast<uint16_t>(low); }
+
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
+NH3API_IDA_INTRIN uint32_t __PAIR__(uint16_t high, T low) noexcept
+{ return ((static_cast<uint32_t>(high)) << sizeof(high) * 8) | static_cast<uint32_t>(low); }
+
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
+NH3API_IDA_INTRIN uint64_t __PAIR__(uint32_t high, T low) noexcept
+{ return ((static_cast<uint64_t>(high)) << sizeof(high) * 8) | static_cast<uint64_t>(low); }
 
 NH3API_IDA_INTRIN uint16_t __PAIR16__ (uint8_t  high, uint8_t  low) noexcept { return static_cast<uint16_t>((( static_cast<uint16_t>(high)) << UINT16_C(8))  | static_cast<uint16_t>(low)); }
 NH3API_IDA_INTRIN uint32_t __PAIR32__ (uint16_t high, uint16_t low) noexcept { return (( static_cast<uint32_t>(high)) << UINT32_C(16)) | static_cast<uint32_t>(low); }
@@ -231,9 +280,43 @@ NH3API_IDA_INTRIN int16_t  __SPAIR16__(int8_t   high, int8_t   low) noexcept { r
 NH3API_IDA_INTRIN int32_t  __SPAIR32__(int16_t  high, int16_t  low) noexcept { return (( static_cast<int32_t>(high))  << INT32_C(16))  | static_cast<int32_t>(low); }
 NH3API_IDA_INTRIN int64_t  __SPAIR64__(int32_t  high, int32_t  low) noexcept { return (( static_cast<int64_t>(high))  << INT64_C(32))  | static_cast<int64_t>(low); }
 
-#undef CHECK_T_CASSERT
+#if NH3API_HAS_BUILTIN(__builtin_rotateleft8) && NH3API_HAS_BUILTIN(__builtin_rotateright8)
 
-#if __has_builtin(__builtin_rotateleft8) && __has_builtin(__builtin_rotateright8)
+// rotate left
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)> NH3API_IDA_INTRIN
+T __ROL__(T value, size_t count) noexcept
+{
+    if constexpr (sizeof(T) == 1)
+        return __builtin_rotateleft8(value, count);
+    else if constexpr (sizeof(T) == 2)
+        return __builtin_rotateleft16(value, count);
+    else if constexpr (sizeof(T) == 4)
+        return __builtin_rotateleft32(value, count);
+    else if constexpr (sizeof(T) == 8)
+        return __builtin_rotateleft64(value, count);
+    #if NH3API_HAS_BUILTIN(__builtin_unreachable)
+    else
+        __builtin_unreachable();
+    #endif
+}
+
+// rotate left
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)> NH3API_IDA_INTRIN
+T __ROR__(T value, size_t count) noexcept
+{
+    if constexpr (sizeof(T) == 1)
+        return __builtin_rotateright8(value, count);
+    else if constexpr (sizeof(T) == 2)
+        return __builtin_rotateright16(value, count);
+    else if constexpr (sizeof(T) == 4)
+        return __builtin_rotateright32(value, count);
+    else if constexpr (sizeof(T) == 8)
+        return __builtin_rotateright64(value, count);
+    #if NH3API_HAS_BUILTIN(__builtin_unreachable)
+    else
+        __builtin_unreachable();
+    #endif
+}
 
 NH3API_IDA_INTRIN uint8_t  __ROL1__(uint8_t  value, uint8_t count)  noexcept { return __builtin_rotateleft8(value, count); }
 NH3API_IDA_INTRIN uint16_t __ROL2__(uint16_t value, uint16_t count) noexcept { return __builtin_rotateleft16(value, count); }
@@ -247,10 +330,9 @@ NH3API_IDA_INTRIN uint64_t __ROR8__(uint64_t value, uint64_t count) noexcept { r
 #else
 
 // rotate left
-template<class T> NH3API_IDA_INTRIN
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)> NH3API_IDA_INTRIN
 T __ROL__(T value, size_t count) noexcept
 {
-    static_assert(std::is_integral_v<T>, "__ROL__: T must be an integral");
     const uint32_t nbits = sizeof(T) * 8;
 
     count %= nbits;
@@ -264,10 +346,9 @@ T __ROL__(T value, size_t count) noexcept
 }
 
 // rotate right
-template<class T> NH3API_IDA_INTRIN
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)> NH3API_IDA_INTRIN
 T __ROR__(T value, size_t count) noexcept
 {
-    static_assert(std::is_integral_v<T>, "__ROR__: T must be an integral");
     const uint32_t nbits = sizeof(T) * 8;
     count %= nbits;
     T low = value << (nbits - count);
@@ -288,53 +369,61 @@ NH3API_IDA_INTRIN uint64_t __ROR8__(uint64_t value, size_t count) noexcept { ret
 #endif
 
 // carry flag of left shift
-template<class T> NH3API_IDA_INTRIN
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)> NH3API_IDA_INTRIN
 int8_t __MKCSHL__(T value, uint32_t count) noexcept
 {
-    static_assert(std::is_integral_v<T>, "__MKCSHL__: T must be an integral");
     const uint32_t nbits = sizeof(T) * 8;
     count %= nbits;
     return (value >> (nbits-count)) & 1;
 }
 
 // carry flag of right shift
-template<class T> NH3API_IDA_INTRIN
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)> NH3API_IDA_INTRIN
 int8_t __MKCSHR__(T value, uint32_t count) noexcept
-{
-    static_assert(std::is_integral_v<T>, "__MKCSHR__: T must be an integral");
-    return (value >> (count-1)) & 1;
-}
+{ return (value >> (count-1)) & 1; }
 
 // sign flag
-template<class T> NH3API_IDA_INTRIN
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)> NH3API_IDA_INTRIN
 int8_t __SETS__(T x) noexcept
+{ return x < 0; }
+
+// parity flag
+template<NH3API_IDA_INTEGRAL_TEMPLATE(T)> NH3API_IDA_INTRIN
+int32_t __SETP__(T x, T y)
 {
-    static_assert(std::is_integral_v<T>, "__SETS__: T must be an integral");
-    switch ( sizeof(T) )
-    {
-        case 1:
-            return static_cast<int8_t>(x) < 0;
-            break;
-        case 2:
-            return static_cast<int16_t>(x) < 0;
-            break;
-        case 4:
-            return static_cast<int32_t>(x) < 0;
-            break;
-        case 8:
-            return static_cast<int64_t>(x) < 0;
-            break;
-        default:
-            return 0;
-            break;
-    }
+    #if NH3API_HAS_BUILTIN(__builtin_parityg)
+        return __builtin_parityg(x - y);
+    #elif NH3API_HAS_BUILTIN(__builtin_parity) && NH3API_HAS_BUILTIN(__builtin_parityll)
+    if constexpr (sizeof(T) == 8)
+        return __builtin_parityll(x - y);
+    else if constexpr (sizeof(T) == 4)
+        return __builtin_parity(x - y);
+    else if constexpr (sizeof(T) == 2)
+        return __builtin_parity(static_cast<uint32_t>(x - y));
+    else if constexpr (sizeof(T) == 1)
+        return __builtin_parity(static_cast<uint32_t>(x - y));
+    #if NH3API_HAS_BUILTIN(__builtin_unreachable)
+    else
+        __builtin_unreachable();
+    #endif
+    #else
+        T diff = x - y;
+        int32_t parity = 0;
+        for (size_t i = 0; i < sizeof(T) * 8; ++i)
+            parity ^= (diff >> i) & 1;
+        return parity;
+    #endif
 }
 
 // overflow flag of subtraction (x-y)
-template<class T, class U> NH3API_IDA_INTRIN
+template<NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U)> NH3API_IDA_INTRIN
 int8_t __OFSUB__(T x, U y) noexcept
 {
-    static_assert(std::is_integral_v<T> && std::is_integral_v<U>, "__OFSUB__: T and U must be integrals");
+#if NH3API_HAS_BUILTIN(__builtin_sub_overflow)
+    using common_type = std::common_type_t<T, U>;
+    common_type result;
+    return __builtin_sub_overflow(static_cast<common_type>(x), static_cast<common_type>(y), &result);
+#else
     if constexpr ( sizeof(T) < sizeof(U) )
     {
         const U x2 = x;
@@ -347,13 +436,18 @@ int8_t __OFSUB__(T x, U y) noexcept
         const int8_t sx = __SETS__(x);
         return (sx ^ __SETS__(y2)) & (sx ^ __SETS__(x-y2));
     }
+#endif
 }
 
 // overflow flag of addition (x+y)
-template<class T, class U> NH3API_IDA_INTRIN
+template<NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U)> NH3API_IDA_INTRIN
 int8_t __OFADD__(T x, U y) noexcept
 {
-    static_assert(std::is_integral_v<T> && std::is_integral_v<U>, "__OFADD__: T and U must be integrals");
+#if NH3API_HAS_BUILTIN(__builtin_add_overflow)
+    using common_type = std::common_type_t<T, U>;
+    common_type result;
+    return __builtin_add_overflow(static_cast<common_type>(x), static_cast<common_type>(y), &result);
+#else
     if constexpr ( sizeof(T) < sizeof(U) )
     {
         const U x2 = x;
@@ -366,77 +460,122 @@ int8_t __OFADD__(T x, U y) noexcept
         const int8_t sx = __SETS__(x);
         return ((1 ^ sx) ^ __SETS__(y2)) & (sx ^ __SETS__(x+y2));
     }
+#endif
 }
 
 // carry flag of subtraction (x-y)
-template<class T, class U> NH3API_IDA_INTRIN
+template<NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U)> NH3API_IDA_INTRIN
 int8_t __CFSUB__(T x, U y) noexcept
 {
-    static_assert(std::is_integral_v<T> && std::is_integral_v<U>, "__CFSUB__: T and U must be integrals");
-    constexpr size_t size = sizeof(T) > sizeof(U) ? sizeof(T) : sizeof(U);
-    switch ( size )
-    {
-        case 1:
-            return static_cast<uint8_t>(x) < static_cast<uint8_t>(y);
-            break;
-        case 2:
-            return static_cast<uint16_t>(x) < static_cast<uint16_t>(y);
-            break;
-        case 4:
-            return static_cast<uint32_t>(x) < static_cast<uint32_t>(y);
-            break;
-        case 8:
-            return static_cast<uint64_t>(x) < static_cast<uint64_t>(y);
-            break;
-        default:
-            return 0;
-            break;
-    }
+    using common_type = std::make_unsigned_t<std::common_type_t<T, U>>;
+    #if NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subcb) && \
+        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subcs) && \
+        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subc) && \
+        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subcll)
+    const common_type ux = static_cast<common_type>(x);
+    const common_type uy = static_cast<common_type>(y);
+    common_type carryout;
+    if constexpr ( sizeof(common_type) == 1 )
+        __builtin_subcb(ux, uy, 0, &carryout);
+    else if constexpr ( sizeof(common_type) == 2 )
+        __builtin_subcs(ux, uy, 0, &carryout);
+    else if constexpr ( sizeof(common_type) == 4 )
+        __builtin_subc(ux, uy, 0, &carryout);
+    else if constexpr ( sizeof(common_type) == 8 )
+        __builtin_subcll(ux, uy, 0, &carryout);
+    else
+        return ux < uy;
+    return static_cast<int8_t>(carryout);
+    #else
+    return (static_cast<common_type>(x) < static_cast<common_type>(y));
+    #endif
 }
 
 // carry flag of addition (x+y)
-template<class T, class U> NH3API_IDA_INTRIN
+template<NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U)> NH3API_IDA_INTRIN
 int8_t __CFADD__(T x, U y) noexcept
 {
-    static_assert(std::is_integral_v<T> && std::is_integral_v<U>, "__CFADD__: T and U must be integrals");
-    constexpr size_t size = sizeof(T) > sizeof(U) ? sizeof(T) : sizeof(U);
-    switch ( size )
+    using common_type = std::make_unsigned_t<std::common_type_t<T, U>>;
+    #if NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addcb) && \
+        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addcs) && \
+        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addc) && \
+        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addcll)
+    common_type ux = static_cast<common_type>(x);
+    common_type uy = static_cast<common_type>(y);
+    common_type carryout;
+    if constexpr (sizeof(common_type) == 1)
+        __builtin_addcb(ux, uy, 0, &carryout);
+    else if constexpr (sizeof(common_type) == 2)
+        __builtin_addcs(ux, uy, 0, &carryout);
+    else if constexpr (sizeof(common_type) == 4)
+        __builtin_addc(ux, uy, 0, &carryout);
+    else if constexpr (sizeof(common_type) == 8)
+        __builtin_addcll(ux, uy, 0, &carryout);
+    else
     {
-        case 1:
-            return static_cast<uint8_t>(x) > static_cast<uint8_t>(x+y);
-            break;
-        case 2:
-            return static_cast<uint16_t>(x) > static_cast<uint16_t>(x+y);
-            break;
-        case 4:
-            return static_cast<uint32_t>(x) > static_cast<uint32_t>(x+y);
-            break;
-        case 8:
-            return static_cast<uint64_t>(x) > static_cast<uint64_t>(x+y);
-            break;
-        default:
-            return 0;
-            break;
+        // fallback: emulate using addition and comparison
+        common_type sum = ux + uy;
+        return (sum < ux || sum < uy);
     }
+    return static_cast<int8_t>(carryout);
+    #else
+    common_type sum = static_cast<common_type>(x) + static_cast<common_type>(y);
+    return (sum < static_cast<common_type>(x) || sum < static_cast<common_type>(y));
+    #endif
 }
 
-NH3API_IDA_INTRIN int8_t  abs8 (int8_t  x) noexcept { return x >= 0 ? x : static_cast<int8_t>(-x); }
-NH3API_IDA_INTRIN int16_t abs16(int16_t x) noexcept { return x >= 0 ? x : static_cast<int16_t>(-x); }
-NH3API_IDA_INTRIN int32_t abs32(int32_t x) noexcept { return x >= 0 ? x : -x; }
-NH3API_IDA_INTRIN int64_t abs64(int64_t x) noexcept { return x >= 0 ? x : -x; }
+NH3API_IDA_INTRIN int8_t abs8(int8_t  x) noexcept
+{ return x >= 0 ? x : static_cast<int8_t>(-x); }
+
+NH3API_IDA_INTRIN int16_t abs16(int16_t x) noexcept
+{ return x >= 0 ? x : static_cast<int16_t>(-x); }
+
+NH3API_IDA_INTRIN int32_t abs32(int32_t x) noexcept
+{
+    #if NH3API_HAS_BUILTIN(__builtin_abs)
+    return __builtin_abs(x);
+    #else
+    return x >= 0 ? x : -x;
+    #endif
+}
+
+NH3API_IDA_INTRIN int64_t abs64(int64_t x) noexcept
+{
+    #if NH3API_HAS_BUILTIN(__builtin_llabs)
+    return __builtin_llabs(x);
+    #else
+    return x >= 0 ? x : -x;
+    #endif
+}
 
 #ifndef COERCE_FLOAT
-    #define COERCE_FLOAT(v)          ::nh3api::bit_cast<float>(v)
-    #define COERCE_DOUBLE(v)         ::nh3api::bit_cast<double>(v)
-    #define COERCE_LONG_DOUBLE(v)    ::nh3api::bit_cast<long double>(v)
-    #define COERCE_UNSIGNED_INT(v)   ::nh3api::bit_cast<uint32_t>(v)
-    #define COERCE_UNSIGNED_INT64(v) ::nh3api::bit_cast<uint64_t>(v)
+    #if NH3API_HAS_BUILTIN_BIT_CAST
+        #define COERCE_FLOAT(...)          (__builtin_bit_cast(float, (__VA_ARGS__)))
+        #define COERCE_DOUBLE(...)         (__builtin_bit_cast(double, (__VA_ARGS__)))
+        #define COERCE_LONG_DOUBLE(...)    (__builtin_bit_cast(long double, (__VA_ARGS__)))
+        #define COERCE_UNSIGNED_INT(...)   (__builtin_bit_cast(uint32_t, (__VA_ARGS__)))
+        #define COERCE_UNSIGNED_INT64(...) (__builtin_bit_cast(uint64_t, (__VA_ARGS__)))
+    #else
+        #define COERCE_FLOAT(...)          (::nh3api::bit_cast<float>((__VA_ARGS__)))
+        #define COERCE_DOUBLE(...)         (::nh3api::bit_cast<double>((__VA_ARGS__)))
+        #define COERCE_LONG_DOUBLE(...)    (::nh3api::bit_cast<long double>((__VA_ARGS__)))
+        #define COERCE_UNSIGNED_INT(...)   (::nh3api::bit_cast<uint32_t>((__VA_ARGS__)))
+        #define COERCE_UNSIGNED_INT64(...) (::nh3api::bit_cast<uint64_t>((__VA_ARGS__)))
+    #endif
 #endif
 
 #ifndef CONTAINING_RECORD
-#if __has_builtin(__builtin_offsetof)
     #define CONTAINING_RECORD(address, type, field) ((type *)((_BYTE*)(address) - offsetof(type, field)))
-#else
-    #define CONTAINING_RECORD(address, type, field) ((type *)((_BYTE*)(address) - __builtin_offsetof(type, field)))
 #endif
+
+#ifndef JUMPOUT
+    #define JUMPOUT(address) (((__noreturn void (*)(void))(address))())
+#endif
+
+#ifndef ADJ
+    #ifdef __widberg__
+        #define ADJ(ptr) ((__parentof(ptr) *)((char *)(ptr) - __deltaof(ptr)))
+    #else
+        #define ADJ(ptr) (static_assert(0, "__shifted pointers are not supported by the current compiler. You may want to use LLVM with Widberg extensions to use this feature."))
+    #endif
 #endif

@@ -198,15 +198,15 @@ NH3API_VIRTUAL_STRUCT sample : public resource
         sample() = delete;
 
         NH3API_FORCEINLINE
-        sample(const char* name, 
-               const void* src, 
-               size_t size, 
-               int32_t channel = 0, 
-               int32_t volume = 127, 
-               bool32_t loop = true) noexcept 
+        sample(const char* name,
+               const void* src,
+               size_t size,
+               int32_t channel = 0,
+               int32_t volume = 127,
+               bool32_t loop = true) noexcept
         NH3API_DELEGATE_DUMMY_BASE(sample)
         { THISCALL_7(void, 0x567050, this, name, src, size, channel, volume, loop); }
-        
+
         NH3API_FORCEINLINE
         sample(const ::nh3api::dummy_tag_t& tag) noexcept
             : resource(tag) // resource(nullptr, RType_misc)
@@ -345,7 +345,7 @@ NH3API_VIRTUAL_CLASS soundManager : public baseManager
 
         void StopMP3()
         { THISCALL_1(void, 0x59B310, this); }
-    
+
     public:
         NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(soundManager)
 

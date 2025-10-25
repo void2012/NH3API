@@ -22,18 +22,15 @@ struct bitNumber_impl_t
     #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
     static
     #endif
-    inline constexpr uint64_t operator[](const size_t pos) 
+    inline constexpr uint64_t operator[](const size_t pos)
     #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
     const
     #endif
     { return 1ULL << pos; }
-} 
-#if NH3API_STD_INLINE_VARIABLES
-inline constexpr
-#endif
+}
 // Bit shift masks lookup table /
 // Таблица побитовых масок.
-const bitNumber;
+inline constexpr bitNumber;
 
 // Town building IDs. /
 // Идентификаторы городских построек.
@@ -157,7 +154,7 @@ enum type_building_id : int32_t
 
 // Town possible buildings mask /
 // Маска возможных построек в городе(вообще).
-inline std::array<uint64_t, kNumTowns>& gTownEligibleBuildMask 
+inline std::array<uint64_t, kNumTowns>& gTownEligibleBuildMask
 = get_global_var_ref(0x697740, std::array<uint64_t, kNumTowns>);
 
 // Each building dependency mask /
@@ -169,7 +166,7 @@ get_global_var_ref(0x6977E8, std::array<std::array<uint64_t, MAX_BUILDING_TYPE>,
 // Town /
 // Город.
 // size = 0x168 = 360, align = 8
-class town 
+class town
 {
     public:
         NH3API_FORCEINLINE
@@ -257,9 +254,9 @@ class town
         // Get <building> cost as pointer to array of 7 ints /
         // Получить массив ресурсов, необходимый для постройки <building>.
         [[nodiscard]] const std::array<int32_t, 7>& get_build_cost_array(type_building_id building) const
-        {   
+        {
             using build_cost_array_t = std::array<int32_t, 7>;
-            return *THISCALL_2(const build_cost_array_t*, 0x5C1480, this, building); 
+            return *THISCALL_2(const build_cost_array_t*, 0x5C1480, this, building);
         }
 
         // Is building ever available in town?
@@ -340,10 +337,10 @@ class town
         // X-координата позиции установки лодки портом города на карте
         // offset: +0x9 = +9,  size = 0x1 = 1
         uint8_t boatY;
-        
+
     protected:
         [[maybe_unused]]
-        byte_t gap_A[2];
+        std::byte gap_A[2];
 
     public:
         // Garrison hero ID /
@@ -363,7 +360,7 @@ class town
 
     protected:
         [[maybe_unused]]
-        byte_t gap_15[1];
+        std::byte gap_15[1];
 
     public:
         // Creature dwellings populations /
@@ -388,7 +385,7 @@ class town
 
     protected:
         [[maybe_unused]]
-        byte_t gap_35[3];
+        std::byte gap_35[3];
 
     public:
         // Type of magic pound(Rampart) resource generated this week /
@@ -408,7 +405,7 @@ class town
 
     protected:
         [[maybe_unused]]
-        byte_t gap_42[2];
+        std::byte gap_42[2];
 
     public:
         // Spells for each level of mage guild /
@@ -423,7 +420,7 @@ class town
 
     protected:
         [[maybe_unused]]
-        byte_t gap_C1[3];
+        std::byte gap_C1[3];
 
     public:
         union {
@@ -491,10 +488,10 @@ public:
     // Есть настроенные строения
     // offset: +0x5 = +5,  size = 0x1 = 1
     bool bCustomBuildings;
-    
+
 protected:
     [[maybe_unused]]
-    byte_t gap_6[2];
+    std::byte gap_6[2];
 
 public:
     // Built buildings mask /
@@ -516,10 +513,10 @@ public:
     // У города настроен гарнизон.
     // offset: +0x19 = +25,  size = 0x1 = 1
     bool bCustomArmies;
-        
+
 protected:
     [[maybe_unused]]
-    byte_t gap_1A[2];
+    std::byte gap_1A[2];
 
 public:
 
@@ -535,7 +532,7 @@ public:
 
 protected:
     [[maybe_unused]]
-    byte_t gap_55[3];
+    std::byte gap_55[3];
 
 public:
     // Town custom name(empty if not setup) /
@@ -555,7 +552,7 @@ public:
 
 protected:
     [[maybe_unused]]
-    byte_t gap_6D[3];
+    std::byte gap_6D[3];
 
 public:
     // Disabled spells mask /

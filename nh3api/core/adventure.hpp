@@ -17,6 +17,8 @@
 #include "base_manager.hpp" // baseManager
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_DISABLE_MSVC_WARNING_BEGIN(4583)
+NH3API_DISABLE_MSVC_WARNING_BEGIN(4582)
 
 class NewmapCell;
 class NewfullMap;
@@ -29,7 +31,7 @@ struct CNetMsgHandler;
 NH3API_VIRTUAL_CLASS advManager : public baseManager
 {
     // structures
-    public: 
+    public:
         struct vftable_t : baseManager::vftable_t
         {
             void (__thiscall *scalar_deleting_destructor)(advManager*, uint8_t);
@@ -63,6 +65,8 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
               last_map_hover(tag),
               BottomViewText(tag)
         {}
+
+        NH3API_SINGLETON(advManager)
 
         NH3API_FORCEINLINE
         ~advManager() noexcept
@@ -247,7 +251,7 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         /// @param fizzleSound true = pickup resource sound, false = kill hero sound
         void EraseAndFizzle(NewmapCell* eventCell, type_point point, bool32_t fizzleSound)
         { THISCALL_4(void, 0x49DDE0, this, eventCell, point, fizzleSound); }
-    
+
     // static functions
     public:
         [[nodiscard]] static int32_t get_like_modifier(hero* current_hero, TCreatureType creature)
@@ -274,8 +278,8 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
     protected:
         // offset: +0x3E = +62,  size = 0x2 = 2
         [[maybe_unused]]
-        byte_t gap_3E[2];
-        
+        std::byte gap_3E[2];
+
     public:
         // offset: +0x40 = +64,  size = 0x4 = 4
         int32_t advCommand;
@@ -367,11 +371,11 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         // avwattak.def
         // offset: +0xE0 = +224,  size = 0x4 = 4
         CSprite* monAttackSprites;
-        
+
         // Map focus point /
         // Координаты клетки фокуса карты (по центру экрана).
         // offset: +0xE4 = +228,  size = 0x4 = 4
-        type_point map_origin; 
+        type_point map_origin;
 
         // Cursor cell position /
         // Координаты клетки карты, на которую наведен курсор.
@@ -414,7 +418,7 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
     protected:
         [[maybe_unused]]
         // offset: +0x105 = +261,  size = 0x3 = 3
-        byte_t gap_105[3];
+        std::byte gap_105[3];
 
         // Unused, = 0 /
         // Не используется, = 0.
@@ -455,7 +459,7 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
     protected:
         [[maybe_unused]]
         // offset: +0x1ED = +493,  size = 0x3 = 3
-        byte_t gap_1ED[3];
+        std::byte gap_1ED[3];
 
     public:
         // Current hero, OBJECT_HERO or OBJECT_BOAT /
@@ -505,8 +509,8 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
     protected:
         [[maybe_unused]]
         // offset: +0x20D = +525,  size = 0x3 = 3
-        byte_t gap_20D[3];
-        
+        std::byte gap_20D[3];
+
         // Unused, = 0 /
         // Не используется, = 0.
         // offset: +0x210 = +528,  size = 0x4 = 4
@@ -564,8 +568,8 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
     protected:
         [[maybe_unused]]
         // offset: +0x391 = +913,  size = 0x3 = 3
-        byte_t gap_391[3];
-        
+        std::byte gap_391[3];
+
     public:
         // offset: +0x394 = +916,  size = 0x4 = 4
         EBottomViewType CurrentBottomView;
@@ -600,4 +604,6 @@ inline bool32_t& bShowIt = get_global_var_ref(0x698A10, bool32_t);
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63A678, advManager)
 
+NH3API_DISABLE_MSVC_WARNING_END
+NH3API_DISABLE_MSVC_WARNING_END
 NH3API_DISABLE_WARNING_END

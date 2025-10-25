@@ -15,9 +15,6 @@
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
-#if !NH3API_CHECK_CPP11
-NH3API_DISABLE_MSVC_WARNING_BEGIN(4341)
-#endif
 // Victory condition type /
 // Тип условия победы.
 enum EVictoryConditionType : int8_t
@@ -39,13 +36,7 @@ enum EVictoryConditionType : int8_t
 
     MAX_VICTORY_CONDITIONS = 13
 };
-#if !NH3API_CHECK_CPP11
-NH3API_DISABLE_MSVC_WARNING_END
-#endif
 
-#if !NH3API_CHECK_CPP11
-NH3API_DISABLE_MSVC_WARNING_BEGIN(4341)
-#endif
 // Loss condition type /
 // Тип условия поражения.
 enum ELossConditionType : int8_t
@@ -57,9 +48,6 @@ enum ELossConditionType : int8_t
 
     MAX_LOSS_CONDITIONS = 3
 };
-#if !NH3API_CHECK_CPP11
-NH3API_DISABLE_MSVC_WARNING_END
-#endif
 
 class town;
 class hero;
@@ -137,7 +125,7 @@ struct VictoryConditionStruct
 
     protected:
         [[maybe_unused]]
-        byte_t gap_3[1];
+        std::byte gap_3[1];
 
     public:
         // offset: +0x4 = +4,  size = 0x4 = 4
@@ -172,7 +160,7 @@ struct VictoryConditionStruct
 
     protected:
         [[maybe_unused]]
-        byte_t gap_38[2];
+        std::byte gap_38[2];
 
     public:
         // offset: +0x28 = +40,  size = 0x4 = 4
@@ -206,7 +194,7 @@ struct VictoryConditionStruct
         int8_t playerWinner;
     private:
         [[maybe_unused]]
-        byte_t gap_74[2];
+        std::byte gap_74[2];
 
 };
 #pragma pack(pop)
@@ -246,7 +234,7 @@ struct LossConditionStruct
 
     protected:
         [[maybe_unused]]
-        byte_t gap_2[3];
+        std::byte gap_2[3];
 
     public:
         // offset: +0x4 = +4,  size = 0x4 = 4

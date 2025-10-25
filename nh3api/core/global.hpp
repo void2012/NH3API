@@ -43,7 +43,7 @@ class game
         protected:
             [[maybe_unused]]
             // offset: +0x11 = +17,  size = 0x3 = 3
-            byte_t gap_11[3];
+            std::byte gap_11[3];
         };
         #pragma pack(pop)
 
@@ -223,7 +223,7 @@ class game
 
         [[nodiscard]] TCreatureType UpgradedCreatureType(TCreatureType creature) const
         { return THISCALL_2(TCreatureType, 0x529BF0, this, creature); }
-    
+
     public:
         // offset: +0x0 = +0,  size = 0x4 = 4
         heroWindow* newGameWin;
@@ -284,7 +284,7 @@ class game
 
         // offset: +0x1F664 = +128612,  size = 0x1C = 28
         std::array<TArtifact, 7> marketArtifacts;
-        
+
         union {
         // offset: +0x1F680 = +128640,  size = 0x10 = 16
         exe_vector<TBlackMarket> BlackMarkets;
@@ -308,7 +308,7 @@ class game
     protected:
         [[maybe_unused]]
         // offset: +0x1F697 = +128663,  size = 0x1 = 1
-        byte_t gap_1F697[1];
+        std::byte gap_1F697[1];
 
     public:
         // offset: +0x1F698 = +128664,  size = 0x4 = 4
@@ -323,12 +323,12 @@ class game
     protected:
         [[maybe_unused]]
         // offset: +0x1F69E = +128670,  size = 0x2 = 2
-        byte_t gap_1F69E[2];
+        std::byte gap_1F69E[2];
 
     public:
         // offset: +0x1F6A0 = +128672,  size = 0x1CC = 460
         SGameSetupOptions sSetup;
-        // ^^^ trivial ^^^ 
+        // ^^^ trivial ^^^
 
         union {
         // offset: +0x1F86C = +129132,  size = 0x304 = 772
@@ -343,7 +343,7 @@ class game
     protected:
         [[maybe_unused]]
         // offset: +0x20ACC = +133836,  size = 0x4 = 4
-        byte_t gap_20ACC[4];
+        std::byte gap_20ACC[4];
 
     public:
         union {
@@ -389,7 +389,7 @@ class game
 
     protected:
         [[maybe_unused]]
-        byte_t gap_4E375[3];
+        std::byte gap_4E375[3];
 
     public:
         union {
@@ -442,7 +442,7 @@ class game
     protected:
         [[maybe_unused]]
         // offset: +0x4E646 = +321094,  size = 0x2 = 2
-        byte_t gap_4E646[2];
+        std::byte gap_4E646[2];
 
     public:
         union {
@@ -459,7 +459,7 @@ class game
     protected:
         [[maybe_unused]]
         // offset: +0x4E678 = +321144,  size = 0x4 = 4
-        byte_t gap_4E678[4];
+        std::byte gap_4E678[4];
 
     public:
         union {
@@ -490,9 +490,9 @@ class game
         union {
         // offset: +0x4E7AC = +321452,  size = 0x10 = 16
         exe_vector<void*> recorded_events;
-        //exe_vector<type_event_record*> recorded_events;            
+        //exe_vector<type_event_record*> recorded_events;
         };
-        
+
         union {
         // offset: +0x4E7BC = +321468,  size = 0x10 = 16
         exe_vector<QuestMonster> quest_monsters;
@@ -501,7 +501,7 @@ class game
     protected:
         [[maybe_unused]]
         // offset: +0x4E7CC = +321484,  size = 0x4 = 4
-        byte_t gap_4E7CC[4];
+        std::byte gap_4E7CC[4];
 };
 #pragma pack(pop)
 
@@ -605,7 +605,7 @@ public:
 protected:
     [[maybe_unused]]
     // offset: +0x8E = +142,  size = 0x2 = 2
-    byte_t gap_8E[2];
+    std::byte gap_8E[2];
 
 public:
     // offset: +0x90 = +144,  size = 0x4 = 4
@@ -631,7 +631,7 @@ public:
 
 inline game* const& gpGame = get_global_var_ref(0x699538, game*);
 
-// Game config / 
+// Game config /
 // Игровые настройки.
 inline configStruct& gConfig = get_global_var_ref(0x6987A8, configStruct);
 

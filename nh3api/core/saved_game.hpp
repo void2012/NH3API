@@ -43,7 +43,7 @@ struct SavedGameHeader
 
         union {
         // offset: +0x10 = +16,  size = 0x304 = 772
-        NewSMapHeader map_header;            
+        NewSMapHeader map_header;
         };
 
         // offset: +0x314 = +788,  size = 0x1CC = 460
@@ -55,7 +55,7 @@ struct SavedGameHeader
     protected:
         [[maybe_unused]]
         // offset: +0x4E1 = +1249,  size = 0x3 = 3
-        byte_t gap_4E1[3];
+        std::byte gap_4E1[3];
 
     public:
         union {

@@ -13,11 +13,11 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_TABSTRACTFILE
 #define NH3API_VIRTUAL_OVERRIDE_TABSTRACTFILE(CLASS_NAME)\
-virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override\
+void __thiscall scalar_deleting_destructor(uint8_t flag) override\
 { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }\
-virtual int32_t __thiscall read(void* buf, size_t len) override\
+int32_t __thiscall read(void* buf, size_t len) override\
 { return get_type_vftable(this)->read(this, buf, len); }\
-virtual int32_t __thiscall write(const void* buf, size_t len) override\
+int32_t __thiscall write(const void* buf, size_t len) override\
 { return get_type_vftable(this)->write(this, buf, len); }
 #endif
 
@@ -187,7 +187,7 @@ NH3API_VIRTUAL_CLASS TGzInflateBuf : public exe_streambuf
         // zlib stream /
         // zlib поток.
         // offset: +0x3C = +60,  size = 0x38 = 56
-        std::array<byte_t, 56> m_zstream;
+        std::array<std::byte, 56> m_zstream;
 
     public:
         // Input buffer /
@@ -307,23 +307,20 @@ class LODFile
 
         LODFile(const LODFile& other)
             : subindex(other.subindex)
-        { std::memcpy(reinterpret_cast<void*>(this), &other, offsetof(LODFile, subindex)); }
+        { std::memcpy(reinterpret_cast<void*>(this), &other, 380/*__builtin_offsetof(LODFile, subindex)*/); }
 
         LODFile(LODFile&& other) noexcept
-        {
-            nh3api::trivial_move<380>(&other, this);
-            this->subindex = std::move(other.subindex);
-        }
+        { nh3api::trivial_move<sizeof(*this)>(&other, this); }
 
         LODFile& operator=(const LODFile& other)
         {
-            std::memcpy(reinterpret_cast<void*>(this), &other, offsetof(LODFile, subindex));
+            std::memcpy(reinterpret_cast<void*>(this), &other, 380 /*__builtin_offsetof(LODFile, subindex)*/);
             return *this;
         }
 
-        LODFile& operator=(LODFile&& other) noexcept 
+        LODFile& operator=(LODFile&& other) noexcept
         {
-            nh3api::trivial_move<380>(&other, this);
+            nh3api::trivial_move<380 /*__builtin_offsetof(LODFile, subindex)*/>(&other, this);
             this->subindex = std::move(other.subindex);
             return *this;
         }
@@ -415,10 +412,8 @@ LODFile* GetLODFile(const char* name) noexcept
     lod_files_array_t& lodfiles = get_global_var_ref(0x69D8A8, lod_files_array_t);
 
     for ( auto& lodfile : lodfiles )
-    {
-        if (_stricmp(name, lodfile.first) == 0)
+        if ( _stricmp(name, lodfile.first) == 0 )
             return &lodfile.second;
-    }
 
     return nullptr;
 }
@@ -524,7 +519,7 @@ NH3API_VIRTUAL_CLASS t_stdio_file_adapter final : public TAbstractFile
         t_stdio_file_adapter(t_stdio_file_adapter&&)                 noexcept = default;
         t_stdio_file_adapter& operator=(const t_stdio_file_adapter&) noexcept = delete;
         t_stdio_file_adapter& operator=(t_stdio_file_adapter&&)      noexcept = default;
-        
+
         t_stdio_file_adapter(const char* filename, const char* mode) noexcept
             : file(exe_fopen(filename, mode), exe_fcloser {})
         { NH3API_SET_VFTABLE(); }

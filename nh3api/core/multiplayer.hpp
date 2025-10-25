@@ -218,7 +218,7 @@ struct CNetMsgHandler
 
     protected:
         [[maybe_unused]]
-        byte_t gap_5[3];
+        std::byte gap_5[3];
 
     public:
         // offset: +0x8 = +8,  size = 0x4 = 4
@@ -229,13 +229,13 @@ struct CNetMsgHandler
 
 // Current game type (single, multiplayer, hotseat, etc.) /
 // Тип текущей игры(однопользовательский, многопользовательский, хотсит и др.).
-enum eNetGameType : int32_t 
+enum eNetGameType : int32_t
 {
     MP_SINGLE  = 0, // Однопользовательская игра.
-    MP_IPX     = 1, // 
+    MP_IPX     = 1, //
     MP_TCP     = 2, // TCP/IP.
     MP_HOTSEAT = 3, // Hotseat.
-    MP_SERIAL  = 4, // 
+    MP_SERIAL  = 4, //
     MP_MODEM   = 5, // Модем
 };
 

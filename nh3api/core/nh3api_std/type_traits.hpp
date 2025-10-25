@@ -19,6 +19,10 @@
 
 #include <utility>
 #include <type_traits>
+#ifdef __cpp_lib_concepts
+#include <concepts>
+#endif
+
 #include "nh3api_std.hpp"
 
 namespace nh3api
@@ -187,134 +191,8 @@ inline constexpr bool has_scalar_deleting_destructor_v = has_scalar_deleting_des
 template<class T, class... Args>
 constexpr bool is_any_of_v = (::std::is_same_v<T, Args> || ...);
 
-#ifdef __cpp_lib_concepts 
-template <typename F, typename ArgT, typename ResultT>
-concept unary_functor = std::invocable<F, ArgT> &&
-                        std::same_as<std::invoke_result_t<F, ArgT>, ResultT>;
-
-#endif
-
 } // namespace tt
 
 using ::std::as_const;
-
-#ifdef __cpp_lib_to_underlying
-using ::std::to_underlying;
-#else
-template<class Enum> [[nodiscard]] NH3API_MSVC_INTRIN constexpr
-std::underlying_type_t<Enum> to_underlying(Enum arg) noexcept
-{ return static_cast<std::underlying_type_t<Enum>>(arg); }
-#endif
-
-#ifdef __cpp_lib_integer_comparison_functions
-using ::std::cmp_equal;
-using ::std::cmp_not_equal;
-using ::std::cmp_less;
-using ::std::cmp_greater;
-using ::std::cmp_less_equal;
-using ::std::cmp_greater_equal;
-#else 
-template<class T, class U> NH3API_PURE
-inline constexpr bool cmp_equal(T t, U u) noexcept
-{
-    if constexpr (::std::is_signed_v<T> == ::std::is_signed_v<U>)
-        return t == u;
-    else if constexpr (::std::is_signed_v<T>)
-        return t >= 0 && ::std::make_unsigned_t<T>(t) == u;
-    else
-        return u >= 0 && ::std::make_unsigned_t<U>(u) == t;
-}
- 
-template<class T, class U> NH3API_PURE
-inline constexpr bool cmp_not_equal(T t, U u) noexcept
-{ return !cmp_equal(t, u); }
- 
-template<class T, class U> NH3API_PURE
-inline constexpr bool cmp_less(T t, U u) noexcept
-{
-    if constexpr (::std::is_signed_v<T> == ::std::is_signed_v<U>)
-        return t < u;
-    else if constexpr (std::is_signed_v<T>)
-        return t < 0 || ::std::make_unsigned_t<T>(t) < u;
-    else
-        return u >= 0 && t < ::std::make_unsigned_t<U>(u);
-}
- 
-template<class T, class U> NH3API_PURE
-inline constexpr bool cmp_greater(T t, U u) noexcept
-{ return cmp_less(u, t); }
- 
-template<class T, class U> NH3API_PURE
-constexpr bool cmp_less_equal(T t, U u) noexcept
-{
-    return !cmp_less(u, t);
-}
- 
-template<class T, class U> NH3API_PURE
-constexpr bool cmp_greater_equal(T t, U u) noexcept
-{
-    return !cmp_less(t, u);
-}
-#endif
-
-#ifdef __cpp_lib_concepts
-template<::std::integral T>
-#else 
-template<typename T>
-#endif
-[[nodiscard]] NH3API_PURE inline constexpr T min_limit() noexcept 
-{
-    if constexpr (::std::is_signed_v<T>)
-    {
-        constexpr auto unsigned_max = static_cast<::std::make_unsigned_t<T>>(-1);
-        return static_cast<T>((unsigned_max >> 1) + 1);
-    }
-    else  
-    {
-        return 0;
-    }
-}
-
-#ifdef __cpp_lib_concepts
-template<::std::integral T>
-#else 
-template<typename T>
-#endif
-[[nodiscard]] NH3API_PURE inline constexpr T max_limit() noexcept 
-{
-    if constexpr (::std::is_signed_v<T>)
-    {
-        constexpr auto unsigned_max = static_cast<::std::make_unsigned_t<T>>(-1);
-        return static_cast<T>(unsigned_max >> 1);
-    }
-    else  
-    {
-        return static_cast<T>(-1);
-    }
-}
-
-#ifdef __cpp_lib_concepts
-template<typename Rx, ::std::integral T>
-#else 
-template<typename Rx, typename T>
-#endif
-[[nodiscard]] NH3API_PURE inline constexpr bool in_range(const T value) noexcept 
-{
-    constexpr T  t_min  = min_limit<T>();
-    constexpr Rx rx_min = min_limit<Rx>();
-
-    if constexpr ( cmp_less(t_min, rx_min) )
-        if ( value < T{rx_min} )
-            return false;
-    
-    constexpr T  t_max = max_limit<T>();
-    constexpr Rx rx_max = max_limit<Rx>();
-
-    if constexpr ( cmp_greater(t_max, rx_max) )
-        if ( value > T{rx_max})
-            return false;
-    
-    return true;
-}
 
 } // namespace nh3api

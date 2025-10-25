@@ -43,6 +43,10 @@
 #include <cstddef>
 #include <windows.h>
 
+#ifndef NH3API_FLAG_INLINE_HEADERS
+    #define NH3API_FLAG_INLINE_HEADERS (1)
+#endif
+
 #ifndef NH3API_JOIN_STRING
     #define NH3API_JOIN_STRING_HELPER(X, Y) X##Y
     #define NH3API_JOIN_STRING(X, Y) NH3API_JOIN_STRING_HELPER(X, Y)
@@ -84,15 +88,15 @@
         #if defined(__clang__)
             #define NH3API_CHECK_CLANG (1)
             #define NH3API_CHECK_MINGW (0)
-            #if (__clang_major__ < 8)
-                #error NH3API requires at least clang 8 to work.
+            #if (__clang_major__ < 9)
+                #error NH3API requires at least clang 9 to work.
             #endif
             #define NH3API_COMPILER_NAME "Clang"
         #else
             #define NH3API_CHECK_CLANG (0)
             #define NH3API_CHECK_MINGW (1)
-            #if (__GNUC__ < 7)
-                #error NH3API requires at least GCC 7 to work.
+            #if (__GNUC__ < 9)
+                #error NH3API requires at least GCC 9 to work.
             #endif
             #define NH3API_COMPILER_NAME "GCC"
         #endif
@@ -235,6 +239,14 @@
     #endif
 #endif
 
+#ifndef NH3API_HAS_CPP_ATTRIBUTE
+    #ifdef __has_cpp_attribute
+        #define NH3API_HAS_CPP_ATTRIBUTE(ATTRIBUTE) __has_cpp_attribute(ATTRIBUTE)
+    #else
+        #define NH3API_HAS_CPP_ATTRIBUTE(ATTRIBUTE) (0)
+    #endif
+#endif
+
 #ifndef NH3API_DLLEXPORT
     #if NH3API_CHECK_MSVC_DRIVER
         #define NH3API_DLLEXPORT __declspec(dllexport)
@@ -242,7 +254,7 @@
         #define NH3API_SELECTANY __declspec(selectany)
     #else
         // prefer C++11 [[attribute]] syntax
-        #if __has_cpp_attribute(__gnu__::__dllexport__)
+        #if NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__dllexport__)
             #define NH3API_DLLEXPORT [[__gnu__::__dllexport__]]
             #define NH3API_DLLIMPORT [[__gnu__::__dllimport__]]
             #define NH3API_SELECTANY [[__gnu__::__selectany__]]
@@ -256,45 +268,34 @@
 
 #ifndef NH3API_PRAGMA
     #if NH3API_CHECK_MSVC_DRIVER
-        #define NH3API_PRAGMA(...) __pragma(__VA_ARGS__)
+        #define NH3API_PRAGMA(X) __pragma(X)
     #else
-        #define NH3API_PRAGMA(...) _Pragma(#__VA_ARGS__)
+        #define NH3API_PRAGMA(X) _Pragma(#X)
     #endif
 #endif
 
 #ifndef NH3API_DISABLE_WARNING
     #if NH3API_CHECK_MSVC
-        #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) NH3API_PRAGMA(warning(push)) \
-                                                              NH3API_PRAGMA(warning(disable : MSVC))
+        #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) __pragma(warning(push)) \
+                                                              __pragma(warning(disable : MSVC))
 
-        #define NH3API_DISABLE_WARNING_END   NH3API_PRAGMA(warning(pop))
-        #define NH3API_DISABLE_WARNING(WARNING) NH3API_PRAGMA(warning(disable : WARNING))
+        #define NH3API_DISABLE_WARNING_END      __pragma(warning(pop))
+        #define NH3API_DISABLE_WARNING(WARNING) __pragma(warning(disable : WARNING))
     #elif defined(__clang__)
         #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) NH3API_PRAGMA(clang diagnostic push) \
                                                               NH3API_PRAGMA(clang diagnostic ignored GCC_CLANG)
-        #define NH3API_DISABLE_WARNING_END   NH3API_PRAGMA(clang diagnostic pop)
+        #define NH3API_DISABLE_WARNING_END      NH3API_PRAGMA(clang diagnostic pop)
         #define NH3API_DISABLE_WARNING(WARNING) NH3API_PRAGMA(clang diagnostic ignored WARNING)
     #elif NH3API_CHECK_MINGW
         #define NH3API_DISABLE_WARNING_BEGIN(GCC_CLANG, MSVC) NH3API_PRAGMA(GCC diagnostic push) \
                                                               NH3API_PRAGMA(GCC diagnostic ignored GCC_CLANG)
-        #define NH3API_DISABLE_WARNING_END   NH3API_PRAGMA(GCC diagnostic pop)
+        #define NH3API_DISABLE_WARNING_END      NH3API_PRAGMA(GCC diagnostic pop)
         #define NH3API_DISABLE_WARNING(WARNING) NH3API_PRAGMA(clang diagnostic ignored WARNING)
     #endif
 #endif
 
-#ifndef NH3API_DISABLE_MSVC_WARNING_BEGIN
-    #if NH3API_CHECK_MSVC
-        #define NH3API_DISABLE_MSVC_WARNING_BEGIN(WARNING_NUMBER) NH3API_PRAGMA(warning(push)) \
-                                                  NH3API_PRAGMA(warning(disable : WARNING_NUMBER))
-        #define NH3API_DISABLE_MSVC_WARNING_END   NH3API_PRAGMA(warning(pop))
-    #else
-        #define NH3API_DISABLE_MSVC_WARNING_BEGIN(WARNING_NUMBER)
-        #define NH3API_DISABLE_MSVC_WARNING_END
-    #endif
-#endif
-
 #ifndef NH3API_STD_MOVE_SEMANTICS
-    #define NH3API_STD_MOVE_SEMANTICS (NH3API_VS2012_2013 || NH3API_CHECK_CPP11)
+    #define NH3API_STD_MOVE_SEMANTICS (1)
 #endif // NH3API_STD_MOVE_SEMANTICS
 
 // disable useless C++ warnings
@@ -303,16 +304,52 @@
 NH3API_DISABLE_WARNING(4201)
 #else
 // GCC/Clang warnings
-NH3API_DISABLE_WARNING("-Wc++98-compat") // C++98 compatibility
+NH3API_DISABLE_WARNING("-Wc++98-compat")          // C++98 compatibility
 NH3API_DISABLE_WARNING("-Wc++98-compat-pedantic") // C++98 compatibility
-NH3API_DISABLE_WARNING("-Wc++11-compat") // C++11 compatibility
+NH3API_DISABLE_WARNING("-Wc++11-compat")          // C++11 compatibility
 NH3API_DISABLE_WARNING("-Wc++11-compat-pedantic") // C++11 compatibility
-NH3API_DISABLE_WARNING("-Wc++14-compat") // C++14 compatibility
+NH3API_DISABLE_WARNING("-Wc++14-compat")          // C++14 compatibility
 NH3API_DISABLE_WARNING("-Wc++14-compat-pedantic") // C++14 compatibility
-NH3API_DISABLE_WARNING("-Wold-style-cast") // C-style cast
-NH3API_DISABLE_WARNING("-Wreserved-identifier") // name that starts with '_'
-NH3API_DISABLE_WARNING("-Wpadded") // padded types
-NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API uses scalar_deleting_destructor)
+NH3API_DISABLE_WARNING("-Wold-style-cast")        // C-style cast
+NH3API_DISABLE_WARNING("-Wreserved-identifier")   // name that starts with '_'
+NH3API_DISABLE_WARNING("-Wpadded")                // padded types
+NH3API_DISABLE_WARNING("-Wnon-virtual-dtor")      // no virtual destructor(NH3API uses scalar_deleting_destructor)
+#endif
+
+#ifndef NH3API_DISABLE_MSVC_WARNING_BEGIN
+    #if NH3API_CHECK_MSVC
+        #define NH3API_DISABLE_MSVC_WARNING_BEGIN(WARNING_NUMBER) __pragma(warning(push)) \
+                                                  __pragma(warning(disable : WARNING_NUMBER))
+        #define NH3API_DISABLE_MSVC_WARNING_END   __pragma(warning(pop))
+    #else
+        #define NH3API_DISABLE_MSVC_WARNING_BEGIN(WARNING_NUMBER)
+        #define NH3API_DISABLE_MSVC_WARNING_END
+    #endif
+#endif
+
+#ifndef NH3API_DISABLE_GCC_CLANG_WARNING_BEGIN
+    #if NH3API_CHECK_MSVC
+        #define NH3API_DISABLE_GCC_CLANG_WARNING_BEGIN(...)
+        #define NH3API_DISABLE_GCC_CLANG_WARNING_END
+    #else
+        #ifdef __clang__
+            #define NH3API_DISABLE_GCC_CLANG_WARNING_BEGIN(...) NH3API_PRAGMA(clang diagnostic push) \
+                                                                NH3API_PRAGMA(clang diagnostic ignored __VA_ARGS__)
+            #define NH3API_DISABLE_GCC_CLANG_WARNING_END        NH3API_PRAGMA(clang diagnostic pop)
+        #else
+            #define NH3API_DISABLE_GCC_CLANG_WARNING_BEGIN(...) NH3API_PRAGMA(GCC diagnostic push) \
+                                                                NH3API_PRAGMA(GCC diagnostic ignored __VA_ARGS__)
+            #define NH3API_DISABLE_GCC_CLANG_WARNING_END        NH3API_PRAGMA(GCC diagnostic pop)
+        #endif
+    #endif
+#endif
+
+#ifndef NH3API_HAS_WARNING
+    #if defined(__has_warning) && !NH3API_CHECK_MSVC
+        #define NH3API_HAS_WARNING(...) __has_warning(__VA_ARGS__)
+    #else
+        #define NH3API_HAS_WARNING(...) (0)
+    #endif
 #endif
 
 // STL vendor check
@@ -490,22 +527,24 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
         #define NH3API_NOINLINE __declspec(noinline)
     #endif // NH3API_NOINLINE
 
-    #if !defined(NH3API_FLAG_OPTIMIZE_FOR_SIZE)
+    #ifndef NH3API_FLAG_OPTIMIZE_FOR_SIZE
         #ifndef NH3API_FLATTEN
-            #if __has_cpp_attribute(msvc::flatten)
+            #if NH3API_HAS_CPP_ATTRIBUTE(clang::flatten)
+                #define NH3API_FLATTEN [[clang::flatten]]
+            #elif NH3API_HAS_CPP_ATTRIBUTE(msvc::flatten)
                 #define NH3API_FLATTEN [[msvc::flatten]]
             #else
                 #define NH3API_FLATTEN
             #endif
         #endif
     #else
-        #if !defined(NH3API_FLATTEN)
+        #ifndef NH3API_FLATTEN
             #define NH3API_FLATTEN __declspec(noinline)
         #endif
     #endif
 #else
     #ifndef NH3API_NO_OPT_BEGIN
-        #if defined(__clang__)
+        #ifdef __clang__
             #define NH3API_NO_OPT_BEGIN NH3API_PRAGMA(clang optimize off)
             #define NH3API_NO_OPT_END   NH3API_PRAGMA(clang optimize on)
         #else
@@ -516,11 +555,11 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
     #endif
 
     #ifndef NH3API_FORCEINLINE
-        #define NH3API_FORCEINLINE inline __attribute__((__always_inline__))
+        #define NH3API_FORCEINLINE __attribute__((__always_inline__)) inline
     #endif
 
     #ifndef NH3API_NOINLINE
-        #define NH3API_NOINLINE __attribute__((__noinline__))
+        #define NH3API_NOINLINE [[__gnu__::__noinline__]]
     #endif
 
     #ifndef NH3API_MALLOC
@@ -538,8 +577,16 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
     #endif
 #endif
 
+#ifndef NH3API_CALLBACK
+    #if NH3API_HAS_CPP_ATTRIBUTE(_Clang::__callback__)
+        #define NH3API_CALLBACK(...) [[_Clang::__callback__(__VA_ARGS__)]]
+    #else
+        #define NH3API_CALLBACK(...)
+    #endif
+#endif
+
 #ifndef NH3API_RETURNS_ALIGNED
-    #if __has_cpp_attribute(__gnu__::__assume_aligned__)
+    #if NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__assume_aligned__)
         #define NH3API_RETURNS_ALIGNED(ALIGNMENT) [[__gnu__::__assume_aligned__(ALIGNMENT)]]
     #else
         #define NH3API_RETURNS_ALIGNED(ALIGNMENT)
@@ -559,7 +606,7 @@ NH3API_DISABLE_WARNING("-Wnon-virtual-dtor") // no virtual destructor(NH3API use
 #endif
 
 #ifndef NH3API_MSVC_INTRIN
-    #if __has_cpp_attribute(msvc::intrinsic)
+    #if NH3API_HAS_CPP_ATTRIBUTE(msvc::intrinsic)
         #define NH3API_MSVC_INTRIN [[msvc::intrinsic]]
     #else
         #define NH3API_MSVC_INTRIN
@@ -614,7 +661,7 @@ using bool32_t = uint32_t;
 #endif
 
 #ifndef NH3API_CONST
-    #if __has_cpp_attribute(__gnu__::__const__)
+    #if NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__const__)
         #define NH3API_CONST [[__gnu__::__const__]]
     #else
         #if NH3API_CHECK_MSVC_DRIVER
@@ -626,7 +673,7 @@ using bool32_t = uint32_t;
 #endif
 
 #ifndef NH3API_PURE
-#if __has_cpp_attribute(__gnu__::__pure__)
+#if NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__pure__)
         #define NH3API_PURE [[__gnu__::__pure__]]
     #else
         #if NH3API_CHECK_MSVC_DRIVER
@@ -638,7 +685,7 @@ using bool32_t = uint32_t;
 #endif
 
 #ifndef NH3API_CLANG_TRIVIAL_ABI
-    #if __has_cpp_attribute(_Clang::__trivial_abi__)
+    #if NH3API_HAS_CPP_ATTRIBUTE(_Clang::__trivial_abi__)
         #define NH3API_CLANG_TRIVIAL_ABI [[_Clang::__trivial_abi__]]
     #else
         #define NH3API_CLANG_TRIVIAL_ABI
@@ -646,11 +693,11 @@ using bool32_t = uint32_t;
 #endif
 
 #ifndef NH3API_INLINE_LAMBDA
-    #if __has_cpp_attribute(_Clang::__always_inline__)
+    #if NH3API_HAS_CPP_ATTRIBUTE(_Clang::__always_inline__)
         #define NH3API_INLINE_LAMBDA [[_Clang::__always_inline__]]
-    #elif __has_cpp_attribute(__gnu__::__always_inline__)
+    #elif NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__always_inline__)
         #define NH3API_INLINE_LAMBDA [[__gnu__::__always_inline__]]
-    #elif __has_cpp_attribute(msvc::always_inline)
+    #elif NH3API_HAS_CPP_ATTRIBUTE(msvc::always_inline)
         #define NH3API_INLINE_LAMBDA [[msvc::always_inline]]
     #else
         #define NH3API_INLINE_LAMBDA
@@ -658,7 +705,7 @@ using bool32_t = uint32_t;
 #endif
 
 #ifndef NH3API_FLAG_ENUM
-    #if __has_cpp_attribute(_Clang::__flag_enum__)
+    #if NH3API_HAS_CPP_ATTRIBUTE(_Clang::__flag_enum__)
         #define NH3API_FLAG_ENUM enum [[_Clang::__flag_enum__]]
     #else
         #define NH3API_FLAG_ENUM enum
@@ -757,6 +804,12 @@ inline constexpr omit_base_vftable_tag;
 // assign derived::vftable to this, omit assignment to base in base constructor
 }
 
+#ifndef NH3API_UNCOPYABLE
+    #define NH3API_UNCOPYABLE(CLASS_NAME) CLASS_NAME(const CLASS_NAME&) = delete; CLASS_NAME& operator=(const CLASS_NAME&) = delete;
+    #define NH3API_IMMOVABLE(CLASS_NAME)  CLASS_NAME(CLASS_NAME&&) = delete; CLASS_NAME&& operator=(CLASS_NAME&&) = delete;
+    #define NH3API_SINGLETON(CLASS_NAME) NH3API_UNCOPYABLE(CLASS_NAME) NH3API_IMMOVABLE(CLASS_NAME)
+#endif
+
 #ifndef NH3API_DEFAULT_DESTRUCTOR
     #define NH3API_DEFAULT_DESTRUCTOR(CLASS_NAME) NH3API_FORCEINLINE ~CLASS_NAME() noexcept = default;
 #endif
@@ -787,20 +840,59 @@ inline constexpr omit_base_vftable_tag;
 
 #ifndef NH3API_HAS_INCLUDE
     #ifdef __has_include
-        #define NH3API_HAS_INCLUDE(ARG) __has_include(ARG)
+        #define NH3API_HAS_INCLUDE(...) (__has_include(__VA_ARGS__))
     #else
-        #define NH3API_HAS_INCLUDE(ARG) (0)
+        #define NH3API_HAS_INCLUDE(...) (0)
     #endif
 #endif
 
-// check if compiler has builtins (MSVC since 2015)
+// check if compiler has builtins (MSVC has builtins since 2015)
 #ifndef NH3API_HAS_BUILTINS
     #define NH3API_HAS_BUILTINS (1)
-    #define NH3API_HAS_BUILTIN(BUILTIN_TO_CHECK) __has_builtin(BUILTIN_TO_CHECK)
+    #if !NH3API_CHECK_MSVC
+        #define NH3API_HAS_BUILTIN(BUILTIN_TO_CHECK) (__has_builtin(BUILTIN_TO_CHECK))
+        #define NH3API_HAS_BUILTIN_BIT_CAST (__has_builtin(__builtin_bit_cast))
+        #define NH3API_HAS_BUILTIN_ASSUME_ALIGNED (__has_builtin(__builtin_assume_aligned))
+        #define NH3API_HAS_BUILTIN_CONSTANT_P (__has_builtin(__builtin_constant_p))
+        #define NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED (__has_builtin(__builtin_is_constant_evaluated))
+        #ifdef __has_constexpr_builtin
+            #define NH3API_HAS_CONSTEXPR_BUILTIN(BUILTIN_TO_CHECK) (__has_constexpr_builtin(BUILTIN_TO_CHECK))
+        #else
+            #define NH3API_HAS_CONSTEXPR_BUILTIN(BUILTIN_TO_CHECK) (0)
+        #endif
+    #else // MSVC has no __has_builtin
+        #define NH3API_HAS_BUILTIN(BUILTIN_TO_CHECK) (0)
+        // MSVC supports __builtin_bit_cast since MSVC v19.26 (Visual Studio 2019)
+        #if NH3API_MSVC_VERSION >= 1926
+            #define NH3API_HAS_BUILTIN_BIT_CAST (1)
+        #else
+            #define NH3API_HAS_BUILTIN_BIT_CAST (0)
+        #endif
+
+        // MSVC supports __builtin_assume_aligned since MSVC v19.26 (Visual Studio 2019)
+        #if NH3API_MSVC_VERSION >= 1928
+            #define NH3API_HAS_BUILTIN_ASSUME_ALIGNED (1)
+        #else
+            #define NH3API_HAS_BUILTIN_ASSUME_ALIGNED (0)
+        #endif
+
+        // I doubt MSVC will ever support __builtin_constant_p
+        #define NH3API_HAS_BUILTIN_CONSTANT_P (0)
+
+        // MSVC supports __builtin_is_constant_evaluated since MSVC v19.25 (Visual Studio 2019)
+        #if NH3API_MSVC_VERSION >= 1925
+            #define NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED (1)
+        #else
+            #define NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED (0)
+        #endif
+
+        // MSVC has no support for __has_builtin in the first place
+        #define NH3API_HAS_CONSTEXPR_BUILTIN(BUILTIN_TO_CHECK) (0)
+    #endif
 #endif
 
 #ifndef NH3API_HAS_IS_CONSTANT_EVALUATED
-    #if __has_builtin(__builtin_is_constant_evaluated)
+    #if NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
         #define NH3API_HAS_IS_CONSTANT_EVALUATED (1)
         namespace nh3api
         {
@@ -829,7 +921,7 @@ inline constexpr omit_base_vftable_tag;
 #ifndef NH3API_IF_CONSTEVAL
     #ifdef __cpp_if_consteval
         #define NH3API_IF_CONSTEVAL if consteval
-    #elif __has_builtin(__builtin_is_constant_evaluated)
+    #elif NH3API_HAS_BUILTIN_IS_CONSTANT_EVALUATED
         #define NH3API_IF_CONSTEVAL if (__builtin_is_constant_evaluated())
     #else
         #define NH3API_IF_CONSTEVAL if (::nh3api::is_constant_evaluated())
@@ -891,35 +983,19 @@ inline constexpr omit_base_vftable_tag;
 // optimize aggressively for size
 
 #ifndef NH3API_INLINE_OR_EXTERN
-    #ifdef NH3API_FLAG_INLINE_HEADERS
-        #define NH3API_INLINE_OR_EXTERN inline
-    #else
-        #define NH3API_INLINE_OR_EXTERN extern
-    #endif
+    #define NH3API_INLINE_OR_EXTERN inline
 #endif
 
 #ifndef NH3API_INLINE_OR_EXTERN_INIT
-    #ifdef NH3API_FLAG_INLINE_HEADERS
-        #define NH3API_INLINE_OR_EXTERN_INIT(...) = __VA_ARGS__
-    #else
-        #define NH3API_INLINE_OR_EXTERN_INIT(...)
-    #endif
+    #define NH3API_INLINE_OR_EXTERN_INIT(...) = __VA_ARGS__
 #endif
 
 #ifndef NH3API_INLINE_STATIC_VARIABLE
-    #ifdef NH3API_FLAG_INLINE_HEADERS
-        #define NH3API_INLINE_STATIC_VARIABLE static inline
-    #else
-        #define NH3API_INLINE_STATIC_VARIABLE static
-    #endif
+    #define NH3API_INLINE_STATIC_VARIABLE static inline
 #endif
 
 #ifndef NH3API_INLINE_STATIC_VARIABLE_INIT
-    #ifdef NH3API_FLAG_INLINE_HEADERS
-        #define NH3API_INLINE_STATIC_VARIABLE_INIT(...) = __VA_ARGS__
-    #else
-        #define NH3API_INLINE_STATIC_VARIABLE_INIT(...)
-    #endif
+    #define NH3API_INLINE_STATIC_VARIABLE_INIT(...) = __VA_ARGS__
 #endif
 
 #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
@@ -1145,7 +1221,7 @@ inline constexpr bool use_era
 // this is a hack designed to enable global variables addresses to be baked into binaries
 // rather that using global variables which is double indirection
 // whole program optimization doesn't always fix this issue though.
-#if __has_builtin(__builtin_constant_p)
+#if NH3API_HAS_BUILTIN_CONSTANT_P
     #define get_global_var_ptr(address,...) (__builtin_constant_p(reinterpret_cast<__VA_ARGS__* const>(address)) ? reinterpret_cast<__VA_ARGS__* const>(address) : reinterpret_cast<__VA_ARGS__* const>(address))  // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
     #define get_global_var_ref(address,...) (*((__builtin_constant_p(reinterpret_cast<__VA_ARGS__* const>(address)) ? reinterpret_cast<__VA_ARGS__* const>(address) : reinterpret_cast<__VA_ARGS__* const>(address)))) // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
 #else
@@ -1161,11 +1237,8 @@ inline constexpr bool use_era
 // requires T::vftable_t
 template<class T> [[nodiscard]] NH3API_FORCEINLINE
 typename T::vftable_t* get_vftable(T* ptr) noexcept
-#if __has_builtin(__builtin_launder)
 { return *reinterpret_cast<typename T::vftable_t**>(__builtin_launder(ptr)); }
-#else
-{ return *reinterpret_cast<typename T::vftable_t**>(ptr); }
-#endif
+
 
 // requires T::vftable_t
 template<class T> [[nodiscard]] NH3API_FORCEINLINE
@@ -1190,11 +1263,7 @@ template<typename T>
 void set_vftable(T* ptr)
 {
     NH3API_MEMSHIELD_BEGIN
-    #if __has_builtin(__builtin_launder)
     *reinterpret_cast<const void**>(__builtin_launder(ptr)) = get_type_vftable(ptr);
-    #else
-    *reinterpret_cast<const void**>(ptr) = get_type_vftable(ptr);
-    #endif
     NH3API_MEMSHIELD_END
 }
 
@@ -1213,7 +1282,7 @@ template<> struct vftable_address<__VA_ARGS__> \
 #endif
 
 template<typename T>
-#if __has_cpp_attribute(_Clang::__no_specializations__)
+#if NH3API_HAS_CPP_ATTRIBUTE(_Clang::__no_specializations__)
 [[_Clang::__no_specializations__("Specialize vftable_address<T> instead.")]]
 #endif
 inline constexpr uintptr_t vftable_address_v = vftable_address<T>::address;

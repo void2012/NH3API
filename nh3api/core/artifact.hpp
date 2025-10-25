@@ -364,7 +364,7 @@ public:
 
 protected:
     [[maybe_unused]]
-    byte_t gap_1E[2];
+    std::byte gap_1E[2];
 
 };
 #pragma pack(pop)

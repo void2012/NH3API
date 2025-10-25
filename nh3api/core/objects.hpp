@@ -35,7 +35,7 @@ struct CObjectType
         // Название файла спрайта объекта.
         // offset: +0x0 = +0,  size = 0x10 = 16
         exe_string ImageName;
-        
+
         // Object width(in cells). For example, hillfort has width = 3 /
         // Ширина изображения объекта(в клетках). Например, хиллфорт имеет ширину = 3.
         // offset: +0x10 = +16,  size = 0x1 = 1
@@ -48,7 +48,7 @@ struct CObjectType
 
     protected:
         [[maybe_unused]]
-        byte_t gap_12[2];
+        std::byte gap_12[2];
 
     public:
         // Draw mask. For example, hilfort(AVXhilg0.msk) has the following placement mask:
@@ -129,11 +129,11 @@ struct CObjectType
         // Является ли частью земли?
         // offset: +0x40 = +64,  size = 0x1 = 1
         bool IsUnderlay;
-    
+
     protected:
         [[maybe_unused]]
         // offset: +0x41 = +65,  size = 0x1 = 1
-        byte_t gap_41[1];
+        std::byte gap_41[1];
 
     public:
         // offset: +0x42 = +66,  size = 0x2 = 2
@@ -207,7 +207,7 @@ public:
 
 protected:
     [[maybe_unused]]
-    byte_t gap_2A[2];
+    std::byte gap_2A[2];
 
 public:
     // The first trigger cell. (Start from the lower right and iterate to the left, from bottom to top) /
@@ -274,10 +274,10 @@ struct TreasureData
         // Настроена охрана?
         // offset: +0x10 = +16,  size = 0x1 = 1
         bool HasCustomGuardians;
-        
+
     protected:
         [[maybe_unused]]
-        byte_t gap_11[3];
+        std::byte gap_11[3];
 
     public:
         // Guards /
@@ -364,7 +364,7 @@ struct BlackBoxData : TreasureData
 
     protected:
         [[maybe_unused]]
-        byte_t gap_4D[3];
+        std::byte gap_4D[3];
 
     public:
         // Experience Bonus(always positive) /
@@ -389,7 +389,7 @@ struct BlackBoxData : TreasureData
 
     protected:
         [[maybe_unused]]
-        byte_t gap_5A[2];
+        std::byte gap_5A[2];
 
     public:
         // Bonus resources(can be negative) /
@@ -477,10 +477,10 @@ class TRandomDwelling
         // Наибольший уровень существа.
         // offset: +0x8 = +8,  size = 0x1 = 1
         uint8_t maxLVL;
-    
+
     protected:
         [[maybe_unused]]
-        byte_t gap_9[3];
+        std::byte gap_9[3];
 
     public:
         // Object /
@@ -569,7 +569,7 @@ class generator
     protected:
         [[maybe_unused]]
         // offset: +0x2 = +2,  size = 0x2 = 2
-        byte_t gap_2[2];
+        std::byte gap_2[2];
 
     public:
         // Creatures /
@@ -615,7 +615,7 @@ class generator
     protected:
         [[maybe_unused]]
         // offset: +0x59 = +89,  size = 0x3 = 3
-        byte_t gap_59[3];
+        std::byte gap_59[3];
 
 };
 #pragma pack(pop)
@@ -633,8 +633,8 @@ class mine
               type(const_no_resource),
               is_abandoned(false),
               guards(),
-              mapX(static_cast<uint8_t>(-1)), 
-              mapY(static_cast<uint8_t>(-1)), 
+              mapX(static_cast<uint8_t>(-1)),
+              mapY(static_cast<uint8_t>(-1)),
               mapZ(static_cast<uint8_t>(-1))
         {}
 
@@ -661,7 +661,7 @@ class mine
 
     protected:
         [[maybe_unused]]
-        byte_t gap_3[1];
+        std::byte gap_3[1];
 
     public:
         // Mine guards /
@@ -686,7 +686,7 @@ class mine
 
     protected:
         [[maybe_unused]]
-        byte_t gap_3F[1];
+        std::byte gap_3F[1];
 
 };
 #pragma pack(pop)
@@ -718,7 +718,7 @@ class garrison
     protected:
         [[maybe_unused]]
         // offset: +0x1 = +1,  size = 0x3 = 3
-        byte_t gap_1[3];
+        std::byte gap_1[3];
 
     public:
         // Garrison army /
@@ -756,14 +756,10 @@ class garrison
 class type_university
 {
     public:
-        NH3API_FORCEINLINE
+        constexpr NH3API_FORCEINLINE
         type_university() noexcept
-        #if NH3API_STD_INITIALIZER_LIST
             : skills{{SKILL_NONE, SKILL_NONE, SKILL_NONE, SKILL_NONE}}
         {}
-        #else
-        { skills.fill(SKILL_NONE); }
-        #endif
 
         NH3API_FORCEINLINE
         type_university(const ::nh3api::dummy_tag_t&) noexcept
@@ -794,10 +790,10 @@ public:
 
     // offset: +0xA = +10,  size = 0x1 = 1
     bool is_free;
-    
+
 protected:
     [[maybe_unused]]
-    byte_t gap_11[1];
+    std::byte gap_11[1];
 
 public:
 
@@ -811,13 +807,11 @@ public:
 class type_creature_bank
 {
     public:
-        NH3API_FORCEINLINE
-        type_creature_bank() noexcept
-        #if NH3API_CHECK_CPP11
-        = default;
-        #else 
-        {}
-        #endif
+        type_creature_bank() noexcept = default;
+        type_creature_bank(const type_creature_bank&) = default;
+        type_creature_bank& operator=(const type_creature_bank&) = default;
+        type_creature_bank(type_creature_bank&&) noexcept = default;
+        type_creature_bank& operator=(type_creature_bank&&) noexcept = default;
 
         NH3API_FORCEINLINE
         type_creature_bank(const ::nh3api::dummy_tag_t& tag) noexcept
@@ -846,10 +840,10 @@ class type_creature_bank
         // Кол-во существ, получаемых в качестве награды при зачистке банка.
         // offset: +0x58 = +88,  size = 0x1 = 1
         int8_t reward_creatures;
-        
+
     protected:
         [[maybe_unused]]
-        byte_t gap_59[3];
+        std::byte gap_59[3];
 
     public:
 
@@ -1170,7 +1164,7 @@ struct mapCellTreasureChest
 
 } NH3API_MSVC_LAYOUT;
 
-enum WiseTreePrices : uint32_t 
+enum WiseTreePrices : uint32_t
 {
     const_tree_wants_nothing = 0,
     const_tree_wants_gold    = 1,
@@ -1355,11 +1349,11 @@ class CObject : public ExtraInfoUnion
                 uint8_t z_,
                 uint16_t type_,
                 uint32_t extraInfo_) noexcept
-            : ExtraInfoUnion(nh3api::bit_cast<ExtraInfoUnion>(extraInfo_)), 
-              x(x_), 
-              y(y_), 
+            : ExtraInfoUnion(nh3api::bit_cast<ExtraInfoUnion>(extraInfo_)),
+              x(x_),
+              y(y_),
               z(z_),
-              TypeID(type_), 
+              TypeID(type_),
               frameOffset(Random(0, 255) & UINT8_MAX)
         {}
 
@@ -1369,21 +1363,21 @@ class CObject : public ExtraInfoUnion
                 uint8_t z_,
                 uint16_t type_,
                 ExtraInfoUnion extraInfo_) noexcept
-            : ExtraInfoUnion(extraInfo_), 
-              x(x_), 
-              y(y_), 
+            : ExtraInfoUnion(extraInfo_),
+              x(x_),
+              y(y_),
               z(z_),
-              TypeID(type_), 
+              TypeID(type_),
               frameOffset(Random(0, 255) & UINT8_MAX)
         {}
 
         NH3API_FORCEINLINE
         CObject() noexcept
             : ExtraInfoUnion(nh3api::bit_cast<ExtraInfoUnion>(0)),
-              x(255), 
-              y(255), 
+              x(255),
+              y(255),
               z(255),
-              TypeID(static_cast<uint16_t>(OBJECT_NONE)), 
+              TypeID(static_cast<uint16_t>(OBJECT_NONE)),
               frameOffset(Random(0, 255) & UINT8_MAX)
         {}
 
@@ -1418,7 +1412,7 @@ class CObject : public ExtraInfoUnion
 
     protected:
         [[maybe_unused]]
-        byte_t gap_7[1];
+        std::byte gap_7[1];
 
     public:
         // Object type /
@@ -1434,7 +1428,7 @@ class CObject : public ExtraInfoUnion
 
     protected:
         [[maybe_unused]]
-        byte_t gap_B[1];
+        std::byte gap_B[1];
 
 };
 #pragma pack(pop) // 2
@@ -1495,10 +1489,10 @@ class type_obscuring_object
         { return ( is_on_map() ) ? was_trigger && (get_obscured_type( ) == OBJECT_TOWN) : false; }
 
         [[nodiscard]] TAdventureObjectType get_obscured_object() const
-        { 
-            if(is_on_map()) 
-                return get_obscured_type(); 
-            else 
+        {
+            if(is_on_map())
+                return get_obscured_type();
+            else
                 return OBJECT_NONE;
         }
 
@@ -1526,7 +1520,7 @@ class type_obscuring_object
 
     protected:
         [[maybe_unused]]
-        byte_t gap_B[1];
+        std::byte gap_B[1];
 
     public:
         // type as adventure object /
@@ -1672,7 +1666,7 @@ class NewmapCell : public ExtraInfoUnion
 
     protected:
         [[maybe_unused]]
-        byte_t gap_A[2];
+        std::byte gap_A[2];
 
     public:
         // Повёрнута ли почва горизонтально?
@@ -1715,14 +1709,14 @@ class NewmapCell : public ExtraInfoUnion
         // На клетке можно построить корабль?
         // offset: +0xD = +13, size = 1 bit, mask = 00001000
         uint8_t can_build_ship          : 1;
-        
+
         // Клетка является триггером?
         // offset: +0xD = +13, size = 1 bit, mask = 00010000
         uint8_t is_trigger              : 1;
-    
+
     protected:
         uint8_t : 3;
-        
+
     public:
         union {
         // Map object cells on this cell /

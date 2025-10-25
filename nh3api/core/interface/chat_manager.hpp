@@ -17,7 +17,7 @@ class CChatManager
         // Строка сообщения чата.
         // size = 0x88 = 136, align = 4
         struct CChatStr
-        {   
+        {
             // Message text /
             // Текст сообщения.
             // offset: +0x0 = +0,  size = 0x80 = 128
@@ -25,19 +25,19 @@ class CChatManager
 
             // offset: +0x80 = +128,  size = 0x4 = 4
             uint32_t killTime;
-            
+
             // System message /
             // Системное сообщение.
             // offset: +0x84 = +132,  size = 0x1 = 1
             bool isSystem;
 
         };
-    
+
     private:
     /*
     CChatManager(int32_t maxChatLines)
-            : msgArray(nullptr), 
-              currMsg(0), 
+            : msgArray(nullptr),
+              currMsg(0),
               msgCount(0),
               changed(true),
               lastWidget(nullptr),
@@ -66,11 +66,11 @@ class CChatManager
         }
     */
 
-    public: 
+    public:
         template<typename... Args>
         void AddChat(const char* cChatMsg, Args... args)
         { CDECL_N(char, 0x553C40, this, cChatMsg, ::std::forward<Args>(args)...); }
-        
+
         template<typename... Args>
         void TurnDurationMsg(const char* cChatMsg, Args... args)
         { CDECL_N(char, 0x553D60, this, cChatMsg, ::std::forward<Args>(args)...); }
@@ -113,7 +113,7 @@ class CChatManager
 
         void SetPosition(int32_t newPos)
         { THISCALL_2(void, 0x554570, this, newPos); }
-        
+
     public:
         // Chat messages
         // Сообщения в чате.

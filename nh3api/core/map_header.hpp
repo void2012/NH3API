@@ -14,9 +14,6 @@
 #include "hero.hpp" // HeroIdentity, HeroPlayerInfo
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
-#if !NH3API_CHECK_MSVC
-NH3API_DISABLE_WARNING("-Winvalid-offsetof")
-#endif
 
 #pragma pack(push, 4)
 // Map header /
@@ -94,22 +91,20 @@ public:
 
             TPlayerSlotAttributes(const TPlayerSlotAttributes& other)
             { *this = other; }
-            
-            #if NH3API_STD_MOVE_SEMANTICS
+
             TPlayerSlotAttributes& operator=(TPlayerSlotAttributes&& other) noexcept
             {
                 if ( this == &other )
                     return *this;
 
                 nh3api::trivial_move<52/*__builtin_offsetof(TPlayerSlotAttributes, heroes)*/>(&other, this);
-                
+
                 this->heroes = std::move(other.heroes);
                 return *this;
-            } 
+            }
 
             TPlayerSlotAttributes(TPlayerSlotAttributes&& other) noexcept
-            { *this = std::move(other); }
-            #endif
+            { nh3api::trivial_move<sizeof(*this)>(&other, this); }
 
         public:
             // Can be human /
@@ -124,7 +119,7 @@ public:
 
         protected:
             [[maybe_unused]]
-            byte_t gap_1D[2];
+            std::byte gap_1D[2];
 
         public:
             // AI strategy type /
@@ -154,7 +149,7 @@ public:
 
         protected:
             [[maybe_unused]]
-            byte_t gap_D[3];
+            std::byte gap_D[3];
 
         public:
             // Main town type /
@@ -174,7 +169,7 @@ public:
 
         protected:
             [[maybe_unused]]
-            byte_t gap_19[3];
+            std::byte gap_19[3];
 
         public:
             // Main hero ID /
@@ -259,7 +254,7 @@ public:
 
 protected:
     [[maybe_unused]]
-    byte_t gap_E[3];
+    std::byte gap_E[3];
 
 public:
     // Map size(width and height are the same) /
@@ -274,7 +269,7 @@ public:
 
 protected:
     [[maybe_unused]]
-    byte_t gap_1D[3];
+    std::byte gap_1D[3];
 
 public:
     union {
@@ -366,8 +361,4 @@ struct NewSMapHeader : CMapHeaderData
 };
 #pragma pack(pop)
 
-#if !NH3API_CHECK_MSVC
 NH3API_DISABLE_WARNING_END
-#endif
-NH3API_DISABLE_WARNING_END
-

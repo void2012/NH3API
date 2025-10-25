@@ -156,17 +156,17 @@ NH3API_INTRIN_FUNCTION
 // Побитовый поворот вправо.
 uint64_t bitrotr64(uint64_t n, uint32_t c) noexcept;
 
-#if NH3API_CHECK_CLANG_CL && !NH3API_HAS_BUILTINS 
+#if NH3API_CHECK_CLANG_CL && !NH3API_HAS_BUILTINS
 #pragma comment(lib, "clang_rt.builtins-i386.lib")
 extern int __builtin_clz(unsigned int) noexcept;
 extern int __builtin_clzll(unsigned long long) noexcept;
 extern int __builtin_ffs(int) noexcept;
-extern int __builtin_ffsll(long long) noexcept; 
+extern int __builtin_ffsll(long long) noexcept;
 extern int __builtin_ctz(unsigned int) noexcept;
 extern int __builtin_ctzll(unsigned long long) noexcept;
 extern int __builtin_popcount(unsigned int) noexcept;
 extern int __builtin_popcountll(unsigned long long) noexcept;
-#endif 
+#endif
 
 #if NH3API_CHECK_MSVC
     NH3API_INTRIN_FUNCTION
@@ -271,20 +271,20 @@ extern int __builtin_popcountll(unsigned long long) noexcept;
 #else
     NH3API_INTRIN_FUNCTION
     uint16_t byteswap16(uint16_t x) noexcept
-    { 
-    #if __has_builtin(__builtin_bswap16)
-        return __builtin_bswap16(x); 
-    #else 
+    {
+    #if NH3API_HAS_BUILTIN(__builtin_bswap16)
+        return __builtin_bswap16(x);
+    #else
         return (x >> 8) | (x << 8);
     #endif
     }
 
     NH3API_INTRIN_FUNCTION
     uint32_t byteswap32(uint32_t x) noexcept
-    { 
-    #if __has_builtin(__builtin_bswap32)
-        return __builtin_bswap32(x); 
-    #else 
+    {
+    #if NH3API_HAS_BUILTIN(__builtin_bswap32)
+        return __builtin_bswap32(x);
+    #else
         return (x >> 24) | ((x & 0x00FF0000) >> 8) | ((x & 0x0000FF00) << 8) | (x << 24);
     #endif
     }
@@ -292,9 +292,9 @@ extern int __builtin_popcountll(unsigned long long) noexcept;
     NH3API_INTRIN_FUNCTION
     uint64_t byteswap64(uint64_t x) noexcept
     {
-    #if __has_builtin(__builtin_bswap64)
-        return __builtin_bswap64(x); 
-    #else 
+    #if NH3API_HAS_BUILTIN(__builtin_bswap64)
+        return __builtin_bswap64(x);
+    #else
         return (x >> 56) |
            ((x & 0x00FF000000000000) >> 40) |
            ((x & 0x0000FF0000000000) >> 24) |
@@ -324,20 +324,20 @@ extern int __builtin_popcountll(unsigned long long) noexcept;
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitffs(uint32_t x) noexcept
-    { 
-    #if __has_builtin(__builtin_ffs)
-        return static_cast<uint32_t>(__builtin_ffs(static_cast<int32_t>(x))); 
-    #else 
+    {
+    #if NH3API_HAS_BUILTIN(__builtin_ffs)
+        return static_cast<uint32_t>(__builtin_ffs(static_cast<int32_t>(x)));
+    #else
         return bitctz(x) + 1;
     #endif
     }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitffs64(uint64_t x) noexcept
-    { 
-    #if __has_builtin(__builtin_ffsll)
-        return static_cast<uint32_t>(__builtin_ffsll(static_cast<int64_t>(x))); 
-    #else 
+    {
+    #if NH3API_HAS_BUILTIN(__builtin_ffsll)
+        return static_cast<uint32_t>(__builtin_ffsll(static_cast<int64_t>(x)));
+    #else
         return bitctz64(x) + 1;
     #endif
     }

@@ -15,23 +15,14 @@
 
 NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 
-inline
 // Текущий игрок.
-int32_t& giCurPlayer
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CCF4, int32_t));
+inline int32_t& giCurPlayer = get_global_var_ref(0x69CCF4, int32_t);
 
-inline
-int32_t& giCurWatchPlayer
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6977DC, int32_t));
+inline int32_t& giCurWatchPlayer = get_global_var_ref(0x6977DC, int32_t);
+inline uint8_t& giCurWatchPlayerBit = get_global_var_ref(0x69CD08, uint8_t);
 
-inline
-uint8_t& giCurWatchPlayerBit
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CD08, uint8_t));
-
-inline
 // Текущий бит игрока.
-uint8_t& giCurrentPlayerBit
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CD10, uint8_t));
+inline uint8_t& giCurrentPlayerBit = get_global_var_ref(0x69CD10, uint8_t);
 
 #pragma pack(push, 1)
 // AI player resoruces info /
@@ -47,7 +38,7 @@ struct AI
 
 protected:
     [[maybe_unused]]
-    byte_t gap_38[4];
+    std::byte gap_38[4];
 
 public:
     // offset: +0x3C = +60,  size = 0x38 = 56
@@ -87,7 +78,7 @@ class playerData
         playerData& operator=(const playerData& other) noexcept
         { THISCALL_2(void, 0x58FA40, this, other); return *this; }
 
-        NH3API_FORCEINLINE 
+        NH3API_FORCEINLINE
         playerData(const playerData& other) noexcept
         { THISCALL_2(void, 0x58FA40, this, &other); }
 
@@ -172,7 +163,7 @@ class playerData
 
     protected:
         [[maybe_unused]]
-        byte_t gap_2[2];
+        std::byte gap_2[2];
 
     public:
         // Current choosen hero /
@@ -197,7 +188,7 @@ class playerData
         uint8_t startingNumHeroes;
 
         [[maybe_unused]]
-        byte_t gap_49[3];
+        std::byte gap_49[3];
 
     public:
         // AI player personality /
@@ -242,7 +233,7 @@ class playerData
 
     protected:
         [[maybe_unused]]
-        byte_t gap_89[3];
+        std::byte gap_89[3];
 
     public:
         union {
@@ -299,7 +290,7 @@ class playerData
 
     protected:
         [[maybe_unused]]
-        byte_t gap_E3[1];
+        std::byte gap_E3[1];
 
     public:
         // Quick combat is on /
@@ -321,10 +312,8 @@ class playerData
 };
 #pragma pack(pop)
 
-inline
 // Текущий игрок.
-playerData* const& gpCurPlayer
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x69CCFC, playerData*));
+inline playerData* const& gpCurPlayer = get_global_var_ref(0x69CCFC, playerData*);
 
 NH3API_SIZE_ASSERT(0x168, playerData);
 

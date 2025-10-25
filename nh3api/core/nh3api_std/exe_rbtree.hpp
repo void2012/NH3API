@@ -60,29 +60,29 @@ class exe_rbtree
     struct _Node
     {
     public:
-        NH3API_FORCEINLINE _Node() 
+        NH3API_FORCEINLINE _Node()
         noexcept(noexcept(std::is_nothrow_default_constructible_v<T>))
             : _Left(nullptr), _Parent(nullptr), _Right(nullptr), _Value(), _Color()
         {}
 
-        NH3API_FORCEINLINE _Node(_Node* left, 
-                                 _Node* parent, 
-                                 _Node* right, 
-                                 const T& value, _Redbl color) 
+        NH3API_FORCEINLINE _Node(_Node* left,
+                                 _Node* parent,
+                                 _Node* right,
+                                 const T& value, _Redbl color)
         noexcept(noexcept(std::is_nothrow_copy_constructible_v<T>))
             : _Left(left), _Parent(parent), _Right(right), _Value(value), _Color(color)
         {}
 
-        NH3API_FORCEINLINE _Node(_Node* left, 
-                                 _Node* parent, 
-                                 _Node* right, 
-                                 T&& value, 
+        NH3API_FORCEINLINE _Node(_Node* left,
+                                 _Node* parent,
+                                 _Node* right,
+                                 T&& value,
                                  _Redbl color) noexcept(noexcept(std::is_nothrow_move_constructible_v<T>))
             : _Left(left), _Parent(parent), _Right(right), _Value(std::move(value)), _Color(color)
         {}
 
         NH3API_FORCEINLINE
-        _Node(_Node&& other) 
+        _Node(_Node&& other)
         noexcept(noexcept(std::is_nothrow_move_constructible_v<T>))
             : _Left(std::exchange(other._Left, nullptr)),
               _Parent(std::exchange(other._Parent, nullptr)),
@@ -133,7 +133,7 @@ class exe_rbtree
     { return ((_Rbref)(*_P)._Color); }
 
     // return reference to key in node
-    static _Keyref _Key(_Nodeptr _P) 
+    static _Keyref _Key(_Nodeptr _P)
     { return (Kfn()(_Value(_P))); }
 
     // get null node
@@ -325,7 +325,7 @@ class exe_rbtree
 
     template <typename _ValueType>
     friend class rbtree_iterator;
-    
+
     // CLASS iterator
   public:
         using const_iterator = rbtree_iterator<::std::add_const_t<T>>;
@@ -418,7 +418,7 @@ class exe_rbtree
             _Copy(other);
         }
 
-        ~exe_rbtree() 
+        ~exe_rbtree()
         noexcept(noexcept(::std::is_nothrow_destructible_v<value_type>))
         {
             clear();
@@ -805,7 +805,7 @@ class exe_rbtree
         {
             return ::std::make_pair(lower_bound(key), upper_bound(key));
         }
-        
+
         ::std::pair<const_iterator, const_iterator> equal_range(const key_type &key) const
         {
             return ::std::make_pair(lower_bound(key), upper_bound(key));
@@ -913,7 +913,7 @@ class exe_rbtree
         }
     }
 
-    void _Tidy() 
+    void _Tidy()
     noexcept(noexcept(::std::is_nothrow_destructible_v<value_type>))
     { clear(); }
 
@@ -989,7 +989,7 @@ class exe_rbtree
                 }
             }
         }
-            
+
         _Color(_Root()) = _Black;
         return iterator(_Z);
     }

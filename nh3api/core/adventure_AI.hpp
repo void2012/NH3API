@@ -15,13 +15,16 @@
 #include "creatures.hpp" // TCreatureType
 #include "spells.hpp"    // SpellID
 
+NH3API_DISABLE_MSVC_WARNING_BEGIN(4583)
+NH3API_DISABLE_MSVC_WARNING_BEGIN(4582)
+
 #pragma pack(push, 8)
 // AI Player /
 // Игрок ИИ.
 // size = 0x98 = 152, align = 8
 class type_AI_player
 {
-    public: 
+    public:
         [[nodiscard]] int32_t get_magus_hut_value() const noexcept
         { return magus_hut_value; }
 
@@ -30,7 +33,7 @@ class type_AI_player
 
         [[nodiscard]] int32_t get_resource_value(const std::array<int32_t, 7>& cost) const noexcept
         {
-            return static_cast<int32_t>(  
+            return static_cast<int32_t>(
                      (cost[WOOD] * this->resource_value[WOOD])
                    + (cost[MERCURY] * this->resource_value[MERCURY])
                    + (cost[ORE] * this->resource_value[ORE])
@@ -67,8 +70,8 @@ class type_AI_player
     protected:
         // offset: +0x2 = +2,  size = 0x2 = 2
         [[maybe_unused]]
-        byte_t gap_2[2];
-    
+        std::byte gap_2[2];
+
     public:
         // Seer hut value /
         // Ценность хижины провидца.
@@ -86,8 +89,8 @@ class type_AI_player
 
     protected:
         // offset: +0x5C = +92,  size = 0x4 = 4
-        [[maybe_unused]] 
-        byte_t gap_5C[4];
+        [[maybe_unused]]
+        std::byte gap_5C[4];
 
     public:
         // offset: +0x60 = +96,  size = 0x38 = 56
@@ -96,9 +99,7 @@ class type_AI_player
 };
 #pragma pack(pop)
 
-inline
-std::array<type_AI_player, 8>& AI_player
-NH3API_INLINE_OR_EXTERN_INIT(get_global_var_ref(0x6929A0, std::array<type_AI_player, 8>));
+inline std::array<type_AI_player, 8>& AI_player = get_global_var_ref(0x6929A0, std::array<type_AI_player, 8>);
 
 enum EArtifactEffectType : int32_t
 {
@@ -172,9 +173,9 @@ NH3API_FORCEINLINE \
 CLASS(const ::nh3api::dummy_tag_t& tag) noexcept \
     : BASE_CLASS(tag) \
 {} \
-virtual void __thiscall scalar_deleting_destructor(uint8_t flag) override \
+void __thiscall scalar_deleting_destructor(uint8_t flag) override \
 { get_type_vftable(this)->scalar_deleting_destructor(this, flag); } \
-virtual EArtifactEffectType __thiscall get_value(const hero* owner, bool equipped, bool exact) const override \
+EArtifactEffectType __thiscall get_value(const hero* owner, bool equipped, bool exact) const override \
 { return get_type_vftable(this)->get_value(this, owner, equipped, exact); }
 #endif // NH3API_VIRTUAL_OVERRIDE_BASEMANAGER
 
@@ -216,7 +217,7 @@ NH3API_VIRTUAL_CLASS type_scouting_artifact : public type_artifact_effect
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_scouting_artifact, type_artifact_effect)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(type_scouting_artifact, type_artifact_effect, int32_t, bonus, 0)
-        
+
     public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t bonus;
@@ -228,7 +229,7 @@ NH3API_VIRTUAL_CLASS type_combat_artifact : public type_artifact_effect
     public:
         NH3API_DECLARE_TYPE_ARTIFACT_EFFECT(type_combat_artifact, type_artifact_effect)
         NH3API_CONSTRUCTOR_TYPE_ARTIFACT_EFFECT1(type_combat_artifact, type_artifact_effect, int32_t, bonus, 0)
-    
+
     public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t bonus;
@@ -419,20 +420,20 @@ NH3API_VIRTUAL_CLASS type_luck_artifact : public type_combat_artifact
 NH3API_VIRTUAL_CLASS type_base_necromancy_artifact : public type_combat_artifact
 {
     public:
-        type_base_necromancy_artifact(const ::nh3api::dummy_tag_t& tag) noexcept 
-            : type_combat_artifact(tag) 
-        {} 
+        type_base_necromancy_artifact(const ::nh3api::dummy_tag_t& tag) noexcept
+            : type_combat_artifact(tag)
+        {}
 
         NH3API_FORCEINLINE type_base_necromancy_artifact(int32_t _bonus)
             : type_combat_artifact(_bonus)
         {}
 
     public:
-        void __thiscall scalar_deleting_destructor(uint8_t flag) override 
-        { type_combat_artifact::scalar_deleting_destructor(flag); } 
+        void __thiscall scalar_deleting_destructor(uint8_t flag) override
+        { type_combat_artifact::scalar_deleting_destructor(flag); }
 
-        EArtifactEffectType __thiscall get_value(const hero* owner, bool equipped, bool exact) const override 
-        { return type_combat_artifact::get_value(owner, equipped, exact); }        
+        EArtifactEffectType __thiscall get_value(const hero* owner, bool equipped, bool exact) const override
+        { return type_combat_artifact::get_value(owner, equipped, exact); }
 
 };
 
@@ -521,11 +522,11 @@ struct type_creature_value
 
         // offset: +0x8 = +8,  size = 0x2 = 2
         int16_t amount;
-        
+
     protected:
         [[maybe_unused]]
         // offset: +0xA = +10,  size = 0x2 = 2
-        byte_t gap_A[2];
+        std::byte gap_A[2];
 
 };
 
@@ -543,15 +544,15 @@ struct type_spellvalue
             : list(tag)
         {}
 
-        type_spellvalue(const type_spellvalue& other) 
+        type_spellvalue(const type_spellvalue& other)
             : list(other.list)
         {
-            std::memcpy(reinterpret_cast<void*>(this), &other, offsetof(type_spellvalue, list));
+            std::memcpy(reinterpret_cast<void*>(this), &other, __builtin_offsetof(type_spellvalue, list));
         }
 
-        type_spellvalue& operator=(const type_spellvalue& other) 
+        type_spellvalue& operator=(const type_spellvalue& other)
         {
-            std::memcpy(reinterpret_cast<void*>(this), &other, offsetof(type_spellvalue, list));
+            std::memcpy(reinterpret_cast<void*>(this), &other, __builtin_offsetof(type_spellvalue, list));
             this->list = other.list;
             return *this;
         }
@@ -609,7 +610,7 @@ struct type_spellvalue
         // offset: +0x14 = +20,  size = 0x10 = 16
         exe_vector<type_creature_value> list;
         };
-        
+
 };
 #pragma pack(pop)
 
@@ -633,7 +634,7 @@ public:
 protected:
     [[maybe_unused]]
     // offset: +0xA = +10,  size = 0x2 = 2
-    byte_t gap_A[2];
+    std::byte gap_A[2];
 
 };
 #pragma pack(pop)
@@ -643,11 +644,11 @@ NH3API_FORCEINLINE int32_t AI_get_spell_value(const hero* our_hero, SpellID spel
 
 class NewmapCell;
 NH3API_FORCEINLINE int32_t AI_value_of_combat(const hero* attacking_hero, const hero* defending_hero, const armyGroup& defending_army, const town* defending_town, const NewmapCell* cell)
-{ 
+{
     if ( attacking_hero == nullptr || defending_hero == nullptr )
         return -1000000000;
     else
-        return FASTCALL_5(int32_t, 0x427330, attacking_hero, defending_hero, &defending_army, defending_town, cell); 
+        return FASTCALL_5(int32_t, 0x427330, attacking_hero, defending_hero, &defending_army, defending_town, cell);
 }
 
 NH3API_FORCEINLINE int32_t AI_approximate_strength(const hero* current_hero)
@@ -657,30 +658,30 @@ NH3API_FORCEINLINE int32_t AI_approximate_strength(const hero* current_hero, con
 { return FASTCALL_2(int32_t, 0x427690, current_hero, &current_army); }
 
 NH3API_FORCEINLINE bool can_take_town(const hero* attacking_hero, const town* defending_town)
-{ 
+{
     if ( attacking_hero == nullptr || defending_town == nullptr )
         return false;
-    else 
-        return FASTCALL_2(bool, 0x428410, attacking_hero, defending_town); 
+    else
+        return FASTCALL_2(bool, 0x428410, attacking_hero, defending_town);
 }
 
 NH3API_FORCEINLINE int32_t AI_get_value_of_artifact(type_artifact artifact, const hero* owner, bool equipped, bool exact)
 { return FASTCALL_4(int32_t, 0x4336C0, artifact, owner, equipped, exact); }
 
 NH3API_FORCEINLINE int32_t total_artifact_value(hero* candidate, int32_t player_id)
-{ 
+{
     if ( candidate == nullptr || (player_id >= 8 || player_id < 0) )
         return 0;
     else
-        return FASTCALL_2(int32_t, 0x4339E0, candidate, player_id); 
+        return FASTCALL_2(int32_t, 0x4339E0, candidate, player_id);
 }
 
 NH3API_FORCEINLINE int32_t AI_get_value_of_artifact(const type_artifact& artifact, int32_t player_id)
-{ 
+{
     if ( (player_id >= 8 || player_id < 0) )
         return 0;
     else
-        return FASTCALL_2(int32_t, 0x433AA0, &artifact, player_id); 
+        return FASTCALL_2(int32_t, 0x433AA0, &artifact, player_id);
 }
 
 NH3API_FORCEINLINE double AI_value_of_morale(int32_t morale, int32_t change)
@@ -697,11 +698,11 @@ NH3API_FORCEINLINE int32_t AI_resource_cost(const playerData* player, const std:
 { return (player) ? FASTCALL_2(int32_t, 0x527150, player, resources.data()) : 0; }
 
 NH3API_FORCEINLINE int32_t AI_resource_cost(int32_t player_id, const std::array<int32_t, 7>& resources)
-{ 
+{
     if ( (player_id >= 8 || player_id < 0) )
         return 0;
     else
-        return FASTCALL_2(int32_t, 0x5271A0, player_id, resources.data()); 
+        return FASTCALL_2(int32_t, 0x5271A0, player_id, resources.data());
 }
 
 NH3API_FORCEINLINE TSecondarySkill AI_choose_secondary_skill(const hero* our_hero, TSecondarySkill first, TSecondarySkill second, bool complex_choice)
@@ -732,3 +733,6 @@ NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B75C, type_angelic_alliance_artifact)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B764, type_undead_king_cloak_artifact)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B770, type_statue_of_legion_artifact)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B778, type_elixir_of_life_artifact)
+
+NH3API_DISABLE_MSVC_WARNING_END
+NH3API_DISABLE_MSVC_WARNING_END

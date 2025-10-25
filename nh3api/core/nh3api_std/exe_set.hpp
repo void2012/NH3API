@@ -71,7 +71,7 @@ public:
                                BinaryPredicate,
                                Nil_Address,
                                Nilrefs_Address>;
-    
+
     using allocator_type = typename base_type::allocator_type;
     using size_type = typename base_type::size_type;
     using difference_type = typename base_type::difference_type;

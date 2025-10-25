@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
-#pragma once 
+#pragma once
 
 #include "combat.hpp"
 
@@ -27,7 +27,7 @@ class type_AI_combat_parameters
         NH3API_FORCEINLINE
         type_AI_combat_parameters(const ::nh3api::dummy_tag_t&) noexcept
         {}
-        
+
         type_AI_combat_parameters(const type_AI_combat_parameters&)            = default;
         type_AI_combat_parameters(type_AI_combat_parameters&&)                 = default;
         type_AI_combat_parameters& operator=(const type_AI_combat_parameters&) = default;
@@ -94,7 +94,7 @@ class type_AI_combat_parameters
 
         // offset: +0x14 = +20,  size = 0x4 = 4
         int32_t awake_friendly_value;
-        
+
         // offset: +0x18 = +24,  size = 0x4 = 4
         int32_t awake_enemy_value;
 
@@ -103,7 +103,7 @@ class type_AI_combat_parameters
 
         // offset: +0x20 = +32,  size = 0x4 = 4
         int32_t our_group;
-        
+
         // offset: +0x24 = +36,  size = 0x4 = 4
         int32_t enemy_group;
 
@@ -116,7 +116,7 @@ struct type_AI_enemy_data
 {
     // offset: +0x0 = +0,  size = 0x4 = 4
     const army* enemy;
-    
+
     // offset: +0x4 = +4,  size = 0x4 = 4
     int32_t damage;
 
@@ -133,7 +133,7 @@ struct type_AI_enemy_data
 // size = 0x14 = 20, align = 4
 struct type_enchant_data
 {
-        
+
         // constructors
     public:
         constexpr type_enchant_data(SpellID new_spell, TSkillMastery new_mastery, int32_t new_power, int32_t new_duration) noexcept
@@ -153,13 +153,13 @@ struct type_enchant_data
         {}
 
         ~type_enchant_data() noexcept = default;
-            
+
     // methods
     public:
-        [[nodiscard]] int32_t get_mastery_value() const 
+        [[nodiscard]] int32_t get_mastery_value() const
         { return THISCALL_1(int32_t, 0x436580, this); }
 
-        [[nodiscard]] bool valid() const 
+        [[nodiscard]] bool valid() const
         { return !(spell == SPELL_NONE && mastery == eMasteryNone && power == 0); }
 
     // member variables
@@ -229,7 +229,7 @@ struct type_spell_choice : type_enchant_data
 NH3API_VIRTUAL_CLASS type_AI_spellcaster
 {
     public:
-        struct vftable_t 
+        struct vftable_t
         {
             void (__thiscall *scalar_deleting_destructor)(type_AI_spellcaster*, uint8_t );
         };
@@ -239,7 +239,7 @@ NH3API_VIRTUAL_CLASS type_AI_spellcaster
         NH3API_FORCEINLINE
         type_AI_spellcaster(combatManager* combatMgr, int32_t side, bool creature_spell) noexcept
             : estimate(::nh3api::dummy_tag)
-        { THISCALL_4(void, 0x436610, this, combatMgr, side, creature_spell); } 
+        { THISCALL_4(void, 0x436610, this, combatMgr, side, creature_spell); }
 
         NH3API_FORCEINLINE
         type_AI_spellcaster(const ::nh3api::dummy_tag_t& tag) noexcept
@@ -289,7 +289,7 @@ NH3API_VIRTUAL_CLASS type_AI_spellcaster
 
         [[nodiscard]] int32_t get_protection_value(const army* our_army, TSpellSchool school, int32_t level, int32_t duration, int32_t amount) const
         { return FASTCALL_6(int32_t, 0x439330, this, our_army, school, level, duration, amount); }
-        
+
         [[nodiscard]] int32_t get_cancel_value(army& current_army, bool bad_spells_only) const
         { return THISCALL_3(int32_t, 0x4396D0, this, &current_army, bad_spells_only); }
 
@@ -343,7 +343,7 @@ NH3API_VIRTUAL_CLASS type_AI_spellcaster
 
         // offset: +0x1D = +29,  size = 0x1 = 1
         bool is_creature_spell;
-        
+
         // offset: +0x20 = +32,  size = 0x28 = 40
         type_AI_combat_parameters estimate;
         // ^^^ trivial ^^^
@@ -368,7 +368,7 @@ NH3API_VIRTUAL_CLASS type_AI_spellcaster
 
 // AI combat simulation creature speed category /
 // Категории скорости существа при симуляции ИИ.
-enum type_speed_category : int32_t 
+enum type_speed_category : int32_t
 {
     const_ranged         = 0, // стрельба
     const_very_fast      = 1, // очень быстрая скорость
@@ -392,7 +392,7 @@ struct type_monster_data
         { return THISCALL_3(int32_t, 0x423D00, this, &choice, casting_hero); }
 
         void cast_resurrection(type_spell_choice& choice, const hero* casting_hero)
-        { 
+        {
             const int32_t resurrection_value = get_resurrection_value(choice, casting_hero) / this->value;
             this->number += resurrection_value;
             this->total_value += resurrection_value * this->value;
@@ -422,37 +422,37 @@ struct type_monster_data
     public:
         // offset: +0x0 = +0,  size = 0x4 = 4
         int32_t index;
-        
+
         // offset: +0x4 = +4,  size = 0x4 = 4
         TCreatureType type;
-        
+
         // offset: +0x8 = +8,  size = 0x4 = 4
         int32_t number;
-        
+
         // offset: +0xC = +12,  size = 0x4 = 4
         int32_t original_number;
-        
+
         // offset: +0x10 = +16,  size = 0x4 = 4
         int32_t speed;
-        
+
         // offset: +0x18 = +24,  size = 0x8 = 8
         double melee_modifier;
-        
+
         // offset: +0x20 = +32,  size = 0x8 = 8
         double final_melee_modifier;
-        
+
         // offset: +0x28 = +40,  size = 0x8 = 8
         double ranged_modifier;
-        
+
         // offset: +0x30 = +48,  size = 0x8 = 8
         double combat_value_per_hit;
-        
+
         // offset: +0x38 = +56,  size = 0x4 = 4
         type_speed_category category;
 
         // offset: +0x3C = +60,  size = 0x4 = 4
         int32_t value;
-        
+
         // offset: +0x40 = +64,  size = 0x4 = 4
         int32_t total_value;
 
@@ -470,7 +470,7 @@ NH3API_FORCEINLINE void AI_auto_combat(hero* attacking_hero, hero* defending_her
 class type_AI_combat_data
 {
     // constructors and destructor
-    public: 
+    public:
         NH3API_FORCEINLINE
         type_AI_combat_data(const hero* new_hero, const armyGroup* new_army, double base_modifier, const hero* _enemy_hero, const town* enemy_town, NewmapCell* map_cell) noexcept
         NH3API_DELEGATE_DUMMY(type_AI_combat_data)
@@ -495,10 +495,10 @@ class type_AI_combat_data
         void adjust_army(bool dismiss_hero)
         { THISCALL_2(void, 0x424880, this, dismiss_hero); }
 
-        [[nodiscard]] int32_t get_fastest_speed() const 
+        [[nodiscard]] int32_t get_fastest_speed() const
         { return THISCALL_1(int32_t, 0x424960, this); }
 
-        [[nodiscard]] type_speed_category get_category(TCreatureType creature, int32_t speed) const 
+        [[nodiscard]] type_speed_category get_category(TCreatureType creature, int32_t speed) const
         {
             const TCreatureTypeTraits& traits = get_global_var_ref(0x6703B8, std::array<TCreatureTypeTraits, MAX_COMBAT_CREATURES>)[creature];
 
@@ -553,7 +553,7 @@ class type_AI_combat_data
                 this->cast_spell(defender, round);
                 defender.cast_spell(*this, round);
             }
-            else  
+            else
             {
                 defender.cast_spell(*this, round);
                 this->cast_spell(defender, round);
@@ -572,23 +572,23 @@ class type_AI_combat_data
         [[nodiscard]] int32_t get_attack(type_speed_category speed_limit, bool shooters_blocked) const
         { return THISCALL_3(int32_t, 0x426390, this, speed_limit, shooters_blocked); }
 
-        [[nodiscard]] int32_t get_final_melee_value() const 
+        [[nodiscard]] int32_t get_final_melee_value() const
         { return THISCALL_1(int32_t, 0x426450, this); }
 
         void do_ranged_combat(type_AI_combat_data& defender)
-        { 
+        {
             this->inflict_damage(defender.get_attack(const_ranged, false), const_ranged);
             defender.inflict_damage(this->get_attack(const_ranged, false), const_ranged);
         }
 
         void do_melee_combat(type_speed_category attacker_speed, type_AI_combat_data& defender)
-        { 
+        {
             this->inflict_damage(defender.get_attack(const_slow, true), attacker_speed);
             defender.inflict_damage(this->get_attack(attacker_speed, false), const_ranged);
         }
 
         void do_melee_combat(type_AI_combat_data& defender)
-        { 
+        {
             this->inflict_damage(defender.get_attack(const_slow, true), const_ranged);
             defender.inflict_damage(this->get_attack(const_slow, true), const_ranged);
         }
@@ -607,7 +607,7 @@ class type_AI_combat_data
 
         [[nodiscard]] int32_t get_total() const
         { return THISCALL_1(int32_t, 0x427750, this); }
-    
+
     // member variables
     public:
         union {
@@ -620,28 +620,28 @@ class type_AI_combat_data
 
         // offset: +0x14 = +20,  size = 0x4 = 4
         int32_t mana;
-        
+
         // offset: +0x18 = +24,  size = 0x1 = 1
         bool can_cast_spells;
-        
+
         // offset: +0x1C = +28,  size = 0x4 = 4
         int32_t total_combat_value;
-        
+
         // offset: +0x20 = +32,  size = 0x4 = 4
         int32_t tactics_advantage;
-        
+
         // offset: +0x24 = +36,  size = 0x4 = 4
         hero* current_hero;
-        
+
         // offset: +0x28 = +40,  size = 0x4 = 4
         const armyGroup* current_army;
-        
+
         // offset: +0x2C = +44,  size = 0x4 = 4
         const hero* enemy_hero;
-        
+
         // offset: +0x30 = +48,  size = 0x1 = 1
         uint8_t wall_archery_penalty;
-        
+
         // offset: +0x32 = +50,  size = 0x2 = 2
         int16_t wall_speed_limit;
 
@@ -672,13 +672,13 @@ class type_AI_attack_hex_chooser
 
         // methods
     public:
-        [[nodiscard]] int32_t get_attack_time() const 
+        [[nodiscard]] int32_t get_attack_time() const
         { return best_attack_time; }
 
-        [[nodiscard]] int32_t get_best_hex() const 
+        [[nodiscard]] int32_t get_best_hex() const
         { return best_hex; }
 
-        [[nodiscard]] int32_t get_hex_value() const 
+        [[nodiscard]] int32_t get_hex_value() const
         { return best_value; }
 
         [[nodiscard]] int32_t get_hex_attack_value(int32_t hex, int32_t& checked)
