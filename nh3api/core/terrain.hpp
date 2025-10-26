@@ -529,7 +529,13 @@ template<>
 struct std::hash<type_point>
 {
     public:
+        #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+        static
+        #endif
         size_t operator()(const type_point& arg) noexcept
+        #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+        const
+        #endif
         { return arg.hash(); }
 };
 

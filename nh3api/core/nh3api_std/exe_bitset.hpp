@@ -663,7 +663,13 @@ template<size_t N>
 struct std::hash< exe_bitset<N> >
 {
     public:
+        #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+        static
+        #endif
         size_t operator()(const exe_bitset<N>& arg) noexcept
+        #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+        const
+        #endif
         { return arg._Hash_code(); }
 };
 

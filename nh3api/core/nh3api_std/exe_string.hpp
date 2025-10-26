@@ -1797,7 +1797,13 @@ template<>
 struct std::hash<exe_string>
 {
     public:
+        #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+        static
+        #endif
         size_t operator()(const exe_string& str) noexcept
+        #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+        const
+        #endif
         {
             nh3api::default_hash hasher;
             hasher.update(str.data(), str.size());

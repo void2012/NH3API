@@ -1753,11 +1753,11 @@ struct TCacheMapKey
         constexpr TCacheMapKey(const char* name_) noexcept
         { ::nh3api::constexpr_char_traits::copy(name.data(), name_, 12); name.back() = '\0'; }
 
-        constexpr TCacheMapKey(std::string_view name_) noexcept 
+        constexpr TCacheMapKey(std::string_view name_) noexcept
         { ::nh3api::constexpr_char_traits::copy(name.data(), name_.data(), std::min<size_t>(name_.size(), 12)); name.back() = '\0'; }
 
-        constexpr TCacheMapKey(const ::std::array<char, 13>& src) noexcept 
-            : name(src) 
+        constexpr TCacheMapKey(const ::std::array<char, 13>& src) noexcept
+            : name(src)
         {}
 
         [[nodiscard]] bool operator<(TCacheMapKey const& rhf) const noexcept
@@ -1907,7 +1907,14 @@ template<>
 struct std::hash< ResourceManager::TCacheMapKey >
 {
     public:
-        [[nodiscard]] size_t operator()(const ResourceManager::TCacheMapKey& key) noexcept
+        [[nodiscard]]
+        #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+        static
+        #endif
+        size_t operator()(const ResourceManager::TCacheMapKey& key) noexcept
+        #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+        const
+        #endif
         {
             return ::nh3api::hash_string(key.name.data(), ::nh3api::safe_strlen(key.name.data(), key.name.size()));
         }

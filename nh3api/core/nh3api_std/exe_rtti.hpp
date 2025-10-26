@@ -232,7 +232,13 @@ template<>
 struct std::hash<exe_type_info>
 {
     public:
+        #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+        static
+        #endif
         size_t operator()(const exe_type_info& arg) noexcept
+        #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+        const
+        #endif
         {
             return arg.hash_code();
         }
