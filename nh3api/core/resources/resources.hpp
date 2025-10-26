@@ -1739,6 +1739,16 @@ namespace ResourceManager
 struct TCacheMapKey
 {
     public:
+        TCacheMapKey(const TCacheMapKey&)            noexcept = default;
+        TCacheMapKey(TCacheMapKey&&)                 noexcept = default;
+        TCacheMapKey& operator=(const TCacheMapKey&) noexcept = default;
+        TCacheMapKey& operator=(TCacheMapKey&&)      noexcept = default;
+
+        TCacheMapKey(::nh3api::dummy_tag_t&) noexcept
+        {}
+
+        TCacheMapKey() noexcept = default;
+
         TCacheMapKey(const char * _name) noexcept
         { ::nh3api::constexpr_char_traits::copy(name.data(), _name, 12); name.back() = '\0'; }
 
