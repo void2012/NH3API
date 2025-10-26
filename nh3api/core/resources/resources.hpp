@@ -6,6 +6,7 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <string_view>
 #include "../nh3api_std/exe_vector.hpp" // exe_vector
 #include "../nh3api_std/exe_string.hpp" // exe_string, nh3api::default_hash
 #include "../nh3api_std/exe_map.hpp"    // exe_map
@@ -1749,8 +1750,11 @@ struct TCacheMapKey
 
         TCacheMapKey() noexcept = default;
 
-        constexpr TCacheMapKey(const char * _name) noexcept
-        { ::nh3api::constexpr_char_traits::copy(name.data(), _name, 12); name.back() = '\0'; }
+        constexpr TCacheMapKey(const char* name_) noexcept
+        { ::nh3api::constexpr_char_traits::copy(name.data(), name_, 12); name.back() = '\0'; }
+
+        constexpr TCacheMapKey(std::string_view name_) noexcept 
+        { ::nh3api::constexpr_char_traits::copy(name.data(), name_.data(), std::min<size_t>(name_.size(), 12)); name.back() = '\0'; }
 
         constexpr TCacheMapKey(const ::std::array<char, 13>& src) noexcept 
             : name(src) 
