@@ -1749,8 +1749,12 @@ struct TCacheMapKey
 
         TCacheMapKey() noexcept = default;
 
-        TCacheMapKey(const char * _name) noexcept
+        constexpr TCacheMapKey(const char * _name) noexcept
         { ::nh3api::constexpr_char_traits::copy(name.data(), _name, 12); name.back() = '\0'; }
+
+        constexpr TCacheMapKey(const ::std::array<char, 13>& src) noexcept 
+            : name(src) 
+        {}
 
         [[nodiscard]] bool operator<(TCacheMapKey const& rhf) const noexcept
         { return ::nh3api::case_insensitive_traits::compare(this->name.data(), rhf.name.data(), this->name.size()) < 0; }
