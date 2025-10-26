@@ -348,24 +348,24 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
 
         NH3API_FORCEINLINE
         TPalette16(const TPalette24& p24,
-                   int32_t rbits,
-                   int32_t rshift,
-                   int32_t gbits,
-                   int32_t gshift,
-                   int32_t bbits,
-                   int32_t bshift) noexcept
+                   uint32_t rbits,
+                   uint32_t rshift,
+                   uint32_t gbits,
+                   uint32_t gshift,
+                   uint32_t bbits,
+                   uint32_t bshift) noexcept
         NH3API_DELEGATE_DUMMY_BASE(TPalette16)
         { THISCALL_8(void, 0x522BC0, this, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
         NH3API_FORCEINLINE
         TPalette16(const char* name,
                    const TPalette24& p24,
-                   int32_t rbits,
-                   int32_t rshift,
-                   int32_t gbits,
-                   int32_t gshift,
-                   int32_t bbits,
-                   int32_t bshift) noexcept
+                   uint32_t rbits,
+                   uint32_t rshift,
+                   uint32_t gbits,
+                   uint32_t gshift,
+                   uint32_t bbits,
+                   uint32_t bshift) noexcept
         NH3API_DELEGATE_DUMMY_BASE(TPalette16)
         { THISCALL_9(void, 0x522C60, this, name, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
@@ -701,11 +701,11 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
 
     public:
         NH3API_FORCEINLINE
-        int32_t AddFrame(int32_t seqnum, CSpriteFrame* frame)
+        int32_t AddFrame(size_t seqnum, CSpriteFrame* frame)
         { return THISCALL_3(int32_t, 0x47B480, this, seqnum, frame); }
 
         NH3API_FORCEINLINE
-        void AllocateSeq(int32_t seqnum, int32_t numFrames)
+        void AllocateSeq(size_t seqnum, size_t numFrames)
         { THISCALL_3(void, 0x47B410, this, seqnum, numFrames); }
 
         [[nodiscard]] NH3API_FORCEINLINE int32_t GetWidth() const
