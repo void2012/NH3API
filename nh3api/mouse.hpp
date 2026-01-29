@@ -9,8 +9,16 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "base_manager.hpp" // baseManager
-#include "resources/resources.hpp" // CSprite
+#include <windef.h> // POINT, RECT
+
+#if __has_include(<synchapi.h>)
+#include <synchapi.h>
+#else
+#include <winbase.h>
+#endif
+
+#include "core/base_manager.hpp"        // baseManager
+#include "core/resources/resources.hpp" // CSprite
 
 #pragma pack(push, 4)
 // Mouse manager /
@@ -22,7 +30,7 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
     public:
         struct vftable_t : baseManager::vftable_t
         {
-            void (__thiscall *scalar_deleting_destructor)(mouseManager*, uint8_t);
+            void (__thiscall* scalar_deleting_destructor)(mouseManager*, uint8_t);
         };
 
     // enums
@@ -41,26 +49,23 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
 
     // constructors / destructor
     public:
-        NH3API_FORCEINLINE
-        mouseManager() noexcept
-            : baseManager(::nh3api::dummy_tag)
+        inline mouseManager() noexcept
+            : baseManager(nh3api::dummy_tag)
         { THISCALL_1(void, 0x50CD40, this); }
 
-        NH3API_FORCEINLINE
-        mouseManager(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline mouseManager(const nh3api::dummy_tag_t& tag) noexcept
             : baseManager(tag)
         {}
 
-        NH3API_FORCEINLINE
-        ~mouseManager() noexcept
-        { ::DeleteCriticalSection(&this->CriticalSection); }
+        inline ~mouseManager() noexcept
+        { STDCALL_1(void, 0x63A0C4, &this->CriticalSection); }
 
     // member functions
     public:
         void SetPointer(int32_t new_frame, mouseManager::EPointerSet new_set)
         { THISCALL_3(void, 0x50CEA0, this, new_frame, new_set); }
 
-        void Update(bool bForceIt)
+        void Update(bool bForceIt = true)
         { THISCALL_2(void, 0x50CF90, this, bForceIt); }
 
         void MouseCoords(int32_t& x, int32_t& y)
@@ -78,6 +83,9 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
         void CheckUpdate()
         { THISCALL_1(void, 0x50D880, this); }
 
+        void LoadFrame(int32_t new_frame)
+        { THISCALL_2(void, 0x50DAB0, this, new_frame); }
+
         void ShowSystemCursor(bool show_it)
         { THISCALL_2(void, 0x50DC20, this, show_it); }
 
@@ -89,8 +97,7 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
 
     // static variables
     public:
-        inline static const std::array<const std::array<const POINT, 5>, 144>& iHotSpot
-        = get_global_var_ref(0x67FFA0, const std::array<const std::array<const POINT, 5>, 144>);
+        inline static const std::array<std::array<POINT, 144>, MAX_POINTER_SETS>& iHotSpot = get_global_var_ref(0x67FFA0, const std::array<std::array<POINT, 144>, MAX_POINTER_SETS>);
 
     // member variables
     public:
@@ -134,7 +141,12 @@ NH3API_VIRTUAL_CLASS mouseManager : public baseManager
         CRITICAL_SECTION CriticalSection;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 4
+
+template<>
+struct nh3api::enum_limits<mouseManager::EPointerSet>
+    : nh3api::enum_limits_base<mouseManager::EPointerSet, mouseManager::EPointerSet::DEFAULT_SET, mouseManager::EPointerSet::ARTIFACT_SET>
+{ static inline constexpr bool is_specialized = true; };
 
 NH3API_SIZE_ASSERT(0x90, mouseManager);
 

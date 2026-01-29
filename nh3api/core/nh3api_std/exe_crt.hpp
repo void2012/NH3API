@@ -20,65 +20,56 @@ using exe_atexit_func_t = void (__cdecl*)(void);
 using exe_beginthread_func_t = void (__cdecl*)(void*);
 using exe_beginthreadex_func_t = uint32_t (__stdcall*)(void*);
 
-NH3API_FORCEINLINE
 // address: 0x6193EA
 // Heroes3.exe internal exit
-void __cdecl exe_exit(int32_t code) noexcept
+inline void __cdecl exe_exit(int32_t code) noexcept
 { CDECL_1(void,  0x6193EA, code); }
 
-NH3API_FORCEINLINE
 // address: 0x617F03
 // Heroes3.exe internal atexit
-int __cdecl exe_atexit(exe_atexit_func_t func) noexcept
-{ return CDECL_1(int, 0x617F03, func); }
+inline int32_t __cdecl exe_atexit(exe_atexit_func_t func) noexcept
+{ return CDECL_1(int32_t, 0x617F03, func); }
 
-NH3API_FORCEINLINE
 // address: 0x61D9CA
 // Heroes3.exe internal terminate
-void __cdecl /*__noreturn*/ exe_terminate() noexcept
+inline void __cdecl /*__noreturn*/ exe_terminate() noexcept
 { CDECL_0(void, 0x61D9CA); }
 
-NH3API_FORCEINLINE
 // address: 0x624F26
 // Heroes3.exe internal abort
-void __cdecl exe_abort() noexcept
+inline void __cdecl exe_abort() noexcept
 { CDECL_0(void, 0x624F26); }
 
-NH3API_FORCEINLINE
 // address: 0x618370
 // Heroes3.exe internal __purecall
-void __cdecl exe_purecall() noexcept
+inline void __cdecl exe_purecall()
 { CDECL_0(void, 0x618370); }
 
 NH3API_CALLBACK(start_address, arglist)
-NH3API_FORCEINLINE
 // address: 0x61A433
 // Heroes3.exe internal _beginthreadex. Use this function to avoid memory leaks related to CreateThread
-uintptr_t __cdecl exe_beginthreadex(SECURITY_ATTRIBUTES* security,
-                                    size_t stack_size,
-                                    exe_beginthreadex_func_t start_address,
-                                    void* arglist,
-                                    uint32_t initflag,
-                                    uint32_t* thrdaddr) noexcept
+inline uintptr_t __cdecl exe_beginthreadex(SECURITY_ATTRIBUTES*     security,
+                                           size_t                   stack_size,
+                                           exe_beginthreadex_func_t start_address,
+                                           void*                    arglist,
+                                           uint32_t                 initflag,
+                                           uint32_t*                thrdaddr) noexcept
 { return CDECL_6(uintptr_t, 0x61A433, security, stack_size, start_address, arglist, initflag, thrdaddr); }
 
-NH3API_FORCEINLINE
 // address: 0x61A53A
 // Heroes3.exe internal _endthreadex
-void __cdecl exe_endthreadex(uint32_t exit_code)
+inline void __cdecl exe_endthreadex(uint32_t exit_code)
 { CDECL_1(void, 0x61A53A, exit_code); }
 
 NH3API_CALLBACK(start_address, args)
-NH3API_FORCEINLINE
 // address: 0x61A56C
 // Heroes3.exe internal _beginthread
-uintptr_t __cdecl exe_beginthread(exe_beginthread_func_t start_address, size_t stack_size, void* args)
+inline uintptr_t __cdecl exe_beginthread(exe_beginthread_func_t start_address, size_t stack_size, void* args)
 { return CDECL_3(uintptr_t, 0x61A56C, start_address, stack_size, args); }
 
-NH3API_FORCEINLINE
 // address: 0x61A676
 // Heroes3.exe internal _beginthread
-void __cdecl exe_endthread()
+inline void __cdecl exe_endthread()
 { CDECL_0(void, 0x61A676); }
 
 #pragma pack(push, 4)
@@ -232,51 +223,44 @@ public:
 } NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
-NH3API_FORCEINLINE
 // address: [0x61D8C3..0x61D92A],  size = 0x67 = 103
 // Get current thread tiddata /
 // tiddata информация, связанная с текущим потоком, созданным CRT.
-exe_tiddata* exe_getptd()
+inline exe_tiddata* exe_getptd() noexcept
 { return CDECL_0(exe_tiddata*, 0x61D8C3); }
 
-NH3API_FORCEINLINE
-exe_new_handler exe_set_new_handler(exe_new_handler handler)
+inline exe_new_handler exe_set_new_handler(exe_new_handler handler) noexcept
 {
     exe_new_handler old_handler = reinterpret_cast<exe_new_handler>(0x6AB86C);
-    *reinterpret_cast<exe_new_handler*>(0x6AB86C) = handler;
+    _InterlockedExchange(*get_global_var_ptr(0x6AB86C, uintptr_t*), reinterpret_cast<uintptr_t>(handler));
     return old_handler;
 }
 
-NH3API_FORCEINLINE
-exe_se_translator exe_set_se_translator(exe_tiddata* curr, exe_se_translator translator)
+inline exe_se_translator exe_set_se_translator(exe_se_translator translator, exe_tiddata* curr_thread_data = exe_getptd()) noexcept
 {
-    exe_se_translator old_translator = curr->_translator;
-    curr->_translator = translator;
+    exe_se_translator old_translator = curr_thread_data->_translator;
+    _InterlockedExchange(reinterpret_cast<volatile uintptr_t*>(curr_thread_data->_translator), reinterpret_cast<uintptr_t>(translator));
     return old_translator;
 }
 
-NH3API_FORCEINLINE
 // address: 0x61B15C
 // Heroes3.exe internal setlocale
-char* exe_setlocale(int category, const char* locale) noexcept
+inline char* exe_setlocale(int category, const char* locale) noexcept
 { return CDECL_2(char*, 0x61B15C, category, locale); }
 
-NH3API_FORCEINLINE
 // address: 0x619E9E
 // Heroes3.exe internal _errno
-int32_t* exe_errno() noexcept
+inline int32_t* exe_errno() noexcept
 { return CDECL_0(int32_t*, 0x619E9E); }
 
-NH3API_FORCEINLINE
 // address: 0x620429
 // Heroes3.exe internal _set_errno
-errno_t exe_set_errno(int32_t error_value) noexcept
+inline errno_t exe_set_errno(int32_t error_value) noexcept
 { return CDECL_1(int32_t, 0x620429, error_value); }
 
-NH3API_FORCEINLINE
 // address: 0x626267
 // Heroes3.exe internal __crtMessageBoxA
-int32_t exe_crtMessageBoxA(const char* lpText, const char* lpCaption, uint32_t uType) noexcept
+inline int32_t exe_crtMessageBoxA(const char* lpText, const char* lpCaption, uint32_t uType) noexcept
 { return CDECL_3(int32_t, 0x626267, lpText, lpCaption, uType); }
 
 NH3API_DISABLE_WARNING_END

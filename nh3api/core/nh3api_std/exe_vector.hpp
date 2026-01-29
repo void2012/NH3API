@@ -14,1372 +14,1281 @@
 
 #pragma once
 
+#include <array>                 // std::array
+#include <cassert>               // assert
+#include <initializer_list>      // std::initializer_list
 #include <type_traits>
-#include "nh3api_std.hpp"
-#include "memory.hpp"
-#include "stl_extras.hpp"
 
-// Three major STL implementations(MSVC STL, libc++, libstdc++)
-// Implement std::vector<T> in the same layout as exe_vector, so we can use the native
-// std::vector<T> implementation. Note that the sizeof(std::vector<T>) must be = 12
-// So for example in Visual Studio, you should disable iterator debugging.
-#ifdef NH3API_FLAG_USE_NATIVE_STD_VECTOR
-#include <vector>
-
-namespace nh3api
-{
-struct nonempty_base
-{
-    uint32_t dummy = 0;
-};
-}
-
-template<typename T>
-class exe_vector : public nh3api::nonempty_base, public std::vector<T, exe_allocator<T>>
-{
-    public:
-        using std::vector<T, exe_allocator<T> >::vector;
-
-        exe_vector(const ::nh3api::dummy_tag_t&) noexcept
-        {}
-};
-
-// Disable std::vector<bool> specialization
-template<>
-class exe_vector<bool> : public nh3api::nonempty_base, public std::vector<uint8_t, exe_allocator<uint8_t>>
-{
-    public:
-
-        using std::vector<uint8_t, exe_allocator<uint8_t>>::vector;
-
-        exe_vector(const ::nh3api::dummy_tag_t&) noexcept
-        {}
-};
-
-static_assert(sizeof(exe_vector<int>) == 16, "sizeof(std::vector<T>) should be 12. Disable debugging iterators if you're on MSVC.");
-#else
-
-#include "iterator.hpp" // nh3api::is_iterator
+#include "iterator.hpp"          // nh3api::is_iterator
+#include "memory.hpp"            // exe_allocator<_Ty>, exe_heap_t
 #include "nh3api_exceptions.hpp" // std::length_error, std::out_of_range, std::runtime_error
+#include "stl_extras.hpp"        // nh3api::synth_three_way_result
 
-NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wattributes")
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(4714)
+NH3API_WARNING_MSVC_DISABLE(26495)
 
-// Disable warning for std::uninitialized_xyz on old MSVC STL
-#if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
-NH3API_DISABLE_MSVC_WARNING_BEGIN(4996)
-#endif
-
-//namespace nh3api
-//{
 #pragma pack(push, 4)
 
 // Visual C++ 6.0 std::vector implementation used by heroes3.exe
-template<class T>
+template<class _Ty>
 class exe_vector
 {
-protected:
-    static_assert(std::is_object_v<T>, "The C++ Standard forbids containers of non-object types "
-                                       "because of [container.requirements].");
+    protected:
+        static_assert(std::is_object_v<_Ty>, "The C++ Standard forbids containers of non-object types "
+                                             "because of [container.requirements].");
 
-    // internal typedefs
-protected:
-    inline static constexpr bool noexcept_copy =
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    std::is_nothrow_copy_constructible_v<T>;
-    #else
-    true;
-    #endif
+        // external typedefs
+    public:
+        using value_type      = _Ty;
+        using size_type       = size_t;
+        using difference_type = ptrdiff_t;
+        using allocator_type  = exe_allocator<value_type>;
+        using pointer         = value_type*;
+        using const_pointer   = const value_type*;
+        using reference       = value_type&;
+        using const_reference = const value_type&;
 
-    inline static constexpr bool noexcept_move =
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    std::is_nothrow_move_constructible_v<T>;
-    #else
-    true;
-    #endif
+        using iterator               = pointer;
+        using const_iterator         = const_pointer;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+        using reverse_iterator       = std::reverse_iterator<iterator>;
 
-    inline static constexpr bool noexcept_default_construct =
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    std::is_nothrow_default_constructible_v<T>;
-    #else
-    true;
-    #endif
-
-// external typedefs
-public:
-    using allocator_type = exe_allocator<T>;
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
-    using value_type = T;
-    using pointer = value_type*;
-    using const_pointer = const value_type*;
-    using reference = value_type&;
-    using const_reference = const value_type&;
-
-    using iterator = pointer;
-    using const_iterator = const_pointer;
-    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-    using reverse_iterator = std::reverse_iterator<iterator>;
-
-protected:
-    #ifndef NH3API_MAKE_EXCEPTION_GUARD
-    #define NH3API_MAKE_EXCEPTION_GUARD(NO_UNWIND_CONDITION, FUNCTOR, ...) \
-    typename nh3api::exception_guard_factory<NO_UNWIND_CONDITION, FUNCTOR>::type \
-    guard = nh3api::make_exception_guard<NO_UNWIND_CONDITION>(FUNCTOR(__VA_ARGS__))
-    #endif
-
-    #ifdef __cpp_concepts
-    template<nh3api::tt::iterator_for_container IterT>
-    #else
-    template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-    #endif
-    void _Range_construct_or_tidy(IterT first, IterT last, std::input_iterator_tag)
-    {
-        nh3api::verify_range(first, last);
-        NH3API_MAKE_EXCEPTION_GUARD(noexcept_move, vector_cleanup, *this);
-        for (; first != last; ++first)
-            emplace_back(*first);
-        guard.complete();
-    }
-
-    #ifdef __cpp_concepts
-    template<nh3api::tt::iterator_for_container IterT>
-    #else
-    template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-    #endif
-    void _Range_construct_or_tidy(IterT first, IterT last, std::forward_iterator_tag)
-    {
-        nh3api::verify_range(first, last);
-        if ( _Buy( static_cast<size_type>(std::distance(first, last))) )
+    protected:
+        struct [[nodiscard]] _Reallocation_guard
         {
-            NH3API_MAKE_EXCEPTION_GUARD(noexcept_copy, vector_cleanup, *this);
-            this->_Last = std::uninitialized_copy(first, last, this->_First);
-            guard.complete();
-        }
-    }
-public:
-    exe_vector() noexcept
-        : _Dummy(0), _First(nullptr), _Last(nullptr), _End(nullptr)
-    {}
+            pointer _New_begin;
+            size_t  _New_capacity;
+            pointer _Constructed_first;
+            pointer _Constructed_last;
 
-    explicit exe_vector(const allocator_type&) noexcept
-        : _Dummy(0), _First(nullptr), _Last(nullptr), _End(nullptr)
-    {}
+            _Reallocation_guard& operator=(const _Reallocation_guard&) = delete;
+            _Reallocation_guard& operator=(_Reallocation_guard&&)      = delete;
 
-    explicit exe_vector(size_type n)
-        : _Dummy(0)
-    {
-        if (_Buy(n))
-        { // nonzero, fill it
-            NH3API_MAKE_EXCEPTION_GUARD(noexcept_default_construct, vector_cleanup, *this);
-            this->_Last = _Default_fill(this->_First, n);
-            guard.complete();
-        }
-    }
+            NH3API_FORCEINLINE ~_Reallocation_guard() noexcept
+            {
+                if ( _New_begin != nullptr )
+                {
+                    std::destroy(_Constructed_first, _Constructed_last);
+                    _Deallocate(_New_begin);
+                }
+            }
+        };
 
-    explicit exe_vector(size_type n, const allocator_type&)
-        : _Dummy(0)
-    {
-        if (_Buy(n))
-        { // nonzero, fill it
-            NH3API_MAKE_EXCEPTION_GUARD(noexcept_default_construct, vector_cleanup, *this);
-            this->_Last = _Default_fill(this->_First, n);
-            guard.complete();
-        }
-    }
-
-    exe_vector(size_type n, const value_type& value, const allocator_type& = allocator_type())
-        : _Dummy(0)
-    {
-        if (_Buy(n))
-        {	// nonzero, fill it
-            NH3API_MAKE_EXCEPTION_GUARD(noexcept_copy, vector_cleanup, *this);
-            this->_Last = _Ufill(this->_First, n, value);
-            guard.complete();
-        }
-    }
-
-    #ifdef __cpp_concepts
-    template<nh3api::tt::iterator_for_container IterT>
-    #else
-    template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-    #endif
-    exe_vector( IterT first, IterT last, const allocator_type&)
-        : _Dummy(0)
-    {
-        nh3api::verify_range(first, last);
-        _Range_construct_or_tidy(nh3api::unfancy(first),
-                                    nh3api::unfancy(last),
-                                    nh3api::iter_category<IterT>());
-    }
-
-    #ifdef __cpp_concepts
-    template<nh3api::tt::iterator_for_container IterT>
-    #else
-    template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-    #endif
-    exe_vector( IterT first, IterT last)
-        : _Dummy(0)
-    {
-        nh3api::verify_range(first, last);
-        _Range_construct_or_tidy(nh3api::unfancy(first),
-                                    nh3api::unfancy(last),
-                                    nh3api::iter_category<IterT>());
-    }
-
-    exe_vector(const exe_vector& other)
-        : _Dummy(0)
-    {
-        if (_Buy(other.size()))
+        struct [[nodiscard]] _Simple_reallocation_guard
         {
-            NH3API_MAKE_EXCEPTION_GUARD(noexcept_copy, vector_cleanup, *this);
-            this->_Last = std::uninitialized_copy(other.begin(), other.end(), this->_First);
-            guard.complete();
-        }
-    }
+            pointer _New_begin;
 
-    // no-op constructor optimization for low-level code
-    exe_vector(const ::nh3api::dummy_tag_t&) noexcept
-    {}
+            _Simple_reallocation_guard& operator=(const _Simple_reallocation_guard&) = delete;
+            _Simple_reallocation_guard& operator=(_Simple_reallocation_guard&&)      = delete;
 
-protected:
-    template<class ... Args>
-    reference _Emplace_back_with_unused_capacity(Args&& ... args)
-    {
-        nh3api::construct_at(_Last, std::forward<Args>(args) ...);
-        reference result = *_Last;
-        ++_Last;
-        return result;
-    }
+            NH3API_FORCEINLINE ~_Simple_reallocation_guard() noexcept
+            {
+                if ( _New_begin != nullptr )
+                    _Deallocate(_New_begin);
+            }
+        };
 
-    template<class ... Args>
-    pointer _Emplace_reallocate(pointer _Whereptr, Args&& ... _Val)
-    { // reallocate and insert by perfectly forwarding _Val at _Whereptr
-        // pre: !_Has_unused_capacity()
-        const size_type _Whereoff = static_cast<size_type>(_Whereptr - this->_First);
-        const size_type _Oldsize  = size();
-
-        if (_Oldsize == max_size())
+        // vaporize the detached piece
+        struct [[nodiscard]] _Vaporization_guard
         {
-            NH3API_THROW(std::length_error, "vector::emplace: size exceeded max_size");
-        }
+            exe_vector* _Target;
+            pointer     _Vaporized_first;
+            pointer     _Vaporized_last;
+            pointer     _Destroyed_first;
 
-        const size_type _Newsize = _Oldsize + 1;
-        const size_type _Newcapacity = _Calculate_growth(_Newsize);
+            _Vaporization_guard& operator=(const _Vaporization_guard&) = delete;
+            _Vaporization_guard& operator=(_Vaporization_guard&&)      = delete;
 
-        pointer _Newvec = _Allocate(_Newcapacity);
-        pointer _Constructed_last = _Newvec + _Whereoff + 1;
-        pointer _Constructed_first = _Constructed_last;
+            NH3API_FORCEINLINE ~_Vaporization_guard() noexcept
+            {
+                if ( _Target != nullptr )
+                {
+                    std::destroy(_Destroyed_first, _Target->_Mylast);
+                    _Target->_Mylast = _Vaporized_first;
+                }
+            }
+        };
 
-        { // scope for exception guard
-        auto guard = nh3api::make_exception_guard
-        <std::is_nothrow_constructible_v<value_type, Args ...>
-        && noexcept_move
-        && noexcept_copy>(range_cleanup(*this, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity));
-
-        nh3api::construct_at(_Newvec + _Whereoff, std::forward<Args>(_Val)...);
-        _Constructed_first = _Newvec + _Whereoff;
-        if (_Whereptr == this->_Last)
-        { // at back, provide strong guarantee
-            _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
-        }
-        else
-        { // provide basic guarantee
-            _Umove(this->_First, _Whereptr, _Newvec);
-            _Constructed_first = _Newvec;
-            _Umove(_Whereptr, this->_Last, _Newvec + _Whereoff + 1);
-        }
-
-        guard.complete();
-        } // scope for exception guard
-
-        _Change_array(_Newvec, _Newsize, _Newcapacity);
-        return (this->_First + _Whereoff);
-    }
-
-public:
-    // Move constructor
-    NH3API_FORCEINLINE exe_vector(exe_vector&& other) noexcept
-    { nh3api::trivial_move<sizeof(exe_vector)>(&other, this); }
-
-    NH3API_FORCEINLINE exe_vector(exe_vector&& other, const allocator_type&)
-    { nh3api::trivial_move<sizeof(exe_vector)>(&other, this); }
-
-    exe_vector(std::initializer_list<value_type> i)
-    {
-        _Range_construct_or_tidy(i.begin(), i.end(), std::random_access_iterator_tag());
-    }
-
-    exe_vector(std::initializer_list<value_type> i, const allocator_type&)
-    {
-        _Range_construct_or_tidy(i.begin(), i.end(), std::random_access_iterator_tag());
-    }
-
-    NH3API_FORCEINLINE exe_vector& operator=(exe_vector&& other) noexcept
-    {
-        if (this != &other)
+        // class with destructor that calls _Tidy
+        struct [[nodiscard]] _Tidy_guard
         {
-            _Tidy();
-            nh3api::trivial_move<sizeof(exe_vector)>(&other, this);
-        }
-        return *this;
-    }
+            exe_vector* _Target;
 
-    exe_vector& operator=(std::initializer_list<value_type> i)
-    {
-        _Assign_range(i.begin(), i.end(), std::random_access_iterator_tag());
-        return *this;
-    }
+            NH3API_FORCEINLINE ~_Tidy_guard() noexcept
+            {
+                if ( _Target )
+                    _Target->_Tidy();
+            }
+        };
 
-    template<class ... Args>
-    iterator emplace( const_iterator _Where, Args&& ... args )
-    {
-        pointer _Whereptr = const_cast<const_pointer>(_Where);
-        pointer _Oldlast  = this->_Last;
-    #if NH3API_DEBUG
-        if (_Whereptr >= this->_First && _Oldlast >= _Whereptr)
-            NH3API_THROW(std::out_of_range, "vector::emplace iterator outside range");
-    #endif
-        if (_Has_unused_capacity())
+    public:
+        exe_vector() noexcept
+            : _Myfirst { nullptr },
+              _Mylast { nullptr },
+              _Myend { nullptr }
+        {}
+
+        explicit exe_vector(const size_t _Count)
+        { _Construct_n(_Count); }
+
+        exe_vector(const size_t _Count, const value_type& _Value)
+        { _Construct_n(_Count, _Value); }
+
+#ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container _Iter>
+#else
+        template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
+#endif
+        exe_vector(_Iter _First, _Iter _Last)
         {
-            if (_Whereptr == _Oldlast)
-            { // at back, provide strong guarantee
-                _Emplace_back_with_unused_capacity(std::forward<Args>(args) ...);
+            nh3api::verify_range(_First, _Last);
+            auto _UFirst = nh3api::unfancy(_First);
+            auto _ULast  = nh3api::unfancy(_Last);
+
+            if constexpr ( nh3api::is_cpp17_fwd_iter_v<_Iter> )
+            {
+                const size_t _Count = static_cast<size_t>(std::distance(_UFirst, _ULast));
+                _Construct_n(_Count, std::move(_UFirst), std::move(_ULast));
+#ifdef __cpp_lib_ranges
+            }
+            else if constexpr ( std::forward_iterator<_Iter> )
+            {
+                const size_t _Count = static_cast<size_t>(std::ranges::distance(_UFirst, _ULast));
+                _Construct_n(_Count, std::move(_UFirst), std::move(_ULast));
+#endif // __cpp_lib_ranges
             }
             else
             {
-                value_type _Obj(std::forward<Args>(args) ...); // handle aliasing
-                // after constructing _Obj, provide basic guarantee
-                nh3api::construct_at(_Oldlast, std::move(_Oldlast[-1]));
-                ++this->_Last;
-                _Move_backward(_Whereptr, _Oldlast - 1, _Oldlast);
-                *_Whereptr = std::move(_Obj);
+                _Tidy_guard _Guard { this };
+
+                _Append_uncounted_range(std::move(_UFirst), std::move(_ULast));
+
+                _Guard._Target = nullptr;
             }
-
-            return _Whereptr;
         }
 
-        return _Emplace_reallocate(_Whereptr, std::forward<Args>(args) ...);
-    }
-
-    void push_back(value_type&& value)
-    { emplace_back(std::move(value)); }
-
-    template<class ... Args>
-    reference emplace_back( Args&& ... args )
-    {
-        if (_Has_unused_capacity())
-            return (_Emplace_back_with_unused_capacity(std::forward<Args>(args) ...));
-
-        return *_Emplace_reallocate(this->_Last, std::forward<Args>(args) ...);
-    }
-
-    iterator insert(const_iterator _Pos, value_type&& _Val)
-    {	// insert _Val at _Pos
-        return emplace(_Pos, std::move(_Val));
-    }
-
-public:
-    ~exe_vector() noexcept
-    { _Tidy(); }
-
-    NH3API_INLINE_LARGE
-    exe_vector& operator=(const exe_vector& other)
-    {
-        if ( this == &other )
-            return *this;
-        else
-            assign(other._First, other._Last);
-
-        return *this;
-    }
-
-    NH3API_FLATTEN
-    void reserve( size_type _Newcapacity )
-    { // increase capacity to _Newcapacity (without geometric growth), provide strong guarantee
-        if (_Newcapacity > capacity())
-        { // something to do (reserve() never shrinks)
-            if (_Newcapacity > max_size())
-                NH3API_THROW(std::length_error, "vector::reserve: requested size too large.");
-
-            _Reallocate_exactly(_Newcapacity);
-        }
-    }
-
-    [[nodiscard]] size_type capacity() const noexcept
-    { return static_cast<size_type>(this->_End - this->_First); }
-
-    void shrink_to_fit()
-    {
-        if (_Has_unused_capacity())
+        exe_vector(std::initializer_list<value_type> _Initializer_list)
         {
-            if (empty())
+            _Construct_n(_Initializer_list.size(), _Initializer_list.begin(), _Initializer_list.end());
+        }
+
+#ifdef __cpp_lib_containers_ranges
+        template<nh3api::tt::container_compatible_range<value_type> _Rng>
+        exe_vector(std::from_range_t, _Rng&& _Range)
+        {
+            if constexpr ( std::ranges::sized_range<_Rng> || std::ranges::forward_range<_Rng> )
+            {
+                _Construct_n(static_cast<size_t>(std::ranges::distance(_Range)), nh3api::unfancy_begin(_Range), nh3api::unfancy_end(_Range));
+            }
+            else
+            {
+                _Tidy_guard _Guard { this };
+
+                _Append_uncounted_range(nh3api::unfancy_begin(_Range), nh3api::unfancy_end(_Range));
+
+                _Guard._Target = nullptr;
+            }
+        }
+#endif
+
+        exe_vector(const exe_vector& _Right)
+        { _Construct_n(static_cast<size_t>(_Right._Mylast - _Right._Myfirst), _Right._Myfirst, _Right._Mylast); }
+
+        // Move constructor
+        exe_vector(exe_vector&& _Right) noexcept
+        {
+            auto& _Dst = reinterpret_cast<std::array<uint32_t, 4>&>(*this);
+            auto& _Src = reinterpret_cast<std::array<uint32_t, 4>&>(_Right);
+            _Dst       = std::exchange(_Src, {});
+        }
+
+        exe_vector& operator=(exe_vector&& _Right) noexcept
+        {
+            if ( this != &_Right )
             {
                 _Tidy();
+                auto& _Dst = reinterpret_cast<std::array<uint32_t, 4>&>(*this);
+                auto& _Src = reinterpret_cast<std::array<uint32_t, 4>&>(_Right);
+                _Dst       = std::exchange(_Src, {});
             }
-            else
-            {
-                _Reallocate_exactly(size());
-            }
-        }
-    }
-
-public:
-    iterator begin() noexcept
-    { return (_First); }
-
-    const_iterator begin() const noexcept
-    { return (const_iterator)(_First); }
-
-    const_iterator cbegin() const noexcept
-    { return (const_iterator)(_First); }
-
-    iterator end() noexcept
-    { return (_Last); }
-
-    const_iterator end() const noexcept
-    { return (const_iterator)(_Last); }
-
-    const_iterator cend() const noexcept
-    { return (const_iterator)(_Last); }
-
-    reverse_iterator rbegin() noexcept
-    { return reverse_iterator(end()); }
-
-    const_reverse_iterator rbegin() const noexcept
-    { return const_reverse_iterator(end()); }
-
-    const_reverse_iterator crbegin() const noexcept
-    { return const_reverse_iterator(end()); }
-
-    reverse_iterator rend() noexcept
-    { return reverse_iterator(begin()); }
-
-    const_reverse_iterator rend() const noexcept
-    { return const_reverse_iterator(begin()); }
-
-    const_reverse_iterator crend() const noexcept
-    { return const_reverse_iterator(begin()); }
-
-    NH3API_INLINE_LARGE
-    void resize(size_type _Newsize)
-    {
-        const size_type _Oldsize = size();
-        const size_type _Oldcapacity = capacity();
-
-        if (_Newsize > _Oldcapacity)
-        { // reallocate
-            if (_Newsize > max_size())
-            {
-                NH3API_THROW(std::length_error, "vector::resize: requested too much size.");
-            }
-
-            const size_type _Newcapacity = _Calculate_growth(_Newsize);
-            pointer _Newvec = _Allocate(_Newcapacity);
-            pointer _Appended_first = _Newvec + _Oldsize;
-            pointer _Appended_last = _Appended_first;
-            { // scope for exception guard
-                NH3API_MAKE_EXCEPTION_GUARD(
-                noexcept_default_construct
-                && noexcept_copy
-                && noexcept_move,
-                range_cleanup, *this, _Appended_first, _Appended_last, _Newvec, _Newcapacity);
-
-                _Appended_last = _Default_fill(_Appended_first, _Newsize - _Oldsize);
-                _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
-
-                guard.complete();
-            } // scope for exception guard
-            _Change_array(_Newvec, _Newsize, _Newcapacity);
-        }
-        else if (_Newsize > _Oldsize)
-        { // append
-            pointer _Oldlast = this->_Last;
-            this->_Last = _Default_fill(_Oldlast, _Newsize - _Oldsize);
-        }
-        else if (_Newsize == _Oldsize)
-        { // nothing to do, avoid invalidating iterators
-        }
-        else
-        { // trim
-            pointer _Newlast = this->_First + _Newsize;
-            _Deallocate(_Newlast);
-            this->_Last = _Newlast;
-        }
-    }
-
-    void resize(size_type _Newsize, const value_type& _Val)
-    {
-        // yeah.. repeat the same code again but this is just to avoid
-        // usage of lambdas or functors and templates
-
-        const size_type _Oldsize = size();
-        const size_type _Oldcapacity = capacity();
-
-        if (_Newsize > _Oldcapacity)
-        { // reallocate
-            if (_Newsize > max_size())
-            {
-                NH3API_THROW(std::length_error, "vector::resize: requested too much size.");
-            }
-
-            const size_type _Newcapacity = _Calculate_growth(_Newsize);
-            pointer _Newvec = _Allocate(_Newcapacity);
-            pointer _Appended_first = _Newvec + _Oldsize;
-            pointer _Appended_last = _Appended_first;
-
-            { // scope for exception guard
-                NH3API_MAKE_EXCEPTION_GUARD(
-                noexcept_default_construct
-                && noexcept_copy
-                && noexcept_move,
-                range_cleanup, *this, _Appended_first, _Appended_last, _Newvec, _Newcapacity);
-
-                _Appended_last = _Ufill(_Appended_first, _Newsize - _Oldsize, _Val);
-                _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
-
-                guard.complete();
-            } // scope for exception guard
-
-            _Change_array(_Newvec, _Newsize, _Newcapacity);
-        }
-        else if (_Newsize > _Oldsize)
-        { // append
-            pointer _Oldlast = this->_Last;
-            this->_Last = _Ufill(_Oldlast, _Newsize - _Oldsize, _Val);
-        }
-        else if (_Newsize == _Oldsize)
-        { // nothing to do, avoid invalidating iterators
-        }
-        else
-        { // trim
-            pointer _Newlast = this->_First + _Newsize;
-            _Deallocate(_Newlast);
-            this->_Last = _Newlast;
-        }
-    }
-
-    NH3API_FORCEINLINE
-    size_type size() const noexcept
-    { return static_cast<size_type>(this->_Last - this->_First); }
-
-    [[nodiscard]] NH3API_FORCEINLINE constexpr
-    static size_type max_size() noexcept
-    { return NH3API_MAX_HEAP_REQUEST / sizeof(value_type); }
-
-    NH3API_FORCEINLINE
-    bool empty() const noexcept
-    { return size() == 0; }
-
-    NH3API_FORCEINLINE
-    static allocator_type get_allocator() noexcept
-    { return allocator_type(); }
-
-    NH3API_FORCEINLINE pointer data() noexcept
-    { return _First; }
-
-    NH3API_FORCEINLINE const_pointer data() const noexcept
-    { return _First; }
-
-    const_reference at(size_type pos) const
-    {
-        if ( size() <= pos )
-            NH3API_THROW(std::out_of_range, "vector::at(pos): invalid pos");
-        return *(_First + pos);
-    }
-    reference at(size_type pos)
-    {
-        if ( size() <= pos )
-            NH3API_THROW(std::out_of_range, "vector::at(pos): invalid pos");
-        return *(_First + pos);
-    }
-    NH3API_FORCEINLINE
-    const_reference operator[]( size_type pos ) const
-    #if !NH3API_DEBUG
-    noexcept
-    #endif
-    {
-    #if !NH3API_DEBUG
-        return *(_First + pos);
-    #else
-        return at(pos);
-    #endif
-    }
-
-    NH3API_FORCEINLINE
-    reference operator[]( size_type pos )
-    #if !NH3API_DEBUG
-    noexcept
-    #endif
-    {
-    #if !NH3API_DEBUG
-        return *(_First + pos);
-    #else
-        return at(pos);
-    #endif
-    }
-
-    NH3API_FORCEINLINE
-    reference front() noexcept
-    {
-        return (*begin());
-    }
-
-    NH3API_FORCEINLINE
-    const_reference front() const noexcept
-    {
-        return (*begin());
-    }
-
-    NH3API_FORCEINLINE
-    reference back() noexcept
-    {
-        return (*(end() - 1));
-    }
-
-    NH3API_FORCEINLINE
-    const_reference back() const noexcept
-    {
-        return (*(end() - 1));
-    }
-
-    NH3API_INLINE_LARGE
-    void push_back(const value_type& value)
-    { emplace_back(value); }
-
-    #ifdef __cpp_concepts
-    template<nh3api::tt::iterator_for_container IterT>
-    #else
-    template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-    #endif
-    void assign(IterT first, IterT last)
-    {
-        nh3api::verify_range(first, last);
-        _Assign_range(nh3api::unfancy(first), nh3api::unfancy(last), nh3api::iter_category<IterT>());
-    }
-
-    // assign _Newsize * _Val
-    void assign(size_type _Newsize, const value_type &_Val)
-    {
-        const size_type _Oldsize = size();
-        const size_type _Oldcapacity = capacity();
-
-        if (_Newsize > _Oldcapacity)
-        { // reallocate
-            if (_Newsize > max_size())
-            {
-                NH3API_THROW(std::length_error, "vector::assign: size exceeded max_size");
-            }
-
-            const size_type _Newcapacity = _Calculate_growth(_Newsize);
-
-            if (this->_First != pointer())
-            { // destroy and deallocate old array
-                _Destroy_range(this->_First, this->_Last);
-                _Deallocate(this->_First);
-            }
-
-            _Buy(_Newcapacity);
-            this->_Last = _Ufill(this->_First, _Newsize, _Val);
-        }
-        else if (_Newsize > _Oldsize)
-        {
-            std::fill(this->_First, this->_Last, _Val);
-            this->_Last = _Ufill(this->_Last, _Newsize - _Oldsize, _Val);
-        }
-        else
-        {
-            pointer _Newlast = this->_First + _Newsize;
-            std::fill(this->_First, _Newlast, _Val);
-            _Destroy_range(_Newlast, this->_Last);
-            this->_Last = _Newlast;
-        }
-    }
-
-    void assign(std::initializer_list<value_type> i)
-    {	// assign initializer_list
-        _Assign_range(i.begin(), i.end(), std::random_access_iterator_tag());
-    }
-
-    // TODO: Implement C++23 assign_range, append_range, insert_range
-
-protected:
-    template<class IterT>
-    void _Assign_range(IterT first, IterT last, std::input_iterator_tag )
-    {	// assign [first, last), input iterators
-        nh3api::verify_range(first, last);
-
-        pointer _Next = this->_First;
-        for (; first != last && _Next != this->_Last; ++first, (void)++_Next)
-        {
-            *_Next = *first;
+            return *this;
         }
 
-        _Destroy_range(_Next, this->_Last);
-        this->_Last = _Next;
+        ~exe_vector() noexcept
+        { _Tidy(); }
 
-        for (; first != last; ++first)
-            emplace_back(*first);
-    }
-
-    template<class IterT>
-    void _Assign_range(IterT first, IterT last, std::forward_iterator_tag )
-    { // assign [first, last), forward iterators
-        nh3api::verify_range(first, last);
-        if (first == last)
-            return;
-
-        const size_type _Newsize = static_cast<size_type>(static_cast<size_t>(std::distance(first, last)));
-        const size_type _Oldsize = size();
-        const size_type _Oldcapacity = capacity();
-
-        if (_Newsize > _Oldcapacity)
-        { // reallocate
-            if (_Newsize > max_size())
-            {
-                NH3API_THROW(std::length_error, "vector::assign: size exceeded max_size");
-            }
-
-            const size_type _Newcapacity = _Calculate_growth(_Newsize);
-
-            if (this->_First != pointer())
-            { // destroy and deallocate old array
-                _Destroy_range(this->_First, this->_Last);
-                _Deallocate(this->_First);
-            }
-
-            _Buy(_Newcapacity);
-
-            this->_Last = std::uninitialized_copy(first, last, this->_First);
-        }
-        else if (_Newsize > _Oldsize)
-        {
-            // performance note: traversing [first, _Mid) twice
-            const IterT _Mid = nh3api::next(first, static_cast<difference_type>(_Oldsize));
-            std::copy(first, _Mid, this->_First);
-            this->_Last = std::uninitialized_copy(_Mid, last, this->_Last);
-        }
-        else
-        {
-            pointer _Newlast = this->_First + _Newsize;
-            std::copy(first, last, this->_First);
-            _Destroy_range(_Newlast, this->_Last);
-            this->_Last = _Newlast;
-        }
-    }
-
-public:
-    iterator insert(const_iterator _Where, const value_type& _Val)
-    { return emplace(_Where, _Val); }
-
-    iterator insert(const_iterator _Where, size_type _Count, const value_type& _Val)
-    {
-        pointer _Whereptr = const_cast<pointer>(_Where);
-        const size_type _Whereoff = static_cast<size_type>(_Where - this->_First);
-        const bool _One_at_back = _Count == 1 && _Where == this->_Last;
-
-        if (_Count == 0)
-        { // nothing to do, avoid invalidating iterators
-        }
-        else if (_Count > _Unused_capacity())
-        { // reallocate
-            const size_type _Oldsize = size();
-
-            if (_Count > max_size() - _Oldsize)
-            {
-                NH3API_THROW(std::length_error, "vector::insert: size exceeded max_size");
-            }
-
-            const size_type _Newsize = _Oldsize + _Count;
-            const size_type _Newcapacity = _Calculate_growth(_Newsize);
-
-            pointer _Newvec = _Allocate(_Newcapacity);
-            pointer _Constructed_last = _Newvec + _Whereoff + _Count;
-            pointer _Constructed_first = _Constructed_last;
-
-            { // scope for exception guard
-                NH3API_MAKE_EXCEPTION_GUARD(
-                    noexcept_copy && noexcept_move,
-                    range_cleanup, *this, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity);
-
-                _Ufill(_Newvec + _Whereoff, _Count, _Val);
-                _Constructed_first = _Newvec + _Whereoff;
-
-                if (_One_at_back)
-                { // provide strong guarantee
-                    _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
-                }
-                else
-                { // provide basic guarantee
-                    _Umove(this->_First, _Whereptr, _Newvec);
-                    _Constructed_first = _Newvec;
-                    _Umove(_Whereptr, this->_Last, _Newvec + _Whereoff + _Count);
-                }
-
-                guard.complete();
-            } // scope for exception guard
-
-            _Change_array(_Newvec, _Newsize, _Newcapacity);
-        }
-        else if (_One_at_back)
-        { // provide strong guarantee
-            _Emplace_back_with_unused_capacity(_Val);
-        }
-        else
-        {                          // provide basic guarantee
-            const T _Tmp = _Val; // handle aliasing
-            pointer _Oldlast = this->_Last;
-            const size_type _Affected_elements = static_cast<size_type>(_Oldlast - _Where);
-
-            if (_Count > _Affected_elements)
-            { // new stuff spills off end
-                this->_Last = _Ufill(_Oldlast, _Count - _Affected_elements, _Tmp);
-                this->_Last = _Umove(_Whereptr, _Oldlast, this->_Last);
-                std::fill(_Whereptr, _Oldlast, _Tmp);
-            }
-            else
-            { // new stuff can all be assigned
-                this->_Last = _Umove(_Oldlast - _Count, _Oldlast, _Oldlast);
-                _Move_backward(_Whereptr, _Oldlast - _Count, _Oldlast);
-                std::fill(_Whereptr, _Whereptr + _Count, _Tmp);
-            }
-        }
-        return _Make_iterator_offset(_Whereoff);
-    }
-
-    #ifdef __cpp_concepts
-    template<nh3api::tt::iterator_for_container IterT>
-    #else
-    template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-    #endif
-    IterT insert( const_iterator _Where, IterT first, IterT last )
-    {
-        nh3api::verify_range(first, last);
-        const size_type _Whereoff = static_cast<size_type>(_Where - this->_First);
-        _Insert_range(_Where, nh3api::unfancy(first), nh3api::unfancy(last), nh3api::iter_category<IterT>());
-        return _Make_iterator_offset(_Whereoff);
-    }
-
-    iterator insert(const_iterator _Where, std::initializer_list<value_type> i)
-    {
-        return insert(_Where, i.begin(), i.end());
-    }
-
-    #if NH3API_DEBUG
-    void pop_back()
-    {	// erase element at end
-        if (empty())
-            NH3API_THROW(std::logic_error, "vector::pop_back(): vector was empty");
-        else
-        {	// erase last element
-            std::destroy_at(this->_Last - 1);
-            --this->_Last;
-        }
-    }
-
-    #else // NH3API_DEBUG
-    void pop_back()
-    {	// erase element at end
-        if (!empty())
-        {	// erase last element
-            std::destroy_at(this->_Last - 1);
-            --this->_Last;
-        }
-    }
-    #endif // NH3API_DEBUG
-
-    iterator erase(const_iterator pos)
-    {
-    #if NH3API_DEBUG
-        if (pos < this->_Last || this->_First <= pos)
-            NH3API_THROW(std::out_of_range, "vector::erase: iterator outside bounds");
-    #endif // NH3API_DEBUG
-
-        if constexpr ( std::is_move_assignable_v<value_type> )
-            std::move(pos + 1, this->_Last, pos);
-        else
-            std::copy(pos + 1, this->_Last, pos);
-        std::destroy_at(this->_Last - 1);
-        --this->_Last;
-        return pos;
-    }
-
-    iterator erase( const_iterator first, const_iterator last )
-    {
-        #if NH3API_DEBUG
-        if (first < _First || last > _Last)
-            NH3API_THROW(std::out_of_range, "vector::erase: iterator outside bounds");
-        #endif // NH3API_DEBUG
-
-        iterator _It1 = const_cast<iterator>(first);
-        iterator _It2 = const_cast<iterator>(last);
-        pointer _Ptr = nullptr;
-        if (_It1 != _It2)
-        { // worth doing, copy down over hole
-            if constexpr ( std::is_move_assignable_v<value_type> )
-                _Ptr = std::move(_It2, this->_Last, _It1);
-            else
-                _Ptr = std::copy(_It2, this->_Last, _It1);
-            _Destroy_range(_Ptr, this->_Last);
-            this->_Last = _Ptr;
-        }
-        return _It1;
-
-    }
-
-    void clear() noexcept
-    {
-        _Destroy_range(_First, _Last);
-        this->_Last = this->_First;
-    }
-
-    void swap( exe_vector& other ) noexcept
-    { nh3api::trivial_swap<sizeof(exe_vector)>(this, &other); }
-
-protected:
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-    struct vector_cleanup
-    {
-        public:
-            constexpr
-            vector_cleanup(exe_vector& _vec) noexcept
-                : vec(_vec)
-            {}
-
-            void operator()()
-            {
-                vec._Tidy();
-                NH3API_RETHROW
-            }
-
-        private:
-            exe_vector& vec;
-    };
-
-    // functor to pass to nh3api's exception guard
-    struct range_cleanup
-    {
-        public:
-            constexpr
-            range_cleanup(exe_vector& _vec,
-                          pointer& _destroy_first,
-                          pointer& _destroy_last,
-                          pointer& _deallocate_at,
-                          const size_type& _deallocation_size ) noexcept
-                : vec(_vec),
-                destroy_first(_destroy_first),
-                destroy_last(_destroy_last),
-                deallocate_at(_deallocate_at),
-                deallocation_size(_deallocation_size)
-            {}
-
-            void operator()()
-            {
-                exe_vector::_Destroy_range(destroy_first, destroy_last);
-                vec._Deallocate(deallocate_at);
-                NH3API_RETHROW
-            }
-
-        private:
-            exe_vector& vec;
-            pointer& destroy_first;
-            pointer& destroy_last;
-            pointer& deallocate_at;
-            const size_type& deallocation_size;
-    };
-    #else
-    struct vector_cleanup
-    {
-        constexpr
-        vector_cleanup(exe_vector&) noexcept
+        inline exe_vector(const nh3api::dummy_tag_t&) noexcept
         {}
 
-        void operator()() const noexcept
-        {}
-    };
-
-    struct range_cleanup
-    {
-        constexpr range_cleanup(exe_vector&,
-                                        pointer,
-                                        pointer,
-                                        pointer,
-                                        const size_type) noexcept
-        {}
-
-        void operator()() const noexcept
-        {}
-    };
-    #endif
-
-    // set capacity to _Newcapacity (without geometric growth), provide strong guarantee
-    void _Reallocate_exactly(const size_type _Newcapacity)
-    {
-        const size_type _Size = size();
-        pointer _Newvec = _Allocate(_Newcapacity);
-
-        if constexpr ( noexcept_copy && noexcept_move )
+    protected:
+        // insert by perfectly forwarding into element at end, provide strong guarantee
+        template<class... _Args>
+        value_type& _Emplace_one_at_back(_Args&&... _Values)
         {
-            _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
+            if ( _Mylast != _Myend )
+                return _Emplace_back_with_unused_capacity(std::forward<_Args>(_Values)...);
+            return *_Emplace_reallocate(_Mylast, std::forward<_Args>(_Values)...);
         }
-        else
+
+        // insert by perfectly forwarding into element at end, provide strong guarantee
+        template<class... _Args>
+        value_type& _Emplace_back_with_unused_capacity(_Args&&... _Values)
+        noexcept(noexcept(std::is_nothrow_constructible_v<value_type, _Args...>))
         {
-            NH3API_TRY
-            {
-                _Umove_if_noexcept(this->_First, this->_Last, _Newvec);
-            }
-            NH3API_CATCH(...)
-            {
-                _Deallocate(_Newvec);
-                NH3API_RETHROW
-            }
+            ::new (static_cast<void*>(_Mylast)) value_type(std::forward<_Args>(_Values)...);
+            value_type& _Result = *_Mylast;
+            ++_Mylast;
+            return _Result;
         }
 
-        _Change_array(_Newvec, _Size, _Newcapacity);
-    }
+        template<class... _Args>
+        pointer _Emplace_reallocate(pointer _Whereptr, _Args&&... _Values)
+        { // reallocate and insert by perfectly forwarding _Val at _Whereptr
+            // pre: !_Has_unused_capacity()
+            const size_t _Whereoff = static_cast<size_t>(_Whereptr - this->_Myfirst);
+            const size_t _Oldsize  = static_cast<size_t>(_Mylast - _Myfirst);
 
-    iterator _Make_iterator_offset(const size_type _Offset) noexcept
-    {	// return the iterator begin() + _Offset
-        return iterator(_First + _Offset);
-    }
+            if ( _Oldsize == max_size() ) NH3API_UNLIKELY
+                nh3api::throw_exception<std::length_error>("vector::emplace: size exceeded maximum size");
 
-    // micro-optimization for capacity() - size()
-    size_type _Unused_capacity() const noexcept
-    { return static_cast<size_type>(this->_End - this->_Last); }
+            const size_t _Newsize     = _Oldsize + 1;
+            const size_t _Newcapacity = _Calculate_growth(_Newsize);
 
-    // micro-optimization for capacity() != size()
-    bool _Has_unused_capacity() const noexcept
-    { return this->_End != this->_Last; }
+            pointer             _Newvec           = _Allocate(_Newcapacity);
+            pointer             _Constructed_last = _Newvec + _Whereoff + 1;
+            _Reallocation_guard _Guard { _Newvec, _Newcapacity, _Constructed_last, _Constructed_last };
+            pointer&            _Constructed_first = _Guard._Constructed_first;
 
-    // move [first, last) to raw dest, using allocator
-    void _Umove_if_noexcept(pointer first, pointer last, pointer dest)
-    {
-        nh3api::verify_range(first, last);
-        _Umove_if_noexcept_impl(first, last, dest,
-        std::disjunction<
-        std::is_nothrow_move_constructible<value_type>,
-        std::negation<std::is_copy_constructible<value_type>>>());
-    }
-
-    // move [first, last) to raw dest, using allocator
-    void _Umove_if_noexcept_impl(pointer first, pointer last, pointer dest, std::true_type) noexcept
-    { _Umove(first, last, dest); }
-
-    // copy [first, last) to raw dest, using allocator
-    void _Umove_if_noexcept_impl(pointer first, pointer last, pointer dest, std::false_type)
-    { std::uninitialized_copy<pointer, pointer>(first, last, dest); }
-
-    NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20 static void _Destroy_range(pointer first, pointer last)
-    noexcept(noexcept(std::is_nothrow_destructible_v<value_type> || std::is_trivially_destructible_v<value_type>))
-    {
-        nh3api::verify_range(first, last);
-
-        if constexpr (!std::is_trivially_destructible_v<value_type>)
-            std::destroy<pointer>(first, last);
-    }
-
-    NH3API_FORCEINLINE static pointer _Umove(pointer first, pointer last, pointer ptr)
-    {
-        nh3api::verify_range(first, last);
-
-        static_assert(std::is_move_constructible_v<value_type> || std::is_copy_constructible_v<value_type>, "value_type must be either copy or move constructible");
-
-        return std::uninitialized_move<pointer, pointer>(first, last, ptr);
-    }
-
-    NH3API_FORCEINLINE static pointer _Move_backward(pointer first, pointer last, pointer ptr)
-    {
-        nh3api::verify_range(first, last);
-        static_assert (std::is_move_assignable_v<value_type> || std::is_copy_assignable_v<value_type>, "value_type must be either copy or move constructible" );
-
-        if constexpr ( std::is_nothrow_move_assignable_v<value_type> || !std::is_copy_assignable_v<value_type> )
-            return std::move_backward<pointer, pointer>(first, last, ptr);
-        else if ( std::is_copy_assignable_v<value_type> )
-            return std::copy_backward<pointer, pointer>(first, last, ptr);
-    }
-
-    NH3API_FORCEINLINE static pointer _Ufill(pointer first, size_type count, const value_type& value)
-    NH3API_NOEXCEPT_EXPR(noexcept_copy)
-    {
-        std::uninitialized_fill_n<pointer, size_type, value_type>(first, count, value);
-        return first + count; // see LWG 1339
-    }
-
-    NH3API_FORCEINLINE static pointer _Default_fill(pointer first, size_type count)
-    noexcept(noexcept(std::is_nothrow_default_constructible_v<value_type>))
-    {
-        nh3api::verify_range_n(first, count);
-        return std::uninitialized_value_construct_n<pointer, size_type>(first, count);
-    }
-
-    NH3API_FORCEINLINE static pointer _Allocate(size_type num) noexcept
-    { return static_cast<pointer>(::operator new(num * sizeof(value_type), exe_heap, std::nothrow)); }
-
-    NH3API_FORCEINLINE static void _Deallocate(void* ptr) noexcept
-    { ::operator delete(ptr, exe_heap); }
-
-    // allocate array with _Capacity elements
-    bool _Buy(size_type _Capacity)
-    {
-        this->_First = nullptr;
-        this->_Last  = nullptr;
-        this->_End   = nullptr;
-
-        if (_Capacity == 0)
-            return false;
-        else if (max_size() < _Capacity)
-            NH3API_THROW(std::invalid_argument, "vector::reserve: invalid requested size.");
-        else
-        {	// nonempty array, allocate storage
-            this->_First = _Allocate(_Capacity);
-            this->_Last  = this->_First;
-            this->_End   = this->_First + _Capacity;
-        }
-        return true;
-    }
-
-    // given _Oldcapacity and _Newsize, calculate geometric growth
-    [[nodiscard]] size_type _Calculate_growth(const size_type _Newsize) const noexcept
-    {
-        const size_type _Oldcapacity = capacity();
-        if (_Oldcapacity > max_size() - _Oldcapacity / 2)
-            return _Newsize;	// geometric growth would overflow
-
-        const size_type _Geometric = _Oldcapacity + _Oldcapacity / 2;
-        if (_Geometric < _Newsize)
-            return _Newsize;	// geometric growth would be insufficient
-        return _Geometric;	// geometric growth is sufficient
-    }
-
-    // discard old array, acquire new array
-    void _Change_array(pointer _Newvec,
-                       const size_type _Newsize,
-                       const size_type _Newcapacity) noexcept
-    {
-        _Tidy();
-
-        this->_First = _Newvec;
-        this->_Last = _Newvec + _Newsize;
-        this->_End = _Newvec + _Newcapacity;
-    }
-
-    // free all storage
-    void _Tidy() noexcept
-    {
-        if (this->_First != nullptr)
-        {	// something to free, destroy and deallocate it
-            _Destroy_range(this->_First, this->_Last);
-            _Deallocate(this->_First);
-        }
-    }
-
-    #ifdef __cpp_concepts
-    template<nh3api::tt::iterator_for_container IterT>
-    #else
-    template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-    #endif
-    // insert [first, last) at _Where, input iterators
-    void _Insert_range(const_iterator _Where, IterT first, IterT last, std::input_iterator_tag)
-    {
-        if (first == last)
-        {
-            return;	// nothing to do, avoid invalidating iterators
-        }
-
-        const size_type _Whereoff = static_cast<size_type>(_Where - this->_First);
-        const size_type _Oldsize = size();
-
-        for (; first != last; ++first)
-            emplace_back(*first);
-
-        std::rotate(this->_First + _Whereoff, this->_First + _Oldsize, this->_Last);
-    }
-
-    template<class IterT>
-    void _Insert_range(const_iterator _Where, IterT first, IterT last, std::forward_iterator_tag)
-    {
-        nh3api::verify_range(first, last);
-        iterator _Whereptr = const_cast<pointer>(_Where);
-        const size_type _Count = static_cast<size_type>(static_cast<size_t>(std::distance(first, last)));
-        const size_type _Whereoff = static_cast<size_type>(_Where - this->_Last);
-        const bool _One_at_back = _Count == 1 && _Where == this->_Last;
-
-        if (_Count == 0)
-        { // nothing to do, avoid invalidating iterators
-        }
-        else if (_Count > _Unused_capacity())
-        { // reallocate
-            const size_type _Oldsize = size();
-
-            if (_Count > max_size() - _Oldsize)
-            {
-                NH3API_THROW(std::length_error, "vector::insert: size exceeded max_size");
-            }
-
-            const size_type _Newsize = _Oldsize + _Count;
-            const size_type _Newcapacity = _Calculate_growth(_Newsize);
-
-            pointer _Newvec = _Allocate(_Newcapacity);
-            pointer _Constructed_last = _Newvec + _Whereoff + _Count;
-            pointer _Constructed_first = _Constructed_last;
-
-            { // scope for exception guard
-            NH3API_MAKE_EXCEPTION_GUARD(
-                noexcept_copy && noexcept_move,
-                range_cleanup, *this, _Constructed_first, _Constructed_last, _Newvec, _Newcapacity);
-
-            std::uninitialized_copy(first, last, _Newvec + _Whereoff);
+            ::new (static_cast<void*>(_Newvec + _Whereoff)) value_type(std::forward<_Args>(_Values)...);
             _Constructed_first = _Newvec + _Whereoff;
-            if (_One_at_back)
-            { // provide strong guarantee
-                _Umove_if_noexcept(this->_Last, this->_Last, _Newvec);
+
+            if ( _Whereptr == _Mylast )
+            { // at back, provide strong guarantee
+                if constexpr ( std::is_nothrow_move_constructible_v<_Ty> || !std::is_copy_constructible_v<_Ty> )
+                    std::uninitialized_move(_Myfirst, _Mylast, _Newvec);
+                else
+                    std::uninitialized_copy(_Myfirst, _Mylast, _Newvec);
             }
             else
             { // provide basic guarantee
-                _Umove(this->_Last, _Whereptr, _Newvec);
+                std::uninitialized_move(_Myfirst, _Whereptr, _Newvec);
                 _Constructed_first = _Newvec;
-                _Umove(_Whereptr, this->_Last, _Newvec + _Whereoff + _Count);
+                std::uninitialized_move(_Whereptr, _Mylast, _Newvec + _Whereoff + 1);
             }
 
-            guard.complete();
-
-            } // scope for exception guard
-
+            _Guard._New_begin = nullptr;
             _Change_array(_Newvec, _Newsize, _Newcapacity);
+            return _Newvec + _Whereoff;
         }
-        else
-        { // Attempt to provide the strong guarantee for EmplaceConstructible failure.
-          // If we encounter copy/move construction/assignment failure, provide the basic guarantee.
-          // (For one-at-back, this provides the strong guarantee.)
 
-            pointer _Oldlast = this->_Last;
-            const size_type _Affected_elements = static_cast<size_type>(_Oldlast - _Where);
+    public:
+        template<class... _Args>
+        value_type& emplace_back(_Args&&... _Values)
+        {
+            return _Emplace_one_at_back(std::forward<_Args>(_Values)...);
+        }
 
-            if (_Count < _Affected_elements)
-            { // some affected elements must be assigned
-                this->_Last = _Umove(_Oldlast - _Count, _Oldlast, _Oldlast);
-                _Move_backward(_Whereptr, _Oldlast - _Count, _Oldlast);
-                _Destroy_range(_Whereptr, _Whereptr + _Count);
+        void push_back(const value_type& _Value)
+        {
+            _Emplace_one_at_back(_Value);
+        }
 
-                if constexpr ( noexcept_copy )
-                {
-                    std::uninitialized_copy<IterT, pointer>(first, last, _Whereptr);
+        void push_back(value_type&& _Value)
+        {
+            _Emplace_one_at_back(std::move(_Value));
+        }
+
+    private:
+        template<class _Iter, class _Sent>
+        void _Append_uncounted_range(_Iter _First, const _Sent _Last)
+        {
+            for ( ; _First != _Last; ++_First )
+                _Emplace_one_at_back(*_First);
+        }
+
+#ifdef __cpp_lib_containers_ranges
+        template<class _Iter>
+        void _Append_counted_range(_Iter _First, const size_t _Count)
+        {
+            pointer      _Oldfirst        = _Myfirst;
+            pointer      _Oldlast         = _Mylast;
+            const size_t _Unused_capacity = static_cast<size_t>(_Myend - _Oldlast);
+            if ( _Count == 0 )
+            { // nothing to do, avoid invalidating iterators
+            }
+            else if ( _Count > _Unused_capacity )
+            { // reallocate
+                const size_t _Oldsize = static_cast<size_t>(_Oldlast - _Oldfirst);
+
+                if ( _Count > max_size() - _Oldsize ) NH3API_UNLIKELY
+                    nh3api::throw_exception<std::length_error>("vector::append_range: range too long");
+
+                const size_t _Newsize          = _Oldsize + _Count;
+                size_t       _Newcapacity      = _Calculate_growth(_Newsize);
+                pointer      _Newvec           = _Allocate(_Newcapacity);
+                pointer      _Constructed_last = _Newvec + _Oldsize + _Count;
+
+                _Reallocation_guard _Guard { _Newvec, _Newcapacity, _Constructed_last, _Constructed_last };
+                pointer&            _Constructed_first = _Guard._Constructed_first;
+
+                std::uninitialized_copy_n(std::move(_First), _Count, _Newvec + _Oldsize);
+                _Constructed_first = _Newvec + _Oldsize;
+
+                if ( _Count == 1 )
+                { // one at back, provide strong guarantee
+                    if constexpr ( std::is_nothrow_move_constructible_v<_Ty> || !std::is_copy_constructible_v<_Ty> )
+                        std::uninitialized_move(_Oldfirst, _Oldlast, _Newvec);
+                    else
+                        std::uninitialized_copy(_Oldfirst, _Oldlast, _Newvec);
                 }
                 else
-                {
-                    NH3API_TRY
-                    {
-                        std::uninitialized_copy<IterT, pointer>(first, last, _Whereptr);
-                    }
-                    NH3API_CATCH(...)
-                    {
-                        NH3API_TRY
-                        {
-                            _Umove(_Whereptr + _Count, _Whereptr + 2 * _Count, _Whereptr);
-                        }
-                        NH3API_CATCH(...)
-                        {
-                            // vaporize the detached piece
-                            _Destroy_range(_Whereptr + _Count, this->_Last);
-                            this->_Last = _Whereptr;
-                            NH3API_RETHROW
-                        }
-                        std::move(_Whereptr + 2 * _Count, this->_Last, _Whereptr + _Count);
-                        _Destroy_range(_Oldlast, this->_Last);
-                        this->_Last = _Oldlast;
-                        NH3API_RETHROW
-                    }
+                { // provide basic guarantee
+                    std::uninitialized_move(_Oldfirst, _Oldlast, _Newvec);
                 }
+
+                _Guard._New_begin = nullptr;
+                _Change_array(_Newvec, _Newsize, _Newcapacity);
             }
             else
-            { // affected elements don't overlap before/after
-                pointer _Relocated = _Whereptr + _Count;
-                this->_Last = _Umove(_Whereptr, _Oldlast, _Relocated);
-                _Destroy_range(_Whereptr, _Oldlast);
-                if constexpr ( noexcept_copy )
-                {
-                    std::uninitialized_copy<IterT, pointer>(first, last, _Whereptr);
+            { // Provide the strong guarantee.
+                // Performance note: except for one-at-back, the strong guarantee is unnecessary here.
+                _Mylast = std::uninitialized_copy_n(std::move(_First), _Count, _Oldlast);
+            }
+        }
+
+public:
+    #if defined(__clang__) && defined(__INTELLISENSE__)
+        template<typename _Range>
+    #else
+        template<nh3api::tt::container_compatible_range<value_type> _Rng>
+    #endif
+        void append_range(_Rng&& _Range)
+        {
+            if constexpr ( std::ranges::forward_range<_Rng> || std::ranges::sized_range<_Rng> )
+                _Append_counted_range(nh3api::unfancy_begin(_Range), static_cast<size_t>(std::ranges::distance(_Range)));
+            else
+                _Append_uncounted_range(nh3api::unfancy_begin(_Range), nh3api::unfancy_end(_Range));
+        }
+
+#endif // __cpp_lib_containers_ranges (C++23)
+public:
+        template<class... _Args>
+        iterator emplace(const_iterator _Where, _Args&&... _Values)
+        {
+            pointer _Whereptr = const_cast<pointer>(_Where);
+            pointer _Oldlast  = this->_Mylast;
+#if NH3API_DEBUG
+            if ( _Whereptr > this->_Myfirst && _Oldlast > _Whereptr )
+                nh3api::throw_exception<std::out_of_range>("vector::emplace iterator outside range");
+#endif
+            if ( _Oldlast != _Myend )
+            {
+                if ( _Whereptr == _Oldlast )
+                { // at back, provide strong guarantee
+                    _Emplace_back_with_unused_capacity(std::forward<_Args>(_Values)...);
                 }
                 else
                 {
-                    NH3API_TRY
+                    value_type _Obj(std::forward<_Args>(_Values)...); // handle aliasing
+                    // after constructing _Obj, provide basic guarantee
+                    ::new (static_cast<void*>(_Oldlast)) value_type { std::move(_Oldlast[-1]) };
+                    ++this->_Mylast;
+                    std::move_backward(_Whereptr, _Oldlast - 1, _Oldlast);
+                    *_Whereptr = std::move(_Obj);
+                }
+
+                return _Whereptr;
+            }
+
+            return _Emplace_reallocate(_Whereptr, std::forward<_Args>(_Values)...);
+        }
+
+        // insert _Value at _Pos
+        iterator insert(const_iterator _Pos, const value_type& _Value)
+        {
+            return emplace(_Pos, _Value);
+        }
+
+        // insert _Value at _Pos
+        iterator insert(const_iterator _Pos, value_type&& _Value)
+        {
+            return emplace(_Pos, std::move(_Value));
+        }
+
+        iterator insert(const_iterator _Where, const size_t _Count, const value_type& _Value)
+        {
+            pointer      _Oldfirst        = this->_Myfirst;
+            pointer      _Oldlast         = this->_Mylast;
+            pointer      _Whereptr        = const_cast<pointer>(_Where);
+            const size_t _Unused_capacity = static_cast<size_t>(this->_Myend - _Oldlast);
+            const size_t _Whereoff        = static_cast<size_t>(_Whereptr - _Oldfirst);
+            const bool   _One_at_back     = _Count == 1 && _Whereptr == _Oldlast;
+
+            if ( _Count == 0 )
+            { // nothing to do, avoid invalidating iterators
+            }
+            else if ( _Count > _Unused_capacity )
+            { // reallocate
+                const size_t _Oldsize = static_cast<size_t>(_Oldlast - _Oldfirst);
+
+                if ( _Count > max_size() - _Oldsize ) NH3API_UNLIKELY
+                    nh3api::throw_exception<std::length_error>("vector::insert: size exceeded max_size");
+
+                const size_t _Newsize     = _Oldsize + _Count;
+                const size_t _Newcapacity = _Calculate_growth(_Newsize);
+
+                pointer             _Newvec           = _Allocate(_Newcapacity);
+                pointer             _Constructed_last = _Newvec + _Whereoff + _Count;
+                _Reallocation_guard _Guard { _Newvec, _Newcapacity, _Constructed_last, _Constructed_last };
+                pointer&            _Constructed_first = _Guard._Constructed_last;
+
+                std::uninitialized_fill_n(_Newvec + _Whereoff, _Count, _Value);
+                _Constructed_first = _Newvec + _Whereoff;
+
+                if ( _One_at_back )
+                { // provide strong guarantee
+                    if constexpr ( std::is_nothrow_move_constructible_v<value_type> || !std::is_copy_constructible_v<value_type> )
+                        std::uninitialized_move(_Oldfirst, _Oldlast, _Newvec);
+                    else
+                        std::uninitialized_copy(_Oldfirst, _Oldlast, _Newvec);
+                }
+                else
+                { // provide basic guarantee
+                    std::uninitialized_move(this->_Myfirst, _Whereptr, _Newvec);
+                    _Constructed_first = _Newvec;
+                    std::uninitialized_move(_Whereptr, this->_Mylast, _Newvec + _Whereoff + _Count);
+                }
+
+                _Guard._New_begin = nullptr;
+                _Change_array(_Newvec, _Newsize, _Newcapacity);
+            }
+            else if ( _One_at_back )
+            { // provide strong guarantee
+                _Emplace_back_with_unused_capacity(_Value);
+            }
+            else
+            {                                                 // provide basic guarantee
+                const value_type _Tmp               = _Value; // handle aliasing
+                const size_t     _Affected_elements = static_cast<size_t>(_Oldlast - _Where);
+
+                if ( _Count > _Affected_elements )
+                { // new stuff spills off end
+                    this->_Mylast = std::uninitialized_fill_n(_Oldlast, _Count - _Affected_elements, _Tmp);
+                    this->_Mylast = std::uninitialized_move(_Whereptr, _Oldlast, this->_Mylast);
+                    std::fill(_Whereptr, _Oldlast, _Tmp);
+                }
+                else
+                { // new stuff can all be assigned
+                    this->_Mylast = std::uninitialized_move(_Oldlast - _Count, _Oldlast, _Oldlast);
+                    std::move_backward(_Whereptr, _Oldlast - _Count, _Oldlast);
+                    std::fill_n(_Whereptr, _Count, _Tmp);
+                }
+            }
+            return _Make_iterator_offset(_Whereoff);
+        }
+
+    private:
+        // insert range [_First, _Last) at _Where
+        template<class _Iter, class _Sent>
+        void _Insert_uncounted_range(const_iterator _Where, _Iter _First, _Sent _Last)
+        {
+            if ( _First == _Last )
+                return; // nothing to do, avoid invalidating iterators
+
+            const size_t _Whereoff = static_cast<size_t>(_Where - this->_Myfirst);
+            const size_t _Oldsize  = static_cast<size_t>(this->_Mylast - this->_Myfirst);
+
+            _Append_uncounted_range(std::move(_First), std::move(_Last));
+            std::rotate(this->_Myfirst + _Whereoff, this->_Myfirst + _Oldsize, this->_Mylast);
+        }
+
+        // insert counted range _First + [0, _Count) at _Where
+        template<class _Iter>
+        void _Insert_counted_range(const_iterator _Where, _Iter _First, const size_t _Count)
+        {
+            pointer      _Whereptr        = const_cast<pointer>(_Where);
+            pointer      _Oldfirst        = this->_Myfirst;
+            pointer      _Oldlast         = this->_Mylast;
+            const size_t _Unused_capacity = static_cast<size_t>(this->_Myend - _Oldlast);
+            if ( _Count == 0 )
+            { // nothing to do, avoid invalidating iterators
+            }
+            else if ( _Count > _Unused_capacity )
+            { // reallocate
+                const size_t _Oldsize = static_cast<size_t>(_Oldlast - _Oldfirst);
+
+                if ( _Count > max_size() - _Oldsize ) NH3API_UNLIKELY
+                    nh3api::throw_exception<std::length_error>("vector::insert: size exceeded max_size");
+
+                const size_t _Newsize     = _Oldsize + _Count;
+                size_t       _Newcapacity = _Calculate_growth(_Newsize);
+
+                pointer      _Newvec           = _Allocate(_Newcapacity);
+                const size_t _Whereoff         = static_cast<size_t>(_Whereptr - _Oldfirst);
+                pointer      _Constructed_last = _Newvec + _Whereoff + _Count;
+
+                _Reallocation_guard _Guard { _Newvec, _Newcapacity, _Constructed_last, _Constructed_last };
+                pointer&            _Constructed_first = _Guard._Constructed_first;
+
+                std::uninitialized_copy_n(std::move(_First), _Count, _Newvec + _Whereoff);
+                _Constructed_first = _Newvec + _Whereoff;
+
+                if ( _Count == 1 && _Whereptr == _Oldlast )
+                { // one at back, provide strong guarantee
+                    if constexpr ( std::is_nothrow_move_constructible_v<value_type> || !std::is_copy_constructible_v<value_type> )
+                        std::uninitialized_move(_Oldfirst, _Oldlast, _Newvec);
+                    else
+                        std::uninitialized_copy(_Oldfirst, _Oldlast, _Newvec);
+                }
+                else
+                { // provide basic guarantee
+                    std::uninitialized_move(_Oldfirst, _Whereptr, _Newvec);
+                    _Constructed_first = _Newvec;
+                    std::uninitialized_move(_Whereptr, _Oldlast, _Newvec + _Whereoff + _Count);
+                }
+
+                _Guard._New_begin = nullptr;
+                _Change_array(_Newvec, _Newsize, _Newcapacity);
+            }
+            else
+            { // Attempt to provide the strong guarantee for EmplaceConstructible failure.
+                // If we encounter copy/move construction/assignment failure, provide the basic guarantee.
+                // (For one-at-back, this provides the strong guarantee.)
+
+                const size_t _Affected_elements = static_cast<size_t>(_Oldlast - _Whereptr);
+
+                if ( _Count < _Affected_elements )
+                { // some affected elements must be assigned
+                    _Mylast = std::uninitialized_move(_Oldlast - _Count, _Oldlast, _Oldlast);
+                    std::move_backward(_Whereptr, _Oldlast - _Count, _Oldlast);
+                    std::destroy(_Whereptr, _Whereptr + _Count);
+
+                    if constexpr ( std::is_nothrow_copy_constructible_v<value_type> || std::is_trivially_copy_constructible_v<value_type> )
                     {
-                        std::uninitialized_copy<IterT, pointer>(first, last, _Whereptr);
+                        std::uninitialized_copy_n(std::move(_First), _Count, _Whereptr);
                     }
-                    NH3API_CATCH(...)
+                    else
                     {
                         NH3API_TRY
                         {
-                            _Umove(_Relocated, this->_Last, _Whereptr);
+                            std::uninitialized_copy_n(std::move(_First), _Count, _Whereptr);
                         }
                         NH3API_CATCH(...)
-                        {
-                            // vaporize the detached piece
-                            _Destroy_range(_Relocated, this->_Last);
-                            this->_Last = _Whereptr;
+                        { // glue the broken pieces back together
+                            _Vaporization_guard _Guard { this, _Whereptr, _Oldlast, _Whereptr + _Count };
+                            std::uninitialized_move(_Whereptr + _Count, _Whereptr + 2 * _Count, _Whereptr);
+                            _Guard._Target = nullptr;
+
+                            std::move(_Whereptr + 2 * _Count, _Mylast, _Whereptr + _Count);
+                            std::destroy(_Oldlast, _Mylast);
+                            _Mylast = _Oldlast;
                             NH3API_RETHROW
                         }
-                        _Destroy_range(_Relocated, this->_Last);
-                        this->_Last = _Oldlast;
-                        NH3API_RETHROW
+                    }
+                }
+                else
+                { // affected elements don't overlap before/after
+                    pointer _Relocated = _Whereptr + _Count;
+                    _Mylast            = std::uninitialized_move(_Whereptr, _Oldlast, _Relocated);
+                    std::destroy(_Whereptr, _Oldlast);
+
+                    if constexpr ( std::is_nothrow_copy_constructible_v<value_type> || std::is_trivially_copy_constructible_v<value_type> )
+                    {
+                        std::uninitialized_copy_n(std::move(_First), _Count, _Whereptr);
+                    }
+                    else
+                    {
+                        NH3API_TRY
+                        {
+                            std::uninitialized_copy_n(std::move(_First), _Count, _Whereptr);
+                        }
+                        NH3API_CATCH(...)
+                        { // glue the broken pieces back together
+                            _Vaporization_guard _Guard { this, _Whereptr, _Oldlast, _Relocated };
+                            std::uninitialized_move(_Relocated, _Mylast, _Whereptr);
+                            _Guard._Target = nullptr;
+
+                            std::destroy(_Relocated, _Mylast);
+                            _Mylast = _Oldlast;
+                            NH3API_RETHROW
+                        }
                     }
                 }
             }
         }
-    }
 
-protected:
-    uint32_t _Dummy; // the original implementation had no size optimization for empty allocator
-    pointer _First;	// pointer to beginning of array
-    pointer _Last;	// pointer to current end of sequence
-    pointer _End;	// pointer to end of array
-};
-#pragma pack(pop)
+    public:
+#ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container _Iter>
+#else
+        template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
+#endif
+        iterator insert(const_iterator _Where, _Iter _First, _Iter _Last)
+        {
+            pointer _Whereptr = const_cast<pointer>(_Where);
+            pointer _Oldfirst = this->_Myfirst;
+            nh3api::verify_range(_First, _Last);
+            auto         _UFirst   = nh3api::unfancy(_First);
+            auto         _ULast    = nh3api::unfancy(_Last);
+            const size_t _Whereoff = static_cast<size_t>(_Whereptr - _Oldfirst);
+            if constexpr ( nh3api::is_cpp17_fwd_iter_v<_Iter> )
+                _Insert_counted_range(_Where, _UFirst, static_cast<size_t>(std::distance(_UFirst, _ULast)));
+#ifdef __cpp_lib_ranges
+            else if ( std::forward_iterator<_Iter> )
+                _Insert_counted_range(_Where, _UFirst, static_cast<size_t>(std::ranges::distance(_UFirst, _ULast)));
+#endif
+            else
+                _Insert_uncounted_range(_Where, _UFirst, _ULast);
+            return _Make_iterator_offset(_Whereoff);
+        }
 
-//}; // namespace nh3api
+#ifdef __cpp_lib_containers_ranges
+        template<nh3api::tt::container_compatible_range<value_type> _Range>
+        iterator insert_range(const_iterator _Where, _Range&& _Rng)
+        {
+            pointer      _Whereptr = const_cast<pointer>(_Where);
+            pointer      _Oldfirst = _Myfirst;
+            const size_t _Whereoff = static_cast<size_t>(_Whereptr - _Oldfirst);
 
-template<class T> NH3API_FORCEINLINE
-    bool operator==(const exe_vector<T>& _Left, const exe_vector<T>& other)
-{	// test for vector equality
-    return (_Left.size() == other.size()
-        && std::equal(_Left.begin(), _Left.end(), other.begin()));
-}
+            if constexpr ( std::ranges::forward_range<_Range> || std::ranges::sized_range<_Range> )
+                _Insert_counted_range(_Where, nh3api::unfancy_begin(_Rng), static_cast<size_t>(std::ranges::distance(_Rng)));
+            else
+                _Insert_uncounted_range(_Where, nh3api::unfancy_begin(_Rng), nh3api::unfancy_end(_Rng));
 
-template<class T> NH3API_FORCEINLINE
-    bool operator!=(const exe_vector<T>& _Left, const exe_vector<T>& other)
-{	// test for vector inequality
-    return (!(_Left == other));
-}
-
-template<class T> NH3API_FORCEINLINE
-    bool operator<(const exe_vector<T>& _Left, const exe_vector<T>& other)
-{	// test if _Left < other for vectors
-    return (std::lexicographical_compare(_Left.begin(), _Left.end(),
-        other.begin(), other.end()));
-}
-
-template<class T> NH3API_FORCEINLINE
-    bool operator>(const exe_vector<T>& _Left, const exe_vector<T>& other)
-{	// test if _Left > other for vectors
-    return (other < _Left);
-}
-
-template<class T> NH3API_FORCEINLINE
-    bool operator<=(const exe_vector<T>& _Left, const exe_vector<T>& other)
-{	// test if _Left <= other for vectors
-    return (!(other < _Left));
-}
-
-template<class T> NH3API_FORCEINLINE
-    bool operator>=(const exe_vector<T>& _Left, const exe_vector<T>& other)
-{	// test if _Left >= other for vectors
-    return (!(_Left < other));
-}
-
-#if NH3API_MSVC_STL && !defined(_MSVC_STL_UPDATE)
-NH3API_DISABLE_MSVC_WARNING_END
+            return _Make_iterator_offset(_Whereoff);
+        }
 #endif
 
-NH3API_DISABLE_WARNING_END
-NH3API_DISABLE_WARNING_END
-#endif // NH3API_FLAG_USE_NATIVE_STD_VECTOR
+        iterator insert(const_iterator _Where, std::initializer_list<value_type> _Initializer_list)
+        {
+            pointer      _Whereptr = const_cast<pointer>(_Where);
+            pointer      _Oldfirst = _Myfirst;
+            const size_t _Whereoff = static_cast<size_t>(_Whereptr - _Oldfirst);
+
+            _Insert_counted_range(_Where, _Initializer_list.begin(), _Initializer_list.size());
+            return _Make_iterator_offset(_Whereoff);
+        }
+
+        void assign(const size_t _Newsize, const value_type& _Val)
+        {
+            const size_t _Oldcapacity = static_cast<size_t>(this->_Myend - this->_Myfirst);
+            if ( _Newsize > _Oldcapacity )
+            { // reallocate
+                _Clear_and_reserve_geometric(_Newsize);
+                _Mylast = std::uninitialized_fill_n(_Myfirst, _Newsize, _Val);
+
+                return;
+            }
+
+            const size_t _Oldsize = static_cast<size_t>(_Mylast - _Myfirst);
+            if ( _Newsize > _Oldsize )
+            {
+                std::fill(_Myfirst, _Mylast, _Val);
+                _Mylast = std::uninitialized_fill_n(_Mylast, _Newsize - _Oldsize, _Val);
+            }
+            else
+            {
+                pointer _Newlast = this->_Myfirst + _Newsize;
+                std::fill(this->_Myfirst, _Newlast, _Val);
+                std::destroy(_Newlast, this->_Mylast);
+                _Mylast = _Newlast;
+            }
+        }
+
+    private:
+        template<class _Iter, class _Sent>
+        void _Assign_uncounted_range(_Iter _First, _Sent _Last)
+        {
+            pointer _Next = this->_Myfirst;
+            for ( ; _First != _Last && _Next != this->_Mylast; ++_First, (void)++_Next )
+                *_Next = *_First;
+
+            std::destroy(_Next, _Mylast);
+            _Mylast = _Next;
+            _Append_uncounted_range(std::move(_First), std::move(_Last));
+        }
+
+        template<class _Iter>
+        void _Assign_counted_range(_Iter _First, const size_t _Newsize)
+        {
+            const size_t _Oldcapacity = static_cast<size_t>(_Myend - _Myfirst);
+            if ( _Newsize > _Oldcapacity )
+            {
+                _Clear_and_reserve_geometric(_Newsize);
+                this->_Mylast = std::uninitialized_copy_n(std::move(_First), _Newsize, _Myfirst);
+                return;
+            }
+
+            const size_t _Oldsize = static_cast<size_t>(_Mylast - _Myfirst);
+            if ( _Newsize > _Oldsize )
+            {
+                for ( pointer _Mid = this->_Myfirst; _Mid != this->_Mylast; ++_Mid, (void)++_First )
+                    *_Mid = *_First;
+
+                this->_Mylast = std::uninitialized_copy_n(std::move(_First), _Newsize - _Oldsize, this->_Mylast);
+            }
+            else
+            {
+                pointer _Newlast = this->_Myfirst + _Newsize;
+                std::copy_n(std::move(_First), _Newsize, this->_Myfirst);
+                std::destroy(_Newlast, this->_Mylast);
+                this->_Mylast = _Newlast;
+            }
+        }
+
+    public:
+#ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container _Iter>
+#else
+        template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
+#endif
+        void assign(_Iter _First, _Iter _Last)
+        {
+            nh3api::verify_range(_First, _Last);
+            auto _UFirst = nh3api::unfancy(_First);
+            auto _ULast  = nh3api::unfancy(_Last);
+
+            if constexpr ( nh3api::is_cpp17_fwd_iter_v<_Iter> )
+                _Assign_counted_range(_UFirst, static_cast<size_t>(std::distance(_UFirst, _ULast)));
+#ifdef __cpp_lib_ranges
+            else if constexpr ( std::forward_iterator<_Iter> )
+                _Assign_counted_range(_UFirst, static_cast<size_t>(std::ranges::distance(_UFirst, _ULast)));
+#endif
+            else
+                _Assign_uncounted_range(_UFirst, _ULast);
+        }
+
+#ifdef __cpp_lib_containers_ranges
+        template<nh3api::tt::container_compatible_range<value_type> _Range>
+        constexpr void assign_range(_Range&& _Rng)
+        {
+            static_assert(std::assignable_from<reference, std::ranges::range_reference_t<_Range>>,
+                          "Elements must be assignable from the range's reference type (N4993 [sequence.reqmts]/60).");
+            if constexpr ( std::ranges::sized_range<_Range> || std::ranges::forward_range<_Range> )
+                _Assign_counted_range(nh3api::unfancy_begin(_Rng), static_cast<size_t>(std::ranges::distance(_Rng)));
+            else
+                _Assign_uncounted_range(nh3api::unfancy_begin(_Rng), nh3api::unfancy_end(_Rng));
+        }
+#endif
+
+        void assign(const std::initializer_list<value_type>& _Initializer_list)
+        {
+            _Assign_counted_range(_Initializer_list.begin(), _Initializer_list.size());
+        }
+
+        exe_vector& operator=(const exe_vector& _Right)
+        {
+            if ( this == &_Right )
+                return *this;
+
+            _Assign_counted_range(_Right._Myfirst, static_cast<size_t>(_Right._Mylast - _Right._Myfirst));
+            return *this;
+        }
+
+        exe_vector& operator=(const std::initializer_list<value_type>& _Initializer_list)
+        {
+            _Assign_counted_range(_Initializer_list.begin(), _Initializer_list.size());
+            return *this;
+        }
+
+    private:
+        void _Resize_reallocate(const size_t _Newsize, const value_type& _Value)
+        {
+            if ( _Newsize > max_size() ) NH3API_UNLIKELY
+                nh3api::throw_exception<std::length_error>("vector::resize: vector too long");
+
+            const size_t _Oldsize     = static_cast<size_t>(this->_Mylast - this->_Myfirst);
+            size_t       _Newcapacity = _Calculate_growth(_Newsize);
+
+            pointer _Newvec         = _Allocate(_Newcapacity);
+            pointer _Appended_first = _Newvec + _Oldsize;
+
+            _Reallocation_guard _Guard { _Newvec, _Newcapacity, _Appended_first, _Appended_first };
+            pointer&            _Appended_last = _Guard._Constructed_last;
+
+            _Appended_last = std::uninitialized_fill_n(_Appended_first, _Newsize - _Oldsize, _Value);
+            if constexpr ( std::is_nothrow_move_constructible_v<value_type> || !std::is_copy_constructible_v<value_type> )
+                std::uninitialized_move(_Myfirst, _Mylast, _Newvec);
+            else
+                std::uninitialized_copy(_Myfirst, _Mylast, _Newvec);
+
+            _Guard._New_begin = nullptr;
+            _Change_array(_Newvec, _Newsize, _Newcapacity);
+        }
+
+        void _Resize_reallocate_default(const size_t _Newsize)
+        {
+            if ( _Newsize > max_size() ) NH3API_UNLIKELY
+                nh3api::throw_exception<std::length_error>("vector::resize: vector too long");
+
+            const size_t _Oldsize     = static_cast<size_t>(this->_Mylast - this->_Myfirst);
+            size_t       _Newcapacity = _Calculate_growth(_Newsize);
+
+            pointer _Newvec         = _Allocate(_Newcapacity);
+            pointer _Appended_first = _Newvec + _Oldsize;
+
+            _Reallocation_guard _Guard { _Newvec, _Newcapacity, _Appended_first, _Appended_first };
+            pointer&            _Appended_last = _Guard._Constructed_last;
+
+            _Appended_last = std::uninitialized_value_construct_n(_Appended_first, _Newsize - _Oldsize);
+            if constexpr ( std::is_nothrow_move_constructible_v<value_type> || !std::is_copy_constructible_v<value_type> )
+                std::uninitialized_move(_Myfirst, _Mylast, _Newvec);
+            else
+                std::uninitialized_copy(_Myfirst, _Mylast, _Newvec);
+
+            _Guard._New_begin = nullptr;
+            _Change_array(_Newvec, _Newsize, _Newcapacity);
+        }
+
+    public:
+        void resize(const size_t _Newsize)
+        {
+            // trim or append value-initialized elements, provide strong guarantee
+            const size_t _Oldsize = static_cast<size_t>(_Mylast - _Myfirst);
+            if ( _Newsize < _Oldsize )
+            { // trim
+                pointer _Newlast = _Myfirst + _Newsize;
+                std::destroy(_Newlast, _Mylast);
+                _Mylast = _Newlast;
+                return;
+            }
+
+            if ( _Newsize > _Oldsize )
+            {     // append
+                const size_t _Oldcapacity = static_cast<size_t>(this->_Myend - _Myfirst);
+                if ( _Newsize > _Oldcapacity )
+                { // reallocate
+                    _Resize_reallocate_default(_Newsize);
+                    return;
+                }
+
+                pointer _Oldlast = _Mylast;
+                this->_Mylast    = std::uninitialized_value_construct_n(_Oldlast, _Newsize - _Oldsize);
+            }
+
+            // if _Newsize == _Oldsize, do nothing; avoid invalidating iterators
+        }
+
+        // trim or append elements, provide strong guarantee
+        void resize(const size_t _Newsize, const value_type& _Value)
+        {
+            const size_t _Oldsize = static_cast<size_t>(_Mylast - _Myfirst);
+            if ( _Newsize < _Oldsize )
+            { // trim
+                pointer _Newlast = _Myfirst + _Newsize;
+                std::destroy(_Newlast, _Mylast);
+                _Mylast = _Newlast;
+                return;
+            }
+
+            if ( _Newsize > _Oldsize )
+            {     // append
+                const size_t _Oldcapacity = static_cast<size_t>(this->_Myend - _Myfirst);
+                if ( _Newsize > _Oldcapacity )
+                { // reallocate
+                    _Resize_reallocate(_Newsize, _Value);
+                    return;
+                }
+
+                pointer _Oldlast = _Mylast;
+                this->_Mylast    = std::uninitialized_fill_n(_Oldlast, _Newsize - _Oldsize, _Value);
+            }
+
+            // if _Newsize == _Oldsize, do nothing; avoid invalidating iterators
+        }
+
+    private:
+        void _Reallocate(const size_t _Newcapacity)
+        {
+            const size_t _Size   = static_cast<size_t>(_Mylast - _Myfirst);
+            pointer      _Newvec = _Allocate(_Newcapacity);
+
+            _Simple_reallocation_guard _Guard { _Newvec };
+
+            if constexpr ( std::is_nothrow_move_constructible_v<value_type> || !std::is_copy_constructible_v<value_type> )
+                std::uninitialized_move(_Myfirst, _Mylast, _Newvec);
+            else
+                std::uninitialized_copy(_Myfirst, _Mylast, _Newvec);
+
+            _Guard._New_begin = nullptr;
+            _Change_array(_Newvec, _Size, _Newcapacity);
+        }
+
+        void _Clear_and_reserve_geometric(const size_t _Newsize)
+        {
+            if ( _Newsize > max_size() ) NH3API_UNLIKELY
+                nh3api::throw_exception<std::length_error>("vector::reserve: vector too long");
+
+            const size_t _Newcapacity = _Calculate_growth(_Newsize);
+            if ( _Myfirst )
+            { // destroy and deallocate old array
+                std::destroy(_Myfirst, _Mylast);
+                _Deallocate(_Myfirst);
+
+                // equivalent to std::memset(this, 0, sizeof(*this));
+                reinterpret_cast<std::array<uint32_t, 4>&>(*this) = {};
+            }
+
+            _Buy_raw(_Newcapacity);
+        }
+
+    public:
+        void reserve(const size_t _Newcapacity)
+        {
+            if ( _Newcapacity > capacity() )
+            {
+                if ( _Newcapacity > max_size() ) NH3API_UNLIKELY
+                    nh3api::throw_exception<std::length_error>("vector::reserve: vector too long");
+
+                _Reallocate(_Newcapacity);
+            }
+        }
+
+        void shrink_to_fit()
+        {
+            // something to do
+            if ( _Mylast != _Myend )
+            {
+                if ( _Myfirst == _Mylast )
+                    _Tidy();
+                else
+                    _Reallocate(static_cast<size_t>(_Mylast - _Myfirst));
+            }
+        }
+
+        void pop_back() noexcept
+        {
+            if ( _Myfirst != _Mylast )
+            {
+                std::destroy_at(_Mylast - 1);
+                --_Mylast;
+            }
+        }
+
+        iterator erase(const_iterator _Where)
+        noexcept(std::is_nothrow_move_assignable_v<value_type>)
+        {
+            iterator _Whereptr = const_cast<iterator>(_Where);
+            if ( _Where >= _Myfirst && _Where <= _Mylast )
+            {
+                std::move(_Whereptr + 1, _Mylast, _Whereptr);
+                std::destroy_at(_Mylast - 1);
+                --_Mylast;
+            }
+            return _Whereptr;
+        }
+
+        iterator erase(const_iterator _First, const_iterator _Last)
+        {
+            nh3api::verify_range(_First, _Last);
+            if ( _First >= _Myfirst && _First < _Mylast
+                 && _Last >= _Myfirst && _Last <= _Mylast )
+            {
+                // something to do, invalidate iterators
+                if ( _First != _Last )
+                {
+                    pointer _Newlast = std::move(const_cast<pointer>(_Last), _Mylast, const_cast<pointer>(_First));
+                    std::destroy(_Newlast, _Mylast);
+                    _Mylast = _Newlast;
+                }
+            }
+            return const_cast<iterator>(_First);
+        }
+
+        void clear() noexcept
+        {
+            if ( _Myfirst == _Mylast )
+                return;
+
+            std::destroy(_Myfirst, _Mylast);
+            _Mylast = _Myfirst;
+        }
+
+        void swap(exe_vector& _Right) noexcept
+        {
+            auto& _Lhs = reinterpret_cast<std::array<uint32_t, 4>&>(*this);
+            auto& _Rhs = reinterpret_cast<std::array<uint32_t, 4>&>(_Right);
+            std::swap(_Lhs, _Rhs);
+        }
+
+        inline pointer data() noexcept
+        {
+            return _Myfirst;
+        }
+
+        [[nodiscard]] inline const_pointer data() const noexcept
+        {
+            return _Myfirst;
+        }
+
+        iterator begin() noexcept
+        {
+            return _Myfirst;
+        }
+
+        const_iterator begin() const noexcept
+        {
+            return _Myfirst;
+        }
+
+        const_iterator cbegin() const noexcept
+        {
+            return _Myfirst;
+        }
+
+        iterator end() noexcept
+        {
+            return _Mylast;
+        }
+
+        const_iterator end() const noexcept
+        {
+            return _Mylast;
+        }
+
+        const_iterator cend() const noexcept
+        {
+            return _Mylast;
+        }
+
+        reverse_iterator rbegin() noexcept
+        {
+            return reverse_iterator { end() };
+        }
+
+        const_reverse_iterator rbegin() const noexcept
+        {
+            return const_reverse_iterator { end() };
+        }
+
+        const_reverse_iterator crbegin() const noexcept
+        {
+            return const_reverse_iterator { end() };
+        }
+
+        reverse_iterator rend() noexcept
+        {
+            return reverse_iterator { begin() };
+        }
+
+        const_reverse_iterator rend() const noexcept
+        {
+            return const_reverse_iterator { begin() };
+        }
+
+        const_reverse_iterator crend() const noexcept
+        {
+            return const_reverse_iterator { begin() };
+        }
+
+        [[nodiscard]] inline size_t size() const noexcept
+        {
+            return static_cast<size_t>(this->_Mylast - this->_Myfirst);
+        }
+
+        [[nodiscard]] inline constexpr static size_t max_size() noexcept
+        {
+            return size_t(~0U) / sizeof(value_type);
+        }
+
+        [[nodiscard]] inline bool empty() const noexcept
+        {
+            return _Myfirst == _Mylast;
+        }
+
+        [[nodiscard]] size_t capacity() const noexcept
+        { return static_cast<size_t>(this->_Myend - this->_Myfirst); }
+
+        inline constexpr static allocator_type get_allocator() noexcept
+        { return {}; }
+
+        const_reference at(size_t pos) const
+        {
+            if ( size() <= pos ) NH3API_UNLIKELY
+                nh3api::throw_exception<std::out_of_range>("vector: invalid subscript");
+
+            return *(_Myfirst + pos);
+        }
+
+        reference at(size_t pos)
+        {
+            if ( size() <= pos ) NH3API_UNLIKELY
+                nh3api::throw_exception<std::out_of_range>("vector: invalid subscript");
+
+            return *(_Myfirst + pos);
+        }
+
+        inline const_reference operator[](size_t pos) const noexcept
+        { return *(_Myfirst + pos); }
+
+        inline reference operator[](size_t pos) noexcept
+        { return *(_Myfirst + pos); }
+
+        inline reference front() noexcept
+        {
+            assert(_Myfirst);
+            return *_Myfirst;
+        }
+
+        inline const_reference front() const noexcept
+        {
+            assert(_Myfirst);
+            return *_Myfirst;
+        }
+
+        inline reference back() noexcept
+        {
+            assert(_Mylast);
+            return _Mylast[-1];
+        }
+
+        inline const_reference back() const noexcept
+        {
+            assert(_Mylast);
+            return _Mylast[-1];
+        }
+
+    private:
+        // return the iterator begin() + _Offset
+        iterator _Make_iterator_offset(const size_t _Offset) noexcept
+        { return this->_Myfirst + _Offset; }
+
+        [[nodiscard]] static inline pointer _Allocate(size_t num) noexcept
+        { return static_cast<pointer>(::operator new(num * sizeof(value_type), exe_heap, std::nothrow)); }
+
+        inline static void _Deallocate(void* _Ptr) noexcept
+        { ::operator delete(_Ptr, exe_heap); }
+
+        // allocate array with _Capacity elements
+        bool _Buy_raw(size_t _Capacity)
+        {
+            this->_Myfirst = _Allocate(_Capacity);
+            this->_Mylast  = this->_Myfirst;
+            this->_Myend   = this->_Myfirst + _Capacity;
+
+            return true;
+        }
+
+        // given _Oldcapacity and _Newsize, calculate geometric growth
+        [[nodiscard]] size_t _Calculate_growth(const size_t _Newsize) const noexcept
+        {
+            const size_t _Oldcapacity = capacity();
+            if ( _Oldcapacity > max_size() - _Oldcapacity / 2 )
+                return max_size(); // geometric growth would overflow
+
+            const size_t _Geometric = _Oldcapacity + _Oldcapacity / 2;
+            if ( _Geometric < _Newsize )
+                return _Newsize; // geometric growth would be insufficient
+            return _Geometric;   // geometric growth is sufficient
+        }
+
+        // discard old array, acquire new array
+        void _Change_array(pointer      _Newvec,
+                           const size_t _Newsize,
+                           const size_t _Newcapacity) noexcept
+        {
+            if ( _Myfirst )
+            {
+                std::destroy(_Myfirst, _Mylast);
+                _Deallocate(_Myfirst);
+            }
+
+            this->_Myfirst = _Newvec;
+            this->_Mylast  = _Newvec + _Newsize;
+            this->_Myend   = _Newvec + _Newcapacity;
+        }
+
+        // free all storage
+        void _Tidy() noexcept
+        {
+            if ( this->_Myfirst != nullptr )
+            { // something to free, destroy and deallocate it
+                std::destroy(this->_Myfirst, this->_Mylast);
+                _Deallocate(this->_Myfirst);
+                reinterpret_cast<std::array<uint32_t, 4>&>(*this) = {};
+            }
+        }
+
+        // Dispatches between the three sized constructions.
+        // 1-arg -> value-construction, e.g. vector(5)
+        // 2-arg -> fill, e.g. vector(5, "meow")
+        // 3-arg -> sized range construction, e.g. vector{"Hello", "Fluffy", "World"}
+        template<typename... _Args>
+        void _Construct_n(const size_t _Count, _Args&&... _args)
+        {
+            if ( _Count != 0 )
+            {
+                if ( _Count > max_size() ) NH3API_UNLIKELY
+                    nh3api::throw_exception<std::length_error>("vector: construction failure - size too large");
+
+                _Buy_raw(_Count);
+                _Tidy_guard _Guard { this };
+                if constexpr ( sizeof...(_args) == 0 )      // construct filling with the default value
+                    this->_Mylast = std::uninitialized_value_construct_n(this->_Myfirst, _Count);
+                else if constexpr ( sizeof...(_args) == 1 ) // construct filling with a value
+                    this->_Mylast = std::uninitialized_fill_n(this->_Myfirst, _Count, _args...);
+                else if constexpr ( sizeof...(_args) == 2 ) // construct copy from two iterators
+                    this->_Mylast = std::uninitialized_copy(std::forward<_Args>(_args)..., this->_Myfirst);
+                else
+                    static_assert(false, "exe_vector::exe_vector: unexpected number of arguments");
+
+                _Guard._Target = nullptr;
+            }
+        }
+
+    protected:
+        uint32_t : 32;
+        pointer _Myfirst; // pointer to beginning of array
+        pointer _Mylast;  // pointer to current end of sequence
+        pointer _Myend;   // pointer to end of array
+};
+
+#pragma pack(pop) // 4
+
+// deduction guide for iterator-based constructor
+template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, int> = 0>
+exe_vector(_Iter, _Iter) -> exe_vector<typename std::iterator_traits<_Iter>::value_type>;
+
+#ifdef __cpp_lib_containers_ranges
+template<std::ranges::input_range _Range>
+exe_vector(std::from_range_t, _Range&&) -> exe_vector<std::ranges::range_value_t<_Range>>;
+#endif
+
+template<class _Ty>
+inline bool operator==(const exe_vector<_Ty>& _Left, const exe_vector<_Ty>& _Right) noexcept
+{ return _Left.size() == _Right.size() && std::equal(_Left.begin(), _Left.end(), _Right.begin()); }
+
+#ifdef __cpp_lib_three_way_comparison
+template<typename _Ty>
+inline nh3api::synth_three_way_result<_Ty> operator<=>(const exe_vector<_Ty>& _Left, const exe_vector<_Ty>& _Right) noexcept
+{
+    return std::lexicographical_compare_three_way(_Left.begin(), _Left.end(),
+            _Right.begin(), _Right.end(), nh3api::synth_three_way);
+}
+#else
+template<class _Ty>
+inline bool operator!=(const exe_vector<_Ty>& _Left, const exe_vector<_Ty>& _Right) noexcept
+{ return !(_Left == _Right); }
+
+template<class _Ty>
+inline bool operator<(const exe_vector<_Ty>& _Left, const exe_vector<_Ty>& _Right) noexcept
+{ return std::lexicographical_compare(_Left.begin(), _Left.end(), _Right.begin(), _Right.end()); }
+
+template<class _Ty>
+inline bool operator>(const exe_vector<_Ty>& _Left, const exe_vector<_Ty>& _Right) noexcept
+{ return _Right < _Left; }
+
+template<class _Ty>
+inline bool operator<=(const exe_vector<_Ty>& _Left, const exe_vector<_Ty>& _Right) noexcept
+{ return !(_Right < _Left); }
+
+template<class _Ty>
+inline bool operator>=(const exe_vector<_Ty>& _Left, const exe_vector<_Ty>& _Right) noexcept
+{ return !(_Left < _Right); }
+
+#endif
+
+NH3API_WARNING(pop)

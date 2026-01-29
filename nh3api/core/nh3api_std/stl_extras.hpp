@@ -9,33 +9,46 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <memory>
-#include <algorithm> // std::clamp
+#include <algorithm>   // std::clamp
 #include <cmath>
-#ifdef __cpp_lib_bit_cast
-#include <bit>
+#include <type_traits> // std::make_unsigned_t
+#include <utility>
+
+#if (__cplusplus >= 202002L) || defined(__cpp_lib_concepts)
+#include <concepts>    // std::integral concept
 #endif
-#include <type_traits>
+
+#if (__cplusplus >= 202002L) || defined(__cpp_lib_bit_cast)
+#include <bit>         // std::bit_cast
+#endif
+
 #include "nh3api_std.hpp"
 
 namespace nh3api
 {
 
-// the reason we're writing our own addressof is that pre-C++17 version wasn't constexpr
-
-template<typename T>
-NH3API_MSVC_INTRIN constexpr NH3API_FORCEINLINE
-T* addressof(T& arg) noexcept
-{ return __builtin_addressof(arg); }
-
-#ifdef __cpp_lib_bit_cast
+#if defined(__cpp_lib_bit_cast) && defined(__cpp_lib_concepts)
 
 using ::std::bit_cast;
+template<class To, class From>
+inline constexpr To cast(const From& from) noexcept
+requires(sizeof(To) == sizeof(From) && ::std::is_trivially_copyable_v<To> && ::std::is_trivially_copyable_v<From> && !::std::is_pointer_v<From>)
+{
+    if constexpr (::std::is_integral_v<To> || ::std::is_enum_v<To>)
+        return static_cast<To>(from);
+    else
+        return __builtin_bit_cast(To, from);
+}
+
+template<class To, class From>
+inline To cast(const From& from) noexcept
+requires (sizeof(To) == sizeof(From) && ::std::is_pointer_v<From>)
+{ return reinterpret_cast<To>(from); }
 
 #else
 
-template<class To, class From, ::std::enable_if_t<(sizeof(To) == sizeof(From)) && std::is_trivially_copyable_v<To> && std::is_trivially_copyable_v<From>, bool> = false >
-NH3API_FORCEINLINE
+template<class To, class From, ::std::enable_if_t<(sizeof(To) == sizeof(From)) && ::std::is_trivially_copyable_v<To> && ::std::is_trivially_copyable_v<From>, bool> = false >
+inline
 #if NH3API_HAS_BUILTIN_BIT_CAST
 constexpr
 #endif
@@ -45,125 +58,29 @@ To bit_cast(const From& from) noexcept
     return __builtin_bit_cast(To, from);
     #else
     To result;
-    ::memcpy(addressof(result), addressof(from), sizeof(To));
+    ::memcpy(__builtin_addressof(result), __builtin_addressof(from), sizeof(To));
     return result;
     #endif
 }
 
-#endif // __cpp_lib_bit_cast
-
-#ifndef __cpp_lib_concepts
-
-template<class To, class From>
-NH3API_FORCEINLINE
+template<class To, class From, ::std::enable_if_t<(sizeof(To) == sizeof(From)) && ::std::is_trivially_copyable_v<To> && ::std::is_trivially_copyable_v<From> && !::std::is_pointer_v<To>, bool> = false >
+inline
 #if NH3API_HAS_BUILTIN_BIT_CAST
 constexpr
 #endif
 To cast(const From& from) noexcept
 {
-    if constexpr (::std::is_pointer_v<To>)
-        return reinterpret_cast<To>(from);
-    else if constexpr (::std::is_arithmetic_v<To> || ::std::is_enum_v<To>)
+    if constexpr (::std::is_integral_v<To> || ::std::is_enum_v<To>)
         return static_cast<To>(from);
     else
         return bit_cast<To>(from);
 }
 
-#else
-
-template<class To, class From>
-constexpr To cast(const From& from) noexcept
-requires(::std::is_arithmetic_v<To> || ::std::is_enum_v<To>)
-{ return static_cast<To>(from); }
-
-template<class To, class From>
-To cast(const From& from) noexcept
-requires(::std::is_pointer_v<To>)
+template<class To, class From, ::std::enable_if_t<(sizeof(To) == sizeof(From)) && ::std::is_trivially_copyable_v<To> && ::std::is_trivially_copyable_v<From> && ::std::is_pointer_v<To>, bool> = false >
+inline To cast(const From& from) noexcept
 { return reinterpret_cast<To>(from); }
 
-template<class To, class From>
-constexpr To cast(const From& from) noexcept
-requires(::std::is_trivially_copyable_v<To> && !::std::is_scalar_v<To>)
-{ return __builtin_bit_cast(To, from); }
-
-#endif // __cpp_lib_concepts to sfinae nh3api::cast
-
-using ::std::destroy_at;
-using ::std::destroy;
-using ::std::destroy_n;
-
-using ::std::exchange;
-
-
-// there is no __cpp_lib_* feature testing macro for std::construct_at
-// use __cpp_lib_constexpr_dynamic_alloc because it's closely of related
-#ifdef __cpp_lib_constexpr_dynamic_alloc
-
-using ::std::construct_at;
-
-#else // C++20
-
-template <class T, class... Args, class = decltype(::new(std::declval<void*>()) T(std::declval<Args>()...))> NH3API_FORCEINLINE
-NH3API_CONSTEXPR_CPP_20
-T* construct_at(T* ptr, Args&&... args)
-noexcept(noexcept(std::is_nothrow_constructible_v<T, Args...>))
-{ return ::new (static_cast<void*>(ptr)) T(::std::forward<Args>(args)...); }
-
-#endif // C++20
-
-using ::std::clamp;
-
-using byte_t = ::std::byte;
-using ::std::to_integer;
-
-using ::std::next;
-using ::std::prev;
-
-// floating-point math
-
-using ::std::fpclassify;
-using ::std::isfinite;
-using ::std::isinf;
-using ::std::isnan;
-using ::std::isnormal;
-using ::std::trunc;
-using ::std::signbit;
-
-template <size_t N, typename T>
-NH3API_FORCEINLINE
-#if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
-constexpr
-#endif
-T* assume_aligned(T* ptr) noexcept
-{
-#if NH3API_HAS_BUILTIN_ASSUME_ALIGNED || NH3API_CHECK_CLANG_CL
-#if NH3API_HAS_IS_CONSTANT_EVALUATED || defined(__cpp_if_consteval)
-    NH3API_IF_CONSTEVAL
-    {
-        return ptr;
-    }
-    else
-    {
-        return reinterpret_cast<T*>(__builtin_assume_aligned(ptr, N));
-    }
-#else
-    return reinterpret_cast<T*>(__builtin_assume_aligned(ptr, N));
-#endif
-#else // Assume pre-C++20 MSVC
-    if ((reinterpret_cast<uintptr_t>(ptr) & ((1 << N) - 1)) == 0)
-        return ptr;
-    else
-        __assume(0);
-#endif
-}
-
-#ifdef __cpp_lib_to_underlying
-using ::std::to_underlying;
-#else
-template<class Enum> [[nodiscard]] NH3API_MSVC_INTRIN constexpr
-std::underlying_type_t<Enum> to_underlying(Enum arg) noexcept
-{ return static_cast<std::underlying_type_t<Enum>>(arg); }
-#endif
+#endif // __cpp_lib_bit_cast
 
 #ifdef __cpp_lib_integer_comparison_functions
 using ::std::cmp_equal;
@@ -173,7 +90,7 @@ using ::std::cmp_greater;
 using ::std::cmp_less_equal;
 using ::std::cmp_greater_equal;
 #else
-template<class T, class U> NH3API_PURE
+template<class T, class U>
 inline constexpr bool cmp_equal(T t, U u) noexcept
 {
     if constexpr (::std::is_signed_v<T> == ::std::is_signed_v<U>)
@@ -184,11 +101,11 @@ inline constexpr bool cmp_equal(T t, U u) noexcept
         return u >= 0 && ::std::make_unsigned_t<U>(u) == t;
 }
 
-template<class T, class U> NH3API_PURE
+template<class T, class U>
 inline constexpr bool cmp_not_equal(T t, U u) noexcept
 { return !cmp_equal(t, u); }
 
-template<class T, class U> NH3API_PURE
+template<class T, class U>
 inline constexpr bool cmp_less(T t, U u) noexcept
 {
     if constexpr (::std::is_signed_v<T> == ::std::is_signed_v<U>)
@@ -199,17 +116,17 @@ inline constexpr bool cmp_less(T t, U u) noexcept
         return u >= 0 && t < ::std::make_unsigned_t<U>(u);
 }
 
-template<class T, class U> NH3API_PURE
+template<class T, class U>
 inline constexpr bool cmp_greater(T t, U u) noexcept
 { return cmp_less(u, t); }
 
-template<class T, class U> NH3API_PURE
+template<class T, class U>
 constexpr bool cmp_less_equal(T t, U u) noexcept
 {
     return !cmp_less(u, t);
 }
 
-template<class T, class U> NH3API_PURE
+template<class T, class U>
 constexpr bool cmp_greater_equal(T t, U u) noexcept
 {
     return !cmp_less(t, u);
@@ -221,7 +138,7 @@ template<::std::integral T>
 #else
 template<typename T>
 #endif
-[[nodiscard]] NH3API_PURE inline constexpr T min_limit() noexcept
+[[nodiscard]] inline constexpr T min_limit() noexcept
 {
     if constexpr (::std::is_signed_v<T>)
     {
@@ -239,7 +156,7 @@ template<::std::integral T>
 #else
 template<typename T>
 #endif
-[[nodiscard]] NH3API_PURE inline constexpr T max_limit() noexcept
+[[nodiscard]] inline constexpr T max_limit() noexcept
 {
     if constexpr (::std::is_signed_v<T>)
     {
@@ -260,7 +177,7 @@ template<typename Rx, ::std::integral T>
 #else
 template<typename Rx, typename T>
 #endif
-[[nodiscard]] NH3API_PURE inline constexpr bool in_range(const T value) noexcept
+[[nodiscard]] inline constexpr bool in_range(const T value) noexcept
 {
     constexpr T  t_min  = min_limit<T>();
     constexpr Rx rx_min = min_limit<Rx>();
@@ -280,6 +197,25 @@ template<typename Rx, typename T>
 }
 #endif
 
-} // namespace nh3api
+#ifdef __cpp_lib_three_way_comparison
 
-using byte_t = std::byte;
+#if NH3API_MSVC_STL
+inline constexpr std::_Synth_three_way synth_three_way = {};
+
+template <class T1, class T2 = T1>
+using synth_three_way_result = ::std::_Synth_three_way_result<T1, T2>;
+#elif NH3API_GCC_STL
+inline constexpr auto synth_three_way = ::std::__detail::__synth3way;
+
+template <class T1, class T2 = T1>
+using synth_three_way_result = ::std::__detail::__synth3way_t<T1, T2>;
+#elif NH3API_CLANG_STL
+
+inline constexpr auto synth_three_way = ::std::__synth_three_way;
+template <class T1, class T2 = T1>
+using synth_three_way_result = ::std::__synth_three_way_result<T1, T2>;
+#endif
+
+#endif // C++20 three-way comparison
+
+} // namespace nh3api

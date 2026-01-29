@@ -11,20 +11,21 @@
 
 #include "nh3api_std/memory.hpp"
 
+#pragma pack(push, 4)
 template<class T>
 class CAutoArray
 {
-    NH3API_STATIC_ASSERT("CAutoArray<T> must have its vftable address known", vftable_address<CAutoArray>::value != 0);
+    static_assert(vftable_address_v<CAutoArray>, "CAutoArray<T> must have its vftable address known");
     public:
         struct vftable_t
         {
-            void (__thiscall *scalar_deleting_destructor)(CAutoArray*, uint8_t);
-            bool (__thiscall *Add)(CAutoArray*, T*);
-            T*   (__thiscall *Get)(CAutoArray*, size_t);
-            bool (__thiscall *Put)(CAutoArray*, size_t, T*);
-            bool (__thiscall *Delete)(CAutoArray*, size_t);
-            bool (__thiscall *Insert)(CAutoArray*, size_t, T*);
-            bool (__thiscall *GetCount)(CAutoArray*, size_t);
+            void (__thiscall* scalar_deleting_destructor)(CAutoArray*, uint8_t);
+            bool (__thiscall* Add)(CAutoArray*, T*);
+            T*   (__thiscall* Get)(CAutoArray*, size_t);
+            bool (__thiscall* Put)(CAutoArray*, size_t, T*);
+            bool (__thiscall* Delete)(CAutoArray*, size_t);
+            bool (__thiscall* Insert)(CAutoArray*, size_t, T*);
+            bool (__thiscall* GetCount)(CAutoArray*, size_t);
         };
 
     public:
@@ -171,3 +172,4 @@ class CAutoArray
         size_t    allocSize;
         size_t    size;
 };
+#pragma pack(pop)

@@ -10,10 +10,13 @@
 #pragma once
 
 #include <array>
+
 #include "nh3api_std/call_macros.hpp"
 #include "events.hpp"
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 #pragma pack(push, 4)
 // size = 0x38 = 56, align = 4
@@ -23,26 +26,23 @@ NH3API_VIRTUAL_CLASS baseManager
         struct vftable_t
         {
             int32_t (__thiscall* Open)(baseManager*, int32_t); // +0
-            void (__thiscall* Close)(baseManager*); // +4
+            void    (__thiscall* Close)(baseManager*); // +4
             int32_t (__thiscall* Main)(baseManager*, message*); // +8
         };
 
     public:
-        NH3API_FORCEINLINE
-        baseManager() noexcept
-        NH3API_DELEGATE_DUMMY(baseManager)
+        inline baseManager() noexcept
+            : baseManager(nh3api::dummy_tag)
         { THISCALL_1(void, 0x44D200, this); }
+
+        inline baseManager(const nh3api::dummy_tag_t&) noexcept
+        {}
 
         baseManager(const baseManager&) noexcept            = default;
         baseManager(baseManager&&) noexcept                 = default;
         baseManager& operator=(const baseManager&) noexcept = default;
         baseManager& operator=(baseManager&&) noexcept      = default;
-
-        NH3API_FORCEINLINE
-        baseManager(const ::nh3api::dummy_tag_t&) noexcept
-        {}
-
-        NH3API_DEFAULT_DESTRUCTOR(baseManager)
+        inline ~baseManager() noexcept = default;
 
     public:
         // vftable shift: +0
@@ -82,7 +82,6 @@ NH3API_VIRTUAL_CLASS baseManager
         int32_t status;
 
 };
-#pragma pack(pop)
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_BASEMANAGER
 #define NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(CLASS_NAME)\
@@ -94,21 +93,22 @@ int32_t __thiscall Main(message& msg) override \
 { return get_type_vftable(this)->Main(static_cast<baseManager*>(this), &msg); }
 #endif // NH3API_VIRTUAL_OVERRIDE_BASEMANAGER
 
-#pragma pack(push, 4)
 // size = 0x10 = 16, align = 4
 struct executive
 {
     public:
-        NH3API_FORCEINLINE
-        executive() noexcept
-        NH3API_DELEGATE_DUMMY(executive)
+        inline executive() noexcept
+            : executive(nh3api::dummy_tag)
         { THISCALL_1(void, 0x4B0660, this); }
 
-        NH3API_FORCEINLINE
-        executive(const ::nh3api::dummy_tag_t&) noexcept
+        inline executive(const nh3api::dummy_tag_t&) noexcept
         {}
 
-        NH3API_DEFAULT_DESTRUCTOR(executive)
+        executive(const executive&)                                 = delete;
+        executive& operator=(const executive&)                      = delete;
+        inline constexpr executive(executive&&) noexcept            = default;
+        inline constexpr executive& operator=(executive&&) noexcept = default;
+        inline ~executive() noexcept                                = default;
 
     public:
         int32_t DoDialog(baseManager* newDialog)
@@ -141,6 +141,6 @@ struct executive
 
 inline executive* const& gpExec = get_global_var_ref(0x699550, executive*);
 
-NH3API_DISABLE_WARNING_END
-
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B9BC, baseManager)
+
+NH3API_WARNING(pop)

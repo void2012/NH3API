@@ -9,7 +9,8 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <array>
+#include <array> // std::array
+
 #include "player_enums.hpp" // EPlayerColor
 #include "hero_enums.hpp" // THero
 #include "terrain.hpp" // TTownType
@@ -18,15 +19,20 @@
 // Игровая сложность.
 enum EGameDifficulty : int8_t
 {
-    DIFFICULTY_EASY = 0,
-    DIFFICULTY_NORMAL = 1,
-    DIFFICULTY_HARD = 2,
-    DIFFICULTY_EXPERT = 3,
-    DIFFICULTY_IMPOSSIBLE = 4,
+    DIFFICULTY_EASY       = 0, // Лёгкая сложность
+    DIFFICULTY_NORMAL     = 1, // Нормальная сложность
+    DIFFICULTY_HARD       = 2, // Средняя сложность
+    DIFFICULTY_EXPERT     = 3, // Экспертная сложность
+    DIFFICULTY_IMPOSSIBLE = 4, // Невозможная сложность
 
     DIFFICULTY_NONE = -1,
-    DIFFICULTY_MAX = 5,
+    DIFFICULTY_MAX  = 5
 };
+
+template<>
+struct nh3api::enum_limits<EGameDifficulty>
+    : nh3api::enum_limits_base<EGameDifficulty, DIFFICULTY_EASY, DIFFICULTY_IMPOSSIBLE>
+{ static inline constexpr bool is_specialized = true; };
 
 #pragma pack(push, 1)
 // Game setup options /
@@ -34,6 +40,7 @@ enum EGameDifficulty : int8_t
 // size = 0x1CC = 460, align = 1
 struct SGameSetupOptions
 {
+public:
     // offset: +0x0 = +0,  size = 0x8 = 8
     std::array<int8_t, MAX_PLAYERS> color;
 
@@ -95,4 +102,4 @@ public:
     std::array<int8_t, MAX_PLAYERS> startingBonus;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 1

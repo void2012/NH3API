@@ -10,7 +10,9 @@
 #include "../base_manager.hpp" // baseManager
 #include "../terrain.hpp" // TTerrainType
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 // Adventure map object sounds /
 // Звуки объектов карты приключений.
@@ -137,8 +139,13 @@ enum e_looping_sound_id : int32_t
     whirlpool_sound                 = 67, //
     wolf_rider_generator_sound      = 68, //
     shore_sound                     = 69, //
-    max_environment_sounds          = 70, //
+    max_environment_sounds          = 70  //
 };
+
+template<>
+struct nh3api::enum_limits<e_looping_sound_id>
+    : nh3api::enum_limits_base<e_looping_sound_id, minotaur_generator_sound, shore_sound>
+{ static inline constexpr bool is_specialized = true; };
 
 #pragma pack(push, 4)
 // size = 0x8 = 8, align = 4
@@ -151,10 +158,8 @@ struct soundNode
     int32_t priority;
 
 };
-#pragma pack(pop)
 
 using HSAMPLE = void*;
-#pragma pack(push, 4)
 // Sound sample info /
 // Информация о звуковой дорожке.
 // size = 0x18 = 24, align = 4
@@ -186,34 +191,33 @@ struct MemorySampleStructure
         int32_t memLooping;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Звуковая дорожка /
 // Sound sample.
 // size = 0x34 = 52, align = 4, baseclass: resource
 NH3API_VIRTUAL_STRUCT sample : public resource
 {
     public:
-        sample() = delete;
+        sample()                                          = delete;
+        sample(const sample&)                             = delete;
+        sample& operator=(const sample&)                  = delete;
+        inline sample(sample&& other) noexcept           = default;
+        inline sample& operator=(sample&& other) noexcept = default;
 
-        NH3API_FORCEINLINE
-        sample(const char* name,
-               const void* src,
-               size_t size,
-               int32_t channel = 0,
-               int32_t volume = 127,
-               bool32_t loop = true) noexcept
-        NH3API_DELEGATE_DUMMY_BASE(sample)
+        inline sample(const char* __restrict name,
+                      const void* __restrict src,
+                      size_t   size,
+                      int32_t  channel = 0,
+                      int32_t  volume  = 127,
+                      bool32_t loop    = true) noexcept
+            : sample(nh3api::dummy_tag)
         { THISCALL_7(void, 0x567050, this, name, src, size, channel, volume, loop); }
 
-        NH3API_FORCEINLINE
-        sample(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline sample(const nh3api::dummy_tag_t& tag) noexcept
             : resource(tag) // resource(nullptr, RType_misc)
         {}
 
-        NH3API_FORCEINLINE
-        ~sample() noexcept
+        inline ~sample() noexcept
         { THISCALL_1(void, 0x567110, this); }
 
     public:
@@ -226,9 +230,7 @@ NH3API_VIRTUAL_STRUCT sample : public resource
         MemorySampleStructure memSample;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // size = 0x8 = 8, align = 4
 struct SAMPLE2
 {
@@ -238,166 +240,26 @@ struct SAMPLE2
     HSAMPLE playSample;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 4
 
 inline void ClearMemSample(SAMPLE2 smpl)
 { if (smpl.resSample && smpl.playSample ) STDCALL_2(void, 0x59A710, smpl.resSample, smpl.playSample); }
 
-inline SAMPLE2 LoadPlaySample(const char* cSampleName)
-{ return cSampleName ? FASTCALL_1(SAMPLE2, 0x59A770, cSampleName) : SAMPLE2{}; }
+inline SAMPLE2 LoadPlaySample(const char* const cSampleName)
+{ return cSampleName ? FASTCALL_1(SAMPLE2, 0x59A770, cSampleName) : SAMPLE2 {}; }
 
 inline void WaitEndSample(SAMPLE2 smpl, int32_t iMilliWait)
 { if (smpl.resSample && smpl.playSample ) FASTCALL_2(void, 0x59A7C0, smpl, iMilliWait); }
 
-inline void launch_sample(const char* sample_name, int32_t max_time = -1, int32_t channel = 3)
+inline void launch_sample(const char* const sample_name, int32_t max_time = -1, int32_t channel = 3)
 { if ( sample_name ) FASTCALL_3(void, 0x59A890, sample_name, max_time, channel); }
 
-inline const std::array<const uint8_t, 10>& giTerrainToMusicTrack = get_global_var_ref(0x678330, const std::array<const uint8_t, 10>);
+inline const std::array<uint8_t, 10>& giTerrainToMusicTrack = get_global_var_ref(0x678330, const std::array<uint8_t, 10>);
 
 // Sound is disabled /
 // Звук в игре отключен.
 inline bool32_t& gbNoSound = get_global_var_ref(0x6992E0, bool32_t);
 
-#pragma pack(push, 4)
-// Sound & music manager /
-// Менеджер звуков и музыки.
-// size = 0xD8 = 216, align = 4, baseclass: baseManager
-NH3API_VIRTUAL_CLASS soundManager : public baseManager
-{
-    public:
-        struct vftable_t : baseManager::vftable_t
-        {
-            void (__thiscall *scalar_deleting_destructor)(soundManager*, uint8_t);
-        };
-
-    public:
-        soundManager() noexcept
-            : baseManager(::nh3api::dummy_tag)
-        { THISCALL_1(void, 0x599A60, this); }
-
-        NH3API_FORCEINLINE
-        soundManager(const ::nh3api::dummy_tag_t& tag) noexcept
-            : baseManager(tag)
-        {}
-
-    public:
-        // Stop all samples /
-        // Прекратить проигрывание звуков.
-        /// @param bStopMusicToo остановить музыку в т.ч.
-        void StopAllSamples(bool bStopMusicToo = true)
-        { THISCALL_2(void, 0x59A090, this, bStopMusicToo); }
-
-        // Stop certain sample /
-        // Прекратить проигрывание определённого звука.
-        /// @param smpl звук
-        void StopSample(HSAMPLE smpl)
-        { THISCALL_2(void, 0x59A180, this, smpl); }
-
-        // Stop certain sample /
-        // Прекратить проигрывание определённого звука.
-        /// @param smpl звук
-        void StopSample(sample* smpl)
-        { if ( smpl ) StopSample(smpl->memSample.memHSample); }
-
-        void WaitSample(HSAMPLE smpl, int32_t time = -1)
-        { if ( smpl) THISCALL_3(void, 0x59A1C0, this, smpl, time); }
-
-        void WaitSample(const sample* smpl, int32_t time = -1)
-        { if ( smpl ) WaitSample(smpl->memSample.memHSample, time); }
-
-        void ModifySample(HSAMPLE inSample, int16_t sFunction, int32_t value)
-        { THISCALL_4(void, 0x59A240, this, inSample, sFunction, value); }
-
-        void SetSampleVolume(HSAMPLE smpl, int value)
-        { ModifySample(smpl, 1, value); }
-
-        void SetSampleVolume(sample* smpl, int value)
-        { if ( smpl ) ModifySample(smpl->memSample.memHSample, 1, value); }
-
-        void AdjustSoundVolumes()
-        { THISCALL_1(void, 0x59A3C0, this); }
-
-        void AdjustMusicVolumes()
-        { THISCALL_1(void, 0x59A4B0, this); }
-
-        int32_t SwitchAmbientMusic(TTerrainType terrain)
-        { return (terrain > TERRAIN_TYPE_NONE && terrain < MAX_TERRAIN_TYPES) ? THISCALL_2(int32_t, 0x59A4E0, this, giTerrainToMusicTrack[static_cast<size_t>(terrain)]) : 0; }
-
-        // Play sample /
-        // Проиграть звуковую дорожку.
-        /// @param sPtr звуковая дорожка
-        HSAMPLE MemorySample(sample* sPtr)
-        { return sPtr ? THISCALL_2(HSAMPLE, 0x59A510, this, sPtr) : nullptr; }
-
-        // Is music playing? /
-        // Играет ли музыка?
-        bool MusicPlaying()
-        { return THISCALL_1(bool, 0x59A6F0, this); }
-
-        void service_sounds()
-        { THISCALL_1(void, 0x59AAD0, this); }
-
-        void ResumeStream()
-        { THISCALL_1(void, 0x59AF00, this); }
-
-        void StartMP3(const char* filename, int32_t loopCount, bool bStopSamples)
-        { THISCALL_4(void, 0x59AFB0, this, filename, loopCount, bStopSamples); }
-
-        void StopMP3()
-        { THISCALL_1(void, 0x59B310, this); }
-
-    public:
-        NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(soundManager)
-
-        NH3API_SCALAR_DELETING_DESTRUCTOR
-
-    public:
-        // offset: +0x38 = +56,  size = 0x4 = 4
-        HANDLE mssHandle;
-
-        // offset: +0x3C = +60,  size = 0x4 = 4
-        HANDLE driver;
-
-        // offset: +0x40 = +64,  size = 0x4 = 4
-        void** samples;
-
-        // offset: +0x44 = +68,  size = 0x38 = 56
-        std::array<void**, 14> samples_array;
-
-        // offset: +0x7C = +124,  size = 0x4 = 4
-        int32_t sampleNum;
-
-        // Currently played terrain music /
-        // Проигрываемая музыка почвы.
-        // offset: +0x80 = +128,  size = 0x4 = 4
-        int32_t currentTerrainMusic;
-
-        // offset: +0x84 = +132,  size = 0x4 = 4
-        bool32_t playSounds;
-
-        // offset: +0x88 = +136,  size = 0x4 = 4
-        bool32_t bChangeSounds;
-
-        // MP3 music is playing /
-        // Проигрывается MP3 музыка?
-        // offset: +0x8C = +140,  size = 0x4 = 4
-        bool32_t MP3Playing;
-
-        // offset: +0x90 = +144,  size = 0x18 = 24
-        CRITICAL_SECTION section_sound_call;
-
-        // offset: +0xA8 = +168,  size = 0x18 = 24
-        CRITICAL_SECTION section_MP3_change;
-
-        // offset: +0xC0 = +192,  size = 0x18 = 24
-        CRITICAL_SECTION section_MP3_name_change;
-
-};
-#pragma pack(pop)
-
-inline soundManager* const& gpSoundManager = get_global_var_ref(0x699414, soundManager*);
-
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x6416E0, sample)
-NH3API_SPECIALIZE_TYPE_VFTABLE(0x63FE68, soundManager)
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

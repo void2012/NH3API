@@ -10,6 +10,10 @@
 #pragma once
 
 #include <iterator> // std::iterator_traits, std::random_access_iterator_tag
+#ifdef __cpp_lib_ranges
+#include <ranges>
+#endif
+
 #include "type_traits.hpp"
 
 namespace nh3api
@@ -32,29 +36,10 @@ inline constexpr bool is_iterator_v = iterator_for_container<IterT>;
 template<class IterT>
 struct is_iterator : ::std::bool_constant<iterator_for_container<IterT>> {};
 
-#ifdef __cpp_lib_concepts
-template <class ContainerType>
-concept container = requires(ContainerType a, const ContainerType b)
-{
-  requires ::std::regular<ContainerType>;
-  requires ::std::swappable<ContainerType>;
-  requires ::std::destructible<typename ContainerType::value_type>;
-  requires ::std::same_as<typename ContainerType::reference, typename ContainerType::value_type &>;
-  requires ::std::same_as<typename ContainerType::const_reference, const typename ContainerType::value_type &>;
-  requires ::std::forward_iterator<typename ContainerType::iterator>;
-  requires ::std::forward_iterator<typename ContainerType::const_iterator>;
-  requires ::std::signed_integral<typename ContainerType::difference_type>;
-  requires ::std::same_as<typename ContainerType::difference_type, typename ::std::iterator_traits<typename ContainerType::iterator>::difference_type>;
-  requires ::std::same_as<typename ContainerType::difference_type, typename ::std::iterator_traits<typename ContainerType::const_iterator>::difference_type>;
-  { a.begin() } -> ::std::same_as<typename ContainerType::iterator>;
-  { a.end() } -> ::std::same_as<typename ContainerType::iterator>;
-  { b.begin() } -> ::std::same_as<typename ContainerType::const_iterator>;
-  { b.end() } -> ::std::same_as<typename ContainerType::const_iterator>;
-  { a.cbegin() } -> ::std::same_as<typename ContainerType::const_iterator>;
-  { a.cend() } -> ::std::same_as<typename ContainerType::const_iterator>;
-  { a.size() } -> ::std::same_as<typename ContainerType::size_type>;
-  { a.empty() } -> ::std::same_as<bool>;
-};
+#ifdef __cpp_lib_containers_ranges
+template <class _Rng, class _Elem>
+concept container_compatible_range =
+    (::std::ranges::input_range<_Rng>) && ::std::convertible_to<::std::ranges::range_reference_t<_Rng>, _Elem>;
 #endif
 
 #else
@@ -69,7 +54,7 @@ template<class IterT>
 struct is_iterator : ::std::bool_constant<is_iterator_v<IterT>> {};
 
 #endif
-} // namespace nh3api::tt
+} // namespace tt
 
 #ifdef __cpp_concepts
 template<tt::iterator_for_container IterT> constexpr
@@ -85,7 +70,10 @@ tt::iterator_category_t<IterT> iter_category() noexcept
 };
 #endif
 
-#ifdef _MSVC_STL_UPDATE
+template <class IterT>
+constexpr bool is_cpp17_fwd_iter_v = ::std::is_convertible_v<typename ::std::iterator_traits<IterT>::iterator_category, ::std::forward_iterator_tag>;
+
+#if NH3API_MSVC_STL
 
 // verify range on MSVC STL checked iterators
 template <class IterT, class _Sentinel> inline
@@ -124,11 +112,11 @@ verify_range_n(_InputIterator _First, _Size_type _N)
 #else
 
 template <class IterT, class _Sentinel>
-constexpr inline void verify_range(const IterT &_First, const _Sentinel &_Last)
+inline constexpr void verify_range(const IterT &_First, const _Sentinel &_Last)
 { (void)_First; (void)_Last; }
 
 template <class IterT, class _Size_type>
-constexpr inline void verify_range_n(const IterT& _First, const _Size_type _N)
+inline constexpr void verify_range_n(const IterT& _First, const _Size_type _N)
 { (void) _First; (void) _N;}
 
 #endif
@@ -136,7 +124,7 @@ constexpr inline void verify_range_n(const IterT& _First, const _Size_type _N)
 // unwrap MSVC STL iterators
 // https://stackoverflow.com/questions/61440041/why-does-themicrosoft-visual-c-library-implementation-unwrap-iterators
 
-#ifdef _MSVC_STL_UPDATE
+#if NH3API_MSVC_STL
 
 template<class IterT>
 [[nodiscard]] inline constexpr decltype(auto) unfancy(const IterT& _It) noexcept
@@ -172,35 +160,22 @@ IterT unfancy(const IterT& iter) noexcept
 
 #endif
 
-#ifdef __cpp_concepts
-template<tt::iterator_for_container PtrOrIterator>
-#else
-template<typename PtrOrIterator, std::enable_if_t<tt::is_iterator_v<PtrOrIterator>, int> = 0>
+#ifdef __cpp_lib_ranges
+#if NH3API_MSVC_STL
+inline constexpr ::std::ranges::_Unchecked_begin::_Cpo unfancy_begin;
+inline constexpr ::std::ranges::_Unchecked_end::_Cpo   unfancy_end;
+#elif NH3API_CLANG_STL
+inline constexpr auto unfancy_begin = ::std::ranges::__begin::__fn{};
+inline constexpr auto unfancy_end   = ::std::ranges::__end::__fn{};
+#elif NH3API_GCC_STL
+#if _GLIBCXX_RELEASE > 13
+inline constexpr ::std::ranges::__access::_Begin unfancy_begin{};
+inline constexpr ::std::ranges::__access::_End   unfancy_end{};
+#else // _GLIBCXX_RELEASE > 13
+inline constexpr ::std::ranges::__cust_access::_Begin unfancy_begin{};
+inline constexpr ::std::ranges::__cust_access::_End   unfancy_end{};
+#endif // _GLIBCXX_RELEASE > 13
 #endif
-[[nodiscard]] void* voidify(PtrOrIterator arg) noexcept
-{
-    if constexpr (::std::is_pointer_v<PtrOrIterator>)
-    {
-        return arg;
-    }
-    else
-    {
-        return __builtin_addressof(*arg);
-    }
-}
-
-// typedefs to comply with the C++ standard
-// iterator typedefs used by algorithms and other stuff
-template<typename _ValueType, typename _DiffType, typename _IterTag>
-struct container_iterator
-{
-    public:
-        using iterator_category = _IterTag;
-        using value_type = _ValueType;
-        using difference_type = _DiffType;
-        using pointer = value_type*;
-        using reference = value_type&;
-
-};
+#endif // __cpp_lib_ranges
 
 } // namespace nh3api

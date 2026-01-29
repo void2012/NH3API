@@ -6,9 +6,11 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "widgets.hpp"
+#include "core/interface/widgets.hpp"
 
 #pragma pack(push, 4)
+// Game chat /
+// Игровой чат.
 // size = 0x44 = 68, align = 4
 class CChatManager
 {
@@ -21,40 +23,26 @@ class CChatManager
             // Message text /
             // Текст сообщения.
             // offset: +0x0 = +0,  size = 0x80 = 128
-            std::array<char, 128> sText;
+            std::array<char, 128> sText {};
 
             // offset: +0x80 = +128,  size = 0x4 = 4
-            uint32_t killTime;
+            uint32_t killTime { 0 };
 
             // System message /
             // Системное сообщение.
             // offset: +0x84 = +132,  size = 0x1 = 1
-            bool isSystem;
+            bool isSystem { false };
 
-        };
+            unsigned char : 8;
+            unsigned char : 8;
+            unsigned char : 8;
 
-    private:
+        } NH3API_MSVC_LAYOUT;
     /*
-    CChatManager(int32_t maxChatLines)
-            : msgArray(nullptr),
-              currMsg(0),
-              msgCount(0),
-              changed(true),
-              lastWidget(nullptr),
-              maxLines(maxChatLines),
-              widgetText(nullptr),
-              position(-1),
-              chatKilled(false),
-              isSysMsg(false),
-              channel(0),
-              chatSample(nullptr),
-              playerDropSample(nullptr),
-              sysMsgSample(nullptr),
-              turnDurSample(nullptr),
-              playerEnterSample(nullptr)
+        CChatManager(int32_t maxChatLines)
         { SetMaxLines(maxChatLines); }
 
-        CChatManager(const ::nh3api::dummy_tag_t&)
+        CChatManager(const nh3api::dummy_tag_t&)
         {}
 
         ~CChatManager()
@@ -67,25 +55,28 @@ class CChatManager
     */
 
     public:
-        template<typename... Args>
+        CChatManager() = delete;
+        ~CChatManager() = delete;
+
+        template<typename... Args> NH3API_FORMAT_PRINTF(2, 3)
         void AddChat(const char* cChatMsg, Args... args)
-        { CDECL_N(char, 0x553C40, this, cChatMsg, ::std::forward<Args>(args)...); }
+        { CDECL_N(char, 0x553C40, this, cChatMsg, std::forward<Args>(args)...); }
 
-        template<typename... Args>
+        template<typename... Args> NH3API_FORMAT_PRINTF(2, 3)
         void TurnDurationMsg(const char* cChatMsg, Args... args)
-        { CDECL_N(char, 0x553D60, this, cChatMsg, ::std::forward<Args>(args)...); }
+        { CDECL_N(char, 0x553D60, this, cChatMsg, std::forward<Args>(args)...); }
 
-        template<typename... Args>
+        template<typename... Args> NH3API_FORMAT_PRINTF(2, 3)
         void SystemMsg(const char* cChatMsg, Args... args)
-        { CDECL_N(char, 0x553EA0, this, cChatMsg, ::std::forward<Args>(args)...); }
+        { CDECL_N(char, 0x553EA0, this, cChatMsg, std::forward<Args>(args)...); }
 
-        template<typename... Args>
+        template<typename... Args> NH3API_FORMAT_PRINTF(2, 3)
         void PlayerDropMsg(const char* cChatMsg, Args... args)
-        { CDECL_N(char, 0x553F60, this, cChatMsg, ::std::forward<Args>(args)...); }
+        { CDECL_N(char, 0x553F60, this, cChatMsg, std::forward<Args>(args)...); }
 
-        template<typename... Args>
+        template<typename... Args> NH3API_FORMAT_PRINTF(2, 3)
         void PlayerEnterMsg(const char* cChatMsg, Args... args)
-        { CDECL_N(char, 0x554030, this, cChatMsg, ::std::forward<Args>(args)...); }
+        { CDECL_N(char, 0x554030, this, cChatMsg, std::forward<Args>(args)...); }
 
         void UpdateWidget(textWidget* Widget, bool killOld, int32_t numLines)
         { THISCALL_4(void, 0x554100, this, Widget, killOld, numLines); }
@@ -118,61 +109,73 @@ class CChatManager
         // Chat messages
         // Сообщения в чате.
         // offset: +0x0 = +0,  size = 0x4 = 4
-        CChatStr* msgArray;
+        CChatStr* msgArray {nullptr};
 
         // Current chat message index /
         // Индекс текущего сообщения в чате.
         // offset: +0x4 = +4,  size = 0x4 = 4
-        int32_t currMsg;
+        int32_t currMsg {0};
 
         // Number of chat messages /
         // Количество сообщений чата.
         // offset: +0x8 = +8,  size = 0x4 = 4
-        int32_t msgCount;
+        int32_t msgCount {0};
 
         // offset: +0xC = +12,  size = 0x4 = 4
-        const char* widgetText;
+        const char* widgetText {nullptr};
 
         // offset: +0x10 = +16,  size = 0x4 = 4
-        uint32_t pauseTime;
+        uint32_t pauseTime {0};
 
         // offset: +0x14 = +20,  size = 0x1 = 1
-        bool changed;
+        bool changed {false};
+
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
         // offset: +0x18 = +24,  size = 0x4 = 4
-        textWidget* lastWidget;
+        textWidget* lastWidget {nullptr};
 
         // offset: +0x1C = +28,  size = 0x4 = 4
-        int32_t maxLines;
+        int32_t maxLines {0};
 
         // offset: +0x20 = +32,  size = 0x4 = 4
-        int32_t position;
+        int32_t position {-1};
 
         // offset: +0x24 = +36,  size = 0x1 = 1
-        bool chatKilled;
+        bool chatKilled {false};
+
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
         // offset: +0x28 = +40,  size = 0x4 = 4
-        uint32_t channel;
+        uint32_t channel {0};
 
         // offset: +0x2C = +44,  size = 0x1 = 1
-        bool isSysMsg;
+        bool isSysMsg {false};
+
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
         // offset: +0x30 = +48,  size = 0x4 = 4
-        sample* chatSample;
+        sample* chatSample {nullptr};
 
         // offset: +0x34 = +52,  size = 0x4 = 4
-        sample* playerDropSample;
+        sample* playerDropSample {nullptr};
 
         // offset: +0x38 = +56,  size = 0x4 = 4
-        sample* sysMsgSample;
+        sample* sysMsgSample {nullptr};
 
         // offset: +0x3C = +60,  size = 0x4 = 4
-        sample* turnDurSample;
+        sample* turnDurSample {nullptr};
 
         // offset: +0x40 = +64,  size = 0x4 = 4
-        sample* playerEnterSample;
+        sample* playerEnterSample {nullptr};
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 4
 
 inline CChatManager& chatMan = get_global_var_ref(0x69D800, CChatManager);

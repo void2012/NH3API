@@ -6,10 +6,15 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "../nh3api_std/exe_vector.hpp"
+#include <array>                          // std::array
+#include <memory>                         // std::destroy_at
+
+#include "../nh3api_std/exe_vector.hpp"   // exe_vector
 #include "../nh3api_std/exe_streambuf.hpp"
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_TABSTRACTFILE
 #define NH3API_VIRTUAL_OVERRIDE_TABSTRACTFILE(CLASS_NAME)\
@@ -21,15 +26,17 @@ int32_t __thiscall write(const void* buf, size_t len) override\
 { return get_type_vftable(this)->write(this, buf, len); }
 #endif
 
+#pragma pack(push, 4)
 // Abstract file class
+// size = 0x4 = 4, align = 4
 NH3API_VIRTUAL_CLASS TAbstractFile
 {
     public:
         struct vftable_t
         {
-            void (__thiscall *scalar_deleting_destructor)(TAbstractFile*, uint8_t);
-            int32_t (__thiscall *read)(TAbstractFile*, void*, size_t);
-            int32_t (__thiscall *write)(TAbstractFile*, const void*, size_t);
+            void    (__thiscall* scalar_deleting_destructor)(TAbstractFile*, uint8_t);
+            int32_t (__thiscall* read)(TAbstractFile*, void*, size_t);
+            int32_t (__thiscall* write)(TAbstractFile*, const void*, size_t);
         };
 
     public:
@@ -41,10 +48,10 @@ NH3API_VIRTUAL_CLASS TAbstractFile
         TAbstractFile& operator=(const TAbstractFile&) noexcept = default;
         TAbstractFile& operator=(TAbstractFile&&)      noexcept = default;
 
-        TAbstractFile(const ::nh3api::omit_base_vftable_tag_t&) noexcept
+        TAbstractFile(const nh3api::omit_base_vftable_tag_t&) noexcept
         {}
 
-        TAbstractFile(const ::nh3api::dummy_tag_t&) noexcept
+        TAbstractFile(const nh3api::dummy_tag_t&) noexcept
         {}
 
         ~TAbstractFile() noexcept = default;
@@ -62,42 +69,37 @@ NH3API_VIRTUAL_CLASS TAbstractFile
 
 };
 
-NH3API_FORCEINLINE
-// address: 0x607100
-// Compress buffer <source> of length <sourceLen> and write result to <dest> of length <destLen> /
-// Сжать область памяти <source> длиной <sourceLen> и записать результат в область памяти <dest> длиной <destLen>.
-int32_t exe_compress(void* dest, uint32_t destLen, const void* source, uint32_t sourceLen) noexcept
+// Zlib: compress buffer <source> of length <sourceLen> and write result to <dest> of length <destLen> /
+// Zlib: Сжать область памяти <source> длиной <sourceLen> и записать результат в область памяти <dest> длиной <destLen>.
+inline int32_t exe_compress(void* dest, uint32_t destLen, const void* source, uint32_t sourceLen) noexcept
 { return FASTCALL_5(int32_t, 0x607100, dest, destLen, source, sourceLen, 6); }
 
-NH3API_FORCEINLINE
-// address: 0x6071A0
-// Uncompress buffer <source> of length <sourceLen> and write result to <dest> of length <destLen> /
-// Распаковать область памяти <source> длиной <sourceLen> и записать результат в область памяти <dest> длиной <destLen>.
-int32_t exe_uncompress(void* dest, uint32_t destLen, const void* source, uint32_t sourceLen) noexcept
+// Zlib: Uncompress buffer <source> of length <sourceLen> and write result to <dest> of length <destLen> /
+// Zlib: Распаковать область памяти <source> длиной <sourceLen> и записать результат в область памяти <dest> длиной <destLen>.
+inline int32_t exe_uncompress(void* dest, uint32_t destLen, const void* source, uint32_t sourceLen) noexcept
 { return FASTCALL_4(int32_t, 0x6071A0, dest, destLen, source, sourceLen); }
 
-#pragma pack(push, 4)
 // zlib file /
 // zlib файл.
 // size = 0x8 = 8, align = 4, baseclass: TAbstractFile
 NH3API_VIRTUAL_CLASS TGzFile : public TAbstractFile
 {
     public:
-        TGzFile(const TGzFile&)            noexcept = default;
-        TGzFile(TGzFile&&)                 noexcept = default;
-        TGzFile& operator=(const TGzFile&) noexcept = default;
-        TGzFile& operator=(TGzFile&&)      noexcept = default;
-
-        TGzFile(const char* path, const char* mode) noexcept
+        TGzFile(const char* __restrict const path, const char* __restrict const mode = "rb") noexcept
             : TAbstractFile(nh3api::omit_base_vftable_tag)
         { THISCALL_3(void, 0x4D6EB0, this, path, mode); }
 
-        TGzFile(const ::nh3api::dummy_tag_t& tag) noexcept
+        TGzFile(const nh3api::dummy_tag_t& tag) noexcept
             : TAbstractFile(tag)
         {}
 
         ~TGzFile() noexcept
         { THISCALL_1(void, 0x4D6FC0, this); }
+
+        TGzFile(const TGzFile&)            noexcept = default;
+        TGzFile(TGzFile&&)                 noexcept = default;
+        TGzFile& operator=(const TGzFile&) noexcept = default;
+        TGzFile& operator=(TGzFile&&)      noexcept = default;
 
     // virtual functions
     public:
@@ -111,9 +113,7 @@ NH3API_VIRTUAL_CLASS TGzFile : public TAbstractFile
         void* file;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Streambuf file /
 // Файл чтения с помощью streambuf.
 // size = 0x8 = 8, align = 4, baseclass: TAbstractFile
@@ -126,10 +126,10 @@ NH3API_VIRTUAL_CLASS TStreamBufFile : public TAbstractFile
         TStreamBufFile& operator=(TStreamBufFile&&)      noexcept = default;
 
         TStreamBufFile(exe_streambuf* src_stream) noexcept
-            : TAbstractFile(::nh3api::omit_base_vftable_tag), stream(src_stream)
+            : TAbstractFile(nh3api::omit_base_vftable_tag), stream{src_stream}
         { NH3API_SET_VFTABLE(); }
 
-        TStreamBufFile(const ::nh3api::dummy_tag_t& tag) noexcept
+        TStreamBufFile(const nh3api::dummy_tag_t& tag) noexcept
             : TAbstractFile(tag)
         {}
 
@@ -145,33 +145,29 @@ NH3API_VIRTUAL_CLASS TStreamBufFile : public TAbstractFile
         exe_streambuf* stream;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // zlib stream buffer /
 // Поток чтения gz-файла.
 // size = 0x84 = 132, align = 4, baseclass: std::streambuf
 NH3API_VIRTUAL_CLASS TGzInflateBuf : public exe_streambuf
 {
     public:
-        NH3API_FORCEINLINE
-        TGzInflateBuf(exe_streambuf& src) noexcept(false)
-            : exe_streambuf(::nh3api::dummy_tag)
+        inline TGzInflateBuf(exe_streambuf& src) noexcept(false)
+            : exe_streambuf(nh3api::dummy_tag)
         { THISCALL_2(void, 0x4D6260, this, &src); }
 
-        NH3API_FORCEINLINE
-        TGzInflateBuf(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline TGzInflateBuf(const nh3api::dummy_tag_t& tag) noexcept
             : exe_streambuf(tag)
         {}
 
     public:
-        [[nodiscard]] bool is_compressed() const
+        [[nodiscard]] bool is_compressed() const noexcept
         { return m_is_compressed; }
 
-        [[nodiscard]] uint32_t crc() const
+        [[nodiscard]] uint32_t crc() const noexcept
         { return m_crc; }
 
-        [[nodiscard]] bool is_open() const
+        [[nodiscard]] bool is_open() const noexcept
         { return m_open && m_stream_is_open; }
 
     public:
@@ -214,141 +210,142 @@ NH3API_VIRTUAL_CLASS TGzInflateBuf : public exe_streambuf
 
         // offset: +0x83 = +131,  size = 0x1 = 1
         bool m_open;
-
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // LOD file entry /
 // Запись LOD-файла.
 // size = 0x20 = 32, align = 4
 struct LODEntry
 {
-    public:
-        NH3API_FORCEINLINE
-        LODEntry() noexcept
-        { nh3api::trivial_zero<sizeof(LODEntry)>(this); }
+    // Entry name /
+    // Название записи.
+    // offset: +0x0 = +0,  size = 0x10 = 16
+    std::array<char, 16> name {};
 
-        NH3API_FORCEINLINE
-        LODEntry(const ::nh3api::dummy_tag_t&) noexcept
-        {}
+    // Entry offset /
+    // Смещение записи
+    // offset: +0x10 = +16,  size = 0x4 = 4
+    ptrdiff_t offset {0};
 
-    public:
-        // Entry name /
-        // Название записи.
-        // offset: +0x0 = +0,  size = 0x10 = 16
-        std::array<char, 16> name;
+    // Entry uncompressed size /
+    // Размер несжатой записи.
+    // offset: +0x14 = +20,  size = 0x4 = 4
+    size_t size {0};
 
-        // Entry offset /
-        // Смещение записи
-        // offset: +0x10 = +16,  size = 0x4 = 4
-        int32_t offset;
+    //
+    // offset: +0x18 = +24,  size = 0x4 = 4
+    int32_t attrib {0};
 
-        // Entry uncompressed size /
-        // Размер несжатой записи.
-        // offset: +0x14 = +20,  size = 0x4 = 4
-        int32_t size;
-
-        // offset: +0x18 = +24,  size = 0x4 = 4
-        int32_t attrib;
-
-        // Entry compressed size /
-        // Размер сжатой записи.
-        // offset: +0x1C = +28,  size = 0x4 = 4
-        int32_t csize;
+    // Entry compressed size /
+    // Размер сжатой записи.
+    // offset: +0x1C = +28,  size = 0x4 = 4
+    size_t csize {0};
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // LOD file header /
 // Заголовок LOD файла.
 // size = 0x5C = 92, align = 4
 struct LODHeader
 {
-    public:
-        LODHeader()
-        { LOD_ID.fill('\0'); }
+    // offset: +0x0 = +0,  size = 0x4 = 4
+    std::array<char, 4> LOD_ID {};
 
-    public:
-        // offset: +0x0 = +0,  size = 0x4 = 4
-        std::array<char, 4> LOD_ID;
+    // LOD File version /
+    // Версия LOD-файла.
+    // offset: +0x4 = +4,  size = 0x4 = 4
+    int32_t version {500};
 
-        // LOD File version /
-        // Версия LOD-файла.
-        // offset: +0x4 = +4,  size = 0x4 = 4
-        int32_t version = 500;
+    // Number of entries /
+    // Количество записей.
+    // offset: +0x8 = +8,  size = 0x4 = 4
+    size_t numEntries {0};
 
-        // Number of entries /
-        // Количество записей.
-        // offset: +0x8 = +8,  size = 0x4 = 4
-        int32_t numEntries = 0;
-
-    protected:
-        // offset: +0xC = +12,  size = 0x50 = 80
-        std::array<char, 80> reserved;
+protected:
+    // offset: +0xC = +12,  size = 0x50 = 80
+    std::array<std::byte, 80> reserved {};
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // LOD File /
 // LOD Файл.
 // size = 0x18C = 396, align = 4
 class LODFile
 {
     public:
-        LODFile() noexcept
-            :   fileptr(nullptr),
-                opened(false),
-                dataBuffer(nullptr),
-                header(),
-                subindex()
+        enum class openmode : int32_t
+        {
+            read_write = 0,
+            read       = 1
+        };
+
+    public:
+        inline LODFile() noexcept
+            : subindex{}
         {}
 
-        LODFile(const LODFile& other)
-            : subindex(other.subindex)
-        { std::memcpy(reinterpret_cast<void*>(this), &other, 380/*__builtin_offsetof(LODFile, subindex)*/); }
+        inline LODFile(const LODFile& other)
+            : subindex { other.subindex }
+        { std::memcpy(reinterpret_cast<void*>(this), &other, 380 /*__builtin_offsetof(LODFile, subindex)*/); }
 
-        LODFile(LODFile&& other) noexcept
-        { nh3api::trivial_move<sizeof(*this)>(&other, this); }
-
-        LODFile& operator=(const LODFile& other)
+        inline LODFile(LODFile&& other) noexcept
         {
-            std::memcpy(reinterpret_cast<void*>(this), &other, 380 /*__builtin_offsetof(LODFile, subindex)*/);
+            std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+            std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+        }
+
+        inline LODFile& operator=(const LODFile& other)
+        {
+            if ( this != &other )
+            {
+                std::memcpy(reinterpret_cast<void*>(this), &other, 380 /*__builtin_offsetof(LODFile, subindex)*/);
+                this->subindex = other.subindex;
+            }
+
             return *this;
         }
 
-        LODFile& operator=(LODFile&& other) noexcept
+        inline LODFile& operator=(LODFile&& other) noexcept
         {
-            nh3api::trivial_move<380 /*__builtin_offsetof(LODFile, subindex)*/>(&other, this);
-            this->subindex = std::move(other.subindex);
+            if ( this != &other )
+            {
+                std::destroy_at(&this->subindex);
+                std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+                std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+            }
+
             return *this;
         }
 
-        LODFile(const ::nh3api::dummy_tag_t& tag) noexcept
-            : subindex(tag)
+        inline LODFile(const nh3api::dummy_tag_t& tag) noexcept
+            : subindex { tag }
         {}
 
-        ~LODFile() noexcept
+        inline ~LODFile() noexcept
         { THISCALL_1(void, 0x4FAE90, this); }
 
     public:
-        LODEntry* getItemIndex(char const* item_name) noexcept
+        LODEntry* getItemIndex(const char* const item_name) noexcept
         { return THISCALL_2(LODEntry*, 0x4FACA0, this, item_name); }
 
-        bool      exist(char const* item_name) noexcept
+        bool      exist(const char* const item_name) noexcept
         {
-            Find( 0, static_cast<size_t>(numEntries), item_name );
-            return matchindex >= 0;
+            if ( item_name )
+            {
+                Find(0, static_cast<size_t>(numEntries), item_name);
+                return matchindex >= 0;
+            }
+
+            return false;
+
         }
 
-        void      Find(uint32_t begin, uint32_t end, const char* item_name) noexcept
+        void      Find(uint32_t begin, uint32_t end, const char* const item_name) noexcept
         { THISCALL_4(void, 0x4FACF0, this, begin, end, item_name); }
 
-        int32_t   open(char const* filename, uint32_t flags) noexcept
-        { return THISCALL_3(int32_t, 0x4FAF30, this, filename, flags); }
+        int32_t   open(const char* const filename, openmode flags = openmode::read) noexcept
+        { return THISCALL_3(int32_t, 0x4FAF30, this, filename, static_cast<int32_t>(flags)); }
 
-        bool      pointAt(char const* itemName) noexcept
+        bool      pointAt(const char* const itemName) noexcept
         { return THISCALL_2(bool, 0x4FB100, this, itemName); }
 
         int32_t   read(void* dest, int32_t numBytes) noexcept
@@ -358,59 +355,51 @@ class LODFile
         // File pointer /
         // Указатель файла.
         // offset: +0x0 = +0,  size = 0x4 = 4
-        exe_FILE* fileptr;
+        exe_FILE* fileptr {nullptr};
 
         // Lod file name /
         // Название файла LOD.
         // offset: +0x4 = +4,  size = 0x100 = 256
-        std::array<char, 256> LODFileName;
+        std::array<char, 256> LODFileName {};
 
         // FILE stream is open /
         // Открыт поток файла.
         // offset: +0x104 = +260,  size = 0x4 = 4
-        bool32_t opened;
+        bool32_t opened {false};
 
         // offset: +0x108 = +264,  size = 0x4 = 4
-        void* dataBuffer;
+        void* dataBuffer {nullptr};
 
         // offset: +0x10C = +268,  size = 0x4 = 4
-        uint32_t dataBufferSize;
+        size_t dataBufferSize {0};
 
         // offset: +0x110 = +272,  size = 0x4 = 4
-        int32_t dataItemIndex;
+        int32_t dataItemIndex {0};
 
         // offset: +0x114 = +276,  size = 0x4 = 4
-        int32_t dataPos;
+        ptrdiff_t dataPos {0};
 
         // offset: +0x118 = +280,  size = 0x4 = 4
-        int32_t matchindex;
+        int32_t matchindex {0};
 
         // offset: +0x11C = +284,  size = 0x5C = 92
-        LODHeader header;
+        LODHeader header {};
 
         // offset: +0x178 = +376,  size = 0x4 = 4
-        int32_t numEntries;
+        size_t numEntries {0};
 
         union {
         // offset: +0x17C = +380,  size = 0x10 = 16
         exe_vector<LODEntry> subindex;
         };
-
 };
-#pragma pack(pop)
 
-NH3API_FORCEINLINE
-LODFile* GetLODFile(const char* name) noexcept
+inline LODFile* GetLODFile(const char* const name) noexcept
 {
-    if ( !name )
-        return nullptr;
-    const size_t name_size = strlen(name);
-    if ( name_size == 0 )
+    if ( name == nullptr )
         return nullptr;
 
-    using lod_files_array_t = std::array<std::pair<const char*, LODFile>, 5>;
-    lod_files_array_t& lodfiles = get_global_var_ref(0x69D8A8, lod_files_array_t);
-
+    auto& lodfiles = get_global_var_ref(0x69D8A8, std::array<std::pair<const char*, LODFile>, 5>);
     for ( auto& lodfile : lodfiles )
         if ( _stricmp(name, lodfile.first) == 0 )
             return &lodfile.second;
@@ -418,7 +407,6 @@ LODFile* GetLODFile(const char* name) noexcept
     return nullptr;
 }
 
-#pragma pack(push, 4)
 // LOD File stream /
 // Поток чтения из LOD.
 // size = 0x8 = 8, align = 4, baseclass: TAbstractFile
@@ -426,15 +414,15 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter final : public TAbstractFile
 {
     public:
         t_lod_file_adapter(LODFile* src) noexcept
-            : TAbstractFile(::nh3api::dummy_tag), lod_file(src)
+            : TAbstractFile(nh3api::dummy_tag), lod_file{src}
         { NH3API_SET_VFTABLE(); }
 
         t_lod_file_adapter(LODFile& src) noexcept
-            : TAbstractFile(::nh3api::dummy_tag), lod_file(&src)
+            : TAbstractFile(nh3api::dummy_tag), lod_file{&src}
         { NH3API_SET_VFTABLE(); }
 
         t_lod_file_adapter(const char* name) noexcept
-            : TAbstractFile(::nh3api::dummy_tag), lod_file(GetLODFile(name))
+            : TAbstractFile(nh3api::dummy_tag), lod_file{GetLODFile(name)}
         { NH3API_SET_VFTABLE(); }
 
     public:
@@ -451,24 +439,24 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter final : public TAbstractFile
         {
             if (lod_file == nullptr)
                 return false;
-            else
-                return !!lod_file->opened;
+
+            return lod_file->opened;
         }
 
         // get entry by name
-        LODEntry* get_entry(const char* name) noexcept
+        LODEntry* get_entry(const char* const name) noexcept
         {
-            if (lod_file->pointAt(name) && lod_file->dataItemIndex >= 0)
+            if ( name && lod_file->pointAt(name) && lod_file && lod_file->dataItemIndex >= 0 )
                 return &lod_file->subindex[static_cast<size_t>(lod_file->dataItemIndex)];
-            else
-                return nullptr;
+
+            return nullptr;
         }
 
         // read LOD File entry into buffer
-        [[nodiscard]] exe_vector<uint8_t> read_entry(const char* name)
+        [[nodiscard]] exe_vector<std::byte> read_entry(const char* const name)
         {
-            exe_vector<uint8_t> buffer;
-            if (!lod_file->pointAt(name))
+            exe_vector<std::byte> buffer;
+            if ( lod_file == nullptr || name == nullptr || !lod_file->pointAt(name) )
                 return buffer; // not found, empty buffer
 
             if ( lod_file->dataItemIndex < 0 )
@@ -479,12 +467,12 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter final : public TAbstractFile
             if ( entry_size == 0 )
                 return buffer; // entry is empty
 
-            buffer.resize(entry_size, 0);
+            buffer.resize(entry_size);
             read(buffer.data(), entry_size);
             return buffer;
         }
 
-        void seek(int32_t offset) noexcept
+        void seek(ptrdiff_t offset) noexcept
         { exe_fseek(lod_file->fileptr, offset, SEEK_SET); }
 
     // virtual functions
@@ -505,29 +493,23 @@ NH3API_VIRTUAL_CLASS t_lod_file_adapter final : public TAbstractFile
         LODFile* lod_file;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // size = 0x8 = 8, align = 4, baseclass: TAbstractFile
 NH3API_VIRTUAL_CLASS t_stdio_file_adapter final : public TAbstractFile
 {
-    protected:
-        using file_ptr = exe_unique_file;
-
     public:
+        t_stdio_file_adapter(const char* const filename, const char* const mode) noexcept
+            : file { exe_fopen(filename, mode), exe_fcloser {} }
+        { NH3API_SET_VFTABLE(); }
+
+        ~t_stdio_file_adapter() noexcept = default;
         t_stdio_file_adapter(const t_stdio_file_adapter&)            noexcept = delete;
         t_stdio_file_adapter(t_stdio_file_adapter&&)                 noexcept = default;
         t_stdio_file_adapter& operator=(const t_stdio_file_adapter&) noexcept = delete;
         t_stdio_file_adapter& operator=(t_stdio_file_adapter&&)      noexcept = default;
 
-        t_stdio_file_adapter(const char* filename, const char* mode) noexcept
-            : file(exe_fopen(filename, mode), exe_fcloser {})
-        { NH3API_SET_VFTABLE(); }
-
-        ~t_stdio_file_adapter() noexcept
-        { exe_fclose(file.get()); }
-
-        void seek(int32_t offset)
+    public:
+        void seek(ptrdiff_t offset)
         { exe_fseek(file.get(), offset, SEEK_SET); }
 
         exe_FILE* get_file() noexcept
@@ -544,17 +526,27 @@ NH3API_VIRTUAL_CLASS t_stdio_file_adapter final : public TAbstractFile
         { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }
 
         int32_t __thiscall read(void* buf, size_t len) override
-        { return static_cast<int32_t>(exe_fread(buf, len, 1, file.get())); }
+        {
+            if ( buf && len && file )
+                return static_cast<int32_t>(exe_fread(buf, len, 1, file.get()));
+
+            return 0;
+        }
 
         int32_t __thiscall write(const void* buf, size_t len) override
-        { return static_cast<int32_t>(exe_fwrite(buf, len, 1, file.get())); }
+        {
+            if ( buf && len && file )
+                return static_cast<int32_t>(exe_fwrite(buf, len, 1, file.get()));
 
-    public:
+            return 0;
+        }
+
+    protected:
         // offset: +0x4 = +4,  size = 0x4 = 4
-        file_ptr file;
+        exe_unique_file file;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 4
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63DAC0, TAbstractFile)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63E74C, TGzFile)
@@ -562,4 +554,4 @@ NH3API_SPECIALIZE_TYPE_VFTABLE(0x63DACC, TStreamBufFile)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63E710, TGzInflateBuf)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x641138, t_lod_file_adapter)
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

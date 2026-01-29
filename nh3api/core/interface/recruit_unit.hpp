@@ -11,51 +11,50 @@
 
 #pragma pack(push, 4)
 // size = 0xBC = 188, align = 4, baseclass: baseManager
-class recruitUnit : public baseManager
+NH3API_VIRTUAL_CLASS recruitUnit : public baseManager
 {
     public:
-        recruitUnit() = delete;
-        recruitUnit(const recruitUnit&)            = default;
-        recruitUnit(recruitUnit&&)                 = delete;
-        recruitUnit& operator=(const recruitUnit&) = default;
-        recruitUnit& operator=(recruitUnit&&)      = delete;
-
-        recruitUnit(armyGroup*    newGroup,
-                    bool          bGroupIsTownGarrison,
-                    TCreatureType MonType1_,
-                    int16_t*      numMon1,
-                    TCreatureType MonType2_,
-                    int16_t*      numMon2,
-                    TCreatureType MonType3_,
-                    int16_t*      numMon3,
-                    TCreatureType MonType4_,
-                    int16_t*      numMon4) noexcept
-            : recruitUnit(::nh3api::dummy_tag)
+        inline recruitUnit(armyGroup*    newGroup,
+                           bool          bGroupIsTownGarrison,
+                           TCreatureType MonType1_,
+                           int16_t*      numMon1,
+                           TCreatureType MonType2_,
+                           int16_t*      numMon2,
+                           TCreatureType MonType3_,
+                           int16_t*      numMon3,
+                           TCreatureType MonType4_,
+                           int16_t*      numMon4) noexcept
+            : recruitUnit(nh3api::dummy_tag)
         { THISCALL_11(void, 0x551750, this, newGroup, bGroupIsTownGarrison, MonType1_, numMon1, MonType2_, numMon2, MonType3_, numMon3, MonType4_, numMon4); }
 
-        recruitUnit(hero* thisHero_,
-                    TCreatureType MonType1_,
-                    int16_t* numMon1,
-                    TCreatureType MonType2_,
-                    int16_t* numMon2,
-                    TCreatureType MonType3_,
-                    int16_t* numMon3,
-                    TCreatureType MonType4_,
-                    int16_t* numMon4) noexcept
-            : recruitUnit(::nh3api::dummy_tag)
+        inline recruitUnit(hero * thisHero_,
+                           TCreatureType MonType1_,
+                           int16_t*      numMon1,
+                           TCreatureType MonType2_,
+                           int16_t*      numMon2,
+                           TCreatureType MonType3_,
+                           int16_t*      numMon3,
+                           TCreatureType MonType4_,
+                           int16_t*      numMon4) noexcept
+            : recruitUnit(nh3api::dummy_tag)
         { THISCALL_10(void, 0x551860, this, thisHero_, MonType1_, numMon1, MonType2_, numMon2, MonType3_, numMon3, MonType4_, numMon4); }
 
-        recruitUnit(town* newTown,
-                    int32_t newDwellingIndex,
-                    int32_t bInInTownMainScreen) noexcept
-            : recruitUnit(::nh3api::dummy_tag)
+        inline recruitUnit(town * newTown,
+                           int32_t newDwellingIndex,
+                           int32_t bInInTownMainScreen) noexcept
+            : recruitUnit(nh3api::dummy_tag)
         { THISCALL_4(void, 0x551960, this, newTown, newDwellingIndex, bInInTownMainScreen); }
 
-        recruitUnit(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline recruitUnit(const nh3api::dummy_tag_t& tag) noexcept
             : baseManager(tag)
         {}
 
-        NH3API_DEFAULT_DESTRUCTOR(recruitUnit)
+        inline ~recruitUnit() noexcept = default;
+        recruitUnit()                              = delete;
+        recruitUnit(const recruitUnit&)            = delete;
+        recruitUnit(recruitUnit&&)                 = delete;
+        recruitUnit& operator=(const recruitUnit&) = delete;
+        recruitUnit& operator=(recruitUnit&&)      = delete;
 
     public:
         void Update(bool new_monster, int32_t slot) noexcept
@@ -147,6 +146,6 @@ class recruitUnit : public baseManager
         int32_t numberToBuy;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 4
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x640C80, recruitUnit)

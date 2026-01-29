@@ -26,1559 +26,2535 @@
  */
 #pragma once
 
-#include <array> // std::array
-#include <cmath> // std::fpclassify
-#include <utility>       // std::swap, std::forward
-//#ifdef __cpp_lib_ranges
-//#include <ranges> // std::ranges::enable_view, std::ranges::enable_borrowed_range
-//#endif
-#include "char_traits.hpp" // std::char_traits, constexpr_char_traits
-#include "intrin.hpp"    // constexpr string functions, std::fpclassify, nh3api::count_digits, float classification macros
-#include "memory.hpp"    // allocators
-#include "iterator.hpp"  // std::reverse_iterator, tt::is_iterator
-#include "nh3api_exceptions.hpp" // exceptions
-#include "hash.hpp" // nh3api::default_hash
+#include <algorithm>             // std::copy, std::copy_n, std::max, std::min, std::remove
+#include <array>                 // std::array
+#include <cassert>               // assert
+#include <cmath>                 // std::fpclassify
+#include <initializer_list>      // std::initializer_list
+#include <utility>               // std::swap, std::forward
+#if ( __cplusplus >= 202002L ) || defined(__cpp_lib_ranges)
+#include <ranges>                // std::ranges::begin, std::ranges::contiguous_range, std::ranges::data, std::ranges::forward_range, std::from_range
+#endif
+#include <stdexcept>             // std::length_error, std::out_of_range
+#include <string>                // std::string, std::wstring, std::char_traits
 
-NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+#include "nh3api_exceptions.hpp" // nh3api::throw_exception
+#include "hash.hpp"              // nh3api::default_hash
+#include "intrin.hpp"            // constexpr string functions, std::fpclassify, nh3api::count_digits, float classification macros
+#include "iterator.hpp"          // std::reverse_iterator, tt::is_iterator
+#include "memory.hpp"            // allocators
 
-struct exe_string_equal_accessor;
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wattributes")
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(4714)
+NH3API_WARNING_MSVC_DISABLE(26495)
+
+namespace nh3api
+{
+#ifdef __cpp_lib_ranges_contains
+template <class Range>
+concept contiguous_chars_range =
+(std::ranges::contiguous_range<Range>) && std::same_as<std::remove_cvref_t<std::ranges::range_reference_t<Range>>, char>;
+#endif
+
+} // namespace nh3api
+
+class exe_string;
+
+template<>
+struct nh3api::private_accessor<exe_string>;
+
+// tag to select constructors used by basic_string's concatenation operators (operator+)
+struct exe_string_constructor_concat_tag
+{ inline explicit exe_string_constructor_concat_tag() = default; };
 
 #pragma pack(push, 4)
-// Visual C++ 6.0 implementation of std::basic_string,
-// which uses unsafe copy-on-write semantics with 8-bit reference counting.
-// Use only for binary compatibility with the program.
+// Visual C++ 6.0 implementation of std::string,
+// which uses unsafe copy-on-write semantics with 8-bit reference counting(in this library, CoW is not implemented on copy, it is preserved for compatibility).
+// Use only for binary compatibility with the game.
 // Consider using std::basic_string or exe_std_string/exe_std_wstring which use .exe allocator
 class exe_string
 {
     // external typedefs
     public:
-        using value_type = char;
-        using allocator_type = exe_allocator<char>;
-        using traits_type = std::char_traits<char>;
-        using size_type = size_t;
+        using value_type      = char;
+        using allocator_type  = exe_allocator<char>;
+        using traits_type     = std::char_traits<char>;
+        using size_type       = size_t;
         using difference_type = ptrdiff_t;
-        using pointer = value_type*;
-        using const_pointer = const value_type*;
-        using reference = value_type&;
+        using pointer         = value_type*;
+        using const_pointer   = const value_type*;
+        using reference       = value_type&;
         using const_reference = const value_type&;
 
-        using iterator = pointer;
-        using const_iterator = const_pointer;
+        using iterator               = pointer;
+        using const_iterator         = const_pointer;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-        using reverse_iterator = std::reverse_iterator<iterator>;
+        using reverse_iterator       = std::reverse_iterator<iterator>;
 
-    // exceptions
     protected:
-        #ifdef __cpp_concepts
-        template<nh3api::tt::iterator_for_container IterT>
-        #else
-        template<typename IterT>
-        #endif
-        using is_elem_cptr = std::bool_constant<nh3api::tt::is_any_of_v<IterT, const char* const, char* const, const char*, char*>>;
+        template<typename _Iter>
+        using is_elem_cptr = std::bool_constant<nh3api::tt::is_any_of_v<_Iter, const char* const,
+                                                                               char* const,
+                                                                               const char*,
+                                                                               char*>>;
 
-        #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-        [[noreturn]] NH3API_FORCEINLINE
-        static void _Throw_length_exception()
-        {
-            NH3API_THROW(std::length_error, "string too long");
-        }
-        #else
-        [[noreturn]] NH3API_FORCEINLINE
-        static void _Throw_length_exception()
-        {
-            NH3API_THROW(0, 0);
-        }
-        #endif
+        template<typename _Iter>
+        using is_elem_ucptr = std::bool_constant<nh3api::tt::is_any_of_v<_Iter, const unsigned char* const,
+                                                                                unsigned char* const,
+                                                                                const unsigned char*,
+                                                                                unsigned char*>>;
 
-        #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-        [[noreturn]] NH3API_FORCEINLINE
-        static void _Throw_out_of_range_exception()
-        {
-            NH3API_THROW(std::out_of_range, "invalid string position");
-        }
-        #else
-        [[noreturn]] NH3API_FORCEINLINE
-        static void _Throw_out_of_range_exception()
-        {
-            NH3API_THROW(0, 0);
-        }
-        #endif
+        [[noreturn]] inline static void _Throw_length_exception() noexcept(false)
+        { nh3api::throw_exception<std::length_error>("string too long"); }
 
-        // we use the exceptions function like this:
-        // return _Throw_xxx(), yyy;
-        // to help compiler optimize branches
+        [[noreturn]] inline static void _Throw_out_of_range_exception() noexcept(false)
+        { nh3api::throw_exception<std::out_of_range>("invalid string position"); }
 
     public:
-        exe_string() noexcept
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
+        inline constexpr exe_string() noexcept
+            : _Myptr  { nullptr },
+              _Mysize { 0 },
+              _Myres  { 0 }
         {}
 
-        explicit exe_string(const allocator_type&) noexcept
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
-        {}
+        exe_string(const exe_string& _Other)
+        { _Construct<_Construct_strategy::_From_string>(_Other._Myptr, _Other._Mysize); }
 
-        exe_string(const exe_string& other)
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
+        exe_string(const exe_string& _Other, const size_t _Offset)
         {
-            assign(other, 0, npos);
+            _Other._Check_offset(_Offset);
+            _Construct<_Construct_strategy::_From_ptr>(_Other._Myptr + _Offset, _Other._Clamp_suffix_size(_Offset, npos));
         }
 
-        exe_string(const exe_string& other, size_type pos, size_type n, const allocator_type&)
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
+        exe_string(const exe_string& _Other, const size_t _Offset, const size_t _Count)
         {
-            assign( other, pos, n );
+            _Other._Check_offset(_Offset);
+            _Construct<_Construct_strategy::_From_ptr>(_Other._Myptr + _Offset, _Other._Clamp_suffix_size(_Offset, _Count));
         }
 
-        exe_string(const exe_string& other, size_type pos, size_type n)
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
+        exe_string(exe_string&& _Other, const size_t _Offset)
+        { _Move_construct_from_substr(_Other, _Offset, npos); }
+
+        exe_string(exe_string&& _Other, const size_t _Offset, const size_t _Count)
+        { _Move_construct_from_substr(_Other, _Offset, _Count); }
+
+        // construct from const char* and size
+        exe_string(const char* const _String, const size_t _Count)
         {
-            assign( other, pos, n );
+            if ( _String && _Count )
+                _Construct<_Construct_strategy::_From_ptr>(_String, _Count);
+            else
+                _Construct_empty();
         }
 
-        exe_string(const value_type* str, size_type _N, const allocator_type& )
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
+        template<size_t _Size>
+        inline exe_string(const char (&_String)[_Size])
+            : _Mysize { _Size - 1 }
         {
-            assign(str, _N);
+            static_assert(_Size > 1);
+            constexpr size_t _New_capacity = _Calculate_growth(_Size - 1, 0, max_size());
+            this->_Myres                   = _New_capacity;
+            char* const _New_ptr           = _Allocate_for_capacity(_New_capacity);
+            this->_Myptr                   = _New_ptr + 1; // reference count is one byte before the string
+            _Refcnt(this->_Myptr)          = 0;            // set reference count to zero on construction
+            traits_type::copy(_Myptr, _String, _Size - 1);
+            _Myptr[_Size - 1] = '\0';
         }
 
-        exe_string(const value_type* str, size_type _N)
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
+        // construct from const char* and calculate its length
+        inline exe_string(const char* const _String)
         {
-            assign(str, _N);
+            if ( _String ) NH3API_LIKELY
+                _Construct<_Construct_strategy::_From_ptr>(_String, __builtin_strlen(_String));
+            else
+                _Construct_empty();
         }
 
-        exe_string(const value_type* str)
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
+        exe_string(std::nullptr_t) = delete;
+
+        // fill string with the same character n times
+        exe_string(size_t _Count, char _Character)
+        { _Construct<_Construct_strategy::_From_char>(_Character, _Count); }
+
+    #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container _Iter>
+    #else
+        template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
+    #endif
+        exe_string(const _Iter _First, const _Iter _Last)
         {
-            assign(str);
+            nh3api::verify_range(_First, _Last);
+            auto _UFirst = nh3api::unfancy(_First);
+            auto _ULast  = nh3api::unfancy(_Last);
+            if ( _UFirst == _ULast )
+                _Construct_empty();
+            else if constexpr ( is_elem_cptr<decltype(_UFirst)>::value )
+                _Construct<_Construct_strategy::_From_ptr>(_UFirst, static_cast<size_t>(_ULast - _UFirst));
+            else if constexpr ( is_elem_ucptr<decltype(_UFirst)>::value )
+                _Construct<_Construct_strategy::_From_ptr>(reinterpret_cast<const char* const>(_UFirst), static_cast<size_t>(_ULast - _UFirst));
+            else if constexpr ( nh3api::is_cpp17_fwd_iter_v<_Iter> )
+                _Construct_from_iter(std::move(_UFirst), std::move(_ULast), static_cast<size_t>(std::distance(_UFirst, _ULast)));
+            else
+                _Construct_from_iter(std::move(_UFirst), std::move(_ULast));
         }
 
-        exe_string(const value_type* str, const allocator_type&)
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
+    #ifdef __cpp_lib_containers_ranges
+    #if defined(__clang__) && defined(__INTELLISENSE__)
+        template<typename _Range>
+    #else
+        template<nh3api::tt::container_compatible_range<char> _Range>
+    #endif
+        exe_string(std::from_range_t, _Range _Rng)
         {
-            assign(str);
-        }
-
-        exe_string(size_type _N, value_type c)
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
-        {
-            assign(_N, c);
-        }
-
-        exe_string(size_type _N, value_type c, const allocator_type&)
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
-        {
-            assign(_N, c);
-        }
-
-        #ifdef __cpp_concepts
-        template<nh3api::tt::iterator_for_container IterT>
-        #else
-        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-        #endif
-        exe_string(IterT _F, IterT _L)
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
-        {
-            nh3api::verify_range(_F, _L);
-            _Construct(nh3api::unfancy(_F),
-                       nh3api::unfancy(_L),
-                       nh3api::iter_category<IterT>());
-        }
-
-        #ifdef __cpp_concepts
-        template<nh3api::tt::iterator_for_container IterT>
-        #else
-        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-        #endif
-        exe_string( IterT _F, IterT _L, const allocator_type&)
-            : _Dummy(0), _Ptr(nullptr), _Len(0), _Res(0)
-        {
-            nh3api::verify_range(_F, _L);
-            _Construct(nh3api::unfancy(_F),
-                       nh3api::unfancy(_L),
-                       nh3api::iter_category<IterT>());
-        }
-
-        protected:
-        NH3API_FORCEINLINE void _Move_nullify(exe_string* other) noexcept
-        { nh3api::trivial_move<sizeof(exe_string)>(other, this); }
-
-        template <class IterT>
-        void _Construct(IterT _F, IterT _L, std::input_iterator_tag)
-        {
-            NH3API_TRY
+            if constexpr (std::ranges::sized_range<_Range> || std::ranges::forward_range<_Range>)
             {
-                for (; _F != _L; ++_F)
-                    push_back(static_cast<char>(*_F));
-            }
-            NH3API_CATCH(...)
-            {
-                _Tidy_deallocate();
-                NH3API_RETHROW
-            }
-        }
-
-        template <class IterT>
-        void _Construct(IterT _F, IterT _L, std::forward_iterator_tag)
-        {
-            const size_type count = static_cast<size_type>(std::distance(_F, _L));
-            reserve(count);
-            _Construct(_F, _L, std::input_iterator_tag());
-        }
-
-        void _Construct(char* const _F, char* const _L, std::random_access_iterator_tag)
-        {
-            if (_F != _L)
-                assign(_F, static_cast<size_type>(_L - _F));
-        }
-
-        void _Construct(const char* const _F, const char* const _L, std::random_access_iterator_tag)
-        {
-            if (_F != _L)
-                assign(_F, static_cast<size_type>(_L - _F));
-        }
-
-        public:
-        exe_string(exe_string&& other) noexcept
-        {
-            if (this == &other)
-            { // arguments are the same, do nothing
-                return;
+                const size_t _Count = static_cast<size_t>(std::ranges::distance(_Rng));
+                if constexpr ( nh3api::contiguous_chars_range<_Range> )
+                    _Construct<_Construct_strategy::_From_ptr>(std::ranges::data(_Rng), _Count);
+                else
+                    _Construct_from_iter(nh3api::unfancy_begin(_Rng), nh3api::unfancy_end(_Rng), _Count);
             }
             else
             {
-                _Move_nullify(&other);
+                _Construct_from_iter(nh3api::unfancy_begin(_Rng), nh3api::unfancy_end(_Rng));
             }
         }
+    #endif
 
-        exe_string& operator=(exe_string&& other) noexcept
-        { assign(std::forward<exe_string>(other)); return *this; }
+        // Construct from initializer_list of chars
+        exe_string(std::initializer_list<char> _Initializer_list)
+        { _Construct<_Construct_strategy::_From_ptr>(_Initializer_list.begin(), _Initializer_list.size()); }
 
-        NH3API_INLINE_LARGE
-        exe_string& assign(exe_string&& other) noexcept
+        exe_string(exe_string&& _Other) noexcept
+        { _Take_contents(_Other); }
+
+        exe_string(exe_string_constructor_concat_tag,
+                   const char* const _Left_ptr,
+                   const size_t      _Left_size,
+                   const char* const _Right_ptr,
+                   const size_t      _Right_size)
         {
-            if (this == &other)
-            { // arguments are the same, do nothing
+            assert(_Left_size < max_size() && _Right_size < max_size());
+            // we have checked for the nullptrs in the concatenation operator before
+            NH3API_ASSUME(_Left_ptr != nullptr && _Right_ptr != nullptr);
+
+            const size_t _New_size     = _Left_size + _Right_size;
+            size_t       _New_capacity = _MIN_SIZE;
+            _New_capacity              = _Calculate_growth(_New_size, _MIN_SIZE, max_size());
+            _Myptr                     = _Allocate_for_capacity(_New_capacity);
+            _Refcnt(_Myptr)            = 0;
+            _Mysize                    = _New_size;
+            _Myres                     = _New_capacity;
+            traits_type::copy(_Myptr, _Left_ptr, _Left_size);
+            traits_type::copy(_Myptr + static_cast<ptrdiff_t>(_Left_size), _Right_ptr, _Right_size);
+            _Myptr[_New_size] = '\0';
+        }
+
+        exe_string(exe_string_constructor_concat_tag,
+                   exe_string& _Left,
+                   exe_string& _Right)
+        {
+            const size_t _New_size = _Left._Mysize + _Right._Mysize;
+            reserve(_New_size);
+            traits_type::copy(_Myptr, _Left._Myptr, _Left._Mysize);
+            traits_type::copy(_Myptr + _Left._Mysize, _Right._Myptr, _Right._Mysize);
+            _Eos(_New_size);
+        }
+
+        exe_string(const std::string_view _Other)
+        { _Construct<_Construct_strategy::_From_ptr>(_Other.data(), _Other.size()); }
+
+        exe_string(const std::string_view _Other, const size_t offset, const size_t count)
+        {
+            const std::string_view _Subview = _Other.substr(offset, count);
+            _Construct<_Construct_strategy::_From_ptr>(_Subview.data(), _Subview.size());
+        }
+
+        exe_string& operator=(exe_string&& _Other) noexcept
+        {
+            if ( this == &_Other ) NH3API_UNLIKELY
                 return *this;
-            }
-            else
-            {
-                this->_Tidy_deallocate();
-                _Move_nullify(&other);
-            }
+
+            _Tidy_deallocate();
+            _Take_contents(_Other);
             return *this;
         }
 
-        exe_string(const ::nh3api::dummy_tag_t&) noexcept
+        inline exe_string(const nh3api::dummy_tag_t&) noexcept
         {}
 
-        NH3API_FLATTEN
-        ~exe_string() noexcept
+        NH3API_FLATTEN ~exe_string() noexcept
         { _Tidy_deallocate(); }
 
     protected:
-        enum _Mref : uint8_t { _FROZEN = 255 };
+        inline static constexpr uint8_t _FROZEN = 255;
 
     public:
-        inline constexpr static size_type npos = size_type(-1);
+        inline static constexpr size_t npos = size_t(-1);
 
     public:
-        exe_string& operator=( const exe_string& other )
-        { assign(other); return *this; }
-
-        exe_string& operator=( const value_type* str )
-        { assign(str); return *this; }
-
-        exe_string& operator=( value_type c )
+        exe_string& assign(exe_string&& _Other) noexcept
         {
-            assign( 1, c ); return *this;
-        }
+            if ( this == &_Other ) NH3API_UNLIKELY
+                return *this;
 
-        NH3API_INLINE_LARGE
-        exe_string& operator+=( const exe_string& other )
-        {
-            return append( other );
-        }
-
-        NH3API_INLINE_LARGE
-        exe_string& operator+=( const value_type* str )
-        {
-            return append( str );
-        }
-
-        NH3API_INLINE_LARGE
-        exe_string& operator+=( value_type c )
-        {
-            return append( 1, c );
-        }
-
-        exe_string& append( const exe_string& other )
-        {
-            return append( other, 0, npos );
-        }
-
-        exe_string &append(const exe_string &other, size_type pos, size_type n = npos)
-        {
-            if (other.size() < pos)
-            {
-                _Throw_out_of_range_exception();
-            }
-            size_type _N = other.size() - pos;
-            if (_N < n)
-                n = _N;
-            if (npos - _Len <= n)
-            {
-                _Throw_out_of_range_exception();
-            }
-            if (0 < n && _Grow<false>(_N = _Len + n))
-            {
-                nh3api::constexpr_char_traits::copy(_Ptr + _Len, &other.c_str()[pos], n);
-                _Eos(_N);
-            }
+            _Tidy_deallocate();
+            _Take_contents(_Other);
             return *this;
         }
 
-        exe_string& append( const value_type* str, size_type n )
+        exe_string& operator=(std::initializer_list<char> _Initializer_list)
+        { assign(_Initializer_list.begin(), _Initializer_list.size()); return *this; }
+
+        exe_string& operator+=(std::initializer_list<char> _Initializer_list)
+        { return append(_Initializer_list.begin(), _Initializer_list.size()); }
+
+        exe_string& assign(std::initializer_list<char> _Initializer_list)
+        { return assign(_Initializer_list.begin(), _Initializer_list.size()); }
+
+        exe_string& append(std::initializer_list<char> _Initializer_list)
+        { return append(_Initializer_list.begin(), _Initializer_list.size()); }
+
+        iterator insert(const_pointer _Where, const std::initializer_list<char> _Initializer_list)
         {
-            if (_Inside(str))
-                return append(*this, static_cast<size_type>(str - begin()), n);
+            const size_t _Offset = static_cast<size_t>(_Where - _Myptr);
+            insert(_Offset, _Initializer_list.begin(), _Initializer_list.size());
+            return begin() + static_cast<ptrdiff_t>(_Offset);
+        }
 
-            if (npos - _Len <= n)
-                _Throw_out_of_range_exception();
+        exe_string& replace(const_iterator _First, const_iterator _Last, const std::initializer_list<char> _Initializer_list)
+        {
+            nh3api::verify_range(_First, _Last);
+            const size_t _Offset = static_cast<size_t>(_First - _Myptr);
+            const size_t _Length = static_cast<size_t>(_Last - _First);
+            return replace(_Offset, _Length, _Initializer_list.begin(), _Initializer_list.size());
+        }
 
-            size_type _N = _Len + n;
-            // we use noexcept version of _Grow because it is nearly impossible to get the string literal to overflow
-            if ( 0 < n && _Grow<true>(_N) )
-            {
-                nh3api::constexpr_char_traits::copy( _Ptr + _Len, str, n );
-                _Eos( _N );
-            }
+        exe_string& operator=(const exe_string& _Other)
+        {
+            if ( this != &_Other ) NH3API_LIKELY
+				assign(_Other);
+
+			return *this;
+        }
+
+        exe_string& operator=(const std::string_view _String)
+        {
+            assign(_String);
             return *this;
         }
 
-        exe_string& append( const value_type* str )
+        template<typename CharPtr>
+        exe_string& operator=(const CharPtr _String)
         {
-            return append(str, nh3api::constexpr_char_traits::length(str));
-        }
-
-        exe_string& append( size_type n, value_type c )
-        {
-            if (npos - _Len <= n)
-            {
-                _Throw_out_of_range_exception();
-            }
-            size_type _N = 0;
-            if (0 < n && _Grow<false>(_N = _Len + n))
-            {
-                nh3api::constexpr_char_traits::assign(_Ptr + _Len, n, c);
-                _Eos(_N);
-            }
+            assign(_String);
             return *this;
         }
 
-        #ifdef __cpp_concepts
-        template<nh3api::tt::iterator_for_container IterT>
-        #else
-        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-        #endif
-        exe_string& append(IterT _F, IterT _L)
-        {
-            return replace(end(), end(), _F, _L);
-        }
+        exe_string& operator=(std::nullptr_t) = delete;
 
-        void push_back(value_type c)
+        template<size_t _Size>
+        exe_string& operator=(const char (&_String)[_Size])
         {
-            append(1, c);
-        }
-
-        exe_string& assign( const exe_string& other )
-        {
-            return (assign( other, 0, npos ));
-        }
-
-        NH3API_INLINE_LARGE
-        exe_string& assign( const exe_string& other, size_type pos, size_type n )
-        {
-            if ( other.size() < pos )
-            {
-                _Throw_out_of_range_exception();
-            }
-            size_type _N = std::min<size_type>(other.size() - pos, n);
-            if ( this == &other )
-            {
-                erase(static_cast<size_type>(pos + _N));
-                erase(0, pos);
-            }
-            else if ( 0 < _N && _N == other.size() && _Refcnt( other.c_str() ) < _FROZEN - 1)
-            {
-                _Tidy_deallocate();
-                _Ptr = other._Ptr;
-                _Len = other.size();
-                _Res = other.capacity();
-                ++_Refcnt( _Ptr );
-            }
-            else if ( _Grow<false>( _N, true ) )
-            {
-                nh3api::constexpr_char_traits::copy( _Ptr, &other.c_str()[pos], _N );
-                _Eos( _N );
-            }
+            static_assert(_Size >= 1);
+            auto        _Buf     = _Get_buffer(_Size - 1);
+            char* const _New_ptr = _Buf.get();
+            traits_type::copy(_New_ptr, _String, _Size - 1);
+            _Buf.set(this->_Myptr);
+            this->_Myptr        = _New_ptr;
+            this->_Myptr[_Size - 1] = '\0';
             return *this;
         }
 
-        exe_string& assign( const value_type* str, size_type n )
+        exe_string& operator=(char _Character)
         {
-            if ( _Grow<false>( n, true ) )
-            {
-                nh3api::constexpr_char_traits::copy( _Ptr, str, n );
-                _Eos( n );
-            }
+            auto        _Buf     = _Get_buffer(1);
+            char* const _New_ptr = _Buf.get() + 1;
+            _New_ptr[0]          = _Character;
+            _New_ptr[1]          = '\0';
+            _Buf.set(this->_Myptr);
+            this->_Myptr = _New_ptr;
             return *this;
         }
 
-        exe_string& assign( const value_type* str )
-        { return assign(str, nh3api::constexpr_char_traits::length(str)); }
+        exe_string& operator+=(const exe_string& _Other)
+        { return append(_Other); }
 
-        exe_string& assign( size_type _N, value_type c )
+        exe_string& operator+=(const char* const _String)
+        { return append(_String); }
+
+        exe_string& operator+=(std::nullptr_t) = delete;
+
+        template<size_t _Size>
+        exe_string& operator+=(const char (&_String)[_Size])
         {
-            if ( _N == npos )
-            {
-                _Throw_out_of_range_exception();
-            }
-            if ( _Grow<false>( _N, true ) )
-            {
-                nh3api::constexpr_char_traits::assign( _Ptr, _N, c );
-                _Eos( _N );
-            }
+            if constexpr ( _Size == 0 || _Size == 1 || _Size >= max_size() )
+                return *this;
+
+            return _Reallocate_grow_by(
+                _Size - 1,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const char* const _Src,
+                   const size_t _Src_size)
+                {
+                    traits_type::copy(_New_ptr, _Old_ptr, _Old_size);
+                    traits_type::copy(_New_ptr + _Old_size, _Src, _Src_size);
+                },
+                _String, _Size - 1);
+        }
+
+        exe_string& operator+=(const std::string_view _String)
+        { return append(_String); }
+
+        exe_string& operator+=(char _Character)
+        {
+            push_back(_Character);
             return *this;
         }
 
-        #ifdef __cpp_concepts
-        template<nh3api::tt::iterator_for_container IterT>
-        #else
-        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-        #endif
-        exe_string& assign( IterT _F, IterT _L)
-        { return replace( begin(), end(), _F, _L ); }
+        exe_string& append(const exe_string& _Other)
+        { return append(_Other._Myptr, _Other._Mysize); }
 
-        exe_string& insert( size_type pos1, const exe_string& other )
+        exe_string& append(const exe_string& _Other, size_t _Offset, size_t _Count = npos)
         {
-            return insert( pos1, other, 0, npos );
+            _Other._Check_offset(_Offset);
+            _Count = _Other._Clamp_suffix_size(_Offset, _Count);
+            return append(_Other._Myptr + _Offset, _Count);
         }
 
-        exe_string& insert( size_type pos1, const exe_string& other, size_type pos,
-                    size_type n )
+        exe_string& append(const std::string_view _String)
+        { return append(_String.data(), _String.size()); }
+
+        exe_string& append(const std::string_view _String, size_t _Offset, size_t _Count = npos)
+        { return append(_String.substr(_Offset, _Count)); }
+
+        exe_string& append(const char* const _String, const size_t _Count)
         {
-            if ( _Len < pos1 || other.size() < pos )
-            {
-                _Throw_out_of_range_exception();
-            }
-            size_type _N = other.size() - pos;
-            if ( _N < n )
-                n = _N;
-            if (npos - _Len <= n)
-            {
-                _Throw_out_of_range_exception();
-            }
-            if (0 < n && _Grow<false>(_N = _Len + n))
-            {
-                nh3api::constexpr_char_traits::move( _Ptr + pos1 + n, _Ptr + pos1, _Len - pos1 );
-                nh3api::constexpr_char_traits::copy( _Ptr + pos1, &other.c_str()[pos], n );
-                _Eos( _N );
-            }
-            return *this;
+            if ( _String == nullptr || _Count == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            return _Reallocate_grow_by(
+                _Count,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size,
+                    const char* const _Src, const size_t _Src_count)
+                {
+                    NH3API_ASSUME(_Src);
+                    NH3API_ASSUME(_Src_count);
+                    traits_type::copy(_New_ptr, _Old_ptr, _Old_size);
+                    traits_type::copy(_New_ptr + _Old_size, _Src, _Src_count);
+                },
+                _String, _Count);
         }
 
-        exe_string& insert( size_type pos1, const value_type* str, size_type n )
+        exe_string& append(std::nullptr_t) = delete;
+
+        template<size_t _Size>
+        exe_string& append(const char (&_String)[_Size])
         {
-            if ( _Inside(str) )
-                return insert(pos1, *this, static_cast<size_type>(str - cbegin()), n);
+            if constexpr ( _Size == 0 || _Size == 1 || _Size >= max_size() )
+                return *this;
 
-            if ( _Len < pos1 )
-                _Throw_out_of_range_exception();
-
-            if (npos - _Len <= n)
-                _Throw_out_of_range_exception();
-
-            size_type _N = 0;
-            if ( 0 < n && _Grow<false>( _N = _Len + n ) )
-            {
-                nh3api::constexpr_char_traits::move( _Ptr + pos1 + n, _Ptr + pos1, _Len - pos1 );
-                nh3api::constexpr_char_traits::copy( _Ptr + pos1, str, n );
-                _Eos( _N );
-            }
-            return *this;
+            return _Reallocate_grow_by(
+                _Size - 1,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const char* const _Src,
+                   const size_t _Src_size)
+                {
+                    NH3API_ASSUME(_Src);
+                    NH3API_ASSUME(_Src_size);
+                    traits_type::copy(_New_ptr, _Old_ptr, _Old_size);
+                    traits_type::copy(_New_ptr + _Old_size, _Src, _Src_size);
+                },
+                _String, _Size - 1);
         }
 
-        exe_string& insert( size_type pos1, const value_type* str )
+        exe_string& append(const char* const _String)
         {
-            return (insert( pos1, str, nh3api::constexpr_char_traits::length( str ) ));
+            if ( _String == nullptr ) NH3API_UNLIKELY
+                return *this;
+
+            const size_t _Count = __builtin_strlen(_String);
+            if ( _Count == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            return _Reallocate_grow_by(
+                _Count,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size,
+                    const char* const _Src, const size_t _Src_count)
+                {
+                    NH3API_ASSUME(_Src);
+                    NH3API_ASSUME(_Src_count);
+                    traits_type::copy(_New_ptr, _Old_ptr, _Old_size);
+                    traits_type::copy(_New_ptr + _Old_size, _Src, _Src_count);
+                },
+                _String, _Count);
         }
 
-        exe_string& insert( size_type pos1, size_type n, value_type c )
+        exe_string& append(size_t _Count, char _Character)
         {
-            if ( _Len < pos1 )
-            {
-                _Throw_out_of_range_exception();
-            }
-            if ( npos - _Len <= n )
-            {
-                _Throw_out_of_range_exception();
-            }
-            size_type _N = 0;
-            if ( 0 < n && _Grow<false>( _N = _Len + n ) )
-            {
-                nh3api::constexpr_char_traits::move( _Ptr + pos1 + n, _Ptr + pos1, _Len - pos1 );
-                nh3api::constexpr_char_traits::assign( _Ptr + pos1, n, c );
-                _Eos( _N );
-            }
-            return *this;
+            if ( _Count == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            return _Reallocate_grow_by(
+                _Count,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const size_t _Character_num,
+                   const char _Ch)
+                {
+                    NH3API_ASSUME(_Character_num);
+                    traits_type::copy(_New_ptr, _Old_ptr, _Old_size);
+                    traits_type::assign(_New_ptr + _Old_size, _Character_num, _Ch);
+                },
+                _Count, _Character);
         }
 
-        iterator insert(const const_iterator pos, const value_type c )
+    #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container _Iter>
+    #else
+        template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
+    #endif
+        exe_string& append(const _Iter _First, const _Iter _Last)
         {
-            const size_type offset = (_Inside(pos)) ? static_cast<size_type>(pos - begin()) : 0;
-            if ( offset )
-                insert( offset, 1, c );
-            return begin() + offset;
-        }
+            nh3api::verify_range(_First, _Last);
+            const size_t _Appended_size = std::distance(_First, _Last);
+            if ( _Appended_size == 0 ) NH3API_UNLIKELY
+                return *this;
 
-        iterator insert(const const_iterator pos, const size_type n, const value_type c)
-        {
-            const size_type offset = (_Inside(pos)) ? static_cast<size_type>(pos - begin()) : 0;
-            if ( offset )
-                insert( offset, n, c );
-            return begin() + offset;
-        }
-
-        #ifdef __cpp_concepts
-        template<nh3api::tt::iterator_for_container IterT>
-        #else
-        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-        #endif
-        iterator insert( const const_iterator pos, IterT _F, IterT _L)
-        {
-            const size_type offset = (_Inside(pos)) ? static_cast<size_type>(pos - begin()) : 0;
-            if ( offset )
-                replace(pos, pos, _F, _L);
-            return begin() + offset;
-        }
-
-        NH3API_FLATTEN
-        void pop_back()
-        { erase(end() - 1); }
-
-        void shrink_to_fit()
-        { exe_string(*this).swap(*this); }
-
-        NH3API_INLINE_LARGE
-        exe_string& erase( size_type pos1 = 0, size_type n = npos )
-        {
-            if (_Len < pos1)
+            const auto _UFirst = nh3api::unfancy(_First);
+            const auto _ULast = nh3api::unfancy(_Last);
+            if constexpr (is_elem_cptr<decltype(_UFirst)>::value)
             {
-                _Throw_out_of_range_exception();
+                return append(_UFirst, static_cast<size_t>(_ULast - _UFirst));
             }
-            _Split();
-            if (_Len - pos1 < n)
-                n = _Len - pos1;
-            if (0 < n)
-            {
-                nh3api::constexpr_char_traits::move(_Ptr + pos1, _Ptr + pos1 + n, _Len - pos1 - n);
-                size_type _N = _Len - n;
-                if (_Grow<false>(_N))
-                    _Eos(_N);
-            }
-            return *this;
-        }
-
-        iterator erase( const const_iterator pos )
-        {
-            const size_type offset = (_Inside(pos)) ? static_cast<size_type>(pos - begin()) : 0;
-            if ( offset )
-                erase( offset, 1 );
-            return _Ptr + offset;
-        }
-
-        iterator erase( const const_iterator _F, const const_iterator _L )
-        {
-            const size_type difference = (_F < _L) ? static_cast<size_type>(_L - _F) : 0;
-            const size_type offset     = (_Inside(_F)) ? static_cast<size_type>(_F - begin()) : 0;
-            erase(offset, difference);
-            return _Ptr + offset;
-        }
-
-        void clear() noexcept
-        { _Eos(0); }
-
-        exe_string& replace(const size_type pos1, const size_type n1, const exe_string& other )
-        {
-            return replace(pos1, n1, other, 0, npos);
-        }
-
-        NH3API_INLINE_LARGE
-        exe_string& replace(const size_type pos1, size_type n1, const exe_string& other,
-                    const size_type pos, size_type n = npos )
-        {
-            if (_Len < pos1 || other.size() < pos)
-            {
-                _Throw_out_of_range_exception();
-            }
-            if (_Len - pos1 < n1)
-                n1 = _Len - pos1;
-            size_type _N = other.size() - pos;
-            if (_N < n)
-                n = _N;
-            if (npos - n <= _Len - n1)
-            {
-                _Throw_out_of_range_exception();
-            }
-            _Split();
-            size_type _Nm = _Len - n1 - pos1;
-            if (n < n1)
-                nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
-            if ((0 < n || 0 < n1) && _Grow<false>(_N = _Len + n - n1))
-            {
-                if (n1 < n)
-                    nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
-                nh3api::constexpr_char_traits::copy(_Ptr + pos1, &other.c_str()[pos], n);
-                _Eos(_N);
-            }
-            return *this;
-        }
-
-        NH3API_INLINE_LARGE
-        exe_string& replace(const size_type pos1, size_type n1, const value_type* const str, const size_type n )
-        {
-            if ( _Inside(str) )
-                return replace(pos1, n1, *this, static_cast<size_type>(str - cbegin()), n);
-
-            if (_Len < pos1)
-                _Throw_out_of_range_exception();
-
-            if (_Len - pos1 < n1)
-                n1 = _Len - pos1;
-            if (npos - n <= _Len - n1)
-            {
-                _Throw_out_of_range_exception();
-            }
-            _Split();
-            size_type _Nm = _Len - n1 - pos1;
-            if (n < n1)
-                nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
-            size_type _N = 0;
-            if ((0 < n || 0 < n1) && _Grow<false>(_N = _Len + n - n1))
-            {
-                if (n1 < n)
-                    nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
-                nh3api::constexpr_char_traits::copy(_Ptr + pos1, str, n);
-                _Eos(_N);
-            }
-            return *this;
-        }
-
-        exe_string& replace( size_type pos1, size_type n1, const value_type* str )
-        {
-            return (replace( pos1, n1, str, nh3api::constexpr_char_traits::length( str ) ));
-        }
-
-        NH3API_INLINE_LARGE
-        exe_string& replace( size_type pos1, size_type n1,
-                    size_type n, value_type c )
-        {
-            if (_Len < pos1)
-            {
-                _Throw_out_of_range_exception();
-            }
-            if (_Len - pos1 < n1)
-                n1 = _Len - pos1;
-            if (npos - n <= _Len - n1)
-            {
-                _Throw_out_of_range_exception();
-            }
-            _Split();
-            size_type _Nm = _Len - n1 - pos1;
-            if (n < n1)
-                nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
-            size_type _N = 0;
-            if ((0 < n || 0 < n1) && _Grow<false>(_N = _Len + n - n1))
-            {
-                if (n1 < n)
-                    nh3api::constexpr_char_traits::move(_Ptr + pos1 + n, _Ptr + pos1 + n1, _Nm);
-                nh3api::constexpr_char_traits::assign(_Ptr + pos1, n, c);
-                _Eos(_N);
-            }
-            return *this;
-        }
-
-        exe_string& replace(const const_iterator _F, const const_iterator _L, const exe_string& other )
-        {
-            const size_type difference = (_F < _L) ? static_cast<size_type>(_L - _F) : 0;
-            const size_type offset     = (_Inside(_F)) ? static_cast<size_type>(_F - begin()) : 0;
-            if ( offset && difference )
-                return replace(offset, difference, other );
             else
-                return *this;
+            {
+                return _Reallocate_grow_by(
+                _Appended_size,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size,
+                    auto _Src_first, auto _Src_last)
+                {
+                    NH3API_ASSUME(_Old_size);
+                    traits_type::copy(_New_ptr, _Old_ptr, _Old_size);
+                    std::copy(_Src_first, _Src_last, _New_ptr + _Old_size);
+                },
+                _First, _Last);
+            }
         }
 
-        exe_string& replace(const const_iterator _F,
-                            const const_iterator _L,
-                            const value_type* const str,
-                            size_type n)
+    #ifdef __cpp_lib_containers_ranges
+    #if defined(__clang__) && defined(__INTELLISENSE__)
+        template<typename _Range>
+    #else
+        template<nh3api::tt::container_compatible_range<char> _Range>
+    #endif
+        exe_string& append_range(_Range&& _Rng)
         {
-            const size_type difference = (_F < _L) ? static_cast<size_type>(_L - _F) : 0;
-            const size_type offset     = (_Inside(_F)) ? static_cast<size_type>(_F - begin()) : 0;
-            if ( offset && difference && str)
-                return replace( offset, difference, str, n );
+            const size_t _Appended_size = std::ranges::size(_Rng);
+            if ( _Appended_size == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            if constexpr ( std::ranges::sized_range<_Range> && nh3api::contiguous_chars_range<_Range>)
+            {
+                return append(std::ranges::data(_Rng), _Appended_size);
+            }
             else
+            {
+                return _Reallocate_grow_by(
+                _Appended_size,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size,
+                const auto _Rng_begin, const size_t _Rng_size)
+                {
+                    NH3API_ASSUME(_Old_size);
+                    traits_type::copy(_New_ptr, _Old_ptr, _Old_size);
+                    std::ranges::copy_n(_Rng_begin, _Rng_size, _New_ptr + _Old_size);
+                },
+                std::ranges::begin(_Rng), _Appended_size);
+            }
+        }
+    #endif // C++23
+
+        exe_string& assign(const exe_string& _Other)
+        {
+            if ( this == &_Other ) NH3API_UNLIKELY
                 return *this;
+
+            return assign(_Other._Myptr, _Other._Mysize);
         }
 
-        exe_string& replace(const const_iterator _F, const const_iterator _L, const value_type* const str)
+    #ifdef __cpp_lib_concepts
+        template<std::integral SizeType = size_t>
+    #else
+        template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
+    #endif
+        exe_string& assign(const exe_string& _Other, const SizeType _Offset, SizeType _Count)
         {
-            const size_type difference = (_F < _L) ? static_cast<size_type>(_L - _F) : 0;
-            const size_type offset     = (_Inside(_F)) ? static_cast<size_type>(_F - begin()) : 0;
-            if ( offset && difference && str)
-                return replace(offset, difference, str );
+            _Other._Check_offset(_Offset);
+            _Count = _Other._Clamp_suffix_size(_Offset, _Count);
+            return assign(_Other._Myptr + _Offset, _Count);
+        }
+
+        exe_string& assign(const std::string_view _String)
+        { return assign(_String.data(), _String.size()); }
+
+    #ifdef __cpp_lib_concepts
+        template<std::integral SizeType = size_t>
+    #else
+        template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
+    #endif
+        exe_string& assign(const std::string_view _String, const SizeType _Offset, const SizeType _Count = npos)
+        { return assign(_String.substr(_Offset, _Count)); }
+
+    #ifdef __cpp_lib_concepts
+        template<std::integral SizeType = size_t>
+    #else
+        template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
+    #endif
+        exe_string& assign(const char* _String, const SizeType _Count)
+        {
+            if ( _String == nullptr || _Count == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            return _Reallocate_for(_Count,
+            NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const size_t _Src_count, const char* const _Src)
+            {
+                NH3API_ASSUME(_Src);
+                NH3API_ASSUME(_Src_count);
+                traits_type::copy(_New_ptr, _Src, _Src_count);
+            }, _String);
+        }
+
+        exe_string& assign(std::nullptr_t) = delete;
+
+        template<size_t _Size>
+        exe_string& assign(const char (&_String)[_Size])
+        {
+            if constexpr ( _Size == 0 || _Size == 1 || _Size >= max_size() )
+                return *this;
+
+            return _Reallocate_for(_Size - 1,
+            NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const size_t _Count, const char* const _Src)
+            {
+                NH3API_ASSUME(_Src);
+                traits_type::copy(_New_ptr, _Src, _Count);
+            }, _String);
+        }
+
+        exe_string& assign(const char* const _String)
+        {
+            if ( _String == nullptr ) NH3API_UNLIKELY
+                return *this;
+
+            const size_t _Length = __builtin_strlen(_String);
+
+            return _Reallocate_for(_Length,
+            NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const size_t _Count, const char* const _Src)
+            {
+                NH3API_ASSUME(_Src);
+                traits_type::copy(_New_ptr, _Src, _Count);
+            }, _String);
+        }
+
+    #ifdef __cpp_lib_concepts
+        template<std::integral SizeType = size_t>
+    #else
+        template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
+    #endif
+        exe_string& assign(SizeType _Count, char _Character)
+        {
+            if ( _Count == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            return _Reallocate_for(
+            _Count,
+            NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const size_t _Characters_num, const char _Ch)
+            {
+                NH3API_ASSUME(_Characters_num);
+                traits_type::assign(_New_ptr, _Characters_num, _Ch);
+            },
+            _Character);
+        }
+
+    #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container _Iter>
+    #else
+        template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
+    #endif
+        exe_string& assign(const _Iter _First, const _Iter _Last)
+        {
+            nh3api::verify_range(_First, _Last);
+            const size_t _New_size = std::distance(_First, _Last);
+            if ( _New_size == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            auto _UFirst = nh3api::unfancy(_First);
+            auto _ULast  = nh3api::unfancy(_Last);
+            if constexpr ( is_elem_cptr<decltype(_UFirst)>::value )
+            {
+                return assign(_UFirst, _New_size);
+            }
+            else if constexpr ( is_elem_ucptr<decltype(_UFirst)>::value )
+            {
+                return assign(reinterpret_cast<const char* const>(_UFirst), _New_size);
+            }
             else
-                return *this;
+            {
+                return _Reallocate_for(_New_size,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const size_t _Count, const auto _Src)
+                {
+                    std::copy_n(_Src, _Count, _New_ptr);
+                }, _First);
+            }
         }
 
-        exe_string& replace( const const_iterator _F,
-                             const const_iterator _L,
-                             const size_type n,
-                             const value_type c )
+    #ifdef __cpp_lib_containers_ranges
+    #if defined(__clang__) && defined(__INTELLISENSE__)
+        template<typename _Range>
+    #else
+        template<nh3api::tt::container_compatible_range<char> _Range>
+    #endif
+        exe_string& assign_range(_Range&& _Rng)
         {
-            const size_type difference = (_F < _L) ? static_cast<size_type>(_L - _F) : 0;
-            const size_type offset     = (_Inside(_F)) ? static_cast<size_type>(_F - begin()) : 0;
-            if ( offset && difference)
-                return replace(offset, difference, n, c );
+            const size_t _Count = std::ranges::size(_Rng);
+            if ( _Count == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            if constexpr ( std::ranges::sized_range<_Range> && nh3api::contiguous_chars_range<_Range> )
+                return assign(std::ranges::data(_Rng), _Count);
             else
-                return *this;
+                return _Reallocate_for(_Count,
+                       NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const size_t _Rng_size, const auto _Rng_begin)
+                       {
+                           std::ranges::copy_n(_Rng_begin, _Rng_size, _New_ptr);
+                       },
+                       std::ranges::begin(_Rng));
+        }
+    #endif // C++23
+
+        exe_string& insert(const size_t _Offset, const exe_string& _Other)
+        { return insert(_Offset, _Other._Myptr, _Other._Mysize); }
+
+        exe_string& insert(const size_t _Offset, const exe_string& _Other, size_t _OtherOffset, size_t _Count = npos)
+        {
+            _Other._Check_offset(_OtherOffset);
+            _Count = _Other._Clamp_suffix_size(_OtherOffset, _Count);
+            return insert(_Offset, _Other._Myptr + _OtherOffset, _Count);
         }
 
-        #ifdef __cpp_concepts
-        template<nh3api::tt::iterator_for_container IterT>
-        #else
-        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-        #endif
-        exe_string& replace(const const_iterator _F1,
-                            const const_iterator _L1,
-                            const IterT _F2,
-                            const IterT _L2)
+        exe_string& insert(const size_t _Offset, const std::string_view _String)
+        { return insert(_Offset, _String.data(), _String.size()); }
+
+        exe_string& insert(const size_t _Offset, const std::string_view _String, size_t _OtherOffset, size_t _Count = npos)
+        { return insert(_Offset, _String.substr(_OtherOffset, _Count)); }
+
+    #ifdef __cpp_lib_concepts
+        template<std::integral SizeType = size_t>
+    #else
+        template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
+    #endif
+        // insert [_String, _String + _Count) at _Offset
+        exe_string& insert(const SizeType _Offset, const char* const _String, const size_t _Count)
         {
-            if ( !_Inside(_F1) || !_Inside(_L1) )
+            _Check_offset(static_cast<size_t>(_Offset));
+            if ( _String == nullptr || _Count == 0 ) NH3API_UNLIKELY
                 return *this;
 
-            nh3api::verify_range(_F2, _L2);
-            const auto _UF2 = nh3api::unfancy(_F2);
-            const auto _UL2 = nh3api::unfancy(_L2);
-            return _ReplaceRange(_F1,
-                                _L1,
-                                _UF2,
-                                _UL2,
-                                is_elem_cptr<decltype(_UF2)>());
+            return _Reallocate_grow_by(
+            _Count,
+            NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const size_t _Src_offset,
+                const char* const _Src_ptr, const size_t _Src_count)
+            {
+                NH3API_ASSUME(_Src_ptr);
+                NH3API_ASSUME(_Src_count);
+                traits_type::copy(_New_ptr, _Old_ptr, _Src_offset);
+                traits_type::copy(_New_ptr + _Src_offset, _Src_ptr, _Src_count);
+                traits_type::copy(_New_ptr + _Src_offset + _Src_count, _Old_ptr + _Src_offset, _Old_size - _Src_offset + 1);
+            },
+            static_cast<size_t>(_Offset), _String, _Count);
         }
 
-        protected:
-        #ifdef __cpp_concepts
-        template<nh3api::tt::iterator_for_container IterT>
-        #else
-        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-        #endif
-        exe_string& _ReplaceRange(const const_iterator _F1,
-                                const const_iterator _L1,
-                                const IterT _F2,
-                                const IterT _L2,
-                                nh3api::tt::true_type)
+    #ifdef __cpp_lib_concepts
+        template<std::integral SizeType = size_t>
+    #else
+        template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
+    #endif
+        exe_string& insert(const SizeType _Offset, const char* const _String)
         {
-            const size_type difference = (_F1 < _L1) ? static_cast<size_type>(_L1 - _F1) : 0;
-            const size_type offset     = (_Inside(_F1)) ? static_cast<size_type>(_F1 - cbegin()) : 0;
+            _Check_offset(static_cast<size_t>(_Offset));
+            if ( _String == nullptr ) NH3API_UNLIKELY
+                return *this;
 
-            if ( offset && difference)
-                return replace(offset, _L1 - nh3api::unfancy(_F2), _F2, std::distance(_L2, _F2));
+            const size_t _Length = __builtin_strlen(_String);
+            if ( _Length == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            return _Reallocate_grow_by(
+            _Length,
+            NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const size_t _Off,
+                const char* const _Src, const size_t _Src_count)
+            {
+                NH3API_ASSUME(_Src);
+                NH3API_ASSUME(_Src_count);
+                traits_type::copy(_New_ptr, _Old_ptr, _Off);
+                traits_type::copy(_New_ptr + _Off, _Src, _Src_count);
+                traits_type::copy(_New_ptr + _Off + _Src_count, _Old_ptr + _Off, _Old_size - _Off + 1);
+            },
+            static_cast<size_t>(_Offset), _String, _Length);
+        }
+
+    #ifdef __cpp_lib_concepts
+        template<std::integral SizeType = size_t>
+    #else
+        template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
+    #endif
+        exe_string& insert(const SizeType _Offset, const size_t _Count, char _Character)
+        {
+            if ( _Count == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            _Check_offset(static_cast<size_t>(_Offset));
+            return _Reallocate_grow_by(
+            _Count,
+            NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const size_t _Off,
+                const size_t _Characters_num, const char _Ch)
+            {
+                NH3API_ASSUME(_Characters_num);
+                traits_type::copy(_New_ptr, _Old_ptr, _Off);
+                traits_type::assign(_New_ptr + _Off, _Characters_num, _Ch);
+                traits_type::copy(_New_ptr + _Off + _Characters_num, _Old_ptr + _Off, _Old_size - _Off + 1);
+            },
+            static_cast<size_t>(_Offset), _Count, _Character);
+        }
+
+        iterator insert(const const_iterator _Where, char _Character)
+        {
+            const size_t _Offset = (_Inside(_Where)) ? static_cast<size_t>(_Where - cbegin()) : 0;
+            if ( _Offset )
+                insert( _Offset, 1, _Character );
+            return begin() + static_cast<ptrdiff_t>(_Offset);
+        }
+
+        iterator insert(const const_iterator _Where, const size_t _Count, char _Character)
+        {
+            const size_t _Offset = (_Inside(_Where)) ? static_cast<size_t>(_Where - cbegin()) : 0;
+            if ( _Offset )
+                insert( _Offset, _Count, _Character );
+            return begin() + static_cast<ptrdiff_t>(_Offset);
+        }
+
+    #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container _Iter>
+    #else
+        template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
+    #endif
+        iterator insert(const const_iterator _Where, const _Iter _First, const _Iter _Last)
+        {
+            nh3api::verify_range(_First, _Last);
+            const size_t _Offset = (_Inside(_Where)) ? static_cast<size_t>(_Where - cbegin()) : 0;
+            if ( _Offset )
+            {
+                const auto _UFirst = nh3api::unfancy(_First);
+                const auto _ULast  = nh3api::unfancy(_Last);
+                if constexpr ( is_elem_cptr<decltype(_UFirst)>::value )
+                {
+                    const size_t _Count = static_cast<size_t>(_ULast - _UFirst);
+                    if ( _Count == 0 )
+                        return begin() + static_cast<ptrdiff_t>(_Offset);
+
+                    insert(_Offset, _UFirst, _Count);
+                }
+                else
+                {
+                    const size_t _Count = std::distance(_First, _Last);
+                    if ( _Count == 0 )
+                        return begin() + static_cast<ptrdiff_t>(_Offset);
+
+                    _Reallocate_grow_by(
+                        _Count,
+                        NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const size_t _Src_offset,
+                                                  const _Iter _Src_begin, const size_t _Src_count)
+                        {
+                            NH3API_ASSUME(_Src_count);
+                            traits_type::copy(_New_ptr, _Old_ptr, _Src_offset);
+                            std::copy_n(_Src_begin, _Src_count, _New_ptr + _Src_offset);
+                            traits_type::copy(_New_ptr + _Src_offset + _Src_count, _Old_ptr + _Src_offset, _Old_size - _Src_offset + 1);
+                        },
+                        _Offset, _First, _Count);
+                }
+            }
+            return begin() + static_cast<ptrdiff_t>(_Offset);
+        }
+
+    #ifdef __cpp_lib_containers_ranges
+    #if defined(__clang__) && defined(__INTELLISENSE__)
+        template<typename _Range>
+    #else
+        template<nh3api::tt::container_compatible_range<char> _Range>
+    #endif
+        iterator insert_range(const const_iterator _Where, _Range&& _Rng)
+        {
+            const size_t _Offset = (_Inside(_Where)) ? static_cast<size_t>(_Where - cbegin()) : 0;
+            const size_t _Count = std::ranges::size(_Rng);
+            if ( _Count == 0 ) NH3API_UNLIKELY
+                return begin() + static_cast<difference_type>(_Offset);
+
+            if constexpr ( std::ranges::sized_range<_Range> && nh3api::contiguous_chars_range<_Range>)
+            {
+                insert(_Offset, std::ranges::data(_Rng), _Count);
+                return begin() + static_cast<difference_type>(_Offset);
+            }
             else
-                return *this;
+            {
+                _Reallocate_grow_by(
+                _Count,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const size_t _Src_offset,
+                                            const auto _Src_begin, const size_t _Src_count)
+                {
+                    NH3API_ASSUME(_Src_count);
+                    traits_type::copy(_New_ptr, _Old_ptr, _Src_offset);
+                    std::ranges::copy_n(_Src_begin, _Src_count, _New_ptr + _Src_offset);
+                    traits_type::copy(_New_ptr + _Src_offset + _Src_count, _Old_ptr + _Src_offset, _Old_size - _Src_offset + 1);
+                },
+                _Offset, std::ranges::begin(_Rng), _Count);
+                return begin() + static_cast<ptrdiff_t>(_Offset);
+            }
+        }
+    #endif // C++23
+
+    #ifdef __cpp_concepts
+        template<std::integral _Size_type>
+    #else
+        template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
+    #endif
+        exe_string& erase(const _Size_type _Offset)
+        {
+            if ( !empty() )
+            {
+                _Check_offset(_Offset);
+                if ( !_Is_shared() ) NH3API_LIKELY
+                {
+                    _Eos(_Offset);
+                }
+                else
+                {
+                    const size_t _Leftover = _Mysize - _Offset;
+                    auto         _Buf      = _Get_fresh_buffer(_Leftover);
+                    char* const  _New_ptr  = _Buf.get();
+                    traits_type::copy(_New_ptr, _Myptr, _Leftover);
+                    _Buf.set(this->_Myptr);
+                    this->_Myptr            = _New_ptr;
+                    this->_Myptr[_Leftover] = '\0';
+                }
+            }
+
+            return *this;
         }
 
-        #ifdef __cpp_concepts
-        template<nh3api::tt::iterator_for_container IterT>
-        #else
-        template<class IterT, ::std ::enable_if_t<nh3api::tt::is_iterator_v<IterT>, bool> = false>
-        #endif
-        exe_string& _ReplaceRange(const const_iterator _F1,
-                                const const_iterator _L1,
-                                const IterT _F2,
-                                const IterT _L2,
-                                nh3api::tt::false_type)
+    protected:
+        exe_string& _Erase_without_checks(const size_t _Offset, size_t _Count)
         {
-            const exe_string temp(_F2, _L2);
-            replace(_F1, _L1, temp);
+            NH3API_ASSUME(_Myptr != nullptr && _Mysize != 0);
+            if ( _Count == 0 )
+                return *this;
+
+            _Count                 = _Clamp_suffix_size(_Offset, _Count);
+            const size_t _New_size = _Mysize - _Count;
+            if ( !_Is_shared() ) NH3API_LIKELY
+            {
+                char* const _Erase_at = _Myptr + _Offset;
+                // move suffix + null up
+                traits_type::move(_Erase_at, _Erase_at + _Count, _New_size - _Offset + 1);
+                this->_Mysize = _New_size;
+            }
+            else
+            {
+                auto        _Buf      = _Get_fresh_buffer(_New_size);
+                char* const _New_ptr  = _Buf.get();
+                char* const _Erase_at = _New_ptr + _Offset;
+                // copy characters before the offset
+                traits_type::copy(_New_ptr, _Myptr, _Offset);
+                // move suffix + null up
+                traits_type::copy(_Erase_at, _Myptr + _Offset, _New_size - _Offset + 1);
+                _Buf.set(this->_Myptr);
+                this->_Myptr = _New_ptr;
+            }
             return *this;
         }
 
     public:
-        reference front() noexcept
+    #ifdef __cpp_concepts
+        template<std::integral _Size_type>
+    #else
+        template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
+    #endif
+        exe_string& erase(const _Size_type _Offset, _Size_type _Count)
+        {
+            if ( empty() ) NH3API_UNLIKELY
+                return *this;
+
+            _Check_offset(_Offset);
+            return _Erase_without_checks(_Offset, _Count);
+        }
+
+        iterator erase(const const_iterator _Where)
+        {
+            if ( empty() ) NH3API_UNLIKELY
+                return _Myptr;
+
+            if ( _Inside(_Where) )
+            {
+                const size_t _Offset = static_cast<size_t>(_Where - begin());
+                _Erase_without_checks(_Offset, 1);
+                return _Myptr + static_cast<ptrdiff_t>(_Offset);
+            }
+
+            return _Myptr;
+        }
+
+        iterator erase(const const_iterator _First, const const_iterator _Last)
+        {
+            if ( empty() ) NH3API_UNLIKELY
+                return _Myptr;
+
+            nh3api::verify_range(_First, _Last);
+            if ( (_First < _Last) && _Inside(_First) && _Inside_exclusive(_Last) )
+            {
+                const size_t _Offset = static_cast<size_t>(_First - cbegin());
+                _Erase_without_checks(_Offset, static_cast<size_t>(_Last - _First));
+                return _Myptr + static_cast<ptrdiff_t>(_Offset);
+            }
+
+            return _Myptr;
+        }
+
+        void clear()
+        {
+            if ( empty() ) NH3API_UNLIKELY
+                return;
+
+            if ( _Is_shared() ) NH3API_UNLIKELY
+            {
+                auto        _Buf     = _Get_fresh_buffer(1);
+                char* const _New_ptr = _Buf.get();
+                _Buf.set(this->_Myptr);
+                this->_Myptr = _New_ptr;
+            }
+            else
+            {
+                this->_Mysize = 0;
+            }
+
+            traits_type::assign(_Myptr, _Mysize, '\0');
+        }
+
+    #ifdef __cpp_concepts
+        template<std::integral _Size_type>
+    #else
+        template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
+    #endif
+        exe_string& replace(const _Size_type  _Offset,
+                            const _Size_type  _Nx,
+                            const exe_string& _Other)
+        { return replace(_Offset, _Nx, _Other._Myptr, _Other._Mysize); }
+
+    #ifdef __cpp_concepts
+        template<std::integral _Size_type>
+    #else
+        template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
+    #endif
+        exe_string& replace(const _Size_type  _Offset,
+                            _Size_type        _Nx,
+                            const exe_string& _Other,
+                            const _Size_type  _Other_offset,
+                            _Size_type        _Count = npos)
+        {
+            if ( empty() ) NH3API_UNLIKELY
+                return *this;
+
+            _Other._Check_offset(_Other_offset);
+            _Count = _Other._Clamp_suffix_size(_Other_offset, _Count);
+            return replace(_Offset, _Nx, _Other._Myptr + _Other_offset, _Count);
+        }
+
+    #ifdef __cpp_concepts
+        template<std::integral _Size_type>
+    #else
+        template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
+    #endif
+        exe_string& replace(const _Size_type  _Offset,
+                            _Size_type        _Nx,
+                            const char* const _String,
+                            const _Size_type  _Count)
+        {
+            if ( empty() || _String == nullptr || _Count == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            _Check_offset(_Offset);
+            _Nx                      = _Clamp_suffix_size(_Offset, _Nx);
+            const size_t _Growth     = static_cast<size_t>(_Count - _Nx);
+            const bool   _Use_existing_buffer = !empty() && !_Is_shared();
+
+            if ( _Use_existing_buffer && _Nx == _Count )
+            {
+                traits_type::move(_Myptr + _Offset, _String, _Count);
+                return *this;
+            }
+
+            const size_t    _Old_size    = _Mysize;
+            const size_t _Suffix_size = _Old_size - _Nx - _Offset + 1;
+            // suffix shifts backwards; we don't have to move anything out of the way
+            if ( _Use_existing_buffer && _Count < _Nx )
+            {
+                char* const _Insert_at = _Myptr + _Offset;
+                traits_type::move(_Insert_at, _String, _Count);
+                traits_type::move(_Insert_at + _Count, _Insert_at + _Nx, _Suffix_size);
+                _Mysize = _Old_size - (_Nx - _Count);
+                return *this;
+            }
+
+            if ( _Use_existing_buffer && (_Growth <= _Myres - _Old_size) )
+            {
+                _Mysize                        = _Old_size + _Growth;
+                char* const _Old_ptr           = _Myptr;
+                char* const _Insert_at         = _Old_ptr + _Offset;
+                char* const _Suffix_at         = _Insert_at + _Nx;
+                size_t      _Ptr_shifted_after = 0;
+                if ( _String + _Count <= _Insert_at || _String > _Old_ptr + _Old_size )
+                    _Ptr_shifted_after = _Count;
+                else if ( _Suffix_at <= _String )
+                    _Ptr_shifted_after = 0;
+                else
+                    _Ptr_shifted_after = static_cast<size_t>(_Suffix_at - _String);
+
+                traits_type::move(_Suffix_at + _Growth, _Suffix_at, _Suffix_size);
+                // next case must be move, in case _Ptr begins before _Insert_at and contains part of the hole;
+                // this case doesn't occur in insert because the new content must come from outside the removed
+                // content there (because in insert there is no removed content)
+                traits_type::move(_Insert_at, _String, _Ptr_shifted_after);
+                // the next case can be copy, because it comes from the chunk moved out of the way in the
+                // first move, and the hole we're filling can't alias the chunk we moved out of the way
+                traits_type::copy(_Insert_at + _Ptr_shifted_after, _String + _Growth + _Ptr_shifted_after, _Count - _Ptr_shifted_after);
+                return *this;
+            }
+
+            return _Reallocate_grow_by(
+                _Growth,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_str, const size_t _Old_str_size, const size_t _Off,
+                   const size_t _Num, const char* const _Src, const size_t _Src_count)
+                {
+                    NH3API_ASSUME(_Src);
+                    NH3API_ASSUME(_Src_count);
+                    traits_type::copy(_New_ptr, _Old_str, _Off);
+                    traits_type::copy(_New_ptr + _Off, _Src, _Src_count);
+                    traits_type::copy(_New_ptr + _Off + _Src_count, _Old_str + _Off + _Num, _Old_str_size - _Num - _Off + 1);
+                },
+                _Offset, _Nx, _String, _Count);
+        }
+
+    #ifdef __cpp_concepts
+        template<std::integral _Size_type>
+    #else
+        template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
+    #endif
+        exe_string& replace(const _Size_type _Offset, const _Size_type _Nx, const char* const _String)
+        {
+            if ( !this->empty() && _String != nullptr ) NH3API_LIKELY
+                return replace(_Offset, _Nx, _String, __builtin_strlen(_String));
+
+            return *this;
+        }
+
+    #ifdef __cpp_concepts
+        template<std::integral _Size_type>
+    #else
+        template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
+    #endif
+        exe_string& replace(const _Size_type _Offset,
+                            _Size_type       _Nx,
+                            const _Size_type _Count,
+                            char             _Character)
+        {
+            if ( empty() || _Count == 0 ) NH3API_UNLIKELY
+                return *this;
+
+            _Check_offset(_Offset);
+            _Nx = _Clamp_suffix_size(_Offset, _Nx);
+            const bool _Use_existing_buffer = !empty() && !_Is_shared();
+
+            if ( _Use_existing_buffer && _Count == _Nx )
+            {
+                traits_type::assign(_Myptr + _Offset, _Count, _Character);
+                return *this;
+            }
+
+            const size_t _Old_size = _Mysize;
+            if ( _Use_existing_buffer && (_Count < _Nx || (_Count - _Nx <= _Myres - _Old_size)) )
+            {
+                const size_t _New_size = _Old_size + _Count - _Nx;
+                _Mysize                = _New_size;
+                char* const _Insert_at = _Myptr + _Offset;
+                traits_type::move(_Insert_at + _Count, _Insert_at + _Nx, _Old_size - _Nx - _Offset + 1);
+                traits_type::assign(_Insert_at, _Count, _Character);
+                return *this;
+            }
+
+            return _Reallocate_grow_by(
+                _Count - _Nx,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_str, const size_t _Old_str_size, const size_t _Off,
+                   const size_t _Number, const size_t _Character_num, const char _Ch)
+                {
+                    NH3API_ASSUME(_Character_num);
+                    traits_type::copy(_New_ptr, _Old_str, _Off);
+                    traits_type::assign(_New_ptr + _Off, _Character_num, _Ch);
+                    traits_type::copy(_New_ptr + _Off + _Character_num, _Old_str + _Off + _Number, _Old_str_size - _Number - _Off + 1);
+                },
+                _Offset, _Nx, _Count, _Character);
+        }
+
+        exe_string& replace(const const_iterator _First,
+                            const const_iterator _Last,
+                            const exe_string&    _Other)
+        {
+            if ( empty() ) NH3API_UNLIKELY
+                return *this;
+
+            nh3api::verify_range(_First, _Last);
+            const size_t _Difference = (_First < _Last) ? static_cast<size_t>(_Last - _First) : 0;
+            const size_t _Offset     = (_Inside(_First)) ? static_cast<size_t>(_First - _Myptr) : 0;
+            if ( _Offset && _Difference )
+                return replace(_Offset, _Difference, _Other);
+
+            return *this;
+        }
+
+        exe_string& replace(const const_iterator    _First,
+                            const const_iterator    _Last,
+                            const std::string_view _Other)
+        {
+            if ( empty() ) NH3API_UNLIKELY
+                return *this;
+
+            nh3api::verify_range(_First, _Last);
+            const size_t _Difference = (_First < _Last) ? static_cast<size_t>(_Last - _First) : 0;
+            const size_t _Offset     = (_Inside(_First)) ? static_cast<size_t>(_First - _Myptr) : 0;
+            if ( _Offset && _Difference )
+                return replace(_Offset, _Difference, _Other.data(), _Other.size());
+
+            return *this;
+        }
+
+        exe_string& replace(const const_iterator _First,
+                            const const_iterator _Last,
+                            const char* const    _String,
+                            const size_t         _Count)
+        {
+            if ( empty() ) NH3API_UNLIKELY
+                return *this;
+
+            nh3api::verify_range(_First, _Last);
+            const size_t _Difference = (_First < _Last) ? static_cast<size_t>(_Last - _First) : 0;
+            const size_t _Offset     = (_Inside(_First)) ? static_cast<size_t>(_First - begin()) : 0;
+            if ( _Offset && _Difference && _String )
+                return replace(_Offset, _Difference, _String, _Count);
+
+            return *this;
+        }
+
+        exe_string& replace(const const_iterator _First,
+                            const const_iterator _Last,
+                            const char* const    _String)
+        {
+            nh3api::verify_range(_First, _Last);
+            const size_t _Difference = (_First < _Last) ? static_cast<size_t>(_Last - _First) : 0;
+            const size_t _Offset     = (_Inside(_First)) ? static_cast<size_t>(_First - begin()) : 0;
+            if ( _Offset && _Difference && _String )
+                return replace(_Offset, _Difference, _String);
+
+            return *this;
+        }
+
+        exe_string& replace(const const_iterator _First,
+                            const const_iterator _Last,
+                            const size_t         _Count,
+                            char                 _Character)
+        {
+            nh3api::verify_range(_First, _Last);
+            const size_t _Difference = (_First < _Last) ? static_cast<size_t>(_Last - _First) : 0;
+            const size_t _Offset     = (_Inside(_First)) ? static_cast<size_t>(_First - begin()) : 0;
+            if ( _Offset && _Difference )
+                return replace(_Offset, _Difference, _Count, _Character);
+
+            return *this;
+        }
+
+    #ifdef __cpp_concepts
+        template<nh3api::tt::iterator_for_container _Iter>
+    #else
+        template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
+    #endif
+        exe_string& replace(const const_iterator _First,
+                            const const_iterator _Last,
+                            const _Iter          _First2,
+                            const _Iter          _Last2)
+        {
+            nh3api::verify_range(_First, _Last);
+            if ( !_Inside(_First) || !_Inside_exclusive(_Last) )
+                return *this;
+
+            const size_t _Offset = static_cast<size_t>(_First - _Myptr);
+            const size_t _Length = static_cast<size_t>(_Last - _First);
+            nh3api::verify_range(_First2, _Last2);
+            const auto _UFirst2 = nh3api::unfancy(_First2);
+            const auto _ULast2  = nh3api::unfancy(_Last2);
+            if constexpr ( is_elem_cptr<decltype(_UFirst2)>::value )
+            {
+                return replace(_Offset, _Length, _UFirst2, static_cast<size_t>(_ULast2 - _UFirst2));
+            }
+            else
+            {
+                const exe_string _Temp(_UFirst2, _ULast2);
+                return replace(_Offset, _Length, _Temp._Myptr, _Temp._Mysize);
+            }
+        }
+
+    #ifdef __cpp_lib_containers_ranges
+        template<nh3api::tt::container_compatible_range<char> _Range>
+        exe_string& replace_with_range(const const_iterator _First,
+                                       const const_iterator _Last,
+                                       _Range&&             _Rng)
+        {
+            nh3api::verify_range(_First, _Last);
+            if ( !_Inside(_First) || !_Inside_exclusive(_Last) )
+                return *this;
+
+            const size_t _Offset = static_cast<size_t>(_First - _Myptr);
+            const size_t _Length = static_cast<size_t>(_Last - _First);
+            if constexpr (std::ranges::sized_range<_Range> || std::ranges::forward_range<_Range>)
+            {
+                const size_t _Count = static_cast<size_t>(std::ranges::distance(_Rng));
+                return replace(_Offset, _Length, std::ranges::data(_Rng), _Count);
+            }
+            else
+            {
+                const exe_string _Temp(std::from_range, _Rng);
+                return replace(_Offset, _Length, _Temp._Myptr, _Temp._Mysize);
+            }
+        }
+    #endif
+
+    public:
+        [[nodiscard]] reference front() noexcept
         {
             _Freeze();
-            return _Ptr[0];
+            return _Myptr[0];
         }
 
         [[nodiscard]] const_reference front() const noexcept
-        { return _Ptr[0]; }
+        { return _Myptr[0]; }
 
-        reference back() noexcept
+        [[nodiscard]] reference back() noexcept
         {
             _Freeze();
-            return _Ptr[_Len - 1];
+            return _Myptr[_Mysize - 1];
         }
 
         [[nodiscard]] const_reference back() const noexcept
-        { return _Ptr[_Len - 1]; }
+        { return _Myptr[_Mysize - 1]; }
 
-        iterator begin() noexcept
+        [[nodiscard]] iterator begin() noexcept
         {
             _Freeze();
-            return (_Ptr);
+            return _Myptr;
         }
+
         [[nodiscard]] const_iterator begin() const noexcept
-        {
-            return (_Ptr);
-        }
+        { return _Myptr; }
+
         [[nodiscard]] const_iterator cbegin() const noexcept
-        {
-            return (_Ptr);
-        }
-        iterator end() noexcept
+        { return _Myptr; }
+
+        [[nodiscard]] iterator end() noexcept
         {
             _Freeze();
-            return (iterator)(_Ptr + _Len);
+            return _Myptr + _Mysize;
         }
+
         [[nodiscard]] const_iterator end() const noexcept
-        {
-            return (const_iterator)(_Ptr + _Len);
-        }
+        { return static_cast<const_iterator>(_Myptr + _Mysize); }
+
         [[nodiscard]] const_iterator cend() const noexcept
-        {
-            return (const_iterator)(_Ptr + _Len);
-        }
-        reverse_iterator rbegin() noexcept
-        {
-            return (reverse_iterator( end() ));
-        }
+        { return static_cast<const_iterator>(_Myptr + _Mysize); }
+
+        [[nodiscard]] reverse_iterator rbegin() noexcept
+        { return reverse_iterator(end()); }
+
         [[nodiscard]] const_reverse_iterator rbegin() const noexcept
-        {
-            return (const_reverse_iterator( end() ));
-        }
+        { return const_reverse_iterator(end()); }
+
         [[nodiscard]] const_reverse_iterator crbegin() const noexcept
-        {
-            return (const_reverse_iterator( end() ));
-        }
-        reverse_iterator rend() noexcept
-        {
-            return (reverse_iterator( begin() ));
-        }
+        { return const_reverse_iterator(end()); }
+
+        [[nodiscard]] reverse_iterator rend() noexcept
+        { return reverse_iterator(begin()); }
+
         [[nodiscard]] const_reverse_iterator rend() const noexcept
-        {
-            return (const_reverse_iterator( begin() ));
-        }
+        { return const_reverse_iterator(begin()); }
+
         [[nodiscard]] const_reverse_iterator crend() const noexcept
+        {  return const_reverse_iterator(begin()); }
+
+        // reduce capacity
+        void shrink_to_fit()
         {
-            return (const_reverse_iterator( begin() ));
+            if ( _Myptr == nullptr || _Mysize == _Myres ) NH3API_UNLIKELY
+                return;
+
+            char* const _New_ptr = _Allocate_for_capacity(_Mysize);
+            traits_type::copy(_New_ptr, _Myptr, _Mysize);
+            _Tidy_deallocate();
+            this->_Myptr          = _New_ptr;
+            this->_Myptr[_Mysize] = '\0';
+            this->_Myres          = _Mysize;
         }
-        reference at( size_type pos1 )
+
+        reference at(const size_t _Offset)
         {
-            if ( _Len <= pos1 )
-            {
-                _Throw_out_of_range_exception();
-            }
+            _Check_offset_exclusive(_Offset);
             _Freeze();
-            return _Ptr[pos1];
+            return _Myptr[_Offset];
         }
-        [[nodiscard]] const_reference at( size_type pos1 ) const
+
+        [[nodiscard]] const_reference at(const size_t _Offset) const
         {
-            if ( _Len <= pos1 )
-            {
-                _Throw_out_of_range_exception();
-            }
-            return _Ptr[pos1];
+            _Check_offset_exclusive(_Offset);
+            return _Myptr[_Offset];
         }
-        reference operator[]( size_type pos1 )
-        #if !NH3API_DEBUG
-        noexcept
-        #endif
-        {
-        #if !NH3API_DEBUG
-            _Freeze();
-            return (_Ptr[pos1]);
-        #else
-            return at(pos1);
-        #endif
-        }
-        const_reference operator[]( size_type pos1 ) const
-        #if !NH3API_DEBUG
-        noexcept
-        #endif
-        {
-        #if !NH3API_DEBUG
-            return (_Ptr[pos1]);
-        #else
-            return at(pos1);
-        #endif
-        }
-        [[nodiscard]] const value_type* c_str() const noexcept
-        {
-            return _Ptr;
-        }
-        [[nodiscard]] const value_type* data() const noexcept
-        {
-            return _Ptr;
-        }
-        value_type* data() noexcept
+
+        [[nodiscard]] reference operator[](size_t _Offset) noexcept
         {
             _Freeze();
-            return _Ptr;
+            return _Myptr[_Offset];
         }
 
-        [[nodiscard]] size_type length() const noexcept
-        {
-            return (_Len);
-        }
+        [[nodiscard]] const_reference operator[](size_t _Offset) const
+        { return _Myptr[_Offset]; }
 
-        [[nodiscard]] size_type size() const noexcept
-        {
-            return (_Len);
-        }
+        operator std::string_view() const noexcept
+        { return {_Myptr, _Mysize}; }
 
-        [[nodiscard]] NH3API_FORCEINLINE constexpr
-        static size_type max_size() noexcept
-        { return NH3API_MAX_HEAP_REQUEST; }
-
-        void resize(const size_type _N, const value_type c = value_type())
+        void push_back(char _Character)
         {
-            const size_type old_size = size();
-            if (_N <= old_size)
+            if ( !_Is_shared() && _Mysize < _Myres ) NH3API_LIKELY
             {
-                _Eos(_N);
+                const size_t _Old_size = _Mysize;
+                _Mysize                = _Old_size + 1;
+                _Myptr[_Old_size]      = _Character;
+                _Myptr[_Old_size + 1]  = '\0';
             }
             else
             {
-                append(_N - old_size, c);
+                if ( max_size() == _Mysize ) NH3API_UNLIKELY
+                    _Throw_length_exception();
+
+                const size_t _Old_size = this->_Mysize;
+                const size_t _New_size = _Old_size + 1;
+                auto         _Buf      = _Get_fresh_buffer(_New_size);
+                char* const  _New_ptr  = _Buf.get();
+                char* const  _Old_ptr  = this->_Myptr;
+                traits_type::copy(_New_ptr, _Old_ptr, _Old_size);
+                _New_ptr[_Old_size] = _Character;
+                _Buf.set(_Old_ptr);
+                this->_Myptr            = _New_ptr;
+                this->_Myptr[_New_size] = '\0';
             }
         }
 
-        [[nodiscard]] size_type capacity() const noexcept
+        void pop_back()
         {
-            return _Res;
-        }
+            if ( empty() ) NH3API_UNLIKELY
+                return;
 
-        void reserve( size_type _N = 0 )
-        {
-            if ( _Res < _N )
-                _Grow<false>( _N );
-        }
-
-        [[nodiscard]] bool empty() const
-        {
-            return (_Len == 0);
-        }
-
-        size_type copy( value_type* str, size_type _N, size_type pos1 = 0 ) const
-        {
-            if ( _Len < pos1 )
+            const size_t _Leftover = _Mysize - 1;
+            if ( !_Is_shared() ) NH3API_LIKELY
             {
-                _Throw_out_of_range_exception();
+                _Eos(_Leftover);
             }
-            if ( _Len - pos1 < _N )
-                _N = _Len - pos1;
-            if ( 0 < _N )
-                nh3api::constexpr_char_traits::copy( str, _Ptr + pos1, _N );
-            return (_N);
+            else
+            {
+                auto        _Buf     = _Get_fresh_buffer(_Leftover);
+                char* const _New_ptr = _Buf.get();
+                traits_type::copy(_New_ptr, _Myptr, _Leftover);
+                _Buf.set(this->_Myptr);
+                this->_Myptr              = _New_ptr;
+                this->_Myptr[_Leftover] = '\0';
+            }
         }
 
-        void swap( exe_string& other ) noexcept
+        [[nodiscard]] const char* c_str() const noexcept
+        { return _Myptr ? _Myptr : ""; }
+
+        [[nodiscard]] const char* data() const noexcept
+        { return _Myptr; }
+
+        [[nodiscard]] char* data() noexcept
         {
-            nh3api::trivial_swap<sizeof(exe_string)>(this, &other);
+            _Freeze();
+            return _Myptr;
         }
 
-        [[nodiscard]] bool contains(value_type c) const noexcept
-        { return std::find(cbegin(), cend(), c) != cend(); }
+        [[nodiscard]] size_t length() const noexcept
+        { return _Mysize; }
 
-        bool contains(const_pointer str) const
-        { return find(str) != npos; }
+        [[nodiscard]] size_t size() const noexcept
+        { return _Mysize; }
 
-        [[nodiscard]] bool starts_with(value_type c) const
-        { return !empty() && nh3api::constexpr_char_traits::eq(front(), c); }
+        [[nodiscard]] inline constexpr static size_t max_size() noexcept
+        { return size_t(~0U); }
 
-        [[nodiscard]] bool ends_with(value_type c) const
-        { return !empty() && nh3api::constexpr_char_traits::eq(back(), c); }
-
-        [[nodiscard]] size_type find(const exe_string& other, size_type pos = 0 ) const noexcept
+        void resize(const size_t _New_size, char _Character = '\0')
         {
-            assert( other.data() != nullptr && other.size() != 0 );
-            return nh3api::constexpr_char_traits::str_find(data(), size(), other.data(), pos, other.size());
+            const size_t _Old_size = _Mysize;
+            if ( _New_size <= _Old_size )
+            {
+                if ( _Is_shared() ) NH3API_UNLIKELY
+                {
+                    auto        _Buf     = _Get_fresh_buffer(_New_size);
+                    char* const _New_ptr = _Buf.get();
+                    traits_type::copy(_New_ptr, _Myptr, _New_size);
+                    _Buf.set(this->_Myptr);
+                    this->_Myptr = _New_ptr;
+                }
+
+                _Eos(_New_size);
+            }
+            else
+            {
+                append(_New_size - _Old_size, _Character);
+            }
         }
 
-        [[nodiscard]] size_type find( char c, size_type pos = 0 ) const noexcept
+        template<class _Operation>
+        void resize_and_overwrite(const size_t _New_size, _Operation _Op)
         {
-            return nh3api::constexpr_char_traits::str_find(data(), size(), c, pos);
+            // if capacity is insufficient -> reallocate/grow (keeps old contents)
+            if ( _Myres < _New_size )
+            {
+                // _Reallocate_grow_by will set _Mysize == _New_size and place null terminator
+                _Reallocate_grow_by(
+                    _New_size - _Mysize,
+                    NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size)
+                    {
+                        // copy old contents including null terminator
+                        traits_type::copy(_New_ptr, _Old_ptr, _Old_size + 1);
+                    });
+            }
+            else if ( _Is_shared() ) NH3API_UNLIKELY
+            {
+                auto _Buf = _Get_fresh_buffer(_New_size);
+                char* const _New_ptr = _Buf.get();
+                const size_t _To_copy = std::min<size_t>(_Mysize, _New_size);
+                traits_type::copy(_New_ptr, _Myptr, _To_copy);
+                _Buf.set(this->_Myptr);
+                this->_Myptr = _New_ptr;
+                this->_Myptr[_New_size] = '\0';
+                this->_Mysize = _New_size;
+            }
+            else
+            {
+                this->_Mysize = _New_size;
+                this->_Myptr[_New_size] = '\0';
+            }
+
+            char* _Arg_ptr = this->_Myptr;
+            size_t _Arg_size = _New_size;
+            const size_t _Result_size = static_cast<size_t>(_Op(_Arg_ptr, _Arg_size)); // op returns resulting size
+
+            _Eos(_Result_size);
         }
 
-        size_type find( const char* str, size_type pos, size_type n ) const noexcept
-        {
-            assert( str != nullptr && n != 0 );
-            return nh3api::constexpr_char_traits::str_find(data(), size(), str, pos, n);
-        }
+        [[nodiscard]] size_t capacity() const noexcept
+        { return _Myres; }
 
-        size_type find( const char* str, size_type pos = 0 ) const noexcept
-        {
-            assert( str != nullptr );
-            return nh3api::constexpr_char_traits::str_find(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
-        }
-
-        [[nodiscard]] size_type rfind(const exe_string& other, size_type pos = npos ) const noexcept
-        {
-            assert( other.data() != nullptr && other.size() != 0 );
-            return nh3api::constexpr_char_traits::str_rfind(data(), size(), other.data(), pos, other.size());
-        }
-
-        [[nodiscard]] size_type rfind( char c, size_type pos = npos ) const noexcept
-        { return nh3api::constexpr_char_traits::str_rfind(data(), size(), c, pos); }
-
-        size_type rfind( const char* str, size_type pos, size_type n ) const noexcept
-        {
-            assert( str != nullptr && n != 0 );
-            return nh3api::constexpr_char_traits::str_rfind(data(), size(), str, pos, n);
-        }
-
-        size_type rfind( const char* str, size_type pos = npos ) const noexcept
-        {
-            assert( str != nullptr );
-            return nh3api::constexpr_char_traits::str_rfind(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
-        }
-
-        [[nodiscard]] size_type find_first_of(const exe_string& other, size_type pos = 0 ) const noexcept
-        {
-            assert( other.data() != nullptr && other.size() != 0 );
-            return nh3api::constexpr_char_traits::str_find_first_of(data(), size(), other.data(), pos, other.size());
-        }
-
-        [[nodiscard]] size_type find_first_of( char c, size_type pos = 0 ) const noexcept
-        { return find(c, pos); }
-
-        size_type find_first_of( const char* str, size_type pos, size_type n ) const noexcept
-        {
-            assert( str != nullptr && n != 0 );
-            return nh3api::constexpr_char_traits::str_find_first_of(data(), size(), str, pos, n);
-        }
-
-        size_type find_first_of( const char* str, size_type pos = 0 ) const noexcept
-        {
-            assert( str != nullptr );
-            return nh3api::constexpr_char_traits::str_find_first_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
-        }
-
-        [[nodiscard]] size_type find_last_of(const exe_string& other, size_type pos = npos ) const noexcept
-        {
-            assert( other.data() != nullptr && other.size() != 0 );
-            return nh3api::constexpr_char_traits::str_find_last_of(data(), size(), other.data(), pos, other.size());
-        }
-
-        [[nodiscard]] size_type find_last_of( char c, size_type pos = npos ) const noexcept
-        { return rfind(c, pos); }
-
-        size_type find_last_of( const char* str, size_type pos, size_type n ) const noexcept
-        {
-            assert( str != nullptr && n != 0 );
-            return nh3api::constexpr_char_traits::str_find_last_of(data(), size(), str, pos, n);
-        }
-
-        size_type find_last_of( const char* str, size_type pos = npos ) const noexcept
-        {
-            assert( str != nullptr );
-            return nh3api::constexpr_char_traits::str_find_last_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
-        }
-
-        [[nodiscard]] size_type find_first_not_of(const exe_string& other, size_type pos = 0 ) const noexcept
-        {
-            assert( other.data() != nullptr && other.size() != 0 );
-            return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), other.data(), pos, other.size());
-        }
-
-        [[nodiscard]] size_type find_first_not_of( char c, size_type pos = 0 ) const noexcept
-        { return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), c, pos); }
-
-        size_type find_first_not_of( const char* str, size_type pos, size_type n ) const noexcept
-        {
-            assert( str != nullptr && n != 0 );
-            return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), str, pos, n);
-        }
-
-        size_type find_first_not_of( const char* str, size_type pos = 0 ) const noexcept
-        {
-            assert( str != nullptr );
-            return nh3api::constexpr_char_traits::str_find_first_not_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
-        }
-
-        [[nodiscard]] size_type find_last_not_of(const exe_string& other, size_type pos = npos ) const noexcept
-        {
-            assert( other.data() != nullptr && other.size() != 0 );
-            return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), other.data(), pos, other.size());
-        }
-
-        [[nodiscard]] size_type find_last_not_of( char c, size_type pos = 0 ) const noexcept
-        { return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), c, pos); }
-
-        size_type find_last_not_of( const char* str, size_type pos, size_type n ) const noexcept
-        {
-            assert( str != nullptr && n != 0 );
-            return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), str, pos, n);
-        }
-
-        size_type find_last_not_of( const char* str, size_type pos = npos ) const noexcept
-        {
-            assert( str != nullptr );
-            return nh3api::constexpr_char_traits::str_find_last_not_of(data(), size(), str, pos, nh3api::constexpr_char_traits::length(str));
-        }
-
-        #if NH3API_CHECK_CPP23
-
-        [[nodiscard]] exe_string substr( size_type pos = 0, size_type n = npos ) const&
-        { return {*this, pos, n}; }
-
-        exe_string substr( size_type pos = 0, size_type n = npos ) &&
-        { return {*this, pos, n}; }
-
-        #else
-
-        exe_string substr( size_type pos = 0, size_type n = npos ) const
-        { return exe_string( *this, pos, n ); }
-
+        // determine new minimum length of allocated storage
+        void reserve(const size_t _Newcap
+        #if !NH3API_CHECK_CPP20
+        = 0
         #endif
-
-        [[nodiscard]] int compare( const exe_string& other ) const noexcept
+        )
         {
-            return _Compare(this->c_str(), this->size(), other.c_str(), other.size());
+            if ( empty() )
+            {
+				if ( _Newcap == 0 )
+					return;
+
+                const size_t _New_capacity  = _Calculate_growth(_Newcap);
+                char* const  _Allocated_ptr = _Allocate_for_capacity(_New_capacity);
+                char* const  _New_ptr       = _Allocated_ptr + 1;
+                _Refcnt(_New_ptr)           = 0;
+                this->_Myptr                = _New_ptr;
+                this->_Myptr[0]             = '\0';
+                this->_Mysize               = 0;
+                this->_Myres                = _New_capacity;
+                return;
+            }
+
+            // requested capacity is not large enough for current size, ignore
+            if ( _Mysize > _Newcap )
+                return;
+
+            const size_t _Old_size = _Mysize;
+
+            _Reallocate_grow_by(
+                _Newcap - _Old_size,
+                NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_str, const size_t _Old_str_size)
+                {
+                    traits_type::copy(_New_ptr, _Old_str, _Old_str_size + 1);
+                });
+
+            _Eos(_Old_size);
         }
 
-        [[nodiscard]] int compare( size_type pos, size_type count, const exe_string& other ) const
+        [[nodiscard]] inline bool empty() const noexcept
+        { return _Myptr == nullptr || _Mysize == 0; }
+
+        size_t copy(char* _Destination, size_t _Count, const size_t _Offset = 0) const
         {
-            _Check_offset(pos);
-            return _Compare(this->c_str() + pos, this->_Clamp_suffix_size(pos, count), other.c_str(), other.size());
+            if ( _Destination == nullptr || _Count == 0 )
+                return 0;
+
+            _Check_offset(_Offset);
+            _Count = _Clamp_suffix_size(_Offset, _Count);
+            if ( _Count )
+                traits_type::copy(_Destination, _Myptr + static_cast<ptrdiff_t>(_Offset), _Count);
+
+            return _Count;
         }
 
-        [[nodiscard]] int compare(const size_type pos1, const size_type n, const exe_string& other,
-                                  const size_type pos2, const size_type count = npos ) const
+        void swap(exe_string& _Right) noexcept
         {
-            this->_Check_offset(pos1);
-            other._Check_offset(pos2);
-
-            return _Compare(this->c_str() + pos1,
-                            this->_Clamp_suffix_size(pos1, n),
-                            other.c_str() + pos2,
-                            other._Clamp_suffix_size(pos2, count));
+            auto& _Lhs = reinterpret_cast<std::array<uint32_t, 4>&>(*this);
+            auto& _Rhs = reinterpret_cast<std::array<uint32_t, 4>&>(_Right);
+            std::swap(_Lhs, _Rhs);
         }
 
-        int compare(const value_type* const str) const noexcept
-        { return _Compare(this->c_str(), this->size(), str, ::nh3api::constexpr_char_traits::length(str)); }
-
-        int compare(const size_type pos, const size_type count, const value_type* const str ) const
+        [[nodiscard]] bool contains(char _Character) const noexcept
         {
-            _Check_offset(pos);
-            return _Compare(this->c_str() + pos, _Clamp_suffix_size(pos, count), str, ::nh3api::constexpr_char_traits::length(str));
+            if ( empty() )
+                return false;
+
+        #if NH3API_CHECK_MINGW // GCC doesn't support __builtin_char_memchr
+            return __builtin_memchr(_Myptr, _Character, _Mysize) != nullptr;
+        #else
+            return __builtin_char_memchr(_Myptr, _Character, _Mysize) != nullptr;
+        #endif
         }
 
-        int compare(const size_type pos,
-                    const size_type count1,
-                    const value_type* const str,
-                    const size_type count2) const
+        [[nodiscard]] bool contains(const char* const _String) const noexcept
+        { return find(_String) != npos; }
+
+        [[nodiscard]] bool contains(const std::string_view _String) const noexcept
+        { return find(_String) != npos; }
+
+        [[nodiscard]] bool starts_with(char _Character) const noexcept
+        { return !empty() && (front() == _Character); }
+
+        [[nodiscard]] bool starts_with(const char* const _String) const noexcept
         {
-            _Check_offset(pos);
-            return _Compare(this->c_str() + pos, _Clamp_suffix_size(pos, count1), str, count2);
+            if ( _String )
+            {
+                const size_t _Rightsize = __builtin_strlen(_String);
+                if ( _Mysize < _Rightsize )
+                    return false;
+                return __builtin_memcmp(_Myptr, _String, _Rightsize) == 0;
+            }
+
+            return false;
         }
 
-        [[nodiscard]] allocator_type get_allocator() const noexcept
+        [[nodiscard]] bool starts_with(const std::string_view _String) const noexcept
+        {
+            const size_t _Rightsize = _String.size();
+            if ( _String.data() && _Rightsize )
+            {
+                if ( _Mysize < _Rightsize )
+                    return false;
+                return __builtin_memcmp(_Myptr, _String.data(), _Rightsize) == 0;
+            }
+
+            return false;
+        }
+
+        [[nodiscard]] bool ends_with(char _Character) const
+        { return !empty() && (back() == _Character); }
+
+        [[nodiscard]] bool ends_with(const char* const _String) const noexcept
+        {
+            if ( _String )
+            {
+                const size_t _Rightsize = __builtin_strlen(_String);
+                if ( _Mysize < _Rightsize )
+                    return false;
+                return __builtin_memcmp(_Myptr + (_Mysize - _Rightsize), _String, _Rightsize) == 0;
+            }
+
+            return false;
+        }
+
+        [[nodiscard]] bool ends_with(const std::string_view _String) const noexcept
+        {
+            const size_t _Rightsize = _String.size();
+            if ( _String.data() && _Rightsize )
+            {
+                if ( _Mysize < _Rightsize )
+                    return false;
+                return __builtin_memcmp(_Myptr + (_Mysize - _Rightsize), _String.data(), _Rightsize) == 0;
+            }
+
+            return false;
+        }
+
+        [[nodiscard]] size_t find(const exe_string& _Other, const size_t _Offset = 0) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find(_Other._Myptr, _Offset, _Other._Mysize); }
+
+        [[nodiscard]] size_t find(const std::string_view _Other, const size_t _Offset = 0) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find(_Other.data(), _Offset, _Other.size()); }
+
+        [[nodiscard]] size_t find(char _Character, const size_t _Offset = 0) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find(_Character, _Offset); }
+
+        [[nodiscard]] size_t find(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.find(_String, _Offset, _Count) : npos; }
+
+        [[nodiscard]] size_t find(const char* const _String, const size_t _Offset = 0) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.find(_String, _Offset, __builtin_strlen(_String)) : npos; }
+
+        [[nodiscard]] size_t rfind(const exe_string& _Other, const size_t _Offset = npos) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.rfind(_Other._Myptr, _Offset, _Other._Mysize); }
+
+        [[nodiscard]] size_t rfind(const std::string_view _String, const size_t _Offset = npos) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.rfind(_String.data(), _Offset, _String.size()); }
+
+        [[nodiscard]] size_t rfind(char _Character, const size_t _Offset = npos) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.rfind(_Character, _Offset); }
+
+        [[nodiscard]] size_t rfind(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.rfind(_String, _Offset, _Count) : npos; }
+
+        [[nodiscard]] size_t rfind(const char* const _String, const size_t _Offset = npos) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.rfind(_String, _Offset, __builtin_strlen(_String)) : npos; }
+
+        [[nodiscard]] size_t find_first_of(const exe_string& _Other, const size_t _Offset = 0) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_first_of(_Other._Myptr, _Offset, _Other._Mysize); }
+
+        [[nodiscard]] size_t find_first_of(const std::string_view _Other, const size_t _Offset = 0) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_first_of(_Other.data(), _Offset, _Other.size()); }
+
+        [[nodiscard]] size_t find_first_of(char _Character, const size_t _Offset = 0) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_first_of(_Character, _Offset); }
+
+        [[nodiscard]] size_t find_first_of(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_of(_String, _Offset, _Count) : npos; }
+
+        [[nodiscard]] size_t find_first_of(const char* const _String, const size_t _Offset = 0) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+
+        [[nodiscard]] size_t find_last_of(const exe_string& _Other, const size_t _Offset = npos) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_last_of(_Other._Myptr, _Offset, _Other._Mysize); }
+
+        [[nodiscard]] size_t find_last_of(const std::string_view _Other, const size_t _Offset = npos) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_last_of(_Other.data(), _Offset, _Other.size()); }
+
+        [[nodiscard]] size_t find_last_of(char _Character, const size_t _Offset = npos) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_last_of(_Character, _Offset); }
+
+        [[nodiscard]] size_t find_last_of(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_of(_String, _Offset, _Count) : npos; }
+
+        [[nodiscard]] size_t find_last_of(const char* const _String, const size_t _Offset = npos) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+
+        [[nodiscard]] size_t find_first_not_of(const exe_string& _Other, const size_t _Offset = 0) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_first_not_of(_Other._Myptr, _Offset, _Other._Mysize); }
+
+        [[nodiscard]] size_t find_first_not_of(const std::string_view _Other, const size_t _Offset = 0) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_first_not_of(_Other.data(), _Offset, _Other.size()); }
+
+        [[nodiscard]] size_t find_first_not_of(char _Character, const size_t _Offset = 0) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_first_not_of(_Character, _Offset); }
+
+        [[nodiscard]] size_t find_first_not_of(const char* const _String, size_t _Offset, const size_t _Count) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_not_of(_String, _Offset, _Count) : npos; }
+
+        [[nodiscard]] size_t find_first_not_of(const char* const _String, const size_t _Offset = 0) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+
+        [[nodiscard]] size_t find_last_not_of(const exe_string& _Other, const size_t _Offset = npos) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_last_not_of(_Other._Myptr, _Offset, _Other._Mysize); }
+
+        [[nodiscard]] size_t find_last_not_of(const std::string_view _Other, const size_t _Offset = npos) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_last_not_of(_Other.data(), _Offset, _Other.size()); }
+
+        [[nodiscard]] size_t find_last_not_of(char _Character, const size_t _Offset = 0) const noexcept
+        { return std::string_view{_Myptr, _Mysize}.find_last_not_of(_Character, _Offset); }
+
+        [[nodiscard]] size_t find_last_not_of(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, _Count) : npos; }
+
+        [[nodiscard]] size_t find_last_not_of(const char* const _String, const size_t _Offset = npos) const noexcept
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+
+        [[nodiscard]] exe_string substr(const size_t _Offset, const size_t _Count = npos) const&
+        { return { *this, _Offset, _Count }; }
+
+        [[nodiscard]] exe_string substr(const size_t _Offset, const size_t _Count = npos) &&
+        { return { std::move(*this), _Offset, _Count }; }
+
+        [[nodiscard]] exe_string substr() const&
+        { return { *this }; }
+
+        [[nodiscard]] exe_string substr() && noexcept
+        { return { std::move(*this) }; }
+
+        [[nodiscard]] int compare(const std::string_view _String) const noexcept
+        { return _Compare(this->_Myptr, this->_Mysize, _String.data(), _String.size()); }
+
+        [[nodiscard]] int compare(const size_t _Offset, const size_t _Nx, const std::string_view _String) const
+        {
+            _Check_offset(_Offset);
+            return _Compare(this->_Myptr + _Offset, this->_Clamp_suffix_size(_Offset, _Nx), _String.data(), _String.size());
+        }
+
+        [[nodiscard]] int compare(const size_t           _Offset,
+                                  const size_t           _Nx,
+                                  const std::string_view _String,
+                                  const size_t           _Right_offset,
+                                  const size_t           _Count = npos) const
+        {
+            _Check_offset(_Offset);
+            const std::string_view _Subview = _String.substr(_Right_offset, _Count);
+            return _Compare(this->_Myptr + _Offset, this->_Clamp_suffix_size(_Offset, _Nx), _Subview.data(), _Subview.size());
+        }
+
+        [[nodiscard]] int compare(const exe_string& _Other) const noexcept
+        { return _Compare(this->_Myptr, this->_Mysize, _Other._Myptr, _Other._Mysize); }
+
+        [[nodiscard]] int compare(const size_t _Offset, const size_t _Nx, const exe_string& _Other ) const
+        {
+            _Check_offset(_Offset);
+            return _Compare(this->_Myptr + _Offset, this->_Clamp_suffix_size(_Offset, _Nx), _Other._Myptr, _Other._Mysize);
+        }
+
+        [[nodiscard]] int compare(const size_t      _Offset,
+                                  const size_t      _Nx,
+                                  const exe_string& _Other,
+                                  const size_t      _Right_offset,
+                                  const size_t      _Count = npos) const
+        {
+            this->_Check_offset(_Offset);
+            _Other._Check_offset(_Right_offset);
+
+            return _Compare(this->_Myptr + _Offset,
+                            this->_Clamp_suffix_size(_Offset, _Nx),
+                            _Other._Myptr + _Right_offset,
+                            _Other._Clamp_suffix_size(_Right_offset, _Count));
+        }
+
+        int compare(const char* const _String) const noexcept
+        {
+            if ( _String )
+                return _Compare(this->_Myptr, this->_Mysize, _String, __builtin_strlen(_String));
+
+            // compare to null string: if this string is empty, return 0, because null strings are equal
+            // if string is not empty, it is always larger than the null string, so we return 1(the left string, or this string, is larger)
+            return empty() ? 0 : 1;
+        }
+
+        int compare(const size_t _Offset, const size_t _Nx, const char* const _String) const
+        {
+            _Check_offset(_Offset);
+            if ( _String )
+                return _Compare(this->_Myptr + _Offset, _Clamp_suffix_size(_Offset, _Nx), _String, __builtin_strlen(_String));
+
+            // the same logic as in int compare(const char*), but if there are any symbols left after the offset
+            return (_Mysize - _Offset == 0) ? 0 : 1;
+        }
+
+        int compare(const size_t      _Offset,
+                    const size_t      _Nx,
+                    const char* const _String,
+                    const size_t      _Count) const
+        {
+            _Check_offset(_Offset);
+            if ( _String && _Count )
+                return _Compare(this->_Myptr + _Offset, _Clamp_suffix_size(_Offset, _Nx), _String, std::min<size_t>(_Count, __builtin_strlen(_String)));
+
+            // the same logic as in int compare(const char*), but if there are any symbols left after the offset
+            return (_Mysize - _Offset == 0) ? 0 : 1;
+        }
+
+        [[nodiscard]] inline static constexpr allocator_type get_allocator() noexcept
         { return {}; }
 
     private:
-        enum : uint32_t { _MIN_SIZE = 31 };
+        inline static constexpr size_t _MIN_SIZE { 31 };
 
-        // copy _Oldlen elements to newly allocated buffer
-        NH3API_INLINE_LARGE
-        void _Copy( size_type _Newsize ) noexcept
+        // assign by stealing _Right's buffer
+        // pre: this != &_Right
+        // pre: *this owns no memory
+        inline void _Take_contents(exe_string& _Right) noexcept
         {
-            size_type _Clamped_newsize = _Newsize | _MIN_SIZE;
-            if ( max_size() < _Clamped_newsize )
-                _Clamped_newsize = _Newsize;
-            value_type* str = static_cast<value_type*>(::operator new( _Clamped_newsize + 2, exe_heap, std::nothrow ));
+            auto& _Dst = reinterpret_cast<std::array<uint32_t, 4>&>(*this);
+            auto& _Src = reinterpret_cast<std::array<uint32_t, 4>&>(_Right);
+            _Dst = std::exchange(_Src, {});
+        }
 
-            if ( 0 < _Len )
-                nh3api::constexpr_char_traits::copy( str + 1, _Ptr, _Len > _Clamped_newsize ? _Clamped_newsize : _Len );
-            size_type _Old_length = _Len;
-            _Tidy_deallocate();
-            _Ptr = str + 1;
-            _Refcnt(_Ptr) = 0;
-            _Res = _Clamped_newsize;
-            _Eos( _Old_length > _Clamped_newsize ? _Clamped_newsize : _Old_length );
+        void _Move_construct_from_substr(exe_string& _Other, const size_t _Offset, const size_t _Size_max)
+        {
+            _Other._Check_offset(_Offset);
+            const size_t _Result_size = _Other._Clamp_suffix_size(_Offset, _Size_max);
+            char* const  _Other_ptr   = _Other._Myptr;
+
+            // erase characters after offset and move the characters
+            if ( _Offset != 0 )
+                traits_type::move(_Other_ptr, _Other_ptr + _Offset, _Result_size);
+
+            _Other._Eos(_Result_size);
+            this->_Take_contents(_Other);
+        }
+
+        inline void _Construct_empty() noexcept
+        { reinterpret_cast<std::array<uint32_t, 4>&>(*this) = {}; }
+
+        enum class _Construct_strategy : uint8_t
+        {
+            _From_char,
+            _From_ptr,
+            _From_string
+        };
+
+        template<_Construct_strategy _Strat, class _Char_or_ptr>
+        void _Construct(const _Char_or_ptr _Arg, const size_t _Count)
+        {
+            if constexpr ( _Strat == _Construct_strategy::_From_char )
+                static_assert(std::is_same_v<_Char_or_ptr, char>);
+            else
+                static_assert(is_elem_cptr<_Char_or_ptr>::value);
+
+            if ( _Count > max_size() )
+                _Throw_length_exception();
+
+            const size_t _New_capacity  = _Calculate_growth(_Count, 0, max_size());
+            this->_Mysize               = _Count;
+            this->_Myres                = _New_capacity;
+
+            if constexpr ( _Strat != _Construct_strategy::_From_string )
+            {
+                char* const  _New_ptr       = _Allocate_for_capacity(_New_capacity);
+                this->_Myptr                = _New_ptr + 1; // reference count is one byte before the string
+                _Refcnt(this->_Myptr) = 0;            // set reference count to zero on construction
+
+                if constexpr ( _Strat == _Construct_strategy::_From_char )
+                {
+                    traits_type::assign(_Myptr, _Count, _Arg);
+                    _Myptr[_Count] = '\0';
+                }
+                else /*if constexpr ( _Strat == _Construct_strategy::_From_ptr )*/
+                {
+                    traits_type::copy(_Myptr, _Arg, _Count);
+                    _Myptr[_Count] = '\0';
+                }
+            }
+            // _Strat == _Construct_strategy::_From_string
+            else
+            {
+                // NOTE: for performance reason and memory safety reasons,
+                // we do not implement copy-on-write in this implementation reference counting
+                // implement copy-on-write
+            #if 0
+                if ( _Refcnt(_Arg) < _FROZEN - 1 )
+                {
+                    // do not copy, just share the same pointer
+                    _Myptr = _Arg;
+                    // and increment reference count
+                    ++_Refcnt(_Myptr);
+                }
+                else
+            #endif
+                {
+                    // allocate and copy
+                    char* const _New_ptr        = _Allocate_for_capacity(_New_capacity);
+                    this->_Myptr                = _New_ptr + 1; // reference count is one byte before the string
+                    _Refcnt(this->_Myptr) = 0;            // set reference count to zero on construction
+                    traits_type::copy(_Myptr, _Arg, _Count);
+                    _Myptr[_Count] = '\0';
+                }
+            }
+        }
+
+        template<class _Iter, class _Size = std::nullptr_t>
+        void _Construct_from_iter(_Iter _First, const _Iter _Last, _Size _Count = {})
+        {
+            if constexpr ( std::is_same_v<_Size, size_t> )
+            {
+                if ( _Count > max_size() )
+                    _Throw_length_exception();
+
+                const size_t _New_capacity = _Calculate_growth(_Count);
+                char* const  _New_ptr      = _Allocate_for_capacity(_New_capacity);
+                this->_Myptr               = _New_ptr + 1;
+                _Refcnt(this->_Myptr)      = 0;
+                this->_Mysize              = _Count;
+                this->_Myres               = _New_capacity;
+                traits_type::copy(this->_Myptr, _First, _Count);
+                _Myptr[_Count] = '\0';
+            }
+            else
+            {
+                const size_t _New_size = static_cast<size_t>(std::distance(_First, _Last));
+                if ( _New_size > max_size() )
+                    _Throw_length_exception();
+
+                const size_t _New_capacity = _Calculate_growth(_New_size);
+                char* const  _New_ptr      = _Allocate_for_capacity(_New_capacity);
+                this->_Myptr               = _New_ptr + 1;
+                _Refcnt(this->_Myptr)      = 0;
+                this->_Mysize              = _New_size;
+                this->_Myres               = _New_capacity;
+                std::copy(_First, _Last, _Myptr);
+                _Myptr[_New_size] = '\0';
+            }
+        }
+
+        [[nodiscard]] NH3API_MALLOC(1)
+        static inline char* _Allocate_for_capacity(const size_t _Requested_size)
+        {
+            // we allocate one additional byte before the string for ref counting
+            // and another one after the string, for null terminator
+            char* const _Allocated_ptr = static_cast<char*>(::operator new(_Requested_size + 2, exe_heap, std::nothrow));
+            if ( _Allocated_ptr != nullptr ) NH3API_LIKELY
+                return _Allocated_ptr;
+
+            nh3api::throw_exception<std::bad_alloc>();
+        }
+
+        static inline void _Deallocate(char* _Ptr) noexcept
+        { ::operator delete(_Ptr, exe_heap); }
+
+        [[nodiscard]] static inline constexpr size_t _Calculate_growth(const size_t _Requested, const size_t _Old, const size_t _Max) noexcept
+        {
+            size_t _Masked = _Requested | _MIN_SIZE;
+
+            // the mask overflows, settle for max_size()
+            if ( _Masked > _Max )
+                return _Max;
+
+            // similarly, geometric overflows
+            if ( _Old > _Max - _Old / 2 )
+                return _Max;
+
+            return std::max<size_t>(_Masked, _Old + _Old / 2);
+        }
+
+        [[nodiscard]] inline size_t _Calculate_growth(const size_t _Requested) const noexcept
+        { return _Calculate_growth(_Requested, capacity(), max_size()); }
+
+        // reallocate to store exactly _New_size elements, new buffer prepared by
+        // _Fn(_New_ptr, _New_size, _Args...)
+        template<class _Function, class... _FuncArgs>
+        NH3API_FORCEINLINE exe_string& _Reallocate_for(const size_t _New_size, _Function _Fn, _FuncArgs... _Args)
+        {
+            _Check_size(_New_size);
+
+            auto        _Buf     = _Get_buffer(_New_size);
+            char* const _New_ptr = _Buf.get();
+            _Fn(_New_ptr, _New_size, _Args...);
+            _Buf.set(this->_Myptr);
+            this->_Myptr            = _New_ptr;
+            this->_Myptr[_New_size] = '\0';
+            return *this;
+        }
+
+        // reallocate to increase size by _Size_increase elements, new buffer prepared by
+        // _Fn(_New_ptr, _Old_ptr, _Old_size, _Args...)
+        template<class _Function, class... _FuncArgs>
+        NH3API_FORCEINLINE exe_string& _Reallocate_grow_by(const size_t _Size_increase, _Function _Fn, _FuncArgs... _Args)
+        {
+            if ( max_size() - _Mysize < _Size_increase ) NH3API_UNLIKELY
+                _Throw_length_exception();
+
+            const size_t _Old_size = this->_Mysize;
+            const size_t _New_size = _Old_size + _Size_increase;
+            auto         _Buf      = _Get_buffer(_New_size);
+            char* const  _New_ptr  = _Buf.get();
+            char* const  _Old_ptr  = this->_Myptr;
+            _Fn(_New_ptr, _Old_ptr, _Old_size, _Args...);
+            _Buf.set(_Old_ptr);
+            this->_Myptr            = _New_ptr;
+            this->_Myptr[_New_size] = '\0';
+            return *this;
         }
 
         // set new length and null terminator
-        NH3API_FORCEINLINE void _Eos( size_type _N ) noexcept
-        { _Ptr[_Len = _N] = '\0'; }
+        inline void _Eos(const size_t _New_size) noexcept
+        {
+            _Mysize = _New_size;
+            if ( _Myptr )
+                _Myptr[_New_size] = '\0';
+        }
 
-        NH3API_FORCEINLINE bool _Inside(const_pointer ptr) noexcept
-        { return begin() <= ptr && ptr < end(); }
+        [[nodiscard]] inline bool _Inside(const const_iterator _Iterator) const noexcept
+        { return cbegin() <= _Iterator && _Iterator < cend(); }
 
+        [[nodiscard]] inline bool _Inside_exclusive(const const_iterator _Iterator) const noexcept
+        { return cbegin() <= _Iterator && _Iterator <= cend(); }
+
+    #if defined(__GNUC__) || defined(__clang__)
+        [[__gnu__::__hot__]]
+    #endif
+        // Prepare function for modification: "freeze" the string
+        // This is similar to _Split(), but here we are
+        // 1. do not change the size of the string or its contents, we just split the existing string to a unique one
+        // 2. prepare the string for user modification.
         void _Freeze() noexcept
         {
-            if ( _Ptr != nullptr
-                && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
-                _Grow<true>( _Len );
-            if ( _Ptr != nullptr )
-                _Refcnt( _Ptr ) = _FROZEN;
+            if ( _Myptr != nullptr )
+            {
+                if ( _Refcnt(_Myptr) != 0 && _Refcnt(_Myptr) != _FROZEN ) NH3API_UNLIKELY
+                    _Split();
+                _Refcnt(_Myptr) = _FROZEN;
+            }
         }
 
-        template<bool is_noexcept>
-        NH3API_INLINE_LARGE
-        // ensure buffer is big enough, trim to size if _Trim is true
-        bool _Grow(size_type _N, bool _Trim = false)
-        noexcept(noexcept(is_noexcept))
+        // Get the reference counter one byte before the pointer
+        [[nodiscard]] static NH3API_FORCEINLINE uint8_t& _Refcnt(const char* _Ptr) noexcept
         {
-            if constexpr (!is_noexcept)
-            {
-            if ( max_size() < _N )
-            {
-                return _Throw_out_of_range_exception(), false;
-            }
-            }
-            if ( _Ptr != nullptr
-                && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
-                {
-                    if ( _N == 0 )
-                    {
-                        --_Refcnt( _Ptr );
-                        _Tidy();
-                        return false;
-                    }
-                    else
-                    {
-                        _Copy( _N );
-                        return true;
-                    }
-                }
-
-            if ( _N == 0 )
-            {
-                if ( _Trim )
-                    _Tidy_deallocate();
-                else if ( _Ptr != nullptr )
-                    _Eos( 0 );
-                return false;
-            }
-            else
-            {
-                if ( _Trim && (_MIN_SIZE < _Res || _Res < _N) )
-                {
-                    _Tidy_deallocate();
-                    _Copy( _N );
-                }
-                else if ( !_Trim && _Res < _N )
-                    _Copy( _N );
-                return true;
-            }
+            assert(_Ptr);
+            NH3API_ASSUME(_Ptr != nullptr);
+            return reinterpret_cast<uint8_t*>(const_cast<char*>(_Ptr))[-1];
         }
 
-        NH3API_FORCEINLINE uint8_t& _Refcnt(const value_type* ptr) noexcept
-        { return reinterpret_cast<uint8_t*>(const_cast<value_type*>(ptr))[-1]; }
-
+        // Split string into a new unique copy of string to prepare it for modification(append(), erase(), etc.):
+        // 1. allocate a new buffer of size = min(capacity(), _New_size)
+        // 2. copy the old string into a newly allocated buffer
+        // 3. assign the newly allocated buffer pointer to the string pointer (if refcount is zero, deallocate the old buffer)
         void _Split()
         {
-            if ( _Ptr != nullptr && _Refcnt( _Ptr ) != 0 && _Refcnt( _Ptr ) != _FROZEN )
+            char* const  _New_ptr      = _Allocate_for_capacity(_Myres);
+            traits_type::copy(_New_ptr + 1, this->_Myptr, this->_Mysize + 1);
+            _Tidy_deallocate();
+            this->_Myptr          = _New_ptr + 1;
+            _Refcnt(this->_Myptr) = 0;
+        }
+
+        // RAII char[] buffer that releases the array and the reference counting on destruction
+        struct _Refcnt_buffer
+        {
+            public:
+                _Refcnt_buffer(const _Refcnt_buffer&)            = delete;
+                _Refcnt_buffer(_Refcnt_buffer&&)                 = delete;
+                _Refcnt_buffer& operator=(const _Refcnt_buffer&) = delete;
+                _Refcnt_buffer& operator=(_Refcnt_buffer&&)      = delete;
+
+                NH3API_FORCEINLINE _Refcnt_buffer(char* ptr_, bool need_free_) noexcept
+                    : _Ptr { ptr_ }, _Need_free { need_free_ }
+                {}
+
+                [[nodiscard]] NH3API_FORCEINLINE char* get() noexcept
+                { return _Ptr; }
+
+                [[nodiscard]] NH3API_FORCEINLINE const char* get() const noexcept
+                { return _Ptr; }
+
+                NH3API_FORCEINLINE void set(char* const _New_ptr) noexcept
+                { _Ptr = _New_ptr; }
+
+                NH3API_FORCEINLINE ~_Refcnt_buffer() noexcept
+                {
+                    if ( _Need_free && _Ptr )
+                    {
+                        if ( _Refcnt(_Ptr) == 0 || _Refcnt(_Ptr) == _FROZEN ) NH3API_LIKELY
+                            _Deallocate(&_Ptr[-1]);
+                        else
+                            --_Refcnt(_Ptr);
+                    }
+                }
+
+            private:
+                char* _Ptr;
+                bool _Need_free;
+        };
+
+        // _Refcnt_buffer but without local array check, similar to std::unique_ptr
+        struct _Refcnt_fresh_buffer
+        {
+            public:
+                _Refcnt_fresh_buffer(const _Refcnt_fresh_buffer&)            = delete;
+                _Refcnt_fresh_buffer(_Refcnt_fresh_buffer&&)                 = delete;
+                _Refcnt_fresh_buffer& operator=(const _Refcnt_fresh_buffer&) = delete;
+                _Refcnt_fresh_buffer& operator=(_Refcnt_fresh_buffer&&)      = delete;
+
+                NH3API_FORCEINLINE explicit _Refcnt_fresh_buffer(char* ptr_) noexcept
+                    : _Ptr { ptr_ }
+                {}
+
+                [[nodiscard]] NH3API_FORCEINLINE char* get() noexcept
+                { return _Ptr; }
+
+                [[nodiscard]] NH3API_FORCEINLINE const char* get() const noexcept
+                { return _Ptr; }
+
+                NH3API_FORCEINLINE void set(char* const _New_ptr) noexcept
+                { _Ptr = _New_ptr; }
+
+                NH3API_FORCEINLINE ~_Refcnt_fresh_buffer() noexcept
+                {
+					if ( _Ptr )
+					{
+						if ( _Refcnt(_Ptr) == 0 || _Refcnt(_Ptr) == _FROZEN ) NH3API_LIKELY
+							_Deallocate(&_Ptr[-1]);
+						else
+							--_Refcnt(_Ptr);
+					}
+                }
+
+            private:
+                char* _Ptr;
+        };
+
+        // Get the buffer to the string of size _Requested_size:
+        // if the string reference counting is in shared mode, then we split the string and allocate a new buffer
+        // otherwise, use the existing buffer
+        NH3API_FORCEINLINE _Refcnt_buffer _Get_buffer(const size_t _Requested_size)
+        {
+            this->_Mysize = _Requested_size;
+            if ( _Is_shared() || _Myres < _Requested_size ) NH3API_UNLIKELY
             {
-                const value_type* _Temp = _Ptr;
-                _Tidy_deallocate();
-                assign( _Temp );
+                const size_t _New_capacity = _Calculate_growth(_Requested_size);
+                char* const  _New_ptr      = _Allocate_for_capacity(_New_capacity) + 1;
+                _Refcnt(_New_ptr)          = 0;
+                this->_Myres               = _New_capacity;
+                return { _New_ptr, true };
+            }
+
+            return { this->_Myptr, false };
+        }
+
+        // Split the string and allocate a new buffer no matter whether or not the string reference counting is in shared mode
+        NH3API_FORCEINLINE _Refcnt_fresh_buffer _Get_fresh_buffer(const size_t _Requested_size)
+        {
+            const size_t _New_capacity = _Calculate_growth(_Requested_size);
+            char* const  _New_ptr      = _Allocate_for_capacity(_New_capacity) + 1;
+            _Refcnt(_New_ptr)          = 0;
+            this->_Mysize              = _Requested_size;
+            this->_Myres               = _New_capacity;
+            return _Refcnt_fresh_buffer { _New_ptr };
+        }
+
+        inline bool _Is_shared() noexcept
+        { return _Myptr && _Refcnt(_Myptr) != 0 && _Refcnt(_Myptr) != _FROZEN; }
+
+    #if defined(__GNUC__) || defined(__clang__)
+        [[__gnu__::__hot__]]
+    #endif
+        void _Tidy_deallocate() noexcept
+        {
+            if ( _Myptr ) NH3API_LIKELY
+            {
+                if ( _Is_shared() ) NH3API_UNLIKELY
+                    --_Refcnt(_Myptr);
+                else
+                    _Deallocate(&_Myptr[-1]);
+                _Myptr = nullptr;
             }
         }
 
-        NH3API_FLATTEN
-        // initialize buffer, deallocating any storage
-        void _Tidy( bool _Built = false) noexcept
+        inline constexpr static bool _Equal(const char*  _Left,
+                                            const size_t _Left_size,
+                                            const char*  _Right,
+                                            const size_t _Right_size) noexcept
         {
-            if ( !_Built || _Ptr == nullptr )
-                ;
-            else if ( _Refcnt( _Ptr ) == 0 || _Refcnt( _Ptr ) == _FROZEN )
-                ::operator delete( _Ptr - 1, exe_heap );
-            else
-                --_Refcnt( _Ptr );
-
-            nh3api::trivial_zero<sizeof(exe_string)>(this);
-        }
-
-        NH3API_FORCEINLINE void _Tidy_deallocate() noexcept
-        {
-            if ( _Ptr == nullptr )
-                ;
-            else if ( _Refcnt( _Ptr ) == 0 || _Refcnt( _Ptr ) == _FROZEN )
-                ::operator delete( _Ptr - 1, exe_heap );
-            else
-                --_Refcnt( _Ptr );
-        }
-
-        constexpr NH3API_FORCEINLINE
-        static bool _Equal(const char* _Left,
-                           const size_t _Left_size,
-                           const char* _Right,
-                           const size_t _Right_size) noexcept
-        {
-            if (_Left_size != _Right_size)
+            if ( _Left_size != _Right_size )
                 return false;
 
-            if (_Left_size == 0u)
+            if ( _Left_size == 0 )
                 return true;
 
-            return nh3api::constexpr_char_traits::compare(_Left, _Right, _Left_size) == 0;
+            return __builtin_memcmp(_Left, _Right, _Left_size) == 0;
         }
 
-        friend exe_string_equal_accessor;
+        friend nh3api::private_accessor<exe_string>;
 
-        constexpr NH3API_FORCEINLINE
-        static int _Compare(const char* _Left,
-                            const size_t _Left_size,
-                            const char* _Right,
-                            const size_t _Right_size) noexcept
+        inline constexpr static int _Compare(const char*  _Left,
+                                             const size_t _Left_size,
+                                             const char*  _Right,
+                                             const size_t _Right_size) noexcept
         {
-            const int _Ans = nh3api::constexpr_char_traits::compare(_Left, _Right, std::min<size_t>(_Left_size, _Right_size));
-            if (_Ans != 0)
+            const int _Ans = __builtin_memcmp(_Left, _Right, std::min<size_t>(_Left_size, _Right_size));
+            if ( _Ans != 0 )
                 return _Ans;
 
-            if (_Left_size < _Right_size)
+            if ( _Left_size < _Right_size )
                 return -1;
 
-            if (_Left_size > _Right_size)
+            if ( _Left_size > _Right_size )
                 return 1;
 
             return 0;
         }
 
-        // checks whether _Off is in the bounds of [0, size()]
-        NH3API_FORCEINLINE void _Check_offset(const size_type _Off) const
+        inline void _Check_size(const size_t _Requested_size) const
         {
-            if (size() < _Off)
+            if ( _Requested_size > max_size() ) NH3API_UNLIKELY
+                _Throw_length_exception();
+        }
+
+        // checks whether _Off is in the bounds of [0, size()]
+        inline void _Check_offset(const size_t _Offset) const
+        {
+            if ( size() < _Offset ) NH3API_UNLIKELY
                 _Throw_out_of_range_exception();
         }
 
         // checks whether _Off is in the bounds of [0, size())
-        NH3API_FORCEINLINE void _Check_offset_exclusive(const size_type _Off) const
+        inline void _Check_offset_exclusive(const size_t _Offset) const
         {
-            if (size() <= _Off)
+            if ( size() <= _Offset ) NH3API_UNLIKELY
                 _Throw_out_of_range_exception();
         }
 
         // trims _Size to the longest it can be assuming a string at/after _Off
-        [[nodiscard]] NH3API_FORCEINLINE constexpr size_type _Clamp_suffix_size(const size_type _Off, const size_type _Size) const noexcept
-        { return std::min<size_type>(_Size, size() - _Off); }
+        [[nodiscard]] inline size_t _Clamp_suffix_size(const size_t _Off, const size_t _Size) const noexcept
+        { return std::min<size_t>(_Size, size() - _Off); }
 
     protected:
-        uint32_t _Dummy;
-        value_type* _Ptr; // data()
-        size_type _Len; // size()
-        size_type _Res; // capacity()
+        uint32_t : 32;  // padding
+        char*  _Myptr;  // data()
+        size_t _Mysize; // size()
+        size_t _Myres;  // capacity()
 };
 #pragma pack(pop)
 
-struct exe_string_equal_accessor
+template<>
+struct nh3api::private_accessor<exe_string>
 {
-    NH3API_FORCEINLINE static bool equal(const exe_string& lhs, const exe_string& rhs) noexcept
+    inline static bool equal(const exe_string& _Left, const exe_string& _Right) noexcept
+    { return exe_string::_Equal(_Left.c_str(), _Left.size(), _Right.c_str(), _Right.size()); }
+
+    inline static bool equal(const exe_string& _Left, const char* const _Right_string) noexcept
     {
-        return exe_string::_Equal(lhs.c_str(), lhs.size(), rhs.c_str(), rhs.size());
+        if ( _Right_string )
+            return exe_string::_Equal(_Left.c_str(), _Left.size(), _Right_string, __builtin_strlen(_Right_string));
+
+        return _Left.empty();
     }
 
-    NH3API_FORCEINLINE static bool equal(const exe_string& lhs, const char* const rhs) noexcept
+    inline static bool equal(const char* const _Left_string, const exe_string& _Right) noexcept
     {
-        return exe_string::_Equal(lhs.c_str(), lhs.size(), rhs, ::nh3api::constexpr_char_traits::length(rhs));
+        if ( _Left_string )
+            return exe_string::_Equal(_Left_string, __builtin_strlen(_Left_string), _Right.c_str(), _Right.size());
+
+        return _Right.empty();
     }
 
-    NH3API_FORCEINLINE static bool equal(const char* const lhs, const exe_string& rhs) noexcept
-    {
-        return exe_string::_Equal(lhs, ::nh3api::constexpr_char_traits::length(lhs), rhs.c_str(), rhs.size());
-    }
+    inline static void erase_unchecked(exe_string& _String, const size_t _Count)
+    { _String._Erase_without_checks(0, _Count); }
+
+    inline static void freeze(exe_string& _String) noexcept
+    { return _String._Freeze(); }
+
 };
 
 //} // namespace nh3api
 
 NH3API_SIZE_ASSERT(0x10, exe_string);
 
+inline void swap(exe_string& _Left, exe_string& _Right) noexcept
+{ _Left.swap(_Right); }
+
 // concatenation
 
-NH3API_FORCEINLINE
-exe_string operator+(const exe_string& lhs, const exe_string& rhs)
+inline exe_string operator+(const exe_string& _Left, const exe_string& _Right)
 {
-    exe_string result;
-    result.reserve(lhs.size() + rhs.size());
-    result += lhs;
-    result += rhs;
-    return result;
+    const size_t      _Left_size   = _Left.size();
+    const size_t      _Right_size  = _Right.size();
+    const char* const _Left_ptr    = _Left.data();
+    const char* const _Right_ptr   = _Right.data();
+    const bool        _Left_empty  = _Left_size == 0;
+    const bool        _Right_empty = _Right_size == 0;
+
+    if ( (_Left_ptr == nullptr && _Right_ptr == nullptr) || (_Left_empty && _Right_empty) )
+        return {};
+
+    if ( _Right_ptr == nullptr || _Right_empty )
+        return _Left;
+
+    if ( _Left_ptr == nullptr || _Left_empty )
+        return _Right;
+
+    if ( _Left.max_size() - _Left_size < _Right_size )
+        nh3api::throw_exception<std::length_error>("string too long");
+
+    return { exe_string_constructor_concat_tag{}, _Left_ptr, _Left_size, _Right_ptr, _Right_size };
 }
 
-NH3API_FORCEINLINE
-exe_string operator+(const char* const lhs, const exe_string& rhs)
+inline exe_string operator+(const char* const _Left_string, const exe_string& _Right)
 {
-    exe_string result;
-    result.reserve(nh3api::constexpr_char_traits::length(lhs) + rhs.size());
-    result += lhs;
-    result += rhs;
-    return result;
+    if ( _Left_string == nullptr )
+        return _Right;
+
+    const char* const _Right_ptr = _Right.data();
+    const size_t _Right_size     = _Right.size();
+    if ( _Right_ptr == nullptr || _Right_size == 0 )
+        return exe_string { _Left_string };
+
+    const size_t _Left_size = __builtin_strlen(_Left_string);
+    if ( _Right.max_size() - _Left_size < _Right_size )
+        nh3api::throw_exception<std::length_error>("string too long");
+
+    return { exe_string_constructor_concat_tag{}, _Left_string, _Left_size, _Right_ptr, _Right_size };
 }
 
-NH3API_FORCEINLINE
-exe_string operator+(const char lhs, const exe_string& rhs)
+inline exe_string operator+(char _Left_character, const exe_string& _Right)
 {
-    exe_string result;
-    result.reserve(1 + rhs.size());
-    result += lhs;
-    result += rhs;
-    return result;
+    const size_t      _Right_size = _Right.size();
+    const char* const _Right_ptr  = _Right.data();
+    if ( _Right_ptr == nullptr || _Right_size == 0 )
+        return { _Left_character };
+
+    if ( _Right.max_size() == _Right_size )
+        nh3api::throw_exception<std::length_error>("string too long");
+
+    return { exe_string_constructor_concat_tag {}, &_Left_character, 1U, _Right.c_str(), _Right_size };
 }
 
-NH3API_FORCEINLINE
-exe_string operator+(const exe_string& lhs, const char* const rhs)
+inline exe_string operator+(const exe_string& _Left, const char* const _Right_string)
 {
-    exe_string result;
-    result.reserve(lhs.size() + nh3api::constexpr_char_traits::length(rhs));
-    result += lhs;
-    result += rhs;
-    return result;
+    if ( _Right_string == nullptr )
+        return exe_string { _Right_string };
+
+    const char* const _Left_ptr  = _Left.data();
+    const size_t      _Left_size = _Left.size();
+    if ( _Left_ptr == nullptr || _Left_size == 0 )
+        return exe_string { _Right_string };
+
+    const size_t _Right_size = __builtin_strlen(_Right_string);
+    if ( _Left.max_size() - _Right_size < _Left_size )
+        nh3api::throw_exception<std::length_error>("string too long");
+
+    return { exe_string_constructor_concat_tag {}, _Right_string, _Right_size, _Left_ptr, _Left_size };
 }
 
-NH3API_FORCEINLINE
-exe_string operator+(const exe_string& lhs, const char rhs)
+inline exe_string operator+(const exe_string& _Left, char _Right_character)
 {
-    exe_string result;
-    result.reserve(lhs.size() + 1);
-    result += lhs;
-    result += rhs;
-    return result;
+    const size_t      _Left_size = _Left.size();
+    const char* const _Left_ptr  = _Left.data();
+    if ( _Left_ptr == nullptr || _Left_size == 0 )
+        return { _Right_character };
+
+    if ( _Left.max_size() == _Left_size )
+        nh3api::throw_exception<std::length_error>("string too long");
+
+    return { exe_string_constructor_concat_tag {}, _Left_ptr, _Left_size, &_Right_character, 1 };
 }
 
-NH3API_FORCEINLINE exe_string
-operator+(const exe_string &lhs, exe_string&& rhs)
-{ return std::move(rhs.insert(0, lhs)); }
+inline exe_string operator+(const exe_string& _Left, exe_string&& _Right)
+{ return std::move(_Right.insert(0U, _Left)); }
 
-NH3API_FORCEINLINE exe_string
-operator+(exe_string&& lhs, const exe_string& rhs)
-{ return std::move(lhs.append(rhs)); }
+inline exe_string operator+(exe_string&& _Left, const exe_string& _Right)
+{ return std::move(_Left.append(_Right)); }
 
-NH3API_FORCEINLINE exe_string
-operator+(exe_string&& lhs, exe_string&& rhs)
+inline exe_string operator+(exe_string&& _Left, exe_string&& _Right)
 {
-    if (rhs.size() <= lhs.capacity() - lhs.size() || rhs.capacity() - rhs.size() < lhs.size())
-        return std::move(lhs.append(rhs));
-    else
-        return std::move(rhs.insert(0, lhs));
+    if ( (_Left.data() == nullptr && _Right.data() == nullptr) || (_Left.empty() && _Right.empty()) )
+        return {};
+
+    if ( _Right.data() == nullptr || _Right.empty() )
+        return std::move(_Left);
+
+    if ( _Left.data() == nullptr || _Left.empty() )
+        return std::move(_Right);
+
+    return { exe_string_constructor_concat_tag{}, _Left, _Right };
 }
 
-NH3API_FORCEINLINE
-exe_string operator+(const char* const lhs, exe_string&& rhs)
-{ return std::move(rhs.insert(0, lhs)); }
+inline exe_string operator+(const char* const _Left_string, exe_string&& _Right)
+{ return std::move(_Right.insert(0U, _Left_string)); }
 
-NH3API_FORCEINLINE
-exe_string operator+(const char lhs, exe_string&& rhs)
+inline exe_string operator+(char _Left, exe_string&& _Right)
+{ return std::move(_Right.insert(0U, 1U, _Left)); }
+
+inline exe_string operator+(exe_string&& _Left, const char* const _Right_string)
+{ return std::move(_Left.append(_Right_string)); }
+
+inline exe_string operator+(exe_string&& _Left, char _Right_character)
 {
-    return std::move(rhs.insert(static_cast<size_t>(0), static_cast<size_t>(1), lhs));
-}
-
-NH3API_FORCEINLINE
-exe_string operator+(exe_string&& lhs, const char* const rhs)
-{ return std::move(lhs.append(rhs)); }
-
-NH3API_FORCEINLINE
-exe_string operator+(exe_string&& lhs, const char rhs)
-{
-    lhs.push_back(rhs);
-    return std::move(lhs);
+    _Left.push_back(_Right_character);
+    return std::move(_Left);
 }
 
 // relational operators
 
-NH3API_FORCEINLINE
-bool operator==(const exe_string& lhs, const exe_string& rhs) noexcept
-{ return exe_string_equal_accessor::equal(lhs, rhs); }
+inline bool operator==(const exe_string& _Left, const exe_string& _Right) noexcept
+{ return nh3api::private_accessor<exe_string>::equal(_Left, _Right); }
 
-NH3API_FORCEINLINE
-bool operator==(const char* const lhs, const exe_string& rhs) noexcept
-{ return exe_string_equal_accessor::equal(lhs, rhs); }
+inline bool operator==(const char* const _Left_string, const exe_string& _Right) noexcept
+{ return nh3api::private_accessor<exe_string>::equal(_Left_string, _Right); }
 
-NH3API_FORCEINLINE
-bool operator==(const exe_string& lhs, const char* const rhs) noexcept
-{ return exe_string_equal_accessor::equal(lhs, rhs); }
+#ifdef __cpp_lib_three_way_comparison
+inline std::strong_ordering operator<=>(const exe_string& _Left, const exe_string& _Right) noexcept
+{ return static_cast<std::strong_ordering>(_Left.compare(_Right) <=> 0); }
 
-NH3API_FORCEINLINE
-bool operator<(const exe_string& lhs, const exe_string& rhs)
-{ return lhs.compare(rhs) < 0; }
+inline std::strong_ordering operator<=>(const exe_string& _Left, const char* const _Right_string) noexcept
+{ return static_cast<std::strong_ordering>(_Left.compare(_Right_string) <=> 0); }
 
-NH3API_FORCEINLINE
-bool operator<(const char* const lhs, const exe_string& rhs)
-{ return rhs.compare(lhs) > 0; }
+inline std::strong_ordering operator<=>(const char* const _Left_string, const exe_string& _Right) noexcept
+{ return static_cast<std::strong_ordering>(_Right.compare(_Left_string) <=> 0); }
+#else
+inline bool operator==(const exe_string& _Left, const char* const _Right_string) noexcept
+{ return nh3api::private_accessor<exe_string>::equal(_Left, _Right_string); }
 
-NH3API_FORCEINLINE
-bool operator<(const exe_string& lhs, const char* const rhs)
-{ return lhs.compare(rhs) < 0; }
+inline bool operator<(const exe_string& _Left, const exe_string& _Right) noexcept
+{ return _Left.compare(_Right) < 0; }
 
-NH3API_FORCEINLINE
-bool operator>(const exe_string& lhs, const exe_string& rhs)
-{ return rhs < lhs; }
+inline bool operator<(const char* const _Left_string, const exe_string& _Right) noexcept
+{ return _Right.compare(_Left_string) > 0; }
 
-NH3API_FORCEINLINE
-bool operator>(const char* const lhs, const exe_string& rhs)
-{ return rhs < lhs; }
+inline bool operator<(const exe_string& _Left, const char* const _Right) noexcept
+{ return _Left.compare(_Right) < 0; }
 
-NH3API_FORCEINLINE
-bool operator>(const exe_string& lhs, const char* const rhs)
-{ return rhs < lhs; }
+inline bool operator>(const exe_string& _Left, const exe_string& _Right) noexcept
+{ return _Right < _Left; }
 
-NH3API_FORCEINLINE
-bool operator<=(const exe_string& lhs, const exe_string& rhs)
-{ return !(rhs < lhs); }
+inline bool operator>(const char* const _Left_string, const exe_string& _Right) noexcept
+{ return _Right < _Left_string; }
 
-NH3API_FORCEINLINE
-bool operator<=(const char* const lhs, const exe_string& rhs)
-{ return !(rhs < lhs); }
+inline bool operator>(const exe_string& _Left, const char* const _Right_string) noexcept
+{ return _Right_string < _Left; }
 
-NH3API_FORCEINLINE
-bool operator<=(const exe_string& lhs, const char* const rhs)
-{ return !(rhs < lhs); }
+inline bool operator<=(const exe_string& _Left, const exe_string& _Right) noexcept
+{ return !(_Right < _Left); }
 
-NH3API_FORCEINLINE
-bool operator>=(const exe_string& lhs, const exe_string& rhs)
-{ return !(lhs < rhs); }
+inline bool operator<=(const char* const _Left_string, const exe_string& _Right) noexcept
+{ return !(_Right < _Left_string); }
 
-NH3API_FORCEINLINE
-bool operator>=(const char* const lhs, const exe_string& rhs)
-{ return !(lhs < rhs); }
+inline bool operator<=(const exe_string& _Left, const char* const _Right_string) noexcept
+{ return !(_Right_string < _Left); }
 
-NH3API_FORCEINLINE
-bool operator>=(const exe_string& lhs, const char* const rhs)
-{ return !(lhs < rhs); }
+inline bool operator>=(const exe_string& _Left, const exe_string& _Right) noexcept
+{ return !(_Left < _Right); }
 
-NH3API_FORCEINLINE
-bool operator!=(const exe_string& lhs, const exe_string& rhs)
-{ return (!(lhs == rhs)); }
+inline bool operator>=(const char* const _Left_string, const exe_string& _Right) noexcept
+{ return !(_Left_string < _Right); }
 
-NH3API_FORCEINLINE
-bool operator!=(const char* lhs, const exe_string& rhs)
-{ return (!(lhs == rhs)); }
+inline bool operator>=(const exe_string& _Left, const char* const _Right_string) noexcept
+{ return !(_Left < _Right_string); }
 
-NH3API_FORCEINLINE
-bool operator!=(const exe_string& lhs, const char* rhs)
-{ return (!(lhs == rhs)); }
+inline bool operator!=(const exe_string& _Left, const exe_string& _Right) noexcept
+{ return (!(_Left == _Right)); }
 
-#ifdef __cpp_user_defined_literals
-namespace exe_string_literals
-{
-NH3API_FORCEINLINE
-exe_string operator""_exe( const char* str, size_t len )
-{ return exe_string{str, len}; }
-}
+inline bool operator!=(const char* _Left_string, const exe_string& _Right) noexcept
+{ return (!(_Left_string == _Right)); }
+
+inline bool operator!=(const exe_string& _Left, const char* _Right_string) noexcept
+{ return (!(_Left == _Right_string)); }
 #endif
 
 namespace nh3api
@@ -1586,89 +2562,97 @@ namespace nh3api
 
 // get exe_string reference count
 // if you need it for whatever reason
-NH3API_FORCEINLINE uint8_t refcount(const ::exe_string& str) noexcept
-{ return *(const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(str.c_str())) - 1); }
+inline uint8_t refcount(const ::exe_string& _String) noexcept
+{ return static_cast<uint8_t>(_String.c_str()[-1]); }
 
-// fast algorithm by void_17
-template<class StringT>
-static StringT int_to_string(int32_t x)
+// optimization hint: assume that the current exe_string variable is not shared
+// use it ONLY when you are 100% certain.
+inline void assume_not_shared(const ::exe_string& _String) noexcept
 {
-    using CharT = typename StringT::value_type;
-
-    if ( x == 0 )
-        return StringT(1, CharT('0'));
-    bool32_t minusSymbol = (x < 0);
-    x = ::abs32(x);
-    const size_t numSymbols = minusSymbol + count_digits(static_cast<uint32_t>(x));
-    // hint the compiler for small string optimization for std::basic_string
-    NH3API_ASSUME(numSymbols <= 10);
-    StringT str(numSymbols, CharT('\0'));
-    if ( minusSymbol )
-        str[0] = '-';
-    CharT* ptr = const_cast<CharT*>(str.c_str()) + str.size()-1;
-    while (x > 0)
-    {
-        uint8_t digit = static_cast<uint8_t>(x % 10);
-        if constexpr ( ::std::is_same_v<CharT, char> )
-            *ptr-- = static_cast<char>(('0' + digit) & INT8_MAX);
-        else if constexpr ( ::std::is_same_v<CharT, wchar_t> )
-            *ptr-- = static_cast<wchar_t>((L'0' + digit) & INT16_MAX);
-        x /= 10;
-    }
-    return str;
+    if ( _String.c_str() )
+        if ( (refcount(_String) != 0 && refcount(_String) != 255) )
+            NH3API_UNREACHABLE();
 }
 
 // fast algorithm by void_17
 template<class StringT>
-static StringT uint_to_string(uint32_t x)
+static StringT int_to_string(int32_t _Value)
 {
     using CharT = typename StringT::value_type;
-    if ( x == 0 )
+
+    if ( _Value == 0 )
         return StringT(1, CharT('0'));
-    const size_t numSymbols = count_digits(x);
+    bool32_t _Minus_symbol = (_Value < 0);
+    _Value = ::abs32(_Value);
+    const size_t _Num_symbols = _Minus_symbol + count_digits(static_cast<uint32_t>(_Value));
     // hint the compiler for small string optimization for std::basic_string
-    NH3API_ASSUME(numSymbols <= 11);
-    StringT str(numSymbols, CharT('\0'));
-    CharT* ptr = const_cast<CharT*>(str.c_str()) + str.size()-1;
-    while (x > 0)
+    NH3API_ASSUME(_Num_symbols <= 10);
+    StringT _Result(_Num_symbols, CharT('\0'));
+    if ( _Minus_symbol )
+        _Result[0] = '-';
+    CharT* _Ptr = const_cast<CharT*>(_Result.c_str()) + _Result.size()-1;
+    while (_Value > 0)
     {
-        uint8_t digit = static_cast<uint8_t>(x % 10);
+        uint8_t _Digit = static_cast<uint8_t>(_Value % 10);
         if constexpr ( ::std::is_same_v<CharT, char> )
-            *ptr-- = static_cast<char>(('0' + digit) & INT8_MAX);
+            *_Ptr-- = static_cast<char>(('0' + _Digit) & INT8_MAX);
         else if constexpr ( ::std::is_same_v<CharT, wchar_t> )
-            *ptr-- = static_cast<wchar_t>((L'0' + digit) & INT16_MAX);
-        x /= 10;
+            *_Ptr-- = static_cast<wchar_t>((L'0' + _Digit) & INT16_MAX);
+        _Value /= 10;
     }
-    return str;
+    return _Result;
 }
 
-NH3API_FORCEINLINE constexpr const char* get_inf_string(char) noexcept
+// fast algorithm by void_17
+template<class StringT>
+static StringT uint_to_string(uint32_t _Value)
+{
+    using CharT = typename StringT::value_type;
+    if ( _Value == 0 )
+        return StringT(1, CharT('0'));
+    const size_t _Num_symbols = count_digits(_Value);
+    // hint the compiler for small string optimization for std::basic_string
+    NH3API_ASSUME(_Num_symbols <= 11);
+    StringT _Result(_Num_symbols, CharT('\0'));
+    CharT* _Ptr = const_cast<CharT*>(_Result.c_str()) + _Result.size()-1;
+    while (_Value > 0)
+    {
+        uint8_t _Digit = static_cast<uint8_t>(_Value % 10);
+        if constexpr ( ::std::is_same_v<CharT, char> )
+            *_Ptr-- = static_cast<char>(('0' + _Digit) & INT8_MAX);
+        else if constexpr ( ::std::is_same_v<CharT, wchar_t> )
+            *_Ptr-- = static_cast<wchar_t>((L'0' + _Digit) & INT16_MAX);
+        _Value /= 10;
+    }
+    return _Result;
+}
+
+inline constexpr const char* get_inf_string(char) noexcept
 { return "INF"; }
 
-NH3API_FORCEINLINE constexpr const wchar_t* get_inf_string(wchar_t) noexcept
+inline constexpr const wchar_t* get_inf_string(wchar_t) noexcept
 { return L"INF"; }
 
-NH3API_FORCEINLINE constexpr
-const char* get_nan_string(char) noexcept
+inline constexpr const char* get_nan_string(char) noexcept
 { return "NaN"; }
 
-NH3API_FORCEINLINE constexpr const wchar_t* get_nan_string(wchar_t) noexcept
+inline constexpr const wchar_t* get_nan_string(wchar_t) noexcept
 { return L"NaN"; }
 
-NH3API_FORCEINLINE constexpr const char* get_error_fp_string(char) noexcept
+inline constexpr const char* get_error_fp_string(char) noexcept
 { return "ERROR"; }
 
-NH3API_FORCEINLINE constexpr const wchar_t* get_error_fp_string(wchar_t) noexcept
+inline constexpr const wchar_t* get_error_fp_string(wchar_t) noexcept
 { return L"ERROR"; }
 
 template<class StringT>
-static StringT double_to_string(double x, int32_t precision)
+static StringT double_to_string(double _Value, int32_t _Precision)
 {
     using CharT = typename StringT::value_type;
-    if ( precision < 1 || precision > 18 )
+    if ( _Precision < 1 || _Precision > 18 )
         return StringT(get_error_fp_string(CharT()), 5);
 
-    switch (::std::fpclassify(x))
+    switch (::std::fpclassify(_Value))
     {
         case FP_INFINITE:
         {
@@ -1688,102 +2672,91 @@ static StringT double_to_string(double x, int32_t precision)
 
             if constexpr (::std::is_same_v<CharT, char>)
             {
-                sprintf_s(const_cast<char*>(buffer.data()), buffer.size(), "%.*f", precision, x);
+                sprintf_s(const_cast<char*>(buffer.data()), buffer.size(), "%.*f", _Precision, _Value);
             }
             else if (::std::is_same_v<CharT, wchar_t>)
             {
-                swprintf_s(const_cast<wchar_t*>(buffer.data()), buffer.size(), L"%.*f", precision, x);
+                swprintf_s(const_cast<wchar_t*>(buffer.data()), buffer.size(), L"%.*f", _Precision, _Value);
             }
             else
             {}
 
-            return {buffer.data()};
+            return StringT { buffer.data() };
         }
         default:
-            return StringT(get_error_fp_string(CharT()), 5);
+            return StringT (get_error_fp_string(CharT()), 5);
     }
 }
 
 } // namespace nh3api
 
-NH3API_FORCEINLINE
+
 // write signed integer as string
-exe_string to_exe_string(int32_t x)
-{ return nh3api::int_to_string<exe_string>(x); }
+inline exe_string to_exe_string(int32_t _Value)
+{ return nh3api::int_to_string<exe_string>(_Value); }
 
-NH3API_FORCEINLINE
 // write unsigned integer as string
-exe_string to_exe_string(uint32_t x)
-{ return nh3api::uint_to_string<exe_string>(x); }
+inline exe_string to_exe_string(uint32_t _Value)
+{ return nh3api::uint_to_string<exe_string>(_Value); }
 
-NH3API_FORCEINLINE
 // write double as string
-exe_string to_exe_string(double x, int32_t precision = 8)
-{ return nh3api::double_to_string<exe_string>(x, precision); }
+inline exe_string to_exe_string(double _Value, int32_t _Precision = 8)
+{ return nh3api::double_to_string<exe_string>(_Value, _Precision); }
 
-NH3API_FORCEINLINE
 // write float as string
-exe_string to_exe_string(float x, int32_t precision = 4)
-{ return nh3api::double_to_string<exe_string>(static_cast<double>(x), precision); }
+inline exe_string to_exe_string(float _Value, int32_t _Precision = 4)
+{ return nh3api::double_to_string<exe_string>(static_cast<double>(_Value), _Precision); }
 
-NH3API_FORCEINLINE
 // write signed integer as string
-std::string to_std_string(int32_t x)
-{ return nh3api::int_to_string<std::string>(x); }
+inline std::string to_std_string(int32_t _Value)
+{ return nh3api::int_to_string<std::string>(_Value); }
 
-NH3API_FORCEINLINE
 // write unsigned integer as string
-std::string to_std_string(uint32_t x)
-{ return nh3api::uint_to_string<std::string>(x); }
+inline std::string to_std_string(uint32_t _Value)
+{ return nh3api::uint_to_string<std::string>(_Value); }
 
-NH3API_FORCEINLINE
 // write double as string
-std::string to_std_string(double x, int32_t precision = 8)
-{ return nh3api::double_to_string<std::string>(x, precision); }
+inline std::string to_std_string(double _Value, int32_t _Precision = 8)
+{ return nh3api::double_to_string<std::string>(_Value, _Precision); }
 
-NH3API_FORCEINLINE
 // write float as string
-std::string to_std_string(float x, int32_t precision = 4)
-{ return nh3api::double_to_string<std::string>(static_cast<double>(x), precision); }
+inline std::string to_std_string(float _Value, int32_t _Precision = 4)
+{ return nh3api::double_to_string<std::string>(static_cast<double>(_Value), _Precision); }
 
-NH3API_FORCEINLINE
 // write signed integer as wide string
-std::wstring to_std_wstring(int32_t x)
-{ return nh3api::int_to_string<std::wstring>(x); }
+inline std::wstring to_std_wstring(int32_t _Value)
+{ return nh3api::int_to_string<std::wstring>(_Value); }
 
-NH3API_FORCEINLINE
 // write unsigned integer as wide string
-std::wstring to_std_wstring(uint32_t x)
-{ return nh3api::uint_to_string<std::wstring>(x); }
+inline std::wstring to_std_wstring(uint32_t _Value)
+{ return nh3api::uint_to_string<std::wstring>(_Value); }
 
-NH3API_FORCEINLINE
 // write double as wide string
-std::wstring to_std_wstring(double x, int32_t precision = 8)
-{ return nh3api::double_to_string<std::wstring>(x, precision); }
+inline std::wstring to_std_wstring(double _Value, int32_t _Precision = 8)
+{ return nh3api::double_to_string<std::wstring>(_Value, _Precision); }
 
-NH3API_FORCEINLINE
 // write float as wide string
-std::wstring to_std_wstring(float x, int32_t precision = 4)
-{ return nh3api::double_to_string<std::wstring>(static_cast<double>(x), precision); }
+inline std::wstring to_std_wstring(float _Value, int32_t _Precision = 4)
+{ return nh3api::double_to_string<std::wstring>(static_cast<double>(_Value), _Precision); }
 
 namespace nh3api
 {
 
-NH3API_FORCEINLINE size_t hash_string(const ::exe_string& str) noexcept
+inline size_t hash_string(const ::exe_string& str) noexcept
 {
     default_hash hasher;
     hasher.update(str.c_str(), str.size());
     return hasher.digest();
 }
 
-NH3API_FORCEINLINE size_t hash_string(const ::std::string& str) noexcept
+inline size_t hash_string(const ::std::string& str) noexcept
 {
     default_hash hasher;
     hasher.update(str.c_str(), str.size());
     return hasher.digest();
 }
 
-NH3API_FORCEINLINE size_t hash_string(const ::std::wstring& str) noexcept
+inline size_t hash_string(const ::std::wstring& str) noexcept
 {
     default_hash hasher;
     hasher.update(str.c_str(), str.size());
@@ -1797,13 +2770,14 @@ template<>
 struct std::hash<exe_string>
 {
     public:
-        #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+    #ifdef __cpp_static_call_operator
         static
-        #endif
-        size_t operator()(const exe_string& str) noexcept
-        #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+    #endif
+        size_t operator()(const exe_string& str)
+    #ifndef __cpp_static_call_operator
         const
-        #endif
+    #endif
+        noexcept
         {
             nh3api::default_hash hasher;
             hasher.update(str.data(), str.size());
@@ -1812,9 +2786,8 @@ struct std::hash<exe_string>
 };
 
 // std::string which uses exe_allocator<char>
-using exe_std_string = std::basic_string<char, std::char_traits<char>, exe_allocator<char> >;
+using exe_std_string = std::basic_string<char, std::char_traits<char>, exe_allocator<char>>;
 // std::wstring which uses exe_allocator<wchar_t>
-using exe_std_wstring = std::basic_string<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar_t> >;
+using exe_std_wstring = std::basic_string<wchar_t, std::char_traits<wchar_t>, exe_allocator<wchar_t>>;
 
-NH3API_DISABLE_WARNING_END
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

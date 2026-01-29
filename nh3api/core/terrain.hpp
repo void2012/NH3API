@@ -9,10 +9,14 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include "nh3api_std/point.hpp" // TPoint
 #include "nh3api_std/call_macros.hpp" // call macros
+#include "nh3api_std/enum_limits.hpp" // nh3api::enum_limits
 #include "nh3api_std/stl_extras.hpp" // bit_cast
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_MSVC_DISABLE(26495)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
 
 // Terrain type /
 // Тип почвы.
@@ -46,6 +50,11 @@ enum TTerrainType : int32_t
 
 };
 
+template<>
+struct nh3api::enum_limits<TTerrainType>
+    : nh3api::enum_limits_base<TTerrainType, TERRAIN_TYPE_DIRT, TERRAIN_TYPE_ROCK>
+{ static inline constexpr bool is_specialized = true; };
+
 // Road type /
 // Тип дороги.
 enum TRoadType : uint32_t
@@ -62,6 +71,11 @@ enum TRoadType : uint32_t
     ROAD_COBBLESTONE = eRoadCobblestone, // Мощеная дорога
     MAX_ROAD_TYPES   = kNumRoadTypes // Кол-во видов дороги
 };
+
+template<>
+struct nh3api::enum_limits<TRoadType>
+    : nh3api::enum_limits_base<TRoadType, ROAD_NONE, ROAD_COBBLESTONE>
+{ static inline constexpr bool is_specialized = true; };
 
 // River type /
 // Тип реки.
@@ -82,11 +96,16 @@ enum TRiverType : uint32_t
     MAX_RIVER_TYPES = kNumRiverTypes // Кол-во видов рек
 };
 
+template<>
+struct nh3api::enum_limits<TRiverType>
+    : nh3api::enum_limits_base<TRiverType, RIVER_NONE, RIVER_LAVA>
+{ static inline constexpr bool is_specialized = true; };
+
 // Map object types /
 // Объекты на карте.
 enum TAdventureObjectType : int32_t
 {
-    OBJECT_ALTAR_OF_SACRIFICE          = 2,
+    OBJECT_ALTAR_OF_SACRIFICE          = 2,   // Алтарь пожертвования
     OBJECT_ANCHOR_POINT                = 3,   // Точка, на которой можно высадиться
     OBJECT_ARENA                       = 4,   // Арена
     OBJECT_ARTIFACT                    = 5,   // Артефакт(объект)
@@ -343,6 +362,11 @@ enum TAdventureObjectType : int32_t
     LAST_ROE_OBJECT               = OBJECT_RANDOM_MONSTER_L7
 };
 
+template<>
+struct nh3api::enum_limits<TAdventureObjectType>
+    : nh3api::enum_limits_base<TAdventureObjectType, FIRST_ADVENTURE_OBJECT, LAST_ADVENTURE_OBJECT>
+{ static inline constexpr bool is_specialized = true; };
+
 // Magical terrain type(SoD) /
 // Тип накладной магической почвы(SoD).
 enum EMagicTerrain
@@ -357,8 +381,16 @@ enum EMagicTerrain
     MAGIC_TERRAIN_LUCID_POOLS   = 6, // Прозрачные пруды
     MAGIC_TERRAIN_FIERY_FIELDS  = 7, // Огненные поля
     MAGIC_TERRAIN_ROCKLANDS     = 8, // Скалистая земля
-    MAGIC_TERRAIN_MAGIC_CLOUDS  = 9  // Магические облака
+    MAGIC_TERRAIN_MAGIC_CLOUDS  = 9, // Магические облака
+
+    FIRST_MAGIC_TERRAIN_TYPE = MAGIC_TERRAIN_COAST,
+    LAST_MAGIC_TERRAIN_TYPE  = MAGIC_TERRAIN_MAGIC_CLOUDS
 };
+
+template<>
+struct nh3api::enum_limits<EMagicTerrain>
+    : nh3api::enum_limits_base<EMagicTerrain, FIRST_MAGIC_TERRAIN_TYPE, LAST_MAGIC_TERRAIN_TYPE>
+{ static inline constexpr bool is_specialized = true; };
 
 // Town types /
 // Типы городов(фракций).
@@ -374,7 +406,7 @@ enum TTownType : int32_t
     eTownStronghold = 6,  // Цитадель
     eTownFortress   = 7,  // Крепость
     eTownConflux    = 8,  // Сопряжение
-    kNumTowns       = 9, // Количество городов в SoD
+    kNumTowns       = 9,  // Количество городов в игре
 
     TOWN_NEUTRAL    = eTownNeutral, // Нейтральный город
     TOWN_CASTLE     = eTownCastle, // Замок
@@ -389,8 +421,15 @@ enum TTownType : int32_t
     MAX_TOWNS_ROE   = 8, // Количество городов в RoE
     MAX_TOWNS_AB    = 9, // Количество городов в AB
     MAX_TOWNS_SOD   = 9, // Количество городов в SoD
-    MAX_TOWNS       = MAX_TOWNS_SOD // Количество городов в SoD
+    MAX_TOWNS       = MAX_TOWNS_SOD, // Количество городов в SoD
+    FIRST_TOWN_TYPE = TOWN_CASTLE,
+    LAST_TOWN_TYPE  = TOWN_CONFLUX
 };
+
+template<>
+struct nh3api::enum_limits<TTownType>
+    : nh3api::enum_limits_base<TTownType, FIRST_TOWN_TYPE, LAST_TOWN_TYPE>
+{ static inline constexpr bool is_specialized = true; };
 
 // Allowed alignments bitmasks /
 // Маски разрешенных фракций.
@@ -413,40 +452,36 @@ enum : uint32_t
 class type_point
 {
     public:
-        NH3API_FORCEINLINE constexpr
         // The original game supports X, Y up to 255 and Z from 0 to 1. /
         // Оригинальная игра поддерживает X, Y до 255, а Z от 0 до 1.
         /// @param X is in range [0;1023]
         /// @param Y is in range [0;1023]
         /// @param Z is in range [0;15]
-        type_point(int16_t X, int16_t Y, int16_t Z) noexcept
-            : x(X), y(Y), z(Z) {}
-
-        NH3API_FORCEINLINE constexpr
-        // Default constructor /
-        // Конструктор по умолчанию.
-        type_point() noexcept
-            : x(-1), y(-1), z(-1)
+        inline constexpr type_point(int16_t X, int16_t Y, int16_t Z) noexcept
+            : x { X }, y { Y }, z { Z }
         {}
 
-        NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-        type_point(uint32_t data) noexcept
+        // Default constructor /
+        // Конструктор по умолчанию.
+        inline constexpr type_point() noexcept
+            : x {-1}, y {-1}, z {-1}
+        {}
+
+        inline NH3API_CONSTEXPR_CPP_20 type_point(uint32_t data) noexcept
         {
             *this = nh3api::bit_cast<type_point>(data);
         }
 
-        NH3API_FORCEINLINE
-        type_point(const ::nh3api::dummy_tag_t&) noexcept
+        inline type_point(const nh3api::dummy_tag_t&) noexcept
         {}
 
     // setters
     public:
-        constexpr
-        type_point& set(int8_t X, int8_t Y, int8_t Z) noexcept
+        constexpr type_point& set(int8_t X, int8_t Y, int8_t Z) noexcept
         {
-            x = X;
-            y = Y;
-            z = Z;
+            x = static_cast<unsigned char>(X);
+            y = static_cast<unsigned char>(Y);
+            z = static_cast<unsigned char>(Z);
             return *this;
         }
 
@@ -464,13 +499,13 @@ class type_point
         }
 
         constexpr type_point& set_x(int8_t X) noexcept
-        { x = X; return *this; }
+        { x = static_cast<unsigned char>(X); return *this; }
 
         constexpr type_point& set_y(int8_t Y) noexcept
-        { y = Y; return *this; }
+        { y = static_cast<unsigned char>(Y); return *this; }
 
         constexpr type_point& set_z(int8_t Z) noexcept
-        { z = Z; return *this; }
+        { z = static_cast<unsigned char>(Z); return *this; }
 
     // getters
     public:
@@ -481,7 +516,7 @@ class type_point
         { return y; }
 
         [[nodiscard]] constexpr int8_t get_z() const noexcept
-        { return static_cast<int8_t>(z & 0xF); }
+        { return static_cast<int8_t>(static_cast<unsigned char>(z) & 0xFU); }
 
         [[nodiscard]]
         #if NH3API_HAS_BUILTIN_BIT_CAST
@@ -512,7 +547,7 @@ class type_point
             // we fill padding bits with zeroes for predictable behavior
             // NOTE: compilers optimize this to std::bit_cast<uint32_t>(*this) & 0x3FFF03FF
             // But for the sake of constexpr support, we have to do such manual calculations with each bit field.
-            return (0x03FF & x) | (((0x03FF & y) << 16) & 0x03FF0000) | (((0xF & z) << 26) & 0x3C000000);
+            return (0x03FFU & static_cast<unsigned char>(x)) | (((0x03FFU & static_cast<unsigned char>(y)) << 16U) & 0x03FF0000U) | (((0xFU & static_cast<unsigned char>(z)) << 26U) & 0x3C000000U);
         }
 
     public:
@@ -529,13 +564,14 @@ template<>
 struct std::hash<type_point>
 {
     public:
-        #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+    #ifdef __cpp_static_call_operator
         static
-        #endif
-        size_t operator()(const type_point& arg) noexcept
-        #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+    #endif
+        size_t operator()(const type_point& arg)
+    #ifndef __cpp_static_call_operator
         const
-        #endif
+    #endif
+        noexcept
         { return arg.hash(); }
 };
 
@@ -549,65 +585,9 @@ struct tilePoint
     // offset: +0x1 = +1,  size = 0x1 = 1
     int8_t y;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_2[2];
-
-};
-#pragma pack(pop)
-
-#pragma pack(push, 4)
-// size = 0x8 = 8, align = 4
-struct TPoint
-{
-    public:
-        NH3API_FORCEINLINE constexpr
-        TPoint() noexcept
-            : x(-1), y(-1)
-        {}
-
-        NH3API_FORCEINLINE constexpr
-        TPoint(int32_t X, int32_t Y) noexcept
-            : x(X), y(Y)
-        {}
-
-    public:
-        NH3API_FORCEINLINE constexpr
-        TPoint& operator+=(const TPoint& other)
-        {
-            this->x += other.x;
-            this->y += other.y;
-            return *this;
-        }
-
-        NH3API_FORCEINLINE constexpr
-        TPoint& operator-=(const TPoint& other)
-        {
-            this->x -= other.x;
-            this->y -= other.y;
-            return *this;
-        }
-
-        NH3API_FORCEINLINE constexpr
-        friend TPoint operator+(TPoint left, const TPoint& right)
-        {
-            left += right;
-            return left;
-        }
-
-        NH3API_FORCEINLINE constexpr
-        friend TPoint operator-(TPoint left, const TPoint& right)
-        {
-            left -= right;
-            return left;
-        }
-
-    public:
-        // offset: +0x0 = +0,  size = 0x4 = 4
-        int32_t x;
-        // offset: +0x4 = +4,  size = 0x4 = 4
-        int32_t y;
-};
+    unsigned char : 8;
+    unsigned char : 8;
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
 #pragma pack(push, 4)
@@ -615,21 +595,35 @@ struct TPoint
 struct TPoint3 : public TPoint
 {
     public:
-        NH3API_FORCEINLINE constexpr
-        TPoint3() noexcept
-            : TPoint(), z(0)
+        inline constexpr TPoint3() noexcept
+            : TPoint()
         {}
 
-        NH3API_FORCEINLINE constexpr
-        TPoint3(int32_t X, int32_t Y, int32_t Z) noexcept
-            : TPoint(X, Y), z(Z)
+        inline constexpr TPoint3(int32_t X, int32_t Y, int32_t Z) noexcept
+            : TPoint { X, Y }, z { Z }
         {}
 
     public:
         // offset: +0x8 = +8,  size = 0x4 = 4
-        int32_t z;
+        int32_t z = -1;
 };
 #pragma pack(pop)
+
+inline constexpr bool operator==(const TPoint3& lhs, const type_point& rhs) noexcept
+{ return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z; }
+
+#ifndef __cpp_impl_three_way_comparison
+inline constexpr bool operator!=(const TPoint3& lhs, const type_point& rhs) noexcept
+{ return !(lhs == rhs); }
+#endif
+
+inline constexpr bool operator==(const type_point& lhs, const TPoint3& rhs) noexcept
+{ return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z; }
+
+#ifndef __cpp_impl_three_way_comparison
+inline constexpr bool operator!=(const type_point& lhs, const TPoint3& rhs) noexcept
+{ return !(lhs == rhs); }
+#endif
 
 #pragma pack(push, 4)
 // Additional map objects properties /
@@ -653,12 +647,8 @@ struct ExtraObjectProperties
         // offset: +0x2 = +2,  size = 0x1 = 1
         bool removable;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x3 = +3,  size = 0x1 = 1
-        std::byte gap_3[1];
+        unsigned char : 8;
 
-    public:
         // Object name /
         // Название объекта
         // offset: +0x4 = +4,  size = 0x4 = 4
@@ -674,12 +664,11 @@ struct ExtraObjectProperties
         // offset: +0xC = +12,  size = 0x1 = 1
         bool decorative;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0xD = +13,  size = 0x3 = 3
-        std::byte gap_D[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
 inline std::array<ExtraObjectProperties, MAX_OBJECTS>& gExtraObjectProperties
@@ -688,4 +677,4 @@ inline std::array<ExtraObjectProperties, MAX_OBJECTS>& gExtraObjectProperties
 inline const std::array<tilePoint, 8>& normalDirTable
 = get_global_var_ref(0x678150, const std::array<tilePoint, 8>);
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

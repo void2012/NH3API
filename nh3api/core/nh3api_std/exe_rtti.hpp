@@ -31,6 +31,7 @@
     #endif
 #endif
 
+#include "nh3api_std.hpp"
 #include "hash.hpp"
 
 struct __type_info_node
@@ -232,13 +233,14 @@ template<>
 struct std::hash<exe_type_info>
 {
     public:
-        #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+    #ifdef __cpp_static_call_operator
         static
-        #endif
-        size_t operator()(const exe_type_info& arg) noexcept
-        #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+    #endif
+        size_t operator()(const exe_type_info& arg)
+    #ifndef __cpp_static_call_operator
         const
-        #endif
+    #endif
+        noexcept
         {
             return arg.hash_code();
         }

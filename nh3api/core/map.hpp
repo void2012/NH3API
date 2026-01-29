@@ -9,12 +9,14 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "hero.hpp" // HeroPlaceholder
+#include "hero.hpp"    // HeroPlaceholder
 #include "objects.hpp" // map objects
-#include "quests.hpp" // quests
+#include "quests.hpp"  // quests
 #include "terrain.hpp" // TTerrainType, type_point
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 // Размер карты по горизонтали
 inline int32_t& MAP_WIDTH = get_global_var_ref(0x6783C8, int32_t);
@@ -29,67 +31,57 @@ inline int32_t& MAP_HEIGHT = get_global_var_ref(0x6783CC, int32_t);
 class TTimedEvent
 {
     public:
-        NH3API_FORCEINLINE
-        TTimedEvent() noexcept
-            : PlayerFlags(0),
-              ApplyToHuman(false),
-              ApplyToComputer(false),
-              FirstTime(0),
-              Interval(0)
-        {
-            ResQty.fill(0);
-        }
-
-        NH3API_FORCEINLINE
-        TTimedEvent(const ::nh3api::dummy_tag_t& tag) noexcept
-            : Message(tag)
+        inline TTimedEvent() noexcept = default;
+        inline TTimedEvent(const nh3api::dummy_tag_t& tag) noexcept
+            : Message { tag }
         {}
 
-        NH3API_DEFAULT_DESTRUCTOR(TTimedEvent)
+        inline ~TTimedEvent() noexcept                        = default;
+        inline TTimedEvent(const TTimedEvent&)                = default;
+        inline TTimedEvent(TTimedEvent&&) noexcept            = default;
+        inline TTimedEvent& operator=(const TTimedEvent&)     = default;
+        inline TTimedEvent& operator=(TTimedEvent&&) noexcept = default;
 
     public:
         // Event message /
         // Сообщение события.
         // offset: +0x0 = +0,  size = 0x10 = 16
-        exe_string Message;
+        exe_string Message {};
 
         // Bonus resources /
         // Бонусные ресурсы(могут быть отрицательными).
         // offset: +0x10 = +16,  size = 0x1C = 28
-        std::array<int32_t, 7> ResQty;
+        std::array<int32_t, 7> ResQty {};
 
         // Affected players /
         // На каких игроков действует это событие.
         // offset: +0x2C = +44,  size = 0x1 = 1
-        uint8_t PlayerFlags;
+        uint8_t PlayerFlags {0};
 
         // Applies to human player /
         // Событие работает на игрока-человека.
         // offset: +0x2D = +45,  size = 0x1 = 1
-        bool ApplyToHuman;
+        bool ApplyToHuman {false};
 
         // Applies to AI player /
         // Событие работает на компьютера.
         // offset: +0x2E = +46,  size = 0x1 = 1
-        bool ApplyToComputer;
+        bool ApplyToComputer {false};
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_2F[1];
+        unsigned char : 8;
 
-    public:
         // First day /
         // Первый день события.
         // offset: +0x30 = +48,  size = 0x2 = 2
-        int16_t FirstTime;
+        int16_t FirstTime {0};
 
         // Repeat interval /
         // Интервал повторения события.
         // offset: +0x32 = +50,  size = 0x2 = 2
-        int16_t Interval;
+        int16_t Interval {0};
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 4
 
 #pragma pack(push, 8)
 // Town event /
@@ -98,44 +90,42 @@ class TTimedEvent
 class TTownEvent : TTimedEvent
 {
     public:
-        NH3API_FORCEINLINE
-        TTownEvent() noexcept
-            : TTimedEvent()
-        { generatorBonuses.fill(0); }
-
-        NH3API_FORCEINLINE
-        TTownEvent(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline TTownEvent() noexcept = default;
+        inline TTownEvent(const nh3api::dummy_tag_t& tag) noexcept
             : TTimedEvent(tag)
         {}
 
-        NH3API_DEFAULT_DESTRUCTOR(TTownEvent)
+        inline ~TTownEvent() noexcept                       = default;
+        inline TTownEvent(const TTownEvent&)                = default;
+        inline TTownEvent(TTownEvent&&) noexcept            = default;
+        inline TTownEvent& operator=(const TTownEvent&)     = default;
+        inline TTownEvent& operator=(TTownEvent&&) noexcept = default;
 
     public:
         // Town ID /
         // ID города, к которому применяется это событие.
         // offset: +0x34 = +52,  size = 0x1 = 1
-        int8_t TownNum;
+        int8_t TownNum {0};
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_35[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
         // Building bonuses /
         // Бонусы построек.
         // offset: +0x38 = +56,  size = 0x8 = 8
-        uint64_t BuildBuildings;
+        uint64_t BuildBuildings {0ULL};
 
         // Creature bonuses /
         // Бонусы существ.
         // offset: +0x40 = +64,  size = 0xE = 14
-        std::array<uint16_t, 7> generatorBonuses;
+        std::array<uint16_t, 7> generatorBonuses {};
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_4E[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 8
 
 NH3API_SIZE_ASSERT(0x50, TTownEvent);
 
@@ -146,48 +136,52 @@ NH3API_SIZE_ASSERT(0x50, TTownEvent);
 class NewfullMap
 {
     public:
-        NH3API_FORCEINLINE
-        NewfullMap() noexcept
-        NH3API_DELEGATE_DUMMY(NewfullMap)
+        inline NewfullMap() noexcept
+            : NewfullMap(nh3api::dummy_tag)
         { THISCALL_1(void, 0x4FD6B0, this); }
 
-        NH3API_FORCEINLINE
-        NewfullMap(const ::nh3api::dummy_tag_t& tag) noexcept
-            : ObjectTypes(tag),
-              Objects(tag),
-              Sprites(tag),
-              CustomTreasureList(tag),
-              CustomMonsterList(tag),
-              BlackBoxList(tag),
-              SeerHutList(tag),
-              QuestGuardList(tag),
-              TimedEventList(tag),
-              TownEventList(tag),
-              PlaceHolderList(tag),
-              QuestList(tag),
-              RandomDwellingList(tag)
-            ,
-            ObjectTypeTables{{tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
-                        tag, tag, tag, tag, tag, tag, tag}}
+        inline NewfullMap(const nh3api::dummy_tag_t& tag) noexcept
+            : ObjectTypes { tag },
+              Objects { tag },
+              Sprites { tag },
+              CustomTreasureList { tag },
+              CustomMonsterList { tag },
+              BlackBoxList { tag },
+              SeerHutList { tag },
+              QuestGuardList { tag },
+              TimedEventList { tag },
+              TownEventList { tag },
+              PlaceHolderList { tag },
+              QuestList { tag },
+              RandomDwellingList { tag },
+              ObjectTypeTables
+                {
+                  { tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag,
+                   tag, tag, tag, tag, tag, tag, tag }
+                }
         {}
 
-        NH3API_FORCEINLINE
-        ~NewfullMap() noexcept
+        inline ~NewfullMap() noexcept
         { THISCALL_1(void, 0x4FD830, this); }
+
+        NewfullMap(const NewfullMap&)            = delete;
+        NewfullMap(NewfullMap&&)                 = delete;
+        NewfullMap& operator=(const NewfullMap&) = delete;
+        NewfullMap& operator=(NewfullMap&&)      = delete;
 
     public:
         [[nodiscard]] NewmapCell* cell(int32_t x, int32_t y, int32_t z)
@@ -301,94 +295,131 @@ class NewfullMap
         // offset: +0xD4 = +212,  size = 0x4 = 4
         int32_t Size;
 
-        // Has dungeon?
+        // Has dungeon? /
         // Карта двухуровневая?
         // offset: +0xD8 = +216,  size = 0x1 = 1
         bool HasTwoLevels;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_D9[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
-    union {
+        union {
         // Map editor objects. Used by the Random Map Generator /
         // Объекты редактора карт. Используются генератором случайных карт.
         // offset: +0xDC = +220,  size = 0xE80 = 3712
         std::array<exe_vector<CObjectType>, MAX_OBJECTS> ObjectTypeTables;
-    };
+        };
+} NH3API_MSVC_LAYOUT;
 
-};
-#pragma pack(pop)
-
-#pragma pack(push, 4)
+// Creature bank level traits(there are four levels) /
+// Свойства уровня банка существ(всего их четыре).
 // size = 0x60 = 96, align = 4
 struct type_creature_bank_level
 {
-    public:
-        // offset: +0x0 = +0,  size = 0x38 = 56
-        armyGroup guards;
+    // Creature bank level guards /
+    // Охрана уровня банка существ.
+    // offset: +0x0 = +0,  size = 0x38 = 56
+    armyGroup guards;
 
-        // offset: +0x38 = +56,  size = 0x1C = 28
-        std::array<EGameResource, 7> resources;
+    // Resources that the player receives on victory /
+    // Ресурсы, которые игрок получает после победы в качестве вознаграждения.
+    // offset: +0x38 = +56,  size = 0x1C = 28
+    std::array<EGameResource, 7> resources;
 
-        // offset: +0x54 = +84,  size = 0x4 = 4
-        TCreatureType creature_type;
+    // Types of creatures that hero receives on victory /
+    // Тип существ, которых герой получает после победы в качестве вознаграждения.
+    // offset: +0x54 = +84,  size = 0x4 = 4
+    TCreatureType creature_type;
 
-        // offset: +0x58 = +88,  size = 0x1 = 1
-        int8_t creature_amount;
+    // Amount of creatures that hero receives on victory /
+    // Количество существ, которых герой получает после победы в качестве вознаграждения.
+    // offset: +0x58 = +88,  size = 0x1 = 1
+    int8_t creature_amount;
 
-        // offset: +0x59 = +89,  size = 0x1 = 1
-        int8_t chance;
+    // Chance of the current creature bank level /
+    // Шанс текущего уровня банка существ.
+    // offset: +0x59 = +89,  size = 0x1 = 1
+    int8_t chance;
 
-        // offset: +0x5A = +90,  size = 0x1 = 1
-        int8_t upg_chance;
+    // Chance of guards being upgraded /
+    // Шанс улучшенного существа в охране.
+    // offset: +0x5A = +90,  size = 0x1 = 1
+    int8_t upg_chance;
 
-        // offset: +0x5B = +91,  size = 0x1 = 1
-        int8_t treasure_artifacts;
+    // Number of treasure artifacts that drop on victory /
+    // Количество артефактов-сокровищ, которые выпадают после победы.
+    // offset: +0x5B = +91,  size = 0x1 = 1
+    int8_t treasure_artifacts;
 
-        // offset: +0x5C = +92,  size = 0x1 = 1
-        int8_t minor_artifacts;
+    // Number of minor artifacts that drop on victory /
+    // Количество малых артефактов, которые выпадают после победы.
+    // offset: +0x5C = +92,  size = 0x1 = 1
+    int8_t minor_artifacts;
 
-        // offset: +0x5D = +93,  size = 0x1 = 1
-        int8_t major_artifacts;
+    // Number of major artifacts that drop on victory /
+    // Количество великих артефактов, которые выпадают после победы.
+    // offset: +0x5D = +93,  size = 0x1 = 1
+    int8_t major_artifacts;
 
-        // offset: +0x5E = +94,  size = 0x1 = 1
-        int8_t relic_artifacts;
+    // Number of relic artifacts that drop on victory /
+    // Количество артефактов-реликвий, которые выпадают после победы.
+    // offset: +0x5E = +94,  size = 0x1 = 1
+    int8_t relic_artifacts;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_95[1];
+    unsigned char : 8;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
 
-#pragma pack(push, 4)
+// Creature bank traits /
+// Свойства банка существ.
 // size = 0x190 = 400, align = 4
 struct type_creature_bank_traits
 {
+    // Creature bank name /
+    // Название банка существ.
     // offset: +0x0 = +0,  size = 0x10 = 16
     exe_string name;
 
+    // Creature bank levels /
+    // Уровни банка существ.
     // offset: +0x10 = +16,  size = 0x180 = 384
     std::array<type_creature_bank_level, 4> levels;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 4
 
-inline std::array<type_creature_bank_traits, 11>& const_creature_bank_traits
-= get_global_var_ref(0x695088, std::array<type_creature_bank_traits, 11>);
+// Creature bank type /
+// Тип банка существ.
+enum ECreatureBankType : int32_t
+{
+    BANK_CYCLOPS_STOCKPILE    = 0,  // Склады Циклопов
+    BANK_DWARVEN_TREASURY     = 1,  // Сокровищница Гномов
+    BANK_GRIFFIN_CONSERVATORY = 2,  // Консерватория Грифонов
+    BANK_IMP_CACHE            = 3,  // Тайник Бесов
+    BANK_MEDUSA_STORES        = 4,  // Хранилище Медуз
+    BANK_NAGA_BANK            = 5,  // Банк Наг
+    BANK_DRAGON_FLY_HIVE      = 6,  // Улей Ядовитых Змиев
+    BANK_SHIPWRECK            = 7,  // Место Кораблекрушения
+    BANK_DERELICT_SHIP        = 8,  // Покинутый Корабль
+    BANK_CRYPT                = 9,  // Склеп
+    BANK_DRAGON_UTOPIA        = 10, // Утопия Драконов
+    MAX_CREATURE_BANK_TYPES   = 11  // Максимальное количество типов банков существ.
+};
+
+// Traits of all creature bank types /
+// Свойства всех возможных видов банков существ.
+inline std::array<type_creature_bank_traits, MAX_CREATURE_BANK_TYPES>& const_creature_bank_traits
+= get_global_var_ref(0x695088, std::array<type_creature_bank_traits, MAX_CREATURE_BANK_TYPES>);
 
 // Map visibility bits for each player and 9th bit for a monster on the map /
 // Видимость карты для игроков и для монстров на карте.
 inline uint16_t* const& mapExtra = get_global_var_ref(0x698A48, uint16_t*);
 
-[[nodiscard]] NH3API_FORCEINLINE
-uint16_t GetMapExtra(int32_t X, int32_t Y, int32_t Z)
-{ return FASTCALL_3(uint16_t, 0x4F8040, X, Y, Z); }
+[[nodiscard]] inline uint16_t GetMapExtra(uint32_t x, uint32_t y, uint32_t z)
+{ return FASTCALL_3(uint16_t, 0x4F8040, x, y, z); }
 
-[[nodiscard]] NH3API_FORCEINLINE
-uint16_t* GetMapExtraPtr(int32_t x, int32_t y, int32_t z)
+[[nodiscard]] inline uint16_t* GetMapExtraPtr(uint32_t x, uint32_t y, uint32_t z)
 { return FASTCALL_3(uint16_t*, 0x4F8070, x, y, z); }
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

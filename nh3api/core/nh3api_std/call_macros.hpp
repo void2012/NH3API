@@ -10,9 +10,11 @@
 #pragma once
 
 #include <utility>
+
 #include "nh3api_std.hpp"
 
 #ifndef CALL_0
+
 #define CALL_0(return_type, call_type, address) \
  ((return_type (call_type *)(void))address)()
 #define CALL_1(return_type, call_type, address, a1) \
@@ -54,6 +56,27 @@
 #ifndef CALL_VA
 #define CALL_VA(return_type, adress, a1, ...) \
  ((return_type (__cdecl *)(uint32_t, ...))(adress))((uint32_t)(a1), __VA_ARGS__)
+#endif
+
+#ifdef __clang__
+#pragma clang deprecated(CALL_0, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_1, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_2, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_3, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_4, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_5, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_6, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_7, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_8, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_9, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_10, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_11, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_12, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_13, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_14, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_15, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_16, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
+#pragma clang deprecated(CALL_VA, "CALL_* macros are deprecated, use new XYZCALL_* macros instead")
 #endif
 
 template<typename return_type, typename Arg1>
@@ -441,17 +464,31 @@ inline return_type invoke_stdcall(uintptr_t address, Args&& ... args)
 #pragma warning(disable: 4229)
 #endif
 
+#if NH3API_CHECK_MINGW // workaround for a weird GCC bug
+template<typename R, typename ThisPtr, typename ...Args>
+using thiscall_function_t = R(*)(ThisPtr, Args...) [[__gnu__::__thiscall__]];
+
+template<typename R, typename ...Args>
+using fastcall_function_t = R(*)(Args...) [[__gnu__::__fastcall__]];
+
+template<typename R, typename ...Args>
+using cdecl_function_t = R(*)(Args...) [[__gnu__::__cdecl__]];
+
+template<typename R, typename ...Args>
+using stdcall_function_t = R(*)(Args...) [[__gnu__::__stdcall__]];
+#else
 template<typename R, typename ThisPtr, typename ...Args>
 using thiscall_function_t = R(*__thiscall)(ThisPtr, Args...);
 
 template<typename R, typename ...Args>
-using fastcall_function_t = R(*__stdcall)(Args...);
+using fastcall_function_t = R(*__fastcall)(Args...);
 
 template<typename R, typename ...Args>
 using cdecl_function_t = R(*__cdecl)(Args...);
 
 template<typename R, typename ...Args>
 using stdcall_function_t = R(*__stdcall)(Args...);
+#endif
 
 #if NH3API_CHECK_MSVC
 #pragma warning(pop)

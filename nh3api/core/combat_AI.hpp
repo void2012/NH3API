@@ -11,7 +11,7 @@
 
 #include "combat.hpp"
 
-[[nodiscard]] NH3API_FORCEINLINE int32_t AI_get_attack_damage(const army& current_army, int32_t our_hits, const army& enemy, bool ranged, int32_t distance)
+[[nodiscard]] inline int32_t AI_get_attack_damage(const army& current_army, int32_t our_hits, const army& enemy, bool ranged, int32_t distance)
 { return FASTCALL_5(int32_t, 0x4355D0, &current_army, our_hits, &enemy, ranged, distance); }
 
 #pragma pack(push, 4)
@@ -20,18 +20,17 @@ class type_AI_combat_parameters
 {
     // constructors
     public:
-        NH3API_FORCEINLINE
-        type_AI_combat_parameters(const combatManager* combatMgr, int32_t side) noexcept
+        inline type_AI_combat_parameters(const combatManager* combatMgr, int32_t side) noexcept
         { THISCALL_3(void, 0x435B10, this, combatMgr, side); }
 
-        NH3API_FORCEINLINE
-        type_AI_combat_parameters(const ::nh3api::dummy_tag_t&) noexcept
+        inline type_AI_combat_parameters(const nh3api::dummy_tag_t&) noexcept
         {}
 
-        type_AI_combat_parameters(const type_AI_combat_parameters&)            = default;
-        type_AI_combat_parameters(type_AI_combat_parameters&&)                 = default;
-        type_AI_combat_parameters& operator=(const type_AI_combat_parameters&) = default;
-        type_AI_combat_parameters& operator=(type_AI_combat_parameters&&)      = default;
+        inline constexpr type_AI_combat_parameters(const type_AI_combat_parameters&)            noexcept = default;
+        inline constexpr type_AI_combat_parameters(type_AI_combat_parameters&&)                 noexcept = default;
+        inline constexpr type_AI_combat_parameters& operator=(const type_AI_combat_parameters&) noexcept = default;
+        inline constexpr type_AI_combat_parameters& operator=(type_AI_combat_parameters&&)      noexcept = default;
+        inline ~type_AI_combat_parameters() noexcept = default;
 
     // methods
     public:
@@ -108,9 +107,7 @@ class type_AI_combat_parameters
         int32_t enemy_group;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // size = 0x10 = 16, align = 4
 struct type_AI_enemy_data
 {
@@ -127,33 +124,10 @@ struct type_AI_enemy_data
     int32_t total_damage;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // size = 0x14 = 20, align = 4
 struct type_enchant_data
 {
-
-        // constructors
-    public:
-        constexpr type_enchant_data(SpellID new_spell, TSkillMastery new_mastery, int32_t new_power, int32_t new_duration) noexcept
-            : spell(new_spell),
-              mastery(new_mastery),
-              power(new_power),
-              duration(new_duration),
-              check_resistance(true)
-        {}
-
-        constexpr type_enchant_data(const type_enchant_data&) noexcept            = default;
-        constexpr type_enchant_data(type_enchant_data&&) noexcept                 = default;
-        constexpr type_enchant_data& operator=(const type_enchant_data&) noexcept = default;
-        constexpr type_enchant_data& operator=(type_enchant_data&&) noexcept      = default;
-
-        type_enchant_data(const ::nh3api::dummy_tag_t&) noexcept
-        {}
-
-        ~type_enchant_data() noexcept = default;
-
     // methods
     public:
         [[nodiscard]] int32_t get_mastery_value() const
@@ -180,33 +154,27 @@ struct type_enchant_data
         bool check_resistance;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // size = 0x24 = 36, align = 4, baseclass: type_enchant_data
 struct type_spell_choice : type_enchant_data
 {
     public:
-        NH3API_FORCEINLINE
-        type_spell_choice() noexcept
-        NH3API_DELEGATE_DUMMY_BASE(type_spell_choice)
+        inline type_spell_choice() noexcept
+            : type_spell_choice(nh3api::dummy_tag)
         { THISCALL_1(void, 0x4365A0, this); }
 
-        NH3API_FORCEINLINE
-        type_spell_choice(SpellID new_spell, TSkillMastery new_mastery, int32_t new_power, int32_t new_duration) noexcept
-        NH3API_DELEGATE_DUMMY_BASE(type_spell_choice)
+        inline type_spell_choice(SpellID new_spell, TSkillMastery new_mastery, int32_t new_power, int32_t new_duration) noexcept
+            : type_spell_choice(nh3api::dummy_tag)
         { THISCALL_5(void, 0x4365D0, this, new_spell, new_mastery, new_power, new_duration); }
 
-        NH3API_FORCEINLINE
-        type_spell_choice(const ::nh3api::dummy_tag_t& tag) noexcept
-            : type_enchant_data(tag)
+        inline type_spell_choice(const nh3api::dummy_tag_t&) noexcept
         {}
 
-        constexpr type_spell_choice(const type_spell_choice&) noexcept            = default;
-        constexpr type_spell_choice(type_spell_choice&&) noexcept                 = default;
-        constexpr type_spell_choice& operator=(const type_spell_choice&) noexcept = default;
-        constexpr type_spell_choice& operator=(type_spell_choice&&) noexcept      = default;
-        ~type_spell_choice() noexcept = default;
+        inline constexpr type_spell_choice(const type_spell_choice&) noexcept            = default;
+        inline constexpr type_spell_choice(type_spell_choice&&) noexcept                 = default;
+        inline constexpr type_spell_choice& operator=(const type_spell_choice&) noexcept = default;
+        inline constexpr type_spell_choice& operator=(type_spell_choice&&) noexcept      = default;
+        inline ~type_spell_choice() noexcept                                             = default;
 
     public:
         // offset: +0x14 = +20,  size = 0x4 = 4
@@ -222,38 +190,33 @@ struct type_spell_choice : type_enchant_data
         bool cast_now;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // size = 0x410 = 1040, align = 4
 NH3API_VIRTUAL_CLASS type_AI_spellcaster
 {
     public:
         struct vftable_t
         {
-            void (__thiscall *scalar_deleting_destructor)(type_AI_spellcaster*, uint8_t );
+            void (__thiscall* scalar_deleting_destructor)(type_AI_spellcaster*, uint8_t );
         };
 
         // constructors and destructor
     public:
-        NH3API_FORCEINLINE
-        type_AI_spellcaster(combatManager* combatMgr, int32_t side, bool creature_spell) noexcept
-            : estimate(::nh3api::dummy_tag)
+        inline type_AI_spellcaster(combatManager* combatMgr, int32_t side, bool creature_spell) noexcept
+            : estimate { nh3api::dummy_tag }
         { THISCALL_4(void, 0x436610, this, combatMgr, side, creature_spell); }
 
-        NH3API_FORCEINLINE
-        type_AI_spellcaster(const ::nh3api::dummy_tag_t& tag) noexcept
-            : estimate(tag)
+        inline type_AI_spellcaster(const nh3api::dummy_tag_t& tag) noexcept
+            : estimate { tag }
         {}
+
+        inline ~type_AI_spellcaster() noexcept
+        { THISCALL_1(void, 0x436880, this); }
 
         type_AI_spellcaster(const type_AI_spellcaster&)            = delete;
         type_AI_spellcaster(type_AI_spellcaster&&)                 = delete;
         type_AI_spellcaster& operator=(const type_AI_spellcaster&) = delete;
         type_AI_spellcaster& operator=(type_AI_spellcaster&&)      = delete;
-
-        NH3API_FORCEINLINE
-        ~type_AI_spellcaster() noexcept
-        { THISCALL_1(void, 0x436880, this); }
 
     // methods
     public:
@@ -364,7 +327,7 @@ NH3API_VIRTUAL_CLASS type_AI_spellcaster
         std::array<type_AI_enemy_data, 20> worst_enemies;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 4
 
 // AI combat simulation creature speed category /
 // Категории скорости существа при симуляции ИИ.
@@ -378,6 +341,11 @@ enum type_speed_category : int32_t
     const_max_catagories = 5  // кол-во возможных категорий
 
 };
+
+template<>
+struct nh3api::enum_limits<type_speed_category>
+    : nh3api::enum_limits_base<type_speed_category, const_ranged, const_slow>
+{ static inline constexpr bool is_specialized = true; };
 
 #pragma pack(push, 8)
 // size = 0x48 = 72, align = 8
@@ -406,16 +374,16 @@ struct type_monster_data
 
     // comparison operators
     public:
-        [[nodiscard]] constexpr bool operator<(const type_monster_data& other) const noexcept
+        [[nodiscard]] inline constexpr bool operator<(const type_monster_data& other) const noexcept
         { return this->value < other.value; }
 
-        [[nodiscard]] constexpr bool operator>(const type_monster_data& other) const noexcept
+        [[nodiscard]] inline constexpr bool operator>(const type_monster_data& other) const noexcept
         { return this->value > other.value; }
 
-        [[nodiscard]] constexpr bool operator>=(const type_monster_data& other) const noexcept
+        [[nodiscard]] inline constexpr bool operator>=(const type_monster_data& other) const noexcept
         { return !(*this < other); }
 
-        [[nodiscard]] constexpr bool operator<=(const type_monster_data& other) const noexcept
+        [[nodiscard]] inline constexpr bool operator<=(const type_monster_data& other) const noexcept
         { return !(*this > other); }
 
     // member variables
@@ -457,38 +425,39 @@ struct type_monster_data
         int32_t total_value;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 8
 
-NH3API_FORCEINLINE bool AI_quick_combat(hero* attacking_hero, hero* defending_hero, armyGroup& defending_army, town* defending_town, NewmapCell* map_cell)
+inline bool AI_quick_combat(hero* attacking_hero, hero* defending_hero, armyGroup& defending_army, town* defending_town, NewmapCell* map_cell)
 { return FASTCALL_5(bool, 0x4270C0, attacking_hero, defending_hero, &defending_army, defending_town, map_cell); }
 
-NH3API_FORCEINLINE void AI_auto_combat(hero* attacking_hero, hero* defending_hero, armyGroup& attacking_army, armyGroup& defending_army, const town* defending_town, NewmapCell* cell)
+inline void AI_auto_combat(hero* attacking_hero, hero* defending_hero, armyGroup& attacking_army, armyGroup& defending_army, const town* defending_town, NewmapCell* cell)
 { FASTCALL_6(void, 0x427210, attacking_hero, defending_hero, &attacking_army, &defending_army, defending_town, cell); }
 
 #pragma pack(push, 4)
 // size = 0x34 = 52, align = 4
 class type_AI_combat_data
 {
-    // constructors and destructor
+
+        // constructors and destructor
     public:
-        NH3API_FORCEINLINE
-        type_AI_combat_data(const hero* new_hero, const armyGroup* new_army, double base_modifier, const hero* _enemy_hero, const town* enemy_town, NewmapCell* map_cell) noexcept
-        NH3API_DELEGATE_DUMMY(type_AI_combat_data)
+        inline type_AI_combat_data(const hero* new_hero, const armyGroup* new_army, double base_modifier, const hero* _enemy_hero, const town* enemy_town, NewmapCell* map_cell) noexcept
+            : type_AI_combat_data(nh3api::dummy_tag)
         { THISCALL_7(void, 0x423EE0, this, new_hero, new_army, base_modifier, _enemy_hero, enemy_town, map_cell); }
 
-        NH3API_FORCEINLINE
-        type_AI_combat_data(const type_AI_combat_data& that) noexcept
-        NH3API_DELEGATE_DUMMY(type_AI_combat_data)
+        inline type_AI_combat_data(const type_AI_combat_data& that) noexcept
+            : type_AI_combat_data(nh3api::dummy_tag)
         { THISCALL_2(void, 0x4276C0, this, &that); }
 
-        NH3API_FORCEINLINE
-        type_AI_combat_data(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline type_AI_combat_data(const nh3api::dummy_tag_t& tag) noexcept
             : creatures(tag)
         {}
 
-        NH3API_FORCEINLINE
-        ~type_AI_combat_data() noexcept
+        inline ~type_AI_combat_data() noexcept
         { std::destroy_at(&creatures); } // manually destroy 'creatures'
+
+        type_AI_combat_data(type_AI_combat_data&&)                 = delete;
+        type_AI_combat_data& operator=(const type_AI_combat_data&) = delete;
+        type_AI_combat_data& operator=(type_AI_combat_data&&)      = delete;
 
     // methods
     public:
@@ -646,22 +615,19 @@ class type_AI_combat_data
         int16_t wall_speed_limit;
 
 };
-#pragma pack(pop)
 
 class searchArray;
-#pragma pack(push, 4)
+
 // size = 0x2C = 44, align = 4
 class type_AI_attack_hex_chooser
 {
-        // constructors
+    // constructors
     public:
-        NH3API_FORCEINLINE
-        type_AI_attack_hex_chooser(const army* attack_army, const army* enemy_army, const int32_t* enemy_attack_array, searchArray* search_data, const type_AI_combat_parameters& data) noexcept
-        NH3API_DELEGATE_DUMMY(type_AI_attack_hex_chooser)
+        inline type_AI_attack_hex_chooser(const army* attack_army, const army* enemy_army, const int32_t* enemy_attack_array, searchArray* search_data, const type_AI_combat_parameters& data) noexcept
+            : type_AI_attack_hex_chooser(nh3api::dummy_tag)
         { THISCALL_6(void, 0x435D10, this, attack_army, enemy_army, enemy_attack_array, search_data, &data); }
 
-        NH3API_FORCEINLINE
-        type_AI_attack_hex_chooser(const ::nh3api::dummy_tag_t&) noexcept
+        inline type_AI_attack_hex_chooser(const nh3api::dummy_tag_t&) noexcept
         {}
 
         type_AI_attack_hex_chooser(const type_AI_attack_hex_chooser&)            = delete;
@@ -672,13 +638,13 @@ class type_AI_attack_hex_chooser
 
         // methods
     public:
-        [[nodiscard]] int32_t get_attack_time() const
+        [[nodiscard]] int32_t get_attack_time() const noexcept
         { return best_attack_time; }
 
-        [[nodiscard]] int32_t get_best_hex() const
+        [[nodiscard]] int32_t get_best_hex() const noexcept
         { return best_hex; }
 
-        [[nodiscard]] int32_t get_hex_value() const
+        [[nodiscard]] int32_t get_hex_value() const noexcept
         { return best_value; }
 
         [[nodiscard]] int32_t get_hex_attack_value(int32_t hex, int32_t& checked)
@@ -726,6 +692,6 @@ class type_AI_attack_hex_chooser
         type_AI_combat_parameters* estimate;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 4
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63B7D8, type_AI_spellcaster)

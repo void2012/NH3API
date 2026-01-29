@@ -14,18 +14,20 @@
 #include "creatures.hpp" // TCreatureType, armyGroup
 #include "spells.hpp" // SpellID
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_MSVC_DISABLE(26495)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
 
 struct bitNumber_impl_t
 {
-    NH3API_PURE
-    #if NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+#ifdef __cpp_multidimensional_subscript
     static
-    #endif
+#endif
     inline constexpr uint64_t operator[](const size_t pos)
-    #if !NH3API_STD_STATIC_SUBSCRIPT_OPERATOR
+#ifndef __cpp_multidimensional_subscript
     const
-    #endif
+#endif
+    noexcept
     { return 1ULL << pos; }
 }
 // Bit shift masks lookup table /
@@ -149,52 +151,96 @@ enum type_building_id : int32_t
     BUILDING_DWELLING_6_UPGRADE = 43, // Lvl. 7 upgraded creature dwelling / Улучшенное жилище существ 7 уровня
 };
 
-[[nodiscard]] NH3API_FORCEINLINE const char* GetBuildingName(TTownType townType, type_building_id buildingId) noexcept
+template<>
+struct nh3api::enum_limits<type_building_id>
+    : nh3api::enum_limits_base<type_building_id, BUILDING_MAGE_GUILD_1, BUILDING_DWELLING_6_UPGRADE>
+{ static inline constexpr bool is_specialized = true; };
+
+[[nodiscard]] inline const char* GetBuildingName(TTownType townType, type_building_id buildingId) noexcept
 { return FASTCALL_2(const char*, 0x460CC0, townType, buildingId); }
 
 // Town possible buildings mask /
 // Маска возможных построек в городе(вообще).
-inline std::array<uint64_t, kNumTowns>& gTownEligibleBuildMask
-= get_global_var_ref(0x697740, std::array<uint64_t, kNumTowns>);
+inline std::array<uint64_t, MAX_TOWNS>& gTownEligibleBuildMask = get_global_var_ref(0x697740, std::array<uint64_t, MAX_TOWNS>);
 
 // Each building dependency mask /
 // Маска необходимых построек для строительства каждой постройки каждой фракции.
 inline std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>& gHierarchyMask =
 get_global_var_ref(0x6977E8, std::array<std::array<uint64_t, MAX_BUILDING_TYPE>, kNumTowns>);
 
-#pragma pack(push, 4)
+#pragma pack(push, 8)
 // Town /
 // Город.
 // size = 0x168 = 360, align = 8
 class town
 {
     public:
-        NH3API_FORCEINLINE
-        town() noexcept
-        NH3API_DELEGATE_DUMMY(town)
+        inline town() noexcept
+            : town(nh3api::dummy_tag)
         { THISCALL_1(void, 0x5BE280, this); }
 
-        NH3API_FORCEINLINE
-        town(const ::nh3api::dummy_tag_t& tag) noexcept
-            : cName(tag),
-              SpellDisabledMask(tag),
-              town_army(tag)
+        inline town(const nh3api::dummy_tag_t& tag) noexcept
+            : cName { tag },
+              SpellDisabledMask { tag },
+              town_army { tag }
         {}
 
-        NH3API_FORCEINLINE
-        ~town() noexcept
+        town(const town& other)
+        {
+            constexpr size_t cName_offset = __builtin_offsetof(town, cName);
+            std::memcpy(static_cast<void*>(this), static_cast<const void*>(&other), cName_offset);
+            this->cName = other.cName;
+
+            std::memcpy(reinterpret_cast<uint8_t*>(this) + cName_offset + sizeof(cName),
+                        reinterpret_cast<const uint8_t*>(&other) + cName_offset + sizeof(cName),
+                        sizeof(*this) - cName_offset + sizeof(cName));
+        }
+
+        town& operator=(const town& other)
+        {
+            if ( this != &other )
+            {
+                constexpr size_t cName_offset = __builtin_offsetof(town, cName);
+                std::memcpy(static_cast<void*>(this), static_cast<const void*>(&other), cName_offset);
+                this->cName = other.cName;
+
+                std::memcpy(reinterpret_cast<uint8_t*>(this) + cName_offset + sizeof(cName),
+                            reinterpret_cast<const uint8_t*>(&other) + cName_offset + sizeof(cName),
+                            sizeof(*this) - cName_offset + sizeof(cName));
+            }
+            return *this;
+        }
+
+        town(town&& other) noexcept
+        {
+            std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+            std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+        }
+
+        town& operator=(town&& other) noexcept
+        {
+            if ( this != &other )
+            {
+                std::destroy_at(&this->cName);
+                std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+                std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+            }
+            return *this;
+        }
+
+        inline ~town() noexcept
         { THISCALL_1(void, 0x4ACDD0, this); }
 
     public:
         // Get town location on the map /
         // Координаты города.
         [[nodiscard]] type_point get_location() const
-        { return {mapX, mapY, mapZ}; }
+        { return { mapX, mapY, mapZ }; }
 
         // Does town has creatures in garrison? /
         // Есть ли в городе гарнизонные войска или герой с войсками?
         [[nodiscard]] bool HasGarrison() const
-        { return !!THISCALL_1(bool32_t, 0x5BE3E0, this); }
+        { return THISCALL_1(bool32_t, 0x5BE3E0, this); }
 
         // Check if town has building <buildingId> /
         // Проверка, есть ли в городе постройка <buildingId>.
@@ -262,7 +308,7 @@ class town
         // Is building ever available in town?
         // Возможно ли построить <building> в городе?
         [[nodiscard]] bool is_legal_building(type_building_id building) const
-        { return !!THISCALL_2(bool32_t, 0x5C16A0, this, building); }
+        { return THISCALL_2(bool32_t, 0x5C16A0, this, building); }
 
         // Town native terrain /
         // Родная почва фракции.
@@ -338,11 +384,9 @@ class town
         // offset: +0x9 = +9,  size = 0x1 = 1
         uint8_t boatY;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_A[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Garrison hero ID /
         // ID Героя в гарнизоне(сверху)
         // offset: +0xC = +12,  size = 0x4 = 4
@@ -358,11 +402,8 @@ class town
         // offset: +0x14 = +20,  size = 0x1 = 1
         int8_t mageLevel;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_15[1];
+        unsigned char : 8;
 
-    public:
         // Creature dwellings populations /
         // Ненанятые войска в городе
         // offset: +0x16 = +22,  size = 0x1C = 28
@@ -383,11 +424,10 @@ class town
         // offset: +0x34 = +52,  size = 0x1 = 1
         uint8_t pond_amount;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_35[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Type of magic pound(Rampart) resource generated this week /
         // Тип ресурса, который сгенерировал магический пруд(Оплот) на этой неделе.
         // offset: +0x38 = +56,  size = 0x4 = 4
@@ -403,11 +443,9 @@ class town
         // offset: +0x40 = +64,  size = 0x2 = 2
         int16_t summoningPopulation;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_42[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Spells for each level of mage guild /
         // Заклинания на каждом из 5 уровней гильдии магов.
         // offset: +0x44 = +68,  size = 0x78 = 120
@@ -418,11 +456,10 @@ class town
         // offset: +0xBC = +188,  size = 0x5 = 5
         std::array<int8_t, MAX_SPELL_LEVELS> maxTownSpellAvailable;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_C1[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         union {
         // Town name /
         // Название города.
@@ -462,7 +499,7 @@ class town
         // offset: +0x160 = +352,  size = 0x8 = 8
         uint64_t legal_buildings;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
 NH3API_SIZE_ASSERT(0x168, town);
@@ -489,11 +526,9 @@ public:
     // offset: +0x5 = +5,  size = 0x1 = 1
     bool bCustomBuildings;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_6[2];
+    unsigned char : 8;
+    unsigned char : 8;
 
-public:
     // Built buildings mask /
     // Маска построенных построек.
     // offset: +0x8 = +8,  size = 0x8 = 8
@@ -514,11 +549,8 @@ public:
     // offset: +0x19 = +25,  size = 0x1 = 1
     bool bCustomArmies;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_1A[2];
-
-public:
+    unsigned char : 8;
+    unsigned char : 8;
 
     // Town garrison army(empty if not setup) /
     // Гарнизон города(пустой, если не настроен).
@@ -530,11 +562,10 @@ public:
     // offset: +0x54 = +84,  size = 0x1 = 1
     bool bCustomName;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_55[3];
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-public:
     // Town custom name(empty if not setup) /
     // Название города(пустое, если не настроено).
     // offset: +0x58 = +88,  size = 0x10 = 16
@@ -550,11 +581,10 @@ public:
     // offset: +0x6C = +108,  size = 0x1 = 1
     bool bIsGrouped;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_6D[3];
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-public:
     // Disabled spells mask /
     // Маска заклинаний, которые никогда не появятся в городе
     // offset: +0x70 = +112,  size = 0x9 = 9
@@ -565,9 +595,12 @@ public:
     // offset: +0x7C = +124,  size = 0x9 = 9
     exe_bitset<MAX_BOOK_SPELLS> SpellMask;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
+
+inline const char* GetBuildingInfo(const town* this_town, int32_t buildingId, bool bIncludeTitle, bool extended)
+{ return FASTCALL_4(const char*, 0x5D2E40, this_town, buildingId, bIncludeTitle, extended); }
 
 NH3API_SIZE_ASSERT(0x88, TownExtra);
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

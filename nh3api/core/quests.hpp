@@ -9,20 +9,26 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <array>                     // std::array
+
 #include "nh3api_std/exe_vector.hpp" // exe_vector<T>
+#include "artifact.hpp"              // TArtifact
+#include "creatures.hpp"             // TCreatureType, type_point
+#include "hero_enums.hpp"            // THeroID
 #include "nh3api_std/exe_bitset.hpp" // exe_bitset<N>
-#include "resources/resources.hpp" // EGameResource
-#include "resources/files.hpp" // TAbstractFile
-#include "random.hpp" // exe_rand()
-#include "artifact.hpp" // TArtifact
-#include "creatures.hpp" // TCreatureType, type_point
-#include "hero_enums.hpp" // THeroID
-#include "skills.hpp" // TSkillMastery, TSecondarySkill
-#include "player_enums.hpp" // EPlayerColor
+#include "player_enums.hpp"          // EPlayerColor
+#include "random.hpp"                // exe_rand()
+#include "resources/files.hpp"       // TAbstractFile
+#include "resources/resources.hpp"   // EGameResource
+#include "skills.hpp"                // TSkillMastery, TSecondarySkill
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
-enum EQuestType : int32_t
+// Quest type /
+// Тип квеста.
+enum EQuestType : uint32_t
 {
     QUEST_NONE             = 0,
     QUEST_EXPERIENCE       = 1,
@@ -34,9 +40,16 @@ enum EQuestType : int32_t
     QUEST_RESOURCE         = 7,
     QUEST_BE_HERO          = 8,
     QUEST_BELONG_TO_PLAYER = 9,
+    NUM_QUEST_TYPES        = 10
 };
 
+template<>
+struct nh3api::enum_limits<EQuestType>
+    : nh3api::enum_limits_base<EQuestType, QUEST_EXPERIENCE, QUEST_BELONG_TO_PLAYER>
+{ static inline constexpr bool is_specialized = true; };
+
 class hero;
+#pragma pack(push, 4)
 // Quest abstract class /
 // Абстрактный класс - квест.
 // size = 0x40 = 64, align = 4
@@ -46,60 +59,58 @@ NH3API_VIRTUAL_CLASS type_quest
         struct vftable_t
         {
             public:
-                void (__thiscall *scalar_deleting_destructor)(type_quest*, uint8_t);
-                int32_t (__thiscall *ai_value)(const type_quest*, int32_t);
-                bool (__thiscall *can_complete)(const type_quest*, hero*);
-                void (__thiscall *complete)(type_quest*, hero*);
-                void (__thiscall *do_progress_dialog)(type_quest*, hero*);
-                void (__thiscall *do_proposal_dialog)(type_quest*);
-                exe_string* (__thiscall *get_quest_text)(const type_quest*, exe_string*);
-                exe_string* (__thiscall *get_help_text)(const type_quest*, exe_string*);
-                EQuestType (__thiscall *get_type)(const type_quest*);
-                void (__thiscall *hero_defeated)(type_quest*, THeroID, int32_t);
-                void (__thiscall *monster_defeated)(type_quest*, type_point, int32_t);
-                void (__thiscall *load)(type_quest*, TAbstractFile*, int32_t);
-                void (__thiscall *read)(type_quest*, TAbstractFile*);
-                void (__thiscall *save)(const type_quest*, TAbstractFile*);
-                void (__thiscall *init)(type_quest*);
+                void        (__thiscall* scalar_deleting_destructor)(type_quest*, uint8_t);
+                int32_t     (__thiscall* ai_value)(const type_quest*, int32_t);
+                bool        (__thiscall* can_complete)(const type_quest*, hero*);
+                void        (__thiscall* complete)(type_quest*, hero*);
+                void        (__thiscall* do_progress_dialog)(type_quest*, hero*);
+                void        (__thiscall* do_proposal_dialog)(type_quest*);
+                exe_string* (__thiscall* get_quest_text)(const type_quest*, exe_string*);
+                exe_string* (__thiscall* get_help_text)(const type_quest*, exe_string*);
+                EQuestType  (__thiscall* get_type)(const type_quest*);
+                void        (__thiscall* hero_defeated)(type_quest*, THeroID, int32_t);
+                void        (__thiscall* monster_defeated)(type_quest*, type_point, int32_t);
+                void        (__thiscall* load)(type_quest*, TAbstractFile*, int32_t);
+                void        (__thiscall* read)(type_quest*, TAbstractFile*);
+                void        (__thiscall* save)(const type_quest*, TAbstractFile*);
+                void        (__thiscall* init)(type_quest*);
         };
 
     public:
-        NH3API_FORCEINLINE
-        type_quest() noexcept
-            : text_variant(exe_rand() % 3), limit(-1)
+        inline type_quest() noexcept
+            : text_variant { exe_rand() % 3 }
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_quest(bool _seer_hut) noexcept
-            : seer_hut(_seer_hut), text_variant(exe_rand() % 3), limit(-1)
+        inline type_quest(bool seer_hut_) noexcept
+            : seer_hut { seer_hut_ }, text_variant { exe_rand() % 3 }
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_quest(bool _seer_hut, int32_t _text_variant) noexcept
-            : seer_hut(_seer_hut), text_variant(_text_variant), limit(-1)
+        inline type_quest(bool seer_hut_, int32_t text_variant_) noexcept
+            : seer_hut { seer_hut_ }, text_variant { text_variant_ }
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_quest(const nh3api::omit_base_vftable_tag_t&) noexcept
-            : text_variant(exe_rand() % 3), limit(-1)
+        inline type_quest(const nh3api::omit_base_vftable_tag_t&) noexcept
+            : text_variant { exe_rand() % 3 }
         {}
 
-        NH3API_FORCEINLINE
-        type_quest(const nh3api::omit_base_vftable_tag_t&, bool _seer_hut) noexcept
-            : seer_hut(_seer_hut), text_variant(exe_rand() % 3), limit(-1)
+        inline type_quest(const nh3api::omit_base_vftable_tag_t&, bool seer_hut_) noexcept
+            : seer_hut { seer_hut_ }, text_variant { exe_rand() % 3 }
         {}
 
-        NH3API_FORCEINLINE
-        type_quest(const nh3api::omit_base_vftable_tag_t&, bool _seer_hut, int32_t _text_variant) noexcept
-            : seer_hut(_seer_hut), text_variant(_text_variant), limit(-1)
+        inline type_quest(const nh3api::omit_base_vftable_tag_t&, bool seer_hut_, int32_t text_variant_) noexcept
+            : seer_hut { seer_hut_ }, text_variant { text_variant_ }
         {}
 
-        NH3API_FORCEINLINE
-        type_quest(const ::nh3api::dummy_tag_t& tag) noexcept
-            : proposal_text(tag), progress_text(tag), completion_text(tag)
+        inline type_quest(const nh3api::dummy_tag_t& tag) noexcept
+            : proposal_text { tag }, progress_text { tag }, completion_text { tag }
         {}
 
-        NH3API_DEFAULT_DESTRUCTOR(type_quest)
+        inline ~type_quest() noexcept = default;
+
+        inline type_quest(const type_quest&)                = default;
+        inline type_quest(type_quest&&) noexcept            = default;
+        inline type_quest& operator=(const type_quest&)     = default;
+        inline type_quest& operator=(type_quest&&) noexcept = default;
 
     public:
         // vftable shift: +0
@@ -135,12 +146,11 @@ NH3API_VIRTUAL_CLASS type_quest
         virtual exe_string* __thiscall get_quest_text(exe_string * out_str) const
         { return get_type_vftable(this)->get_quest_text(this, out_str); } // ABI compability
 
-        [[nodiscard]] NH3API_FORCEINLINE
         // Quest task message /
         // Текст задания квеста.
-        exe_string __thiscall get_quest_text() const
+        [[nodiscard]] inline exe_string __thiscall get_quest_text() const
         {
-            exe_string result(::nh3api::dummy_tag);
+            exe_string result(nh3api::dummy_tag);
             (void) get_quest_text(&result);
             return result;
         } // ABI compability
@@ -149,10 +159,9 @@ NH3API_VIRTUAL_CLASS type_quest
         [[nodiscard]] virtual exe_string* __thiscall get_help_text(exe_string * out_str) const
         { return get_type_vftable(this)->get_help_text(this, out_str); } // ABI compability
 
-        [[nodiscard]] NH3API_FORCEINLINE
-        exe_string __thiscall get_help_text() const
+        [[nodiscard]] inline exe_string __thiscall get_help_text() const
         {
-            exe_string result(::nh3api::dummy_tag);
+            exe_string result(nh3api::dummy_tag);
             (void) get_help_text(&result);
             return result;
         } // ABI compability
@@ -193,10 +202,9 @@ NH3API_VIRTUAL_CLASS type_quest
         virtual void __thiscall init()
         { get_type_vftable(this)->init(this); }
 
-        [[nodiscard]] NH3API_FORCEINLINE
-        exe_string get_completion_text() const
+        [[nodiscard]] inline exe_string get_completion_text() const
         {
-            exe_string result(::nh3api::dummy_tag);
+            exe_string result(nh3api::dummy_tag);
             (void) THISCALL_2(exe_string*, 0x572FF0, this, &result);
             return result;
         }
@@ -207,11 +215,10 @@ NH3API_VIRTUAL_CLASS type_quest
         // offset: +0x4 = +4,  size = 0x1 = 1
         bool seer_hut;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_5[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Initial proposal text /
         // Текст, всплывающий при первом получении игроком квеста
         // offset: +0x8 = +8,  size = 0x10 = 16
@@ -227,17 +234,17 @@ NH3API_VIRTUAL_CLASS type_quest
         // offset: +0x28 = +40,  size = 0x10 = 16
         exe_string completion_text;
 
-        // Random text variant(0,1,2) /
-        // Случайная вариация текста(0,1,2).
+        // Random text variant(0/1/2) /
+        // Случайная вариация текста(0/1/2).
         // offset: +0x38 = +56,  size = 0x4 = 4
         int32_t text_variant;
 
         // Quest duration limit(in days) /
         // Время, в течение которого необходимо выполнить квест(в днях).
         // offset: +0x3C = +60,  size = 0x4 = 4
-        int32_t limit;
+        int32_t limit {-1};
 
-};
+} NH3API_MSVC_LAYOUT;
 
 NH3API_SIZE_ASSERT(0x40, type_quest);
 
@@ -275,23 +282,24 @@ void __thiscall save(TAbstractFile* file) const override \
 { get_type_vftable(this)->save(reinterpret_cast<const CLASS_NAME*>(this), file); } \
 void __thiscall init() override \
 { get_type_vftable(this)->init(reinterpret_cast<CLASS_NAME*>(this)); } \
-NH3API_DEFAULT_DESTRUCTOR(CLASS_NAME)
+inline CLASS_NAME(const CLASS_NAME&) = default; \
+inline CLASS_NAME& operator=(const CLASS_NAME&) = default; \
+inline CLASS_NAME(CLASS_NAME&&) noexcept = default; \
+inline CLASS_NAME& operator=(CLASS_NAME&&) noexcept = default; \
+inline ~CLASS_NAME() noexcept = default;
 #endif // NH3API_VIRTUAL_OVERRIDE_TYPE_QUEST
 
-#pragma pack(push, 4)
 // Hero belonging to player requirement quest /
 // Квест, для выполнения которого необходимо быть героем определённого игрока.
 // size = 0x44 = 68, align = 4, baseclass: type_quest
 NH3API_VIRTUAL_CLASS type_belong_to_player_quest : public type_quest
 {
     public:
-        NH3API_FORCEINLINE
-        type_belong_to_player_quest(bool _seer_hut) noexcept
-            : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
+        inline type_belong_to_player_quest(bool seer_hut_) noexcept
+            : type_quest(nh3api::omit_base_vftable_tag, seer_hut_)
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_belong_to_player_quest(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline type_belong_to_player_quest(const nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -304,22 +312,18 @@ NH3API_VIRTUAL_CLASS type_belong_to_player_quest : public type_quest
         // offset: +0x40 = +64,  size = 0x4 = 4
         int32_t player;
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Specific hero requirement quest /
 // Квест, для выполнения которого необходимо быть определённым героем.
 // size = 0x44 = 68, align = 4, baseclass: type_quest
 NH3API_VIRTUAL_CLASS type_be_hero_quest : public type_quest
 {
     public:
-        NH3API_FORCEINLINE
-        type_be_hero_quest(bool _seer_hut, THeroID _id) noexcept
-            : type_quest(nh3api::omit_base_vftable_tag, _seer_hut), id(_id)
+        inline type_be_hero_quest(bool seer_hut_, THeroID _id) noexcept
+            : type_quest(nh3api::omit_base_vftable_tag, seer_hut_), id(_id)
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_be_hero_quest(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline type_be_hero_quest(const nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -332,22 +336,18 @@ NH3API_VIRTUAL_CLASS type_be_hero_quest : public type_quest
         // offset: +0x40 = +64,  size = 0x4 = 4
         THeroID id;
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Resource pay quest /
 // Квест, для выполнения которого необходимо заплатить ресурсами.
 // size = 0x5C = 92, align = 4, baseclass: type_quest
 NH3API_VIRTUAL_CLASS type_resource_quest : public type_quest
 {
     public:
-        NH3API_FORCEINLINE
-        type_resource_quest(bool _seer_hut) noexcept
-            : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
+        inline type_resource_quest(bool seer_hut_) noexcept
+            : type_quest(nh3api::omit_base_vftable_tag, seer_hut_)
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_resource_quest(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline type_resource_quest(const nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -360,23 +360,19 @@ NH3API_VIRTUAL_CLASS type_resource_quest : public type_quest
         // offset: +0x40 = +64,  size = 0x1C = 28
         std::array<int32_t, 7> resources;
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Creature sacrifice quest /
 // Квест, для выполнения которого необходимо пожертвовать существами из армии.
 // size = 0x60 = 96, align = 4, baseclass: type_quest
 NH3API_VIRTUAL_CLASS type_creature_quest : public type_quest
 {
     public:
-        NH3API_FORCEINLINE
-        type_creature_quest(bool _seer_hut) noexcept
-            : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
+        inline type_creature_quest(bool seer_hut_) noexcept
+            : type_quest(nh3api::omit_base_vftable_tag, seer_hut_)
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_creature_quest(const ::nh3api::dummy_tag_t& tag) noexcept
-            : type_quest(tag), amounts(tag), types(tag)
+        inline type_creature_quest(const nh3api::dummy_tag_t& tag) noexcept
+            : type_quest(tag), amounts{tag}, types{tag}
         {}
 
     public:
@@ -393,23 +389,19 @@ NH3API_VIRTUAL_CLASS type_creature_quest : public type_quest
         // offset: +0x50 = +80,  size = 0x10 = 16
         exe_vector<TCreatureType> types;
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Artifact requirement quest /
 // Квест, для выполнения которого необходимо отдать артефакт.
 // size = 0x50 = 80, align = 4, baseclass: type_quest
 NH3API_VIRTUAL_CLASS type_artifact_quest : public type_quest
 {
     public:
-        NH3API_FORCEINLINE
-        type_artifact_quest(bool _seer_hut) noexcept
-            : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
+        inline type_artifact_quest(bool seer_hut_) noexcept
+            : type_quest(nh3api::omit_base_vftable_tag, seer_hut_)
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_artifact_quest(const ::nh3api::dummy_tag_t& tag) noexcept
-            : type_quest(tag), artifacts(tag)
+        inline type_artifact_quest(const nh3api::dummy_tag_t& tag) noexcept
+            : type_quest(tag), artifacts{tag}
         {}
 
     public:
@@ -421,22 +413,18 @@ NH3API_VIRTUAL_CLASS type_artifact_quest : public type_quest
         // offset: +0x40 = +64,  size = 0x10 = 16
         exe_vector<TArtifact> artifacts;
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Defeat the monster quest /
 // Квест, для выполнения которого необходимо убить определённого монстра.
 // size = 0x50 = 80, align = 4, baseclass: type_quest
 NH3API_VIRTUAL_CLASS type_monster_quest : public type_quest
 {
     public:
-        NH3API_FORCEINLINE
-        type_monster_quest(bool _seer_hut) noexcept
-            : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
+        inline type_monster_quest(bool seer_hut_) noexcept
+            : type_quest(nh3api::omit_base_vftable_tag, seer_hut_)
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_monster_quest(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline type_monster_quest(const nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -465,22 +453,18 @@ NH3API_VIRTUAL_CLASS type_monster_quest : public type_quest
         int32_t killer;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Defeat the hero quest /
 // Квест, для выполнения которого необходимо убить определённого героя.
 // size = 0x4C = 76, align = 4, baseclass: type_quest
 NH3API_VIRTUAL_CLASS type_defeat_hero_quest : public type_quest
 {
     public:
-        NH3API_FORCEINLINE
-        type_defeat_hero_quest(bool _seer_hut) noexcept
-            : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
+        inline type_defeat_hero_quest(bool seer_hut_) noexcept
+            : type_quest(nh3api::omit_base_vftable_tag, seer_hut_)
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_defeat_hero_quest(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline type_defeat_hero_quest(const nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag), completed(tag)
         {}
 
@@ -504,22 +488,18 @@ NH3API_VIRTUAL_CLASS type_defeat_hero_quest : public type_quest
         exe_bitset<MAX_PLAYERS> completed;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Primary skills quest: guest hero must have the required set of primary skills /
 // Квест первичного навыка: герой-гость должен обладать необходимым набором значений первичных навыков для выполнения квеста.
 // size = 0x44 = 68, align = 4, baseclass: type_quest
 NH3API_VIRTUAL_CLASS type_skill_quest : public type_quest
 {
     public:
-        NH3API_FORCEINLINE
-        type_skill_quest(bool _seer_hut) noexcept
-            : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
+        inline type_skill_quest(bool seer_hut_) noexcept
+            : type_quest(nh3api::omit_base_vftable_tag, seer_hut_)
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_skill_quest(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline type_skill_quest(const nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -532,22 +512,18 @@ NH3API_VIRTUAL_CLASS type_skill_quest : public type_quest
         // offset: +0x40 = +64,  size = 0x4 = 4
         std::array<int8_t, kNumPrimarySkills> skill;
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Experience requirement quest /
 // Квест, для выполнения которого герой-гость должен достигнуть определенного уровня опыта.
 // size = 0x44 = 68, align = 4, baseclass: type_quest
 NH3API_VIRTUAL_CLASS type_experience_quest : public type_quest
 {
     public:
-        NH3API_FORCEINLINE
-        type_experience_quest(bool _seer_hut) noexcept
-            : type_quest(nh3api::omit_base_vftable_tag, _seer_hut)
+        inline type_experience_quest(bool seer_hut_) noexcept
+            : type_quest(nh3api::omit_base_vftable_tag, seer_hut_)
         { NH3API_SET_VFTABLE(); }
 
-        NH3API_FORCEINLINE
-        type_experience_quest(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline type_experience_quest(const nh3api::dummy_tag_t& tag) noexcept
             : type_quest(tag)
         {}
 
@@ -560,7 +536,7 @@ NH3API_VIRTUAL_CLASS type_experience_quest : public type_quest
         // offset: +0x40 = +64,  size = 0x4 = 4
         int32_t level;
 };
-#pragma pack(pop)
+#pragma pack(pop) // 4
 
 #pragma pack(push, 1)
 // Quest guard /
@@ -569,36 +545,31 @@ NH3API_VIRTUAL_CLASS type_experience_quest : public type_quest
 class TQuestGuard
 {
     public:
-        NH3API_FORCEINLINE
-        TQuestGuard() noexcept
-        NH3API_DELEGATE_DUMMY(TQuestGuard)
+        inline TQuestGuard() noexcept
+            : TQuestGuard(nh3api::dummy_tag)
         { THISCALL_1(void, 0x573950, this); }
 
-        NH3API_FORCEINLINE
-        TQuestGuard(const ::nh3api::dummy_tag_t&) noexcept
+        inline TQuestGuard(const nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
-        [[nodiscard]] NH3API_FORCEINLINE
-        exe_string getLogText() const
+        [[nodiscard]] inline exe_string getLogText() const
         {
-            exe_string result(::nh3api::dummy_tag);
+            exe_string result(nh3api::dummy_tag);
             (void) THISCALL_2(exe_string*, 0x573130, this, &result);
             return result;
         }
 
-        [[nodiscard]] NH3API_FORCEINLINE
-        exe_string getQuickViewText(int32_t player) const
+        [[nodiscard]] inline exe_string getQuickViewText(int32_t player) const
         {
-            exe_string result(::nh3api::dummy_tag);
+            exe_string result(nh3api::dummy_tag);
             (void) THISCALL_3(exe_string*, 0x573210, this, &result, player);
             return result;
         }
 
-        [[nodiscard]] NH3API_FORCEINLINE
-        exe_string getRolloverText(int32_t player) const
+        [[nodiscard]] inline exe_string getRolloverText(int32_t player) const
         {
-            exe_string result(::nh3api::dummy_tag);
+            exe_string result(nh3api::dummy_tag);
             (void) THISCALL_3(exe_string*, 0x573410, this, &result, player);
             return result;
         }
@@ -624,7 +595,7 @@ class TQuestGuard
         uint8_t visitedPlayers;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 1
 
 // Seer hut reward type /
 // Тип вознаграждения хижины провидца.
@@ -643,6 +614,11 @@ enum TSeerRewardType : uint32_t
     eRewardCreature       = 10, // Существо
 };
 
+template<>
+struct nh3api::enum_limits<TSeerRewardType>
+    : nh3api::enum_limits_base<TSeerRewardType, eRewardExperience, eRewardCreature>
+{ static inline constexpr bool is_specialized = true; };
+
 #pragma pack(push, 4)
 // Seer hut quest completion reward as a creature /
 // Награда хижины провидца - существо.
@@ -660,19 +636,16 @@ public:
     // offset: +0x4 = +4,  size = 0x2 = 2
     int16_t numTroops;
 
-protected:
-    std::byte gap6[2];
+    unsigned char : 8;
+    unsigned char : 8;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
 
-#pragma pack(push, 4)
 // Seer hut quest completion reward as a game resource /
 // Награда хижины провидца - игровой ресурс.
 // size = 0x8 = 8, align = 4
 struct TSeerResourceReward
 {
-public:
     // Resource type /
     // Тип ресурса.
     // offset: +0x0 = +0,  size = 0x4 = 4
@@ -684,15 +657,12 @@ public:
     uint32_t resQty;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Seer hut quest completion reward as a primary skill /
 // Награда хижины провидца - первичный навык.
 // size = 0x8 = 8, align = 4
 struct TSeerPrimarySkillReward
 {
-public:
     // Primary skill type /
     // Тип первичного навыка.
     // offset: +0x0 = +0,  size = 0x4 = 4
@@ -702,27 +672,18 @@ public:
     // Уровень первичного навыка.
     // offset: +0x4 = +4,  size = 0x1 = 1
     uint8_t bonus;
-protected:
-    std::byte gap5[3];
 
-};
-#pragma pack(pop)
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-#pragma pack(push, 4)
+} NH3API_MSVC_LAYOUT;
+
 // Seerhut reward /
 // Информация о вознаграждении хижины провидца.
 // size = 0xC = 12, align = 4
 struct TSeerReward
 {
-    public:
-        NH3API_FORCEINLINE
-        TSeerReward() noexcept
-        { nh3api::trivial_zero<sizeof(*this)>(this); }
-
-        NH3API_FORCEINLINE
-        TSeerReward(const ::nh3api::dummy_tag_t&) noexcept
-        {}
-
     public:
         [[nodiscard]] int32_t getValue(const hero* current_hero)
         { return THISCALL_2(int32_t, 0x573E40, this, current_hero); }
@@ -736,52 +697,62 @@ struct TSeerReward
     public:
         // Reward type /
         // Тип вознаграждения хижины провидца.
-        // offset: +0x0 = +5,  size = 0x4 = 4
+        // offset: +0x0 = +0,  size = 0x4 = 4
         TSeerRewardType rewardType;
 
-        union
-        {
-            // Experience increment reward /
-            // Кол-во опыта в виде вознаграждения.
-            int32_t ExperienceBonus;
+    union
+    {
+        // Experience increment reward /
+        // Кол-во опыта в виде вознаграждения.
+        // offset: +0x4 = +4 (union member),  size = 0x4 = 4
+        int32_t ExperienceBonus;
 
-            // Mana reward /
-            // Вознаграждение в виде маны.
-            int32_t ManaBonus;
+        // Mana reward /
+        // Вознаграждение в виде маны.
+        // offset: +0x4 = +4 (union member),  size = 0x4 = 4
+        int32_t ManaBonus;
 
-            // Morale reward /
-            // Вознаграждение в виде боевого духа.
-            int8_t MoraleBonus;
+        // Morale reward /
+        // Вознаграждение в виде боевого духа.
+        // offset: +0x4 = +4 (union member),  size = 0x1 = 1
+        int8_t MoraleBonus;
 
-            // Luck reward /
-            // Вознаграждение в виде удачи.
-            int8_t LuckBonus;
+        // Luck reward /
+        // Вознаграждение в виде удачи.
+        // offset: +0x4 = +4 (union member),  size = 0x1 = 1
+        int8_t LuckBonus;
 
-            // Resource reward /
-            // Вознаграждение в виде ресурсов
-            TSeerResourceReward ResourceReward;
+        // Resource reward /
+        // Вознаграждение в виде ресурсов
+        // offset: +0x4 = +4 (union member),  size = 0x8 = 8
+        TSeerResourceReward ResourceReward;
 
-            // Primary skill increment reward /
-            // Увеличение уровня первичного навыка в виде вознаграждения.
-            TSeerPrimarySkillReward PrimarySkillReward;
+        // Primary skill increment reward /
+        // Увеличение уровня первичного навыка в виде вознаграждения.
+        // offset: +0x4 = +4 (union member),  size = 0x8 = 8
+        TSeerPrimarySkillReward PrimarySkillReward;
 
-            // Secondary skill learning reward /
-            // Обучение вторичным навыком в качестве вознаграждения.
-            SecondarySkillData SecondarySkillReward;
+        // Secondary skill learning reward /
+        // Обучение вторичным навыком в качестве вознаграждения.
+        // offset: +0x4 = +4 (union member),  size = 0x8 = 8
+        SecondarySkillData SecondarySkillReward;
 
-            // Artifact reward /
-            // Вознаграждение в виде артефакта.
-            TArtifact ArtifactReward;
+        // Artifact reward /
+        // Вознаграждение в виде артефакта.
+        // offset: +0x4 = +4 (union member),  size = 0x4 = 4
+        TArtifact ArtifactReward;
 
-            // Spell learning reward /
-            // Обучение заклинанию в качестве вознаграждения.
-            SpellID SpellReward;
+        // Spell learning reward /
+        // Обучение заклинанию в качестве вознаграждения.
+        // offset: +0x4 = +4 (union member),  size = 0x4 = 4
+        SpellID SpellReward;
 
-            // Creature reward /
-            // Вознаграждение в существа.
-            TCreatureStack CreatureReward;
+        // Creature reward /
+        // Вознаграждение в существа.
+        // offset: +0x4 = +4 (union member),  size = 0x8 = 8
+        TCreatureStack CreatureReward;
 
-        } NH3API_MSVC_LAYOUT;
+    } NH3API_MSVC_LAYOUT;
 };
 #pragma pack(pop)
 
@@ -792,14 +763,12 @@ struct TSeerReward
 class TSeerHut : TQuestGuard
 {
     public:
-        NH3API_FORCEINLINE
-        TSeerHut() noexcept
-        NH3API_DELEGATE_DUMMY(TSeerHut)
+        inline TSeerHut() noexcept
+            : TSeerHut(nh3api::dummy_tag)
         { THISCALL_1(void, 0x573950, this); }
 
-        NH3API_FORCEINLINE
-        TSeerHut(const ::nh3api::dummy_tag_t& tag) noexcept
-            : TQuestGuard(tag), reward(tag)
+        inline TSeerHut(const nh3api::dummy_tag_t& tag) noexcept
+            : TQuestGuard{ tag }
         {}
 
     public:
@@ -813,13 +782,10 @@ class TSeerHut : TQuestGuard
         // offset: +0x11 = +17,  size = 0x1 = 1
         int8_t      NameIndex;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x12 = +18,  size = 0x1 = 1
-        int8_t unused;
+        unsigned char : 8;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 1
 
 #pragma pack(push, 4)
 // size = 0x8 = 8, align = 4
@@ -832,7 +798,7 @@ struct QuestMonster
     type_point point;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 4
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x64175C, type_quest)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x641798, type_experience_quest)
@@ -845,8 +811,7 @@ NH3API_SPECIALIZE_TYPE_VFTABLE(0x641900, type_resource_quest)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x64193C, type_be_hero_quest)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x641978, type_belong_to_player_quest)
 
-[[nodiscard]] NH3API_FORCEINLINE
-type_quest* create_quest(EQuestType quest_type, bool hut) noexcept
+[[nodiscard]] inline type_quest* create_quest(EQuestType quest_type, bool hut)
 { return FASTCALL_2(type_quest*, 0x573610, quest_type, static_cast<bool32_t>(hut)); }
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

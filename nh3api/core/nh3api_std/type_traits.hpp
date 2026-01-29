@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include <utility>
 #include <type_traits>
+#include <utility>
 #ifdef __cpp_lib_concepts
 #include <concepts>
 #endif
@@ -50,9 +50,13 @@ using ::std::is_same;
 using ::std::alignment_of;
 #ifdef __cpp_lib_type_identity
 using ::std::type_identity;
+using ::std::type_identity_t;
 #else
 template<class T> struct type_identity
 { using type = T; };
+
+template<class T>
+using type_identity_t = typename type_identity<T>::type;
 #endif
 using ::std::conditional;
 using ::std::is_convertible;

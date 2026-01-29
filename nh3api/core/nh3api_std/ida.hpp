@@ -15,11 +15,12 @@
 
 #pragma once
 
-#include <intrin.h>
-#include <limits>
-#include <type_traits>
-#ifdef __cpp_lib_concepts
-#include <concepts>
+#include <cstdint>
+#include <cstring>     // std::memcpy, std::memset
+#include <limits>      // std::numeric_limits
+#include <type_traits> // std::common_type_t, std::enable_if_t, std::make_unsigned_t
+#if (__cplusplus >= 202002L) || defined(__cpp_lib_concepts)
+#include <concepts>    // std::integral
 #endif
 
 #include "nh3api_std.hpp"
@@ -35,27 +36,17 @@ using _WORD = uint16_t;
 using _DWORD = uint32_t;
 // 64 bits
 using _QWORD = uint64_t;
-// 128 bits SSE2
-using _OWORD = __m128i;
 
 // Non-standard boolean types. They are used when the decompiler can not use
 // the standard "bool" type because of the size mistmatch but the possible
 // values are only 0 and 1. See also 'BOOL' type below.
 
-// 8 bits
-using _BOOL1 = int8_t;
-// 16 bits
-using _BOOL2 = int16_t;
-// 32 bits
-using _BOOL4 = int32_t;
-
-#ifndef __pure
-    #if NH3API_CHECK_MSVC_DRIVER
-        #define __pure __declspec(noalias) // not quite the same but similiar
-    #else
-        #define __pure __attribute__((__pure__))
-    #endif
-#endif
+// 8 bits bool
+using _BOOL1 = uint8_t;
+// 16 bits bool
+using _BOOL2 = uint16_t;
+// 32 bits bool
+using _BOOL4 = uint32_t;
 
 #ifndef __noreturn
     #if NH3API_CHECK_MSVC_DRIVER
@@ -63,16 +54,6 @@ using _BOOL4 = int32_t;
     #else
         #define __noreturn __attribute__((__noreturn__))
     #endif
-#endif
-
-#ifndef __cppobj
-    #define __cppobj
-    #define __hidden
-    #define __return_ptr
-    #define __struct_ptr
-    #define __array_ptr
-    #define __unused
-    #define __high
 #endif
 
 #ifndef LAST_IND
@@ -137,9 +118,9 @@ using _BOOL4 = int32_t;
 
 #ifndef SBYTEn
     // now signed macros (the same but with sign extension)
-    #define SBYTEn(x, n)   (*((int8_t*)&(x)+n))
-    #define SWORDn(x, n)   (*((int16_t*)&(x)+n))
-    #define SDWORDn(x, n)  (*((int32_t*)&(x)+n))
+    #define SBYTEn(x, n)   (*((int8_t*)&(x)+(n)))
+    #define SWORDn(x, n)   (*((int16_t*)&(x)+(n)))
+    #define SDWORDn(x, n)  (*((int32_t*)&(x)+(n)))
 #endif
 
 #ifndef SLOBYTE
@@ -174,7 +155,11 @@ using _BOOL4 = int32_t;
 #endif
 
 #ifndef NH3API_IDA_INTRIN
-    #define NH3API_IDA_INTRIN constexpr NH3API_FORCEINLINE __pure
+    #if NH3API_CHECK_MSVC
+        #define NH3API_IDA_INTRIN inline constexpr __declspec(noalias)
+    #else
+        #define NH3API_IDA_INTRIN [[__gnu__::__pure__]] inline constexpr
+    #endif
 #endif
 
 #ifndef NH3API_IDA_INTEGRAL_TEMPLATE
@@ -210,68 +195,88 @@ NH3API_IDA_INTRIN T saturated_mul(T count, T elsize) noexcept
     T result;
     if ( __builtin_mul_overflow(count, elsize, &result) )
         return (std::numeric_limits<T>::max)();
-    else
-        return result;
+
+    return result;
     #else
     return is_mul_ok(count, elsize) ? count * elsize : (std::numeric_limits<T>::max)();
     #endif
 }
 
 #if NH3API_CHECK_MSVC
-#pragma intrinsic(__movsb)
+void __movsb(unsigned char*, unsigned char const*, size_t);
 #endif
 
-// memcpy() with determined behavoir: it always copies
+// memcpy() with determined behavior: it always copies
 // from the start to the end of the buffer
 // note: it copies byte by byte, so it is not equivalent to, for example, rep movsd
 NH3API_FORCEINLINE void* qmemcpy(void* dst, const void* src, size_t count) noexcept
 {
+    #if NH3API_CHECK_MSVC
     __movsb(static_cast<unsigned char*>(dst), static_cast<const unsigned char*>(src), count);
+    #else
+    __asm__ __volatile__("xchg {%%esi, %1|%1, esi}\n"
+                         "rep movsb\n"
+                         "xchg {%%esi, %1|%1, esi}"
+                         : "+D"(dst), "+r"(src), "+c"(count)
+                         :
+                         : "memory");
+    #endif
     return dst;
 }
 
 #if NH3API_CHECK_MSVC
-#pragma intrinsic(__stosd)
+void __stosd(unsigned long*, unsigned long, size_t);
 #endif
 
-NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wattributes")
+NH3API_WARNING_MSVC_DISABLE(4714)
 
-NH3API_FORCEINLINE void memset32(unsigned long* dst, const unsigned long value, size_t count) noexcept
-{ __stosd(dst, value, count); }
+NH3API_FORCEINLINE void memset32(void* dst, unsigned long value, size_t count) noexcept
+{
+    #if NH3API_CHECK_MSVC
+    __stosd(reinterpret_cast<unsigned long*>(dst), static_cast<unsigned long>(value), count);
+    #else
+    __asm__ __volatile__("rep stos{l|d}"
+                       : "+D"(dst), "+c"(count)
+                       : "a"(value)
+                       : "memory");
+    #endif
+}
 
-NH3API_FORCEINLINE void memset_0(void* ptr, size_t size) noexcept
+inline void memset_0(void* ptr, size_t size) noexcept
 { std::memset(ptr, 0, size); }
 
 template<typename T>
-NH3API_FORCEINLINE void memset_0(T* ptr) noexcept
+inline void memset_0(T* ptr) noexcept
 { std::memset(ptr, 0, sizeof(T)); }
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)
 
 // Generate a reference to pair of operands
 template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
 NH3API_IDA_INTRIN int16_t __PAIR__(int8_t  high, T low) noexcept
-{ return ((static_cast<int16_t>(high)) << sizeof(high) * 8) | static_cast<int16_t>(low); }
+{ return ((static_cast<int16_t>(high)) << static_cast<int16_t>(sizeof(high) * 8U)) | static_cast<int16_t>(low); }
 
 template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
 NH3API_IDA_INTRIN int32_t __PAIR__(int16_t high, T low) noexcept
-{ return ((static_cast<int32_t>(high)) << sizeof(high) * 8) | static_cast<int32_t>(low); }
+{ return ((static_cast<int32_t>(high)) << static_cast<int32_t>(sizeof(high) * 8U)) | static_cast<int32_t>(low); }
 
 template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
 NH3API_IDA_INTRIN int64_t __PAIR__(int32_t high, T low) noexcept
-{ return ((static_cast<int64_t>(high)) << sizeof(high) * 8) | static_cast<int64_t>(low); }
+{ return ((static_cast<int64_t>(high)) << static_cast<int64_t>(sizeof(high) * 8U)) | static_cast<int64_t>(low); }
 
 template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
 NH3API_IDA_INTRIN uint16_t __PAIR__(uint8_t high, T low) noexcept
-{ return ((static_cast<uint16_t>(high)) << sizeof(high) * 8) | static_cast<uint16_t>(low); }
+{ return ((static_cast<uint16_t>(high)) << static_cast<uint16_t>(sizeof(high) * 8U)) | static_cast<uint16_t>(low); }
 
 template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
 NH3API_IDA_INTRIN uint32_t __PAIR__(uint16_t high, T low) noexcept
-{ return ((static_cast<uint32_t>(high)) << sizeof(high) * 8) | static_cast<uint32_t>(low); }
+{ return ((static_cast<uint32_t>(high)) << sizeof(high) * 8U) | static_cast<uint32_t>(low); }
 
 template<NH3API_IDA_INTEGRAL_TEMPLATE(T)>
 NH3API_IDA_INTRIN uint64_t __PAIR__(uint32_t high, T low) noexcept
-{ return ((static_cast<uint64_t>(high)) << sizeof(high) * 8) | static_cast<uint64_t>(low); }
+{ return ((static_cast<uint64_t>(high)) << sizeof(high) * 8U) | static_cast<uint64_t>(low); }
 
 NH3API_IDA_INTRIN uint16_t __PAIR16__ (uint8_t  high, uint8_t  low) noexcept { return static_cast<uint16_t>((( static_cast<uint16_t>(high)) << UINT16_C(8))  | static_cast<uint16_t>(low)); }
 NH3API_IDA_INTRIN uint32_t __PAIR32__ (uint16_t high, uint16_t low) noexcept { return (( static_cast<uint32_t>(high)) << UINT32_C(16)) | static_cast<uint32_t>(low); }
@@ -294,10 +299,10 @@ T __ROL__(T value, size_t count) noexcept
         return __builtin_rotateleft32(value, count);
     else if constexpr (sizeof(T) == 8)
         return __builtin_rotateleft64(value, count);
-    #if NH3API_HAS_BUILTIN(__builtin_unreachable)
+#if NH3API_HAS_BUILTIN(__builtin_unreachable)
     else
         __builtin_unreachable();
-    #endif
+#endif
 }
 
 // rotate left
@@ -312,10 +317,10 @@ T __ROR__(T value, size_t count) noexcept
         return __builtin_rotateright32(value, count);
     else if constexpr (sizeof(T) == 8)
         return __builtin_rotateright64(value, count);
-    #if NH3API_HAS_BUILTIN(__builtin_unreachable)
+#if NH3API_HAS_BUILTIN(__builtin_unreachable)
     else
         __builtin_unreachable();
-    #endif
+#endif
 }
 
 NH3API_IDA_INTRIN uint8_t  __ROL1__(uint8_t  value, uint8_t count)  noexcept { return __builtin_rotateleft8(value, count); }
@@ -391,28 +396,26 @@ int8_t __SETS__(T x) noexcept
 template<NH3API_IDA_INTEGRAL_TEMPLATE(T)> NH3API_IDA_INTRIN
 int32_t __SETP__(T x, T y)
 {
-    #if NH3API_HAS_BUILTIN(__builtin_parityg)
+#if NH3API_HAS_BUILTIN(__builtin_parityg)
         return __builtin_parityg(x - y);
-    #elif NH3API_HAS_BUILTIN(__builtin_parity) && NH3API_HAS_BUILTIN(__builtin_parityll)
+#elif NH3API_HAS_BUILTIN(__builtin_parity) && NH3API_HAS_BUILTIN(__builtin_parityll)
     if constexpr (sizeof(T) == 8)
         return __builtin_parityll(x - y);
     else if constexpr (sizeof(T) == 4)
         return __builtin_parity(x - y);
-    else if constexpr (sizeof(T) == 2)
+    else if constexpr (sizeof(T) == 1 || sizeof(T) == 2)
         return __builtin_parity(static_cast<uint32_t>(x - y));
-    else if constexpr (sizeof(T) == 1)
-        return __builtin_parity(static_cast<uint32_t>(x - y));
-    #if NH3API_HAS_BUILTIN(__builtin_unreachable)
+#if NH3API_HAS_BUILTIN(__builtin_unreachable)
     else
         __builtin_unreachable();
-    #endif
-    #else
+#endif
+#else
         T diff = x - y;
         int32_t parity = 0;
         for (size_t i = 0; i < sizeof(T) * 8; ++i)
             parity ^= (diff >> i) & 1;
         return parity;
-    #endif
+#endif
 }
 
 // overflow flag of subtraction (x-y)
@@ -468,10 +471,10 @@ template<NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U)> NH3API_IDA_INTRIN
 int8_t __CFSUB__(T x, U y) noexcept
 {
     using common_type = std::make_unsigned_t<std::common_type_t<T, U>>;
-    #if NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subcb) && \
-        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subcs) && \
-        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subc) && \
-        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subcll)
+#if NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subcb) && \
+    NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subcs) && \
+    NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subc) && \
+    NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_subcll)
     const common_type ux = static_cast<common_type>(x);
     const common_type uy = static_cast<common_type>(y);
     common_type carryout;
@@ -486,9 +489,9 @@ int8_t __CFSUB__(T x, U y) noexcept
     else
         return ux < uy;
     return static_cast<int8_t>(carryout);
-    #else
+#else
     return (static_cast<common_type>(x) < static_cast<common_type>(y));
-    #endif
+#endif
 }
 
 // carry flag of addition (x+y)
@@ -496,10 +499,10 @@ template<NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U)> NH3API_IDA_INTRIN
 int8_t __CFADD__(T x, U y) noexcept
 {
     using common_type = std::make_unsigned_t<std::common_type_t<T, U>>;
-    #if NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addcb) && \
-        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addcs) && \
-        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addc) && \
-        NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addcll)
+#if NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addcb) && \
+    NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addcs) && \
+    NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addc) && \
+    NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_addcll)
     common_type ux = static_cast<common_type>(x);
     common_type uy = static_cast<common_type>(y);
     common_type carryout;
@@ -518,10 +521,10 @@ int8_t __CFADD__(T x, U y) noexcept
         return (sum < ux || sum < uy);
     }
     return static_cast<int8_t>(carryout);
-    #else
+#else
     common_type sum = static_cast<common_type>(x) + static_cast<common_type>(y);
     return (sum < static_cast<common_type>(x) || sum < static_cast<common_type>(y));
-    #endif
+#endif
 }
 
 NH3API_IDA_INTRIN int8_t abs8(int8_t  x) noexcept
@@ -532,20 +535,20 @@ NH3API_IDA_INTRIN int16_t abs16(int16_t x) noexcept
 
 NH3API_IDA_INTRIN int32_t abs32(int32_t x) noexcept
 {
-    #if NH3API_HAS_BUILTIN(__builtin_abs)
+#if NH3API_HAS_BUILTIN(__builtin_abs)
     return __builtin_abs(x);
-    #else
+#else
     return x >= 0 ? x : -x;
-    #endif
+#endif
 }
 
 NH3API_IDA_INTRIN int64_t abs64(int64_t x) noexcept
 {
-    #if NH3API_HAS_BUILTIN(__builtin_llabs)
+#if NH3API_HAS_BUILTIN(__builtin_llabs)
     return __builtin_llabs(x);
-    #else
+#else
     return x >= 0 ? x : -x;
-    #endif
+#endif
 }
 
 #ifndef COERCE_FLOAT

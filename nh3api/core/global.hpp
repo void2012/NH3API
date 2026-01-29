@@ -9,13 +9,15 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "town.hpp" // town, TownExtra
-#include "hero.hpp" // hero, HeroExtra
-#include "campaign.hpp" // SCampaign
-#include "map.hpp" // NewfullMap
+#include "campaign.hpp"    // SCampaign
+#include "hero.hpp"        // hero, HeroExtra
+#include "map.hpp"         // NewfullMap
 #include "multiplayer.hpp" // eNetGameType
+#include "town.hpp"        // town, TownExtra
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 enum type_action_type : int32_t
 {
@@ -25,12 +27,86 @@ enum type_action_type : int32_t
     const_recorded_action       = 3  //
 };
 
-#pragma pack(push, 1)
+template<>
+struct nh3api::enum_limits<type_action_type>
+    : nh3api::enum_limits_base<type_action_type, const_initialization_action, const_recorded_action>
+{ static inline constexpr bool is_specialized = true; };
+
+enum type_event_record_type : uint32_t
+{
+    const_record_none         = 0, //
+    const_record_move_hero    = 1, //
+    const_record_teleport     = 2, //
+    const_record_claim_mine   = 3, //
+    const_record_claim_town   = 4, //
+    const_record_hide_boat    = 5, //
+    const_record_show_boat    = 6, //
+    const_record_erase        = 7, //
+    const_record_hide_hero    = 8, //
+    const_record_show_hero    = 9, //
+    const_record_player_death = 10, //
+    const_record_shroud       = 11, //
+};
+
+template<>
+struct nh3api::enum_limits<type_event_record_type>
+    : nh3api::enum_limits_base<type_event_record_type, const_record_move_hero, const_record_shroud>
+{ static inline constexpr bool is_specialized = true; };
+
+#pragma pack(push, 4)
+// Turn player actions for the replay /
+// Действия игрока, воспроизводимые кнопкой "повторить ход".
+// size = 0x8 = 8, align = 4
+struct type_event_record
+{
+    public:
+        struct vftable_t
+        {
+            void (__thiscall* scalar_deleting_destructor)(type_event_record*, uint8_t);
+            type_event_record_type (__thiscall* get_type)(const type_event_record*);
+            bool (__thiscall* load)(type_event_record*, TAbstractFile*, int32_t);
+            bool (__thiscall* save)(const type_event_record*, TAbstractFile*, int32_t);
+            void (__thiscall* replay)(type_event_record*, bool);
+            void (__thiscall* undo)(type_event_record*);
+        };
+
+    public:
+        [[nodiscard]] int8_t get_player_id() const noexcept
+        { return player_id; }
+
+    public:
+        NH3API_SCALAR_DELETING_DESTRUCTOR
+
+        // vftable shift: +4
+        virtual type_event_record_type __thiscall get_type() const
+        { return get_vftable(this)->get_type(this); }
+
+        // vftable shift: +8
+        virtual bool __thiscall load(TAbstractFile* file, int32_t version)
+        { return get_vftable(this)->load(this, file, version); }
+
+        // vftable shift: +12
+        virtual bool __thiscall save(TAbstractFile* file, int32_t version) const
+        { return get_vftable(this)->save(this, file, version); }
+
+        // vftable shift: +16
+        virtual void __thiscall replay(bool a1)
+        { get_vftable(this)->replay(this, a1); }
+
+        // vftable shift: +20
+        virtual void __thiscall undo()
+        { get_vftable(this)->undo(this); }
+
+    public:
+        // offset: +0x4 = +4,  size = 0x1 = 1
+        int8_t player_id;
+
+};
+
 // size = 0x4E7D0 = 321488, align = 1
 class game
 {
     public:
-        #pragma pack(push, 4)
         // size = 0x14 = 20, align = 4
         struct TRumour
         {
@@ -40,57 +116,77 @@ class game
             // offset: +0x10 = +16,  size = 0x1 = 1
             bool Unavailable;
 
-        protected:
-            [[maybe_unused]]
-            // offset: +0x11 = +17,  size = 0x3 = 3
-            std::byte gap_11[3];
-        };
-        #pragma pack(pop)
+            unsigned char : 8;
+            unsigned char : 8;
+            unsigned char : 8;
+        } NH3API_MSVC_LAYOUT;
 
     public:
-        NH3API_FORCEINLINE
-        game() noexcept
+        inline game() noexcept
+            : game(nh3api::dummy_tag)
         { THISCALL_1(void, 0x4CDBE0, this); }
 
-        NH3API_FORCEINLINE
-        game(const ::nh3api::dummy_tag_t& tag) noexcept
-            : townExtraPool(tag),
-              sCampaign(tag),
-              BlackMarkets(tag),
-              sMapHeader(tag),
-              worldMap(tag),
-              player{{tag, tag, tag, tag, tag, tag, tag, tag}},
-              townPool(tag),
-              signPool(tag),
-              minePool(tag),
-              generatorPool(tag),
-              garrisonPool(tag),
-              boatPool(tag),
-              university_pool(tag),
-              creature_banks(tag),
-              MapRumours(tag),
-              whirlpools(tag),
-              underground_gates(tag),
-              underground_gate_exits(tag),
-              recorded_events(tag),
-              quest_monsters(tag)
+        inline game(const nh3api::dummy_tag_t& tag) noexcept
+            : townExtraPool { tag },
+              sCampaign { tag },
+              BlackMarkets { tag },
+              sMapHeader { tag },
+              worldMap { tag },
+              player { { tag, tag, tag, tag, tag, tag, tag, tag } },
+              townPool { tag },
+              signPool { tag },
+              minePool { tag },
+              generatorPool { tag },
+              garrisonPool { tag },
+              boatPool { tag },
+              university_pool { tag },
+              creature_banks { tag },
+              MapRumours { tag },
+              whirlpools { tag },
+              underground_gates { tag },
+              underground_gate_exits { tag },
+              recorded_events { tag },
+              quest_monsters { tag }
         { THISCALL_1(void, 0x4CDBE0, this); }
 
-        game(const game& other) = delete;
-        game(game&& other) = delete;
+        game(const game& other)            = delete;
+        game(game&& other)                 = delete;
         game& operator=(const game& other) = delete;
-        game& operator=(game&& other) = delete;
+        game& operator=(game&& other)      = delete;
 
-        NH3API_FORCEINLINE
-        ~game() noexcept
+        inline ~game() noexcept
         { THISCALL_1(void, 0x4CE270, this); }
 
     public:
-        [[nodiscard]] bool IsMultiplayer() const
-        { return THISCALL_1(bool, 0x4CE950, this); }
+        [[nodiscard]] bool is_human_ally(int32_t player_number) const
+        { return THISCALL_2(bool, 0x42B9E0, this, player_number); }
+
+        [[nodiscard]] town* GetTown(int32_t whichTown)
+        { return THISCALL_2(town*, 0x42BA30, this, whichTown); }
+
+        [[nodiscard]] const town* GetTown(int32_t whichTown) const
+        { return THISCALL_2(town*, 0x42BA30, this, whichTown); }
+
+        [[nodiscard]] int32_t GetNumMapLevels() const
+        { return worldMap.HasTwoLevels ? 2 : 1; }
 
         [[nodiscard]] bool OnSameTeam(int32_t player1, int32_t player2) const
         { return THISCALL_3(bool, 0x529BB0, this, player1, player2); }
+
+        [[nodiscard]] NewmapCell* get_cell(type_point point)
+        { return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
+
+        [[nodiscard]] const NewmapCell* get_cell(type_point point) const
+        { return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
+
+        [[nodiscard]] NewmapCell* get_cell(uint8_t x, uint8_t y, uint8_t z)
+        { return &this->worldMap.cellData[x + this->worldMap.Size * (y + z * this->worldMap.Size)]; }
+
+        [[nodiscard]] const NewmapCell* get_cell(uint8_t x, uint8_t y, uint8_t z) const
+        { return &this->worldMap.cellData[x + this->worldMap.Size * (y + z * this->worldMap.Size)]; }
+
+        [[nodiscard]] bool IsMultiplayer() const
+        { return THISCALL_1(bool, 0x4CE950, this); }
 
         [[nodiscard]] bool IsHuman(int32_t gamePos) const
         { return THISCALL_2(bool, 0x4CE600, this, gamePos); }
@@ -107,32 +203,11 @@ class game
         [[nodiscard]] int32_t GetLocalPlayerGamePos() const
         { return THISCALL_1(int32_t, 0x4CE6E0, this); }
 
-        [[nodiscard]] bool is_human_ally(int32_t player_number) const
-        { return THISCALL_2(bool, 0x42B9E0, this, player_number); }
-
         [[nodiscard]] const char* GetPlayerName(int32_t player_id)
         { return THISCALL_2(char*, 0x4CE820, this, player_id); }
 
         [[nodiscard]] int32_t GetTeam(int32_t player_id) const
         { return THISCALL_2(int32_t, 0x4A55D0, this, player_id); }
-
-        [[nodiscard]] town* GetTown(int32_t whichTown)
-        { return THISCALL_2(town*, 0x42BA30, this, whichTown); }
-
-        [[nodiscard]] const town* GetTown(int32_t whichTown) const
-        { return THISCALL_2(town*, 0x42BA30, this, whichTown); }
-
-        [[nodiscard]] NewmapCell* get_cell(type_point point)
-        { return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
-
-        [[nodiscard]] const NewmapCell* get_cell(type_point point) const
-        { return THISCALL_2(NewmapCell*, 0x42ED80, this, point); }
-
-        [[nodiscard]] NewmapCell* get_cell(uint8_t x, uint8_t y, uint8_t z)
-        { return &this->worldMap.cellData[x + this->worldMap.Size * (y + z * this->worldMap.Size)]; }
-
-        [[nodiscard]] const NewmapCell* get_cell(uint8_t x, uint8_t y, uint8_t z) const
-        { return &this->worldMap.cellData[x + this->worldMap.Size * (y + z * this->worldMap.Size)]; }
 
         [[nodiscard]] hero* GetHero(int32_t which)
         { return THISCALL_2(hero*, 0x4317D0, this, which); }
@@ -172,6 +247,12 @@ class game
 
         void ResetVisibility(int32_t start_x, int32_t start_y, int32_t z, int32_t whichPlayer, int32_t range)
         { THISCALL_6(void, 0x49D040, this, start_x, start_y, z, whichPlayer, range); }
+
+        void clear_event_records()
+        { THISCALL_1(void, 0x49D2A0, this); }
+
+        void clear_event_records(int8_t player_id)
+        { THISCALL_2(void, 0x49D330, this, player_id); }
 
         [[nodiscard]] TCreatureType GetRandomMonster(int32_t minLevel, int32_t maxLevel)
         { return THISCALL_3(TCreatureType, 0x4C8F80, this, minLevel, maxLevel); }
@@ -225,8 +306,10 @@ class game
         { return THISCALL_2(TCreatureType, 0x529BF0, this, creature); }
 
     public:
-        // offset: +0x0 = +0,  size = 0x4 = 4
-        heroWindow* newGameWin;
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
         // offset: +0x4 = +4,  size = 0x46 = 70
         std::array<uint8_t, 70> spellAllocInfo;
@@ -235,7 +318,7 @@ class game
         std::array<uint8_t, 70> spellDisabledInfo;
 
         // offset: +0x90 = +144,  size = 0x4 = 4
-        LPCRITICAL_SECTION bink_critical_section;
+        PRTL_CRITICAL_SECTION bink_critical_section;
 
         union {
         // offset: +0x94 = +148,  size = 0x10 = 16
@@ -305,12 +388,8 @@ class game
         // offset: +0x1F696 = +128662,  size = 0x1 = 1
         uint8_t ultimateValid;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x1F697 = +128663,  size = 0x1 = 1
-        std::byte gap_1F697[1];
+        unsigned char : 8;
 
-    public:
         // offset: +0x1F698 = +128664,  size = 0x4 = 4
         int32_t iGameType;
 
@@ -320,12 +399,9 @@ class game
         // offset: +0x1F69D = +128669,  size = 0x1 = 1
         bool is_tutorial;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x1F69E = +128670,  size = 0x2 = 2
-        std::byte gap_1F69E[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x1F6A0 = +128672,  size = 0x1CC = 460
         SGameSetupOptions sSetup;
         // ^^^ trivial ^^^
@@ -340,12 +416,11 @@ class game
         NewfullMap worldMap;
         };
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x20ACC = +133836,  size = 0x4 = 4
-        std::byte gap_20ACC[4];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         union {
         // offset: +0x20AD0 = +133840,  size = 0xB40 = 2880
         std::array<playerData, 8> player;
@@ -387,11 +462,10 @@ class game
         // offset: +0x4E372 = +320370,  size = 0x3 = 3
         std::array<uint8_t, 3> cartographerFlags;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_4E375[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         union {
         // offset: +0x4E378 = +320376,  size = 0x10 = 16
         exe_vector<Sign> signPool;
@@ -439,12 +513,9 @@ class game
         // offset: +0x4E546 = +320838,  size = 0x100 = 256
         std::array<bool, 256> rumourAllocInfo;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x4E646 = +321094,  size = 0x2 = 2
-        std::byte gap_4E646[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         union {
         // offset: +0x4E648 = +321096,  size = 0x10 = 16
         exe_vector<TRumour> MapRumours;
@@ -456,12 +527,11 @@ class game
         // offset: +0x4E674 = +321140,  size = 0x4 = 4
         heroWindow* armyWindow;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x4E678 = +321144,  size = 0x4 = 4
-        std::byte gap_4E678[4];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         union {
         // offset: +0x4E67C = +321148,  size = 0x80 = 128
         std::array<exe_vector<type_point>, 8> two_way_liths;
@@ -489,8 +559,7 @@ class game
 
         union {
         // offset: +0x4E7AC = +321452,  size = 0x10 = 16
-        exe_vector<void*> recorded_events;
-        //exe_vector<type_event_record*> recorded_events;
+        exe_vector<type_event_record*> recorded_events;
         };
 
         union {
@@ -498,16 +567,15 @@ class game
         exe_vector<QuestMonster> quest_monsters;
         };
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x4E7CC = +321484,  size = 0x4 = 4
-        std::byte gap_4E7CC[4];
-};
-#pragma pack(pop)
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
+
+} NH3API_MSVC_LAYOUT;
 
 NH3API_SIZE_ASSERT(0x4E7D0, game);
 
-#pragma pack(push, 4)
 // size = 0xD4 = 212, align = 4
 struct configStruct
 {
@@ -602,12 +670,9 @@ public:
     // offset: +0x8D = +141,  size = 0x1 = 1
     bool bFirstInstall;
 
-protected:
-    [[maybe_unused]]
-    // offset: +0x8E = +142,  size = 0x2 = 2
-    std::byte gap_8E[2];
+    unsigned char : 8;
+    unsigned char : 8;
 
-public:
     // offset: +0x90 = +144,  size = 0x4 = 4
     std::array<char, 4> cUniqueSystemID;
 
@@ -626,22 +691,32 @@ public:
     // offset: +0xBF = +191,  size = 0x15 = 21
     std::array<char, 21> cNetName;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 4
 
 inline game* const& gpGame = get_global_var_ref(0x699538, game*);
+
+inline bool OnMySide(int32_t iWhichPlayer)
+{
+    assert(iWhichPlayer < 8);
+    assert(giCurPlayer < 8);
+    if ( iWhichPlayer < 0 )
+        return false;
+
+    return ( giCurPlayer >= 0 ) ? gpGame->sMapHeader.teamInfo[static_cast<size_t>(giCurPlayer)] == gpGame->sMapHeader.teamInfo[static_cast<size_t>(iWhichPlayer)] : false;
+}
 
 // Game config /
 // Игровые настройки.
 inline configStruct& gConfig = get_global_var_ref(0x6987A8, configStruct);
 
-inline int32_t& giThisGamePos = get_global_var_ref(0x6995A4, int32_t);
+inline int32_t&  giThisGamePos                = get_global_var_ref(0x6995A4, int32_t);
 inline bool32_t& gbThisNetGotAdventureControl = get_global_var_ref(0x6977D8, bool32_t);
-inline bool32_t& gbInNewGameSetup = get_global_var_ref(0x698450, bool32_t);
-inline bool32_t& gbInReplay = get_global_var_ref(0x696A54, bool32_t);
-inline bool32_t& gbGameOver = get_global_var_ref(0x697308, bool32_t);
-inline bool32_t& gbRemoteOn = get_global_var_ref(0x69959C, bool32_t);
-inline bool& bDefeatedAllPlayers = get_global_var_ref(0x69956C, bool);
+inline bool32_t& gbInNewGameSetup             = get_global_var_ref(0x698450, bool32_t);
+inline bool32_t& gbInReplay                   = get_global_var_ref(0x696A54, bool32_t);
+inline bool32_t& gbGameOver                   = get_global_var_ref(0x697308, bool32_t);
+inline bool32_t& gbRemoteOn                   = get_global_var_ref(0x69959C, bool32_t);
+inline bool&     bDefeatedAllPlayers          = get_global_var_ref(0x69956C, bool);
 
 // Month creature type /
 // Тип существа месяца.
@@ -665,4 +740,4 @@ inline exe_bitset<48>& puzzlePiecesRemoved = get_global_var_ref(0x697738, exe_bi
 // Текущий тип игры.
 inline eNetGameType& iMPNetProtocol = get_global_var_ref(0x698A40, eNetGameType);
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

@@ -9,20 +9,26 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <algorithm>                 // std::clamp
+#include <array>                     // std::array
+#include <memory>                    // std::destroy_at
+
+#include "artifact.hpp"              // TArtifact, type_artifact
+#include "creatures.hpp"             // TCreatureType
+#include "hero_enums.hpp"            // THeroID, TSex, TRace, THeroClass, hero_seqid
 #include "nh3api_std/exe_bitset.hpp" // exe_bitset<N>
-#include "resources/resources.hpp" // EGameResource
-#include "hero_enums.hpp" // THeroID, TSex, TRace, THeroClass, hero_seqid
-#include "player.hpp" // playerData
-#include "objects.hpp" // type_obscuring_object
-#include "artifact.hpp" // TArtifact, type_artifact
-#include "creatures.hpp" // TCreatureType
-#include "skills.hpp" // TSkillMastery
-#include "utils.hpp" // bstruct_t
+#include "objects.hpp"               // type_obscuring_object
+#include "player.hpp"                // playerData
+#include "resources/resources.hpp"   // EGameResource
+#include "skills.hpp"                // TSkillMastery
+#include "utils.hpp"                 // bstruct_t
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
-#define hero_hpp_gpGame reinterpret_cast<void*>(0x699538)
-#define hero_hpp_gpGame_get(OFFSET, ...) get_bstruct(hero_hpp_gpGame).get<__VA_ARGS__>(OFFSET)
+#define hero_hpp_gpGame (reinterpret_cast<void*>(0x699538))
+#define hero_hpp_gpGame_get(OFFSET, ...) (get_bstruct(hero_hpp_gpGame).get<__VA_ARGS__>(OFFSET))
 
 #pragma pack(push, 4)
 // Hero basic info from the map editor /
@@ -30,27 +36,20 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 // size = 0x14 = 20, align = 4
 struct HeroIdentity
 {
-public:
     // Portrait index /
     // Номер портрета.
     // offset: +0x0 = +0,  size = 0x1 = 1
     int8_t portrait;
 
-protected:
-    [[maybe_unused]]
-    // offset: +0x1 = +1,  size = 0x3 = 3
-    std::byte gap_1[3];
+    unsigned char : 8;
 
-public:
     // Hero name /
     // Имя героя.
     // offset: +0x4 = +4,  size = 0x10 = 16
     exe_string name;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
 
-#pragma pack(push, 4)
 // HeroIdentity with hero availability for each of players /
 // HeroIdentity с доступностью героя для каждого из игроков.
 // size = 0xC = 12, align = 4, baseclass: HeroIdentity
@@ -60,11 +59,320 @@ struct HeroPlayerInfo : public HeroIdentity
     // offset: +0x8 = +8,  size = 0x4 = 4
     exe_bitset<8> players;
 
+} NH3API_MSVC_LAYOUT;
+
+// Hero placeholder /
+// Лагерь героя.
+// size = 0x10 = 16, align = 4
+struct HeroPlaceholder
+{
+    // Map object /
+    // Соответствующий объект карты
+    // offset: +0x0 = +0,  size = 0x4 = 4
+    CObject* object;
+
+    // Player this hero belongs to /
+    // Игрок, которому принадлежит этот герой
+    // offset: +0x4 = +4,  size = 0x1 = 1
+    int8_t player;
+
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
+
+    // Hero ID /
+    // ID героя.
+    // offset: +0x8 = +8,  size = 0x4 = 4
+    THeroID id;
+
+    // Hero power /
+    // Сила героя.
+    // offset: +0xC = +12,  size = 0x1 = 1
+    int8_t power;
+
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
+} NH3API_MSVC_LAYOUT;
+
+enum EHeroSpecificAbilityType : uint32_t
+{
+    SPECIALITY_SKILL              = 0,
+    SPECIALITY_CREATURE           = 1,
+    SPECIALITY_RESOURCE           = 2,
+    SPECIALITY_SPELL              = 3,
+    SPECIALITY_CREATURE_UNIVERSAL = 4,
+    SPECIALITY_SPEED              = 5,
+    SPECIALITY_CREATURE_UPGRADE   = 6,
+    SPECIALITY_DRAGONS            = 7
 };
-#pragma pack(pop)
+
+template<>
+struct nh3api::enum_limits<EHeroSpecificAbilityType>
+    : nh3api::enum_limits_base<EHeroSpecificAbilityType, SPECIALITY_SKILL, SPECIALITY_DRAGONS>
+{ static inline constexpr bool is_specialized = true; };
+
+// Hero speciality traits /
+// Специализация героя.
+// size = 0x28 = 40, align = 4
+struct THeroSpecificAbility
+{
+    public:
+        // Speciality type /
+        // Тип специализации.
+        // offset: +0x0 = +0,  size = 0x4 = 4
+        EHeroSpecificAbilityType type;
+
+        // Speciality subtype /
+        // Подтип специализации.
+        // offset: +0x4 = +4,  size = 0x4 = 4
+        union
+        {
+            TSecondarySkill skill;    // вторичный навык
+            TCreatureType   creature; // существо
+            EGameResource   resource; // ресурс
+            SpellID         spell;    // заклинание
+        } NH3API_MSVC_LAYOUT info;
+
+        // offset: +0x8 = +8,  size = 0x4 = 4
+        int32_t creatureAttackBonus;
+
+        // offset: +0xC = +12,  size = 0x4 = 4
+        int32_t creatureDefenseBonus;
+
+        // offset: +0x10 = +16,  size = 0x4 = 4
+        int32_t creatureDamageBonus;
+
+        // offset: +0x14 = +20,  size = 0x4 = 4
+        TCreatureType creatureGrade;
+
+    protected:
+        // offset: +0x18 = +24,  size = 0x4 = 4
+        int32_t unknown;
+
+    public:
+        // Short speciality name /
+        // Короткое название специализации героя.
+        // offset: +0x1C = +28,  size = 0x4 = 4
+        const char* nameShort;
+
+        // Full speciality name /
+        // Полное названте специализации героя.
+        // offset: +0x20 = +32,  size = 0x4 = 4
+        const char* name;
+
+        // Full speciality description /
+        // Описание специализации героя.
+        // offset: +0x24 = +36,  size = 0x4 = 4
+        const char* description;
+
+};
+
+// Hero class traits /
+// Свойства класса героев.
+// size = 0x40 = 64, align = 4
+struct THeroClassTraits
+{
+    // Town type /
+    // Тип города.
+    // offset: +0x0 = +0,  size = 0x4 = 4
+    TTownType m_townType;
+
+    // Class name /
+    // Название класса.
+    // offset: +0x4 = +4,  size = 0x4 = 4
+    const char* m_name;
+
+    // Aggression coefficient /
+    // Коэффициент агрессии героя.
+    // offset: +0x8 = +8,  size = 0x4 = 4
+    float m_aggression;
+
+    // Initial primary skills /
+    // Начальные первичные навыки.
+    // offset: +0xC = +12,  size = 0x4 = 4
+    std::array<int8_t, 4> m_initialPrimarySkill;
+
+    // Chance to gain primary each skill before level 10 /
+    // Шанс получения каждого первичного навыка до 10 уровня.
+    // offset: +0x10 = +16,  size = 0x4 = 4
+    std::array<int8_t, 4> m_gainPrimarySkillChance;
+
+    // Chance to gain primary each skill past level 10 /
+    // Шанс получения каждого первичного навыка после 10 уровня.
+    // offset: +0x14 = +20,  size = 0x4 = 4
+    std::array<int8_t, 4> m_gainPrimarySkillChance10P;
+
+    // Chance to gain each secondary skill /
+    // Шанс получения каждого вторичного навыка.
+    // offset: +0x18 = +24,  size = 0x1C = 28
+    std::array<int8_t, 28> m_gainSecondarySkillChance;
+
+    // Chance for heroes of this class to appear in each town /
+    // Шанс появления героев этого класса в таверне города.
+    // offset: +0x34 = +52,  size = 0x9 = 9
+    std::array<int8_t, 9> m_foundInTownType;
+
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
+} NH3API_MSVC_LAYOUT;
+
+// Hero traits /
+// Свойства героев.
+// size = 0x5C = 92, align = 4
+struct THeroTraits
+{
+    // Hero sex /
+    // Пол героя.
+    // offset: +0x0 = +0,  size = 0x4 = 4
+    TSex m_sex;
+
+    // Hero race /
+    // Раса героя.
+    // offset: +0x4 = +4,  size = 0x4 = 4
+    TRace m_race;
+
+    // Hero class /
+    // Класс героя.
+    // offset: +0x8 = +8,  size = 0x4 = 4
+    THeroClass m_class;
+
+    // First second skill /
+    // Первый вторичный навык.
+    // offset: +0xC = +12,  size = 0x4 = 4
+    TSecondarySkill m_1stSkill;
+
+    // First second skill mastery /
+    // Уровень первого вторичного навыка.
+    // offset: +0x10 = +16,  size = 0x4 = 4
+    TSkillMastery m_1stSkillLevel;
+
+    // Second second skill /
+    // Второй вторичный навык.
+    // offset: +0x14 = +20,  size = 0x4 = 4
+    TSecondarySkill m_2ndSkill;
+
+    // Second second skill mastery /
+    // Уровень второго вторичного навыка.
+    // offset: +0x18 = +24,  size = 0x4 = 4
+    TSkillMastery m_2ndSkillLevel;
+
+    // Hero starts with spell book /
+    // Герой начинает с книгой заклинаний.
+    // offset: +0x1C = +28,  size = 0x4 = 4
+    bool32_t m_startsWithSpellbook;
+
+    // Starting spell /
+    // Заклинание, с которым начинает герой.
+    // offset: +0x20 = +32,  size = 0x4 = 4
+    SpellID m_startingSpell;
+
+    // 1st creature type in hero default starting army /
+    // Первый тип существа в начальной армии героя.
+    // offset: +0x24 = +36,  size = 0x4 = 4
+    TCreatureType m_1stStack;
+
+    // 2nd creature type in hero default starting army /
+    // Второй тип существа в начальной армии героя.
+    // offset: +0x28 = +40,  size = 0x4 = 4
+    TCreatureType m_2ndStack;
+
+    // 3rd creature type in hero default starting army /
+    // Третий тип существа в начальной армии героя.
+    // offset: +0x2C = +44,  size = 0x4 = 4
+    TCreatureType m_3rdStack;
+
+    // Small portrait pcx name /
+    // Название изображения малого портрета героя.
+    // offset: +0x30 = +48,  size = 0x4 = 4
+    const char* m_small_portrait_name;
+
+    // Large portrait pcx name /
+    // Название изображения большого портрета героя.
+    // offset: +0x34 = +52,  size = 0x4 = 4
+    const char* m_large_portrait_name;
+
+    // Hero is allowed in RoE /
+    // Герой разрешён в RoE.
+    // offset: +0x38 = +56,  size = 0x1 = 1
+    bool m_allowedInRoE;
+
+    // Hero is allowed in AB and SoD /
+    // Герой разрешён в AB и SoD.
+    // offset: +0x39 = +57,  size = 0x1 = 1
+    bool m_allowedInABSoD;
+
+    // Is campaign hero /
+    // Герои из кампании
+    // offset: +0x3A = +58,  size = 0x1 = 1
+    bool m_isCampaignHero;
+
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
+
+    // Hero name
+    // Имя героя.
+    // offset: +0x40 = +64,  size = 0x4 = 4
+    const char* m_name;
+
+    // 1st army stack creature amount low /
+    // Низкий предел количества существ в первом стеке.
+    // offset: +0x44 = +68,  size = 0x4 = 4
+    int32_t m_1stStackLow;
+
+    // 1st army stack creature amount high /
+    // Верхний предел количества существ в первом стеке.
+    // offset: +0x48 = +72,  size = 0x4 = 4
+    int32_t m_1stStackHigh;
+
+    // 2nd army stack creature amount low /
+    // Низкий предел количества существ во втором стеке.
+    // offset: +0x4C = +76,  size = 0x4 = 4
+    int32_t m_2ndStackLow;
+
+    // 2nd army stack creature amount high /
+    // Верхний предел количества существ во втором стеке.
+    // offset: +0x50 = +80,  size = 0x4 = 4
+    int32_t m_2ndStackHigh;
+
+    // 3rd army stack creature amount low /
+    // Низкий предел количества существ в третьем стеке.
+    // offset: +0x54 = +84,  size = 0x4 = 4
+    int32_t m_3rdStackLow;
+
+    // 3rd army stack creature amount high /
+    // Верхний предел количества существ в третьем стеке.
+    // offset: +0x58 = +88,  size = 0x4 = 4
+    int32_t m_3rdStackHigh;
+
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 4
+
+// Heroes traits /
+// Свойства героев.
+inline std::array<THeroTraits, MAX_HEROES_SOD>& akHeroTraits
+= get_global_var_ref(0x679DD0, std::array<THeroTraits, MAX_HEROES_SOD>);
+
+// Heroes classes traits /
+// Свойства классов героев.
+inline std::array<THeroClassTraits, kNumHeroClasses>& akHeroClassTraits
+= get_global_var_ref(0x67D868, std::array<THeroClassTraits, kNumHeroClasses>);
+
+// Heroes specific abilities /
+// Специализации героев.
+inline std::array<THeroSpecificAbility, MAX_HEROES_SOD>& akHeroSpecificAbilities
+= get_global_var_ref(0x678420, std::array<THeroSpecificAbility, MAX_HEROES_SOD>);
+
+inline std::array<int32_t, 20>& move_constants
+= get_global_var_ref(0x698AE8, std::array<int32_t, 20>);
 
 class army;
 class boat;
+
 #pragma pack(push, 1)
 // hero class:
 // stores information for hero on adventure map /
@@ -74,25 +382,22 @@ class boat;
 class hero : public type_obscuring_object
 {
     public:
-        NH3API_FORCEINLINE
-        hero() noexcept
-        NH3API_DELEGATE_DUMMY(hero)
+        inline hero() noexcept
+            : hero(nh3api::dummy_tag)
         { THISCALL_1(void, 0x4D8860, this); }
 
-        NH3API_FORCEINLINE
-        hero(const hero& other) noexcept
-        NH3API_DELEGATE_DUMMY(hero)
+        inline hero(const hero& other) noexcept
+            : hero(nh3api::dummy_tag)
         { THISCALL_2(void, 0x406410, this, &other); }
 
-        NH3API_FORCEINLINE
-        hero(const ::nh3api::dummy_tag_t& tag) noexcept
-            : TownSpecialGrantedMask(tag), bio(tag)
+        inline hero(const nh3api::dummy_tag_t& tag) noexcept
+            : TownSpecialGrantedMask { tag }, bio { tag }
         {}
 
-        NH3API_FORCEINLINE ~hero() noexcept
+        inline ~hero() noexcept
         { THISCALL_1(void, 0x45F870, this); }
 
-        NH3API_FORCEINLINE hero& operator=(const hero& other) noexcept
+        inline hero& operator=(const hero& other) noexcept
         {
             THISCALL_2(void, 0x406410, this, &other);
             return *this;
@@ -100,23 +405,17 @@ class hero : public type_obscuring_object
 
         hero(hero&& other) noexcept
         {
-            // we can move everything trivially safely because it's construction
-            if ( this != &other )
-                nh3api::trivial_move<sizeof(*this)>(&other, this);
+            std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+            std::memset(static_cast<void*>(&other), 0, sizeof(*this));
         }
 
         hero& operator=(hero&& other) noexcept
         {
-            // for move assignment operator, we need to move `bio` safely
-            // everything else can be trivially moved
             if ( this != &other )
             {
-                // move all data before `bio` to *this
-                nh3api::trivial_move<986>(&other, this);
-                // move `bio`
-                this->bio = std::move(other.bio);
-                // move remaining data
-                nh3api::trivial_move<168>(reinterpret_cast<uint8_t*>(&other) + 1002, reinterpret_cast<uint8_t*>(this) + 1002);
+                std::destroy_at(&this->bio);
+                std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+                std::memset(static_cast<void*>(&other), 0, sizeof(*this));
             }
             return *this;
         }
@@ -125,7 +424,7 @@ class hero : public type_obscuring_object
         // This hero belongs to human player /
         // Герой принадлежит игроку-человеку.
         [[nodiscard]] bool belongs_to_human() const
-        { return playerOwner >= 0 && THISCALL_2(bool, 0x4CE600, hero_hpp_gpGame, playerOwner); }
+        { return playerOwner >= 0 && THISCALL_2(bool, 0x4CE600, 0x699538, playerOwner); }
 
         // Count equipped artifacts /
         // Посчитать количество надетых на героя артефактов (countWarMachines = включая военные машины).
@@ -149,16 +448,16 @@ class hero : public type_obscuring_object
 
         // Add <spell> to spellbook /
         // Добавить заклинание <spell> в книгу заклинаний.
-        void AddSpell(SpellID spell)
+        void AddSpell(SpellID spell) noexcept
         {
-            if ( spell > SPELL_NONE && spell < MAX_BOOK_SPELLS)
+            if ( spell > SPELL_NONE && spell < MAX_BOOK_SPELLS )
             {
-                in_spellbook[static_cast<size_t>(spell)] = true;
+                in_spellbook[static_cast<size_t>(spell)]     = true;
                 available_spells[static_cast<size_t>(spell)] = true;
             }
         }
 
-        void Deallocate(bool bGameLoaded, bool remote_move)
+        void Deallocate(bool bGameLoaded = true, bool remote_move = false)
         { THISCALL_3(void, 0x4DA130, this, bGameLoaded, remote_move); }
 
         // Get experience points for <iLevel> /
@@ -171,79 +470,213 @@ class hero : public type_obscuring_object
         [[nodiscard]] static int32_t GetExperienceIncrement(int32_t level)
         { return FASTCALL_1(int32_t, 0x4DA690, level); }
 
+        [[nodiscard]] bool GetHflip() const noexcept
+        { return facing > 4; }
+
+        [[nodiscard]] hero_seqid GetStandSequence() const noexcept
+        { return THISCALL_1(hero_seqid, 0x4D9380, this); }
+
+        [[nodiscard]] bool IsFlying() const
+        { return ((flags & HF_ISINBOAT) == 0) && ((flightLevel != eMasteryInvalid) || IsWieldingArtifact(ARTIFACT_ANGEL_WINGS)); }
+
+        [[nodiscard]] bool CanWalkOnWater() const
+        { return ((flags & HF_ISINBOAT) == 0) && ((waterWalkPower != eMasteryInvalid) || IsWieldingArtifact(ARTIFACT_BOOTS_OF_LEVITATION)); }
+
+        void obscure_cell()
+        { type_obscuring_object::obscure_cell(OBJECT_HERO, id); }
+
         // First not empty backpack slot /
         // Первый непустой слот рюкзака
         [[nodiscard]] int32_t get_last_backpack_index() const
         {
-            int32_t i = 64; /*backpack.size()*/
+            int32_t i = 64; /* = backpack.size(); */
             while ( i-- != 0 )
                 if ( backpack[static_cast<size_t>(i)].type != ARTIFACT_NONE )
                     return i;
             return -1;
         }
 
-        [[nodiscard]] NH3API_FORCEINLINE
-        exe_string get_morale_description() const
+        [[nodiscard]] inline exe_string get_morale_description() const
         {
-            exe_string result(::nh3api::dummy_tag);
+            exe_string result(nh3api::dummy_tag);
             (void) THISCALL_2(exe_string*, 0x4DC590, this, &result);
             return result;
         }
 
-        [[nodiscard]] NH3API_FORCEINLINE
-        exe_string get_luck_description() const
+        [[nodiscard]] inline exe_string get_luck_description() const
         {
-            exe_string result(::nh3api::dummy_tag);
+            exe_string result(nh3api::dummy_tag);
             (void) THISCALL_2(exe_string*, 0x4DCD30, this, &result);
             return result;
         }
 
         void SetSS(TSecondarySkill iWhichSS, TSkillMastery iLevelToSet)
-        { THISCALL_3(void, 0x4E2480, this, iWhichSS, iLevelToSet); }
+        {
+            assert(nh3api::in_enum_range(iWhichSS));
+            assert(nh3api::in_enum_range(iLevelToSet));
+
+            if ( nh3api::in_enum_range(iWhichSS) && nh3api::in_enum_range(iLevelToSet) )
+                THISCALL_3(void, 0x4E2480, this, iWhichSS, iLevelToSet);
+        }
 
         int32_t TakeSS(TSecondarySkill iWhichSS, TSkillMastery iNumLevelsToTake)
-        { return THISCALL_3(int32_t, 0x4E24C0, this, iWhichSS, iNumLevelsToTake); }
+        {
+            assert(nh3api::in_enum_range(iWhichSS));
+            assert(nh3api::in_enum_range(iNumLevelsToTake));
+
+            if ( nh3api::in_enum_range(iWhichSS) && nh3api::in_enum_range(iNumLevelsToTake) )
+                return THISCALL_3(int32_t, 0x4E24C0, this, iWhichSS, iNumLevelsToTake);
+            return 0;
+        }
 
         int32_t GiveSS(TSecondarySkill iWhichSS, TSkillMastery iNumLevelsToGive)
-        { return THISCALL_3(int32_t, 0x4E2540, this, iWhichSS, iNumLevelsToGive); }
+        {
+            assert(nh3api::in_enum_range(iWhichSS));
+            assert(nh3api::in_enum_range(iNumLevelsToGive));
+
+            if ( nh3api::in_enum_range(iWhichSS) && nh3api::in_enum_range(iNumLevelsToGive) )
+                return THISCALL_3(int32_t, 0x4E2540, this, iWhichSS, iNumLevelsToGive);
+            return 0;
+        }
 
         [[nodiscard]] int32_t CreatureTypeCount(TCreatureType creatureType) const
         { return THISCALL_2(int32_t, 0x4E25B0, this, creatureType); }
 
         void UpgradeCreatures(TCreatureType sourceCreatureType, TCreatureType destCreatureType)
-        { THISCALL_3(void, 0x4E25E0, this, sourceCreatureType, destCreatureType); }
+        {
+            if ( nh3api::in_enum_range(sourceCreatureType) && nh3api::in_enum_range(destCreatureType) )
+                THISCALL_3(void, 0x4E25E0, this, sourceCreatureType, destCreatureType);
+        }
 
-        [[nodiscard]] int32_t GetNthSS(int32_t nSS) const
-        { return THISCALL_2(int32_t, 0x4E2610, this, nSS); }
+        [[nodiscard]] TSecondarySkill GetNthSS(uint32_t nSS) const
+        {
+            if ( nSS > 0 && nSS <= 8 )
+                return THISCALL_2(TSecondarySkill, 0x4E2610, this, nSS);
+            return SKILL_NONE;
+        }
+
+        [[nodiscard]] bool HasSecondarySkill(TSecondarySkill skill) const noexcept
+        { return nh3api::in_enum_range(skill) ? (SSOrder[static_cast<size_t>(skill)] != 0) : false; }
 
         void TransferArtifacts(hero* src)
         { THISCALL_2(void, 0x4E2640, this, src); }
 
-        [[nodiscard]] bool artifactAllowedInSlot(TArtifact artifact, TArtifactSlot slot)
-        { return THISCALL_3(bool, 0x4E2AB0, this, artifact, slot); }
+        [[nodiscard]] bool ArtifactAllowedInSlot(TArtifact artifact, TArtifactSlot slot)
+        {
+            if ( nh3api::in_enum_range(artifact) && nh3api::in_enum_range(slot) )
+                return THISCALL_3(bool, 0x4E27C0, this, artifact, slot);
+            return false;
+        }
 
-        bool EquipArtifact(type_artifact& artifact, TArtifactSlot slot)
-        { return THISCALL_3(bool, 0x4E2C70, this, &artifact, slot); }
+        [[nodiscard]] bool ArtifactEquippableInSlot(TArtifact artifact, TArtifactSlot slot)
+        {
+            if ( nh3api::in_enum_range(artifact) && nh3api::in_enum_range(slot) )
+                return THISCALL_3(bool, 0x4E2AB0, this, artifact, slot);
+            return false;
+        }
+
+        bool equip_artifact(const type_artifact& artifact, TArtifactSlot slot)
+        {
+            if ( nh3api::in_enum_range(slot) || slot == -1 )
+                return THISCALL_3(bool, 0x4E2C70, this, &artifact, slot);
+            return false;
+        }
 
         void remove_artifact(TArtifactSlot slot)
         { THISCALL_2(void, 0x4E2E40, this, slot); }
 
         void remove_backpack_artifact(TArtifactSlot slot)
-        { THISCALL_2(void, 0x4E2FC0, this, slot & 0xFFFF); }
+        { THISCALL_2(void, 0x4E2FC0, this, static_cast<uint16_t>(slot) & 0xFFFFU); }
 
         bool remove_artifact(TArtifact art)
         { return THISCALL_2(bool, 0x4E3040, this, art); }
 
-        [[nodiscard]] NH3API_FORCEINLINE
-        exe_string get_backpack_error() const
+        [[nodiscard]] inline exe_string get_backpack_error() const
         {
-            exe_string result(::nh3api::dummy_tag);
+            exe_string result(nh3api::dummy_tag);
             (void) THISCALL_2(exe_string*, 0x4E3140, this, &result);
             return result;
         }
 
         bool add_to_backpack(const type_artifact& artifact, TArtifactSlot slot)
         { return THISCALL_3(bool, 0x4E3200, this, &artifact, slot); }
+
+        type_artifact& get_backpack(size_t slot) noexcept
+        {
+            assert(slot < 64);
+            if ( slot < 64 )
+                return backpack[slot];
+            NH3API_UNREACHABLE();
+        }
+
+        [[nodiscard]] const type_artifact& get_backpack(size_t slot) const noexcept
+        {
+            assert(slot < 64);
+            if ( slot < 64 )
+                return backpack[slot];
+            NH3API_UNREACHABLE();
+        }
+
+        type_artifact& get_artifact(TArtifactSlot slot) noexcept
+        {
+            assert(slot >= FIRST_ARTIFACT_SLOT && slot < MAX_ARTIFACT_SLOTS);
+            if ( slot >= FIRST_ARTIFACT_SLOT && slot < MAX_ARTIFACT_SLOTS )
+                return equipped[static_cast<size_t>(slot)];
+            NH3API_UNREACHABLE();
+        }
+
+        [[nodiscard]] const type_artifact& get_artifact(TArtifactSlot slot) const noexcept
+        {
+            assert(slot >= FIRST_ARTIFACT_SLOT && slot < MAX_ARTIFACT_SLOTS);
+            if ( slot >= FIRST_ARTIFACT_SLOT && slot < MAX_ARTIFACT_SLOTS )
+                return equipped[static_cast<size_t>(slot)];
+            NH3API_UNREACHABLE();
+        }
+
+        [[nodiscard]] int8_t GetPrimarySkill(TPrimarySkill skill) const noexcept
+        {
+            assert(skill >= FIRST_PRIMARY_SKILL && skill < MAX_PRIMARY_SKILLS);
+            if ( skill >= FIRST_PRIMARY_SKILL && skill < MAX_PRIMARY_SKILLS )
+                return std::clamp<int8_t>(stats[static_cast<size_t>(skill)], 0, 99);
+            return 0;
+        }
+
+        void SetPrimarySkill(TPrimarySkill skill, int8_t amount) noexcept
+        {
+            assert(skill >= FIRST_PRIMARY_SKILL && skill < MAX_PRIMARY_SKILLS);
+            if ( skill >= FIRST_PRIMARY_SKILL && skill < MAX_PRIMARY_SKILLS )
+                stats[static_cast<size_t>(skill)] = std::clamp<int8_t>(amount, 0, 99);
+        }
+
+        [[nodiscard]] float get_aggression() const noexcept
+        { return aggression; }
+
+        [[nodiscard]] TSkillMastery get_secondary_skill(TSecondarySkill skill) const noexcept
+        {
+            assert(skill >= FIRST_SECONDARY_SKILL && skill < MAX_SECONDARY_SKILLS);
+            if ( skill >= FIRST_SECONDARY_SKILL && skill < MAX_SECONDARY_SKILLS )
+                return static_cast<TSkillMastery>(SSLevel[static_cast<size_t>(skill)]);
+            return SKILL_MASTERY_NONE;
+        }
+
+        [[nodiscard]] int32_t get_value_of_duration() const noexcept
+        { return value_of_duration; }
+
+        [[nodiscard]] int32_t get_value_of_knowledge() const noexcept
+        { return value_of_knowledge; }
+
+        [[nodiscard]] int32_t get_value_of_power() const noexcept
+        { return value_of_power; }
+
+        [[nodiscard]] bool is_in_spellbook(SpellID spell) const noexcept
+        {
+            if ( spell >= FIRST_BOOK_SPELL && spell < MAX_BOOK_SPELLS )
+                return in_spellbook[static_cast<size_t>(spell)];
+            return false;
+        }
+
+        [[nodiscard]] int32_t GetMaxMana() const
+        { return static_cast<int32_t>(std::clamp<int32_t>(stats[static_cast<size_t>(PRIMARY_SKILL_KNOWLEDGE)], 1, 99) * 10 * GetIntelligenceFactor()); }
 
         bool GiveArtifact(const type_artifact& artifact, bool assemble_combo, bool equip_it)
         { return THISCALL_4(bool, 0x4E32E0, this, &artifact, assemble_combo, equip_it); }
@@ -254,13 +687,19 @@ class hero : public type_obscuring_object
         void GiveResource(EGameResource whichRes, int32_t howMuch)
         { THISCALL_3(void, 0x4E3870, this, whichRes, howMuch); }
 
+        [[nodiscard]] const char* GetSpecificAbilityText() const noexcept
+        { return akHeroSpecificAbilities[static_cast<size_t>(id)].name; }
+
+        [[nodiscard]] const char* GetSpecificAbilityTextShort() const noexcept
+        { return akHeroSpecificAbilities[static_cast<size_t>(id)].nameShort; }
+
         [[nodiscard]] int32_t GetLuck(const hero* otherHero, int32_t on_cursed_ground, int32_t apply_limits) const
         { return THISCALL_4(int32_t, 0x4E3930, this, otherHero, on_cursed_ground, apply_limits); }
 
         [[nodiscard]] int32_t GetMorale(const hero* other_hero, bool on_cursed_ground, int32_t apply_limits) const
         { return THISCALL_4(int32_t, 0x4E3C20, this, other_hero, on_cursed_ground, apply_limits); }
 
-        [[nodiscard]] TCreatureType getNecromancyCreature() const
+        [[nodiscard]] TCreatureType GetNecromancyCreature() const
         { return THISCALL_1(TCreatureType, 0x4E3ED0, this); }
 
         [[nodiscard]] double GetNecromancyFactor(bool apply_limit) const
@@ -296,7 +735,7 @@ class hero : public type_obscuring_object
         [[nodiscard]] double GetExperienceBonusFactor() const
         { return THISCALL_1(double, 0x4E4AB0, this); }
 
-        [[nodiscard]] double GetManaModifier() const
+        [[nodiscard]] double GetIntelligenceFactor() const
         { return THISCALL_1(double, 0x4E4B20, this); }
 
         [[nodiscard]] double GetFirstAidFactor() const
@@ -338,11 +777,22 @@ class hero : public type_obscuring_object
         [[nodiscard]] bool can_summon_boat() const
         { return THISCALL_1(bool, 0x4E57C0, this); }
 
-        playerData* get_player()
-        { return ( this->playerOwner >= 0 ) ? &hero_hpp_gpGame_get(0x20AD0, std::array<playerData, 8>)[static_cast<size_t>(this->playerOwner)] : nullptr; }
+        [[nodiscard]] playerData* get_player() noexcept
+        { return ( playerOwner >= 0 && playerOwner < 8 ) ? &hero_hpp_gpGame_get(0x20AD0, std::array<playerData, 8>)[static_cast<size_t>(this->playerOwner)] : nullptr; }
 
-        [[nodiscard]] const playerData* get_player() const
-        { return ( this->playerOwner >= 0 ) ? &hero_hpp_gpGame_get(0x20AD0, std::array<playerData, 8>)[static_cast<size_t>(this->playerOwner)] : nullptr; }
+        [[nodiscard]] const playerData* get_player() const noexcept
+        { return ( playerOwner >= 0 && playerOwner < 8 ) ? &hero_hpp_gpGame_get(0x20AD0, std::array<playerData, 8>)[static_cast<size_t>(this->playerOwner)] : nullptr; }
+
+        // Get town currently occupied by a hero /
+        // Город, на данный момент занятый героем.
+        [[nodiscard]] town* GetOccupiedTown() const noexcept
+        { return type_obscuring_object::get_obscured_town(); }
+
+        [[nodiscard]] type_point get_target() const noexcept
+        { return { static_cast<int16_t>(targetX), static_cast<int16_t>(targetY), static_cast<int8_t>(targetZ) }; }
+
+        [[nodiscard]] bool SpellIsAvailable(SpellID spell) const noexcept
+        { return (spell >= FIRST_BOOK_SPELL && spell < MAX_BOOK_SPELLS) && available_spells[static_cast<size_t>(spell)]; }
 
         [[nodiscard]] bool is_in_patrol_radius(type_point point) const
         { return THISCALL_2(bool, 0x4E5950, this, point); }
@@ -404,18 +854,18 @@ class hero : public type_obscuring_object
         // offset: +0x34 = +52,  size = 0x1 = 1
         uint8_t         portrait;
 
-        // AI target cell x coordinate /
-        // X клетки цели пути ИИ.
+        // Path target cell X coordinate /
+        // X-координата клетки, на которую нацелен герой на карте.
         // offset: +0x35 = +53,  size = 0x4 = 4
         int32_t         targetX;
 
-        // AI target cell y coordinate /
-        // Y клетки цели пути ИИ.
+        // Path target cell Y coordinate /
+        // Y-координата клетки, на которую нацелен герой на карте.
         // offset: +0x39 = +57,  size = 0x4 = 4
         int32_t         targetY;
 
-        // AI target cell z coordinate /
-        // Z клетки цели пути ИИ.
+        // Path target cell Z coordinate /
+        // Z-координата клетки, на которую нацелен герой на карте.
         // offset: +0x3D = +61,  size = 0x2 = 2
         int16_t         targetZ;
 
@@ -424,13 +874,11 @@ class hero : public type_obscuring_object
         // offset: +0x3F = +63,  size = 0x2 = 2
         int16_t         last_magic_school_level;
 
-        // AI target cell distance in MP /
-        // Расстояние до клетки цели пути ИИ(в MP).
+        // AI target cell distance in Move Points(MP) /
+        // Расстояние до клетки цели пути ИИ(в Move Point-ах(MP)).
         // offset: +0x41 = +65,  size = 0x2 = 2
         int16_t         target_distance;
 
-        //
-        //
         // offset: +0x43 = +67,  size = 0x1 = 1
         bool            target_is_critical;
 
@@ -562,7 +1010,7 @@ class hero : public type_obscuring_object
         uint32_t Shrine3Flags;
 
     public:
-        // Hero level up tree seed /
+        // Hero level up tree random seed /
         // Случайный сид дерева улучшения уровня героя.
         // offset: +0x8F = +143,  size = 0x1 = 1
         uint8_t iLevelSeed;
@@ -655,9 +1103,9 @@ class hero : public type_obscuring_object
         // Equipped artifacts /
         // Надетые на героя артефакты.
         // offset: +0x12D = +301,  size = 0x98 = 152
-        std::array<type_artifact, MAX_ARTIFACT_SLOTS_SOD> equipped;
+        std::array<type_artifact, MAX_ARTIFACT_SLOTS> equipped;
 
-        // blocked slots by combo artifacts /
+        // blocked slots by combination artifacts /
         // Заблокированные слоты сборным артефактов.
         // offset: +0x1C5 = +453,  size = 0xF = 15
         std::array<int8_t, 15> blockedSlots;
@@ -702,7 +1150,7 @@ class hero : public type_obscuring_object
         // Primary skills /
         // Первичные навыки.
         // offset: +0x476 = +1142,  size = 0x4 = 4
-        std::array<int8_t, kNumPrimarySkills> stats;
+        std::array<int8_t, MAX_PRIMARY_SKILLS> stats;
 
         // Hero aggression /
         // Агрессия героя.
@@ -734,199 +1182,182 @@ class hero : public type_obscuring_object
         // offset: +0x48E = +1166,  size = 0x4 = 4
         int32_t value_of_well;
 };
-#pragma pack(pop)
 
-#pragma pack(push, 1)
+NH3API_SIZE_ASSERT(0x492, hero);
+
 // Hero extra information(from map file) /
 // Информация о герое(из файла карты).
 // size = 0x334 = 820, align = 1
 struct HeroExtra
 {
-    public:
-        // Player owning this hero /
-        // Игрок, обладающий этим героем.
-        // offset: +0x0 = +0,  size = 0x1 = 1
-        int8_t Owner;
+    // Player owning this hero /
+    // Игрок, обладающий этим героем.
+    // offset: +0x0 = +0,  size = 0x1 = 1
+    int8_t Owner;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x1 = +1,  size = 0x3 = 3
-        std::byte gap_1[3];
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-    public:
-        // Hero ID /
-        // ID Героя.
-        // offset: +0x4 = +4,  size = 0x4 = 4
-        THeroID id;
+    // Hero ID /
+    // ID Героя.
+    // offset: +0x4 = +4,  size = 0x4 = 4
+    THeroID id;
 
-        // offset: +0x8 = +8,  size = 0x4 = 4
-        int32_t objRef;
+    // offset: +0x8 = +8,  size = 0x4 = 4
+    int32_t objRef;
 
-        // Hero's name was set in map editor /
-        // Имя героя настроено в редакторе.
-        // offset: +0xC = +12,  size = 0x1 = 1
-        bool bCustomName;
+    // Hero's name was set in map editor /
+    // Имя героя настроено в редакторе.
+    // offset: +0xC = +12,  size = 0x1 = 1
+    bool bCustomName;
 
-        // Hero's name. Max length is 12 /
-        // Имя героя. Максимальное кол-во символов = 12.
-        // offset: +0xD = +13,  size = 0xD = 13
-        std::array<char, 13> Name;
+    // Hero's name. Max length is 12 /
+    // Имя героя. Максимальное кол-во символов = 12.
+    // offset: +0xD = +13,  size = 0xD = 13
+    std::array<char, 13> Name;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x1A = +26,  size = 0x2 = 2
-        std::byte gap_1A[2];
+    unsigned char : 8;
+    unsigned char : 8;
 
-    public:
-        // Hero experience in XP /
-        // Опыт героя в очках опыта.
-        // offset: +0x1C = +28,  size = 0x4 = 4
-        int32_t Experience;
+    // Hero experience in XP /
+    // Опыт героя в очках опыта.
+    // offset: +0x1C = +28,  size = 0x4 = 4
+    int32_t Experience;
 
-        // Does hero have custom portrait number via map editor? /
-        // Настроен ли номер портрета в редакторе карт?
-        // offset: +0x20 = +32,  size = 0x1 = 1
-        bool bCustomPortraitNumber;
+    // Does hero have custom portrait number via map editor? /
+    // Настроен ли номер портрета в редакторе карт?
+    // offset: +0x20 = +32,  size = 0x1 = 1
+    bool bCustomPortraitNumber;
 
-        // Hero portrait number /
-        // Номер портрета героя.
-        // offset: +0x21 = +33,  size = 0x1 = 1
-        uint8_t PortraitNumber;
+    // Hero portrait number /
+    // Номер портрета героя.
+    // offset: +0x21 = +33,  size = 0x1 = 1
+    uint8_t PortraitNumber;
 
-        // Does hero have custom secondary skills via map editor?
-        // Настроены ли вторичные навыки героя в редакторе карт?
-        // offset: +0x22 = +34,  size = 0x1 = 1
-        bool bCustomSecondarySkills;
+    // Does hero have custom secondary skills via map editor?
+    // Настроены ли вторичные навыки героя в редакторе карт?
+    // offset: +0x22 = +34,  size = 0x1 = 1
+    bool bCustomSecondarySkills;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x23 = +35,  size = 0x1 = 1
-        std::byte gap_23[1];
+    unsigned char : 8;
 
-    public:
-        // Number of hero secondary skills /
-        // Кол-во вторичных навыков героя.
-        // offset: +0x24 = +36,  size = 0x4 = 4
-        int32_t NumSecondarySkills;
+    // Number of hero secondary skills /
+    // Кол-во вторичных навыков героя.
+    // offset: +0x24 = +36,  size = 0x4 = 4
+    int32_t NumSecondarySkills;
 
-        // Hero secondary skills /
-        // Вторичные навыки героя.
-        // offset: +0x28 = +40,  size = 0x8 = 8
-        std::array<int8_t, 8> secondarySkill;
+    // Hero secondary skills /
+    // Вторичные навыки героя.
+    // offset: +0x28 = +40,  size = 0x8 = 8
+    std::array<int8_t, MAX_SKILLS_PER_HERO> secondarySkill;
 
-        // Hero secondary skills levels(masteries) /
-        // Уровни вторичного навыка.
-        // offset: +0x30 = +48,  size = 0x8 = 8
-        std::array<int8_t, 8> secondarySkillLevel;
+    // Hero secondary skills levels(masteries) /
+    // Уровни вторичного навыка.
+    // offset: +0x30 = +48,  size = 0x8 = 8
+    std::array<int8_t, MAX_SKILLS_PER_HERO> secondarySkillLevel;
 
-        // Does hero have custom army edited via map editor?
-        // Армия героя настроена в редакторе карт?
-        // offset: +0x38 = +56,  size = 0x1 = 1
-        int8_t bCustomArmies;
+    // Does hero have custom army edited via map editor?
+    // Армия героя настроена в редакторе карт?
+    // offset: +0x38 = +56,  size = 0x1 = 1
+    bool bCustomArmies;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x39 = +57,  size = 0x3 = 3
-        std::byte gap_39[3];
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-    public:
-        // Creature types edited via map editor /
-        // Типы существ, настроенные в редакторе карт.
-        // offset: +0x3C = +60,  size = 0x1C = 28
-        std::array<TCreatureType, 7> armies;
+    // Creature types edited via map editor /
+    // Типы существ, настроенные в редакторе карт.
+    // offset: +0x3C = +60,  size = 0x1C = 28
+    std::array<TCreatureType, 7> armies;
 
-        // Creature numbers edited via map editor /
-        // Кол-ва существ, настроенные в редакторе карт.
-        // offset: +0x58 = +88,  size = 0xE = 14
-        std::array<int16_t, 7> numTroops;
+    // Creature numbers edited via map editor /
+    // Кол-ва существ, настроенные в редакторе карт.
+    // offset: +0x58 = +88,  size = 0xE = 14
+    std::array<int16_t, 7> numTroops;
 
-        // Hero army formation. (See enum hero::Formation) /
-        // Строй в армии героя. (см. enum hero::Formation).
-        // offset: +0x66 = +102,  size = 0x1 = 1
-        int8_t GroupFormation;
+    // Hero army formation. (See enum hero::Formation) /
+    // Строй в армии героя. (см. enum hero::Formation).
+    // offset: +0x66 = +102,  size = 0x1 = 1
+    int8_t GroupFormation;
 
-        // Are hero artifacts edited(via map editor)? /
-        // Артефакты героя настроены(в редакторе карт)?
-        // offset: +0x67 = +103,  size = 0x1 = 1
-        int8_t bCustomArtifacts;
+    // Are hero artifacts edited(via map editor)? /
+    // Артефакты героя настроены(в редакторе карт)?
+    // offset: +0x67 = +103,  size = 0x1 = 1
+    int8_t bCustomArtifacts;
 
-        // Equipped artifacts /
-        // Артефакты, надетые на героя.
-        // offset: +0x68 = +104,  size = 0x98 = 152
-        std::array<type_artifact, MAX_ARTIFACT_SLOTS_SOD> artifacts;
+    // Equipped artifacts /
+    // Артефакты, надетые на героя.
+    // offset: +0x68 = +104,  size = 0x98 = 152
+    std::array<type_artifact, MAX_ARTIFACT_SLOTS_SOD> artifacts;
 
-        // Hero backpack /
-        // Рюкзак героя. Вмещает 64 артефакта.
-        // offset: +0x100 = +256,  size = 0x200 = 512
-        std::array<type_artifact, 64> backpack;
+    // Hero backpack /
+    // Рюкзак героя. Вмещает 64 артефакта.
+    // offset: +0x100 = +256,  size = 0x200 = 512
+    std::array<type_artifact, 64> backpack;
 
-        // Number of artifacts in backpack /
-        // Кол-во артефактов в рюкзаке героя.
-        // offset: +0x300 = +768,  size = 0x1 = 1
-        uint8_t numInBackpack;
+    // Number of artifacts in backpack /
+    // Кол-во артефактов в рюкзаке героя.
+    // offset: +0x300 = +768,  size = 0x1 = 1
+    uint8_t numInBackpack;
 
-        // Hero initial position /
-        // Первоначальная клетка героя.
-        // offset: +0x301 = +769,  size = 0x4 = 4
-        type_point location;
+    // Hero initial position /
+    // Первоначальная клетка героя.
+    // offset: +0x301 = +769,  size = 0x4 = 4
+    type_point location;
 
-        // Hero patrol radius from the (location.x, location.y) cell /
-        // Радиус ограничения движения героя относительно клетки (location.x, location.y).
-        // offset: +0x305 = +773,  size = 0x1 = 1
-        int8_t PatrolRadius;
+    // Hero patrol radius from the (location.x, location.y) cell /
+    // Радиус ограничения движения героя относительно клетки (location.x, location.y).
+    // offset: +0x305 = +773,  size = 0x1 = 1
+    int8_t PatrolRadius;
 
-        // Customized biography /
-        // Биография героя настроена в редакторе карт.
-        // offset: +0x306 = +774,  size = 0x1 = 1
-        bool bCustomBiography;
+    // Customized biography /
+    // Биография героя настроена в редакторе карт.
+    // offset: +0x306 = +774,  size = 0x1 = 1
+    bool bCustomBiography;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x307 = +775,  size = 0x1 = 1
-        std::byte gap_307[1];
+    unsigned char : 8;
 
-    public:
-        // Hero biography /
-        // Биография героя.
-        // offset: +0x308 = +776,  size = 0x10 = 16
-        exe_string sBiography;
+    // Hero biography /
+    // Биография героя.
+    // offset: +0x308 = +776,  size = 0x10 = 16
+    exe_string sBiography;
 
-        // Hero sex(0 = man, 1 = woman) /
-        // Пол героя(0 = мужчина, 1 = женщина).
-        // offset: +0x318 = +792,  size = 0x4 = 4
-        TSex sex;
+    // Hero sex(0 = man, 1 = woman) /
+    // Пол героя(0 = мужчина, 1 = женщина).
+    // offset: +0x318 = +792,  size = 0x4 = 4
+    TSex sex;
 
-        // Hero has custom spells? /
-        // У героя настроены заклинания?
-        // offset: +0x31C = +796,  size = 0x1 = 1
-        int8_t bCustomSpells;
+    // Hero has custom spells? /
+    // У героя настроены заклинания?
+    // offset: +0x31C = +796,  size = 0x1 = 1
+    int8_t bCustomSpells;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x31D = +797,  size = 0x3 = 3
-        std::byte gap_31D[3];
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-    public:
-        // Customized spells /
-        // Настроенные заклинания.
-        // offset: +0x320 = +800,  size = 0xC = 12
-        exe_bitset<70> customSpells;
+    // Customized spells /
+    // Настроенные заклинания.
+    // offset: +0x320 = +800,  size = 0xC = 12
+    exe_bitset<70> customSpells;
 
-        // Hero has customized primary skills /
-        // У героя настроены первичные навыки?
-        // offset: +0x32C = +812,  size = 0x1 = 1
-        int8_t bCustomPrimarySkills;
+    // Hero has customized primary skills /
+    // У героя настроены первичные навыки?
+    // offset: +0x32C = +812,  size = 0x1 = 1
+    int8_t bCustomPrimarySkills;
 
-        // Customized hero primary skills /
-        // Настроенные первичные навыки героя.
-        // offset: +0x32D = +813,  size = 0x4 = 4
-        std::array<int8_t, 4> primarySkills;
+    // Customized hero primary skills /
+    // Настроенные первичные навыки героя.
+    // offset: +0x32D = +813,  size = 0x4 = 4
+    std::array<int8_t, MAX_PRIMARY_SKILLS> primarySkills;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_32E[3];
-};
-#pragma pack(pop)
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
+
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 1
 
 #pragma pack(push, 4)
 // Boat /
@@ -935,13 +1366,9 @@ struct HeroExtra
 class boat : public type_obscuring_object
 {
     public:
-        boat() noexcept
-            : type_obscuring_object(),
-              allocated(false)
-        {}
+        inline boat() noexcept = default;
 
-        NH3API_FORCEINLINE
-        boat(const ::nh3api::dummy_tag_t&) noexcept
+        inline boat(const nh3api::dummy_tag_t&) noexcept
         {}
 
         void obscure_cell()
@@ -951,7 +1378,7 @@ class boat : public type_obscuring_object
         // Is boat allocated? /
         // Лодка выделена?
         // offset: +0x18 = +24,  size = 0x1 = 1
-        bool allocated;
+        bool allocated { false };
 
         // Boat ID /
         // ID лодки.
@@ -973,11 +1400,10 @@ class boat : public type_obscuring_object
         // offset: +0x1C = +28,  size = 0x1 = 1
         int8_t playerOwner;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_1D[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Hero occupying this boat /
         // Герой, сидящий в лодке.
         // offset: +0x20 = +32,  size = 0x4 = 4
@@ -988,331 +1414,17 @@ class boat : public type_obscuring_object
         // offset: +0x24 = +36,  size = 0x1 = 1
         bool occupied;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_25[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
-#pragma pack(push, 4)
-// Hero placeholder /
-// Лагерь героя.
-// size = 0x10 = 16, align = 4
-struct HeroPlaceholder
-{
-    public:
-        // Map object /
-        // Соответствующий объект карты
-        // offset: +0x0 = +0,  size = 0x4 = 4
-        CObject* object;
+inline void do_monster_join_dialog(hero* inHero, TCreatureType type, int32_t amount)
+{ FASTCALL_3(void, 0x5D15D0, inHero, type, amount); }
 
-        // Player this hero belongs to /
-        // Игрок, которому принадлежит этот герой
-        // offset: +0x4 = +4,  size = 0x1 = 1
-        int8_t player;
+inline void do_monster_join_dialog(hero* inHero, armyGroup& monsters, bool leave_guards)
+{ FASTCALL_3(void, 0x5D16B0, inHero, &monsters, leave_guards); }
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x5 = +5,  size = 0x3 = 3
-        std::byte gap_5[3];
-
-    public:
-        // Hero ID /
-        // ID героя.
-        // offset: +0x8 = +8,  size = 0x4 = 4
-        THeroID id;
-
-        // Hero power /
-        // Сила героя.
-        // offset: +0xC = +12,  size = 0x1 = 1
-        int8_t power;
-
-    protected:
-        [[maybe_unused]]
-        // offset: +0xD = +13,  size = 0x3 = 3
-        std::byte gap_D[3];
-
-};
-#pragma pack(pop)
-
-enum EHeroSpecificAbilityType : uint32_t
-{
-    SPECIALITY_SKILL = 0,
-    SPECIALITY_CREATURE = 1,
-    SPECIALITY_RESOURCE = 2,
-    SPECIALITY_SPELL    = 3,
-    SPECIALITY_CREATURE_UNIVERSAL = 4,
-    SPECIALITY_SIR_MULLICH = 5,
-    SPECIALITY_CREATURE_UPGRADE = 6,
-    SPECIALITY_MUTARE = 7
-};
-
-#pragma pack(push, 4)
-// Hero speciality traits /
-// Специализация героя.
-// size = 0x28 = 40, align = 4
-struct THeroSpecificAbility
-{
-    public:
-        // Speciality type /
-        // Тип специализации.
-        // offset: +0x0 = +0,  size = 0x4 = 4
-        EHeroSpecificAbilityType specialityType;
-
-        // Speciality subtype /
-        // Подтип специализации.
-        // offset: +0x4 = +4,  size = 0x4 = 4
-        union
-        {
-            TSecondarySkill skill;    // вторичный навык
-            TCreatureType   creature; // существо
-            EGameResource   resource; // ресурс
-            SpellID         spell;    // заклинание
-        } NH3API_MSVC_LAYOUT info;
-
-        // offset: +0x8 = +8,  size = 0x4 = 4
-        int32_t creature_attack_bonus;
-
-        // offset: +0xC = +12,  size = 0x4 = 4
-        int32_t creature_defense_bonus;
-
-        // offset: +0x10 = +16,  size = 0x4 = 4
-        int32_t creature_damage_bonus;
-
-        // offset: +0x14 = +20,  size = 0x4 = 4
-        TCreatureType creature_grade;
-
-    protected:
-        // offset: +0x18 = +24,  size = 0x4 = 4
-        int32_t unknown;
-
-    public:
-        // Short speciality name /
-        // Короткое название специализации героя.
-        // offset: +0x1C = +28,  size = 0x4 = 4
-        const char* nameShort;
-
-        // Full speciality name /
-        // Полное названте специализации героя.
-        // offset: +0x20 = +32,  size = 0x4 = 4
-        const char* nameFull;
-
-        // Full speciality description /
-        // Описание специализации героя.
-        // offset: +0x24 = +36,  size = 0x4 = 4
-        const char* description;
-
-};
-#pragma pack(pop)
-
-#pragma pack(push, 4)
-// Hero class traits /
-// Свойства класса героев.
-// size = 0x40 = 64, align = 4
-struct THeroClassTraits
-{
-    public:
-        // Town type /
-        // Тип города.
-        // offset: +0x0 = +0,  size = 0x4 = 4
-        TTownType m_townType;
-
-        // Class name /
-        // Название класса.
-        // offset: +0x4 = +4,  size = 0x4 = 4
-        const char* m_name;
-
-        // Aggression coefficient /
-        // Коэффициент агрессии героя.
-        // offset: +0x8 = +8,  size = 0x4 = 4
-        float m_aggression;
-
-        // Initial primary skills /
-        // Начальные первичные навыки.
-        // offset: +0xC = +12,  size = 0x4 = 4
-        std::array<int8_t, 4> m_initialPrimarySkill;
-
-        // Chance to gain primary each skill before level 10 /
-        // Шанс получения каждого первичного навыка до 10 уровня.
-        // offset: +0x10 = +16,  size = 0x4 = 4
-        std::array<int8_t, 4> m_gainPrimarySkillChance;
-
-        // Chance to gain primary each skill past level 10 /
-        // Шанс получения каждого первичного навыка после 10 уровня.
-        // offset: +0x14 = +20,  size = 0x4 = 4
-        std::array<int8_t, 4> m_gainPrimarySkillChance10P;
-
-        // Chance to gain each secondary skill /
-        // Шанс получения каждого вторичного навыка.
-        // offset: +0x18 = +24,  size = 0x1C = 28
-        std::array<int8_t, 28> m_gainSecondarySkillChance;
-
-        // Chance for heroes of this class to appear in each town /
-        // Шанс появления героев этого класса в таверне города.
-        // offset: +0x34 = +52,  size = 0x9 = 9
-        std::array<int8_t, 9> m_foundInTownType;
-
-    protected:
-        [[maybe_unused]]
-        std::byte gap_3D[3];
-
-};
-#pragma pack(pop)
-
-#pragma pack(push, 4)
-// Hero traits /
-// Свойства героев.
-// size = 0x5C = 92, align = 4
-struct THeroTraits
-{
-    public:
-        // Hero sex /
-        // Пол героя.
-        // offset: +0x0 = +0,  size = 0x4 = 4
-        TSex m_sex;
-
-        // Hero race /
-        // Раса героя.
-        // offset: +0x4 = +4,  size = 0x4 = 4
-        TRace m_race;
-
-        // Hero class /
-        // Класс героя.
-        // offset: +0x8 = +8,  size = 0x4 = 4
-        THeroClass m_class;
-
-        // First second skill /
-        // Первый вторичный навык.
-        // offset: +0xC = +12,  size = 0x4 = 4
-        TSecondarySkill m_1stSkill;
-
-        // First second skill mastery /
-        // Уровень первого вторичного навыка.
-        // offset: +0x10 = +16,  size = 0x4 = 4
-        TSkillMastery m_1stSkillLevel;
-
-        // Second second skill /
-        // Второй вторичный навык.
-        // offset: +0x14 = +20,  size = 0x4 = 4
-        TSecondarySkill m_2ndSkill;
-
-        // Second second skill mastery /
-        // Уровень второго вторичного навыка.
-        // offset: +0x18 = +24,  size = 0x4 = 4
-        TSkillMastery m_2ndSkillLevel;
-
-        // Hero starts with spell book /
-        // Герой начинает с книгой заклинаний.
-        // offset: +0x1C = +28,  size = 0x4 = 4
-        bool32_t m_startsWithSpellbook;
-
-        // Starting spell /
-        // Заклинание, с которым начинает герой.
-        // offset: +0x20 = +32,  size = 0x4 = 4
-        SpellID m_startingSpell;
-
-        // 1st creature type in hero default starting army /
-        // Первый тип существа в начальной армии героя.
-        // offset: +0x24 = +36,  size = 0x4 = 4
-        TCreatureType m_1stStack;
-
-        // 2nd creature type in hero default starting army /
-        // Второй тип существа в начальной армии героя.
-        // offset: +0x28 = +40,  size = 0x4 = 4
-        TCreatureType m_2ndStack;
-
-        // 3rd creature type in hero default starting army /
-        // Третий тип существа в начальной армии героя.
-        // offset: +0x2C = +44,  size = 0x4 = 4
-        TCreatureType m_3rdStack;
-
-        // Small portrait pcx name /
-        // Название изображения малого портрета героя.
-        // offset: +0x30 = +48,  size = 0x4 = 4
-        const char* m_small_portrait_name;
-
-        // Large portrait pcx name /
-        // Название изображения большого портрета героя.
-        // offset: +0x34 = +52,  size = 0x4 = 4
-        const char* m_large_portrait_name;
-
-        // Hero is allowed in RoE /
-        // Герой разрешён в RoE.
-        // offset: +0x38 = +56,  size = 0x1 = 1
-        bool m_allowedInRoE;
-
-        // Hero is allowed in AB and SoD /
-        // Герой разрешён в AB и SoD.
-        // offset: +0x39 = +57,  size = 0x1 = 1
-        bool m_allowedInABSoD;
-
-        // Is campaign hero /
-        // Герои из кампании
-        // offset: +0x3A = +58,  size = 0x1 = 1
-        bool m_isCampaignHero;
-
-    protected:
-        [[maybe_unused]]
-        std::byte gap_3B[1];
-        // offset: +0x3C = +60,  size = 0x4 = 4
-        uint32_t attributes;
-
-    public:
-        // Hero name
-        // Имя героя.
-        // offset: +0x40 = +64,  size = 0x4 = 4
-        const char* m_name;
-
-        // 1st army stack creature amount low /
-        // Низкий предел количества существ в первом стеке.
-        // offset: +0x44 = +68,  size = 0x4 = 4
-        int32_t m_1stStackLow;
-
-        // 1st army stack creature amount high /
-        // Верхний предел количества существ в первом стеке.
-        // offset: +0x48 = +72,  size = 0x4 = 4
-        int32_t m_1stStackHigh;
-
-        // 2nd army stack creature amount low /
-        // Низкий предел количества существ во втором стеке.
-        // offset: +0x4C = +76,  size = 0x4 = 4
-        int32_t m_2ndStackLow;
-
-        // 2nd army stack creature amount high /
-        // Верхний предел количества существ во втором стеке.
-        // offset: +0x50 = +80,  size = 0x4 = 4
-        int32_t m_2ndStackHigh;
-
-        // 3rd army stack creature amount low /
-        // Низкий предел количества существ в третьем стеке.
-        // offset: +0x54 = +84,  size = 0x4 = 4
-        int32_t m_3rdStackLow;
-
-        // 3rd army stack creature amount high /
-        // Верхний предел количества существ в третьем стеке.
-        // offset: +0x58 = +88,  size = 0x4 = 4
-        int32_t m_3rdStackHigh;
-
-};
-#pragma pack(pop)
-
-// Heroes traits /
-// Свойства героев.
-inline std::array<THeroTraits, MAX_HEROES_SOD>& akHeroTraits
-= get_global_var_ref(0x679DD0, std::array<THeroTraits, MAX_HEROES_SOD>);
-
-// Heroes classes traits /
-// Свойства классов героев.
-inline std::array<THeroClassTraits, kNumHeroClasses>& akHeroClassTraits
-= get_global_var_ref(0x67D868, std::array<THeroClassTraits, kNumHeroClasses>);
-
-// Heroes specific abilities /
-// Специализации героев.
-inline std::array<THeroSpecificAbility, MAX_HEROES_SOD>& akHeroSpecificAbilities
-= get_global_var_ref(0x678420, std::array<THeroSpecificAbility, MAX_HEROES_SOD>);
-
-inline std::array<int32_t, 20>& move_constants
-= get_global_var_ref(0x698AE8, std::array<int32_t, 20>);
-
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

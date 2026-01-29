@@ -40,11 +40,9 @@ AttributeMacros: [
                   'NH3API_CONSTEXPR_CPP_23',
                   'NH3API_CONSTEXPR_CPP_20',
                   'NH3API_MALLOC',
-                  'NH3API_MSVC_INTRIN',
                   'NH3API_MSVC_LAYOUT',
                   'NH3API_DEALLOCATOR',
                   'NH3API_NO_VFTABLE',
-                  'NH3API_CONST',
                   'NH3API_NAKED'
                  ]
 BinPackArguments: true
@@ -85,7 +83,7 @@ BreakInheritanceList: AfterComma
 BreakStringLiterals: true
 BreakTemplateDeclarations: Yes
 CompactNamespaces: false
-ContinuationIndentWidth: 4
+ContinuationIndentWidth: 8
 Cpp11BracedListStyle: false
 EmptyLineAfterAccessModifier: Never
 EmptyLineBeforeAccessModifier: LogicalBlock

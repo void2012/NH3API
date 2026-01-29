@@ -18,17 +18,14 @@
 struct SavedGameHeader
 {
     public:
-        NH3API_FORCEINLINE
-        SavedGameHeader() noexcept
+        inline SavedGameHeader() noexcept
         { THISCALL_1(void, 0x4BBDA0, this); }
 
-        NH3API_FORCEINLINE
-        SavedGameHeader(const ::nh3api::dummy_tag_t& tag) noexcept
-            : map_header(tag), campaign(tag), file_name(tag)
+        inline SavedGameHeader(const nh3api::dummy_tag_t& tag) noexcept
+            : map_header { tag }, campaign { tag }, file_name { tag }
         { THISCALL_1(void, 0x4BBDA0, this); }
 
-        NH3API_FORCEINLINE
-        ~SavedGameHeader() noexcept
+        inline ~SavedGameHeader() noexcept
         { THISCALL_1(void, 0x4BDC40, this); }
 
     public:
@@ -52,12 +49,10 @@ struct SavedGameHeader
         // offset: +0x4E0 = +1248,  size = 0x1 = 1
         bool campaign_game;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x4E1 = +1249,  size = 0x3 = 3
-        std::byte gap_4E1[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         union {
         // offset: +0x4E4 = +1252,  size = 0x7C = 124
         SCampaign campaign;
@@ -71,6 +66,9 @@ struct SavedGameHeader
         // offset: +0x570 = +1392,  size = 0x2 = 2
         int16_t difficultyRating;
 
+        unsigned char : 8;
+        unsigned char : 8;
+
         // offset: +0x574 = +1396,  size = 0x4 = 4
         int32_t numDeadPlayers;
 
@@ -83,7 +81,7 @@ struct SavedGameHeader
         // offset: +0x5A0 = +1440,  size = 0x4 = 4
         int32_t current_player;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
 NH3API_SIZE_ASSERT(0x5A4, SavedGameHeader);

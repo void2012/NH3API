@@ -9,13 +9,12 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include <cwchar>  // wsclen, mbstate_t
-#include <cstring> // size_t
-#include <string>  // std::char_traits, and optionally std::basic_string
 #include "ida.hpp" // abs32
 
 namespace nh3api
 {
+
+/*
 struct constexpr_char_traits
 {
 public:
@@ -30,22 +29,15 @@ private:
     enum : uint32_t { npos = (uint32_t)(-1) };
 
 public:
-    static constexpr NH3API_FORCEINLINE
-    void assign(char& c1, const char& c2) noexcept
+    static inline constexpr void assign(char& c1, const char& c2) noexcept
     { c1 = c2; }
 
-    static constexpr NH3API_FORCEINLINE
-    bool eq(char c1, char c2) noexcept
+    static inline constexpr bool eq(char c1, char c2) noexcept
     { return c1 == c2; }
 
-    static constexpr NH3API_FORCEINLINE
-    bool lt(char c1, char c2) noexcept
-    { return (uint8_t)c1 < (uint8_t)c2; }
+    static inline constexpr bool lt(char c1, char c2) noexcept
+    { return static_cast<uint8_t>(c1) < static_cast<uint8_t>(c2); }
 
-    #ifdef __cpp_lib_constexpr_string
-    static constexpr size_t length(const char* str) noexcept
-    { return ::std::char_traits<char>::length(str); }
-    #else
     static constexpr size_t length(const char* str) noexcept
     {
         if ( str == nullptr )
@@ -53,12 +45,7 @@ public:
 
         return __builtin_strlen(str);
     }
-    #endif
 
-    #ifdef __cpp_lib_constexpr_string
-    static constexpr int compare(const char* left, const char* right, size_t count) noexcept
-    { return ::std::char_traits<char>::compare(left, right, count); }
-    #else
     static constexpr int compare(const char* left, const char* right, size_t count) noexcept
     {
         if ( left == nullptr || right == nullptr || count == 0 )
@@ -66,16 +53,25 @@ public:
 
         return __builtin_memcmp(left, right, count);
     }
-    #endif
 
     #if defined(__cpp_lib_constexpr_string) && (__cpp_lib_constexpr_string >= 201907L)
     static constexpr char* move(char* dst, const char* src, size_t count) noexcept
     {
+        #if NH3API_DEBUG
+        if ( dst == nullptr || src == nullptr )
+            return nullptr;
+        #endif
+
         return ::std::char_traits<char>::move(dst, src, count);
     }
     #else
     static constexpr char* move(char* dst, const char* src, size_t count) noexcept
     {
+        #if NH3API_DEBUG
+        if ( dst == nullptr || src == nullptr )
+            return nullptr;
+        #endif
+
         #if NH3API_HAS_BUILTIN(__builtin_memmove)
         __builtin_memmove(dst, src, count);
         return dst;
@@ -121,12 +117,20 @@ public:
 
     #if defined(__cpp_lib_constexpr_string) && (__cpp_lib_constexpr_string >= 201907L)
     static constexpr char* copy(char* dst, const char* src, size_t count) noexcept
-    { return ::std::char_traits<char>::copy(dst, src, count); }
+    {
+        #if NH3API_DEBUG
+        if ( dst == nullptr || src == nullptr )
+            return nullptr;
+        #endif
+
+        return ::std::char_traits<char>::copy(dst, src, count);
+    }
     #else
     static constexpr char* copy(char* dst, const char* src, size_t count) noexcept
     {
         if ( dst == nullptr || src == nullptr )
             return nullptr;
+
         #if NH3API_HAS_BUILTIN(__builtin_memcpy)
         __builtin_memcpy(dst, src, count);
         return dst;
@@ -172,12 +176,20 @@ public:
 
     #if defined(__cpp_lib_constexpr_string) && (__cpp_lib_constexpr_string >= 201907L)
     static constexpr char* assign(char* str, size_t count, char value) noexcept
-    { return ::std::char_traits<char>::assign(str, count, value); }
+    {
+        #if NH3API_DEBUG
+        if ( str == nullptr )
+            return nullptr;
+        #endif
+        return ::std::char_traits<char>::assign(str, count, value);
+    }
     #else
     static constexpr char* assign(char* str, size_t count, char value) noexcept
     {
+        #if NH3API_DEBUG
         if ( str == nullptr )
             return nullptr;
+        #endif
         #if NH3API_HAS_BUILTIN(__builtin_memset)
         __builtin_memset(str, value, count);
         return str;
@@ -203,240 +215,20 @@ public:
     #else
     static constexpr const char* find(const char* str, size_t count, const char& ch) noexcept
     {
+        #if NH3API_DEBUG
         if ( count == 0 || str == nullptr)
             return nullptr;
+        #endif
 
         return __builtin_char_memchr(str, ch, count);
     }
     #endif
 
-    NH3API_FORCEINLINE size_t constexpr
-    static str_find(const char* str, size_t size, char c, size_t pos) noexcept
-    {
-        if ( pos >= size )
-            return npos;
-        const char* found = find(str + pos, size - pos, c);
-        if ( found == nullptr )
-            return npos;
-        return static_cast<size_t>(found - str);
-    }
-
-    NH3API_FORCEINLINE constexpr
-    static const char* search_substring(const char* first1,
-                                        const char* last1,
-                                        const char* first2,
-                                        const char* last2) noexcept
-    {
-        // Take advantage of knowing source and pattern lengths.
-        // Stop short when source is smaller than pattern.
-        const ptrdiff_t len2 = last2 - first2;
-        if (len2 == 0)
-            return first1;
-
-        ptrdiff_t len1 = last1 - first1;
-        if (len1 < len2)
-            return last1;
-
-        // First element of first2 is loop invariant.
-        const char f2 = *first2;
-        while (true)
-        {
-            len1 = last1 - first1;
-            // Check whether first1 still has at least len2 bytes.
-            if (len1 < len2)
-                return last1;
-
-            // Find f2 the first byte matching in first1.
-            first1 = find(first1, static_cast<size_t>(len1 - len2 + 1), f2);
-            if (first1 == nullptr)
-                return last1;
-
-            // It is faster to compare from the first byte of first1 even if we
-            // already know that it matches the first byte of first2: this is because
-            // first2 is most likely aligned, as it is user's "pattern" string, and
-            // first1 + 1 is most likely not aligned, as the match is in the middle of
-            // the string.
-            if (compare(first1, first2, static_cast<const size_t>(len2)) == 0)
-                return first1;
-
-            ++first1;
-        }
-    }
-
-    NH3API_FORCEINLINE size_t constexpr
-    static str_find(const char* str, size_t size, const char* needle, size_t pos, size_t n) noexcept
-    {
-        if (pos > size)
-            return npos;
-
-        if (n == 0) // There is nothing to search, just return pos.
-            return pos;
-
-        const char* found = search_substring(str + pos, str + size, needle, needle + n);
-
-        if (found == str + size)
-            return npos;
-        return static_cast<size_t>(found - str);
-    }
-
-    NH3API_FORCEINLINE size_t constexpr
-    static str_rfind(const char* str, size_t size, char c, size_t pos) noexcept
-    {
-        if (size < 1)
-            return npos;
-
-        if (pos < size)
-            ++pos;
-        else
-            pos = size;
-
-        for (const char* i = str + pos; i != str;)
-        {
-            if (eq(*--i, c))
-                return static_cast<size_t>(i - str);
-        }
-        return npos;
-    }
-
-    NH3API_FORCEINLINE size_t constexpr
-    static str_rfind(const char* str, size_t size, const char* needle, size_t pos, size_t n) noexcept
-    {
-        pos = ::std::min<size_t>(pos, size);
-        if (n < size - pos)
-            pos += n;
-        else
-            pos = size;
-
-        if (n == 0)
-            return (pos <= size) ? pos : size;
-
-        if (size == 0 || n > size)
-            return npos;
-
-        for (size_t i = pos - n; ; --i)
-        {
-            bool match = true;
-            for (size_t j = 0; j < n; ++j)
-            {
-                if ( !eq(str[i + j], needle[j]) )
-                {
-                    match = false;
-                    break;
-                }
-            }
-            if (match)
-                return i;
-
-            if (i == 0)
-                break;
-        }
-        return npos;
-    }
-
-protected:
-    NH3API_FORCEINLINE constexpr
-    static const char* find_first_of_impl(const char* first1,
-                                            const char* last1,
-                                            const char* first2,
-                                            const char* last2) noexcept
-    {
-        for (; first1 != last1; ++first1)
-            for (const char* i = first2; i != last2; ++i)
-                if (eq(*first1, *i))
-                    return first1;
-        return last1;
-    }
-
-public:
-    NH3API_FORCEINLINE size_t constexpr
-    static str_find_first_of(const char* str,
-                        size_t size,
-                        const char* needle,
-                        size_t pos,
-                        size_t n) noexcept
-    {
-        if (pos >= size || n == 0)
-            return npos;
-        const char* found = find_first_of_impl(str + pos, str + size, needle, needle + n);
-        if (found == str + size)
-            return npos;
-        return static_cast<size_t>(found - str);
-    }
-
-    NH3API_FORCEINLINE size_t constexpr
-    static str_find_last_of(const char* str, size_t size, const char* needle, size_t pos, size_t n) noexcept
-    {
-        if (n != 0)
-        {
-            if (pos < size)
-                ++pos;
-            else
-                pos = size;
-            for (const char* curr = str + pos; curr != str;)
-            {
-                const char* const found = find(needle, n, *--curr);
-                if (found)
-                    return static_cast<size_t>(curr - str);
-            }
-        }
-        return npos;
-    }
-
-    NH3API_FORCEINLINE size_t constexpr
-    static str_find_first_not_of(const char* str, size_t size, const char* needle, size_t pos, size_t n) noexcept
-    {
-        if (pos < size)
-        {
-            const char* shifted = str + size;
-            for (const char* curr = str + pos; curr != shifted; ++curr)
-                if (find(needle, n, *curr) == nullptr)
-                    return static_cast<size_t>(curr - str);
-        }
-        return npos;
-    }
-
-    NH3API_FORCEINLINE size_t constexpr
-    static str_find_first_not_of(const char* str, size_t size, char c, size_t pos) noexcept
-    {
-        if (pos < size)
-        {
-            const char* const shifted = str + size;
-            for (const char* curr = str + pos; curr != shifted; ++curr)
-                if (!eq(*curr, c))
-                    return static_cast<size_t>(curr - str);
-        }
-        return npos;
-    }
-
-    NH3API_FORCEINLINE size_t constexpr
-    static str_find_last_not_of(const char* str, size_t size, const char* needle, size_t pos, size_t n) noexcept
-    {
-        if (pos < size)
-            ++pos;
-        else
-            pos = size;
-        for (const char* curr = str + pos; curr != str;)
-            if (find(needle, n, *--curr) == nullptr)
-                return static_cast<size_t>(curr - str);
-        return npos;
-    }
-
-    NH3API_FORCEINLINE size_t constexpr
-    static str_find_last_not_of(const char* str, size_t size, char c, size_t pos) noexcept
-    {
-        if (pos < size)
-            ++pos;
-        else
-            pos = size;
-        for (const char* curr = str + pos; curr != str;)
-            if (!eq(*--curr, c))
-                return static_cast<size_t>(curr - str);
-        return npos;
-    }
 };
+*/
 
 // safe strlen which is bound to max_size
-constexpr NH3API_FORCEINLINE size_t safe_strlen(const char* str, const size_t max_size) noexcept
+inline constexpr size_t safe_strlen(const char* str, const size_t max_size) noexcept
 {
     if ( str == nullptr )
             return 0;
@@ -444,7 +236,7 @@ constexpr NH3API_FORCEINLINE size_t safe_strlen(const char* str, const size_t ma
     NH3API_IF_CONSTEVAL
     {
         size_t len = 0;
-        while (len < max_size && str[len] != '\0')
+        while ( len < max_size && str[len] != '\0' )
             ++len;
 
         return len;
@@ -456,7 +248,7 @@ constexpr NH3API_FORCEINLINE size_t safe_strlen(const char* str, const size_t ma
 }
 
 // safe strlen which is bound to max_size
-constexpr NH3API_FORCEINLINE size_t safe_strlen(const wchar_t* str, const size_t max_size) noexcept
+inline constexpr size_t safe_strlen(const wchar_t* str, const size_t max_size) noexcept
 {
     if ( str == nullptr )
             return 0;
@@ -475,59 +267,65 @@ constexpr NH3API_FORCEINLINE size_t safe_strlen(const wchar_t* str, const size_t
     }
 }
 // constexpr atoi that uses no locale
-constexpr NH3API_FORCEINLINE int32_t constexpr_atoi(const char* p) noexcept
+inline constexpr int32_t constexpr_atoi(const char* p) noexcept
 {
-    int32_t x = 0;
-    bool neg = false;
+    int32_t x   = 0;
+    bool    neg = false;
+
     if ( *p == '-' )
     {
         neg = true;
         ++p;
     }
+
     while ( *p >= '0' && *p <= '9' )
     {
         x = (x * 10) + (*p - '0');
         ++p;
     }
+
     if ( neg )
-    {
         x = -x;
-    }
+
     return x;
 }
 
 // convert letter character to lowercase
-NH3API_CONST NH3API_FORCEINLINE constexpr char tolower_constexpr(const char c) noexcept
+[[nodiscard]] inline constexpr char tolower_constexpr(const char c) noexcept
 { return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c; }
 
+/*
 struct case_insensitive_traits
 {
     using char_type = char;
     using int_type = int;
     using state_type = ::std::mbstate_t;
     #ifdef __cpp_lib_three_way_comparison
-    using comparison_category = ::std::strong_ordering;
+    using comparison_category = ::std::weak_ordering;
     #endif
 
     static constexpr char* move(char* dst, const char* src, size_t count) noexcept
     { return constexpr_char_traits::move(dst, src, count); }
 
-    NH3API_CONST static constexpr bool eq(char c1, char c2) noexcept
+    static constexpr bool eq(char c1, char c2) noexcept
     { return tolower_constexpr(c1) == tolower_constexpr(c2); }
 
-    NH3API_CONST static constexpr bool ne(char c1, char c2) noexcept
+    static constexpr bool ne(char c1, char c2) noexcept
     { return tolower_constexpr(c1) != tolower_constexpr(c2); }
 
-    NH3API_CONST static constexpr bool lt(char c1, char c2) noexcept
+    static constexpr bool lt(char c1, char c2) noexcept
     { return tolower_constexpr(c1) < tolower_constexpr(c2); }
 
     static constexpr int compare(const char* s1, const char* s2, size_t n) noexcept
     {
+        if ( s1 == nullptr || s2 == nullptr )
+            return 0;
+
         while (n-- != 0)
         {
-            if (tolower_constexpr(*s1) < tolower_constexpr(*s2))
+            if ( tolower_constexpr(*s1) < tolower_constexpr(*s2) )
                 return -1;
-            if (tolower_constexpr(*s1) > tolower_constexpr(*s2))
+            if ( tolower_constexpr(*s1) > tolower_constexpr(*s2) )
                 return 1;
             ++s1;
             ++s2;
@@ -537,9 +335,12 @@ struct case_insensitive_traits
 
     static constexpr const char* find(const char* s, int n, char a) noexcept
     {
+        if ( s == nullptr )
+            return nullptr;
+
         while ( n-- > 0)
         {
-            if (tolower_constexpr(*s) == tolower_constexpr(a))
+            if ( tolower_constexpr(*s) == tolower_constexpr(a) )
             {
                 return s;
             }
@@ -548,8 +349,7 @@ struct case_insensitive_traits
         return nullptr;
     }
 
-    static constexpr NH3API_FORCEINLINE
-    void assign(char& c1, const char& c2) noexcept
+    static inline constexpr void assign(char& c1, const char& c2) noexcept
     { c1 = tolower_constexpr(c2); }
 
     static constexpr char* copy(char* dst, const char* src, size_t count) noexcept
@@ -559,33 +359,28 @@ struct case_insensitive_traits
     { return constexpr_char_traits::assign(str, count, tolower_constexpr(value)); }
 
     static constexpr size_t length(const char* str) noexcept
-    { return constexpr_char_traits::length(str); }
-};
-
-constexpr NH3API_FORCEINLINE
-bool isalpha_constexpr(const char c) noexcept
-{
-    const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                            "abcdefghijklmnopqrstuvwxyz";
-    const char* letter = ::std::begin(alphabet);
-    while(*letter != '\0' && *letter != c)
-        ++letter;
-    if (*letter)
-        return true;
-    return false;
-}
-
-inline constexpr void swap_chars_ranges(char* __restrict first1,
-                                        char* __restrict last1,
-                                        char* __restrict first2) noexcept
-{
-    const size_t n = static_cast<size_t>(::abs32(last1 - first1));
-    for ( size_t i = 0; i < n; ++i )
     {
-        const char tmp = first1[i];
-        first1[i]      = first2[i];
-        first2[i]      = tmp;
+        if ( str == nullptr )
+            return 0;
+
+        return __builtin_strlen(str);
     }
+};
+*/
+
+inline constexpr bool isalpha_constexpr(const char c) noexcept
+{
+    constexpr char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                "abcdefghijklmnopqrstuvwxyz";
+    const char*    letter     = &alphabet[0];
+
+    while ( *letter != '\0' && *letter != c )
+        ++letter;
+
+    if ( *letter )
+        return true;
+
+    return false;
 }
 
 } // namespace nh3api

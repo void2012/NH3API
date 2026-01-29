@@ -13,41 +13,53 @@
 #include "hero_enums.hpp" // THeroID
 #include "terrain.hpp" // type_point
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 // Victory condition type /
 // Тип условия победы.
 enum EVictoryConditionType : int8_t
 {
-    VICTORY_NONE = -1, // победить всех врагов
-    VICTORY_AQUIRE_ARTIFACT = 0, // заполучить артефакт
-    VICTORY_ACCUMULATE_CREATURES = 1, // накопить существ
-    VICTORY_ACCUMULATE_RESOURCES = 2, // накопить ресурсы
-    VICTORY_UPGRADE_TOWN = 3, // улучшить город
-    VICTORY_BUILD_HOLY_GRAIL_STRUCT = 4, // построить в городе Грааль
-    VICTORY_DEFEAT_HERO = 5, // сразить героя
-    VICTORY_CAPTURE_TOWN = 6, // захватить город
-    VICTORY_DEFEAT_MONSTER = 7, // сразить монстра
-    VICTORY_FLAG_ALL_CREATURE_GENERATORS = 8, // захватить все внешние жилища
-    VICTORY_FLAG_ALL_MINES = 9, // захватить все шахты и маяки
-    VICTORY_TRANSPORT_ARTIFACT = 10, // переместить артефакт в город
-    VICTORY_DEFEAT_ALL_MONSTERS = 11, // уничтожить всех монстров
-    VICTORY_SURVIVE_UNTIL_TIME_EXPIRES = 12, // выжить определенное время
+    VICTORY_NONE                         = -1, // победить всех врагов
+    VICTORY_AQUIRE_ARTIFACT              = 0,  // заполучить артефакт
+    VICTORY_ACCUMULATE_CREATURES         = 1,  // накопить существ
+    VICTORY_ACCUMULATE_RESOURCES         = 2,  // накопить ресурсы
+    VICTORY_UPGRADE_TOWN                 = 3,  // улучшить город
+    VICTORY_BUILD_HOLY_GRAIL_STRUCT      = 4,  // построить в городе Грааль
+    VICTORY_DEFEAT_HERO                  = 5,  // сразить героя
+    VICTORY_CAPTURE_TOWN                 = 6,  // захватить город
+    VICTORY_DEFEAT_MONSTER               = 7,  // сразить монстра
+    VICTORY_FLAG_ALL_CREATURE_GENERATORS = 8,  // захватить все внешние жилища
+    VICTORY_FLAG_ALL_MINES               = 9,  // захватить все шахты и маяки
+    VICTORY_TRANSPORT_ARTIFACT           = 10, // переместить артефакт в город
+    VICTORY_DEFEAT_ALL_MONSTERS          = 11, // уничтожить всех монстров
+    VICTORY_SURVIVE_UNTIL_TIME_EXPIRES   = 12, // выжить определенное время
 
     MAX_VICTORY_CONDITIONS = 13
 };
+
+template<>
+struct nh3api::enum_limits<EVictoryConditionType>
+    : nh3api::enum_limits_base<EVictoryConditionType, VICTORY_NONE, VICTORY_SURVIVE_UNTIL_TIME_EXPIRES>
+{ static inline constexpr bool is_specialized = true; };
 
 // Loss condition type /
 // Тип условия поражения.
 enum ELossConditionType : int8_t
 {
-    LOSS_NONE = -1, // потерять все города и всех героев
-    LOSS_LOSE_TOWN = 0, // потерять город
-    LOSS_LOSE_HERO = 1, // потерять героя
-    LOSS_TIME_EXPIRES = 2, // время вышло
+    LOSS_NONE         = -1, // потерять все города и всех героев
+    LOSS_LOSE_TOWN    = 0,  // потерять город
+    LOSS_LOSE_HERO    = 1,  // потерять героя
+    LOSS_TIME_EXPIRES = 2,  // время вышло
 
     MAX_LOSS_CONDITIONS = 3
 };
+
+template<>
+struct nh3api::enum_limits<ELossConditionType>
+    : nh3api::enum_limits_base<ELossConditionType, LOSS_NONE, LOSS_TIME_EXPIRES>
+{ static inline constexpr bool is_specialized = true; };
 
 class town;
 class hero;
@@ -58,13 +70,11 @@ class hero;
 struct VictoryConditionStruct
 {
     public:
-        NH3API_FORCEINLINE
-        VictoryConditionStruct() noexcept
-        NH3API_DELEGATE_DUMMY(VictoryConditionStruct)
+        inline VictoryConditionStruct() noexcept
+            : VictoryConditionStruct(nh3api::dummy_tag)
         { THISCALL_1(void, 0x4BC000, this); }
 
-        NH3API_FORCEINLINE
-        VictoryConditionStruct(const ::nh3api::dummy_tag_t&) noexcept
+        inline VictoryConditionStruct(const nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
@@ -123,11 +133,8 @@ struct VictoryConditionStruct
         // offset: +0x2 = +2,  size = 0x1 = 1
         bool AppliesToComputer;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_3[1];
+        unsigned char : 8;
 
-    public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t ArtifactNum;
 
@@ -158,11 +165,9 @@ struct VictoryConditionStruct
         // offset: +0x25 = +37,  size = 0x1 = 1
         int8_t CastleLevel;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_38[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x28 = +40,  size = 0x4 = 4
         int32_t HeroX;
 
@@ -192,27 +197,23 @@ struct VictoryConditionStruct
 
         // offset: +0x49 = +73,  size = 0x1 = 1
         int8_t playerWinner;
-    private:
-        [[maybe_unused]]
-        std::byte gap_74[2];
 
-};
-#pragma pack(pop)
+        unsigned char : 8;
+        unsigned char : 8;
 
-#pragma pack(push, 4)
+} NH3API_MSVC_LAYOUT;
+
 // Loss condition /
 // Условие поражения.
 // size = 0x24 = 36, align = 4
 struct LossConditionStruct
 {
     public:
-        NH3API_FORCEINLINE
-        LossConditionStruct() noexcept
-        NH3API_DELEGATE_DUMMY(LossConditionStruct)
+        inline LossConditionStruct() noexcept
+            : LossConditionStruct(nh3api::dummy_tag)
         { THISCALL_1(void, 0x45B7A0, this); }
 
-        NH3API_FORCEINLINE
-        LossConditionStruct(const ::nh3api::dummy_tag_t&) noexcept
+        inline LossConditionStruct(const nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
@@ -232,11 +233,10 @@ struct LossConditionStruct
         // offset: +0x0 = +0,  size = 0x1 = 1
         ELossConditionType Type;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_2[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x4 = +4,  size = 0x4 = 4
         int32_t TownX;
 
@@ -267,7 +267,7 @@ struct LossConditionStruct
         // offset: +0x23 = +35,  size = 0x1 = 1
         int8_t  playerLoser;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 4
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

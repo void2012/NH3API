@@ -9,42 +9,52 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std/exe_deque.hpp" // exe_deque<T>
-#include "hexcell.hpp" // hexcell
-#include "resources/sound.hpp" // gpSoundManager, sample
-#include "skills.hpp" // TSkillMastery
-#include "creatures.hpp" // TCreatureType, akCreatureTypeTraits, TCreatureTypeTraits
-#include "spells.hpp" // SpellID
-#include "utils.hpp" // bstruct_t, get_bstruct
+#include <algorithm>                // std::clamp
+#include <array>                    // std::array
+#include <memory>                   // std::destroy_at
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
-NH3API_DISABLE_MSVC_WARNING_BEGIN(4583)
-NH3API_DISABLE_MSVC_WARNING_BEGIN(4582)
+#include "nh3api_std/exe_deque.hpp" // exe_deque<T>
+#include "creatures.hpp"            // TCreatureType, akCreatureTypeTraits, TCreatureTypeTraits
+#include "hexcell.hpp"              // hexcell
+#include "resources/sounds.hpp"     // gpSoundManager, sample
+#include "skills.hpp"               // TSkillMastery
+#include "spells.hpp"               // SpellID
+#include "utils.hpp"                // bstruct_t, get_bstruct
+
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
+NH3API_WARNING_MSVC_DISABLE(4582)
+NH3API_WARNING_MSVC_DISABLE(4583)
 
 class army;
-#define army_hpp_gpCombatManager reinterpret_cast<void*>(0x699420)
-#define army_hpp_gpCombatManager_get(OFFSET, ...) get_bstruct(army_hpp_gpCombatManager).get<__VA_ARGS__>(OFFSET)
+#define army_hpp_gpCombatManager (reinterpret_cast<void*>(0x699420))
+#define army_hpp_gpCombatManager_get(OFFSET, ...) (get_bstruct(army_hpp_gpCombatManager).get<__VA_ARGS__>(OFFSET))
 
 enum TWallTargetId : int32_t
 {
     const_no_wall_target    = -1, //
-    eTargetUpperTower       = 0, //
-    eTargetUpperWall        = 1, //
-    eTargetMidUpperWall     = 2, //
-    eTargetGate             = 3, //
-    eTargetMidLowerWall     = 4, //
-    eTargetLowerWall        = 5, //
-    eTargetLowerTower       = 6, //
-    eTargetMainBuilding     = 7, //
-    kNumWallTargets         = 8, //
-    const_first_wall_target = 0, //
+    eTargetUpperTower       = 0,  //
+    eTargetUpperWall        = 1,  //
+    eTargetMidUpperWall     = 2,  //
+    eTargetGate             = 3,  //
+    eTargetMidLowerWall     = 4,  //
+    eTargetLowerWall        = 5,  //
+    eTargetLowerTower       = 6,  //
+    eTargetMainBuilding     = 7,  //
+    kNumWallTargets         = 8,  //
+    const_first_wall_target = 0,  //
 };
+
+template<>
+struct nh3api::enum_limits<TWallTargetId>
+: nh3api::enum_limits_base<TWallTargetId, const_first_wall_target, kNumWallTargets>
+{ static inline constexpr bool is_specialized = true; };
 
 #pragma pack(push, 1)
 // size = 0x8 = 8, align = 1
 struct type_ballistics_traits
 {
-
     // offset: +0x0 = +0,  size = 0x1 = 1
     int8_t chance_to_hit_main_building;
 
@@ -64,7 +74,7 @@ struct type_ballistics_traits
     std::array<int8_t, 3> chance_to_inflict_damage;
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 1
 
 #pragma pack(push, 4)
 // army class: stores information for every troop in a combat. /
@@ -95,62 +105,65 @@ class army
         };
 
     public:
-        NH3API_FORCEINLINE
-        army() noexcept
-        NH3API_DELEGATE_DUMMY(army)
+        inline army() noexcept
+            : army(nh3api::dummy_tag)
         { THISCALL_1(void, 0x43CF70, this); }
 
-        NH3API_FORCEINLINE
-        army(const army& other)
-        NH3API_DELEGATE_DUMMY(army)
+        inline army(const army& other)
+            : army(nh3api::dummy_tag)
         { THISCALL_2(void, 0x437650, this, &other); }
 
-        NH3API_FORCEINLINE
-        army& operator=(const army& other)
-        { THISCALL_2(void, 0x437650, this, &other); return *this; }
-
-        army(army&& other) noexcept
-        // since exe_deque and exe_vector move constructors are trivial, we trivially move the whole thing
-        { nh3api::trivial_move<sizeof(*this)>(&other, this); }
-
-        army& operator=(army&& other) noexcept
+        inline army& operator=(const army& other)
         {
-            nh3api::trivial_move<1056>(&other, this);
-            nh3api::trivial_move<164>(reinterpret_cast<uint8_t*>(&other) + 1104,
-                                      reinterpret_cast<uint8_t*>(this) + 1104);
-            nh3api::trivial_move<20>(reinterpret_cast<uint8_t*>(&other) + 1332,
-                                     reinterpret_cast<uint8_t*>(this) + 1332);
-            this->SpellInfluenceQueue = std::move(other.SpellInfluenceQueue);
-            this->bound_armies        = std::move(other.bound_armies);
-            this->binders             = std::move(other.binders);
-            this->aura_clients        = std::move(other.aura_clients);
-            this->aura_sources        = std::move(other.aura_sources);
+            if ( this != &other )
+                THISCALL_2(void, 0x437650, this, &other);
+
             return *this;
         }
 
-        NH3API_FORCEINLINE
-        army(const ::nh3api::dummy_tag_t& tag) noexcept
-            : SpellInfluenceQueue(tag),
-              bound_armies(tag),
-              binders(tag),
-              aura_clients(tag),
-              aura_sources(tag)
+        army(army&& other) noexcept
+        {
+            std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+            std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+        }
+
+        army& operator=(army&& other) noexcept
+        {
+            if ( this != &other )
+            {
+                std::destroy_at(&this->SpellInfluenceQueue);
+                std::destroy_at(&this->bound_armies);
+                std::destroy_at(&this->binders);
+                std::destroy_at(&this->aura_clients);
+                std::destroy_at(&this->aura_sources);
+                std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+                std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+            }
+
+            return *this;
+        }
+
+        inline army(const nh3api::dummy_tag_t& tag) noexcept
+            : SpellInfluenceQueue { tag },
+              bound_armies { tag },
+              binders { tag },
+              aura_clients { tag },
+              aura_sources { tag }
         {}
 
-        NH3API_FORCEINLINE
-        ~army() noexcept
+        inline ~army() noexcept
         { THISCALL_1(void, 0x43D120, this); }
 
     public:
         // offset to front(returns either 1 or -1) /
         // поворот вперед(возвращает 1 или -1)
         /// @param direction направление
-        [[nodiscard]] int32_t OffsetToFront(int32_t direction) const
+        [[nodiscard]] int32_t OffsetToFront(int32_t direction) const noexcept
         {
-            if ((-1 < direction) && (direction < 3))
+            if ( (-1 < direction) && (direction < 3) )
                 return 1;
 
-            if ((2 < direction) && (direction < 6))
+            if ( (2 < direction) && (direction < 6) )
                 return -1;
 
             return (this->facing != 0) ? 1 : -1;
@@ -158,7 +171,7 @@ class army
 
         // clears fields AI_expected_damage...AI_possible_targets /
         // очищает поля  AI_expected_damage...AI_possible_targets
-        void       clear_AI_values()
+        void       clear_AI_values() noexcept
         {
             AI_expected_damage  = 0;
             AI_target           = nullptr;
@@ -170,50 +183,50 @@ class army
         // flag check(for example, this->Is(CF_DOUBLE_WIDE) will return true if the creature is double wide) /
         // проверка флага(напр. this->Is(CF_DOUBLE_WIDE) возвращает true, если существо является широким(2 клетки) )
         /// @param flag число-флаг(используйте | для проверки множества флагов одновременно)
-        [[nodiscard]] bool Is(uint32_t flag) const
-        { return this->sMonInfo.flags && flag; }
+        [[nodiscard]] bool Is(uint32_t flag) const noexcept
+        { return this->sMonInfo.flags & flag; }
 
-        [[nodiscard]] int32_t get_AI_expected_damage() const
+        [[nodiscard]] int32_t get_AI_expected_damage() const noexcept
         { return this->AI_expected_damage; }
 
-        [[nodiscard]] army* get_AI_target()
+        [[nodiscard]] army* get_AI_target() noexcept
         { return this->AI_target; }
 
-        [[nodiscard]] const army* get_AI_target() const
+        [[nodiscard]] const army* get_AI_target() const noexcept
         { return this->AI_target; }
 
-        [[nodiscard]] int32_t get_AI_target_value() const
+        [[nodiscard]] int32_t get_AI_target_value() const noexcept
         { return this->AI_target_value; }
 
         [[nodiscard]] int32_t get_AI_target_time() const
         { return get_AI_target_time(GetSpeed()); }
 
-        [[nodiscard]] int32_t get_AI_possible_targets() const
+        [[nodiscard]] int32_t get_AI_possible_targets() const noexcept
         { return this->AI_possible_targets; }
 
         // Get initial owning side
         // Сторона, которой принадлежит отряд с начала боя
-        [[nodiscard]] int32_t get_owning_side() const
+        [[nodiscard]] int32_t get_owning_side() const noexcept
         { return this->group; }
 
         // Get current owning side(considering hypn. spell)
         // Сторона, который принадлежит отряд сейчас(учитывая закл. гипноз)
-        [[nodiscard]] int32_t get_controlling_side() const
+        [[nodiscard]] int32_t get_controlling_side() const noexcept
         { return ( spellInfluence[SPELL_HYPNOTIZE] ) ? 1 - group : group; }
 
         // Get a specific spell <spell> duration time (in rounds) /
         // Время, в течении которого работает заклинание <spell> (измеряется в раундах)
-        [[nodiscard]] int32_t get_spell_time(SpellID spell) const
+        [[nodiscard]] int32_t get_spell_time(SpellID spell) const noexcept
         { return (spell >= FIRST_COMBAT_SPELL && spell < MAX_SPELLS) ? spellInfluence[static_cast<size_t>(spell)] : 0; }
 
         // Is active?
         // Живо ли существо?
-        [[nodiscard]] bool IsActive() const
+        [[nodiscard]] bool IsActive() const noexcept
         { return (armyType > -1) && (numTroops > 0); }
 
         // Is incapacitated? (Has at least one active spell: Blind, Stone Gaze, Paralyze) /
         // Обездвижено ли существо(Если есть хотя бы одно из этих закл.: Слепота, Окаменение, Паралич)
-        [[nodiscard]] bool IsIncapacitated() const
+        [[nodiscard]] bool IsIncapacitated() const noexcept
         {
             return (spellInfluence[SPELL_BLIND] != 0)
                 || (spellInfluence[SPELL_STONE] != 0)
@@ -222,7 +235,7 @@ class army
 
         // Can Retaliate to <other> troop? /
         // Может ли существо ответить на атаку существа <other>?
-        [[nodiscard]] bool can_retaliate(const army& other) const
+        [[nodiscard]] bool can_retaliate(const army& other) const noexcept
         {
             return !other.Is(CF_FREE_ATTACK) &&
             this->spellInfluence[SPELL_PARALYZE] &&
@@ -231,7 +244,7 @@ class army
 
         // Can't attack? /
         // НЕ может ли существо атаковать?
-        [[nodiscard]] bool cannot_attack() const
+        [[nodiscard]] bool cannot_attack() const noexcept
         {
             return ( Is(CF_IMMOBILIZED)
                     || IsIncapacitated()
@@ -242,7 +255,7 @@ class army
 
         // Is war machine? /
         // Является боевой машиной
-        [[nodiscard]] bool IsWarMachine() const
+        [[nodiscard]] bool IsWarMachine() const noexcept
         { return Is(CF_SIEGE_WEAPON); }
 
         // Get an adjacent hex from given <direction> /
@@ -251,22 +264,22 @@ class army
 
         // Get Morale(check the limit[-3;3]: <apply_limits>) /
         // Мораль существа(проверить лимит[-3;3]: <apply_limits>)
-        [[nodiscard]] int32_t GetMorale(bool apply_limits = true) const
-        {	if ( !apply_limits ) return iMorale; else return nh3api::clamp(iMorale, -3, 3); }
+        [[nodiscard]] int32_t GetMorale(bool apply_limits = true) const noexcept
+        {	if ( !apply_limits ) return iMorale; return std::clamp(iMorale, -3, 3); }
 
         // Get Luck(check the limit[-3;3]: <apply_limits>) /
         // Удача существа(проверить лимит[-3;3]: <apply_limits>)
-        [[nodiscard]] int32_t GetLuck(bool apply_limits = true) const
-        { if ( !apply_limits ) return iLuck; else return nh3api::clamp(iLuck, -3, 3); }
+        [[nodiscard]] int32_t GetLuck(bool apply_limits = true) const noexcept
+        { if ( !apply_limits ) return iLuck; return std::clamp(iLuck, -3, 3); }
 
         // Get a specific spell <spell> skill mastery level /
         // Получить мастерство определенного наложенного типа заклинания <spell>
-        [[nodiscard]] TSkillMastery get_spell_level(SpellID spell) const
+        [[nodiscard]] TSkillMastery get_spell_level(SpellID spell) const noexcept
         { return (spell >= FIRST_COMBAT_SPELL && spell < MAX_SPELLS) ? spell_level[static_cast<size_t>(spell)] : eMasteryNone; }
 
         // Set retalation count in the beginning of battle /
         // Установить количество ответок на атаку в начале битвы
-        void       set_retaliation_count()
+        void       set_retaliation_count() noexcept
         {
             this->retaliationCount = 1;
             if ( this->armyType == CREATURE_GRIFFIN )
@@ -300,23 +313,23 @@ class army
 
         // Luck set depending on battle context /
         // Установка Удачи в зависимости от контекста боя.
-        void       SetLuck(const hero*      owner_hero,
-                           const armyGroup* owner_group,
-                           const town*      owner_town,
-                           const hero*      other_hero,
-                           const armyGroup* other_group,
-                           int8_t ground_type )
+        void SetLuck(const hero*      owner_hero,
+                     const armyGroup* owner_group,
+                     const town*      owner_town,
+                     const hero*      other_hero,
+                     const armyGroup* other_group,
+                     int8_t           ground_type)
         { THISCALL_7(void, 0x43DC40, this, owner_hero, owner_group, owner_town, other_hero, other_group, ground_type); }
 
         // Morale set depending on battle context /
         // Установка Морали в зависимости от контекста боя.
-        void       SetMorale(const hero*      owner_hero,
-                             const armyGroup* owner_group,
-                             const town*      owner_town,
-                             const hero*      other_hero,
-                             const armyGroup* other_group,
-                             int8_t ground_type,
-                             bool angelic_alliance )
+        void SetMorale(const hero*      owner_hero,
+                       const armyGroup* owner_group,
+                       const town*      owner_town,
+                       const hero*      other_hero,
+                       const armyGroup* other_group,
+                       int8_t           ground_type,
+                       bool             angelic_alliance)
         { THISCALL_8(void, 0x43DD20, this, owner_hero, owner_group, owner_town, other_hero, other_group, ground_type, angelic_alliance); }
 
         // Draw a creature at cords (<x>;<y>) /
@@ -338,22 +351,6 @@ class army
         // Убрать все опутывания дендроидов
         void       remove_binding()
         { THISCALL_1(void, 0x43EB30, this); }
-
-        // End walk animation and samples /
-        // Закончить анимацию и звуки движения
-        void       EndWalk()
-        {
-            if ( !THISCALL_1(bool, 0x46A080, army_hpp_gpCombatManager) )
-            {
-                play_sample( PRE_WALK_SAMPLE );
-                if ( armySample[WALK_SAMPLE] )
-                {
-                    gpSoundManager->StopSample( armySample[POST_WALK_SAMPLE] );
-                }
-                PlayAnimation( 21, -1, 0 );
-                PlayAnimation(  2, +1, 0 );
-            }
-        }
 
         // Walk animation in direction <direction> (called in WalkTo() in a loop for every cell in path) /
         // Проиграть анимацию движения, смотря в сторону <direction> (вызывается в WalkTo() в цикле каждую клетку пути)
@@ -379,12 +376,11 @@ class army
             if ( direction < 0 || direction >= 8 )
                 return -1;
 
-            constexpr uint8_t dir_array_1[8] = { 0, 1, 2, 7, 3, 4, 5, 6 };
-            constexpr uint8_t dir_array_2[8] = { 0, 1, 2, 4, 5, 6, 7, 3 };
+            const uint8_t dir_array_1[8] = { 0, 1, 2, 7, 3, 4, 5, 6 };
+            const uint8_t dir_array_2[8] = { 0, 1, 2, 4, 5, 6, 7, 3 };
             if ( Is(CF_DOUBLE_WIDE) )
                 return dir_array_1[(dir_array_2[direction] + 1) % 8];
-            else
-                return (direction + 1) % 6;
+            return (direction + 1) % 6;
         }
 
         [[nodiscard]] int32_t get_counter_clockwise(int32_t direction) const
@@ -392,12 +388,11 @@ class army
             if ( direction < 0 || direction >= 8 )
                 return -1;
 
-            constexpr uint8_t dir_array_1[8] = { 0, 1, 2, 7, 3, 4, 5, 6 };
-            constexpr uint8_t dir_array_2[8] = { 0, 1, 2, 4, 5, 6, 7, 3 };
+            const uint8_t dir_array_1[8] = { 0, 1, 2, 7, 3, 4, 5, 6 };
+            const uint8_t dir_array_2[8] = { 0, 1, 2, 4, 5, 6, 7, 3 };
             if ( Is(CF_DOUBLE_WIDE) )
                 return dir_array_1[(dir_array_2[direction] + 7) % 8];
-            else
-                return (direction + 5) % 6;
+            return (direction + 5) % 6;
         }
 
     protected:
@@ -482,7 +477,7 @@ class army
 
         // Get current controller hero pointer (considering hypn. spell) /
         // Указатель на героя, который в данный момент контролирует это существо(учитывая гипноз)
-        [[nodiscard]] const hero* get_controller() const
+        [[nodiscard]] const hero* get_controller() const noexcept
         {
             if ( group > 1 || group < 0 )
                 return nullptr;
@@ -495,7 +490,7 @@ class army
 
         // Get current controller hero pointer (considering hypn. spell) /
         // Указатель на героя, который в данный момент контролирует это существо(учитывая гипноз)
-        [[nodiscard]] hero* get_controller()
+        [[nodiscard]] hero* get_controller() noexcept
         {
             if ( group > 1 || group < 0 )
                 return nullptr;
@@ -508,12 +503,12 @@ class army
 
         // Get initial hero pointer /
         // Указатель на героя, который контролирует существо с начала боя
-        [[nodiscard]] hero* get_owner()
+        [[nodiscard]] hero* get_owner() noexcept
         { return ( group == 1 || group == 0 ) ? army_hpp_gpCombatManager_get(0x53CC, std::array<hero*,2>)[static_cast<size_t>(group)] : nullptr; }
 
         // Get initial hero pointer /
         // Указатель на героя, который контролирует существо с начала боя
-        [[nodiscard]] const hero* get_owner() const
+        [[nodiscard]] const hero* get_owner() const noexcept
         { return ( group == 1 || group == 0 ) ? army_hpp_gpCombatManager_get(0x53CC, std::array<hero*,2>)[static_cast<size_t>(group)] : nullptr; }
 
         // Calculate average damage /
@@ -528,17 +523,21 @@ class army
         /// @param amount выбранное количество существ
         /// @param limit_damage (true/false) ограничение урона(?) обычно true
         /// @param distance расстояние от текущего отряда до врага
-        [[nodiscard]] int32_t get_average_damage(const army& enemy, bool ranged_attack, int32_t amount, bool limit_damage, int32_t distance) const
+        [[nodiscard]] int32_t get_average_damage(const army& enemy,
+                                                 bool        ranged_attack,
+                                                 int32_t     amount,
+                                                 bool        limit_damage,
+                                                 int32_t     distance) const
         { return THISCALL_6(int32_t, 0x4424A0, this, &enemy, ranged_attack, amount, limit_damage, distance); }
 
         // Is <other> an enemy? /
         // Является ли <other> врагом?
-        [[nodiscard]] bool is_enemy(const army* other) const
+        [[nodiscard]] bool is_enemy(const army* other) const noexcept
         {
-            if (!other || this == other)
+            if ( !other || this == other )
                 return false;
 
-            if (this->spellInfluence[SPELL_BERSERK] || other->spellInfluence[SPELL_BERSERK])
+            if ( this->spellInfluence[SPELL_BERSERK] || other->spellInfluence[SPELL_BERSERK] )
                 return true;
 
             return get_controlling_side() != other->group;
@@ -556,10 +555,10 @@ class army
 
         // Get unit total combat value /
         // Посчитать эффективную боевую ценность существа из отряда
-        [[nodiscard]] double get_unit_combat_value(int32_t lowest_attack,
-                                                      int32_t lowest_defense,
-                                                      bool ranged,
-                                                      const army* excluded) const
+        [[nodiscard]] double get_unit_combat_value(int32_t     lowest_attack,
+                                                   int32_t     lowest_defense,
+                                                   bool        ranged,
+                                                   const army* excluded) const
         { return THISCALL_5(double, 0x442770, this, lowest_attack, lowest_defense, ranged, excluded); }
 
         // Get total combat value /
@@ -570,10 +569,10 @@ class army
         // Get total combat value upon receiving damage /
         // Посчитать эффективную боевую ценность потерь при нанесении урона
         [[nodiscard]] int32_t get_loss_combat_value(int32_t lowest_attack,
-                                                       int32_t lowest_defense,
-                                                       bool ranged,
-                                                       int32_t damage,
-                                                       bool kills_only) const
+                                                    int32_t lowest_defense,
+                                                    bool    ranged,
+                                                    int32_t damage,
+                                                    bool    kills_only) const
         { return THISCALL_6(int32_t, 0x442CF0, this, lowest_attack, lowest_defense, ranged, damage, kills_only); }
 
         // Get total HP. <simulated> = true in AI's simulated combats /
@@ -596,7 +595,11 @@ class army
         [[nodiscard]] int32_t ComputeBaseDamage(bool simulate_only = false) const
         { return THISCALL_2(int32_t, 0x442E80, this, simulate_only); }
 
-        [[nodiscard]] int32_t ComputeAttackerDamageBonuses(int32_t base_damage, bool is_shooting, army* defender, bool simulate_only, int32_t distance) const
+        [[nodiscard]] int32_t ComputeAttackerDamageBonuses(int32_t base_damage,
+                                                           bool    is_shooting,
+                                                           army*   defender,
+                                                           bool    simulate_only,
+                                                           int32_t distance) const
         { return THISCALL_6(int32_t, 0x443560, this, base_damage, is_shooting, defender, simulate_only, distance); }
 
         // Compute Attacker <enemy> damage reduction coefficent
@@ -620,12 +623,12 @@ class army
         /// @param distance расстояние до врага в гексах
         /// @param fire_damage указатель на урон огненного щита(заполняется функцией)
         /// @return returns adjusted damage / возвращает итоговый урон
-        [[nodiscard]] int32_t adjust_damage(army* enemy,
-                                               int32_t base_damage,
-                                               bool bIsShot,
-                                               bool simulated,
-                                               int32_t distance,
-                                               int32_t *fire_damage) const
+        [[nodiscard]] int32_t adjust_damage(army*    enemy,
+                                            int32_t  base_damage,
+                                            bool     bIsShot,
+                                            bool     simulated,
+                                            int32_t  distance,
+                                            int32_t* fire_damage) const
         { return THISCALL_7(int32_t, 0x443C60, this, enemy, base_damage, bIsShot, simulated, distance, fire_damage); }
 
         // Damage enemy /
@@ -635,13 +638,15 @@ class army
         /// @param iKilled количество убитых(заполняется функцией)
         /// @param bIsShot (true/false) является выстрелом
         /// @return returns amount of killed troops / возвращает количество убитых
-        int32_t    DamageEnemy( army* enemy,
-                                int32_t* iDamage,
-                                int32_t* iKilled,
-                                bool bIsShot)
+        int32_t DamageEnemy(army*    enemy,
+                            int32_t* iDamage,
+                            int32_t* iKilled,
+                            bool     bIsShot)
         {
+            assert(iDamage && iKilled);
             if ( !enemy )
                 return 0;
+
             int32_t fire_damage = 0;
             *iDamage = this->adjust_damage(enemy, this->ComputeBaseDamage(false), bIsShot, false, this->joustBonus, &fire_damage);
             *iKilled = enemy->Damage(*iDamage);
@@ -691,10 +696,10 @@ class army
         /// @param power сила заклинания
         /// @param mastery ступень навыка заклинания
         /// @param casting_hero указатель на героя, который будет кастовать
-        void       SetSpellInfluence(SpellID spell,
-                                     int32_t power,
-                                     TSkillMastery mastery,
-                                     hero const *casting_hero)
+        void SetSpellInfluence(SpellID       spell,
+                               int32_t       power,
+                               TSkillMastery mastery,
+                               hero const*   casting_hero)
         { THISCALL_5(void, 0x444610, this, spell, power, mastery, casting_hero); }
 
         // Decrement each spell influence (by round) /
@@ -709,11 +714,12 @@ class army
                     if ( spellInfluence[i] == 1 )
                         CancelIndividualSpell(static_cast<SpellID>(i));
                     else
-                        spellInfluence[i] -= 1;
+                        --spellInfluence[i];
                 }
             }
+
             if ( iRoundsLeftBeforeVanish > 0 )
-                iRoundsLeftBeforeVanish -= 1;
+                --iRoundsLeftBeforeVanish;
         }
 
         // Fills vector <armies> with berserk targets /
@@ -788,7 +794,7 @@ class army
             int32_t result = (this->gridIndex > 0 && this->gridIndex < 187) ? army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[static_cast<size_t>(this->gridIndex)].refX : 0;
             if ( Is(CF_DOUBLE_WIDE) )
             {
-                result += (this->facing) ? 22 : -22 ;
+                result += (this->facing) ? 22 : -22;
             }
             return result;
         }
@@ -796,6 +802,7 @@ class army
         [[nodiscard]] int32_t FrontX() const
         {
             CSpriteFrame* standingStillFrame = stdIcon->s[cs_walk]->f[1];
+            assert(standingStillFrame);
             int32_t cropped = standingStillFrame->CroppedX + standingStillFrame->CroppedWidth - OFFSET_X;
             int32_t result = (this->gridIndex > 0 && this->gridIndex < 187) ? army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[static_cast<size_t>(this->gridIndex)].refX : 0;
             result += ( this->facing ) ? cropped : -cropped;
@@ -804,7 +811,7 @@ class army
 
         // Get second grid index (Double wide creatures occupy two hexes, functions finds the second one) /
         // Индекс второго гекса(для двойных существ, которые занимают две клетки)
-        [[nodiscard]] int32_t get_second_grid_index() const
+        [[nodiscard]] int32_t get_second_grid_index() const noexcept
         { 	return ( !Is(CF_DOUBLE_WIDE) ) ? gridIndex : gridIndex + ( facing ? 1 : -1 ); }
 
         // Checks wether <arg> hex is adjacent(considering 8 adj. hexes for double-wide creatures ) /
@@ -837,7 +844,7 @@ class army
         /// @param bAllowShifting всегда = false / always = false
         /// @param iNewDestIndex указатель на новый гекс(заполняется функцией)
         [[nodiscard]] bool CanFit(int32_t destIndex, int32_t bAllowShifting, int32_t* iNewDestIndex) const
-        { return !!THISCALL_4(bool32_t, 0x446960, this, destIndex, bAllowShifting, iNewDestIndex); }
+        { return THISCALL_4(bool32_t, 0x446960, this, destIndex, bAllowShifting, iNewDestIndex); }
 
         // Get resurrected from <target> army size /
         // Посчитать количество возрожденных существ из <target>
@@ -865,12 +872,9 @@ class army
         {
             uint32_t result = 0;
             for ( size_t i = FIRST_COMBAT_SPELL; i < MAX_COMBAT_SPELLS; ++i )
-            {
                 if ( FASTCALL_2(bool, 0x447BD0, i, target) )
-                {
                     ++result;
-                }
-            }
+
             return result;
         }
 
@@ -884,9 +888,9 @@ class army
         [[nodiscard]] int32_t get_mirror_effect() const
         { return THISCALL_1(int32_t, 0x448510, this); }
 
-        [[nodiscard]] int32_t get_multi_head_directions(int32_t our_hex,
-                                                           const army* enemy,
-                                                           int32_t enemy_hex ) const
+        [[nodiscard]] int32_t get_multi_head_directions(int32_t     our_hex,
+                                                        const army* enemy,
+                                                        int32_t     enemy_hex) const
         { return THISCALL_4(int32_t, 0x4487D0, this, our_hex, enemy, enemy_hex); }
 
         // Calculate turns left to reach the AI_target given <speed> /
@@ -901,13 +905,13 @@ class army
 
         // Need to turn? /
         // Нужно ли развернуться?
-        [[nodiscard]] bool NeedToTurn(int32_t direction) const
-        { return direction < 6 && (this->facing == 0) != direction >= 3; }
+        [[nodiscard]] bool NeedToTurn(int32_t direction) const noexcept
+        { return direction < 6 && ((this->facing == 0) != (direction >= 3)); }
 
         // Get creature name /
         // Получить имя существа.
         [[nodiscard]] const char* GetName() const
-        { return GetName(numTroops); }
+        { return this->GetName(numTroops); }
 
         // Get army name given amount <count> /
         // Получить имя существа в зависимости от количества <count>.
@@ -922,12 +926,12 @@ class army
 
         // Does the creature leaves no body after death? /
         // Существо не оставляет после после смерти труп?
-        [[nodiscard]] bool LeavesNoBody() const
-        { return Is( CF_SACRIFICED | CF_SUMMONED ); }
+        [[nodiscard]] bool LeavesNoBody() const noexcept
+        { return Is(CF_SACRIFICED | CF_SUMMONED); }
 
         // Creature is within highlighted area /
         // Существо находится внутри площади выделения.
-        [[nodiscard]] bool is_in_area_highlight() const
+        [[nodiscard]] bool is_in_area_highlight() const noexcept
         { return is_area_effect_target; }
 
         // Is Flight to <destIndex> valid? /
@@ -958,13 +962,13 @@ class army
         /// @param bMoveUnlimited бесконечное движение(= false)
         /// @param bLiteralTarget unused / не используется
         bool       FindPath(int32_t fpTargetCellIndex, int32_t maxMoves, bool bMoveUnlimited, bool bLiteralTarget)
-        { return !!THISCALL_5(bool32_t, 0x523EC0, this, fpTargetCellIndex, maxMoves, bMoveUnlimited, bLiteralTarget); }
+        { return THISCALL_5(bool32_t, 0x523EC0, this, fpTargetCellIndex, maxMoves, bMoveUnlimited, bLiteralTarget); }
 
         // Is path to <fpTargetCellIndex> valid?
         // Возможен ли путь до <fpTargetCellIndex>?
         /// @param destIndex гекс-цель
         [[nodiscard]] bool ValidPath(int32_t destIndex)
-        { return !!THISCALL_3(bool32_t, 0x523F60, this, destIndex, false); }
+        { return THISCALL_3(bool32_t, 0x523F60, this, destIndex, false); }
 
         // Get Attack mask
         // Маска атаки
@@ -972,7 +976,7 @@ class army
         { return THISCALL_4(uint32_t, 0x524010, this, currIndex, criteria, iLiteralTargetIndex); }
 
         [[nodiscard]] bool ValidAttack(int32_t currIndex, int32_t direction, int32_t criteria, int32_t iLiteralIndex, int32_t* testCellIndex) const
-        { return !!THISCALL_6(bool32_t, 0x5240A0, this, currIndex, direction, criteria, iLiteralIndex, testCellIndex); }
+        { return THISCALL_6(bool32_t, 0x5240A0, this, currIndex, direction, criteria, iLiteralIndex, testCellIndex); }
 
         // Call army::get_adjacent_hex( hex, direction ) instead /
         // Вызывайте army::get_adjacent_hex( hex, direction ).
@@ -986,7 +990,7 @@ class army
 
         // Is in Unicorn aura? /
         // Действует ли аура единорога?
-        [[nodiscard]] bool is_in_aura() const
+        [[nodiscard]] bool is_in_aura() const noexcept
         { return !aura_sources.empty(); }
 
     public:
@@ -1005,22 +1009,20 @@ class army
         // offset: +0x4 = +4,  size = 0x1 = 1
         int8_t iRemainingFrames;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_5[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x8 = +8,  size = 0x4 = 4
         int32_t iDrawPriority;
 
         // offset: +0xC = +12,  size = 0x1 = 1
         bool bShowTroopCount;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_D[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Combat side(group) to attack /
         // Сторона, которую атакует данное существо
         // offset: +0x10 = +16,  size = 0x4 = 4
@@ -1040,11 +1042,10 @@ class army
         // offset: +0x20 = +32,  size = 0x1 = 1
         bool bShowPowEffect;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_21[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x24 = +36,  size = 0x4 = 4
         int32_t iMirrorSourceIndex;
 
@@ -1061,14 +1062,10 @@ class army
         // offset: +0x30 = +48,  size = 0x1 = 1
         bool IsMoving;
 
-    protected:
-        // offset: +0x31 = +49,  size = 0x1 = 1
-        bool LetsPretendImNotHere;
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-        [[maybe_unused]]
-        std::byte gap_32[2];
-
-    public:
         // Creature type /
         // Тип существа
         // offset: +0x34 = +52,  size = 0x4 = 4
@@ -1143,22 +1140,18 @@ class army
         // offset: +0xEA = +234,  size = 0x1 = 1
         bool bAllUnitsKilled;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_EB[1];
+        unsigned char : 8;
 
-    public:
         // offset: +0xEC = +236,  size = 0x4 = 4
         SpellID iPostPowSpellToCast;
 
         // offset: +0xF0 = +240,  size = 0x1 = 1
         bool hitByCreature;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_F1[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Creature side("group"), 0 or 1 /
         // Сторона("группа"), которой принадлежит существо(0 или 1)
         // offset: +0xF4 = +244,  size = 0x4 = 4
@@ -1331,11 +1324,9 @@ class army
         // offset: +0x4C1 = +1217,  size = 0x1 = 1
         bool residualParalyze;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_4C2[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x4C4 = +1220,  size = 0x4 = 4
         TSkillMastery forgetfulness_level;
 
@@ -1356,11 +1347,10 @@ class army
         // offset: +0x4D8 = +1240,  size = 0x1 = 1
         bool OnNativeTerrain;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_4D9[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x4DC = +1244,  size = 0x4 = 4
         int32_t DefendBonus;
 
@@ -1388,11 +1378,9 @@ class army
         // offset: +0x4F1 = +1265,  size = 0x1 = 1
         bool is_area_effect_target;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_4F2[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         union {
         // Creatures binded by the current dendroid /
         // опутанные существа данным дендроидом.
@@ -1446,14 +1434,17 @@ class army
         // offset: +0x544 = +1348,  size = 0x4 = 4
         int32_t AI_possible_targets;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT; // class army
+#pragma pack(pop) // 4
+
+template<>
+struct nh3api::enum_limits<army::TSampleID>
+    : nh3api::enum_limits_base<army::TSampleID, army::TSampleID::WALK_SAMPLE, army::TSampleID::POST_WALK_SAMPLE>
+{};
 
 NH3API_SIZE_ASSERT(0x548, army);
 
 #undef army_hpp_gpCombatManager
 #undef army_hpp_gpCombatManager_get
 
-NH3API_DISABLE_MSVC_WARNING_END
-NH3API_DISABLE_MSVC_WARNING_END
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

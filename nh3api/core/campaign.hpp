@@ -9,12 +9,16 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "interface/widgets.hpp" // widgets
-#include "artifact.hpp" // TArtifact
-#include "creatures.hpp" // TCreatureType
-#include "map_header.hpp" // NewSMapHeader
+#include <array>                 // std::array
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+#include "interface/widgets.hpp" // widgets
+#include "artifact.hpp"          // type_artifact
+#include "creatures.hpp"         // TCreatureType
+#include "map_header.hpp"        // NewSMapHeader
+
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 // Campaign type /
 // Тип кампании.
@@ -46,64 +50,70 @@ enum ECampaignType : int32_t
     CUSTOM_CAMPAIGN             = 20
 };
 
+template<>
+struct nh3api::enum_limits<ECampaignType>
+    : nh3api::enum_limits_base<ECampaignType, ROE_LONG_LIVE_THE_QUEEN, SOD_SPECTRE_OF_POWER>
+{ static inline constexpr bool is_specialized = true; };
+
 #pragma pack(push, 4)
 // Campaign scenario info in campaign scenario dialog /
 // Информация о сценарии в диалоге кампании.
 // size = 0x4D4 = 1236, align = 4, baseclass: NewSMapHeader
 struct CampaignScenarioPreview : public NewSMapHeader
 {
-    CampaignScenarioPreview()
-        : NewSMapHeader()
-    {}
+    public:
+        CampaignScenarioPreview()
+            : NewSMapHeader()
+        {}
 
-    NH3API_DEFAULT_DESTRUCTOR(CampaignScenarioPreview)
+        CampaignScenarioPreview(const CampaignScenarioPreview&)            = delete;
+        CampaignScenarioPreview(CampaignScenarioPreview&&)                 = delete;
+        CampaignScenarioPreview& operator=(const CampaignScenarioPreview&) = delete;
+        CampaignScenarioPreview& operator=(CampaignScenarioPreview&&)      = delete;
+        inline ~CampaignScenarioPreview() noexcept                         = default;
 
-public:
-    // Game setup options /
-    // Начальные условия игры.
-    // offset: +0x304 = +772,  size = 0x1CC = 460
-    SGameSetupOptions game_setup;
-    // ^^^ trivial ^^^
+    public:
+        // Game setup options /
+        // Начальные условия игры.
+        // offset: +0x304 = +772,  size = 0x1CC = 460
+        SGameSetupOptions game_setup;
+        // ^^^ trivial ^^^
 
-    // Scenario is available /
-    // Сценарий доступен.
-    // offset: +0x4D0 = +1232,  size = 0x1 = 1
-    bool available;
+        // Scenario is available /
+        // Сценарий доступен.
+        // offset: +0x4D0 = +1232,  size = 0x1 = 1
+        bool available;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_4D1[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
 
 NH3API_SIZE_ASSERT(0x4D4, CampaignScenarioPreview);
 
-#pragma pack(push, 4)
 // Campaign scenario dialog /
 // Диалог кампании.
 // size = 0xB4 = 180, align = 4, baseclass: heroWindow
 NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
 {
     public:
-        NH3API_FORCEINLINE
-        TCampaignBrief(bool newCampaign, int32_t bViewFromGame)
-        NH3API_NOEXCEPT_EXPR(false) // TGzInflateBuf may throw TGzInflateBuf::TDataError, std::filebuf::_Initcvt may throw std::bad_cast
-        NH3API_DELEGATE_DUMMY_BASE(TCampaignBrief)
-        { THISCALL_3(void, 0x458DA0, this, newCampaign, bViewFromGame); }
+        inline TCampaignBrief(bool newCampaign, bool bViewFromGame)
+        noexcept(false) // TGzInflateBuf may throw TGzInflateBuf::TDataError, std::filebuf::_Initcvt may throw std::bad_cast
+            : TCampaignBrief(nh3api::dummy_tag)
+        { THISCALL_3(void, 0x458DA0, this, newCampaign, static_cast<bool32_t>(bViewFromGame)); }
 
-        NH3API_FORCEINLINE
-        TCampaignBrief(const ::nh3api::dummy_tag_t& tag) noexcept
-            : heroWindow(tag), scenarios(tag)
+        inline TCampaignBrief(const nh3api::dummy_tag_t& tag) noexcept
+            : heroWindow(tag),
+              scenarios { tag }
         {}
 
-        TCampaignBrief(const TCampaignBrief&) = delete;
+        TCampaignBrief(const TCampaignBrief&)            = delete;
         TCampaignBrief& operator=(const TCampaignBrief&) = delete;
-        TCampaignBrief(TCampaignBrief&&) = delete;
-        TCampaignBrief& operator=(TCampaignBrief&&) = delete;
+        TCampaignBrief(TCampaignBrief&&)                 = delete;
+        TCampaignBrief& operator=(TCampaignBrief&&)      = delete;
 
-        NH3API_FORCEINLINE
-        ~TCampaignBrief() noexcept
+        inline ~TCampaignBrief() noexcept
         { THISCALL_1(void, 0x45AC90, this); }
 
     public:
@@ -172,11 +182,9 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
             // offset: +0x39 = +57,  size = 0x1 = 1
             EGameDifficulty difficulty;
 
-        protected:
-            [[maybe_unused]]
-            std::byte gap_3A[2];
+            unsigned char : 8;
+            unsigned char : 8;
 
-        public:
             // Scenario prologue /
             // Пролог сценария.
             // offset: +0x3C = +60,  size = 0x4 = 4
@@ -212,11 +220,10 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
             // offset: +0x48 = +72,  size = 0x1 = 1
             bool retain_artifacts;
 
-        protected:
-            [[maybe_unused]]
-            std::byte gap_49[3];
+            unsigned char : 8;
+            unsigned char : 8;
+            unsigned char : 8;
 
-        public:
             // offset: +0x4C = +76,  size = 0x20 = 32
             std::array<int32_t, 8> heroes_status;
 
@@ -241,28 +248,79 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
             void* options;
             // t_scenario_start_options* options;
 
-        };
+        } NH3API_MSVC_LAYOUT;
 
         // size = 0x5C = 92, align = 4
         struct CampaignHeaderStruct
         {
             public:
-                NH3API_FORCEINLINE
-                CampaignHeaderStruct()
-                NH3API_NOEXCEPT_EXPR(false) // TGzInflateBuf may throw TGzInflateBuf::TDataError, std::filebuf::_Initcvt may throw std::bad_cast
-                NH3API_DELEGATE_DUMMY(CampaignHeaderStruct)
+                inline CampaignHeaderStruct()
+                    noexcept(false) // TGzInflateBuf may throw TGzInflateBuf::TDataError, std::filebuf::_Initcvt may throw std::bad_cast
+                    : CampaignHeaderStruct(nh3api::dummy_tag)
                 { THISCALL_1(void, 0x4883C0, this); }
 
-                NH3API_FORCEINLINE
-                CampaignHeaderStruct(const nh3api::dummy_tag_t& tag) noexcept
-                    : file_name(tag),
-                      campaign_name(tag),
-                      campaign_desc(tag),
-                      scenarios(tag)
+                inline CampaignHeaderStruct(const nh3api::dummy_tag_t& tag) noexcept
+                    : file_name { tag },
+                      campaign_name { tag },
+                      campaign_desc { tag },
+                      scenarios { tag }
                 {}
 
-                NH3API_FORCEINLINE
-                ~CampaignHeaderStruct() noexcept
+                inline CampaignHeaderStruct(const CampaignHeaderStruct& other)
+                    : file_error { other.file_error },
+                      file_name { other.file_name },
+                      campaign_version { other.campaign_version },
+                      region_map { other.region_map },
+                      campaign_name { other.campaign_name },
+                      campaign_desc { other.campaign_desc },
+                      scenarios { other.scenarios },
+                      data { other.data },
+                      stream { other.stream },
+                      variable_difficulty { other.variable_difficulty },
+                      campaign_music { other.campaign_music }
+                {}
+
+                inline CampaignHeaderStruct& operator=(const CampaignHeaderStruct& other)
+                {
+                    if ( this != &other )
+                    {
+                        file_error          = other.file_error;
+                        file_name           = other.file_name;
+                        campaign_version    = other.campaign_version;
+                        region_map          = other.region_map;
+                        campaign_name       = other.campaign_name;
+                        campaign_desc       = other.campaign_desc;
+                        scenarios           = other.scenarios;
+                        data                = other.data;
+                        stream              = other.stream;
+                        variable_difficulty = other.variable_difficulty;
+                        campaign_music      = other.campaign_music;
+                    }
+
+                    return *this;
+                }
+
+                inline CampaignHeaderStruct(CampaignHeaderStruct&& other) noexcept
+                {
+                    std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+                    std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+                }
+
+                inline CampaignHeaderStruct& operator=(CampaignHeaderStruct&& other) noexcept
+                {
+                    if ( this != &other )
+                    {
+                        std::destroy_at(&this->file_name);
+                        std::destroy_at(&this->campaign_name);
+                        std::destroy_at(&this->campaign_desc);
+                        std::destroy_at(&this->scenarios);
+                        std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+                        std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+                    }
+                    return *this;
+                }
+
+                inline ~CampaignHeaderStruct() noexcept
                 { THISCALL_1(void, 0x4881E0, this); }
 
             public:
@@ -304,14 +362,13 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
                 // offset: +0x54 = +84,  size = 0x1 = 1
                 bool variable_difficulty;
 
-            protected:
-                [[maybe_unused]]
-                std::byte gap_55[3];
+                unsigned char : 8;
+                unsigned char : 8;
+                unsigned char : 8;
 
-            public:
                 // offset: +0x58 = +88,  size = 0x4 = 4
                 int32_t campaign_music;
-        };
+        } NH3API_MSVC_LAYOUT;
 
     public:
         // offset: +0x4C = +76,  size = 0x4 = 4
@@ -332,12 +389,11 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
         // offset: +0x64 = +100,  size = 0x4 = 4
         CampaignHeaderStruct* campaign;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x68 = +104,  size = 0x4 = 4
-        int32_t unknown;
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Selected scenario ID /
         // ID выбранного сценария.
         // offset: +0x6C = +108,  size = 0x4 = 4
@@ -364,28 +420,24 @@ NH3API_VIRTUAL_CLASS TCampaignBrief : public heroWindow
         // offset: +0xB0 = +176,  size = 0x4 = 4
         type_text_scroller* scroller;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63BC2C, TCampaignBrief)
 
-#pragma pack(push, 4)
 // Campaign scenario progress information /
 // Информация о ходе прохождения сценарии кампании.
 // size = 0x14 = 20, align = 4
 struct CampaignScenarioInfo
 {
-public:
     // Scenario completed /
     // Сценарий завершён.
     // offset: +0x0 = +0,  size = 0x1 = 1
     bool completed;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_1[3];
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-public:
     // Days completed /
     // Кол-во дней, за которые пройден сценарий.
     // offset: +0x4 = +4,  size = 0x4 = 4
@@ -406,28 +458,24 @@ public:
     // offset: +0x10 = +16,  size = 0x4 = 4
     int32_t complete_order;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
 
-#pragma pack(push, 4)
 // Campaign progress information /
 // Информация о ходе прохождения кампании.
 // size = 0x7C = 124, align = 4
 struct SCampaign
 {
     public:
-        NH3API_FORCEINLINE
-        SCampaign() noexcept
-        NH3API_DELEGATE_DUMMY(SCampaign)
+        inline SCampaign() noexcept
+            : SCampaign(nh3api::dummy_tag)
         { THISCALL_1(void, 0x489040, this); }
 
-        NH3API_FORCEINLINE
-        SCampaign(const ::nh3api::dummy_tag_t& tag) noexcept
-            : CampaignFilename(tag),
-              carryover_pool(tag),
-              carryover_artifact(tag),
-              scenarios(tag),
-              assigned_carryover(tag)
+        inline SCampaign(const nh3api::dummy_tag_t& tag) noexcept
+            : CampaignFilename { tag },
+              carryover_pool { tag },
+              carryover_artifact { tag },
+              scenarios { tag },
+              assigned_carryover { tag }
         {}
 
         SCampaign(const SCampaign&)                = default;
@@ -437,11 +485,17 @@ struct SCampaign
 
         // we don't wrap non-trivial members in union because there is no destructor
         // available in the game as a standalone function, as it was inlined inside of game::game()
-        NH3API_DEFAULT_DESTRUCTOR(SCampaign)
+        inline ~SCampaign() noexcept = default;
 
     public:
         [[nodiscard]] bool CampaignComplete() const
         { return THISCALL_1(bool, 0x489310, this); }
+
+        CampaignScenarioInfo* GetCurrentScenario()
+        { return THISCALL_1(CampaignScenarioInfo*, 0x57CB00, this); }
+
+        [[nodiscard]] CampaignScenarioInfo* GetCurrentScenario() const
+        { return THISCALL_1(CampaignScenarioInfo*, 0x57CB00, this); }
 
     public:
         // Player is cheater /
@@ -459,12 +513,8 @@ struct SCampaign
         // offset: +0x2 = +2,  size = 0x1 = 1
         int8_t iCurMap;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x3 = +3,  size = 0x1 = 1
-        std::byte gap_3[1];
+        unsigned char : 8;
 
-    public:
         // Current campaign /
         // Текущая кампания.
         // offset: +0x4 = +4,  size = 0x4 = 4
@@ -481,11 +531,10 @@ struct SCampaign
         // offset: +0xC = +12,  size = 0x1 = 1
         int8_t iCrossoverArrayIndex;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_D[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Scenario chosen bonus /
         // Выбранный бонус сценария.
         // offset: +0x10 = +16,  size = 0x4 = 4
@@ -501,12 +550,10 @@ struct SCampaign
         // offset: +0x24 = +36,  size = 0x15 = 21
         std::array<bool, 21> bCampaignCompleted;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x39 = +57,  size = 0x3 = 3
-        std::byte gap_39[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Crossover heroes /
         // Переходящие в другой сценарий герои.
         // offset: +0x3C = +60,  size = 0x10 = 16
@@ -527,7 +574,7 @@ struct SCampaign
         // offset: +0x6C = +108,  size = 0x10 = 16
         exe_vector<int32_t> assigned_carryover;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

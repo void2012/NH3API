@@ -6,64 +6,66 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "../resources/resources.hpp"
-#include "../events.hpp"
+#include "../nh3api_std/point.hpp"    // TPoint
+#include "../events.hpp"              // message
+#include "../resources/resources.hpp" // Bitmap16Bit, THelpText, font
 
-// implementation of no-op constructors with dummy_tag
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 class heroWindow;
 #pragma pack(push, 4)
-// widget base class /
-// Базовый класс - элемент диалоговой системы(виджет).
+// widget abstract base class /
+// Базовый абстрактный класс - элемент диалоговой системы(виджет).
 // size = 0x30 = 48, align = 4
 NH3API_VIRTUAL_CLASS widget
 {
     public:
         struct vftable_t
         {
-            void* (__thiscall* scalar_deleting_destructor)(widget*, uint8_t);
+            void*   (__thiscall* scalar_deleting_destructor)(widget*, uint8_t);
             int32_t (__thiscall* Open)(widget*, int32_t, heroWindow*);
             int32_t (__thiscall* Main)(widget*, message*);
-            void (__thiscall* zBufferDraw)(const widget*, uint16_t*, uint32_t);
-            void (__thiscall* Draw)(const widget*);
+            void    (__thiscall* zBufferDraw)(const widget*, uint16_t*, uint32_t);
+            void    (__thiscall* Draw)(const widget*);
             int32_t (__thiscall* GetRealHeight)(const widget*);
             int32_t (__thiscall* GetRealWidth)(const widget*);
-            void (__thiscall* process_hover)(widget*);
-            void (__thiscall* Dim)(const widget*);
-            void (__thiscall* enable)(widget*, bool);
-            void (__thiscall* OnSetFocus)(widget*);
-            void (__thiscall* OnKillFocus)(widget*);
-            void (__thiscall* sleep)(widget*, bool);
+            void    (__thiscall* process_hover)(widget*);
+            void    (__thiscall* Dim)(const widget*);
+            void    (__thiscall* enable)(widget*, bool);
+            void    (__thiscall* OnSetFocus)(widget*);
+            void    (__thiscall* OnKillFocus)(widget*);
+            void    (__thiscall* sleep)(widget*, bool);
         };
 
     public:
-        enum ETypes : uint16_t
+        NH3API_FLAG_ENUM ETypes : uint16_t
         {
-            NULL_WIDGET          = 0, //
-            BORDER               = 1, //
-            BUTTON               = 2, //
-            TEXT_BUTTON          = 3, //
-            DRAGBAR              = 4, //
-            TEXT_WIDGET          = 8, //
-            ICON_WIDGET          = 16, //
-            ICON_WIDGET_XC_YBM2  = 17, //
-            ICON_WIDGET_CREATURE = 18, //
-            UPDATE_WIDGET        = 32, //
-            DIMMER_WIDGET        = 64, //
-            MONO_WIDGET          = 128, //
-            TEXT_ENTRY_WIDGET    = 256, //
-            COLORED_BORDER       = 1024, //
-            BITMAP_BORDER        = 2048, //
-            HIT_SELECT_BUTTON    = 4096, //
-            REL_VERIFY_BUTTON    = 8192, //
-            USER                 = 16384, //
+            NULL_WIDGET          = 0b000000000000000, //
+            BORDER               = 0b000000000000001, //
+            BUTTON               = 0b000000000000010, //
+            TEXT_BUTTON          = 0b000000000000011, //
+            DRAGBAR              = 0b000000000000100, //
+            TEXT_WIDGET          = 0b000000000001000, //
+            ICON_WIDGET          = 0b000000000010000, //
+            ICON_WIDGET_XC_YBM2  = 0b000000000010001, //
+            ICON_WIDGET_CREATURE = 0b000000000010010, //
+            UPDATE_WIDGET        = 0b000000000100000, //
+            DIMMER_WIDGET        = 0b000000001000000, //
+            MONO_WIDGET          = 0b000000010000000, //
+            TEXT_ENTRY_WIDGET    = 0b000000100000000, //
+            COLORED_BORDER       = 0b000010000000000, //
+            BITMAP_BORDER        = 0b000100000000000, //
+            HIT_SELECT_BUTTON    = 0b001000000000000, //
+            REL_VERIFY_BUTTON    = 0b010000000000000, //
+            USER                 = 0b100000000000000  //
         };
 
         enum EQualifiers : uint32_t
         {
             WIDGET_SINGLE_CLICK = 1, //
-            WIDGET_DOUBLE_CLICK = 2, //
+            WIDGET_DOUBLE_CLICK = 2  //
         };
 
         enum EReturnCodes : uint32_t
@@ -71,7 +73,7 @@ NH3API_VIRTUAL_CLASS widget
             WIDGET_END_DIALOG   = 10, //
             WIDGET_SELECT       = 12, //
             WIDGET_DESELECT     = 13, //
-            WIDGET_RIGHT_SELECT = 14, //
+            WIDGET_RIGHT_SELECT = 14  //
         };
 
         enum ECommands : uint32_t
@@ -104,46 +106,47 @@ NH3API_VIRTUAL_CLASS widget
             WIDGET_SET_WIDTH                 = 61, //
             WIDGET_SET_HEIGHT                = 62, //
             WIDGET_SET_COLORIZE              = 63, //
-            WIDGET_SET_FOCUS                 = 64, //
+            WIDGET_SET_FOCUS                 = 64  //
         };
 
-        enum EStatusFlags : uint16_t
+        NH3API_FLAG_ENUM EStatusFlags : uint16_t
         {
-            WIDGET_STATUS_MASK   = 65535, //
-            WIDGET_SELECTED      = 1, //
-            WIDGET_ACTIVE        = 2, //
-            WIDGET_DRAWN         = 4, //
-            WIDGET_DIMMED        = 8, //
-            WIDGET_HIGHLIGHTED   = 16, //
-            WIDGET_DISABLED      = 32, //
-            WIDGET_DIMMED_NODRAW = 4096, //
-            WIDGET_ASLEEP        = 8192, //
-            WIDGET_UPDATE        = 16384, //
+            WIDGET_STATUS_MASK   = 0b1111111111111111, //
+            WIDGET_SELECTED      = 0b0000000000000001, //
+            WIDGET_ACTIVE        = 0b0000000000000010, //
+            WIDGET_DRAWN         = 0b0000000000000100, //
+            WIDGET_DIMMED        = 0b0000000000001000, //
+            WIDGET_HIGHLIGHTED   = 0b0000000000010000, //
+            WIDGET_DISABLED      = 0b0000000000100000, //
+            WIDGET_DIMMED_NODRAW = 0b0001000000000000, //
+            WIDGET_ASLEEP        = 0b0010000000000000, //
+            WIDGET_UPDATE        = 0b0100000000000000  //
         };
 
     // constructors and destructors
     protected:
-        widget() noexcept
+        inline widget() noexcept
         { THISCALL_1(void, 0x5FE9D0, this); }
 
-        widget(int16_t x_,
-               int16_t y_,
-               int16_t w,
-               int16_t h,
-               int16_t id_,
-               ETypes style_) noexcept
+        inline widget(int16_t x_,
+                      int16_t y_,
+                      int16_t w,
+                      int16_t h,
+                      int16_t id_,
+                      ETypes  style_) noexcept
         { THISCALL_7(void, 0x5FE900, this, x_, y_, w, h, id_, static_cast<int16_t>(style_)); }
 
     public:
-        widget(const widget&)            noexcept = default;
-        widget(widget&&)                 noexcept = default;
-        widget& operator=(const widget&) noexcept = default;
-        widget& operator=(widget&&)      noexcept = default;
-        widget(const ::nh3api::dummy_tag_t&) noexcept
+        inline widget(const nh3api::dummy_tag_t&) noexcept
         {}
 
-        ~widget() noexcept
+        inline ~widget() noexcept
         { THISCALL_1(void, 0x575DF0, this); }
+
+        widget(const widget&)            = delete;
+        widget(widget&&)                 = delete;
+        widget& operator=(const widget&) = delete;
+        widget& operator=(widget&&)      = delete;
 
     // virtual functions
     public:
@@ -234,18 +237,21 @@ NH3API_VIRTUAL_CLASS widget
         void set_width(int32_t new_width)
         { send_message(WIDGET_SET_WIDTH, new_width); }
 
-        [[nodiscard]] const char* get_rclick_text() const
+        [[nodiscard]] const char* get_rclick_text() const noexcept
         { return freeText ? RightClick : nullptr; }
 
         void hide()
-        { send_message(WIDGET_CLEAR_STATUS, WIDGET_DRAWN|WIDGET_ACTIVE); }
+        { send_message(WIDGET_CLEAR_STATUS, WIDGET_DRAWN | WIDGET_ACTIVE); }
 
         void show()
-        { send_message(WIDGET_SET_STATUS, WIDGET_DRAWN|WIDGET_ACTIVE); }
+        { send_message(WIDGET_SET_STATUS, WIDGET_DRAWN | WIDGET_ACTIVE); }
+
+        static void clear_hover_widget() noexcept
+        { last_hover_widget = nullptr; }
 
     // static variables
     public:
-        static inline widget* const& last_hover_widget = get_global_var_ref(0x6AACD0, widget*);
+        static inline widget*& last_hover_widget = get_global_var_ref(0x6AACD0, widget*);
 
     // member variables
     public:
@@ -319,50 +325,47 @@ NH3API_VIRTUAL_CLASS widget
         // offset: +0x28 = +40,  size = 0x1 = 1
         bool freeText;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_29[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x2C = +44,  size = 0x4 = 4
         int32_t sleepCount;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_WIDGET
 #define NH3API_VIRTUAL_OVERRIDE_WIDGET(CLASS_NAME) \
-void __thiscall scalar_deleting_destructor(uint8_t flag)  override\
+void __thiscall scalar_deleting_destructor(uint8_t flag) override\
 { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }\
-int32_t __thiscall Open(int32_t newPriority, heroWindow* parent)  override\
+int32_t __thiscall Open(int32_t newPriority, heroWindow* parent) override\
 { return get_type_vftable(this)->Open(this, newPriority, parent); }\
-int32_t __thiscall Main(message* msg)  override\
+int32_t __thiscall Main(message* msg) override\
 { return get_type_vftable(this)->Main(this, msg); }\
-void __thiscall zBufferDraw(uint16_t* zBuffer, uint32_t fill_color) const  override\
+void __thiscall zBufferDraw(uint16_t* zBuffer, uint32_t fill_color) const override\
 { get_type_vftable(this)->zBufferDraw(this, zBuffer, fill_color); }\
-void __thiscall Draw() const  override\
+void __thiscall Draw() const override\
 { get_type_vftable(this)->Draw(this); }\
-[[nodiscard]] int32_t __thiscall GetRealHeight() const  override\
+[[nodiscard]] int32_t __thiscall GetRealHeight() const override\
 { return get_type_vftable(this)->GetRealHeight(this); }\
-[[nodiscard]] int32_t __thiscall GetRealWidth() const  override\
+[[nodiscard]] int32_t __thiscall GetRealWidth() const override\
 { return get_type_vftable(this)->GetRealWidth(this); }\
-void __thiscall process_hover()  override\
+void __thiscall process_hover() override\
 { get_type_vftable(this)->process_hover(this); }\
-void __thiscall Dim() const  override\
+void __thiscall Dim() const override\
 { get_type_vftable(this)->Dim(this); }\
-void __thiscall enable(bool arg)  override\
+void __thiscall enable(bool arg) override\
 { get_type_vftable(this)->enable(this, arg); }\
-void __thiscall OnSetFocus()  override\
+void __thiscall OnSetFocus() override\
 { get_type_vftable(this)->OnSetFocus(this); }\
-void __thiscall OnKillFocus()  override\
+void __thiscall OnKillFocus() override\
 { get_type_vftable(this)->OnKillFocus(this); }\
-void __thiscall sleep(bool arg)  override\
+void __thiscall sleep(bool arg) override\
 { get_type_vftable(this)->sleep(this, arg); }
 #endif
 
 using TWidgetVector = exe_vector<widget*>;
 
-#pragma pack(push, 4)
 // Window base class /
 // Базовый класс - окно.
 // size = 0x4C = 76, align = 4
@@ -371,32 +374,31 @@ NH3API_VIRTUAL_CLASS heroWindow
     public:
         struct vftable_t
         {
-            void (__thiscall* scalar_deleting_destructor)(heroWindow*, uint8_t);
+            void    (__thiscall* scalar_deleting_destructor)(heroWindow*, uint8_t);
             int32_t (__thiscall* Open)(heroWindow*, int32_t, bool);
-            void (__thiscall* Close)(heroWindow*, bool);
+            void    (__thiscall* Close)(heroWindow*, bool);
             int32_t (__thiscall* handle_message)(heroWindow*, message*);
-            void (__thiscall* handle_widget_hover)(heroWindow*, widget*);
-            void (__thiscall* DrawWindow)(heroWindow*, bool, int32_t,
-                                        int32_t);
-            void (__thiscall* DoModal)(heroWindow*, bool);
-            void (__thiscall* AddWidgetsToMessageStream)(heroWindow*);
-            void (__thiscall* sleep)(heroWindow*, bool);
+            void    (__thiscall* handle_widget_hover)(heroWindow*, widget*);
+            void    (__thiscall* DrawWindow)(heroWindow*, bool, int32_t, int32_t);
+            void    (__thiscall* DoModal)(heroWindow*, bool);
+            void    (__thiscall* AddWidgetsToMessageStream)(heroWindow*);
+            void    (__thiscall* sleep)(heroWindow*, bool);
         };
 
     public:
         enum : int32_t
         {
             MIN_WIDGET_ID     = -65535, //
-            MAX_WIDGET_ID     = 65535, //
-            DropShadowXOffset = 8, //
-            DropShadowYOffset = 8, //
+            MAX_WIDGET_ID     = 65535,  //
+            DropShadowXOffset = 8,      //
+            DropShadowYOffset = 8       //
         };
 
         enum TStatus : int32_t
         {
             NO_STATUS = 0, //
             VISIBLE   = 1, //
-            CORRUPT   = 2, //
+            CORRUPT   = 2  //
         };
 
         enum TAttribute : uint32_t
@@ -406,32 +408,29 @@ NH3API_VIRTUAL_CLASS heroWindow
             SAVEBACK    = 2, //
             DIALOG      = 4, //
             NOSAVEBACK  = 8, //
-            DROP_SHADOW = 16, //
+            DROP_SHADOW = 16 //
         };
+
+    public:
+        inline heroWindow(int32_t    winX,
+                          int32_t    winY,
+                          int32_t    winWidth,
+                          int32_t    winHeight,
+                          TAttribute winType) noexcept
+        { THISCALL_6(void, 0x5FEFB0, this, winX, winY, winWidth, winHeight, winType); }
+
+        inline heroWindow(const nh3api::dummy_tag_t& tag) noexcept
+            : Widgets(tag)
+        {}
+
+        inline ~heroWindow() noexcept
+        { THISCALL_1(void, 0x5FF040, this); }
 
         heroWindow()                             = delete;
         heroWindow(const heroWindow&)            = delete;
         heroWindow(heroWindow&&)                 = delete;
         heroWindow& operator=(const heroWindow&) = delete;
         heroWindow& operator=(heroWindow&&)      = delete;
-
-    public:
-        NH3API_FORCEINLINE
-        heroWindow(int32_t winX,
-                   int32_t winY,
-                   int32_t winWidth,
-                   int32_t winHeight,
-                   TAttribute winType) noexcept
-        { THISCALL_6(void, 0x5FEFB0, this, winX, winY, winWidth, winHeight, winType); }
-
-        NH3API_FORCEINLINE
-        heroWindow(const ::nh3api::dummy_tag_t& tag) noexcept
-            : Widgets(tag)
-        {}
-
-        NH3API_FORCEINLINE
-        ~heroWindow() noexcept
-        { THISCALL_1(void, 0x5FF040, this); }
 
     public:
         // vftable shift: +0
@@ -474,15 +473,18 @@ NH3API_VIRTUAL_CLASS heroWindow
         { return FASTCALL_1(int32_t, 0x5FFAC0, &msg); }
 
         int32_t BroadcastMessage(message::ECommandType command,
-                                 widget::ECommands subtype,
-                                 int32_t itemID,
-                                 uint32_t extra)
+                                 widget::ECommands     subtype,
+                                 int32_t               itemID,
+                                 uint32_t              extra)
         { return THISCALL_5(int32_t, 0x5FF400, this, command, subtype, itemID, extra); }
 
         int32_t BroadcastMessage(message& msg)
         { return THISCALL_2(int32_t, 0x5FF3A0, this, &msg); }
 
         widget* GetWidget(int32_t widget_id)
+        { return THISCALL_2(widget*, 0x5FF5B0, this, widget_id); }
+
+        [[nodiscard]] const widget* GetWidget(int32_t widget_id) const
         { return THISCALL_2(widget*, 0x5FF5B0, this, widget_id); }
 
         int32_t WidgetSetStatus(int32_t id, widget::EStatusFlags new_status)
@@ -495,8 +497,7 @@ NH3API_VIRTUAL_CLASS heroWindow
         // Установить позицию виджета.
         void WidgetSetPos(int32_t id, int32_t new_x, int32_t new_y)
         {
-            widget* w = GetWidget(id);
-            if (w)
+            if ( widget* w = GetWidget(id); w != nullptr )
                 w->set_pos(new_x, new_y);
         }
 
@@ -504,8 +505,7 @@ NH3API_VIRTUAL_CLASS heroWindow
         // Установить высоту виджета.
         void WidgetSetHeight(int32_t id, int32_t new_height)
         {
-            widget* w = GetWidget(id);
-            if (w)
+            if ( widget* w = GetWidget(id); w != nullptr )
                 w->set_height(new_height);
         }
 
@@ -513,12 +513,11 @@ NH3API_VIRTUAL_CLASS heroWindow
         // Установить ширину виджета.
         void WidgetSetWidth(int32_t id, int32_t new_width)
         {
-            widget* w = GetWidget(id);
-            if (w)
+            if ( widget* w = GetWidget(id); w != nullptr )
                 w->set_width(new_width);
         }
 
-        void CenterWindow(int32_t centerX, int32_t centerY)
+        void CenterWindow(int32_t centerX = -1, int32_t centerY = -1)
         { THISCALL_3(void, 0x5FF800, this, centerX, centerY); }
 
         // Find widget ID by (mx, my) coordinates /
@@ -529,6 +528,11 @@ NH3API_VIRTUAL_CLASS heroWindow
         // Find widget by (mx, my) coordinates /
         // Найти виджета по координатам (mx, my).
         widget* findWidgetPtr(int32_t mx, int32_t my)
+        { return THISCALL_3(widget*, 0x5FF9A0, this, mx, my); }
+
+        // Find widget by (mx, my) coordinates /
+        // Найти виджета по координатам (mx, my).
+        [[nodiscard]] const widget* findWidgetPtr(int32_t mx, int32_t my) const
         { return THISCALL_3(widget*, 0x5FF9A0, this, mx, my); }
 
         void SetFocus(int32_t id)
@@ -554,14 +558,14 @@ NH3API_VIRTUAL_CLASS heroWindow
         { return THISCALL_1(int32_t, 0x5FF6C0, this); }
 
         // Enable all widgets belonging to the current window /
-        // Перерисовать все виджеты, принадлежащие текущему окну.
-        void EnableAllWidgets(bool enable)
+        // Сделать все виджеты, принадлежащие текущему окну, неактивными.
+        void EnableAllWidgets(bool enable = true)
         {
-            for (auto& Widget : Widgets)
-                Widget->enable(enable);
+            for ( widget* w : Widgets )
+                w->enable(enable);
         }
 
-        void SleepAllWidgets(bool put_to_sleep)
+        void SleepAllWidgets(bool put_to_sleep = true)
         { THISCALL_2(void, 0x5FFB70, this, put_to_sleep); }
 
         // Redraw(refresh) the whole window /
@@ -618,7 +622,6 @@ NH3API_VIRTUAL_CLASS heroWindow
         int32_t sleepCount;
 
 };
-#pragma pack(pop)
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_HEROWINDOW
 #define NH3API_VIRTUAL_OVERRIDE_HEROWINDOW(CLASS_NAME) \
@@ -643,44 +646,40 @@ void __thiscall sleep(bool arg) override\
 #endif
 
 class textWidget;
-#pragma pack(push, 4)
 // size = 0x50 = 80, align = 4, baseclass: heroWindow
-class CHeroWindowEx : public heroWindow
+NH3API_VIRTUAL_CLASS CHeroWindowEx : public heroWindow
 {
     public:
         struct vftable_t : public heroWindow::vftable_t
         {
-            int32_t (__thiscall* WindowHandler)(CHeroWindowEx*, message*);
-            bool (__thiscall* ProcessHover)(CHeroWindowEx*, int32_t, int32_t);
-            bool (__thiscall* ProcessRightSelect)(CHeroWindowEx*, int32_t);
-            int32_t (__thiscall* OnWidgetDeselect)(CHeroWindowEx*, int32_t, bool*);
+            int32_t     (__thiscall* WindowHandler)(CHeroWindowEx*, message*);
+            bool        (__thiscall* ProcessHover)(CHeroWindowEx*, int32_t, int32_t);
+            bool        (__thiscall* ProcessRightSelect)(CHeroWindowEx*, int32_t);
+            int32_t     (__thiscall* OnWidgetDeselect)(CHeroWindowEx*, int32_t, bool*);
             textWidget* (__thiscall* GetRolloverWidget)(CHeroWindowEx*);
         };
+
+    public:
+        inline CHeroWindowEx(int32_t                winX,
+                             int32_t                winY,
+                             int32_t                winWidth,
+                             int32_t                winHeight,
+                             heroWindow::TAttribute winType) noexcept
+            : heroWindow(nh3api::dummy_tag)
+        { THISCALL_6(void, 0x5FFC00, this, winX, winY, winWidth, winHeight, winType); }
+
+        inline CHeroWindowEx(const nh3api::dummy_tag_t& tag) noexcept
+            : heroWindow(tag)
+        {}
+
+        inline ~CHeroWindowEx() noexcept
+        { THISCALL_1(void, 0x41B070, this); }
 
         CHeroWindowEx() = delete;
         CHeroWindowEx(const CHeroWindowEx&)            = delete;
         CHeroWindowEx(CHeroWindowEx&&)                 = delete;
         CHeroWindowEx& operator=(const CHeroWindowEx&) = delete;
         CHeroWindowEx& operator=(CHeroWindowEx&&)      = delete;
-
-    public:
-        NH3API_FORCEINLINE
-        CHeroWindowEx(int32_t winX,
-                      int32_t winY,
-                      int32_t winWidth,
-                      int32_t winHeight,
-                      heroWindow::TAttribute winType) noexcept
-            : heroWindow(::nh3api::dummy_tag)
-        { THISCALL_6(void, 0x5FFC00, this, winX, winY, winWidth, winHeight, winType); }
-
-        NH3API_FORCEINLINE
-        CHeroWindowEx(const ::nh3api::dummy_tag_t& tag) noexcept
-            : heroWindow(tag)
-        {}
-
-        NH3API_FORCEINLINE
-        ~CHeroWindowEx() noexcept
-        { THISCALL_1(void, 0x41B070, this); }
 
     // virtual functions
     public:
@@ -715,7 +714,6 @@ class CHeroWindowEx : public heroWindow
         int32_t m_lastIMHoverID;
 
 };
-#pragma pack(pop)
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_CHEROWINDOWEX
 #define NH3API_VIRTUAL_OVERRIDE_CHEROWINDOWEX(CLASS_NAME)\
@@ -732,10 +730,8 @@ textWidget* __thiscall GetRolloverWidget() override\
 { return get_type_vftable(this)->GetRolloverWidget(this); }
 #endif
 
-#pragma pack(push, 4)
-//
 // size = 0x60 = 96, align = 4, baseclass: CHeroWindowEx
-class CAdvPopup : public CHeroWindowEx
+NH3API_VIRTUAL_CLASS CAdvPopup : public CHeroWindowEx
 {
     public:
         struct vftable_t : CHeroWindowEx::vftable_t
@@ -743,30 +739,27 @@ class CAdvPopup : public CHeroWindowEx
             int32_t (__thiscall* ExitDialog)(CAdvPopup*, message*);
         };
 
+    public:
+        inline CAdvPopup(int32_t                winX,
+                         int32_t                winY,
+                         int32_t                winWidth,
+                         int32_t                winHeight,
+                         heroWindow::TAttribute winType) noexcept
+            : CHeroWindowEx(nh3api::dummy_tag)
+        { THISCALL_6(void, 0x41AFA0, this, winX, winY, winWidth, winHeight, winType); }
+
+        inline CAdvPopup(const nh3api::dummy_tag_t& tag) noexcept
+            : CHeroWindowEx(tag)
+        {}
+
+        inline ~CAdvPopup() noexcept
+        { THISCALL_1(void, 0x41B080, this); }
+
         CAdvPopup() = delete;
         CAdvPopup(const CAdvPopup&)            = delete;
         CAdvPopup(CAdvPopup&&)                 = delete;
         CAdvPopup& operator=(const CAdvPopup&) = delete;
         CAdvPopup& operator=(CAdvPopup&&)      = delete;
-
-    public:
-        NH3API_FORCEINLINE
-        CAdvPopup(int32_t winX,
-                  int32_t winY,
-                  int32_t winWidth,
-                  int32_t winHeight,
-                  heroWindow::TAttribute winType) noexcept
-            : CHeroWindowEx(::nh3api::dummy_tag)
-        { THISCALL_6(void, 0x41AFA0, this, winX, winY, winWidth, winHeight, winType); }
-
-        NH3API_FORCEINLINE
-        CAdvPopup(const ::nh3api::dummy_tag_t& tag) noexcept
-            : CHeroWindowEx(tag)
-        {}
-
-        NH3API_FORCEINLINE
-        ~CAdvPopup() noexcept
-        { THISCALL_1(void, 0x41B080, this); }
 
     public:
         NH3API_VIRTUAL_OVERRIDE_CHEROWINDOWEX(CAdvPopup)
@@ -788,12 +781,11 @@ class CAdvPopup : public CHeroWindowEx
         // offset: +0x5C = +92,  size = 0x1 = 1
         bool netHandlerInPopup;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_5D[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
+} NH3API_MSVC_LAYOUT;
 
-};
-#pragma pack(pop)
 #ifndef NH3API_VIRTUAL_OVERRIDE_CADVPOPUP
 #define NH3API_VIRTUAL_OVERRIDE_CADVPOPUP(CLASS_NAME)\
 NH3API_VIRTUAL_OVERRIDE_HEROWINDOW(CLASS_NAME)\
@@ -802,10 +794,8 @@ int32_t __thiscall ExitDialog(message& msg) override\
 { return get_type_vftable(this)->ExitDialog(this, &msg); }
 #endif
 
-#pragma pack(push, 4)
-//
 // size = 0x54 = 84, align = 4, baseclass: heroWindow
-class TDialogBox : public heroWindow
+NH3API_VIRTUAL_CLASS TDialogBox : public heroWindow
 {
     public:
         struct vftable_t : heroWindow::vftable_t
@@ -815,31 +805,31 @@ class TDialogBox : public heroWindow
             bool (__thiscall* TDialogBox_Setup)(TDialogBox*, int32_t, int32_t, int32_t, int32_t);
         };
 
+    public:
+        inline TDialogBox(heroWindow::TAttribute winType) noexcept
+            : heroWindow(nh3api::dummy_tag)
+        { THISCALL_2(void, 0x48F9E0, this, winType); }
+
+        inline TDialogBox(int32_t winX,
+                          int32_t winY,
+                          int32_t winWidth,
+                          int32_t winHeight,
+                          heroWindow::TAttribute winType) noexcept
+            : heroWindow(nh3api::dummy_tag)
+        { THISCALL_6(void, 0x48F940, this, winX, winY, winWidth, winHeight, winType); }
+
+        inline TDialogBox(const nh3api::dummy_tag_t& tag) noexcept
+            : heroWindow(tag)
+        {}
+
+        inline ~TDialogBox() noexcept
+        { THISCALL_1(void, 0x48FA10, this); }
+
         TDialogBox()                             = delete;
         TDialogBox(const TDialogBox&)            = delete;
         TDialogBox(TDialogBox&&)                 = delete;
         TDialogBox& operator=(const TDialogBox&) = delete;
         TDialogBox& operator=(TDialogBox&&)      = delete;
-
-    public:
-        NH3API_FORCEINLINE
-        TDialogBox(heroWindow::TAttribute winType) noexcept
-            : heroWindow(::nh3api::dummy_tag)
-        { THISCALL_2(void, 0x48F9E0, this, winType); }
-
-        NH3API_FORCEINLINE
-        TDialogBox(int32_t winX, int32_t winY, int32_t winWidth, int32_t winHeight, heroWindow::TAttribute winType) noexcept
-            : heroWindow(::nh3api::dummy_tag)
-        { THISCALL_6(void, 0x48F940, this, winX, winY, winWidth, winHeight, winType); }
-
-        NH3API_FORCEINLINE
-        TDialogBox(const ::nh3api::dummy_tag_t& tag) noexcept
-            : heroWindow(tag)
-        {}
-
-        NH3API_FORCEINLINE
-        ~TDialogBox() noexcept
-        { THISCALL_1(void, 0x48FA10, this); }
 
     public:
         NH3API_VIRTUAL_OVERRIDE_HEROWINDOW(TDialogBox)
@@ -856,7 +846,6 @@ class TDialogBox : public heroWindow
         int32_t endID;
 
 };
-#pragma pack(pop)
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_TDIALOGBOX
 #define NH3API_VIRTUAL_OVERRIDE_TDIALOGBOX(CLASS_NAME)\
@@ -865,38 +854,34 @@ bool __thiscall Setup(int32_t winX, int32_t winY, int32_t winWidth, int32_t winH
 { return get_type_vftable(this)->TDialogBox_Setup(this, winX, winY, winWidth, winHeight); }
 #endif
 
-#pragma pack(push, 4)
 // size = 0x58 = 88, align = 4, baseclass: TDialogBox
-class CTextDialog : public TDialogBox
+NH3API_VIRTUAL_CLASS CTextDialog : public TDialogBox
 {
     public:
         struct vftable_t : TDialogBox::vftable_t
         {
-            bool (__thiscall *CTextDialog_Setup)(CTextDialog*, const char*, font*);
-            void (__thiscall *UpdateText)(CTextDialog*, const char*);
-            void (__thiscall *CalcDimensions)(CTextDialog*, const char*, font*, int32_t*, int32_t*, int32_t*, int32_t*);
+            bool (__thiscall* CTextDialog_Setup)(CTextDialog*, const char*, font*);
+            void (__thiscall* UpdateText)(CTextDialog*, const char*);
+            void (__thiscall* CalcDimensions)(CTextDialog*, const char*, font*, int32_t*, int32_t*, int32_t*, int32_t*);
         };
+
+    public:
+        inline CTextDialog(heroWindow::TAttribute winType) noexcept
+            : TDialogBox(nh3api::dummy_tag)
+        { THISCALL_2(void, 0x490360, this, winType); }
+
+        inline CTextDialog(const nh3api::dummy_tag_t& tag) noexcept
+            : TDialogBox(tag)
+        {}
+
+        inline ~CTextDialog() noexcept
+        { THISCALL_1(void, 0x4902F0, this); }
 
         CTextDialog()                              = delete;
         CTextDialog(const CTextDialog&)            = delete;
         CTextDialog(CTextDialog&&)                 = delete;
         CTextDialog& operator=(const CTextDialog&) = delete;
         CTextDialog& operator=(CTextDialog&&)      = delete;
-
-    public:
-        NH3API_FORCEINLINE
-        CTextDialog(heroWindow::TAttribute winType) noexcept
-            : TDialogBox(::nh3api::dummy_tag)
-        { THISCALL_2(void, 0x490360, this, winType); }
-
-        NH3API_FORCEINLINE
-        CTextDialog(const ::nh3api::dummy_tag_t& tag) noexcept
-            : TDialogBox(tag)
-        {}
-
-        NH3API_FORCEINLINE
-        ~CTextDialog() noexcept
-        { THISCALL_1(void, 0x4902F0, this); }
 
     public:
         NH3API_VIRTUAL_OVERRIDE_TDIALOGBOX(CTextDialog)
@@ -922,9 +907,7 @@ class CTextDialog : public TDialogBox
         textWidget* pTextWidget;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Modeless window /
 // i.e. such window that is not a dialog,
 // that is, it doesn't block other windows
@@ -934,29 +917,30 @@ class CTextDialog : public TDialogBox
 // оно не блокирует другие окна. Примером может служить окно колонки ресурсов.
 // Такое окно не может существовать само по себе, оно зависит от родительского окна.
 // size = 0x34 = 52, align = 4
-class TSubWindow
+NH3API_VIRTUAL_CLASS TSubWindow
 {
     public:
         struct vftable_t
-        { void (__thiscall *scalar_deleting_destructor)(TSubWindow*, uint8_t); };
+        { void (__thiscall* scalar_deleting_destructor)(TSubWindow*, uint8_t); };
 
     public:
-        NH3API_FORCEINLINE
-        TSubWindow() noexcept
+        inline TSubWindow() noexcept
         { THISCALL_1(void, 0x5AA650, this); }
 
-        NH3API_FORCEINLINE
-        TSubWindow(int32_t x, int32_t y, int32_t w, int32_t h, heroWindow* parent_window) noexcept
+        inline TSubWindow(int32_t x, int32_t y, int32_t w, int32_t h, heroWindow* parent_window) noexcept
         { THISCALL_6(void, 0x5AA6D0, this, x, y, w, h, parent_window); }
 
-        NH3API_FORCEINLINE
-        TSubWindow(const ::nh3api::dummy_tag_t& tag) noexcept
-            : Widgets(tag)
+        inline TSubWindow(const nh3api::dummy_tag_t& tag) noexcept
+            : Widgets { tag }
         {}
 
-        NH3API_FORCEINLINE
-        ~TSubWindow() noexcept
+        inline ~TSubWindow() noexcept
         { THISCALL_1(void, 0x5AA720, this); }
+
+        TSubWindow(const TSubWindow&)            = delete;
+        TSubWindow(TSubWindow&&)                 = delete;
+        TSubWindow& operator=(const TSubWindow&) = delete;
+        TSubWindow& operator=(TSubWindow&&)      = delete;
 
     public:
         void initialize(int32_t x, int32_t y, int32_t w, int32_t h, heroWindow* parent_window)
@@ -964,6 +948,12 @@ class TSubWindow
 
         void AddWidget(widget* newWidget, int32_t newPriority)
         { THISCALL_3(void, 0x5AA7B0, this, newWidget, newPriority); }
+
+        void RemoveWidget(widget* killWidget)
+        {
+            if ( ParentWindow && killWidget )
+                ParentWindow->RemoveWidget(killWidget);
+        }
 
         void Draw(bool update, int32_t iLowID, int32_t iHighID)
         { THISCALL_4(void, 0x5AA800, this, update, iLowID, iHighID); }
@@ -1014,7 +1004,6 @@ class TSubWindow
         Bitmap16Bit* Background;
 
 };
-#pragma pack(pop)
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_TSUBWINDOW
 #define NH3API_VIRTUAL_OVERRIDE_TSUBWINDOW(CLASS_NAME) \
@@ -1022,7 +1011,6 @@ void __thiscall scalar_deleting_destructor(uint8_t flag) override\
 { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }
 #endif
 
-#pragma pack(push, 4)
 // size = 0x8 = 8, align = 4
 struct type_dialog_resource
 {
@@ -1033,9 +1021,7 @@ struct type_dialog_resource
     int32_t qualifier;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // size = 0x4C = 76, align = 4
 struct type_dialog_icon
 {
@@ -1055,7 +1041,7 @@ struct type_dialog_icon
     int32_t spriteFrameIndex;
 
     // offset: +0x2C = +44,  size = 0x8 = 8
-    POINT spritePos;
+    TPoint spritePos;
 
     // offset: +0x34 = +52,  size = 0x4 = 4
     int32_t spriteHeight;
@@ -1064,7 +1050,7 @@ struct type_dialog_icon
     int32_t spriteWidth;
 
     // offset: +0x3C = +60,  size = 0x8 = 8
-    POINT textPos;
+    TPoint textPos;
 
     // offset: +0x44 = +68,  size = 0x4 = 4
     int32_t textHeight;
@@ -1073,7 +1059,6 @@ struct type_dialog_icon
     int32_t textWidth;
 
 };
-#pragma pack(pop)
 
 // NormalDialog dialog interaction type /
 // Вид диалога NormalDialog.
@@ -1090,13 +1075,11 @@ enum EMBType : int32_t
     NORMAL_DIALOG_CHOOSE_OPTIONAL = 10
 };
 
-#pragma pack(push, 4)
 // Normal Dialog info /
 // Настройки стандартного диалога.
 // size = 0x2A0 = 672, align = 4
 struct TNormalDialogInfo
 {
-public:
     // offset: +0x0 = +0,  size = 0x10 = 16
     exe_string dialog_text;
 
@@ -1127,11 +1110,10 @@ public:
     // offset: +0x30 = +48,  size = 0x1 = 1
     bool text_expansion;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_31[3];
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-public:
     // offset: +0x34 = +52,  size = 0x260 = 608
     std::array<type_dialog_icon, 8> icons;
 
@@ -1144,39 +1126,37 @@ public:
     // offset: +0x29C = +668,  size = 0x4 = 4
     int32_t timeout;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 4
 
 #if NH3API_DEBUG
-NH3API_FORCEINLINE
 // address: 0x4F6C00
 // Do default dialog /
 // Стандартный диалог.
-void NormalDialog(const char* cText,
-                  EMBType iMBType = NORMAL_DIALOG_DEFAULT,
-                  int32_t x = -1,
-                  int32_t y = -1,
-                  EGameResource iResType1 = const_no_resource,
-                  int32_t iResExtra1 = 0,
-                  EGameResource iResType2 = const_no_resource,
-                  int32_t iResExtra2 = 0,
-                  int32_t iSpecial = -1,
-                  int32_t iTimeout = 0,
-                  EGameResource iResType3 = const_no_resource,
-                  int32_t iResExtra3 = 0)
+inline void NormalDialog(const char*   cText,
+                         EMBType       iMBType    = NORMAL_DIALOG_DEFAULT,
+                         int32_t       x          = -1,
+                         int32_t       y          = -1,
+                         EGameResource iResType1  = const_no_resource,
+                         int32_t       iResExtra1 = 0,
+                         EGameResource iResType2  = const_no_resource,
+                         int32_t       iResExtra2 = 0,
+                         int32_t       iSpecial   = -1,
+                         int32_t       iTimeout   = 0,
+                         EGameResource iResType3  = const_no_resource,
+                         int32_t       iResExtra3 = 0)
 {
-    assert(cText && "cText must not be a nullptr");
-    assert(strlen(cText) && "cText must not be an empty string");
-    FASTCALL_12(void, 0x4F6C00, cText, iMBType, x, y, iResType1, iResExtra1, iResType2, iResExtra2, iSpecial, iTimeout, iResType3, iResExtra3);
+    if ( cText )
+        FASTCALL_12(void, 0x4F6C00, cText, iMBType, x, y, iResType1, iResExtra1, iResType2, iResExtra2, iSpecial, iTimeout, iResType3, iResExtra3);
 }
 #else
 // code size optimization
 struct _NormalDialog
 {
-    public:
-    NH3API_NOINLINE
-    static void __fastcall show(const char* cText) noexcept
-    { FASTCALL_12(void,
+    NH3API_NOINLINE static void __fastcall show(const char* cText) noexcept
+    { 
+        if ( cText )
+        FASTCALL_12(void,
                   0x4F6C00,
                   cText,
                   NORMAL_DIALOG_DEFAULT,
@@ -1189,46 +1169,76 @@ struct _NormalDialog
                   -1,
                   0,
                   const_no_resource,
-                  0); }
+                  0); 
+    }
 };
 
-NH3API_FORCEINLINE
 // address: 0x4F6C00
 // Do default dialog /
 // Стандартный диалог.
-void NormalDialog(const char* cText) noexcept
+inline void NormalDialog(const char* cText) noexcept
 { _NormalDialog::show(cText); }
 
-NH3API_FORCEINLINE
 // address: 0x4F6C00
 // Do default dialog /
 // Стандартный диалог.
-void NormalDialog(const char* cText,
-                  EMBType iMBType,
-                  int32_t x = -1,
-                  int32_t y = -1,
-                  EGameResource iResType1 = const_no_resource,
-                  int32_t iResExtra1 = 0,
-                  EGameResource iResType2 = const_no_resource,
-                  int32_t iResExtra2 = 0,
-                  int32_t iSpecial = -1,
-                  int32_t iTimeout = 0,
-                  EGameResource iResType3 = const_no_resource,
-                  int32_t iResExtra3 = 0)
-{ FASTCALL_12(void, 0x4F6C00, cText, iMBType, x, y, iResType1, iResExtra1, iResType2, iResExtra2, iSpecial, iTimeout, iResType3, iResExtra3); }
+inline void NormalDialog(const char*   cText,
+                  EMBType       iMBType,
+                  int32_t       x          = -1,
+                  int32_t       y          = -1,
+                  EGameResource iResType1  = const_no_resource,
+                  int32_t       iResExtra1 = 0,
+                  EGameResource iResType2  = const_no_resource,
+                  int32_t       iResExtra2 = 0,
+                  int32_t       iSpecial   = -1,
+                  int32_t       iTimeout   = 0,
+                  EGameResource iResType3  = const_no_resource,
+                  int32_t       iResExtra3 = 0)
+{ 
+    if ( cText )
+        FASTCALL_12(void, 0x4F6C00, cText, iMBType, x, y, iResType1, iResExtra1, iResType2, iResExtra2, iSpecial, iTimeout, iResType3, iResExtra3); 
+}
+#endif // debug
 
-#endif
+// address: 0x4F6C00
+// Do default dialog /
+// Стандартный диалог.
+inline void NormalDialog(const exe_string& string) noexcept
+{ 
+    if ( !string.empty() )
+        NormalDialog(string.c_str()); 
+}
 
-NH3API_FORCEINLINE
+// address: 0x4F6C00
+// Do default dialog /
+// Стандартный диалог.
+inline void NormalDialog(const std::string& string) noexcept
+{ 
+    if ( !string.empty() )
+        NormalDialog(string.c_str()); 
+}
+
+// address: 0x4F6C00
+// Do default dialog /
+// Стандартный диалог.
+inline void NormalDialog(char character) noexcept
+{
+    char buf[2] { character, '\0' };
+    NormalDialog(&buf[0]);
+}
+
 // address: 0x4F7D20
 // Do extended dialog /
 // Расширенный диалог.
-void extended_dialog(const char* const text,
-                     const exe_vector<type_dialog_resource>& resources,
-                     int32_t x = -1,
-                     int32_t y = -1,
-                     int32_t timeout = 0)
+inline void extended_dialog(const char* const __restrict text,
+                            const exe_vector<type_dialog_resource>& __restrict resources,
+                            const int32_t x       = -1,
+                            const int32_t y       = -1,
+                            const int32_t timeout = 0)
 { FASTCALL_5(void, 0x4F7D20, text, &resources, x, y, timeout); }
+
+void NormalDialog(std::nullptr_t)    = delete;
+void extended_dialog(std::nullptr_t) = delete;
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x643CA0, widget)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x643CD4, heroWindow)
@@ -1238,4 +1248,4 @@ NH3API_SPECIALIZE_TYPE_VFTABLE(0x63DB40, TDialogBox)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63DB68, CTextDialog)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x64235C, TSubWindow)
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

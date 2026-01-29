@@ -10,6 +10,7 @@
 #pragma once
 
 #include "nh3api_std/nh3api_std.hpp"
+#include "nh3api_std/enum_limits.hpp"
 
 // Heroes IDs /
 // Герои.
@@ -190,6 +191,11 @@ enum THeroID : int32_t
     MAX_HEROES           = MAX_HEROES_SOD
 };
 
+template<>
+struct nh3api::enum_limits<THeroID>
+    : nh3api::enum_limits_base<THeroID, HERO_ORRIN, HERO_XERON>
+{ static inline constexpr bool is_specialized = true; };
+
 // Hero classes /
 // Классы героя
 enum THeroClass : int32_t
@@ -212,8 +218,33 @@ enum THeroClass : int32_t
     eClassWitch        = 15, // Класс "Ведьма"
     eClassPlanesWalker = 16, // Класс "Странник"
     eClassElementalist = 17, // Класс "Элементалист"
-    kNumHeroClasses    = 18 // Количество классов в игре
+    kNumHeroClasses    = 18, // Количество классов героев в игре
+
+    HERO_CLASS_KNIGHT       = 0,  // Класс "Рыцарь"
+    HERO_CLASS_CLERIC       = 1,  // Класс "Клерик"
+    HERO_CLASS_RANGER       = 2,  // Класс "Рейнджер"
+    HERO_CLASS_DRUID        = 3,  // Класс "Друид"
+    HERO_CLASS_ALCHEMIST    = 4,  // Класс "Алхимик"
+    HERO_CLASS_WIZARD       = 5,  // Класс "Чародей"
+    HERO_CLASS_PAGAN        = 6,  // Класс "Одержимый"
+    HERO_CLASS_HERETIC      = 7,  // Класс "Еретик"
+    HERO_CLASS_DEATHKNIGHT  = 8,  // Класс "Рыцарь Смерти"
+    HERO_CLASS_NECROMANCER  = 9,  // Класс "Некромант"
+    HERO_CLASS_OVERLORD     = 10, // Класс "Верховный лорд"
+    HERO_CLASS_WARLOCK      = 11, // Класс "Чернокнижник"
+    HERO_CLASS_BARBARIAN    = 12, // Класс "Варвар"
+    HERO_CLASS_BATTLEMAGE   = 13, // Класс "Боевой маг"
+    HERO_CLASS_BEASTMASTER  = 14, // Класс "Зверолов"
+    HERO_CLASS_WITCH        = 15, // Класс "Ведьма"
+    HERO_CLASS_PLANESWALKER = 16, // Класс "Странник"
+    HERO_CLASS_ELEMENTALIST = 17, // Класс "Элементалист"
+    MAX_HERO_CLASSES = 18 // Количество классов героев в игре
 };
+
+template<>
+struct nh3api::enum_limits<THeroClass>
+    : nh3api::enum_limits_base<THeroClass, HERO_CLASS_KNIGHT, HERO_CLASS_ELEMENTALIST>
+{ static inline constexpr bool is_specialized = true; };
 
 // Hero sex /
 // Пол героя.
@@ -268,39 +299,44 @@ enum hero_seqid : uint32_t
     hs_max       = 18  // Кол-во кадров поворота героя или лодки
 };
 
+template<>
+struct nh3api::enum_limits<hero_seqid>
+    : nh3api::enum_limits_base<hero_seqid, hs_stand_n, hs_turn_s_se>
+{ static inline constexpr bool is_specialized = true; };
+
 // Hero state flags /
 // Флаги состояния героя.
 NH3API_FLAG_ENUM hero_flags : uint32_t
 {
-    HF_WELL                = 0x1,
-    HF_STABLES             = 0x2,
-    HF_BUOY                = 0x4,
-    HF_SWANPOND            = 0x8,
-    HF_IDOLFORTUNEMORALE   = 0x10,
-    HF_FOUNTAINFORTUNE_N1  = 0x20,
-    HF_WATERINGHOLE        = 0x40,
-    HF_OASIS               = 0x80,
-    HF_TEMPLE              = 0x100,
-    HF_SHIPWRECK           = 0x200,
-    HF_CRYPT               = 0x400,
-    HF_DERELICTSHIPPENALTY = 0x800,
-    HF_PYRAMID             = 0x1000,
-    HF_FAERIERING          = 0x2000,
-    HF_FOUNTAINOFYOUTH     = 0x4000,
-    HF_MERMAIDS            = 0x8000,
-    HF_RALLYFLAG           = 0x10000,
-    HF_ISINTAVERN          = 0x20000,
-    HF_ISINBOAT            = 0x40000,
-    HF_UNKNOWN             = 0x80000,
-    HF_SIRENS              = 0x100000,
-    HF_WARRIORTOMB         = 0x200000,
-    HF_LUCKCHEAT           = 0x400000,
-    HF_MORALECHEAT         = 0x800000,
-    HF_MOVEPOINTSCHEAT     = 0x1000000,
-    HF_IDOLFORTUNELUCK     = 0x2000000,
-    HF_TEMPLEDAY7          = 0x4000000,
-    HF_FOUNTAINFORTUNE_1   = 0x8000000,
-    HF_FOUNTAINFORTUNE_2   = 0x10000000,
-    HF_FOUNTAINFORTUNE_3   = 0x20000000,
-    HF_UNKNOWN2            = 0x40000000
+    HF_WELL                = 0b0000000000000000000000000000001,
+    HF_STABLES             = 0b0000000000000000000000000000010,
+    HF_BUOY                = 0b0000000000000000000000000000100,
+    HF_SWANPOND            = 0b0000000000000000000000000001000,
+    HF_IDOLFORTUNEMORALE   = 0b0000000000000000000000000010000,
+    HF_FOUNTAINFORTUNE_N1  = 0b0000000000000000000000000100000,
+    HF_WATERINGHOLE        = 0b0000000000000000000000001000000,
+    HF_OASIS               = 0b0000000000000000000000010000000,
+    HF_TEMPLE              = 0b0000000000000000000000100000000,
+    HF_SHIPWRECK           = 0b0000000000000000000001000000000,
+    HF_CRYPT               = 0b0000000000000000000010000000000,
+    HF_DERELICTSHIPPENALTY = 0b0000000000000000000100000000000,
+    HF_PYRAMID             = 0b0000000000000000001000000000000,
+    HF_FAERIERING          = 0b0000000000000000010000000000000,
+    HF_FOUNTAINOFYOUTH     = 0b0000000000000000100000000000000,
+    HF_MERMAIDS            = 0b0000000000000001000000000000000,
+    HF_RALLYFLAG           = 0b0000000000000010000000000000000,
+    HF_ISINTAVERN          = 0b0000000000000100000000000000000,
+    HF_ISINBOAT            = 0b0000000000001000000000000000000,
+    HF_UNKNOWN             = 0b0000000000010000000000000000000,
+    HF_SIRENS              = 0b0000000000100000000000000000000,
+    HF_WARRIORTOMB         = 0b0000000001000000000000000000000,
+    HF_LUCKCHEAT           = 0b0000000010000000000000000000000,
+    HF_MORALECHEAT         = 0b0000000100000000000000000000000,
+    HF_MOVEPOINTSCHEAT     = 0b0000001000000000000000000000000,
+    HF_IDOLFORTUNELUCK     = 0b0000010000000000000000000000000,
+    HF_TEMPLEDAY7          = 0b0000100000000000000000000000000,
+    HF_FOUNTAINFORTUNE_1   = 0b0001000000000000000000000000000,
+    HF_FOUNTAINFORTUNE_2   = 0b0010000000000000000000000000000,
+    HF_FOUNTAINFORTUNE_3   = 0b0100000000000000000000000000000,
+    HF_UNKNOWN2            = 0b1000000000000000000000000000000
 };

@@ -10,22 +10,24 @@
 #pragma once
 
 #include "nh3api_std/exe_bitset.hpp" // exe_bitset<N>
-#include "spells.hpp" // SpellID
+#include "spells.hpp"                // SpellID
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 // Artifact type /
 // Тип артефакта.
 enum TArtifact : int32_t
 {
-    ARTIFACT_NONE                  = -1,  // Никакой(используется для проверок)
-    ARTIFACT_SPELLBOOK             = 0,   // Книга заклинаний
-    ARTIFACT_SPELL_SCROLL          = 1,   // Свиток заклинания
-    ARTIFACT_GRAIL                 = 0,   // Грааль
-    ARTIFACT_CATAPULT              = 3,   // Катапульта(артефакт)
-    ARTIFACT_BALLISTA              = 4,   // Баллиста(артефакт)
-    ARTIFACT_AMMO_CART             = 5,   // Тележка с боеприпасами(артефакт)
-    ARTIFACT_FIRST_AID_TENT        = 6,   // Палатка первой помощи(артефакт)
+    ARTIFACT_NONE                           = -1,  // Никакой(используется для проверок)
+    ARTIFACT_SPELLBOOK                      = 0,   // Книга заклинаний
+    ARTIFACT_SPELL_SCROLL                   = 1,   // Свиток заклинания
+    ARTIFACT_GRAIL                          = 0,   // Грааль
+    ARTIFACT_CATAPULT                       = 3,   // Катапульта(артефакт)
+    ARTIFACT_BALLISTA                       = 4,   // Баллиста(артефакт)
+    ARTIFACT_AMMO_CART                      = 5,   // Тележка с боеприпасами(артефакт)
+    ARTIFACT_FIRST_AID_TENT                 = 6,   // Палатка первой помощи(артефакт)
     ARTIFACT_CENTAUR_AXE                    = 7,   // Секира кентавра
     ARTIFACT_BLACKSHARD_OF_THE_DEAD_KNIGHT  = 8,   // Блэкшард мёртвого рыцаря
     ARTIFACT_GREATER_GNOLLS_FLAIL           = 9,   // Кистень великого гнолла
@@ -162,55 +164,72 @@ enum TArtifact : int32_t
     ARTIFACT_WIZARDS_WELL                   = 138, // Колодец волшебника
     ARTIFACT_RING_OF_THE_MAGI               = 139, // Кольцо мага
     ARTIFACT_CORNUCOPIA                     = 140, // Рог изобилия
+    ARTIFACT_DIPLOMATS_SUIT                 = 141, // Unused / Не используется
+    ARTIFACT_MIRED_IN_NEUTRALITY            = 142, // Unused / Не используется
+    ARTIFACT_IRONFIST_OF_THE_OGRE           = 143, // Unused / Не используется
 
-    MAX_ARTIFACTS_ROE = 127, // Кол-во артефактов в RoE
-    MAX_ARTIFACTS_AB  = 129, // Кол-во артефактов в AB
-    MAX_ARTIFACTS_SOD = 144, // Кол-во артефактов в SoD
-    MAX_ARTIFACTS = MAX_ARTIFACTS_SOD, // Кол-во артефактов
-    MAX_COMBO_ARTIFACTS = 12 // Кол-во сборных артефактов
+    MAX_ARTIFACTS_ROE   = 127,                     // Кол-во артефактов в RoE
+    MAX_ARTIFACTS_AB    = 129,                     // Кол-во артефактов в AB
+    MAX_ARTIFACTS_SOD   = 144,                     // Кол-во артефактов в SoD
+    MAX_ARTIFACTS       = MAX_ARTIFACTS_SOD,       // Кол-во артефактов
+    FIRST_ARTIFACT      = ARTIFACT_SPELLBOOK,
+    LAST_ARTIFACT       = ARTIFACT_IRONFIST_OF_THE_OGRE
 };
+
+template<>
+struct nh3api::enum_limits<TArtifact>
+    : nh3api::enum_limits_base<TArtifact, ARTIFACT_SPELLBOOK, ARTIFACT_IRONFIST_OF_THE_OGRE>
+{ static inline constexpr bool is_specialized = true; };
 
 // Hero artifact slots /
 // Слоты артефактов на теле героя
 enum TArtifactSlot : int32_t
 {
-    SLOT_HEAD           = 0,  // Голова
-    SLOT_SHOULDERS      = 1,  // Плечи
-    SLOT_NECK           = 2,  // Шея
-    SLOT_RIGHT_HAND     = 3,  // Правая рука
-    SLOT_LEFT_HAND      = 4,  // Левая рука
-    SLOT_TORSO          = 5,  // Торс
-    SLOT_RIGHT_RING     = 6,  // Правое кольцо
-    SLOT_LEFT_RING      = 7,  // Левое кольцо
-    SLOT_FEET           = 8,  // Ноги
-    SLOT_MISC1          = 9,  // Разное 1
-    SLOT_MISC2          = 10, // Разное 2
-    SLOT_MISC3          = 11, // Разное 3
-    SLOT_MISC4          = 12, // Разное 4
-    SLOT_BALLISTA       = 13, // Место Баллисты
-    SLOT_AMMO_CART      = 14, // Место Подводы с боеприпасами
-    SLOT_FIRST_AID_TENT = 15, // Место Палатки
-    SLOT_CATAPULT       = 16, // Место Катапульты
-    SLOT_SPELLBOOK      = 17, // Место Книги заклинаний
-    SLOT_MISC5          = 18, // Разное 5
+    SLOT_NONE           = -1,
+    SLOT_HEAD           = 0,                         // Голова
+    SLOT_SHOULDERS      = 1,                         // Плечи
+    SLOT_NECK           = 2,                         // Шея
+    SLOT_RIGHT_HAND     = 3,                         // Правая рука
+    SLOT_LEFT_HAND      = 4,                         // Левая рука
+    SLOT_TORSO          = 5,                         // Торс
+    SLOT_RIGHT_RING     = 6,                         // Правое кольцо
+    SLOT_LEFT_RING      = 7,                         // Левое кольцо
+    SLOT_FEET           = 8,                         // Ноги
+    SLOT_MISC1          = 9,                         // Разное 1
+    SLOT_MISC2          = 10,                        // Разное 2
+    SLOT_MISC3          = 11,                        // Разное 3
+    SLOT_MISC4          = 12,                        // Разное 4
+    SLOT_BALLISTA       = 13,                        // Место Баллисты
+    SLOT_AMMO_CART      = 14,                        // Место Подводы с боеприпасами
+    SLOT_FIRST_AID_TENT = 15,                        // Место Палатки
+    SLOT_CATAPULT       = 16,                        // Место Катапульты
+    SLOT_SPELLBOOK      = 17,                        // Место Книги заклинаний
+    SLOT_MISC5          = 18,                        // Разное 5
 
-    MAX_ARTIFACT_SLOTS_ROE = 18, // Кол-во слотов артефактов в RoE
-    MAX_ARTIFACT_SLOTS_AB  = 18, // Кол-во слотов артефактов в AB
-    MAX_ARTIFACT_SLOTS_SOD = 19, // Кол-во слотов артефактов в SoD
-    MAX_ARTIFACT_SLOTS = MAX_ARTIFACT_SLOTS_SOD, // Кол-во слотов артефактов
-    MAX_BACKPACK_SLOTS = 64 // Кол-во слотов рюкзака
+    MAX_ARTIFACT_SLOTS_ROE = 18,                     // Кол-во слотов артефактов в RoE
+    MAX_ARTIFACT_SLOTS_AB  = 18,                     // Кол-во слотов артефактов в AB
+    MAX_ARTIFACT_SLOTS_SOD = 19,                     // Кол-во слотов артефактов в SoD
+    MAX_ARTIFACT_SLOTS     = MAX_ARTIFACT_SLOTS_SOD, // Кол-во слотов артефактов
+    MAX_BACKPACK_SLOTS     = 64,                     // Кол-во слотов рюкзака
+    FIRST_ARTIFACT_SLOT    = SLOT_HEAD,
+    LAST_ARTIFACT_SLOT     = SLOT_MISC5
 };
+
+template<>
+struct nh3api::enum_limits<TArtifactSlot>
+    : nh3api::enum_limits_base<TArtifactSlot, FIRST_ARTIFACT_SLOT, LAST_ARTIFACT_SLOT>
+{ static inline constexpr bool is_specialized = true; };
 
 // Artifact class /
 // Класс артефакта.
 enum ArtifactClass : uint32_t
 {
-    ARTIFACT_CLASS_NONE     = 1 << 0, // Нет класса
-    ARTIFACT_CLASS_TREASURE = 1 << 1, // Сокровище
-    ARTIFACT_CLASS_MINOR    = 1 << 2, // Малый
-    ARTIFACT_CLASS_MAJOR    = 1 << 3, // Великий
-    ARTIFACT_CLASS_RELIC    = 1 << 4, // Реликвия
-    ARTIFACT_CLASS_ANY      = 0x1F, // Класс по умолчанию
+    ARTIFACT_CLASS_ANY      = 0b11111, // Класс по умолчанию
+    ARTIFACT_CLASS_NONE     = 0b00000, // Нет класса
+    ARTIFACT_CLASS_TREASURE = 0b00010, // Сокровище
+    ARTIFACT_CLASS_MINOR    = 0b00100, // Малый
+    ARTIFACT_CLASS_MAJOR    = 0b01000, // Великий
+    ARTIFACT_CLASS_RELIC    = 0b10000  // Реликвия
 };
 
 #pragma pack(push, 4)
@@ -220,58 +239,71 @@ enum ArtifactClass : uint32_t
 struct type_artifact
 {
     public:
-        constexpr type_artifact() noexcept
-            : type(ARTIFACT_NONE), spell(SPELL_NONE)
+        inline constexpr type_artifact() noexcept = default;
+
+        inline constexpr type_artifact(TArtifact _type, SpellID _spell) noexcept
+            : type { _type }, spell { _spell }
         {}
 
-        constexpr type_artifact(TArtifact _type, SpellID _spell) noexcept
-            : type(_type), spell(_spell)
+        inline constexpr type_artifact(TArtifact _type, int32_t _spell) noexcept
+            : type { _type }, spell { static_cast<SpellID>(_spell) }
         {}
 
-        constexpr type_artifact(TArtifact _type, int32_t _spell) noexcept
-            : type(_type), spell(static_cast<SpellID>(_spell))
+        inline constexpr type_artifact(int32_t _type, int32_t _spell) noexcept
+            : type { static_cast<TArtifact>(_type) }, spell { static_cast<SpellID>(_spell) }
         {}
 
-        constexpr type_artifact(int32_t _type, int32_t _spell) noexcept
-            : type(static_cast<TArtifact>(_type)), spell(static_cast<SpellID>(_spell))
+        inline type_artifact(const nh3api::dummy_tag_t&) noexcept
         {}
 
-        NH3API_FORCEINLINE
-        type_artifact(const ::nh3api::dummy_tag_t&) noexcept
-        {}
+        inline constexpr type_artifact(const type_artifact&) noexcept            = default;
+        inline constexpr type_artifact(type_artifact&&) noexcept                 = default;
+        inline constexpr type_artifact& operator=(const type_artifact&) noexcept = default;
+        inline constexpr type_artifact& operator=(type_artifact&&) noexcept      = default;
+
+        inline constexpr bool operator==(const type_artifact& other) const noexcept
+        { return this->type == other.type && this->spell == other.spell; }
+
+        #ifndef __cpp_impl_three_way_comparison
+        inline constexpr bool operator!=(const type_artifact& other) const noexcept
+        { return !(*this == other); }
+        #endif
+
+        inline ~type_artifact() noexcept = default;
 
     public:
-        void get_rollover_text(char* buffer) const
+        inline void get_rollover_text(char* buffer) const
         { THISCALL_2(void, 0x4DB5C0, this, buffer); }
 
-        [[nodiscard]] NH3API_FORCEINLINE exe_string get_description() const
+        [[nodiscard]] inline exe_string get_description() const
         {
-            exe_string result(::nh3api::dummy_tag);
+            exe_string result(nh3api::dummy_tag);
             THISCALL_2(exe_string*, 0x4DB650, this, &result);
             return result;
         }
 
     public:
-        constexpr bool operator==(const type_artifact& other) const noexcept
-        { return (this->type == other.type) && (this->spell == other.spell); }
+        [[nodiscard]] inline constexpr std::pair<TArtifact, SpellID> to_pair() const noexcept
+        { return { type, spell }; }
 
-        constexpr bool operator!=(const type_artifact& other) const noexcept
-        { return !(*this == other); }
+        [[nodiscard]] inline constexpr int64_t to_int64() const noexcept
+        { return static_cast<int64_t>((static_cast<uint64_t>(type) << 32U) | static_cast<uint32_t>(spell)); }
+
+        [[nodiscard]] inline constexpr uint64_t to_uint64() const noexcept
+        { return (static_cast<uint64_t>(type) << 32U) | static_cast<uint32_t>(spell); }
 
     public:
         // Artifact type /
         // Тип артефакта.
         // offset: +0x0 = +0,  size = 0x4 = 4
-        TArtifact type;
+        TArtifact type {ARTIFACT_NONE};
 
         // Spell scroll spell /
         // Заклинание свитка заклинаний.
         // offset: +0x4 = +4,  size = 0x4 = 4
-        SpellID spell;
+        SpellID spell {SPELL_NONE};
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Combination artifact /
 // Сборный артефакт /
 // size = 0x18 = 24, align = 4
@@ -287,28 +319,32 @@ struct CombinationArtifact
     // offset: +0x4 = +4,  size = 0x14 = 20
     exe_bitset<144> requirements;
 };
-#pragma pack(pop)
 
 // Combination artifact type /
 // Тип собираемого артефакта.
 enum CombinationArtifactType : int32_t
 {
-    COMBO_NONE = -1,
-    COMBO_ANGELIC_ALLIANCE           = 0, // Альянс Ангелов
-    COMBO_CLOAK_OF_THE_UNDEAD_KING   = 1, // Плащ Короля Нежити
-    COMBO_ELIXIR_OF_LIFE             = 2, // Эликсир Жизни
-    COMBO_ARMOR_OF_THE_DAMNED        = 3, // Доспехи Проклятого
-    COMBO_STATUE_OF_LEGION           = 4, // Статуя Легиона
-    COMBO_POWER_OF_THE_DRAGON_FATHER = 5, // Мощь Отца Драконов
-    COMBO_TITANS_THUNDER             = 6, // Грохот Титана
-    COMBO_ADMIRALS_HAT               = 7, // Шляпа Адмирала
-    COMBO_BOW_OF_THE_SHARPSHOOTER    = 8, // Лук Снайпера
-    COMBO_WIZARDS_WELL               = 9, // Колодец Волшебника
+    COMBO_NONE                       = -1,
+    COMBO_ANGELIC_ALLIANCE           = 0,  // Альянс Ангелов
+    COMBO_CLOAK_OF_THE_UNDEAD_KING   = 1,  // Плащ Короля Нежити
+    COMBO_ELIXIR_OF_LIFE             = 2,  // Эликсир Жизни
+    COMBO_ARMOR_OF_THE_DAMNED        = 3,  // Доспехи Проклятого
+    COMBO_STATUE_OF_LEGION           = 4,  // Статуя Легиона
+    COMBO_POWER_OF_THE_DRAGON_FATHER = 5,  // Мощь Отца Драконов
+    COMBO_TITANS_THUNDER             = 6,  // Грохот Титана
+    COMBO_ADMIRALS_HAT               = 7,  // Шляпа Адмирала
+    COMBO_BOW_OF_THE_SHARPSHOOTER    = 8,  // Лук Снайпера
+    COMBO_WIZARDS_WELL               = 9,  // Колодец Волшебника
     COMBO_RING_OF_THE_MAGI           = 10, // Кольцо Мага
     COMBO_CORNUCOPIA                 = 11, // Рог изобилия
+    MAX_COMBO_ARTIFACTS              = 12  // Кол-во сборных артефактов
 };
 
-#pragma pack(push, 4)
+template<>
+struct nh3api::enum_limits<CombinationArtifactType>
+    : nh3api::enum_limits_base<CombinationArtifactType, COMBO_ANGELIC_ALLIANCE, COMBO_CORNUCOPIA>
+{ static inline constexpr bool is_specialized = true; };
+
 // Artifact traits /
 // Свойства артефактов.
 // size = 0x20 = 32, align = 4
@@ -332,7 +368,7 @@ struct TArtifactTraits
     // Artifact class /
     // Класс артефакта
     // offset: +0xC = +12,  size = 0x4 = 4
-    int32_t m_class;
+    ArtifactClass m_class;
 
     // Artifact description
     // Описание артефакта
@@ -349,27 +385,17 @@ struct TArtifactTraits
     // offset: +0x18 = +24,  size = 0x4 = 4
     CombinationArtifactType m_targetCombo;
 
-protected:
-    [[maybe_unused]]
-    // unused /
-    // не используется.
-    // offset: +0x1C = +28,  size = 0x1 = 1
-    bool m_disabled;
+    unsigned char : 8;
 
-public:
     // Artifact gives spells /
     // Артефакт даёт заклинания.
     // offset: +0x1D = +29,  size = 0x1 = 1
     bool m_givesSpells;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_1E[2];
+    unsigned char : 8;
+    unsigned char : 8;
+} NH3API_MSVC_LAYOUT;
 
-};
-#pragma pack(pop)
-
-#pragma pack(push, 4)
 // Artifact slots traits /
 // Свойства слотов артефактов.
 // size = 0x8 = 8, align = 4
@@ -400,11 +426,11 @@ inline std::array<TArtifactSlotTraits, MAX_ARTIFACT_SLOTS>& akArtifactSlotTraits
 
 // Combination artifact info /
 // Свойства сборочных артефактов.
-inline std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>& gCombinationArtifacts
+inline std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>& akCombinationArtifacts
 = get_global_var_ref(0x693938, std::array<CombinationArtifact, MAX_COMBO_ARTIFACTS>);
 
 // Artifact currently held in mouse in the dialog /
 // Артефакт, в данный момент удерживаемый мышью в диалоге.
 inline type_artifact& holding_artifact = get_global_var_ref(0x698AD8, type_artifact);
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

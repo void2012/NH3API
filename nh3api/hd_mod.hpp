@@ -12,11 +12,12 @@
 // HD Mod API
 // source: https://forum.df2.ru/index.php?showtopic=10421&st=2480&p=593378&#entry593378
 
+#include "core/nh3api_std/point.hpp"
+#include "core/nh3api_std/enum_limits.hpp"
 #include "core/nh3api_std/exe_string.hpp"
 #include "core/nh3api_std/exe_vector.hpp"
 #include "core/nh3api_std/patcher_x86.hpp"
 #include "core/resources/resources.hpp"
-
 
 // Game version of HD Mod /
 // Версия игры с точки зрения HD Mod.
@@ -32,6 +33,11 @@ enum HD_game_version
     HD_MOP  = 0x40
 };
 
+template<>
+struct nh3api::enum_limits<HD_game_version>
+    : nh3api::enum_limits_base<HD_game_version, HD_NONE, HD_MOP>
+{ static inline constexpr bool is_specialized = true; };
+
 inline HANDLE getHDModHandle() noexcept
 { return GetModuleHandleA("_hd3_.dll"); }
 
@@ -39,8 +45,8 @@ inline bool isHDModPresent(const Patcher* patcher)
 {
     if ( patcher )
         return static_cast<bool>(getHDModHandle()) && static_cast<bool>(patcher->GetInstance("HD"));
-    else
-        return false;
+
+    return false;
 }
 
 template<typename T, T DefaultValue = T {}>
@@ -63,40 +69,40 @@ inline const char* getHDModDirectory(const Patcher* patcher)
 inline bool isHDPlusPresent(const Patcher* patcher)
 { return getHDModVariable<bool>(patcher, "HD+.On"); }
 
-inline POINT getHDModResolution(const Patcher* patcher)
+inline TPoint getHDModResolution(const Patcher* patcher)
 { return { getHDModVariable<int32_t>(patcher, "HD.Option.RezX"), getHDModVariable<int32_t>(patcher, "HD.Option.RezY")}; }
 
 inline int32_t getScreenWidth(const Patcher* patcher)
 {
     if ( isHDModPresent(patcher) )
         return getHDModVariable<int32_t>(patcher, "HD.Option.RezX");
-    else
-        return 800;
+
+    return 800;
 }
 
 inline int32_t getScreenHeight(const Patcher* patcher)
 {
     if ( isHDModPresent(patcher) )
         return getHDModVariable<int32_t>(patcher, "HD.Option.RezY");
-    else
-        return 600;
+
+    return 600;
 }
 
-inline POINT getGameScreenResolution(const Patcher* patcher)
+inline TPoint getGameScreenResolution(const Patcher* patcher)
 {
     if ( isHDModPresent(patcher) )
         return getHDModResolution(patcher);
-    else
-        return { 800, 600 };
+
+    return { 800, 600 };
 }
 
 // Retrieve names of HD Mod plugins /
 // Названия плагинов HD Mod.
 inline exe_vector<exe_string> getHDModPlugins(const Patcher* patcher)
 {
-    exe_vector<exe_string>   result{};
+    exe_vector<exe_string> result {};
     const char* __restrict const* __restrict const packDirs = getHDModVariable<const char* const* const>(patcher, "HD.PackDirs");
-    const size_t packDirsCount        = getHDModVariable<const size_t>(patcher, "HD.PackDirs.Count");
+    const size_t packDirsCount                              = getHDModVariable<const size_t>(patcher, "HD.PackDirs.Count");
 
     if ( packDirs && packDirsCount )
         for ( size_t i = 0; i < packDirsCount; ++i )
@@ -133,16 +139,16 @@ struct FileTree
     HD::FileTree* const HDFileTree = getHDModFileTree(patcher);
     if ( HDFileTree == nullptr )
         return nullptr;
-    else
-        return HDFileTree->FindPath(filename);
+
+    return HDFileTree->FindPath(filename);
 }
 
 [[nodiscard]] inline const char* getHDModFilePath(HD::FileTree* const __restrict HDFileTree, const char* const __restrict filename)
 {
     if ( HDFileTree == nullptr )
         return nullptr;
-    else
-        return HDFileTree->FindPath(filename);
+
+    return HDFileTree->FindPath(filename);
 }
 
 // Check for WINE /
@@ -154,21 +160,19 @@ struct FileTree
     static FARPROC func        = nullptr;
     if ( !initialized )
     {
-        library = GetModuleHandleA("ntdll.dll");
+        library = GetModuleHandleW(L"ntdll.dll");
         if ( library ) // I *really* hope you're running it with windows or WINE
             func = GetProcAddress(library, "wine_get_version");
         initialized = true;
     }
     if ( library )
         return static_cast<bool>(func);
-    else
-        return false; // So you really run without the ntdll.dll.........
+
+    return false; // So you really run without the ntdll.dll.........
 }
 
-enum : int32_t
-{
-    RType_palette32 = 97 // 32-битная палитра в HD Mod
-};
+// 32-битная палитра в HD Mod
+inline constexpr EResourceType RType_palette32 = static_cast<EResourceType>(97);
 
 namespace HD
 {
@@ -177,14 +181,14 @@ struct Bitmap : public ::resource
 {
     public:
         inline Bitmap(int32_t w, int32_t h) noexcept
-        NH3API_DELEGATE_DUMMY_BASE(Bitmap)
+            : Bitmap(nh3api::dummy_tag)
         { THISCALL_3(void, 0x44DC40, this, w, h); }
 
         inline Bitmap(const char* name, int32_t w, int32_t h) noexcept
-        NH3API_DELEGATE_DUMMY_BASE(Bitmap)
+            : Bitmap(nh3api::dummy_tag)
         { THISCALL_4(void, 0x44DD20, this, name, w, h); }
 
-        inline Bitmap(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline Bitmap(const nh3api::dummy_tag_t& tag) noexcept
             : ::resource(tag)
         {}
 
@@ -279,50 +283,52 @@ struct Palette : public ::resource
 {
     public:
         inline Palette() noexcept
-        NH3API_DELEGATE_DUMMY_BASE(Palette)
+            : Palette(nh3api::dummy_tag)
         { THISCALL_1(void, 0x522B40, this); }
 
         inline Palette(const ::TPalette24& p24) noexcept
-        NH3API_DELEGATE_DUMMY_BASE(Palette)
+            : Palette(nh3api::dummy_tag)
         { THISCALL_2(void, 0x522D00, this, &p24); }
 
-        inline Palette(const void* data) noexcept
-        NH3API_DELEGATE_DUMMY_BASE(Palette)
+        inline Palette(const void* const data) noexcept
+            : Palette(nh3api::dummy_tag)
         { THISCALL_2(void, 0x522B90, this, data); }
 
         inline Palette(const ::TPalette24& p24,
-                        uint32_t            rbits,
-                        uint32_t            rshift,
-                        uint32_t            gbits,
-                        uint32_t            gshift,
-                        uint32_t            bbits,
-                        uint32_t            bshift) noexcept
-        NH3API_DELEGATE_DUMMY_BASE(Palette)
+                       uint32_t            rbits,
+                       uint32_t            rshift,
+                       uint32_t            gbits,
+                       uint32_t            gshift,
+                       uint32_t            bbits,
+                       uint32_t            bshift) noexcept
+            : Palette(nh3api::dummy_tag)
         { THISCALL_8(void, 0x522BC0, this, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
-        inline Palette(const char*         name,
-                        const ::TPalette24& p24,
-                        uint32_t            rbits,
-                        uint32_t            rshift,
-                        uint32_t            gbits,
-                        uint32_t            gshift,
-                        uint32_t            bbits,
-                        uint32_t            bshift) noexcept
-        NH3API_DELEGATE_DUMMY_BASE(Palette)
+        inline Palette(const char* const   name,
+                       const ::TPalette24& p24,
+                       uint32_t            rbits,
+                       uint32_t            rshift,
+                       uint32_t            gbits,
+                       uint32_t            gshift,
+                       uint32_t            bbits,
+                       uint32_t            bshift) noexcept
+            : Palette(nh3api::dummy_tag)
         { THISCALL_9(void, 0x522C60, this, name, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
-        inline Palette(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline Palette(const nh3api::dummy_tag_t& tag) noexcept
             : resource(tag) // resource(nullptr, RType_misc)
         {}
 
         inline Palette& operator=(const Palette& other) noexcept
         {
-            THISCALL_2(Palette*, 0x522E00, this, &other);
+            if ( this != &other )
+                THISCALL_2(Palette*, 0x522E00, this, &other);
+
             return *this;
         }
 
         inline Palette(Palette const& other) noexcept
-        NH3API_DELEGATE_DUMMY_BASE(Palette)
+            : Palette(nh3api::dummy_tag)
         { THISCALL_2(void, 0x522DD0, this, &other); }
 
         inline Palette& operator=(const ::TPalette16& other) noexcept
@@ -373,24 +379,13 @@ struct Palette : public ::resource
 
 } // namespace HD
 
-// virtual aliases for HD::Bitmap and HD::Palette
-// I recommend using
-// std::variant<Bitmap16Bit, HD::Bitmap> and
-// std::variant<TPalette16, HD::Palette>
-
 template<>
 struct vftable_address<HD::Bitmap>
-{
-        static const uintptr_t address = vftable_address<Bitmap16Bit>::address;
-};
+{ static const uintptr_t address = vftable_address<Bitmap16Bit>::address; };
 
 template<>
 struct vftable_address<HD::Palette>
-{
-        static const uintptr_t address = vftable_address<TPalette16>::address;
-};
+{ static const uintptr_t address = vftable_address<TPalette16>::address; };
 
 inline bool isHDMod32Bit(const TPalette16* pal /* = gGamePalette */)
-{
-    return pal->resType == static_cast<EResourceType>(RType_palette32);
-}
+{ return pal->resType == RType_palette32; }

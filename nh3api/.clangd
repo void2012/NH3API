@@ -1,11 +1,20 @@
 CompileFlags:
-    Add: [-Wall,
-          -std=c++23,
-          -D_X86_,
-          -DNH3API_FLAG_INLINE_HEADERS,
-          -m32,
-          -Wno-unused-includes]
-    # Remove: [-W*]
+    Add: [
+          -DNH3API_CLANGD, # Macro to guard code where clangd behaves weird. Do NOT define it in your code for compilation, as this is only for editing the code with clangd
+          -Wall, # Enable (almost) every single clang warning
+          -Wextra, # Enable additional warnings
+          -std=c++23, # Don't worry, I'm not planning to break C++17 and v141_xp compatibility, this is just to implement C++23 features
+          -D_X86_, # For whatever reason, WinAPI and MSVC STL requires it and the compiler doesn't define it by default
+          -m32, # NH3API supports only 32-bit x86 architecture
+          -Wno-unused-includes, # Do not warn about unused includes, this warning is broken anyway
+          -Wno-unsafe-buffer-usage-in-libc-call, # We can't avoid calls to functions like memcpy for performance, especially on MSVC which is poor at optimizing things
+          -Wno-unsafe-buffer-usage, # We also can't avoid raw pointer operations for binary compatibility (believe me, I would love to get rid of every single raw pointer in the library!)
+          -Wno-unused-macros, # Most macros in NH3API are defined in nh3api_std.hpp, so this is useless, too
+          -Wno-c++98-compat, # NH3API has dropped support for C++98/C++11/C++14
+          -Wno-c++98-compat-pedantic, # Ditto
+          -Wno-pre-c++14-compat, # Ditto
+          -Wno-pre-c++17-compat, # Ditto
+          ]
 
 Index:
     StandardLibrary: true
@@ -14,39 +23,67 @@ Diagnostics:
     Suppress: unused-includes
     UnusedIncludes: None
     ClangTidy:
-        Add: [performance*, modernize*, cppcoreguidelines*, misc*]
+        Add: "*"
         Remove: [
-                 cppcoreguidelines-avoid-c-arrays,
-                 cppcoreguidelines-avoid-const-or-ref-data-members,
-                 cppcoreguidelines-avoid-do-while,
-                 cppcoreguidelines-avoid-magic-numbers,
-                 cppcoreguidelines-avoid-non-const-global-variables,
-                 cppcoreguidelines-macro-usage,
-                 cppcoreguidelines-non-private-member-variables-in-classes,
-                 cppcoreguidelines-pro-bounds-constant-array-index,
-                 cppcoreguidelines-pro-bounds-pointer-arithmetic,
-                 cppcoreguidelines-pro-type-const-cast,
-                 cppcoreguidelines-pro-type-member-init,
-                 cppcoreguidelines-pro-type-reinterpret-cast,
-                 cppcoreguidelines-pro-type-static-cast-downcast,
-                 cppcoreguidelines-pro-type-union-access,
-                 cppcoreguidelines-pro-type-vararg,
-                 cppcoreguidelines-virtual-class-destructor,
-                 misc-non-private-member-variables-in-classes,
-                 modernize-avoid-c-arrays,
-                 modernize-use-auto,
-                 modernize-use-ranges,
-                 modernize-use-trailing-return-type,
-                 performance-enum-size,
-                 performance-no-int-to-ptr,
-                 readability*
+                 altera-*, # These checks are extremely niche
+                 google-explicit-constructor, # In theory, this would be good but leads to more verbose code
+                 hicpp-explicit-conversions, # Ditto
+                 misc-misplaced-const, # const pointer (not pointers-to-const) are often used in STL code
+                 cppcoreguidelines-avoid-c-arrays, # Can't avoid C-style arrays in the function arguments to force explicit string literals passed as parameters
+                 hicpp-avoid-c-arrays, # Ditto
+                 modernize-avoid-c-arrays, # Ditto
+                 google-readability-*, # We're following the LLVM style of braces for readability, so these checks do not fit
+                 hicpp-braces-around-statements, # Ditto
+                 google-runtime-int, # unsigned long and unsigned int are technically not the same, so we can't just use int32_t all of the time
+                 google-default-arguments, # Default arguments are often for binary compatibility reasons(the a)
+                 cert-dcl51-cpp, # We can't avoid identifiers starting with the underscore because we pull a lot of code from MSVC STL and changing it is too much unnecessary work
+                 bugprone-reserved-identifier, # Ditto
+                 cert-dcl37-c, # Ditto
+                 cert-dcl58-cpp, # Specializing std::hash is okay per C++ standard
+                 cppcoreguidelines-avoid-const-or-ref-data-members, # Disabled for binary compatibility
+                 bugprone-easily-swappable-parameters, # We have to strictly follow the original function signatures
+                 llvmlibc-*, # These checks are relevant only inside the LLVM libc implementation
+                 fuchsia-*, # Very cringeworthy checks
+                 hicpp-special-member-functions, # Useless alias for cppcoreguidelines-special-member-functions
+                 hicpp-use-auto, # auto makes the compilation a bit slower, also it doesn't always improve readability
+                 modernize-use-auto, # Ditto
+                 hicpp-no-assembler, # Inline assembly used for a few hacks inside NH3API
+                 hicpp-named-parameter, # Unnamed parameters are used to silence the "unused parameter warning", now this?
+                 modernize-use-ranges, # C++17 doesn't have std::ranges
+                 modernize-use-trailing-return-type, # Just no. This is a really bad practice.
+                 cppcoreguidelines-avoid-do-while, # do { ... } while(0) is often used in macros
+                 cppcoreguidelines-avoid-magic-numbers, # I don't really want to introduce every single new enum just in one place
+                 cppcoreguidelines-avoid-non-const-global-variables, # The game makes heavy use of non-const global variables and NH3API just follows the game architecture.
+                 cppcoreguidelines-macro-usage, # For portability across LLVM, GCC and MSVC, we can't really avoid macros.
+                 misc-non-private-member-variables-in-classes, # In NH3API every game type variable is public
+                 cppcoreguidelines-non-private-member-variables-in-classes, # Ditto
+                 cppcoreguidelines-pro-bounds-constant-array-index, # This is just insane.
+                 cppcoreguidelines-pro-bounds-pointer-arithmetic, # Not always possible to avoid completely
+                 cppcoreguidelines-pro-type-const-cast, # Not always possible to write const-correct code with virtual functions without const_cast.
+                 cppcoreguidelines-pro-type-member-init, # Disabled for performance reasons (NH3API is supposed to be completely zero-cost abstraction)
+                 hicpp-member-init, # Ditto
+                 cppcoreguidelines-pro-type-reinterpret-cast, # Sadly, for binary compatibility and performance reason, we have to use reinterpret_cast very often. But I know what I'm doing and you don't have to worry about it.
+                 cppcoreguidelines-pro-type-static-cast-downcast, # No dynamic_cast allowed anywhere in NH3API
+                 cppcoreguidelines-pro-type-union-access, # We can't avoid unions because of the binary compatibility, also std::variant is really poorly designed
+                 cppcoreguidelines-pro-type-vararg, # You can potentially get rid of the C-style va_args but this may disrupt the calling convention
+                 cppcoreguidelines-virtual-class-destructor, # NH3API can't define virtual destructors by design, it uses scalar_deleting_destructor for binary compatibility. Also you must NOT allocate and deallocate the game polymorphic types with the standard new/delete in your code, use NH3API overloads with exe_heap, which map to the appropriate .exe new/delete
+                 performance-enum-size, # In NH3API, the choice for the underlying type for enums often depends on where the enum is used. I pick the most optimal size for every single enum, especially when it oftens used/fits into a few variables of some structures. If the enum is not used in any structures as type of a member variable, I pick either uint32_t for flag enums or int32_t/uint32_t for other enums based on whether or not the negative values make sense, often for checks or their lack thereof
+                 performance-no-int-to-ptr, # NH3API uses too many uintptr_t-to-pointer conversions for readability and performance, we can't just avoid it. The whole library is kind of built around fixed addresses in the .exe binary
+                 readability* # Absolutely incompatible with NH3API
                  ]
+        CheckOptions:
+                      cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true
+                      cppcoreguidelines-special-member-functions.AllowMissingMoveFunctions: true
+                      cppcoreguidelines-special-member-functions.AllowMissingMoveFunctionsWhenCopyIsDeleted: true
+                      cppcoreguidelines-special-member-functions.AllowImplicitlyDeletedCopyOrMove: true
 
 Completion:
-    AllScopes: Yes
-    ArgumentLists: Delimiters
-    HeaderInsertion: Never
+    AllScopes: Yes # Actually, not that bad.
+    ArgumentLists: Delimiters # The default is FullPlaceholders, which inserts the function with a signature, including the types, which is ridiculous
+    HeaderInsertion: Never # Never insert any headers automatically to make use of as least dependencies as possible
+    CodePatterns: None # The idea itself is not that bad, the problem is that you have to either disable this option completely, or get used to annoying specific parts of the feature(like if...else if part, it drove me insane!)
 
+# Inlay Hints make it difficult to write and edit the code, also since the argument names frequently are the same as parameter names, these are just an overkill
 InlayHints:
     BlockEnd: true
     ParameterNames: false
@@ -55,4 +92,4 @@ InlayHints:
     DefaultArguments: false
 
 Hover:
-    ShowAKA: true
+    ShowAKA: true # One of the most useful features of clangd! Helpful, excellent, simple

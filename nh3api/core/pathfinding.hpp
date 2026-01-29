@@ -10,11 +10,14 @@
 #pragma once
 
 #include <windef.h> // RECT
-#include "nh3api_std/exe_vector.hpp" // exe_vector<T>
-#include "skills.hpp" // TSkillMastery
-#include "terrain.hpp" // type_point
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+#include "nh3api_std/exe_vector.hpp" // exe_vector<T>
+#include "skills.hpp"                // TSkillMastery
+#include "terrain.hpp"               // type_point
+
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 #pragma pack(push, 1)
 // Path finding engine cell /
@@ -101,6 +104,11 @@ enum type_search_type : uint32_t
     const_AI_alternate_search = 5  //
 };
 
+template<>
+struct nh3api::enum_limits<type_search_type>
+    : nh3api::enum_limits_base<type_search_type, const_normal_search, const_AI_alternate_search>
+{ static inline constexpr bool is_specialized = true; };
+
 class army;
 class hero;
 #pragma pack(push, 4)
@@ -110,17 +118,14 @@ class hero;
 class searchArray
 {
     public:
-        NH3API_FORCEINLINE
-        searchArray() noexcept
+        inline searchArray() noexcept
         { THISCALL_1(void, 0x4B10D0, this); }
 
-        NH3API_FORCEINLINE
-        searchArray(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline searchArray(const nh3api::dummy_tag_t& tag) noexcept
             : queue(tag), result(tag), visited_points(tag)
         {}
 
-        NH3API_FORCEINLINE
-        ~searchArray() noexcept
+        inline ~searchArray() noexcept
         { THISCALL_1(void, 0x4B1140, this); }
 
     public:
@@ -174,11 +179,10 @@ class searchArray
         // offset: +0x4 = +4,  size = 0x1 = 1
         uint8_t pay_transition_costs;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_5[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x8 = +8,  size = 0x4 = 4
         int32_t this_turns_movement;
 
@@ -209,11 +213,10 @@ class searchArray
         // offset: +0x20 = +32,  size = 0x1 = 1
         bool limit_reached;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_21[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x24 = +36,  size = 0x4 = 4
         pathCell* cellData;
 
@@ -241,11 +244,11 @@ class searchArray
         // offset: +0x6C = +108,  size = 0x4 = 4
         int32_t* danger_zones;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
 NH3API_SIZE_ASSERT(0x70, searchArray);
 
 inline searchArray* const& gpSearchArray = get_global_var_ref(0x6992D4, searchArray*);
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

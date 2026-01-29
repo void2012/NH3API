@@ -20,17 +20,10 @@
 namespace nh3api
 {
 
-// integer math
-
-#if !NH3API_CHECK_MSVC
 // integer logarithm of base 2
-NH3API_CONST constexpr NH3API_FORCEINLINE uint32_t ilog2(uint32_t x) noexcept
-{ return (static_cast<uint32_t>(__builtin_clz(x))) ^ 31u; }
-#else
-NH3API_CONST constexpr
-// integer logarithm of base 2
-NH3API_FORCEINLINE uint32_t ilog2(uint32_t x) noexcept
+inline constexpr uint32_t ilog2(uint32_t x) noexcept
 {
+    #if NH3API_CHECK_MSVC
     NH3API_IF_CONSTEVAL
     {
         // implementation from MSVC STL
@@ -54,12 +47,13 @@ NH3API_FORCEINLINE uint32_t ilog2(uint32_t x) noexcept
         _BitScanReverse(&result, x);
         return result;
     }
+    #else
+    return (static_cast<uint32_t>(__builtin_clz(x))) ^ 31u;
+    #endif
 }
-#endif
 
-NH3API_CONST
 // count the amount of digits in an integer
-constexpr NH3API_FORCEINLINE uint32_t count_digits(uint32_t x) noexcept
+NH3API_FORCEINLINE constexpr uint32_t count_digits(uint32_t x) noexcept
 {
     constexpr uint32_t digits_table[] = {9, 99, 999, 9999, 99999,
     999999, 9999999, 99999999, 999999999};
@@ -250,7 +244,7 @@ extern int __builtin_popcountll(unsigned long long) noexcept;
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitpopcnt64(uint64_t x) noexcept
-    { return bitpopcnt((uint32_t)(x)) + bitpopcnt((uint32_t)(x >> 32)); }
+    { return bitpopcnt(static_cast<uint32_t>(x)) + bitpopcnt(static_cast<uint32_t>(x >> 32)); }
 
     NH3API_INTRIN_FUNCTION
     uint32_t bitrotl(uint32_t n, uint32_t c) noexcept

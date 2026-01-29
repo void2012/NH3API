@@ -10,10 +10,12 @@
 #pragma once
 
 #include <array>
+
+#include "nh3api_std/enum_limits.hpp"
 #include "nh3api_std/intrin.hpp"
 
 // Secondary skill mastery /
-// Ступень вторичного
+// Ступень вторичного навыка.
 enum TSkillMastery : int32_t
 {
     eMasteryInvalid  = -1,                     // Пустое (используется для проверок)
@@ -28,48 +30,61 @@ enum TSkillMastery : int32_t
     SKILL_MASTERY_BASIC    = eMasteryBasic,    // Базовый (1 ступень)
     SKILL_MASTERY_ADVANCED = eMasteryAdvanced, // Продвинутый (2 ступень)
     SKILL_MASTERY_EXPERT   = eMasteryExpert,   // Эксперт (3 ступень)
-    MAX_SKILL_MASTERIES    = kNumMasteries     // Количество возможных ступеней навыков
-
+    MAX_SKILL_MASTERIES    = kNumMasteries,    // Количество возможных ступеней навыков
+    FIRST_SKILL_MASTERY    = SKILL_MASTERY_NONE,
+    LAST_SKILL_MASTERY     = SKILL_MASTERY_EXPERT
 };
+
+template<>
+struct nh3api::enum_limits<TSkillMastery>
+    : nh3api::enum_limits_base<TSkillMastery, FIRST_SKILL_MASTERY, LAST_SKILL_MASTERY>
+{ static inline constexpr bool is_specialized = true; };
 
 // Hero's secondary skill /
 // Вторичный навык героя.
 enum TSecondarySkill : int32_t
 {
-    SKILL_PATHFINDING  = 0,  // Поиск пути
-    SKILL_ARCHERY      = 1,  // Стрелок
-    SKILL_LOGISTICS    = 2,  // Логистика
-    SKILL_SCOUTING     = 3,  // Разведка
-    SKILL_DIPLOMACY    = 4,  // Дипломатия
-    SKILL_NAVIGATION   = 5,  // Навигация
-    SKILL_LEADERSHIP   = 6,  // Лидерство
-    SKILL_WISDOM       = 7,  // Мудрость
-    SKILL_MYSTICISM    = 8,  // Мистицизм
-    SKILL_LUCK         = 9,  // Удача
-    SKILL_BALLISTICS   = 10, // Баллистика
-    SKILL_EAGLE_EYE    = 11, // Орлиный глаз
-    SKILL_NECROMANCY   = 12, // Некромантия
-    SKILL_ESTATES      = 13, // Казначей
-    SKILL_FIRE_MAGIC   = 14, // Магия Огня
-    SKILL_AIR_MAGIC    = 15, // Магия Воздуха
-    SKILL_WATER_MAGIC  = 16, // Магия Воды
-    SKILL_EARTH_MAGIC  = 17, // Магия Земли
-    SKILL_SCHOLAR      = 18, // Книжник
-    SKILL_TACTICS      = 19, // Тактика
-    SKILL_ARTILLERY    = 20, // Артиллерия
-    SKILL_LEARNING     = 21, // Обучение
-    SKILL_OFFENSE      = 22, // Нападение
-    SKILL_ARMORER      = 23, // Доспехи
-    SKILL_INTELLIGENCE = 24, // Интеллект
-    SKILL_SORCERY      = 25, // Волшебство
-    SKILL_RESISTANCE   = 26, // Сопротивление
-    SKILL_FIRST_AID    = 27, // Первая помощь
+    SKILL_PATHFINDING  = 0,                      // Поиск пути
+    SKILL_ARCHERY      = 1,                      // Стрельба
+    SKILL_LOGISTICS    = 2,                      // Логистика
+    SKILL_SCOUTING     = 3,                      // Разведка
+    SKILL_DIPLOMACY    = 4,                      // Дипломатия
+    SKILL_NAVIGATION   = 5,                      // Навигация
+    SKILL_LEADERSHIP   = 6,                      // Лидерство
+    SKILL_WISDOM       = 7,                      // Мудрость
+    SKILL_MYSTICISM    = 8,                      // Мистицизм
+    SKILL_LUCK         = 9,                      // Удача
+    SKILL_BALLISTICS   = 10,                     // Баллистика
+    SKILL_EAGLE_EYE    = 11,                     // Орлиный глаз
+    SKILL_NECROMANCY   = 12,                     // Некромантия
+    SKILL_ESTATES      = 13,                     // Казначей
+    SKILL_FIRE_MAGIC   = 14,                     // Магия Огня
+    SKILL_AIR_MAGIC    = 15,                     // Магия Воздуха
+    SKILL_WATER_MAGIC  = 16,                     // Магия Воды
+    SKILL_EARTH_MAGIC  = 17,                     // Магия Земли
+    SKILL_SCHOLAR      = 18,                     // Книжник
+    SKILL_TACTICS      = 19,                     // Тактика
+    SKILL_ARTILLERY    = 20,                     // Артиллерия
+    SKILL_LEARNING     = 21,                     // Обучение
+    SKILL_OFFENSE      = 22,                     // Нападение
+    SKILL_ARMORER      = 23,                     // Доспехи
+    SKILL_INTELLIGENCE = 24,                     // Интеллект
+    SKILL_SORCERY      = 25,                     // Волшебство
+    SKILL_RESISTANCE   = 26,                     // Сопротивление
+    SKILL_FIRST_AID    = 27,                     // Первая помощь
 
-    SKILL_NONE           = -1,
-    MAX_SECONDARY_SKILLS = 28, // Количество вторичных навыков в игре
-    MAX_SKILLS_PER_HERO  = 8,  // Максимальное количество вторичных навыков героя
-    MAX_HERO_SKILLS      = MAX_SKILLS_PER_HERO // Максимальное количество вторичных навыков героя
+    SKILL_NONE            = -1,
+    MAX_SECONDARY_SKILLS  = 28,                  // Количество вторичных навыков в игре
+    MAX_SKILLS_PER_HERO   = 8,                   // Максимальное количество вторичных навыков героя
+    MAX_HERO_SKILLS       = MAX_SKILLS_PER_HERO, // Максимальное количество вторичных навыков героя
+    FIRST_SECONDARY_SKILL = SKILL_PATHFINDING,
+    LAST_SECONDARY_SKILL  = SKILL_FIRST_AID
 };
+
+template<>
+struct nh3api::enum_limits<TSecondarySkill>
+    : nh3api::enum_limits_base<TSecondarySkill, SKILL_PATHFINDING, SKILL_FIRST_AID>
+{ static inline constexpr bool is_specialized = true; };
 
 // Hero's primary skill /
 // Первичный навык героя.
@@ -82,6 +97,8 @@ enum TPrimarySkill : int32_t
     kNumPrimarySkills     = 4,  // Количество первичных навыков в игре
     kMaxPrimarySkillLevel = 99, // Максимальный уровень первичного навыка в игре
 
+    FIRST_PRIMARY_SKILL     = ePriSkillAttack,
+    LAST_PRIMARY_SKILL      = ePriSkillKnowledge,
     PRIMARY_SKILL_ATTACK    = ePriSkillAttack,
     PRIMARY_SKILL_DEFENSE   = ePriSkillDefense,
     PRIMARY_SKILL_POWER     = ePriSkillPower,
@@ -90,7 +107,6 @@ enum TPrimarySkill : int32_t
     MAX_PRIMARY_SKILL_LEVEL = kMaxPrimarySkillLevel
 };
 
-#pragma pack(push, 4)
 // Secondary skill traits /
 // Свойства вторичных навыков.
 // size = 0x10 = 16, align = 4
@@ -104,29 +120,26 @@ struct TSSkillTraits
     // Skill description for three skill masteries /
     // Описание навыка для каждой из ступеней.
     // offset: +0x4 = +4,  size: 0xC = 12
-    std::array<const char*, MAX_SKILL_MASTERIES - 1> desc;
-};
-#pragma pack(pop)
+    std::array<const char*, 3> desc;
 
-#pragma pack(push, 4)
+};
+
 // Secondary Skill Data in Pandora's box and Seer's Hut /
 // Данные вторичного навыка вознаграждения в ящике пандоры и хижине провидца.
 // size = 0x8 = 8, align = 4
 struct SecondarySkillData
 {
-    public:
-        // Secondary skill /
-        // Вторичный навык.
-        // offset: +0x0 = +0,  size = 0x4 = 4
-        TSecondarySkill type;
+    // Secondary skill /
+    // Вторичный навык.
+    // offset: +0x0 = +0,  size = 0x4 = 4
+    TSecondarySkill type;
 
-        // Secondary skill mastery /
-        // Ступень вторичного навыка.
-        // offset: +0x4 = +4,  size = 0x4 = 4
-        TSkillMastery level;
+    // Secondary skill mastery /
+    // Ступень вторичного навыка.
+    // offset: +0x4 = +4,  size = 0x4 = 4
+    TSkillMastery level;
 
 };
-#pragma pack(pop)
 
 // Secondary Skill traits table. Filled by game from "SSTRAITS.TXT" /
 // Таблица свойств вторичных навыков. Заполняется игрой из файла "SSTRAITS.TXT"

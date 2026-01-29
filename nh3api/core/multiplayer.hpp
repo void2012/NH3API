@@ -33,9 +33,7 @@ struct CNetPlayerInfo
     int32_t version;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Multiplayer message /
 // Сообщение мультиплеера.
 // size = 0x14 = 20, align = 4
@@ -126,9 +124,9 @@ struct CNetMsg
             RS_DESTROY_PLAYER                = 1079, //
             RS_GAME_TRANSMIT_ACK             = 1080, //
             RS_GAME_XFER_CONFIRM_END         = 1081, //
-            RS_GENERATING_RANDOM_MAP         = 1082,
-            RS_REQUEST_RANDOM_MAPS_LIST_SIZE = 1083,
-            RS_REQUEST_RANDOM_MAPS_LIST      = 1084
+            RS_GENERATING_RANDOM_MAP         = 1082, //
+            RS_REQUEST_RANDOM_MAPS_LIST_SIZE = 1083, //
+            RS_REQUEST_RANDOM_MAPS_LIST      = 1084  //
         };
 
 public:
@@ -148,9 +146,7 @@ public:
     uint32_t m_UncompressedSize;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // size = 0x18 = 24, align = 4
 struct t_complex_net_message
 {
@@ -175,21 +171,18 @@ struct t_complex_net_message
         CNetMsg netmsg;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
-//
 // size = 0xC = 12, align = 4
 struct CNetMsgHandler
 {
     public:
         struct vftable_t
         {
-            void (__thiscall *scalar_deleting_destructor)(CNetMsgHandler*, uint8_t);
-            CNetMsg *(__thiscall *CheckHandleNet)(CNetMsgHandler *, bool , bool *);
-            CNetMsg *(__thiscall *GetAbortPopupMsg)(CNetMsgHandler *);
-            CNetMsg *(__thiscall *HandleNetMsg)(CNetMsgHandler *, CNetMsg *);
-            void (__thiscall *HandleGiftMsg)(CNetMsgHandler *, CNetMsg *);
+            void     (__thiscall* scalar_deleting_destructor)(CNetMsgHandler*, uint8_t);
+            CNetMsg *(__thiscall* CheckHandleNet)(CNetMsgHandler *, bool , bool *);
+            CNetMsg *(__thiscall* GetAbortPopupMsg)(CNetMsgHandler *);
+            CNetMsg *(__thiscall* HandleNetMsg)(CNetMsgHandler *, CNetMsg *);
+            void     (__thiscall* HandleGiftMsg)(CNetMsgHandler *, CNetMsg *);
         };
 
     public:
@@ -216,16 +209,15 @@ struct CNetMsgHandler
         // offset: +0x4 = +4,  size = 0x1 = 1
         bool m_inPopup;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_5[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x8 = +8,  size = 0x4 = 4
         CNetMsg* m_pAbortPopupMsg;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 4
 
 // Current game type (single, multiplayer, hotseat, etc.) /
 // Тип текущей игры(однопользовательский, многопользовательский, хотсит и др.).
@@ -236,7 +228,7 @@ enum eNetGameType : int32_t
     MP_TCP     = 2, // TCP/IP.
     MP_HOTSEAT = 3, // Hotseat.
     MP_SERIAL  = 4, //
-    MP_MODEM   = 5, // Модем
+    MP_MODEM   = 5  // Модем
 };
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x640280, t_complex_net_message)

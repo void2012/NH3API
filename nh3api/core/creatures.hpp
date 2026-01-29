@@ -10,9 +10,11 @@
 #pragma once
 
 #include "nh3api_std/exe_string.hpp" // exe_string
-#include "terrain.hpp" // EMagicTerrain, TTerrainType, TTownType, kNumTowns
+#include "terrain.hpp"               // EMagicTerrain, TTerrainType, TTownType, kNumTowns
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 // Creature type /
 // Тип существа.
@@ -228,6 +230,11 @@ enum TCreatureType : int32_t
     MAX_COMBAT_CREATURES     = MAX_COMBAT_CREATURES_SOD // Количество существ на поле боя
 };
 
+template<>
+struct nh3api::enum_limits<TCreatureType>
+    : nh3api::enum_limits_base<TCreatureType, CREATURE_PIKEMAN, CREATURE_TROLL>
+{ static inline constexpr bool is_specialized = true; };
+
 // Creature sprite sequences ID during combat /
 // Индексы последовательностей кадров анимации существ на поле боя.
 enum creature_seqid : int32_t
@@ -254,107 +261,142 @@ enum creature_seqid : int32_t
     cs_special_dr = 19, //
     cs_prewalk    = 20, //
     cs_postwalk   = 21, //
-    cs_max        = 22 //
+    cs_max        = 22  //
 };
+
+template<>
+struct nh3api::enum_limits<creature_seqid>
+    : nh3api::enum_limits_base<creature_seqid, cs_walk, cs_postwalk>
+{ static inline constexpr bool is_specialized = true; };
 
 // Creature flags /
 // Флаги существа.
-enum creature_flags : uint32_t
+NH3API_FLAG_ENUM creature_flags : uint32_t
 {
     // Const flag: Occupies two hexes. /
     // Существо занимает две клетки.
-    CF_DOUBLE_WIDE           = 0x1u,
+    CF_DOUBLE_WIDE           = 0b00000000000000000000000000000001,
+
     // Const flag: Can fly. /
     // Существо умеет летать.
-    CF_FLYING_ARMY           = 0x2u,
+    CF_FLYING_ARMY           = 0b00000000000000000000000000000010,
+
     // Const flag: Can shoot. /
     // Существо умеет стрелять.
-    CF_SHOOTING_ARMY         = 0x4u,
+    CF_SHOOTING_ARMY         = 0b00000000000000000000000000000100,
+
     // Const flag: has extended attack(more than 1 hex). /
     // Существо умеет атаковать больше чем на одну клетку(напр.,  дыхание дракона).
-    CF_HAS_EXTENDED_ATTACK   = 0x8u,
+    CF_HAS_EXTENDED_ATTACK   = 0b00000000000000000000000000001000,
+
     // Const flag: Alive. /
     // Существо - живое(скелеты, зомби, элементали и другие НЕ живые)
-    CF_ALIVE                 = 0x10u,
+    CF_ALIVE                 = 0b00000000000000000000000000010000,
+
     // Const flag: Catapult. /
     // Катапульта.
-    CF_CATAPULT              = 0x20u,
+    CF_CATAPULT              = 0b00000000000000000000000000100000,
+
     // Const flag: Siege Weapon. /
     // Орудие осады города
-    CF_SIEGE_WEAPON          = 0x40u,
+    CF_SIEGE_WEAPON          = 0b00000000000000000000000001000000,
+
     // Const flag: Dragons,  Behemoth,  Hydra,  Phoenix /
     // Драконы,  Чудище,  Гидра,  Феникс.
-    CF_KING_1                = 0x80u,
+    CF_KING_1                = 0b00000000000000000000000010000000,
+
     // Const flag: Angel,  Devil /
     // Ангел,  Дьявол.
-    CF_KING_2                = 0x100u,
+    CF_KING_2                = 0b00000000000000000000000100000000,
+
     // Const flag: Titan /
     // Титан.
-    CF_KING_3                = 0x200u,
+    CF_KING_3                = 0b00000000000000000000001000000000,
+
     // Const flag: Immune to Mind Spells(Berserk, Blind, Forgetfulness, Frenzy, Hypnotize, Sorrow). /
     // Иммунитет к заклинаниям разума.(Берсерк, Слепота, Забывчивость, Бешенство, Гипноз, Печаль).
-    CF_IMMUNE_TO_MIND_SPELLS = 0x400u,
+    CF_IMMUNE_TO_MIND_SPELLS = 0b00000000000000000000010000000000,
+
     // Const flag: Shoots rays. /
     // Стреляет лучом(напр.,  созерцатели и маги).
-    CF_SHOOTS_RAY            = 0x800u,
+    CF_SHOOTS_RAY            = 0b00000000000000000000100000000000,
+
     // Const flag: No melee penalty for a shooter. /
     // Нет штрафа в рукопашной(актуально для стрелков).
-    CF_NO_MELEE_PENALTY      = 0x1000u,
+    CF_NO_MELEE_PENALTY      = 0b00000000000000000001000000000000,
+
     // Const flag: Unused. Can be exploited for your own new flag /
     // Неиспользуемый флаг. Может быть использован как ваш новый флаг.
-    CF_UNUSED                = 0x2000u,
+    CF_UNUSED                = 0b00000000000000000010000000000000,
+
     // Const flag: Immune to fire spells. /
     // Иммунитет к заклинаниям огня.
-    CF_IMMUNE_TO_FIRE_SPELLS = 0x4000u,
+    CF_IMMUNE_TO_FIRE_SPELLS = 0b00000000000000000100000000000000,
+
     // Const flag: Double attack. /
     // Двойная атака.
-    CF_TWO_ATTACKS           = 0x8000u,
-    CF_FREE_ATTACK           = 0x10000u,
+    CF_TWO_ATTACKS           = 0b00000000000000001000000000000000,
+    CF_FREE_ATTACK           = 0b00000000000000010000000000000000,
+
     // Const flag: No morale dependency. /
     // Не зависит от боевого духа.
-    CF_NO_MORALE             = 0x20000u,
+    CF_NO_MORALE             = 0b00000000000000100000000000000000,
+
     // Const flag: Undead. /
     // Мертвец
-    CF_UNDEAD                = 0x40000u,
+    CF_UNDEAD                = 0b00000000000001000000000000000000,
+
     // Const flag: Multi Headed. /
     // Несколько голов.
-    CF_MULTI_HEADED          = 0x80000u,
+    CF_MULTI_HEADED          = 0b00000000000010000000000000000000,
+
     // Const flag: Can throw a fireball. /
     // Атака фаерболлом.
-    CF_FIREBALL_ATTACK       = 0x100000u,
+    CF_FIREBALL_ATTACK       = 0b00000000000100000000000000000000,
+
     // Combat flag: Immobilized. /
     // Флаг битвы: Не может двигаться.
-    CF_IMMOBILIZED           = 0x200000u,
+    CF_IMMOBILIZED           = 0b00000000001000000000000000000000,
+
     // Combat flag: Summoned. /
     // Флаг битвы: Вызвано заклинанием.
-    CF_SUMMONED              = 0x400000u,
+    CF_SUMMONED              = 0b00000000010000000000000000000000,
+
     // Combat flag: Clone. /
     // Флаг битвы: Клон.
-    CF_CLONE                 = 0x800000u,
+    CF_CLONE                 = 0b00000000100000000000000000000000,
+
     // Combat flag: Getting morale. /
     // Флаг битвы: Моралится.
-    CF_MORALE                = 0x1000000u,
+    CF_MORALE                = 0b00000001000000000000000000000000,
+
     // Combat flag: Waiting. /
     // Флаг битвы: Ждёт.
-    CF_WAITING               = 0x2000000u,
+    CF_WAITING               = 0b00000010000000000000000000000000,
+
     // Combat flag: Ended turn. /
     // Флаг битвы: Ход завершён.
-    CF_DONE                  = 0x4000000u,
+    CF_DONE                  = 0b00000100000000000000000000000000,
+
     // Combat flag: Defending. /
     // Флаг битвы: В оборонительной стойке.
-    CF_DEFENDING             = 0x8000000u,
+    CF_DEFENDING             = 0b00001000000000000000000000000000,
+
     // Combat flag: Sacrificed. /
     // Флаг битвы: Было жертвой заклинания "Жертва".
-    CF_SACRIFICED            = 0x10000000u,
+    CF_SACRIFICED            = 0b00010000000000000000000000000000,
+
     // Combat flag: Drawn red. /
     // Флаг битвы: Закрашено красным.
-    CF_RED_COLORING          = 0x20000000u,
+    CF_RED_COLORING          = 0b00100000000000000000000000000000,
+
     // Combat flag: Drawn grey. /
     // Флаг битвы: Закрашено серым.
-    CF_GREY_COLORING         = 0x40000000u,
+    CF_GREY_COLORING         = 0b01000000000000000000000000000000,
+
     // Combat flag: Dragon. /
     // Флаг битвы: Дракон.
-    CF_DRAGON                = 0x80000000u
+    CF_DRAGON                = 0b10000000000000000000000000000000
 
 };
 
@@ -478,9 +520,7 @@ struct TCreatureTypeTraits
     int32_t wanderingHigh;
 
 };
-#pragma pack(pop)
 
-#pragma pack(push, 4)
 // Creature frame info /
 // Информация об анимации существа.
 // size = 0x54 = 84, align = 4
@@ -511,7 +551,6 @@ struct SMonFrameInfo
     int32_t iFlightPixelSpan;
 
 };
-#pragma pack(pop)
 
 // All creature traits /
 // Свойства всех существ.
@@ -525,280 +564,260 @@ inline std::array<std::array<std::array<TCreatureType, 7>, 2>, kNumTowns>& gDwel
 
 class town;
 class hero;
-#pragma pack(push, 4)
+
 // Army array /
 // Массив армии
 // size = 0x38 = 56, align = 4
 class armyGroup
 {
-public:
-    NH3API_FORCEINLINE NH3API_CONSTEXPR_CPP_20
-    // Default constructor /
-    // Конструктор по умолчанию
-    armyGroup() noexcept
-    {
-        type.fill(CREATURE_NONE);
-        amount.fill(-1);
-    }
+    public:
+        // Distribute <amount> creature of <type> /
+        // Распределить количество существ <amount> типа <type>.
+        inline armyGroup(TCreatureType type_, int32_t amount_) noexcept
+            : armyGroup(nh3api::dummy_tag)
+        { THISCALL_3(void, 0x44A770, this, type_, amount_); }
 
-    armyGroup(const armyGroup& other) noexcept
-    { nh3api::trivial_copy<sizeof(*this)>(&other, this); }
+        inline armyGroup(const nh3api::dummy_tag_t&) noexcept
+        {}
 
-    armyGroup& operator=(const armyGroup& other) noexcept
-    {
-        nh3api::trivial_copy<sizeof(*this)>(&other, this);
-        return *this;
-    }
+        inline constexpr armyGroup() noexcept = default;
+        inline ~armyGroup() noexcept = default;
+        inline constexpr armyGroup(const armyGroup& other) noexcept = default;
+        inline constexpr armyGroup& operator=(const armyGroup& other) noexcept = default;
+        inline constexpr armyGroup(armyGroup&& other) noexcept = default;
+        inline constexpr armyGroup& operator=(armyGroup&& other) noexcept = default;
 
-    armyGroup(armyGroup&& other) noexcept
-    {
-        #if NH3API_HAS_BUILTIN(__builtin_memcpy_inline) && NH3API_HAS_BUILTIN(__builtin_memset_inline)
-        __builtin_memcpy_inline(reinterpret_cast<void*>(this), &other, sizeof(*this));
-        __builtin_memset_inline(&other, 0xFF, sizeof(*this));
-        #else
-        std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(*this));
-        std::memset(&other, 0xFF, sizeof(*this));
-        #endif
-    }
+    #ifdef __cpp_impl_three_way_comparison
+        inline constexpr bool operator==(const armyGroup& other) const noexcept = default;
+        inline constexpr bool operator!=(const armyGroup& other) const noexcept = default;
+    #else
+        inline constexpr bool operator==(const armyGroup& other) const noexcept
+        { return __builtin_memcmp(this, &other, sizeof(*this)) == 0;}
 
-    armyGroup& operator=(armyGroup&& other) noexcept
-    {
-        #if NH3API_HAS_BUILTIN(__builtin_memcpy_inline) && NH3API_HAS_BUILTIN(__builtin_memset_inline)
-        __builtin_memcpy_inline(reinterpret_cast<void*>(this), &other, sizeof(*this));
-        __builtin_memset_inline(&other, 0xFF, sizeof(*this));
-        #else
-        std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(*this));
-        std::memset(&other, 0xFF, sizeof(*this));
-        #endif
-        return *this;
-    }
+        inline constexpr bool operator!=(const armyGroup& other) const noexcept
+        { return !(*this == other); }
+    #endif
 
-    NH3API_FORCEINLINE
-    // Distribute <amount> creature of <type> /
-    // Распределить количество существ <amount> типа <type>.
-    armyGroup(TCreatureType type_, int32_t amount_) noexcept
-    NH3API_DELEGATE_DUMMY(armyGroup)
-    { THISCALL_3(void, 0x44A770, this, type_, amount_); }
+    public:
+        // Has creatures /
+        // В армии есть существа.
+        [[nodiscard]] bool HasCreatures() const
+        { return THISCALL_1(bool, 0x449370, this); }
 
-    NH3API_FORCEINLINE
-    armyGroup(const ::nh3api::dummy_tag_t&) noexcept
-    {}
+        // Has all armies undead /
+        // Все существа армии - нежить.
+        [[nodiscard]] bool HasAllUndead() const
+        { return THISCALL_1(bool, 0x44A7F0, this ); }
 
-public:
-    // Has creatures /
-    // В армии есть существа.
-    [[nodiscard]] bool HasCreatures() const
-    { return THISCALL_1(bool, 0x449370, this); }
-
-    // Has all armies undead /
-    // Все существа армии - нежить.
-    [[nodiscard]] bool HasAllUndead() const
-    { return THISCALL_1(bool, 0x44A7F0, this ); }
-
-    // Dismiss creature at <whichIndex> /
-    // Удалить существо на позиции <whichIndex>
-    constexpr void Dismiss(size_t whichIndex)
-    {
-        if ( whichIndex < 7 )
+        // Dismiss creature at <whichIndex> /
+        // Удалить существо на позиции <whichIndex>
+        constexpr void Dismiss(size_t whichIndex)
         {
-            type[whichIndex]   = CREATURE_NONE;
-            amount[whichIndex] = 0;
+            if ( whichIndex < 7 )
+            {
+                type[whichIndex]   = CREATURE_NONE;
+                amount[whichIndex] = 0;
+            }
         }
-    }
 
-    // Has creature of type <monType>  /
-    // В армии есть существо типа <monType>.
-    [[nodiscard]] bool IsMember(TCreatureType monType) const
-    { return THISCALL_2(bool, 0x44A850, this, monType); }
+        // Has creature of type <monType>  /
+        // В армии есть существо типа <monType>.
+        [[nodiscard]] bool IsMember(TCreatureType monType) const
+        { return THISCALL_2(bool, 0x44A850, this, monType); }
 
-    // Can creature of type <monType> join army? /
-    // Может ли существо типа <monType> присоединится?
-    [[nodiscard]] bool CanJoin(TCreatureType monType) const
-    { return !!THISCALL_2(bool32_t, 0x44A920, this, monType); }
+        // Can creature of type <monType> join army? /
+        // Может ли существо типа <monType> присоединится?
+        [[nodiscard]] bool CanJoin(TCreatureType monType) const
+        { return THISCALL_2(bool32_t, 0x44A920, this, monType); }
 
-    // Sum AI_value of each creature /
-    // Посчитать сумму AI_value всей армии.
-    [[nodiscard]] int32_t get_AI_value() const
-    { return THISCALL_1(int32_t, 0x44A950, this); }
+        // Sum AI_value of each creature /
+        // Посчитать сумму AI_value всей армии.
+        [[nodiscard]] int32_t get_AI_value() const
+        { return THISCALL_1(int32_t, 0x44A950, this); }
 
-    // Sum amount of held positions /
-    // Посчитать количество непустых ячеек армии
-    [[nodiscard]] int32_t GetNumArmies() const
-    { return THISCALL_1(int32_t, 0x44A990, this); }
+        // Sum amount of held positions /
+        // Посчитать количество непустых ячеек армии
+        [[nodiscard]] int32_t GetNumArmies() const
+        { return THISCALL_1(int32_t, 0x44A990, this); }
 
-    // Add creature of type <armyType> and amount <newNumTroops> to <newIndex> /
-    // Добавить существо типа <armyType> количества <newNumTroops> в ячейку <newIndex>
-    /// @param armyType Тип существа
-    /// @param newNumTroops Количество существ
-    /// @param newIndex Индекс добавления
-    bool Add(TCreatureType armyType, int32_t newNumTroops, int32_t newIndex)
-    { return !!THISCALL_4(bool32_t, 0x44A9B0, this, armyType, newNumTroops, newIndex); }
+        // Add creature of type <armyType> and amount <newNumTroops> to <newIndex> /
+        // Добавить существо типа <armyType> количества <newNumTroops> в ячейку <newIndex>
+        /// @param armyType Тип существа
+        /// @param newNumTroops Количество существ
+        /// @param newIndex Индекс добавления
+        bool Add(TCreatureType armyType, int32_t newNumTroops, int32_t newIndex)
+        { return THISCALL_4(bool32_t, 0x44A9B0, this, armyType, newNumTroops, newIndex); }
 
-    // Swap two armies stacks. Use std::swap to swap whole two armies /
-    // Обмен ячеек двух армий. Используйте std::swap чтобы полностью обменять ячейки двух армией.
-    /// @param srcIndex индекс армии
-    /// @param destGroup армия, с которой осуществляется обмен
-    /// @param destIndex индекс армии обмена
-    void Swap(int32_t srcIndex, armyGroup* destGroup, int32_t destIndex)
-    { THISCALL_4(void, 0x44AA30, this, srcIndex, destGroup, destIndex); }
+        // Swap two armies stacks. Use std::swap to swap whole two armies /
+        // Обмен ячеек двух армий. Используйте std::swap чтобы полностью обменять ячейки двух армией.
+        /// @param srcIndex индекс армии
+        /// @param destGroup армия, с которой осуществляется обмен
+        /// @param destIndex индекс армии обмена
+        void Swap(int32_t srcIndex, armyGroup* destGroup, int32_t destIndex)
+        { THISCALL_4(void, 0x44AA30, this, srcIndex, destGroup, destIndex); }
 
-    // Sum each creature amount /
-    // Посчитать сумму количества существ армии.
-    [[nodiscard]] int32_t get_creature_total() const
-    { return THISCALL_1(int32_t,  0x44AA70, this); }
+        // Sum each creature amount /
+        // Посчитать сумму количества существ армии.
+        [[nodiscard]] uint32_t get_creature_total() const
+        { return static_cast<uint32_t>(THISCALL_1(int32_t,  0x44AA70, this)); }
 
-    // Sum amount of creatures of type <monType> /
-    // Посчитать количество существ типа <monType> в армии.
-    [[nodiscard]] constexpr uint32_t get_creature_total(TCreatureType monType) const
-    {
-        uint32_t result = 0;
-        for (size_t i = 0; i < 7; ++i)
-            if (type[i] == monType && amount[i] > 0)
-                result += static_cast<uint32_t>(amount[i]);
+        // Sum amount of creatures of type <monType> /
+        // Посчитать количество существ типа <monType> в армии.
+        [[nodiscard]] constexpr uint32_t get_creature_total(TCreatureType monType) const
+        {
+            uint32_t result = 0;
+            for ( size_t i = 0; i < 7; ++i )
+                if ( type[i] == monType && amount[i] > 0 )
+                    result += static_cast<uint32_t>(static_cast<uint16_t>(amount[i]));
 
-        return result;
-    }
+            return result;
+        }
 
-    // static. Get army size name depending on <howMany> /
-    // Не нужен указатель this. Получить название количества существ в армии.
-    /// @param howMany количество существ
-    /// @param iNameSet 0 or 2 is upper limit, 1 is interval / 0 или 2 это верхнее ограничение, 1 это интервал
-    [[nodiscard]] static char const * GetArmySizeName(int32_t howMany, int32_t iNameSet)
-    { return FASTCALL_2(const char*, 0x44AAB0, howMany, iNameSet); }
+        // static. Get army size name depending on <howMany> /
+        // Не нужен указатель this. Получить название количества существ в армии.
+        /// @param howMany количество существ
+        /// @param iNameSet 0 or 2 is upper limit, 1 is interval / 0 или 2 это верхнее ограничение, 1 это интервал
+        [[nodiscard]] static char const* GetArmySizeName(int32_t howMany, int32_t iNameSet)
+        { return FASTCALL_2(const char*, 0x44AAB0, howMany, iNameSet); }
 
-    [[nodiscard]]
-    // Get army morale /
-    // Боевой дух всей армии.
-    /// @param ownerHero обладатель этой армии
-    /// @param ownerTown город героя-обладателя
-    /// @param otherHero unused / не используется
-    /// @param otherGroup unused / не используется
-    /// @param on_cursed_ground на проклятой земле
-    /// @param apply_limits применить лимит [-3;3]
-    /// @param angelic_alliance ангельский союз
-    int32_t GetMorale(const hero* ownerHero,
-                      const town* ownerTown,
-                      const hero* otherHero,
-                      const armyGroup* otherGroup,
-                      bool on_cursed_ground,
-                      bool angelic_alliance,
-                      bool apply_limits = true) const
-    { return THISCALL_8(int32_t, 0x44AB30, this,
-                                           ownerHero,
-                                           ownerTown,
-                                           otherHero,
-                                           otherGroup,
-                                           on_cursed_ground,
-                                           angelic_alliance,
-                                           apply_limits); }
+        // Get army morale /
+        // Боевой дух всей армии.
+        /// @param ownerHero обладатель этой армии
+        /// @param ownerTown город героя-обладателя
+        /// @param otherHero unused / не используется
+        /// @param otherGroup unused / не используется
+        /// @param on_cursed_ground на проклятой земле
+        /// @param apply_limits применить лимит [-3;3]
+        /// @param angelic_alliance ангельский союз
+        [[nodiscard]] int32_t GetMorale(const hero*      ownerHero,
+                                        const town*      ownerTown,
+                                        const hero*      otherHero,
+                                        const armyGroup* otherGroup,
+                                        bool             on_cursed_ground,
+                                        bool             angelic_alliance,
+                                        bool             apply_limits = true) const
+        { return THISCALL_8(int32_t, 0x44AB30, this,
+                                            ownerHero,
+                                            ownerTown,
+                                            otherHero,
+                                            otherGroup,
+                                            on_cursed_ground,
+                                            angelic_alliance,
+                                            apply_limits); }
 
-    [[nodiscard]]
-    // Get <index> morale /
-    // Боевой дух ячейки <index> в армии
-    /// @param index индекс отдельной ячейки армии
-    /// @param ownerHero обладатель этой армии
-    /// @param ownerTown город героя-обладателя
-    /// @param ground_type тип накладной земли
-    /// @param angelic_alliance Ангельский альянс
-    /// @param apply_limits применить лимит [-3;3]
-    int32_t GetArmyMorale(int32_t index,
-                          const hero* ownerHero,
-                          const town* ownerTown,
-                          int32_t ground_type,
-                          bool angelic_alliance,
-                          bool apply_limits = true) const
-    { return THISCALL_7(int32_t, 0x44ADD0, this, index, ownerHero, ownerTown, ground_type, angelic_alliance, apply_limits); }
+        [[nodiscard]]
+        // Get <index> morale /
+        // Боевой дух ячейки <index> в армии
+        /// @param index индекс отдельной ячейки армии
+        /// @param ownerHero обладатель этой армии
+        /// @param ownerTown город героя-обладателя
+        /// @param ground_type тип накладной земли
+        /// @param angelic_alliance Ангельский альянс
+        /// @param apply_limits применить лимит [-3;3]
+        int32_t GetArmyMorale(int32_t     index,
+                              const hero* ownerHero,
+                              const town* ownerTown,
+                              int32_t     ground_type,
+                              bool        angelic_alliance,
+                              bool        apply_limits = true) const
+        { return THISCALL_7(int32_t, 0x44ADD0, this, index, ownerHero, ownerTown, ground_type, angelic_alliance, apply_limits); }
 
-    [[nodiscard]]
-    // Get army luck /
-    // Удача всей армии.
-    /// @param ownerHero обладатель этой армии
-    /// @param ownerTown город героя-обладателя
-    /// @param otherHero unused / не используется
-    /// @param otherGroup unused / не используется
-    /// @param on_cursed_ground на проклятой земле
-    /// @param apply_limits применить лимит [-3;3]
-    int32_t GetLuck(const hero* ownerHero,
-                    const town* ownerTown,
-                    const hero* otherHero,
-                    const armyGroup* otherGroup,
-                    bool on_cursed_ground = false,
-                    bool apply_limits = false) const
-    { return THISCALL_7(int32_t, 0x44AFA0, this, ownerHero, ownerTown, otherHero, otherGroup, on_cursed_ground, apply_limits); }
+        [[nodiscard]]
+        // Get army luck /
+        // Удача всей армии.
+        /// @param ownerHero обладатель этой армии
+        /// @param ownerTown город героя-обладателя
+        /// @param otherHero unused / не используется
+        /// @param otherGroup unused / не используется
+        /// @param on_cursed_ground на проклятой земле
+        /// @param apply_limits применить лимит [-3;3]
+        int32_t GetLuck(const hero*      ownerHero,
+                        const town*      ownerTown,
+                        const hero*      otherHero,
+                        const armyGroup* otherGroup,
+                        bool             on_cursed_ground = false,
+                        bool             apply_limits     = false) const
+        { return THISCALL_7(int32_t, 0x44AFA0, this, ownerHero, ownerTown, otherHero, otherGroup, on_cursed_ground, apply_limits); }
 
-    [[nodiscard]]
-    // Get <index> luck /
-    // Удача ячейки <index> в армии
-    /// @param index индекс отдельной ячейки армии
-    /// @param ownerHero обладатель этой армии
-    /// @param ownerTown город героя-обладателя
-    /// @param ground_type тип накладной магической земли
-    /// @param apply_limits применить лимит [-3;3]
-    int32_t GetArmyLuck(int32_t index,
-                        const hero* ownerHero,
-                        const town* ownerTown,
-                        EMagicTerrain ground_type,
-                        bool apply_limits = true) const
-    { return THISCALL_6(int32_t, 0x44B090, this, index, ownerHero, ownerTown, ground_type, apply_limits); }
+        [[nodiscard]]
+        // Get <index> luck /
+        // Удача ячейки <index> в армии
+        /// @param index индекс отдельной ячейки армии
+        /// @param ownerHero обладатель этой армии
+        /// @param ownerTown город героя-обладателя
+        /// @param ground_type тип накладной магической земли
+        /// @param apply_limits применить лимит [-3;3]
+        int32_t GetArmyLuck(int32_t       index,
+                            const hero*   ownerHero,
+                            const town*   ownerTown,
+                            EMagicTerrain ground_type,
+                            bool          apply_limits = true) const
+        { return THISCALL_6(int32_t, 0x44B090, this, index, ownerHero, ownerTown, ground_type, apply_limits); }
 
-    bool Merge(armyGroup* ag)
-    { return THISCALL_2(bool, 0x44B2F0, this, ag); }
+        bool Merge(armyGroup* ag)
+        { return THISCALL_2(bool, 0x44B2F0, this, ag); }
 
-    void merge_armies(armyGroup& source)
-    { THISCALL_2(void, 0x44B4F0, this, &source); }
+        void merge_armies(armyGroup& source)
+        { THISCALL_2(void, 0x44B4F0, this, &source); }
 
-    [[nodiscard]] NH3API_FORCEINLINE
-    exe_string get_morale_description(TCreatureType
-                                      creature,
-                                      int32_t morale,
-                                      const hero* ownerHero,
-                                      const town* ownerTown,
-                                      const hero* other_hero,
-                                      const armyGroup* other_group,
-                                      EMagicTerrain ground_type) const
-    {
-        exe_string result(::nh3api::dummy_tag);
-        (void) THISCALL_9(exe_string*, 0x44B630, this, &result, creature, morale, ownerHero, ownerTown, other_hero, other_group, ground_type);
-        return result;
-    }
+        [[nodiscard]] inline
+        exe_string get_morale_description(TCreatureType    creature,
+                                          int32_t          morale,
+                                          const hero*      ownerHero,
+                                          const town*      ownerTown,
+                                          const hero*      other_hero,
+                                          const armyGroup* other_group,
+                                          EMagicTerrain    ground_type) const
+        {
+            exe_string result(nh3api::dummy_tag);
+            (void) THISCALL_9(exe_string*, 0x44B630, this, &result, creature, morale, ownerHero, ownerTown, other_hero, other_group, ground_type);
+            return result;
+        }
 
-    [[nodiscard]] NH3API_FORCEINLINE
-    exe_string get_luck_description(TCreatureType army_type,
-                                    int32_t luck,
-                                    hero* our_hero,
-                                    town* our_town,
-                                    hero* enemy_hero,
-                                    bool on_cursed_ground,
-                                    EMagicTerrain magic_terrain) const
-    {
-        exe_string result(::nh3api::dummy_tag);
-        (void) THISCALL_9(exe_string*, 0x44BE90, this, &result, army_type, luck, our_hero, our_town, enemy_hero, on_cursed_ground, magic_terrain);
-        return result;
-    }
+        [[nodiscard]] inline
+        exe_string get_luck_description(TCreatureType army_type,
+                                        int32_t       luck,
+                                        hero*         our_hero,
+                                        town*         our_town,
+                                        hero*         enemy_hero,
+                                        bool          on_cursed_ground,
+                                        EMagicTerrain magic_terrain) const
+        {
+            exe_string result(nh3api::dummy_tag);
+            (void) THISCALL_9(exe_string*, 0x44BE90, this, &result, army_type, luck, our_hero, our_town, enemy_hero, on_cursed_ground, magic_terrain);
+            return result;
+        }
 
-    // Get first available unit of army native terrain /
-    // Родная земля первой доступной ячейки армии(именно поэтому, например, кочевников нужно ставить в самый левый слот).
-    [[nodiscard]] TTerrainType GetNativeTerrain() const
-    { return THISCALL_1(TTerrainType, 0x44C260, this); }
+        // Get first available unit of army native terrain /
+        // Родная земля первой доступной ячейки армии(именно поэтому, например, кочевников нужно ставить в самый левый слот).
+        [[nodiscard]] TTerrainType GetNativeTerrain() const
+        { return THISCALL_1(TTerrainType, 0x44C260, this); }
 
-public:
-    // Creature type /
-    // Тип существа в ячейке.
-    // offset: +0x0 = +0,  size: 0x1C = 28
-    std::array<TCreatureType, 7> type;
+    // utility functions
+    public:
+        [[nodiscard]] inline constexpr auto to_pair() const noexcept
+        { return std::pair { type, amount }; }
 
-    // Creature amount /
-    // Количество существ в ячейке.
-    // offset: +0x1C = +28,  size: 0x1C = 28
-    std::array<int32_t, 7> amount;
+    public:
+        // Creature type /
+        // Тип существа в ячейке.
+        // offset: +0x0 = +0,  size: 0x1C = 28
+        std::array<TCreatureType, 7> type
+        {CREATURE_NONE, CREATURE_NONE, CREATURE_NONE, CREATURE_NONE, CREATURE_NONE, CREATURE_NONE, CREATURE_NONE};
+
+        // Creature amount /
+        // Количество существ в ячейке.
+        // offset: +0x1C = +28,  size: 0x1C = 28
+        std::array<int32_t, 7> amount
+        {-1, -1, -1, -1, -1, -1, -1};
 
 };
-#pragma pack(pop)
+#pragma pack(pop) // 4
 
-NH3API_FORCEINLINE void get_upgrade_cost(TCreatureType creature, int32_t amount, std::array<int32_t, 7>& cost)
+inline void get_upgrade_cost(TCreatureType creature, int32_t amount, std::array<int32_t, 7>& cost)
 { FASTCALL_3(void, 0x54EB50, creature, amount, cost.data()); }
 
-NH3API_FORCEINLINE void GetMonsterCost(int32_t monId, std::array<int32_t, 7>& resCost)
+inline void GetMonsterCost(int32_t monId, std::array<int32_t, 7>& resCost)
 { FASTCALL_2(void, 0x54EBC0, monId, resCost.data()); }
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

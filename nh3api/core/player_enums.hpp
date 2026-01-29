@@ -9,7 +9,12 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std/type_traits.hpp"
+#include "nh3api_std/nh3api_std.hpp"
+
+#include <type_traits>
+#if (__cplusplus >= 202002L) || defined(__cpp_lib_concepts)
+#include <concepts>    // std::integral
+#endif
 
 // Player colors /
 // Цвета игроков.
@@ -29,63 +34,80 @@ enum EPlayerColor : int32_t
 
 // Player bits /
 // Биты игроков.
-enum EPlayerBit : uint8_t
+NH3API_FLAG_ENUM EPlayerBit : uint8_t
 {
-    PLAYER_BIT_RED    = 1 << 0,    // Красный
-    PLAYER_BIT_BLUE   = 1 << 1,   // Синий
-    PLYAER_BIT_TAN    = 1 << 2,    // Серый
-    PLAYER_BIT_GREEN  = 1 << 3,  // Зелёный
-    PLAYER_BIT_ORANGE = 1 << 4, // Оранжевый
-    PLAYER_BIT_PURPLE = 1 << 5, // Фиолетовый
-    PLAYER_BIT_TEAL   = 1 << 6,   // Бирюзовый
-    PLAYER_BIT_PINK   = 1 << 7,   // Розовый
+    PLAYER_BIT_RED    = 0b00000000, // Красный
+    PLAYER_BIT_BLUE   = 0b00000010, // Синий
+    PLYAER_BIT_TAN    = 0b00000100, // Серый
+    PLAYER_BIT_GREEN  = 0b00001000, // Зелёный
+    PLAYER_BIT_ORANGE = 0b00010000, // Оранжевый
+    PLAYER_BIT_PURPLE = 0b00100000, // Фиолетовый
+    PLAYER_BIT_TEAL   = 0b01000000, // Бирюзовый
+    PLAYER_BIT_PINK   = 0b10000000  // Розовый
 };
 
-constexpr NH3API_FORCEINLINE EPlayerBit operator|(EPlayerBit lhs, EPlayerBit rhs) noexcept
+inline constexpr EPlayerBit operator|(EPlayerBit lhs, EPlayerBit rhs) noexcept
 { return static_cast<EPlayerBit>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs))); }
 
-constexpr NH3API_FORCEINLINE EPlayerBit& operator|=(EPlayerBit& lhs, EPlayerBit rhs) noexcept
+inline constexpr EPlayerBit& operator|=(EPlayerBit& lhs, EPlayerBit rhs) noexcept
 { return lhs = lhs | rhs; }
 
-constexpr NH3API_FORCEINLINE EPlayerBit operator&(EPlayerBit lhs, EPlayerBit rhs) noexcept
+inline constexpr EPlayerBit operator&(EPlayerBit lhs, EPlayerBit rhs) noexcept
 { return static_cast<EPlayerBit>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs))); }
 
-constexpr NH3API_FORCEINLINE EPlayerBit& operator&=(EPlayerBit& lhs, EPlayerBit rhs) noexcept
+inline constexpr EPlayerBit& operator&=(EPlayerBit& lhs, EPlayerBit rhs) noexcept
 { return lhs = lhs & rhs; }
 
-constexpr NH3API_FORCEINLINE EPlayerBit operator^(EPlayerBit lhs, EPlayerBit rhs) noexcept
+inline constexpr EPlayerBit operator^(EPlayerBit lhs, EPlayerBit rhs) noexcept
 { return static_cast<EPlayerBit>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) ^ static_cast<uint32_t>(rhs))); }
 
-constexpr NH3API_FORCEINLINE EPlayerBit& operator^=(EPlayerBit& lhs, EPlayerBit rhs) noexcept
+inline constexpr EPlayerBit& operator^=(EPlayerBit& lhs, EPlayerBit rhs) noexcept
 { return lhs = lhs ^ rhs; }
 
-constexpr NH3API_FORCEINLINE EPlayerBit operator~(EPlayerBit arg) noexcept
+inline constexpr EPlayerBit operator~(EPlayerBit arg) noexcept
 { return static_cast<EPlayerBit>(static_cast<uint8_t>(~static_cast<uint32_t>(arg))); }
 
+#ifdef __cpp_lib_concepts
+inline constexpr EPlayerBit& operator<<=(EPlayerBit& lhs, std::integral auto shift) noexcept
+{ return lhs = lhs << shift; }
+
 template <class _Integer>
-constexpr NH3API_FORCEINLINE EPlayerBit& operator<<=(EPlayerBit& lhs, _Integer shift) noexcept
+inline constexpr EPlayerBit operator<<(EPlayerBit lhs, std::integral auto shift) noexcept
+{ return static_cast<EPlayerBit>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) << shift)); }
+
+template <class _Integer>
+inline constexpr EPlayerBit& operator>>=(EPlayerBit& lhs, std::integral auto shift) noexcept
+{ return lhs = lhs >> shift; }
+
+template <class _Integer>
+inline constexpr EPlayerBit operator>>(EPlayerBit lhs, std::integral auto shift) noexcept
+{ return static_cast<EPlayerBit>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) >> shift)); }
+#else
+template <class _Integer>
+inline constexpr EPlayerBit& operator<<=(EPlayerBit& lhs, _Integer shift) noexcept
 {
-    NH3API_STATIC_ASSERT("operand must be an integral type", nh3api::tt::is_integral<_Integer>::value);
+    static_assert(std::is_integral_v<_Integer>, "operand must be an integral type");
     return lhs = lhs << shift;
 }
 
 template <class _Integer>
-constexpr NH3API_FORCEINLINE EPlayerBit operator<<(EPlayerBit lhs, _Integer shift) noexcept
+inline constexpr EPlayerBit operator<<(EPlayerBit lhs, _Integer shift) noexcept
 {
-    NH3API_STATIC_ASSERT("operand must be an integral type", nh3api::tt::is_integral<_Integer>::value);
+    static_assert(std::is_integral_v<_Integer>, "operand must be an integral type");
     return static_cast<EPlayerBit>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) << shift));
 }
 
 template <class _Integer>
-constexpr NH3API_FORCEINLINE EPlayerBit& operator>>=(EPlayerBit& lhs, _Integer shift) noexcept
+inline constexpr EPlayerBit& operator>>=(EPlayerBit& lhs, _Integer shift) noexcept
 {
-    NH3API_STATIC_ASSERT("operand must be an integral type", nh3api::tt::is_integral<_Integer>::value);
+    static_assert(std::is_integral_v<_Integer>, "operand must be an integral type");
     return lhs = lhs >> shift;
 }
 
 template <class _Integer>
-constexpr NH3API_FORCEINLINE EPlayerBit operator>>(EPlayerBit lhs, _Integer shift) noexcept
+inline constexpr EPlayerBit operator>>(EPlayerBit lhs, _Integer shift) noexcept
 {
-    NH3API_STATIC_ASSERT("operand must be an integral type", nh3api::tt::is_integral<_Integer>::value);
+    static_assert(std::is_integral_v<_Integer>, "operand must be an integral type");
     return static_cast<EPlayerBit>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) >> shift));
 }
+#endif

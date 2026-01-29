@@ -11,7 +11,9 @@
 
 #include "core/nh3api_std/memory.hpp"
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wattributes")
+NH3API_WARNING_MSVC_DISABLE(4714)
 
 #pragma pack(push, 4)
 // Turn duration timer /
@@ -20,13 +22,9 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 struct CTurnDuration
 {
     public:
-        NH3API_FORCEINLINE
-        CTurnDuration() noexcept
-            : m_lastWarned(0), m_turnStartTime(0), m_currDuration(0), m_nextWarning(0), m_pauseTime(0)
-        {}
+        inline constexpr CTurnDuration() noexcept = default;
 
-        NH3API_FORCEINLINE
-        CTurnDuration(const ::nh3api::dummy_tag_t&) noexcept
+        inline CTurnDuration(const nh3api::dummy_tag_t&) noexcept
         {}
 
         [[nodiscard]] bool IsOn() const
@@ -58,23 +56,23 @@ struct CTurnDuration
 
     public:
         // offset: +0x0 = +0,  size = 0x4 = 4
-        uint32_t m_lastWarned;
+        uint32_t m_lastWarned {0};
 
         // offset: +0x4 = +4,  size = 0x4 = 4
-        uint32_t m_turnStartTime;
+        uint32_t m_turnStartTime {0};
 
         // offset: +0x8 = +8,  size = 0x4 = 4
-        uint32_t m_currDuration;
+        uint32_t m_currDuration {0};
 
         // offset: +0xC = +12,  size = 0x4 = 4
-        uint32_t m_nextWarning;
+        uint32_t m_nextWarning {0};
 
         // offset: +0x10 = +16,  size = 0x4 = 4
-        uint32_t m_pauseTime;
+        uint32_t m_pauseTime {0};
 
 };
 #pragma pack(pop)
 
 inline CTurnDuration& g_turnDuration = get_global_var_ref(0x69D680, CTurnDuration);
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

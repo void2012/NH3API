@@ -9,158 +9,147 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std.hpp"
-#include "type_traits.hpp" // is_nothrow_move_constructible
-
-#include <exception>
 #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+#include <exception>
 #include <stdexcept> // std::length_error, std::out_of_range
 #endif
 
-// you can specify your own behaviour using template specialization
-/*
-template<>
-[[noreturn]]
-NH3API_NOINLINE
-void throw_exception<MyException>(const char what[])
+#include <type_traits>
+
+#if defined(_MSC_VER) && !defined(__MINGW32__)
+#include <vcruntime_exception.h>
+#else
+#pragma pack(push, 4)
+struct __std_exception_data
 {
-    throw T(what);
-}
-*/
+    char const* _What;
+    bool        _DoFree;
+};
+#pragma pack(pop)
+#endif
+
+#include "nh3api_std.hpp"
+#include "memory.hpp"
+
+// size = 0xC = 12, align = 4
+struct exe_exception
+{
+	// vftable
+	public:
+		struct vftable_t
+		{
+			void (__thiscall* scalar_deleting_destructor)(exe_exception*, uint8_t);
+			const char* (__thiscall* what)(exe_exception*);
+			// void (__thiscall* _Doraise)(const exe_exception*);
+		};
+
+	// virtual functions
+	public:
+		// vftable shift: +0
+		virtual void __thiscall scalar_deleting_destructor(uint8_t flag)
+		{ return get_vftable(this)->scalar_deleting_destructor(this, flag); }
+
+		// vftable shift: +4
+		virtual const char* __thiscall what() noexcept
+		{ return get_vftable(this)->what(this); }
+
+		// vftable shift: +8
+		// [[noreturn]] virtual void __thiscall _Doraise() const
+		// { get_vftable(this)->_Doraise(this); NH3API_UNREACHABLE(); }
+
+	// member variables
+	public:
+        __std_exception_data _Data;
+};
 
 namespace nh3api
 {
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-template<typename T>
-[[noreturn]]
-NH3API_NOINLINE
-void throw_exception(const char what[])
-{
-    throw T(what);
-}
-#else
+#if !defined(NH3API_FLAG_NO_CPP_EXCEPTIONS) && (NH3API_RAISE_EXCEPTION_TYPE == NH3API_RAISE_EXCEPTION_NATIVE)
+template<typename ExceptionTypeT>
+[[noreturn]] void throw_exception(const char what_message[]) noexcept(false)
+{ throw ExceptionTypeT{what_message}; }
 
-template<typename>
-[[noreturn]]
-NH3API_NOINLINE
-void throw_exception(const char[])
+template<typename ExceptionTypeT>
+[[noreturn]] void throw_exception() noexcept(false)
+{ throw ExceptionTypeT{}; }
+#else
+template<typename ExceptionTypeT, size_t StrSize>
+[[noreturn]] void throw_exception([[maybe_unused]] const char (&what_message)[StrSize])
 {
-    RaiseException(0xE06D7363u, EXCEPTION_NONCONTINUABLE, 0, nullptr);
-    ::std::abort();
+#if NH3API_RAISE_EXCEPTION_TYPE == NH3API_RAISE_EXCEPTION_EXE
+    #pragma pack(push, 4)
+    struct pseudo_exe_runtime_error
+    {
+        uintptr_t            vftable { 0x645650 };
+        __std_exception_data _Data   { static_cast<char*>(::operator new(1, ::exe_heap)), true };
+
+        // avoid dependency on exe_string.hpp
+        struct pseudo_exe_string
+        {
+            int32_t dummy   {0};
+            char*   _Myptr  {&(static_cast<char*>(::operator new(StrSize + 1, ::exe_heap))[1])};
+            size_t  _Mysize {StrSize};
+            size_t  _Myres  {StrSize};
+        } _Str;
+    };
+    pseudo_exe_runtime_error pseudo_exception_object;
+    (const_cast<char*>(pseudo_exception_object._Data._What))[0] = '\0';
+    (reinterpret_cast<uint8_t*>(pseudo_exception_object._Str._Myptr))[-1] = 0; // set refcount to 0
+    ::std::memcpy(pseudo_exception_object._Str._Myptr, what_message, StrSize);
+    #pragma pack(pop)
+    // _CxxThrowException(&exception_object, &__TI2?AVruntime_error@std@@);
+    STDCALL_2(void, 0x617B07, static_cast<void*>(&pseudo_exception_object), 0x6487B8);
+#elif NH3API_RAISE_EXCEPTION_TYPE == NH3API_RAISE_EXCEPTION_UD2
+    __ud2();
+#elif NH3API_RAISE_EXCEPTION_TYPE == NH3API_RAISE_EXCEPTION_ABORT
+    #if NH3API_HAS_BUILTIN(__builtin_abort)
+    __builtin_abort();
+    #else
+    ::abort();
+    #endif
+#endif
+    NH3API_UNREACHABLE();
+}
+
+inline constexpr char unknown_cpp_exception_msg[] {"Unknown C++ Runtime Exception"};
+
+template<typename ExceptionTypeT>
+[[noreturn]] void throw_exception()
+{
+#if NH3API_RAISE_EXCEPTION_TYPE == NH3API_RAISE_EXCEPTION_EXE
+    #pragma pack(push, 4)
+    struct pseudo_exe_runtime_error
+    {
+        uintptr_t            vftable { 0x645650 };
+        __std_exception_data _Data   { static_cast<char*>(::operator new(1, ::exe_heap)), true };
+
+        // avoid dependency on exe_string.hpp
+        struct pseudo_exe_string
+        {
+            int32_t dummy   {0};
+            char*   _Myptr  {&(static_cast<char*>(::operator new(1 + sizeof(unknown_cpp_exception_msg), ::exe_heap))[1])};
+            size_t  _Mysize {sizeof(unknown_cpp_exception_msg)};
+            size_t  _Myres  {sizeof(unknown_cpp_exception_msg)};
+        } _Str;
+    } pseudo_exception_object;
+    (const_cast<char*>(pseudo_exception_object._Data._What))[0] = '\0';
+    (reinterpret_cast<uint8_t*>(pseudo_exception_object._Str._Myptr))[-1] = 0; // set refcount to 0
+    ::std::memcpy(pseudo_exception_object._Str._Myptr, &unknown_cpp_exception_msg[0], sizeof(unknown_cpp_exception_msg));
+    #pragma pack(pop)
+    // _CxxThrowException(&exception_object, &__TI2?AVruntime_error@std@@);
+    STDCALL_2(void, 0x617B07, static_cast<void*>(&pseudo_exception_object), 0x6487B8);
+
+#elif NH3API_RAISE_EXCEPTION_TYPE == NH3API_RAISE_EXCEPTION_UD2
+    __ud2();
+#elif NH3API_RAISE_EXCEPTION_TYPE == NH3API_RAISE_EXCEPTION_ABORT
+    #if NH3API_HAS_BUILTIN(__builtin_abort)
+    __builtin_abort();
+    #else
+    ::abort();
+    #endif
+#endif
+    NH3API_UNREACHABLE();
 }
 #endif
 
 } // namespace nh3api
-
-#ifndef NH3API_THROW
-    #ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-        #define NH3API_THROW(EXCEPTION_TYPE, WHAT) ::nh3api::throw_exception<EXCEPTION_TYPE>(WHAT)
-    #else
-        #define NH3API_THROW(EXCEPTION_TYPE, WHAT) ::nh3api::throw_exception<void>("")
-    #endif
-#endif // NH3API_THROW
-
-namespace nh3api
-{
-
-template<typename RollBack>
-struct exception_guard_rollback
-{
-    exception_guard_rollback() = delete;
-
-    constexpr explicit exception_guard_rollback(RollBack _rollback)
-    noexcept(noexcept(std::is_nothrow_move_constructible_v<RollBack>))
-        : rollback(::std::move(_rollback)), completed(false)
-    {}
-
-    constexpr exception_guard_rollback(exception_guard_rollback&& other)
-    noexcept(noexcept(std::is_nothrow_move_constructible_v<RollBack>))
-        : rollback(::std::move(other.rollback)), completed(other.completed)
-    { other.completed = true; }
-
-    exception_guard_rollback(const exception_guard_rollback&) = delete;
-    exception_guard_rollback& operator=(const exception_guard_rollback&) = delete;
-    exception_guard_rollback& operator=(const exception_guard_rollback&&) = delete;
-
-    constexpr void complete() noexcept
-    { completed = true; }
-
-    ~exception_guard_rollback()
-    {
-        if ( !completed )
-            rollback();
-    }
-
-    protected:
-    #if NH3API_HAS_CPP_ATTRIBUTE(msvc::no_unique_address)
-    [[msvc::no_unique_address]]
-    #elif NH3API_HAS_CPP_ATTRIBUTE(no_unique_address)
-    [[no_unique_address]]
-    #endif
-    RollBack rollback;
-    bool completed;
-};
-
-template<typename RollBack>
-struct exception_guard_noop
-{
-    exception_guard_noop() noexcept = delete;
-
-    constexpr explicit exception_guard_noop(RollBack) noexcept
-        : completed(false)
-    {}
-
-    constexpr exception_guard_noop(exception_guard_noop&& other) noexcept
-        : completed(other.completed)
-    { other.completed = true; }
-
-    exception_guard_noop(const exception_guard_noop&) noexcept = delete;
-    exception_guard_noop& operator=(const exception_guard_noop&) noexcept = delete;
-    exception_guard_noop& operator=(const exception_guard_noop&&) noexcept = delete;
-
-    constexpr void complete() noexcept
-    { completed = true; }
-
-    ~exception_guard_noop() noexcept
-    { assert(completed); }
-
-    protected:
-    bool completed;
-};
-
-template<bool IsNoexcept, typename RollBack>
-struct exception_guard_factory
-{
-    using type = exception_guard_noop<RollBack>;
-
-    inline constexpr static type get(RollBack rollback) noexcept
-    { return type(rollback); }
-};
-
-// partial specialization for when exceptions are enabled
-// when they are disabled, do noop in both IsNoexcept:bool cases
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-template<typename RollBack>
-struct exception_guard_factory<false, RollBack>
-{
-    using type = exception_guard_rollback<RollBack>;
-
-    constexpr NH3API_FORCEINLINE static type get(RollBack rollback)
-    noexcept(noexcept(std::is_nothrow_move_constructible_v<RollBack>))
-    { return type(::std::move(rollback)); }
-};
-#endif
-
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-template<bool IsNoexcept, typename RollBack>
-NH3API_FORCEINLINE constexpr typename exception_guard_factory<IsNoexcept, RollBack>::type make_exception_guard(RollBack rollback)
-noexcept(noexcept(std::is_nothrow_move_constructible_v<RollBack>))
-{ return exception_guard_factory<IsNoexcept, RollBack>::get(::std::move(rollback)); }
-
-#else
-template<bool IsNoexcept, typename RollBack> NH3API_FORCEINLINE
-constexpr exception_guard_noop<RollBack> make_exception_guard(RollBack rollback) noexcept
-{ return exception_guard_noop<RollBack>(rollback); }
-#endif // NH3API_FLAG_NO_CPP_EXCEPTIONS
-
-}

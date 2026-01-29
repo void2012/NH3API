@@ -10,15 +10,17 @@
 #pragma once
 
 #include "nh3api_std/exe_vector.hpp" // exe_vector<T>
-#include "hero_enums.hpp" // THeroID
 #include "artifact.hpp" // TArtifact
+#include "hero_enums.hpp" // THeroID
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 // Текущий игрок.
 inline int32_t& giCurPlayer = get_global_var_ref(0x69CCF4, int32_t);
 
-inline int32_t& giCurWatchPlayer = get_global_var_ref(0x6977DC, int32_t);
+inline int32_t& giCurWatchPlayer    = get_global_var_ref(0x6977DC, int32_t);
 inline uint8_t& giCurWatchPlayerBit = get_global_var_ref(0x69CD08, uint8_t);
 
 // Текущий бит игрока.
@@ -36,11 +38,11 @@ struct AI
     // offset: +0x1C = +28,  size = 0x1C = 28
     std::array<int32_t, 7> turnProductionResource;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_38[4];
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-public:
     // offset: +0x3C = +60,  size = 0x38 = 56
     std::array<double, 7> resource_value;
 
@@ -50,7 +52,7 @@ public:
     // offset: +0x78 = +120,  size = 0x4 = 4
     float turnValueOfAvgArtifact;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
 class TAbstractFile;
@@ -63,27 +65,22 @@ class town;
 class playerData
 {
     public:
-        NH3API_FORCEINLINE
-        playerData() noexcept
-        NH3API_DELEGATE_DUMMY(playerData)
+        inline playerData() noexcept
+            : playerData(nh3api::dummy_tag)
         { THISCALL_1(void, 0x4B9AB0, this); }
 
-        NH3API_FORCEINLINE
-        playerData(const ::nh3api::dummy_tag_t& tag) noexcept
-            : shipyards(tag),
-              assembledCombos(tag)
+        inline playerData(const nh3api::dummy_tag_t& tag) noexcept
+            : shipyards { tag },
+              assembledCombos { tag }
         {}
 
-        NH3API_FORCEINLINE
-        playerData& operator=(const playerData& other) noexcept
+        inline playerData& operator=(const playerData& other) noexcept
         { THISCALL_2(void, 0x58FA40, this, other); return *this; }
 
-        NH3API_FORCEINLINE
-        playerData(const playerData& other) noexcept
+        inline playerData(const playerData& other) noexcept
         { THISCALL_2(void, 0x58FA40, this, &other); }
 
-        NH3API_FORCEINLINE
-        ~playerData() noexcept
+        inline ~playerData() noexcept
         { THISCALL_1(void, 0x4CE230, this); }
 
     public:
@@ -161,11 +158,9 @@ class playerData
         // offset: +0x1 = +1,  size = 0x1 = 1
         int8_t numHeroes;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_2[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Current choosen hero /
         // Текущий выбранный герой.
         // offset: +0x4 = +4,  size = 0x4 = 4
@@ -187,8 +182,9 @@ class playerData
         // offset: +0x30 = +48,  size = 0x1 = 1
         uint8_t startingNumHeroes;
 
-        [[maybe_unused]]
-        std::byte gap_49[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
     public:
         // AI player personality /
@@ -231,11 +227,10 @@ class playerData
         // offset: +0x88 = +136,  size = 0x1 = 1
         bool placement_help_enabled;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_89[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         union {
         // Player shipyards /
         // Верфи игрока.
@@ -288,11 +283,8 @@ class playerData
         // offset: +0xE2 = +226,  size = 0x1 = 1
         bool isHuman;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_E3[1];
+        unsigned char : 8;
 
-    public:
         // Quick combat is on /
         // Включен режим быстрого боя.
         // offset: +0xE4 = +228,  size = 0x4 = 4
@@ -309,7 +301,7 @@ class playerData
         // ИИ: Информация о ресурсах.
         // offset: +0xEC = +236,  size = 0x7C = 124
         AI ai;
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
 // Текущий игрок.
@@ -317,7 +309,7 @@ inline playerData* const& gpCurPlayer = get_global_var_ref(0x69CCFC, playerData*
 
 NH3API_SIZE_ASSERT(0x168, playerData);
 
-NH3API_FORCEINLINE int32_t GetNumObelisks(int32_t whichPlayer)
-{ return FASTCALL_1(int32_t, 0x4BA860, whichPlayer); }
+inline int32_t GetNumObelisks(int32_t whichPlayer)
+{ return (whichPlayer >= 0 && whichPlayer < 8) ? FASTCALL_1(int32_t, 0x4BA860, whichPlayer) : 0; }
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

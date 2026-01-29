@@ -9,12 +9,10 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <string_view>
-#ifdef __cpp_lib_ranges
-#include <ranges>
-#endif
-#include "type_traits.hpp" // is_unsigned
-#include "intrin.hpp" // strlen_constexpr
+#include <type_traits>
 
 namespace nh3api
 {
@@ -54,9 +52,9 @@ class basic_fnv1a final
             for (size_t i = 0; i < size; ++i)
             {
                 // we can't use reinterpret_cast in constexpr, so calculate for low and high bytes
-                size_t next = static_cast<size_t>(data[i] & 0xFF00);
+                size_t next = static_cast<size_t>(data[i] & 0xFF00U);
                 acc = (acc ^ next) * Prime;
-                next = static_cast<size_t>(data[i] & 0x00FF);
+                next = static_cast<size_t>(data[i] & 0x00FFU);
                 acc = (acc ^ next) * Prime;
             }
             this->state_ = acc;
@@ -68,13 +66,13 @@ class basic_fnv1a final
             for (size_t i = 0; i < size; ++i)
             {
                 // we can't use reinterpret_cast in constexpr, so calculate for low and high bytes
-                size_t next = static_cast<size_t>(data[i] & 0xFF000000);
+                size_t next = static_cast<size_t>(data[i] & 0xFF000000U);
                 acc = (acc ^ next) * Prime;
-                next = static_cast<size_t>(data[i] & 0x00FF0000);
+                next = static_cast<size_t>(data[i] & 0x00FF0000U);
                 acc = (acc ^ next) * Prime;
-                next = static_cast<size_t>(data[i] & 0x0000FF00);
+                next = static_cast<size_t>(data[i] & 0x0000FF00U);
                 acc = (acc ^ next) * Prime;
-                next = static_cast<size_t>(data[i] & 0x000000FF);
+                next = static_cast<size_t>(data[i] & 0x000000FFU);
                 acc = (acc ^ next) * Prime;
             }
             this->state_ = acc;
@@ -84,42 +82,38 @@ class basic_fnv1a final
         { return this->state_; }
 };
 
-using default_hash = basic_fnv1a<size_t, 2166136261u, 16777619u>;
+using default_hash = basic_fnv1a<size_t, 2166136261, 16777619>;
 
-[[nodiscard]] constexpr NH3API_FORCEINLINE
-size_t hash_string(const char* const str, size_t size) noexcept
+[[nodiscard]] inline constexpr size_t hash_string(const char* const str, size_t size) noexcept
 {
     default_hash hasher;
     hasher.update(str, size);
     return hasher.digest();
 }
 
-[[nodiscard]] constexpr NH3API_FORCEINLINE
-size_t hash_string(const wchar_t* const str, size_t size) noexcept
+[[nodiscard]] inline constexpr size_t hash_string(const wchar_t* const str, size_t size) noexcept
 {
     default_hash hasher;
     hasher.update(str, size);
     return hasher.digest();
 }
 
-[[nodiscard]] constexpr NH3API_FORCEINLINE
-size_t hash_string(::std::string_view str) noexcept
+[[nodiscard]] inline constexpr size_t hash_string(::std::string_view str) noexcept
 {
     default_hash hasher;
     hasher.update(str.data(), str.size());
     return hasher.digest();
 }
 
-[[nodiscard]] constexpr NH3API_FORCEINLINE
-size_t hash_string(::std::wstring_view str) noexcept
+[[nodiscard]] inline constexpr size_t hash_string(::std::wstring_view str) noexcept
 {
     default_hash hasher;
     hasher.update(str.data(), str.size());
     return hasher.digest();
 }
 
-template <size_t size> [[nodiscard]]
-constexpr NH3API_FORCEINLINE size_t hash_string(const char (&str)[size]) noexcept
+template <size_t size>
+[[nodiscard]] inline constexpr size_t hash_string(const char (&str)[size]) noexcept
 {
     default_hash hasher;
     // ignore null terminator for string literals
@@ -127,8 +121,8 @@ constexpr NH3API_FORCEINLINE size_t hash_string(const char (&str)[size]) noexcep
     return hasher.digest();
 }
 
-template <size_t size> [[nodiscard]]
-constexpr NH3API_FORCEINLINE size_t hash_string(const wchar_t (&str)[size]) noexcept
+template <size_t size>
+[[nodiscard]] inline constexpr size_t hash_string(const wchar_t (&str)[size]) noexcept
 {
     default_hash hasher;
     // ignore null terminator for string literals
@@ -141,7 +135,6 @@ constexpr NH3API_FORCEINLINE size_t hash_string(const wchar_t (&str)[size]) noex
 template<::std::ranges::range Range>
 size_t hash_range(const Range& range)
 {
-
     TODO: implement it
     using value_t = ::std::ranges::range_value_t<Range>;
     ::std::hash<value_t> hasher;

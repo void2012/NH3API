@@ -14,7 +14,9 @@
 #include "core/nh3api_std/exe_string.hpp" // exe_string, to_exe_string, string printing
 #include "core/utils.hpp"
 
-NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wattributes")
+NH3API_WARNING_MSVC_DISABLE(4714)
 
 // legacy typedefs
 
@@ -157,4 +159,4 @@ NH3API_FORCEINLINE
 exe_string IntToStr<exe_string>(uint32_t x)
 { return to_exe_string(x); }
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

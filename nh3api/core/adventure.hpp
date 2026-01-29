@@ -9,20 +9,47 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std/memory.hpp" // NH3API_SCALAR_DELETING_DESTRUCTOR
-#include "resources/sound.hpp" // e_looping_sound_id, sample, soundNode
 #include "interface/dialogs.hpp" // TAdventureMapWindow
-#include "creatures.hpp" // armyGroup, TCreatureType, also includes "terrain.hpp": TTerrainType
-#include "hero_enums.hpp" // hero_seqid
-#include "base_manager.hpp" // baseManager
+#include "base_manager.hpp"      // baseManager
+#include "creatures.hpp"         // armyGroup, TCreatureType, also includes "terrain.hpp": TTerrainType
+#include "hero_enums.hpp"        // hero_seqid
+#include "map.hpp"               // MAP_HEIGHT, MAP_WIDTH, NewfullMap
+#include "resources/sounds.hpp"  // e_looping_sound_id, sample, soundNode
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
-NH3API_DISABLE_MSVC_WARNING_BEGIN(4583)
-NH3API_DISABLE_MSVC_WARNING_BEGIN(4582)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(4582)
+NH3API_WARNING_MSVC_DISABLE(4583)
+NH3API_WARNING_MSVC_DISABLE(26495)
 
-class NewmapCell;
-class NewfullMap;
-class hero;
+enum type_adventure_cursor : int32_t
+{
+    ADV_ARROW_POINTER          = 0,
+    ADV_WAIT_POINTER           = 1,
+    ADV_HERO_INFO_POINTER      = 2,
+    ADV_TOWN_INFO_POINTER      = 3,
+    ADV_WALK_POINTER           = 4,
+    ADV_SWORD_POINTER          = 5,
+    ADV_BOAT_POINTER           = 6,
+    ADV_MULTI_TURN_OFFSET      = 6,
+    ADV_ANCHOR_POINTER         = 7,
+    ADV_EXCHANGE_POINTER       = 8,
+    ADV_EVENT_POINTER          = 9,
+    ADV_BOAT_EVENT_POINTER     = 28,
+    ADV_SCROLL_POINTER         = 32,
+    ADV_SCROLL_NORTH           = 32,
+    ADV_SCROLL_NORTHEAST       = 33,
+    ADV_SCROLL_EAST            = 34,
+    ADV_SCROLL_SOUTHEAST       = 35,
+    ADV_SCROLL_SOUTH           = 36,
+    ADV_SCROLL_SOUTHWEST       = 37,
+    ADV_SCROLL_WEST            = 38,
+    ADV_SCROLL_NORTHWEST       = 39,
+    ADV_HIGHLIGHTED_POINTER    = 40,
+    ADV_DIMENSION_DOOR_POINTER = 41,
+    ADV_SKUTTLE_BOAT_POINTER   = 42
+};
+
 struct CNetMsgHandler;
 #pragma pack(push, 4)
 // Adventure map manager /
@@ -34,7 +61,7 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
     public:
         struct vftable_t : baseManager::vftable_t
         {
-            void (__thiscall *scalar_deleting_destructor)(advManager*, uint8_t);
+            void (__thiscall* scalar_deleting_destructor)(advManager*, uint8_t);
         };
 
     // enums
@@ -53,24 +80,24 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         };
 
     public:
-        NH3API_FORCEINLINE
-        advManager() noexcept
-        NH3API_DELEGATE_DUMMY_BASE(advManager)
+        inline advManager() noexcept
+            : advManager(nh3api::dummy_tag)
         { THISCALL_1(void, 0x406D80, this); }
 
-        NH3API_FORCEINLINE
-        advManager(const ::nh3api::dummy_tag_t& tag) noexcept
-            : CachedGraphics(tag),
-              map_origin(tag),
-              last_map_hover(tag),
-              BottomViewText(tag)
+        inline advManager(const nh3api::dummy_tag_t& tag) noexcept
+            : CachedGraphics { tag },
+              map_origin { tag },
+              last_map_hover { tag },
+              BottomViewText { tag }
         {}
 
-        NH3API_SINGLETON(advManager)
-
-        NH3API_FORCEINLINE
-        ~advManager() noexcept
+        inline ~advManager() noexcept
         { THISCALL_1(void, 0x4F4080, this); }
+
+        advManager(const advManager&)            = delete;
+        advManager& operator=(const advManager&) = delete;
+        advManager(advManager&&)                 = delete;
+        advManager&& operator=(advManager&&)     = delete;
 
     public:
         NH3API_VIRTUAL_OVERRIDE_BASEMANAGER(advManager)
@@ -87,12 +114,32 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         // Координата клетки карты, над которой наведена мышь.
         [[nodiscard]] type_point get_mouse_map_point() const
         {
-            type_point result(::nh3api::dummy_tag);
+            type_point result(nh3api::dummy_tag);
             (void) THISCALL_2(type_point, 0x407A70, this, &result);
             return result;
         }
 
-        void Reseed()
+        NewmapCell* DoAdvCommand(type_point& trigger_point)
+        { return THISCALL_2(NewmapCell*, 0x407AE0, this, &trigger_point); }
+
+        void DrawRolloverText(const char* text)
+        { THISCALL_2(void, 0x40B040, this, text); }
+
+        void SetRolloverText(NewmapCell* testCell, int32_t rx, int32_t ry)
+        {
+            if ( testCell )
+                THISCALL_4(void, 0x40B0B0, this, testCell, rx, ry);
+        }
+
+        type_adventure_cursor get_normal_cursor(NewmapCell* currCell)
+        {
+            if ( currCell )
+                return THISCALL_2(type_adventure_cursor, 0x40E1E0, this, currCell);
+
+            return ADV_ARROW_POINTER;
+        }
+
+        void Reseed() noexcept
         { seedingValid = 0; }
 
         // Update the whole screen /
@@ -103,25 +150,13 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         void UpdateScreen()
         { THISCALL_3(void, 0x40F1D0, this, false, false); }
 
+        int32_t GetCloudLookup(int32_t srcX, int32_t scrY, int32_t Z)
+        { return THISCALL_4(int32_t, 0x40F820, this, srcX, scrY, Z); }
+
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
         [[nodiscard]] NewmapCell* GetCell(type_point point)
         { return THISCALL_2(NewmapCell*, 0x412B30, this, point); }
-
-        // Get cell info by coordinates /
-        // Получить информацию о клетке по координатам.
-        [[nodiscard]] NewmapCell* GetCell(int8_t x, int8_t y, int8_t z)
-        {
-            return GetCell(type_point(x, y, z));
-            // removed for avoiding dependency on map.hpp
-            /*
-            if ( x >= 0 && y >= 0 && z >= 0 && x < MAP_WIDTH && y < MAP_HEIGHT )
-                return &this->map->cellData[x + y * map->Size + map->Size * z * map->Size];
-            else
-                return this->map->cellData;
-            */
-
-        }
 
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
@@ -130,23 +165,36 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
 
         // Get cell info by coordinates /
         // Получить информацию о клетке по координатам.
+        [[nodiscard]] NewmapCell* GetCell(int8_t x, int8_t y, int8_t z)
+        { return GetCell({ x, y, z }); }
+
+        // Get cell info by coordinates /
+        // Получить информацию о клетке по координатам.
         [[nodiscard]] const NewmapCell* GetCell(int8_t x, int8_t y, int8_t z) const
-        { return GetCell(type_point(x, y, z)); }
+        { return GetCell({ x, y, z }); }
 
         void UpdateRadar(type_point origin,
                          bool updateFlag,
                          bool bPartialUpdate,
-                         bool view_mines,
-                         bool view_heros,
-                         bool view_towns)
+                         bool view_mines = false,
+                         bool view_heros = false,
+                         bool view_towns = false)
         { THISCALL_7(void, 0x412BA0, this, origin, updateFlag, bPartialUpdate, view_mines, view_heros, view_towns); }
 
-        void UpdateRadar(bool updateFlag,
-                         bool bPartialUpdate,
-                         bool view_mines,
-                         bool view_heroes,
-                         bool view_towns)
+        void UpdateRadar(bool updateFlag     = true,
+                         bool bPartialUpdate = true,
+                         bool view_mines     = false,
+                         bool view_heroes    = false,
+                         bool view_towns     = false)
         { THISCALL_6(void, 0x4136F0, this, updateFlag, bPartialUpdate, view_mines, view_heroes, view_towns); }
+
+        void ClearBottomView()
+        {
+            if ( this->advWindow )
+                this->advWindow->ClearBottomView();
+
+            this->CurrentBottomView = BVTYPE_NONE;
+        }
 
         void OverrideBottomView(EBottomViewType view, int32_t time)
         { THISCALL_3(void, 0x415CC0, this, view, time); }
@@ -155,10 +203,16 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         { THISCALL_4(void, 0x415D40, this, force_update, bDrawWindow, bUpdate); }
 
         void BVResMsg(const char* cMsg, EGameResource iResType, int32_t iResQty)
-        { THISCALL_4(void, 0x415FC0, this, cMsg, iResType, iResQty); }
+        {
+            if ( cMsg )
+                THISCALL_4(void, 0x415FC0, this, cMsg, iResType, iResQty);
+        }
 
         void BVMessage(const char* cMsg)
-        { THISCALL_2(void, 0x416170, this, cMsg); }
+        {
+            if ( cMsg )
+                THISCALL_2(void, 0x416170, this, cMsg);
+        }
 
         void DeactivateCurrTown(bool waitingPlayer)
         { THISCALL_2(void, 0x4174D0, this, waitingPlayer); }
@@ -196,9 +250,39 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         void TrimLoopingSounds(int32_t iMaxSoundsAllowed)
         { THISCALL_2(void, 0x41A140, this, iMaxSoundsAllowed); }
 
-        bool FindAdjacentMonster(type_point point,
+        void DisableButtons()
+        { THISCALL_1(void, 0x41A240, this); }
+
+        void EnableButtons()
+        { THISCALL_1(void, 0x41A300, this); }
+
+        [[nodiscard]] uint16_t GetRouteArray(int32_t x, int32_t y, int32_t z) const noexcept
+        {
+            if ( x >= 0 && y >= 0 && (z == 0 || z == 1))
+                return this->pRouteArray[x + MAP_WIDTH * (y + z * MAP_HEIGHT)];
+
+            return 0;
+        }
+
+        [[nodiscard]] const uint16_t* GetRouteArrayPtr(int32_t x, int32_t y, int32_t z) const
+        {
+            if ( x >= 0 && y >= 0 && (z == 0 || z == 1))
+                return &this->pRouteArray[x + MAP_WIDTH * (y + z * MAP_HEIGHT)];
+
+            return nullptr;
+        }
+
+        [[nodiscard]] uint16_t* GetRouteArrayPtr(int32_t x, int32_t y, int32_t z)
+        {
+            if ( x >= 0 && y >= 0 && (z == 0 || z == 1))
+                return &this->pRouteArray[x + MAP_WIDTH * (y + z * MAP_HEIGHT)];
+
+            return nullptr;
+        }
+
+        bool FindAdjacentMonster(type_point  point,
                                  type_point& result,
-                                 type_point excluded)
+                                 type_point  excluded)
         { return THISCALL_4(bool, 0x41A3C0, this, point, &result, excluded); }
 
         // Begin combat /
@@ -213,15 +297,15 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         /// @param iSeed случайный сид
         /// @return winner side(left = 0, right = 1) / победитель(левый = 0, правый = 1)
         int32_t DoCombat(type_point point,
-                         hero* leftHero,
+                         hero*      leftHero,
                          armyGroup* leftArmyGroup,
-                         int32_t iRightPlayer,
-                         town* rightTown,
-                         hero* rightHero,
+                         int32_t    iRightPlayer,
+                         town*      rightTown,
+                         hero*      rightHero,
                          armyGroup* rightArmyGroup,
-                         int32_t iSeed,
-                         int32_t bFinishHeroes = true,
-                         int32_t alternate_layout = false)
+                         int32_t    iSeed,
+                         int32_t    bFinishHeroes    = true,
+                         int32_t    alternate_layout = false)
         { return THISCALL_11(int32_t,
                              0x4AD160,
                              this,
@@ -244,6 +328,12 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         void EraseObj(NewmapCell* thisCell, type_point point, bool record)
         { THISCALL_4(void, 0x4AA820, this, thisCell, point, record); }
 
+        void EventSound(int32_t eventID, int32_t extraInfo)
+        { THISCALL_3(void, 0x4AB100, this, eventID, extraInfo); }
+
+        void FizzleCenter(int32_t whichSound)
+        { THISCALL_2(void, 0x4AC8A0, this, whichSound); }
+
         // Erase an object with a sound effect /
         // Стереть объект на карте со звуковым эффектом
         /// @param eventCell клетка
@@ -251,6 +341,18 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         /// @param fizzleSound true = pickup resource sound, false = kill hero sound
         void EraseAndFizzle(NewmapCell* eventCell, type_point point, bool32_t fizzleSound)
         { THISCALL_4(void, 0x49DDE0, this, eventCell, point, fizzleSound); }
+
+        [[nodiscard]] TreasureData* get_treasure_data(NewmapCell* this_cell)
+        { return THISCALL_2(TreasureData*, 0x49ECB0, this, this_cell); }
+
+        [[nodiscard]] const TreasureData* get_treasure_data(NewmapCell* this_cell) const
+        { return THISCALL_2(TreasureData*, 0x49ECB0, this, this_cell); }
+
+        [[nodiscard]] BlackBoxData* get_black_box(const ExtraInfoUnion* infounion)
+        { return THISCALL_2(BlackBoxData*, 0x4A0890, this, infounion); }
+
+        [[nodiscard]] const BlackBoxData* get_black_box(const ExtraInfoUnion* infounion) const
+        { return THISCALL_2(BlackBoxData*, 0x4A0890, this, infounion); }
 
     // static functions
     public:
@@ -275,12 +377,9 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         // offset: +0x3D = +61,  size = 0x1 = 1
         bool DebugViewAll;
 
-    protected:
-        // offset: +0x3E = +62,  size = 0x2 = 2
-        [[maybe_unused]]
-        std::byte gap_3E[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x40 = +64,  size = 0x4 = 4
         int32_t advCommand;
 
@@ -416,9 +515,9 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         bool animCtrPaused;
 
     protected:
-        [[maybe_unused]]
-        // offset: +0x105 = +261,  size = 0x3 = 3
-        std::byte gap_105[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
         // Unused, = 0 /
         // Не используется, = 0.
@@ -456,12 +555,10 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         // offset: +0x1EC = +492,  size = 0x1 = 1
         bool heroVisible;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x1ED = +493,  size = 0x3 = 3
-        std::byte gap_1ED[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // Current hero, OBJECT_HERO or OBJECT_BOAT /
         // Тип объекта героя(герой, OBJECT_HERO или лодка, OBJECT_BOAT).
         // offset: +0x1F0 = +496,  size = 0x4 = 4
@@ -507,9 +604,9 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         bool bCurHeroMobile;
 
     protected:
-        [[maybe_unused]]
-        // offset: +0x20D = +525,  size = 0x3 = 3
-        std::byte gap_20D[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
         // Unused, = 0 /
         // Не используется, = 0.
@@ -565,12 +662,10 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         // offset: +0x390 = +912,  size = 0x1 = 1
         bool bHeroMoving;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x391 = +913,  size = 0x3 = 3
-        std::byte gap_391[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x394 = +916,  size = 0x4 = 4
         EBottomViewType CurrentBottomView;
 
@@ -591,7 +686,7 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         exe_string BottomViewText;
         };
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
 NH3API_SIZE_ASSERT(0x3B8, advManager);
@@ -604,6 +699,4 @@ inline bool32_t& bShowIt = get_global_var_ref(0x698A10, bool32_t);
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63A678, advManager)
 
-NH3API_DISABLE_MSVC_WARNING_END
-NH3API_DISABLE_MSVC_WARNING_END
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

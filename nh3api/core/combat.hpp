@@ -9,27 +9,32 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "nh3api_std/exe_set.hpp" // exe_set<T>
-#include "interface/widgets.hpp" // widgets
-#include "objects.hpp" // hero, town, etc.
-#include "army.hpp" // army, TCreatureType
-#include "hexcell.hpp" // hexcell
+#include <array>                  // std::array
+#include <cstddef>                // std::byte
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+#include "army.hpp"               // army, TCreatureType
+#include "hexcell.hpp"            // hexcell
+#include "interface/widgets.hpp"  // widgets
+#include "nh3api_std/exe_set.hpp" // exe_set<T>
+#include "objects.hpp"            // hero, town, etc.
+
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 enum type_combat_cursor : int32_t
 {
-    SELECT_NULL                  = 0, //
-    SELECT_MOVE                  = 1, //
-    SELECT_FLY                   = 2, //
-    SELECT_SPECIAL_ATTACK        = 3, //
-    SELECT_TENT                  = 4, //
-    SELECT_ARMY_INFO             = 5, //
-    CBT_ARROW_POINTER            = 6, //
-    const_attack_northeast       = 7, //
-    SELECT_ATTACK                = 7, //
-    const_attack_east            = 8, //
-    const_attack_southeast       = 9, //
+    SELECT_NULL                  = 0,  //
+    SELECT_MOVE                  = 1,  //
+    SELECT_FLY                   = 2,  //
+    SELECT_SPECIAL_ATTACK        = 3,  //
+    SELECT_TENT                  = 4,  //
+    SELECT_ARMY_INFO             = 5,  //
+    CBT_ARROW_POINTER            = 6,  //
+    const_attack_northeast       = 7,  //
+    SELECT_ATTACK                = 7,  //
+    const_attack_east            = 8,  //
+    const_attack_southeast       = 9,  //
     const_attack_southwest       = 10, //
     const_attack_west            = 11, //
     const_attack_northwest       = 12, //
@@ -42,8 +47,37 @@ enum type_combat_cursor : int32_t
     SELECT_TELEPORT              = 19, //
     SELECT_CREATURE_SPELL        = 20, //
     SELECT_ENEMY_TENT            = 21, //
-    const_select_tower_info      = 22 //
+    const_select_tower_info      = 22, //
+
+    COMBAT_CURSOR_MOVE                  = SELECT_MOVE,
+    COMBAT_CURSOR_FLY                   = SELECT_FLY,
+    COMBAT_CURSOR_SPECIAL_ATTACK        = SELECT_SPECIAL_ATTACK,
+    COMBAT_CURSOR_TENT                  = SELECT_TENT,
+    COMBAT_CURSOR_ARMY_INFO             = SELECT_ARMY_INFO,
+    COMBAT_CURSOR_ARROW_POINTER         = CBT_ARROW_POINTER,
+    COMBAT_CURSOR_ATTACK_NORTHEAST      = const_attack_northeast,
+    COMBAT_CURSOR_ATTACK                = COMBAT_CURSOR_ATTACK_NORTHEAST,
+    COMBAT_CURSOR_ATTACK_EAST           = const_attack_east,
+    COMBAT_CURSOR_ATTACK_SOUTHEAST      = const_attack_southeast,
+    COMBAT_CURSOR_ATTACK_SOUTWEST       = const_attack_southwest,
+    COMBAT_CURSOR_ATTACK_WEST           = const_attack_west,
+    COMBAT_CURSOR_ATTACK_NORTHWEST      = const_attack_northwest,
+    COMBAT_CURSOR_ATTACK_UP             = const_attack_up,
+    COMBAT_CURSOR_ATTACK_DOWN           = const_attack_down,
+    COMBAT_CURSOR_SPECIAL_ATTACK_BROKEN = SELECT_SPECIAL_ATTACK_BROKEN,
+    COMBAT_CURSOR_ATTACK_WALL           = SELECT_ATTACK_WALL,
+    COMBAT_CURSOR_FIRST_AID             = SELECT_FIRST_AID,
+    COMBAT_CURSOR_SACRIFICE             = SELECT_SACRIFICE,
+    COMBAT_CURSOR_TELEPORT              = SELECT_TELEPORT,
+    COMBAT_CURSOR_CREATURE_SPELL        = SELECT_CREATURE_SPELL,
+    COMBAT_CURSOR_SELECT_HERO_INFO      = SELECT_ENEMY_TENT,
+    COMBAT_CURSOR_SELECT_TOWER_INFO     = const_select_tower_info
 };
+
+template<>
+struct nh3api::enum_limits<type_combat_cursor>
+    : nh3api::enum_limits_base<type_combat_cursor, COMBAT_CURSOR_MOVE, COMBAT_CURSOR_SELECT_TOWER_INFO>
+{ static inline constexpr bool is_specialized = true; };
 
 enum ECombatAction : int32_t
 {
@@ -59,15 +93,37 @@ enum ECombatAction : int32_t
     COMBAT_ACTION_CATAPULT_SHOOT      = 9,
     COMBAT_ACTION_ARMY_CAST_SPELL     = 10,
     COMBAT_ACTION_FIRST_AID_TENT_CURE = 11,
-    COMBAT_ACTION_SKIP_TURN           = 12
+    COMBAT_ACTION_SKIP_TURN           = 12,
+    MAX_COMBAT_ACTIONS                = 13
 };
 
-enum TFortificationLevel : int32_t
+template<>
+struct nh3api::enum_limits<ECombatAction>
+    : nh3api::enum_limits_base<ECombatAction, COMBAT_ACTION_CAST_SPELL, COMBAT_ACTION_SKIP_TURN>
+{ static inline constexpr bool is_specialized = true; };
+
+enum TFortificationLevel : uint32_t
 {
     eFortificationNone    = 0, //
     eFortificationFort    = 1, //
     eFortificationCitadel = 2, //
-    eFortificationCastle  = 3 //
+    eFortificationCastle  = 3  //
+};
+
+template<>
+struct nh3api::enum_limits<TFortificationLevel>
+    : nh3api::enum_limits_base<TFortificationLevel, eFortificationFort, eFortificationCastle>
+{ static inline constexpr bool is_specialized = true; };
+
+// Combat hero sprite sequence IDs /
+// Последовательности кадров спрайта героя на поле боя.
+enum combat_hero_seqid : uint32_t
+{
+    chs_stand   = 0,
+    chs_fidget  = 1,
+    chs_defeat  = 2,
+    chs_victory = 3,
+    chs_cast    = 4
 };
 
 #pragma pack(push, 4)
@@ -79,10 +135,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
     public:
         struct vftable_t : baseManager::vftable_t
         {
-            void (__thiscall *scalar_deleting_destructor)(combatManager*, uint8_t);
+            void (__thiscall* scalar_deleting_destructor)(combatManager*, uint8_t);
         };
 
-        #pragma pack(push, 2)
         // size = 0xC = 12, align = 2
         struct adjacency_array
         {
@@ -91,7 +146,6 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             // offset: +0x0 = +0,  size = 0xC = 12
             std::array<int16_t, 6> adjacent;
         };
-        #pragma pack(pop)
 
         // size = 0x44 = 68, align = 4
         struct SElevationOverlay
@@ -141,17 +195,14 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             // offset: +0x2 = +2,  size = 0x2 = 2
             int16_t y;
 
-        protected:
-            [[maybe_unused]]
-            // offset: +0x3 = +3,  size = 0x2 = 2
-            std::byte gap_3[2];
+            unsigned char : 8;
+            unsigned char : 8;
 
-        public:
             // offset: +0x4 = +4,  size = 0x2 = 2
             int16_t hex;
 
             // offset: +0x8 = +8,  size = 0x14 = 20
-            std::array<const char*, 5> filenames;
+            std::array<char*, 5> filenames;
 
             // offset: +0x1C = +28,  size = 0x4 = 4
             const char* name;
@@ -159,12 +210,10 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             // offset: +0x20 = +32,  size = 0x2 = 2
             int16_t hitpoints;
 
-        protected:
-            [[maybe_unused]]
-            // offset: +0x22 = +34,  size = 0x2 = 2
-            std::byte gap_22[2];
+            unsigned char : 8;
+            unsigned char : 8;
 
-        };
+        } NH3API_MSVC_LAYOUT;
 
         // size = 0x14 = 20, align = 4
         struct TObstacleInfo
@@ -210,12 +259,8 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             // offset: +0xA = +10,  size = 0x1 = 1
             bool is_visible;
 
-        protected:
-            [[maybe_unused]]
-            // offset: +0xB = +11,  size = 0x1 = 1
-            std::byte gap_B[1];
+            unsigned char : 8;
 
-        public:
             // offset: +0xC = +12,  size = 0x4 = 4
             int32_t damage;
 
@@ -331,7 +376,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
         };
 
-        enum TDoorStatus : int32_t
+        enum TDoorStatus : uint32_t
         {
             DOOR_BROKEN = 0, //
             DOOR_DOWN   = 1, //
@@ -339,7 +384,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             DOOR_UP     = 3 //
         };
 
-        enum TArcherID : int32_t
+        enum TArcherID : uint32_t
         {
             eArcherMainBuilding = 0, //
             eArcherLowerTower   = 1, //
@@ -386,30 +431,29 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         };
 
     public:
-        NH3API_FORCEINLINE
-        combatManager() noexcept
-        NH3API_DELEGATE_DUMMY_BASE(combatManager)
+        inline combatManager() noexcept
+            : combatManager(nh3api::dummy_tag)
         { THISCALL_1(void, 0x462340, this); }
 
-        NH3API_FORCEINLINE
-        combatManager(const ::nh3api::dummy_tag_t& tag) noexcept
+        // clang-format off
+        inline combatManager(const nh3api::dummy_tag_t& tag) noexcept
             :
-            EagleEyeSpellLearned{tag, tag},
+            EagleEyeSpellLearned { tag, tag },
             Armies
             {{
-            {tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag},
-            {tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag}
+                {tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag},
+                {tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag, tag}
             }},
-            Obstacles(tag)
+            Obstacles{tag}
         {}
+        // clang-format on
 
         combatManager(const combatManager&)            = delete;
         combatManager& operator=(const combatManager&) = delete;
         combatManager(combatManager&&)                 = delete;
         combatManager& operator=(combatManager&&)      = delete;
 
-        NH3API_FORCEINLINE
-        ~combatManager() noexcept
+        inline ~combatManager() noexcept
         { THISCALL_1(void, 0x4F3FD0, this); }
 
     public:
@@ -507,16 +551,16 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
                                   int32_t destX,
                                   int32_t destY,
                                   int32_t nSprites,
-                                  const float* const angles,
-                                  const char* const* const file_names)
+                                  const float* __restrict angles,
+                                  const char* const* __restrict file_names)
         { THISCALL_8(void, 0x467990, this, startX, startY, destX, destY, nSprites, angles, file_names); }
 
         void ShootMissile(int32_t startX,
                           int32_t startY,
                           int32_t destX,
                           int32_t destY,
-                          const float* const angles,
-                          const CSprite* const missile)
+                          const float* __restrict angles,
+                          const CSprite* __restrict missile)
         { THISCALL_7(void, 0x467E00, this, startX, startY, destX, destY, angles, missile); }
 
         void RemoveArmyFromGrid(const army* arg)
@@ -550,15 +594,23 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         { return THISCALL_3(bool, 0x475D20, this, group, index); }
 
         [[nodiscard]] bool valid_wall_target(TWallTargetId wall_target) const
-        { return !!THISCALL_2(bool32_t, 0x475D70, this, wall_target); }
+        { return THISCALL_2(bool32_t, 0x475D70, this, wall_target); }
+
+        [[nodiscard]] type_combat_cursor GetCommand(int32_t newIndex)
+        { return THISCALL_2(type_combat_cursor, 0x475DC0, this, newIndex); }
 
         // Current side surrender cost /
         // Стоимость откупа у текущей стороны битвы.
         [[nodiscard]] int32_t get_surrender_cost() const
         { return THISCALL_1(int32_t, 0x477330, this); }
 
-        army* AddArmy(int32_t iSide, int32_t iMonType, int32_t iMonQty, int32_t iGridIndex, int32_t iSetAttributes, bool32_t bFizzleItIn)
-        { return THISCALL_7(army*, 0x479A30, this, iSide, iMonType, iMonQty, iGridIndex, iSetAttributes, bFizzleItIn); }
+        army* AddArmy(int32_t iSide,
+                      int32_t iMonType,
+                      int32_t iMonQty,
+                      int32_t iGridIndex,
+                      int32_t iSetAttributes,
+                      bool    bFizzleItIn)
+        { return THISCALL_7(army*, 0x479A30, this, iSide, iMonType, iMonQty, iGridIndex, iSetAttributes, static_cast<bool32_t>(bFizzleItIn)); }
 
         int32_t ResetLimitCreature()
         { return THISCALL_1(int32_t, 0x493290, this); }
@@ -572,12 +624,12 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         void UpdateMouseGrid(int32_t iNewMouseGridIndex, int32_t bAllowDuringAction)
         { THISCALL_3(void, 0x493F10, this, iNewMouseGridIndex, bAllowDuringAction); }
 
-        void DrawFrame(bool update,
-                       bool bLimitCreatureEffect,
-                       bool bLimitDraw,
+        void DrawFrame(bool    update,
+                       bool    bLimitCreatureEffect,
+                       bool    bLimitDraw,
                        int32_t iDelay,
-                       bool bRefreshBackground,
-                       bool bDoDelayTil)
+                       bool    bRefreshBackground,
+                       bool    bDoDelayTil)
         { THISCALL_7(void, 0x493FC0,
                      this,
                      static_cast<bool32_t>(update),
@@ -587,7 +639,14 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
                      static_cast<bool32_t>(bRefreshBackground),
                      static_cast<bool32_t>(bDoDelayTil)); }
 
-        void ComputeExtent(CSprite* sprite, int32_t sequence, int32_t frame, int32_t x, int32_t y, SLimitData* pLimitData, int32_t isFlipped, bool saveBiggestExtent)
+        void ComputeExtent(CSprite* __restrict sprite,
+                           int32_t sequence,
+                           int32_t frame,
+                           int32_t x,
+                           int32_t y,
+                           SLimitData* __restrict pLimitData,
+                           int32_t isFlipped,
+                           bool    saveBiggestExtent)
         { THISCALL_9(void, 0x495AD0, this, sprite, sequence, frame, x, y, pLimitData, isFlipped, saveBiggestExtent); }
 
         void ComputeMaxExtent()
@@ -604,53 +663,23 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
     // static variables
     public:
-        static inline const std::array<const uint8_t, 12>& moatCell
-        = get_global_var_ref(0x63BCE8, const std::array<const uint8_t, 12>);
+        static inline const std::array<uint8_t, 12>&                            moatCell          = get_global_var_ref(0x63BCE8, const std::array<uint8_t, 12>);
+        static inline const std::array<uint8_t, 12>&                            moat2Cell         = get_global_var_ref(0x63BCF4, const std::array<uint8_t, 12>);
+        static inline const std::array<uint8_t, 12>&                            wallCell          = get_global_var_ref(0x63BD00, const std::array<uint8_t, 12>);
+        static inline const std::array<uint8_t, 12>&                            leftCell          = get_global_var_ref(0x63BD0C, const std::array<uint8_t, 12>);
+        static inline const std::array<uint32_t, MAX_TOWNS>&                    moatDamage        = get_global_var_ref(0x63BD18, const std::array<uint32_t, MAX_TOWNS>);
+        static inline const std::array<std::array<SCmbtHero, 2>, MAX_TOWNS>&    sCmbtHero         = get_global_var_ref(0x63BD40, const std::array<std::array<typename combatManager::SCmbtHero, 2>, MAX_TOWNS>);
+        static inline const std::array<TWallTarget, 8>&                         wallTargets       = get_global_var_ref(0x63BE60, const std::array<typename combatManager::TWallTarget, 8>);
+        static inline const std::array<SElevationOverlay, 34>&                  sElevationOverlay = get_global_var_ref(0x63BEC0, const std::array<typename combatManager::SElevationOverlay, 34>);
+        static inline const std::array<TObstacleInfo, 91>&                      ObstacleInfo      = get_global_var_ref(0x63C7C8, const std::array<typename combatManager::TObstacleInfo, 91>);
+        static inline const TObstacleInfo&                                      QuicksandInfo     = get_global_var_ref(0x63CEE8, const typename combatManager::TObstacleInfo);
+        static inline const TObstacleInfo&                                      LandMineInfo      = get_global_var_ref(0x63CF00, const typename combatManager::TObstacleInfo);
+        static inline const std::array<TObstacleInfo, 5>&                       WallObstacleInfo  = get_global_var_ref(0x63CF18, const std::array<typename combatManager::TObstacleInfo, 5>);
+        static inline const std::array<float, 3>&                               CombatSpeedMod    = get_global_var_ref(0x63CF7C, const std::array<float, 3>);
+        static inline const std::array<TArcherTraits, MAX_TOWNS>&               ArcherTraits      = get_global_var_ref(0x63CF88, const std::array<typename combatManager::TArcherTraits, MAX_TOWNS>);
+        static inline const std::array<std::array<TWallTraits, 18>, MAX_TOWNS>& akWallTraits      = get_global_var_ref(0x66D848, const std::array<std::array<typename combatManager::TWallTraits, 18>, MAX_TOWNS>);
 
-        static inline const std::array<const uint8_t, 12>& moat2Cell
-        = get_global_var_ref(0x63BCF4, const std::array<const uint8_t, 12>);
-
-        static inline const std::array<const uint8_t, 12>& wallCell
-        = get_global_var_ref(0x63BD00, const std::array<const uint8_t, 12>);
-
-        static inline const std::array<const uint8_t, 12>& leftCell
-        = get_global_var_ref(0x63BD0C, const std::array<const uint8_t, 12>);
-
-        static inline const std::array<const uint32_t, MAX_TOWNS>& moatDamage
-        = get_global_var_ref(0x63BD18, const std::array<const uint32_t, MAX_TOWNS>);
-
-        static inline const std::array<const std::array<const SCmbtHero, 2>, MAX_TOWNS>& sCmbtHero
-        = get_global_var_ref(0x63BD40, const std::array<const std::array<const typename combatManager::SCmbtHero, 2>, MAX_TOWNS>);
-
-        static inline const std::array<const TWallTarget, 8>& wallTargets
-        = get_global_var_ref(0x63BE60, const std::array<const typename combatManager::TWallTarget, 8>);
-
-        static inline const std::array<const SElevationOverlay, 34>& sElevationOverlay
-        = get_global_var_ref(0x63BEC0, const std::array<const typename combatManager::SElevationOverlay, 34>);
-
-        static inline const std::array<const TObstacleInfo, 91>& ObstacleInfo
-        = get_global_var_ref(0x63C7C8, const std::array<const typename combatManager::TObstacleInfo, 91>);
-
-        static inline const TObstacleInfo& QuicksandInfo
-        = get_global_var_ref(0x63CEE8, const typename combatManager::TObstacleInfo);
-
-        static inline const TObstacleInfo& LandMineInfo
-        = get_global_var_ref(0x63CF00, const typename combatManager::TObstacleInfo);
-
-        static inline const std::array<const TObstacleInfo, 5>& WallObstacleInfo
-        = get_global_var_ref(0x63CF18, const std::array<const typename combatManager::TObstacleInfo, 5>);
-
-        static inline const std::array<const float, 3>& CombatSpeedMod
-        = get_global_var_ref(0x63CF7C, const std::array<const float, 3>);
-
-        static inline const std::array<const TArcherTraits, MAX_TOWNS>& ArcherTraits
-        = get_global_var_ref(0x63CF88, const std::array<const typename combatManager::TArcherTraits, MAX_TOWNS>);
-
-        static inline const std::array<const std::array<const TWallTraits, 18>, MAX_TOWNS>& akWallTraits
-        = get_global_var_ref(0x66D848, const std::array<const std::array<const typename combatManager::TWallTraits, 18>, MAX_TOWNS>);
-
-
-    // member variables
+        // member variables
     public:
         // offset: +0x38 = +56,  size = 0x4 = 4
         void* netMsgHandlerPause;
@@ -674,12 +703,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x107 = +263,  size = 0xBB = 187
         std::array<bool, MAX_COMBAT_HEXES> iCurDrawGridShade;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x1C2 = +450,  size = 0x1 = 1
-        std::byte gap_1C2[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x1C4 = +452,  size = 0x51D0 = 20944
         std::array<hexcell, MAX_COMBAT_HEXES> cell;
 
@@ -704,12 +730,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x53A9 = +21417,  size = 0x1 = 1
         bool moatIsWide;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x14030 = +81968,  size = 0x1 = 1
-        std::byte gap_53AA[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x53AC = +21420,  size = 0x4 = 4
         Bitmap16Bit* SaveScreenPreGrid;
 
@@ -734,12 +757,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x53C5 = +21445,  size = 0x1 = 1
         bool OnBeach;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x14030 = +81968,  size = 0x1 = 1
-        std::byte gap_53C6[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x53C8 = +21448,  size = 0x4 = 4
         town* combatTown;
 
@@ -788,7 +808,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x543C = +21564,  size = 0x20 = 32
         std::array<SLimitData, NUM_SIDES> sCmbtHeroFlagLimitData;
 
-        typedef exe_set<SpellID, 0x694FA0, 0x694FA4> TSpellSet;
+        using TSpellSet = exe_set<SpellID, 0x694FA0, 0x694FA4>;
 
         union {
         // Spells learned with eagle eye /
@@ -820,11 +840,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x54B0 = +21680,  size = 0x2 = 2
         std::array<bool, NUM_SIDES> bArtifactCast;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_54B1[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x54B4 = +21684,  size = 0x8 = 8
         std::array<bool32_t, NUM_SIDES> bSpellsCast;
 
@@ -843,12 +861,11 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         std::array<std::array<army, MAX_COMBAT_ARMIES + 1>, NUM_SIDES> Armies;
         };
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x1329C = +78492,  size = 0x1 = 1
-        std::byte gap_1329C[4];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x132A0 = +78496,  size = 0x8 = 8
         std::array<int32_t, NUM_SIDES> turnSinceLastEnchanter;
 
@@ -862,11 +879,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x132B0 = +78512,  size = 0x2 = 2
         std::array<bool, NUM_SIDES> SummonedElemental;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_132B1[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x132B4 = +78516,  size = 0x4 = 4
         int32_t SideRetreated;
 
@@ -888,11 +903,10 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x132CC = +78540,  size = 0x1 = 1
         bool selectorOn;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_132CD[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x132D0 = +78544,  size = 0x4 = 4
         int32_t selectorIndex;
 
@@ -961,11 +975,11 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
         // offset: +0x13460 = +78944,  size = 0x1 = 1
         bool bSomeCreaturesVanish;
-    protected:
-        [[maybe_unused]]
-        std::byte gap_13461[3];
 
-    public:
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
+
         // offset: +0x13464 = +78948,  size = 0x4 = 4
         const char* cBkgName;
 
@@ -975,11 +989,10 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x13D2C = +81196,  size = 0x1 = 1
         bool SaveBiggestExtent;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_13D2D[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x13D30 = +81200,  size = 0x4 = 4
         int32_t LimitToExtent;
 
@@ -1009,11 +1022,10 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x13D68 = +81256,  size = 0x1 = 1
         bool InPlacementPhase;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_13D69[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x13D6C = +81260,  size = 0x4 = 4
         int32_t turn_number;
 
@@ -1029,11 +1041,8 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x13D76 = +81270,  size = 0x1 = 1
         bool DebugShowBlockedHexes;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_13D77[1];
+        unsigned char : 8;
 
-    public:
         // Besieged castle archers /
         // Информация о стрелковых башнях обороняющегося замка.
         // offset: +0x13D78 = +81272,  size = 0x6C = 108
@@ -1042,11 +1051,10 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x13DE4 = +81380,  size = 0x1 = 1
         bool in_second_phase;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_13DE5[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x13DE8 = +81384,  size = 0x4 = 4
         int32_t OriginalAttackSkill;
 
@@ -1097,17 +1105,18 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x1402F = +81967,  size = 0x1 = 1
         bool any_action_taken;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x14030 = +81968,  size = 0x1 = 1
-        std::byte gap_14030[1];
+        unsigned char : 8;
 
-    public:
         // offset: +0x14031 = +81969,  size = 0xBB = 187
         std::array<bool, MAX_COMBAT_HEXES> creaturePath;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 4
+
+template<>
+struct nh3api::enum_limits<combatManager::TArcherID>
+    : nh3api::enum_limits_base<combatManager::TArcherID, combatManager::TArcherID::eArcherMainBuilding, combatManager::TArcherID::eArcherUpperTower>
+{ static inline constexpr bool is_specialized = true; };
 
 NH3API_SIZE_ASSERT(0x140EC, combatManager);
 
@@ -1119,4 +1128,4 @@ inline bool&                   gbInCombat           = get_global_var_ref(0x69959
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63D3E8, combatManager)
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

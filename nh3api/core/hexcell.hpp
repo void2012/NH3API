@@ -10,9 +10,12 @@
 #pragma once
 
 #include <array>
+
 #include "nh3api_std/memory.hpp" // std::array<T, N>, THISCALL_ macros
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 #pragma pack(push, 4)
 // size = 0x10 = 16, align = 4
@@ -39,13 +42,11 @@ class army;
 struct hexcell
 {
     public:
-        NH3API_FORCEINLINE
-        hexcell() noexcept
-        NH3API_DELEGATE_DUMMY(hexcell)
+        inline hexcell() noexcept
+            : hexcell(nh3api::dummy_tag)
         { THISCALL_1(void, 0x4E7210, this); }
 
-        NH3API_FORCEINLINE
-        hexcell(const ::nh3api::dummy_tag_t&) noexcept
+        inline hexcell(const nh3api::dummy_tag_t&) noexcept
         {}
 
     public:
@@ -86,23 +87,20 @@ struct hexcell
         // offset: +0xC = +12,  size = 0x2 = 2
         int16_t fullHexBRY;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0xD = +13,  size = 0x2 = 2
-        std::byte gap_D[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x10 = +16,  size = 0x4 = 4
-        enum TAttributes : uint32_t
+        NH3API_FLAG_ENUM TAttributes : uint32_t
         {
-            IS_OBSTACLE_ORIGIN = 1,
-            IS_BLOCKED = 2,
-            IS_QUICKSAND = 4,
-            IS_LANDMINE = 8,
-            IS_FIREWALL = 16,
-            IS_STONEWALL = 32,
-            IS_OBSTACLIZED = 63,
-            IS_MAGIC_OBSTACLE = 60
+            IS_OBSTACLE_ORIGIN = 0b000001,
+            IS_BLOCKED         = 0b000010,
+            IS_QUICKSAND       = 0b000100,
+            IS_LANDMINE        = 0b001000,
+            IS_FIREWALL        = 0b010000,
+            IS_STONEWALL       = 0b100000,
+            IS_OBSTACLIZED     = 0b111111,
+            IS_MAGIC_OBSTACLE  = 0b111100
         } attributes;
 
         // offset: +0x14 = +20,  size = 0x4 = 4
@@ -117,12 +115,8 @@ struct hexcell
         // offset: +0x1A = +26,  size = 0x1 = 1
         int8_t partOfDouble;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x1B = +27,  size = 0x2 = 2
-        std::byte gap_1B[1];
+        unsigned char : 8;
 
-    public:
         // offset: +0x1C = +28,  size = 0x4 = 4
         int32_t iBodiesInHex;
 
@@ -147,19 +141,16 @@ struct hexcell
         // offset: +0x4D = +77,  size = 0x1 = 1
         int8_t background_offset;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x4E = +78,  size = 0x2 = 2
-        std::byte gap_4E[2];
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x50 = +80,  size = 0x10 = 16
         SLimitData obstacleLimitData;
 
         // offset: +0x60 = +96,  size = 0x10 = 16
         SLimitData cloudLimitData;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

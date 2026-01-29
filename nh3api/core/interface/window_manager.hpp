@@ -25,7 +25,7 @@ enum DialogReturnType : int32_t
 // Dialog system manager /
 // Менеджер системы диалогов.
 // size = 0x60 = 96, align = 4, baseclass: baseManager
-class heroWindowManager : public baseManager
+NH3API_VIRTUAL_CLASS heroWindowManager : public baseManager
 {
     public:
         heroWindowManager() = delete;
@@ -83,12 +83,10 @@ class heroWindowManager : public baseManager
         // offset: +0x48 = +72,  size = 0x1 = 1
         bool isWaitingForFadeIn;
 
-    protected:
-        [[maybe_unused]]
-        // offset: +0x49 = +73,  size = 0x3 = 3
-        std::byte gap_49[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x4C = +76,  size = 0x4 = 4
         Bitmap16Bit* bmpFizzleSource;
 
@@ -106,10 +104,12 @@ class heroWindowManager : public baseManager
         // offset: +0x5C = +92,  size = 0x4 = 4
         heroWindow* tailWindow;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
 
+// Dialog system manager /
+// Менеджер системы диалогов.
 inline heroWindowManager* const& gpWindowManager = get_global_var_ref(0x6992D0, heroWindowManager*);
-inline const uint32_t& giDialogTimeout = get_global_var_ref(0x6977D4, const uint32_t);
+inline const uint32_t&           giDialogTimeout = get_global_var_ref(0x6977D4, const uint32_t);
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x643D5C, heroWindowManager)

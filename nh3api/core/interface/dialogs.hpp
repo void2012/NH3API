@@ -7,11 +7,14 @@
 #pragma once
 
 #include "widgets.hpp"
+#include "../creatures.hpp"
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
+class hero;
 #pragma pack(push, 4)
-//
 // size = 0x78 = 120, align = 4, baseclass: TSubWindow
 NH3API_VIRTUAL_CLASS TResourceDisplay : public TSubWindow
 {
@@ -25,18 +28,15 @@ NH3API_VIRTUAL_CLASS TResourceDisplay : public TSubWindow
         TResourceDisplay& operator=(TResourceDisplay&&)      = delete;
 
     public:
-        NH3API_FORCEINLINE
-        TResourceDisplay(heroWindow* parent, bool is_small) noexcept
-            : TSubWindow(::nh3api::dummy_tag)
+        inline TResourceDisplay(heroWindow* parent, bool is_small) noexcept
+            : TSubWindow(nh3api::dummy_tag)
         { THISCALL_3(void, 0x558DF0, this, parent, is_small); }
 
-        NH3API_FORCEINLINE
-        TResourceDisplay(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline TResourceDisplay(const nh3api::dummy_tag_t& tag) noexcept
             : TSubWindow(tag)
         {}
 
-        NH3API_FORCEINLINE
-        ~TResourceDisplay() noexcept
+        inline ~TResourceDisplay() noexcept
         { THISCALL_1(void, 0x5590D0, this); }
 
     public:
@@ -55,11 +55,10 @@ NH3API_VIRTUAL_CLASS TResourceDisplay : public TSubWindow
         // offset: +0x34 = +52,  size = 0x1 = 1
         bool IsSmall;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_35[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x38 = +56,  size = 0x1C = 28
         std::array<textWidget*, 7> ResourceWidgets;
 
@@ -72,11 +71,8 @@ NH3API_VIRTUAL_CLASS TResourceDisplay : public TSubWindow
         // offset: +0x74 = +116,  size = 0x4 = 4
         textWidget* DayWidget;
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
 
-#pragma pack(push, 4)
-//
 // size = 0x34 = 52, align = 4, baseclass: TSubWindow
 NH3API_VIRTUAL_CLASS type_bottom_view_window : public TSubWindow
 {
@@ -86,25 +82,22 @@ NH3API_VIRTUAL_CLASS type_bottom_view_window : public TSubWindow
             void (__thiscall* animate)(type_bottom_view_window* );
         };
 
+    public:
+        inline type_bottom_view_window(heroWindow* parent_window) noexcept
+        { THISCALL_2(void, 0x451EC0, this, parent_window); }
+
+        inline type_bottom_view_window(const nh3api::dummy_tag_t&) noexcept
+            : TSubWindow(nh3api::dummy_tag)
+        {}
+
+        inline ~type_bottom_view_window() noexcept
+        { THISCALL_1(void, 0x450A20, this); }
+
         type_bottom_view_window() = delete;
         type_bottom_view_window(const type_bottom_view_window&)            = delete;
         type_bottom_view_window(type_bottom_view_window&&)                 = delete;
         type_bottom_view_window& operator=(const type_bottom_view_window&) = delete;
         type_bottom_view_window& operator=(type_bottom_view_window&&)      = delete;
-
-    public:
-        NH3API_FORCEINLINE
-        type_bottom_view_window(heroWindow* parent_window) noexcept
-        { THISCALL_2(void, 0x451EC0, this, parent_window); }
-
-        NH3API_FORCEINLINE
-        type_bottom_view_window(const ::nh3api::dummy_tag_t&) noexcept
-            : TSubWindow(::nh3api::dummy_tag)
-        {}
-
-        NH3API_FORCEINLINE
-        ~type_bottom_view_window() noexcept
-        { THISCALL_1(void, 0x450A20, this); }
 
     public:
         NH3API_VIRTUAL_OVERRIDE_TSUBWINDOW(type_bottom_view_window)
@@ -114,10 +107,7 @@ NH3API_VIRTUAL_CLASS type_bottom_view_window : public TSubWindow
         { get_vftable(this)->animate(this); }
 
 };
-#pragma pack(pop)
 
-class hero;
-#pragma pack(push, 4)
 // Adventure map window /
 // Окно карты приключений.
 // size = 0xA0 = 160, align = 4, baseclass: heroWindow
@@ -127,19 +117,21 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
         struct vftable_t : heroWindow::vftable_t {};
 
     public:
-        NH3API_FORCEINLINE
-        TAdventureMapWindow() noexcept
-            : heroWindow(::nh3api::dummy_tag)
+        inline TAdventureMapWindow() noexcept
+            : heroWindow(nh3api::dummy_tag)
         { THISCALL_1(TAdventureMapWindow*, 0x401510, this); }
 
-        NH3API_FORCEINLINE
-        TAdventureMapWindow(const ::nh3api::dummy_tag_t& tag) noexcept
+        inline TAdventureMapWindow(const nh3api::dummy_tag_t& tag) noexcept
             : heroWindow(tag)
         {}
 
-        NH3API_FORCEINLINE
-        ~TAdventureMapWindow() noexcept
+        inline ~TAdventureMapWindow() noexcept
         { THISCALL_1(void, 0x402B10, this); }
+
+        TAdventureMapWindow(const TAdventureMapWindow&)            = delete;
+        TAdventureMapWindow(TAdventureMapWindow&&)                 = delete;
+        TAdventureMapWindow& operator=(const TAdventureMapWindow&) = delete;
+        TAdventureMapWindow& operator=(TAdventureMapWindow&&)      = delete;
 
     public:
         void animate_bottom_view(bool in_background)
@@ -239,11 +231,10 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
         // offset: +0x6C = +108,  size = 0x1 = 1
         bool animate_in_background;
 
-    protected:
-        [[maybe_unused]]
-        std::byte gap_6D[3];
+        unsigned char : 8;
+        unsigned char : 8;
+        unsigned char : 8;
 
-    public:
         // offset: +0x70 = +112,  size = 0x14 = 20
         std::array<bitmapBorder*, 5> hero_borders;
 
@@ -255,13 +246,13 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
 
     protected:
         // offset: +0x9C = +156,  size = 0x4 = 4
-        void* immersion_ptr;
+        void* immersion;
 
-};
+} NH3API_MSVC_LAYOUT;
 #pragma pack(pop)
-
-NH3API_DISABLE_WARNING_END
 
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x641034, TResourceDisplay)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63BB04, type_bottom_view_window)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63A5E4, TAdventureMapWindow)
+
+NH3API_WARNING(pop)

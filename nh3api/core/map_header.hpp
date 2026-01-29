@@ -9,11 +9,17 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "game_setup.hpp" // SGameSetupOptions
-#include "lossvictory.hpp" // VictoryConditionStruct, LossConditionStruct
-#include "hero.hpp" // HeroIdentity, HeroPlayerInfo
+#include <array>           // std::array
+#include <cstddef>         // std::byte
+#include <memory>          // std::destroy, std::destroy_at, std::uninitialized_default_construct
 
-NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
+#include "game_setup.hpp"  // SGameSetupOptions
+#include "hero.hpp"        // HeroIdentity, HeroPlayerInfo
+#include "lossvictory.hpp" // VictoryConditionStruct, LossConditionStruct
+
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
+NH3API_WARNING_MSVC_DISABLE(26495)
 
 #pragma pack(push, 4)
 // Map header /
@@ -22,38 +28,32 @@ NH3API_DISABLE_WARNING_BEGIN("-Wuninitialized", 26495)
 struct CMapHeaderData
 {
 public:
-    NH3API_FORCEINLINE
-    CMapHeaderData() noexcept
-        : iVersion(28),
-          IsPlayable(true),
-          iDifficulty(DIFFICULTY_NORMAL),
-          numPlayers(MAX_PLAYERS),
-          minNumHumanPlayers(1),
-          maxNumHumanPlayers(MAX_PLAYERS),
-          lastTownNameAssigned(0),
-          mapHasNotBeenSaved(false),
-          max_hero_level(-1),
-          numTeams(0),
-          teamInfo{{0, 0, 0, 0, 0, 0, 0, 0}},
-          gap_E(),
-          Size(0),
-          HasTwoLayers(false),
-          gap_1D()
+    inline CMapHeaderData() noexcept
+        : IsPlayable { true },
+          iDifficulty { DIFFICULTY_NORMAL },
+          numPlayers { MAX_PLAYERS },
+          minNumHumanPlayers { 1 },
+          maxNumHumanPlayers { MAX_PLAYERS },
+          lastTownNameAssigned { 0 },
+          mapHasNotBeenSaved { false },
+          max_hero_level { -1 },
+          numTeams { 0 },
+          teamInfo { { 0, 0, 0, 0, 0, 0, 0, 0 } },
+          Size { 0 },
+          HasTwoLayers { false }
     {
-        nh3api::construct_at(&placeholders);
-        std::uninitialized_default_construct_n(PlayerSlotAttributes.begin(), PlayerSlotAttributes.size());
+        ::new (static_cast<void*>(&this->placeholders)) exe_vector<int32_t> {};
+        std::uninitialized_default_construct(PlayerSlotAttributes.begin(), PlayerSlotAttributes.end());
     }
 
-    NH3API_FORCEINLINE
-    CMapHeaderData(const ::nh3api::dummy_tag_t& tag) noexcept
-        : placeholders(tag),
-          PlayerSlotAttributes{{tag, tag, tag, tag, tag, tag, tag, tag}}
+    inline CMapHeaderData(const nh3api::dummy_tag_t& tag) noexcept
+        : placeholders { tag },
+          PlayerSlotAttributes { { tag, tag, tag, tag, tag, tag, tag, tag } }
     {}
 
-    NH3API_FORCEINLINE
-    ~CMapHeaderData() noexcept
+    inline ~CMapHeaderData() noexcept
     {
-        std::destroy_at(&placeholders);
+        std::destroy_at(&this->placeholders);
         std::destroy(PlayerSlotAttributes.begin(), PlayerSlotAttributes.end());
     }
 
@@ -64,47 +64,51 @@ public:
     struct TPlayerSlotAttributes
     {
         public:
-            NH3API_FORCEINLINE
-            TPlayerSlotAttributes() noexcept
-            NH3API_DELEGATE_DUMMY(TPlayerSlotAttributes)
+            inline TPlayerSlotAttributes() noexcept
+                : TPlayerSlotAttributes(nh3api::dummy_tag)
             { THISCALL_1(void, 0x45A630, this); }
 
-            NH3API_FORCEINLINE
-            TPlayerSlotAttributes(const ::nh3api::dummy_tag_t& tag) noexcept
-                : heroes(tag)
+            inline TPlayerSlotAttributes(const nh3api::dummy_tag_t& tag) noexcept
+                : heroes { tag }
             {}
 
-            NH3API_FORCEINLINE
-            ~TPlayerSlotAttributes() noexcept
+            inline ~TPlayerSlotAttributes() noexcept
             { THISCALL_1(void, 0x45A860, this); }
 
             TPlayerSlotAttributes& operator=(const TPlayerSlotAttributes& other)
             {
-                if ( this == &other )
-                    return *this;
+                if ( this != &other )
+                {
+                    std::memcpy(static_cast<void*>(this), static_cast<const void*>(&other), __builtin_offsetof(TPlayerSlotAttributes, heroes));
+                    this->heroes = other.heroes;
+                }
 
-                nh3api::trivial_copy<52/*__builtin_offsetof(TPlayerSlotAttributes, heroes)*/>(&other, this);
-
-                this->heroes = other.heroes;
                 return *this;
             }
 
             TPlayerSlotAttributes(const TPlayerSlotAttributes& other)
-            { *this = other; }
+            {
+                std::memcpy(static_cast<void*>(this), static_cast<const void*>(&other), __builtin_offsetof(TPlayerSlotAttributes, heroes));
+                this->heroes = other.heroes;
+            }
 
             TPlayerSlotAttributes& operator=(TPlayerSlotAttributes&& other) noexcept
             {
-                if ( this == &other )
-                    return *this;
+                if ( this != &other )
+                {
+                    std::destroy_at(&this->heroes);
+                    std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+                    std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+                }
 
-                nh3api::trivial_move<52/*__builtin_offsetof(TPlayerSlotAttributes, heroes)*/>(&other, this);
-
-                this->heroes = std::move(other.heroes);
                 return *this;
             }
 
             TPlayerSlotAttributes(TPlayerSlotAttributes&& other) noexcept
-            { nh3api::trivial_move<sizeof(*this)>(&other, this); }
+            {
+                std::memcpy(static_cast<void*>(this), static_cast<void*>(&other), sizeof(*this));
+                std::memset(static_cast<void*>(&other), 0, sizeof(*this));
+            }
 
         public:
             // Can be human /
@@ -117,11 +121,9 @@ public:
             // offset: +0x1 = +1,  size = 0x1 = 1
             bool CanBeComputer;
 
-        protected:
-            [[maybe_unused]]
-            std::byte gap_1D[2];
+            unsigned char : 8;
+            unsigned char : 8;
 
-        public:
             // AI strategy type /
             // Тип ИИ игрока.
             // offset: +0x4 = +4,  size = 0x4 = 4
@@ -147,11 +149,10 @@ public:
             // offset: +0xC = +12,  size = 0x1 = 1
             bool has_main_town;
 
-        protected:
-            [[maybe_unused]]
-            std::byte gap_D[3];
+            unsigned char : 8;
+            unsigned char : 8;
+            unsigned char : 8;
 
-        public:
             // Main town type /
             // Тип главного города.
             // offset: +0x10 = +16,  size = 0x4 = 4
@@ -167,11 +168,10 @@ public:
             // offset: +0x18 = +24,  size = 0x1 = 1
             bool hasRandomHero;
 
-        protected:
-            [[maybe_unused]]
-            std::byte gap_19[3];
+            unsigned char : 8;
+            unsigned char : 8;
+            unsigned char : 8;
 
-        public:
             // Main hero ID /
             // ID главного героя.
             // offset: +0x1C = +28,  size = 0x4 = 4
@@ -194,13 +194,13 @@ public:
             // offset: +0x34 = +52,  size = 0x10 = 16
             exe_vector<HeroIdentity> heroes;
             };
-    };
+    } NH3API_MSVC_LAYOUT;
 
 public:
     // Map version /
     // Версия карты.
     // offset: +0x0 = +0,  size = 0x4 = 4
-    int32_t iVersion;
+    int32_t iVersion = 28;
 
     // Map has no map editor problems /
     // Карта не содержит ошибок редактора.
@@ -252,11 +252,10 @@ public:
     // offset: +0xD = +13,  size = 0x8 = 8
     std::array<int8_t, 8> teamInfo;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_E[3];
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-public:
     // Map size(width and height are the same) /
     // Размер карты(ширина и высота совпадают).
     // offset: +0x18 = +24,  size = 0x4 = 4
@@ -267,11 +266,10 @@ public:
     // offset: +0x1C = +28,  size = 0x1 = 1
     bool HasTwoLayers;
 
-protected:
-    [[maybe_unused]]
-    std::byte gap_1D[3];
+    unsigned char : 8;
+    unsigned char : 8;
+    unsigned char : 8;
 
-public:
     union {
     // Hero placeholders /
     // Герои, переходящие в следующий сценарий кампании.
@@ -298,36 +296,35 @@ public:
     std::array<TPlayerSlotAttributes, MAX_PLAYERS> PlayerSlotAttributes;
     };
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
 
-#pragma pack(push, 4)
 // Map information /
 // Информация о карте.
 // size = 0x304 = 772, align = 4, baseclass: CMapHeaderData
 struct NewSMapHeader : CMapHeaderData
 {
     public:
-        NH3API_FORCEINLINE
-        NewSMapHeader() noexcept
-        NH3API_DELEGATE_DUMMY(NewSMapHeader)
+        inline NewSMapHeader() noexcept
+            : NewSMapHeader(nh3api::dummy_tag)
         { THISCALL_1(void, 0x45A670, this); }
 
-        NH3API_FORCEINLINE
-        NewSMapHeader(const ::nh3api::dummy_tag_t& tag) noexcept
-            : heroPlayerSetups(tag),
-              mapName(tag),
-              mapDescription(tag),
-              availableHeroes(tag)
+        inline NewSMapHeader(const nh3api::dummy_tag_t& tag) noexcept
+            : heroPlayerSetups { tag },
+              mapName { tag },
+              mapDescription { tag },
+              availableHeroes { tag }
         {}
 
-        NH3API_FORCEINLINE
-        ~NewSMapHeader() noexcept
+        inline ~NewSMapHeader() noexcept
         { THISCALL_1(void, 0x45A9E0, this); }
 
-        NH3API_FORCEINLINE
-        NewSMapHeader& operator=(const NewSMapHeader& other) noexcept
-        { THISCALL_2(void, 0x457990, this, &other); return *this; }
+        inline NewSMapHeader& operator=(const NewSMapHeader& other) noexcept
+        {
+            if ( this != &other )
+                THISCALL_2(void, 0x457990, this, &other);
+
+            return *this;
+        }
 
     public:
         union {
@@ -358,7 +355,7 @@ struct NewSMapHeader : CMapHeaderData
         exe_bitset<MAX_HEROES> availableHeroes;
         };
 
-};
-#pragma pack(pop)
+} NH3API_MSVC_LAYOUT;
+#pragma pack(pop) // 4
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)
