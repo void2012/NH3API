@@ -106,8 +106,8 @@ struct executive
 
         executive(const executive&)                                 = delete;
         executive& operator=(const executive&)                      = delete;
-        inline constexpr executive(executive&&) noexcept            = default;
-        inline constexpr executive& operator=(executive&&) noexcept = default;
+        inline executive(executive&&) noexcept            = default;
+        inline executive& operator=(executive&&) noexcept = default;
         inline ~executive() noexcept                                = default;
 
     public:

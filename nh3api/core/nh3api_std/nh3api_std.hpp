@@ -687,6 +687,16 @@ using bool32_t = uint32_t;
     #endif
 #endif
 
+#ifndef NH3API_LIFETIMEBOUND
+    #if NH3API_HAS_CPP_ATTRIBUTE(_Clang::__lifetimebound__)
+        #define NH3API_LIFETIMEBOUND [[_Clang::__lifetimebound__]]
+    #elif NH3API_HAS_CPP_ATTRIBUTE(msvc::lifetimebound)
+        #define NH3API_LIFETIMEBOUND [[msvc::lifetimebound]]
+    #else
+        #define NH3API_LIFETIMEBOUND
+    #endif
+#endif
+
 #ifndef NH3API_LIKELY
     #if NH3API_HAS_CPP_ATTRIBUTE(likely) && NH3API_HAS_CPP_ATTRIBUTE(unlikely)
         #define NH3API_LIKELY [[likely]]

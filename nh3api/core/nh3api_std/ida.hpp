@@ -213,7 +213,7 @@ void __movsb(unsigned char*, unsigned char const*, size_t);
 // memcpy() with determined behavior: it always copies
 // from the start to the end of the buffer
 // note: it copies byte by byte, so it is not equivalent to, for example, rep movsd
-NH3API_FORCEINLINE void* qmemcpy(void* dst, const void* src, size_t count) noexcept
+NH3API_FORCEINLINE void* qmemcpy(NH3API_LIFETIMEBOUND void* dst, const void* src, size_t count) noexcept
 {
     #if NH3API_CHECK_MSVC || defined(__INTELLISENSE__)
     __movsb(static_cast<unsigned char*>(dst), static_cast<const unsigned char*>(src), count);

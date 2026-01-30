@@ -792,7 +792,7 @@ NH3API_VIRTUAL_CLASS exe_filebuf : public exe_streambuf
         bool _Closef;
 
         // offset: +0x4C = +76,  size = 0x4 = 4
-        void* _Loc;
+        void* _Loc2;
 
         // offset: +0x50 = +80,  size = 0x4 = 4
         exe_FILE* _File;
