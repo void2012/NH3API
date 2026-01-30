@@ -611,7 +611,10 @@ class exe_string
         exe_string& assign(const char* _String, const SizeType _Count)
         {
             if ( _String == nullptr || _Count == 0 ) NH3API_UNLIKELY
+            {
+                clear();
                 return *this;
+            }
 
             return _Reallocate_for(_Count,
             NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const size_t _Src_count, const char* const _Src)
@@ -628,7 +631,10 @@ class exe_string
         exe_string& assign(const char (&_String)[_Size])
         {
             if constexpr ( _Size == 0 || _Size == 1 || _Size >= max_size() )
+            {
+                clear();
                 return *this;
+            }
 
             return _Reallocate_for(_Size - 1,
             NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const size_t _Count, const char* const _Src)
@@ -641,9 +647,17 @@ class exe_string
         exe_string& assign(const char* const _String)
         {
             if ( _String == nullptr ) NH3API_UNLIKELY
+            {
+                clear();
                 return *this;
+            }
 
             const size_t _Length = __builtin_strlen(_String);
+            if ( _Length == 0 ) NH3API_UNLIKELY
+            {
+                clear();
+                return *this;
+            }
 
             return _Reallocate_for(_Length,
             NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const size_t _Count, const char* const _Src)
@@ -661,7 +675,10 @@ class exe_string
         exe_string& assign(SizeType _Count, char _Character)
         {
             if ( _Count == 0 ) NH3API_UNLIKELY
+            {
+                clear();
                 return *this;
+            }
 
             return _Reallocate_for(
             _Count,
@@ -683,7 +700,10 @@ class exe_string
             nh3api::verify_range(_First, _Last);
             const size_t _New_size = std::distance(_First, _Last);
             if ( _New_size == 0 ) NH3API_UNLIKELY
+            {
+                clear();
                 return *this;
+            }
 
             auto _UFirst = nh3api::unfancy(_First);
             auto _ULast  = nh3api::unfancy(_Last);
