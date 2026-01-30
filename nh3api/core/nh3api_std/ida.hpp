@@ -535,7 +535,7 @@ NH3API_IDA_INTRIN int16_t abs16(int16_t x) noexcept
 
 NH3API_IDA_INTRIN int32_t abs32(int32_t x) noexcept
 {
-#if NH3API_HAS_BUILTIN(__builtin_abs) && defined(__has_constexpr_builtin) && __has_constexpr_builtin(__builtin_abs)
+#if NH3API_HAS_BUILTIN(__builtin_abs) && NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_abs)
     return __builtin_abs(x);
 #else
     return x >= 0 ? x : -x;
@@ -544,7 +544,7 @@ NH3API_IDA_INTRIN int32_t abs32(int32_t x) noexcept
 
 NH3API_IDA_INTRIN int64_t abs64(int64_t x) noexcept
 {
-#if NH3API_HAS_BUILTIN(__builtin_llabs) && defined(__has_constexpr_builtin) && __has_constexpr_builtin(__builtin_llabs)
+#if NH3API_HAS_BUILTIN(__builtin_llabs) && NH3API_HAS_CONSTEXPR_BUILTIN(__builtin_llabs)
     return __builtin_llabs(x);
 #else
     return x >= 0 ? x : -x;
