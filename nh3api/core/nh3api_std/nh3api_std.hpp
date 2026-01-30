@@ -44,7 +44,7 @@
     #define _X86_ 1
 #endif
 
-#if __has_include(<minwindef.h>)
+#if !defined(_WINDEF_) && __has_include(<minwindef.h>)
 #include <minwindef.h>
 #else
 #include <windef.h>
