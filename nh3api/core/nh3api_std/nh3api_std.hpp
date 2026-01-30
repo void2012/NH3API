@@ -40,6 +40,10 @@
     #define NH3API_MAX(x,y) ((x) > (y) ? (x) : (y))
 #endif
 
+#ifndef _X86_
+    #define _X86_ 1
+#endif
+
 #if __has_include(<minwindef.h>)
 #include <minwindef.h>
 #else

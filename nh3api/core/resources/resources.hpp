@@ -1096,7 +1096,7 @@ NH3API_VIRTUAL_STRUCT Bitmap16Bit : public resource
         { return Width; }
 
         [[nodiscard]] inline int32_t GetHeight() const noexcept
-        { return Width; }
+        { return Height; }
 
         [[nodiscard]] inline int32_t GetPitch() const noexcept
         { return Pitch; }
