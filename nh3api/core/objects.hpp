@@ -489,7 +489,7 @@ class generator
         {}
 
     public:
-        [[nodiscard]] int32_t get_owner() const
+        [[nodiscard]] int32_t get_owner() const noexcept
         { return playerOwner; }
 
         // Read from game save file /
@@ -1645,10 +1645,10 @@ class type_obscuring_object
         void restore_cell()
         { THISCALL_1(void, 0x4D7950, this); }
 
-        [[nodiscard]] bool obscures_town() const
+        [[nodiscard]] bool obscures_town() const noexcept
         { return ( is_on_map() ) ? was_trigger && (get_obscured_type() == OBJECT_TOWN) : false; }
 
-        [[nodiscard]] TAdventureObjectType get_obscured_object() const
+        [[nodiscard]] TAdventureObjectType get_obscured_object() const noexcept
         {
             if ( is_on_map() )
                 return get_obscured_type();

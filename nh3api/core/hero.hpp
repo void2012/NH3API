@@ -487,7 +487,7 @@ class hero : public type_obscuring_object
 
         // First not empty backpack slot /
         // Первый непустой слот рюкзака
-        [[nodiscard]] int32_t get_last_backpack_index() const
+        [[nodiscard]] int32_t get_last_backpack_index() const noexcept
         {
             int32_t i = 64; /* = backpack.size(); */
             while ( i-- != 0 )

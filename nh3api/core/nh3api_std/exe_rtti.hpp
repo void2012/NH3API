@@ -92,12 +92,12 @@ class NH3API_CLANG_TRIVIAL_ABI global_type_info_node
         }
 
     protected:
-        [[nodiscard]] const __type_info_node* get() const
+        [[nodiscard]] const __type_info_node* get() const noexcept
         {
             return &node;
         }
 
-        __type_info_node* get()
+        __type_info_node* get() noexcept
         {
             return &node;
         }

@@ -707,10 +707,10 @@ NH3API_VIRTUAL_STRUCT CSprite : public resource
         inline void AllocateSeq(size_t seqnum, size_t numFrames)
         { THISCALL_3(void, 0x47B410, this, seqnum, numFrames); }
 
-        [[nodiscard]] inline int32_t GetWidth() const
+        [[nodiscard]] inline int32_t GetWidth() const noexcept
         { return Width; }
 
-        [[nodiscard]] inline int32_t GetHeight() const
+        [[nodiscard]] inline int32_t GetHeight() const noexcept
         { return Height; }
 
         inline void SetPalette(const TPalette16& pal)

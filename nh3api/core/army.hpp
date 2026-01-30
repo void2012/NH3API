@@ -780,16 +780,16 @@ class army
         /// @param casting_hero герой, который накладывает заклинание
         void       Cure(int32_t level, int32_t iSpellPower, hero const * casting_hero);
 
-        [[nodiscard]] int32_t MidY() const
+        [[nodiscard]] int32_t MidY() const noexcept
         { return BottomY() - this->image_height / 2; }
 
-        [[nodiscard]] int32_t TopY() const
+        [[nodiscard]] int32_t TopY() const noexcept
         { return BottomY() - this->image_height; }
 
-        [[nodiscard]] int32_t BottomY() const
+        [[nodiscard]] int32_t BottomY() const noexcept
         { return (this->gridIndex > 0 && this->gridIndex < 187) ? army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[static_cast<size_t>(this->gridIndex)].refY : 0; }
 
-        [[nodiscard]] int32_t MidX() const
+        [[nodiscard]] int32_t MidX() const noexcept
         {
             int32_t result = (this->gridIndex > 0 && this->gridIndex < 187) ? army_hpp_gpCombatManager_get(0x1C4, std::array<hexcell, 187>)[static_cast<size_t>(this->gridIndex)].refX : 0;
             if ( Is(CF_DOUBLE_WIDE) )
@@ -799,7 +799,7 @@ class army
             return result;
         }
 
-        [[nodiscard]] int32_t FrontX() const
+        [[nodiscard]] int32_t FrontX() const noexcept
         {
             CSpriteFrame* standingStillFrame = stdIcon->s[cs_walk]->f[1];
             assert(standingStillFrame);

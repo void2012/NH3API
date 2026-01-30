@@ -107,7 +107,7 @@ inline int32_t exe_fseek(exe_FILE* file, ptrdiff_t offset, ptrdiff_t origin) noe
 // address: 0x618D31
 // Heroes3.exe internal thread-safe fsetpos /
 // внутренний fsetpos Heroes3.exe (thread-safe).
-inline int32_t exe_fsetpos(exe_FILE* __restrict in_file, std::fpos_t* __restrict in_pos) noexcept
+inline int32_t exe_fsetpos(exe_FILE* __restrict in_file, fpos_t* __restrict in_pos) noexcept
 { return CDECL_2(int32_t, 0x618D31, in_file, in_pos); }
 
 // address: 0x618D49
@@ -260,7 +260,7 @@ class exe_fpos
             : _Off { _O }, _Fpos { 0 }, _State { _Stz }
         {}
 
-        exe_fpos(_St _S, std::fpos_t _F) noexcept
+        exe_fpos(_St _S, fpos_t _F) noexcept
             : _Off { 0 }, _Fpos { _F }, _State { _S }
         {}
 
@@ -270,7 +270,7 @@ class exe_fpos
         [[nodiscard]] _St state() const noexcept
         { return _State; }
 
-        [[nodiscard]] std::fpos_t get_fpos_t() const noexcept
+        [[nodiscard]] fpos_t get_fpos_t() const noexcept
         { return _Fpos; }
 
         [[nodiscard]] explicit operator int32_t() const noexcept
@@ -315,10 +315,10 @@ class exe_fpos
         inline static constexpr _St _Stz = _St{};
 
     private:
-        int32_t     _Off;
+        int32_t _Off;
         uint32_t : 32;
-        std::fpos_t _Fpos;
-        _St         _State;
+        fpos_t _Fpos;
+        _St    _State;
         uint32_t : 32;
 } NH3API_MSVC_LAYOUT;
 

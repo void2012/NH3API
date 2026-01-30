@@ -110,7 +110,7 @@ class exe_map : public nh3api::exe_rbtree<KeyType,
             return (*pos).second;
         }
 
-        value_compare value_comp() const
+        value_compare value_comp() const noexcept
         { return value_compare(this->key_comp()); }
 
         using base_type::insert;

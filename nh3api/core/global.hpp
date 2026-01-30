@@ -78,7 +78,7 @@ struct type_event_record
         NH3API_SCALAR_DELETING_DESTRUCTOR
 
         // vftable shift: +4
-        virtual type_event_record_type __thiscall get_type() const
+        [[nodiscard]] virtual type_event_record_type __thiscall get_type() const
         { return get_vftable(this)->get_type(this); }
 
         // vftable shift: +8
@@ -167,7 +167,7 @@ class game
         [[nodiscard]] const town* GetTown(int32_t whichTown) const
         { return THISCALL_2(town*, 0x42BA30, this, whichTown); }
 
-        [[nodiscard]] int32_t GetNumMapLevels() const
+        [[nodiscard]] int32_t GetNumMapLevels() const noexcept
         { return worldMap.HasTwoLevels ? 2 : 1; }
 
         [[nodiscard]] bool OnSameTeam(int32_t player1, int32_t player2) const

@@ -234,7 +234,7 @@ class town
     public:
         // Get town location on the map /
         // Координаты города.
-        [[nodiscard]] type_point get_location() const
+        [[nodiscard]] type_point get_location() const noexcept
         { return { mapX, mapY, mapZ }; }
 
         // Does town has creatures in garrison? /

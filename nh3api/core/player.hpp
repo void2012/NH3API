@@ -141,10 +141,10 @@ class playerData
         [[nodiscard]] const char* GetName() const
         { return THISCALL_1(char*, 0x4BAA70, this); }
 
-        [[nodiscard]] bool hasAssembledCombos() const
+        [[nodiscard]] bool hasAssembledCombos() const noexcept
         { return assembledCombos.any(); }
 
-        [[nodiscard]] uint32_t numAssembledCombos() const
+        [[nodiscard]] uint32_t numAssembledCombos() const noexcept
         { return assembledCombos.count(); }
 
     public:

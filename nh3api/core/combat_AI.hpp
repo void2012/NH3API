@@ -133,7 +133,7 @@ struct type_enchant_data
         [[nodiscard]] int32_t get_mastery_value() const
         { return THISCALL_1(int32_t, 0x436580, this); }
 
-        [[nodiscard]] bool valid() const
+        [[nodiscard]] bool valid() const noexcept
         { return !(spell == SPELL_NONE && mastery == eMasteryNone && power == 0); }
 
     // member variables

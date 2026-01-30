@@ -820,7 +820,7 @@ NH3API_VIRTUAL_CLASS slider : public widget
 
     public:
         [[nodiscard]] int32_t get_maximum() const noexcept
-        { return this->numStates - 1; }
+        { return std::max<int32_t>(this->numStates - 1, 0); }
 
     public:
         // offset: +0x30 = +48,  size = 0x4 = 4
@@ -1030,27 +1030,27 @@ NH3API_VIRTUAL_CLASS CChatEdit : public textEntryWidget
         NH3API_VIRTUAL_OVERRIDE_TEXTENTRYWIDGET(CChatEdit)
 
         // vftable shift: +76
-        virtual void __thiscall UpdateScreen() noexcept
+        virtual void __thiscall UpdateScreen()
         { get_type_vftable(this)->UpdateScreen(this); }
 
         // vftable shift: +80
-        virtual int32_t __thiscall OnEnter(message msg) noexcept
+        virtual int32_t __thiscall OnEnter(message msg)
         { return get_type_vftable(this)->OnEnter(this, msg); }
 
         // vftable shift: +84
-        virtual int32_t __thiscall OnEscape(message msg) noexcept
+        virtual int32_t __thiscall OnEscape(message msg)
         { return get_type_vftable(this)->OnEscape(this, msg); }
 
         // vftable shift: +88
-        virtual int32_t __thiscall OnFunctionKey(message msg, int32_t toWho) noexcept
+        virtual int32_t __thiscall OnFunctionKey(message msg, int32_t toWho)
         { return get_type_vftable(this)->OnFunctionKey(this, msg, toWho); }
 
         // vftable shift: +92
-        [[nodiscard]] virtual bool __thiscall IsOpen() const noexcept
+        [[nodiscard]] virtual bool __thiscall IsOpen() const
         { return get_type_vftable(this)->IsOpen(this); }
 
         // vftable shift: +96
-        virtual void __thiscall SendChat(const char* sChat, int32_t toWho) noexcept
+        virtual void __thiscall SendChat(const char* sChat, int32_t toWho)
         { get_type_vftable(this)->SendChat(this, sChat, toWho); }
 
 };
