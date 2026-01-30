@@ -1133,7 +1133,6 @@ public:
         void _Buy_raw(size_t _Newcapacity)
         {
             NH3API_ASSUME(!_Myfirst && !_Mylast && !_Myend); // check that *this is tidy
-            NH3API_ASSUME(0 < _Newcapacity && _Newcapacity <= max_size());
             this->_Myfirst = _Allocate(_Newcapacity);
             this->_Mylast  = this->_Myfirst;
             this->_Myend   = this->_Myfirst + _Newcapacity;
