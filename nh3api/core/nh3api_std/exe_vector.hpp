@@ -1237,6 +1237,10 @@ public:
 
                 _Guard._Target = nullptr;
             }
+            else  
+            {
+                reinterpret_cast<std::array<uint32_t, 4>&>(*this) = {};
+            }
         }
 
     protected:
