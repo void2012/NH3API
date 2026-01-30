@@ -50,6 +50,9 @@ NH3API_VIRTUAL_CLASS heroWindowManager : public baseManager
         void DoQuickView(heroWindow* newWindow) noexcept
         { THISCALL_2(void, 0x603000, this, newWindow); }
 
+        void UpdateScreen(int32_t x, int32_t y, int32_t h, int32_t w)
+        { THISCALL_5(void, 0x603190, this, x, y, h, w); }
+
         void FadeScreen(int32_t inOut, int32_t speed, bool expect_fadein) noexcept
         { THISCALL_4(void, 0x603210, this, inOut, speed, expect_fadein); }
 
