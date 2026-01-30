@@ -710,7 +710,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         std::array<hexcell, MAX_COMBAT_HEXES> cell;
 
         // offset: +0x5394 = +21396,  size = 0x4 = 4
-        int32_t combatTerrain;
+        TTerrainType combatTerrain;
 
         // offset: +0x5398 = +21400,  size = 0x4 = 4
         int32_t combatFringe;
