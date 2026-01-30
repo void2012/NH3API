@@ -1094,6 +1094,11 @@ protected:
 
     #endif // MSVC or MinGW GCC
 
+    #if NH3API_HAS_BUILTIN_CONSTANT_P
+    [[__gnu__::__error__("HiHooks do not support fastcall and thiscall calling conventions in SPLICE_ mode with DIRECT_, use EXTENDED_ or SAFE_ instead.")]]
+    static void hihook_splice_error();
+    #endif
+
     // protected
     virtual HiHook* __stdcall xWriteHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, void* new_func) = 0;
 
@@ -1201,6 +1206,13 @@ public:
                         EHiHookCallingConvention calltype,
                         F*                       new_func)
     {
+        #if NH3API_HAS_BUILTIN_CONSTANT_P
+        if ( __builtin_constant_p(hooktype) && __builtin_constant_p(subtype) && __builtin_constant_p(calltype) )
+        {
+            if ( hooktype == SPLICE_ && subtype == DIRECT_ && (calltype == THISCALL_ || calltype == FASTCALL_) )
+                hihook_splice_error();
+        }
+        #endif
         hihook_function_condition(new_func);
         return xWriteHiHook(address, hooktype, subtype, calltype, reinterpret_cast<void*>(new_func));
     }
@@ -1245,6 +1257,13 @@ public:
                                 EHiHookCallingConvention calltype,
                                 F*                       new_func)
     {
+        #if NH3API_HAS_BUILTIN_CONSTANT_P
+        if ( __builtin_constant_p(hooktype) && __builtin_constant_p(subtype) && __builtin_constant_p(calltype) )
+        {
+            if ( hooktype == SPLICE_ && subtype == DIRECT_ && (calltype == THISCALL_ || calltype == FASTCALL_) )
+                hihook_splice_error();
+        }
+        #endif
         hihook_function_condition(new_func);
         return xCreateHiHook(address, hooktype, subtype, calltype, reinterpret_cast<void*>(new_func));
     }
