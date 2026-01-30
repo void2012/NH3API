@@ -381,7 +381,7 @@ public:
             pointer _Whereptr = const_cast<pointer>(_Where);
             pointer _Oldlast  = this->_Mylast;
 #if NH3API_DEBUG
-            if ( _Whereptr > this->_Myfirst && _Oldlast > _Whereptr )
+            if (_Whereptr < this->_Myfirst || _Whereptr > this->_Mylast) NH3API_UNLIKELY
                 nh3api::throw_exception<std::out_of_range>("vector::emplace iterator outside range");
 #endif
             if ( _Oldlast != _Myend )
@@ -984,8 +984,9 @@ public:
         iterator erase(const_iterator _First, const_iterator _Last)
         {
             nh3api::verify_range(_First, _Last);
-            if ( _First >= _Myfirst && _First < _Mylast
-                 && _Last >= _Myfirst && _Last <= _Mylast )
+            if (_First < _Myfirst || _Last > _Mylast || _First > _Last) NH3API_UNLIKELY
+                nh3api::throw_exception<std::out_of_range>("vector::erase iterator outside range");
+            else
             {
                 // something to do, invalidate iterators
                 if ( _First != _Last )
@@ -1015,89 +1016,55 @@ public:
         }
 
         inline pointer data() noexcept
-        {
-            return _Myfirst;
-        }
+        { return _Myfirst; }
 
         [[nodiscard]] inline const_pointer data() const noexcept
-        {
-            return _Myfirst;
-        }
+        { return _Myfirst; }
 
         iterator begin() noexcept
-        {
-            return _Myfirst;
-        }
+        { return _Myfirst; }
 
         const_iterator begin() const noexcept
-        {
-            return _Myfirst;
-        }
+        { return _Myfirst; }
 
         const_iterator cbegin() const noexcept
-        {
-            return _Myfirst;
-        }
+        { return _Myfirst; }
 
         iterator end() noexcept
-        {
-            return _Mylast;
-        }
+        { return _Mylast; }
 
         const_iterator end() const noexcept
-        {
-            return _Mylast;
-        }
+        { return _Mylast; }
 
         const_iterator cend() const noexcept
-        {
-            return _Mylast;
-        }
+        { return _Mylast; }
 
         reverse_iterator rbegin() noexcept
-        {
-            return reverse_iterator { end() };
-        }
+        { return reverse_iterator { end() }; }
 
         const_reverse_iterator rbegin() const noexcept
-        {
-            return const_reverse_iterator { end() };
-        }
+        { return const_reverse_iterator { end() }; }
 
         const_reverse_iterator crbegin() const noexcept
-        {
-            return const_reverse_iterator { end() };
-        }
+        { return const_reverse_iterator { end() }; }
 
         reverse_iterator rend() noexcept
-        {
-            return reverse_iterator { begin() };
-        }
+        { return reverse_iterator { begin() }; }
 
         const_reverse_iterator rend() const noexcept
-        {
-            return const_reverse_iterator { begin() };
-        }
+        { return const_reverse_iterator { begin() }; }
 
         const_reverse_iterator crend() const noexcept
-        {
-            return const_reverse_iterator { begin() };
-        }
+        { return const_reverse_iterator { begin() }; }
 
         [[nodiscard]] inline size_t size() const noexcept
-        {
-            return static_cast<size_t>(this->_Mylast - this->_Myfirst);
-        }
+        { return static_cast<size_t>(this->_Mylast - this->_Myfirst); }
 
         [[nodiscard]] inline constexpr static size_t max_size() noexcept
-        {
-            return size_t(~0U) / sizeof(value_type);
-        }
+        { return size_t(~0U) / sizeof(value_type); }
 
         [[nodiscard]] inline bool empty() const noexcept
-        {
-            return _Myfirst == _Mylast;
-        }
+        { return _Myfirst == _Mylast; }
 
         [[nodiscard]] size_t capacity() const noexcept
         { return static_cast<size_t>(this->_Myend - this->_Myfirst); }
@@ -1107,7 +1074,7 @@ public:
 
         const_reference at(size_t pos) const
         {
-            if ( size() <= pos ) NH3API_UNLIKELY
+            if ( pos >= size() ) NH3API_UNLIKELY
                 nh3api::throw_exception<std::out_of_range>("vector: invalid subscript");
 
             return *(_Myfirst + pos);
@@ -1156,20 +1123,20 @@ public:
         iterator _Make_iterator_offset(const size_t _Offset) noexcept
         { return this->_Myfirst + _Offset; }
 
-        [[nodiscard]] static inline pointer _Allocate(size_t num) noexcept
-        { return static_cast<pointer>(::operator new(num * sizeof(value_type), exe_heap, std::nothrow)); }
+        [[nodiscard]] static inline pointer _Allocate(size_t _Requested) noexcept
+        { return static_cast<pointer>(::operator new(_Requested * sizeof(value_type), exe_heap, std::nothrow)); }
 
         inline static void _Deallocate(void* _Ptr) noexcept
         { ::operator delete(_Ptr, exe_heap); }
 
         // allocate array with _Capacity elements
-        bool _Buy_raw(size_t _Capacity)
+        void _Buy_raw(size_t _Newcapacity)
         {
-            this->_Myfirst = _Allocate(_Capacity);
+            NH3API_ASSUME(!_Myfirst && !_Mylast && !_Myend); // check that *this is tidy
+            NH3API_ASSUME(0 < _Newcapacity && _Newcapacity <= max_size());
+            this->_Myfirst = _Allocate(_Newcapacity);
             this->_Mylast  = this->_Myfirst;
-            this->_Myend   = this->_Myfirst + _Capacity;
-
-            return true;
+            this->_Myend   = this->_Myfirst + _Newcapacity;
         }
 
         // given _Oldcapacity and _Newsize, calculate geometric growth
@@ -1198,7 +1165,7 @@ public:
 
             this->_Myfirst = _Newvec;
             this->_Mylast  = _Newvec + _Newsize;
-            this->_Myend   = _Newvec + _Newcapacity;
+            this->_Myend   = _Newvec + (_Newcapacity ? _Newcapacity : 0);
         }
 
         // free all storage
@@ -1237,7 +1204,7 @@ public:
 
                 _Guard._Target = nullptr;
             }
-            else  
+            else
             {
                 reinterpret_cast<std::array<uint32_t, 4>&>(*this) = {};
             }
