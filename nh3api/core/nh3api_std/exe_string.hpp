@@ -178,7 +178,7 @@ class exe_string
         exe_string(size_t _Count, char _Character)
         { _Construct<_Construct_strategy::_From_char>(_Character, _Count); }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_concepts) && !defined(__INTELLISENSE__)
         template<nh3api::tt::iterator_for_container _Iter>
     #else
         template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
@@ -507,7 +507,7 @@ class exe_string
                 _Count, _Character);
         }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_concepts) && !defined(__INTELLISENSE__)
         template<nh3api::tt::iterator_for_container _Iter>
     #else
         template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
@@ -580,7 +580,7 @@ class exe_string
             return assign(_Other._Myptr, _Other._Mysize);
         }
 
-    #ifdef __cpp_lib_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral SizeType = size_t>
     #else
         template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
@@ -595,7 +595,7 @@ class exe_string
         exe_string& assign(const std::string_view _String)
         { return assign(_String.data(), _String.size()); }
 
-    #ifdef __cpp_lib_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral SizeType = size_t>
     #else
         template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
@@ -603,7 +603,7 @@ class exe_string
         exe_string& assign(const std::string_view _String, const SizeType _Offset, const SizeType _Count = npos)
         { return assign(_String.substr(_Offset, _Count)); }
 
-    #ifdef __cpp_lib_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral SizeType = size_t>
     #else
         template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
@@ -653,7 +653,7 @@ class exe_string
             }, _String);
         }
 
-    #ifdef __cpp_lib_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral SizeType = size_t>
     #else
         template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
@@ -673,7 +673,7 @@ class exe_string
             _Character);
         }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_concepts) && !defined(__INTELLISENSE__)
         template<nh3api::tt::iterator_for_container _Iter>
     #else
         template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
@@ -745,7 +745,7 @@ class exe_string
         exe_string& insert(const size_t _Offset, const std::string_view _String, size_t _OtherOffset, size_t _Count = npos)
         { return insert(_Offset, _String.substr(_OtherOffset, _Count)); }
 
-    #ifdef __cpp_lib_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral SizeType = size_t>
     #else
         template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
@@ -771,7 +771,7 @@ class exe_string
             static_cast<size_t>(_Offset), _String, _Count);
         }
 
-    #ifdef __cpp_lib_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral SizeType = size_t>
     #else
         template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
@@ -800,7 +800,7 @@ class exe_string
             static_cast<size_t>(_Offset), _String, _Length);
         }
 
-    #ifdef __cpp_lib_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral SizeType = size_t>
     #else
         template<typename SizeType = size_t, std::enable_if_t<std::is_integral_v<SizeType> && !std::is_same_v<SizeType,bool>, int> = 0 >
@@ -840,7 +840,7 @@ class exe_string
             return begin() + static_cast<ptrdiff_t>(_Offset);
         }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<nh3api::tt::iterator_for_container _Iter>
     #else
         template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
@@ -919,7 +919,7 @@ class exe_string
         }
     #endif // C++23
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral _Size_type>
     #else
         template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
@@ -980,7 +980,7 @@ class exe_string
         }
 
     public:
-    #ifdef __cpp_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral _Size_type>
     #else
         template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
@@ -1045,7 +1045,7 @@ class exe_string
             traits_type::assign(_Myptr, _Mysize, '\0');
         }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral _Size_type>
     #else
         template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
@@ -1055,7 +1055,7 @@ class exe_string
                             const exe_string& _Other)
         { return replace(_Offset, _Nx, _Other._Myptr, _Other._Mysize); }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral _Size_type>
     #else
         template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
@@ -1074,7 +1074,7 @@ class exe_string
             return replace(_Offset, _Nx, _Other._Myptr + _Other_offset, _Count);
         }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral _Size_type>
     #else
         template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
@@ -1149,7 +1149,7 @@ class exe_string
                 _Offset, _Nx, _String, _Count);
         }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral _Size_type>
     #else
         template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
@@ -1162,7 +1162,7 @@ class exe_string
             return *this;
         }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
         template<std::integral _Size_type>
     #else
         template<class _Size_type, std::enable_if_t<std::is_integral_v<_Size_type>, bool> = false>
@@ -1285,7 +1285,7 @@ class exe_string
             return *this;
         }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_concepts) && !defined(__INTELLISENSE__)
         template<nh3api::tt::iterator_for_container _Iter>
     #else
         template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>

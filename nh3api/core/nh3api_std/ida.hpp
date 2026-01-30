@@ -15,7 +15,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <cstring>     // std::memcpy, std::memset
 #include <limits>      // std::numeric_limits
 #include <type_traits> // std::common_type_t, std::enable_if_t, std::make_unsigned_t
@@ -164,8 +163,13 @@ using _BOOL4 = uint32_t;
 
 #ifndef NH3API_IDA_INTEGRAL_TEMPLATE
     #ifdef __cpp_lib_concepts
-        #define NH3API_IDA_INTEGRAL_TEMPLATE(T) std::integral T
-        #define NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U) std::integral T, std::integral U
+        #ifdef __INTELLISENSE__
+            #define NH3API_IDA_INTEGRAL_TEMPLATE(T) typename T
+            #define NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U) typename T, typename U
+        #else
+            #define NH3API_IDA_INTEGRAL_TEMPLATE(T) std::integral T
+            #define NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U) std::integral T, std::integral U
+        #endif
     #else
         #define NH3API_IDA_INTEGRAL_TEMPLATE(T) typename T,std::enable_if_t<std::is_integral_v<T>,bool> =false
         #define NH3API_IDA_INTEGRAL_TEMPLATE_2(T, U) typename T, typename U, std::enable_if_t<std::is_integral_v<T> && std::is_integral_v<U>,bool> =false
@@ -211,7 +215,7 @@ void __movsb(unsigned char*, unsigned char const*, size_t);
 // note: it copies byte by byte, so it is not equivalent to, for example, rep movsd
 NH3API_FORCEINLINE void* qmemcpy(void* dst, const void* src, size_t count) noexcept
 {
-    #if NH3API_CHECK_MSVC
+    #if NH3API_CHECK_MSVC || defined(__INTELLISENSE__)
     __movsb(static_cast<unsigned char*>(dst), static_cast<const unsigned char*>(src), count);
     #else
     __asm__ __volatile__("xchg {%%esi, %1|%1, esi}\n"
@@ -234,7 +238,7 @@ NH3API_WARNING_MSVC_DISABLE(4714)
 
 NH3API_FORCEINLINE void memset32(void* dst, unsigned long value, size_t count) noexcept
 {
-    #if NH3API_CHECK_MSVC
+    #if NH3API_CHECK_MSVC || defined(__INTELLISENSE__)
     __stosd(reinterpret_cast<unsigned long*>(dst), static_cast<unsigned long>(value), count);
     #else
     __asm__ __volatile__("rep stos{l|d}"

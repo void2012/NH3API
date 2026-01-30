@@ -420,7 +420,7 @@ protected:
     using reverse_iterator       = std::reverse_iterator<iterator>;
 
 protected:
-#ifdef __cpp_concepts
+#if defined(__cpp_concepts) && !defined(__INTELLISENSE__)
     template<nh3api::tt::iterator_for_container _Iter>
 #else
     template<class _Iter, ::std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
@@ -494,7 +494,7 @@ public:
         return *this;
     }
 
-#ifdef __cpp_concepts
+#if defined(__cpp_concepts) && !defined(__INTELLISENSE__)
     template<nh3api::tt::iterator_for_container _Iter>
 #else
     template<class _Iter, ::std ::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
@@ -746,7 +746,7 @@ public:
             _Freeback();
     }
 
-#ifdef __cpp_concepts
+#if defined(__cpp_concepts) && !defined(__INTELLISENSE__)
     template<nh3api::tt::iterator_for_container _Iter>
 #else
     template<class _Iter, ::std ::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
@@ -797,7 +797,7 @@ public:
     void insert(iterator _Where, const size_t _Count, const value_type& _Value)
     { _Insert_n(_Where, _Count, _Value); }
 
-#ifdef __cpp_concepts
+#if defined(__cpp_concepts) && !defined(__INTELLISENSE__)
     template<nh3api::tt::iterator_for_container _Iter>
 #else
     template<class _Iter, ::std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>

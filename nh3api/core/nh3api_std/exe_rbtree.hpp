@@ -797,7 +797,7 @@ class exe_rbtree
         iterator insert(const_iterator _Where, value_type&& _Value)
         { return emplace_hint(_Where, ::std::move(_Value)); }
 
-    #ifdef __cpp_concepts
+    #if defined(__cpp_concepts) && !defined(__INTELLISENSE__)
         template<::nh3api::tt::iterator_for_container _Iter>
     #else
         template<class _Iter, ::std::enable_if_t<::nh3api::tt::is_iterator_v<_Iter>, bool> = false>
