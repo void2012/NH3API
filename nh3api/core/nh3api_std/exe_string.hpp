@@ -153,12 +153,13 @@ class exe_string
         inline exe_string(const char (&_String)[_Size])
             : _Mysize { _Size - 1 }
         {
-            static_assert(_Size > 1);
+
+            static_assert(_Size > 0);
             constexpr size_t _New_capacity = _Calculate_growth(_Size - 1, 0, max_size());
             this->_Myres                   = _New_capacity;
             char* const _New_ptr           = _Allocate_for_capacity(_New_capacity);
-            this->_Myptr                   = _New_ptr + 1; // reference count is one byte before the string
-            _Refcnt(this->_Myptr)          = 0;            // set reference count to zero on construction
+            this->_Myptr                   = _New_ptr + 1;
+            _Refcnt(this->_Myptr)          = 0;
             traits_type::copy(_Myptr, _String, _Size - 1);
             _Myptr[_Size - 1] = '\0';
         }
@@ -243,7 +244,7 @@ class exe_string
             const size_t _New_size     = _Left_size + _Right_size;
             size_t       _New_capacity = _MIN_SIZE;
             _New_capacity              = _Calculate_growth(_New_size, _MIN_SIZE, max_size());
-            _Myptr                     = _Allocate_for_capacity(_New_capacity);
+            _Myptr                     = _Allocate_for_capacity(_New_capacity) + 1;
             _Refcnt(_Myptr)            = 0;
             _Mysize                    = _New_size;
             _Myres                     = _New_capacity;
@@ -359,12 +360,14 @@ class exe_string
         exe_string& operator=(const char (&_String)[_Size])
         {
             static_assert(_Size >= 1);
-            auto        _Buf     = _Get_buffer(_Size - 1);
+            const size_t _New_size = _Size - 1;
+            auto _Buf = _Get_buffer(_New_size);
             char* const _New_ptr = _Buf.get();
-            traits_type::copy(_New_ptr, _String, _Size - 1);
+            traits_type::copy(_New_ptr, _String, _New_size);
             _Buf.set(this->_Myptr);
-            this->_Myptr        = _New_ptr;
-            this->_Myptr[_Size - 1] = '\0';
+            this->_Myptr = _New_ptr;
+            this->_Myptr[_New_size] = '\0';
+            this->_Mysize = _New_size;
             return *this;
         }
 
@@ -1427,7 +1430,8 @@ class exe_string
             if ( _Myptr == nullptr || _Mysize == _Myres ) NH3API_UNLIKELY
                 return;
 
-            char* const _New_ptr = _Allocate_for_capacity(_Mysize);
+            char* const _New_ptr = _Allocate_for_capacity(_Mysize) + 1;
+            _Refcnt(_New_ptr)    = 0;
             traits_type::copy(_New_ptr, _Myptr, _Mysize);
             _Tidy_deallocate();
             this->_Myptr          = _New_ptr;
@@ -2268,7 +2272,7 @@ class exe_string
             return _Refcnt_fresh_buffer { _New_ptr };
         }
 
-        inline bool _Is_shared() noexcept
+        inline bool _Is_shared() const noexcept
         { return _Myptr && _Refcnt(_Myptr) != 0 && _Refcnt(_Myptr) != _FROZEN; }
 
     #if defined(__GNUC__) || defined(__clang__)
