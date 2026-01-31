@@ -27,24 +27,8 @@
 namespace nh3api
 {
 
-#if defined(__cpp_lib_bit_cast) && defined(__cpp_lib_concepts)
-
+#if defined(__cpp_lib_bit_cast)
 using ::std::bit_cast;
-template<class To, class From>
-inline constexpr To cast(const From& from) noexcept
-requires(sizeof(To) == sizeof(From) && ::std::is_trivially_copyable_v<To> && ::std::is_trivially_copyable_v<From> && !::std::is_pointer_v<From>)
-{
-    if constexpr (::std::is_integral_v<To> || ::std::is_enum_v<To>)
-        return static_cast<To>(from);
-    else
-        return __builtin_bit_cast(To, from);
-}
-
-template<class To, class From>
-inline To cast(const From& from) noexcept
-requires (sizeof(To) == sizeof(From) && ::std::is_pointer_v<From>)
-{ return reinterpret_cast<To>(from); }
-
 #else
 
 template<class To, class From, ::std::enable_if_t<(sizeof(To) == sizeof(From)) && ::std::is_trivially_copyable_v<To> && ::std::is_trivially_copyable_v<From>, bool> = false >
@@ -63,24 +47,50 @@ To bit_cast(const From& from) noexcept
     #endif
 }
 
-template<class To, class From, ::std::enable_if_t<(sizeof(To) == sizeof(From)) && ::std::is_trivially_copyable_v<To> && ::std::is_trivially_copyable_v<From> && !::std::is_pointer_v<To>, bool> = false >
+#endif // __cpp_lib_bit_cast
+
+#if defined(__cpp_lib_concepts) && __cpp_lib_concepts >= 202002L
+
+template<class To, class From>
+constexpr To cast(const From& from) noexcept
+requires(::std::is_trivially_copyable_v<To> && 
+         ::std::is_trivially_copyable_v<From>)
+{
+    if constexpr ( ::std::is_integral_v<To> || ::std::is_enum_v<To> ) 
+        return static_cast<To>(from);
+    else if constexpr ( ::std::is_pointer_v<To> || ::std::is_pointer_v<From> ) 
+        return reinterpret_cast<To>(from);
+    else 
+        return bit_cast<To>(from);
+}
+
+#else
+
+template<class To, class From,
+         typename = ::std::enable_if_t<
+             ::std::is_trivially_copyable_v<To> && 
+             ::std::is_trivially_copyable_v<From>>>
 inline
 #if NH3API_HAS_BUILTIN_BIT_CAST
 constexpr
 #endif
 To cast(const From& from) noexcept
 {
-    if constexpr (::std::is_integral_v<To> || ::std::is_enum_v<To>)
+    if constexpr ( ::std::is_integral_v<To> || ::std::is_enum_v<To> ) 
         return static_cast<To>(from);
-    else
-        return bit_cast<To>(from);
+     else if constexpr ( ::std::is_pointer_v<To> || ::std::is_pointer_v<From> ) 
+        return reinterpret_cast<To>(from);
+     else 
+        return bit_cast<To>(from); 
 }
 
-template<class To, class From, ::std::enable_if_t<(sizeof(To) == sizeof(From)) && ::std::is_trivially_copyable_v<To> && ::std::is_trivially_copyable_v<From> && ::std::is_pointer_v<To>, bool> = false >
-inline To cast(const From& from) noexcept
-{ return reinterpret_cast<To>(from); }
+#endif // __cpp_lib_concepts
 
-#endif // __cpp_lib_bit_cast
+template<class To, class From>
+inline To cast(const From* from) noexcept
+{
+    return cast<To>(reinterpret_cast<uintptr_t>(from));
+}
 
 #ifdef __cpp_lib_integer_comparison_functions
 using ::std::cmp_equal;

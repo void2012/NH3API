@@ -2110,7 +2110,7 @@ public:
     // Метод VarGetValue возвращает значение "переменной" c именем name
     // если "переменная" с таким именем не была инициализированна, возвращает default_value.
     template<typename ValueType> NH3API_NO_SANITIZE_ADDRESS
-    inline ValueType VarGetValue(const char* __restrict name, const ValueType default_value = ValueType{}) const
+    inline ValueType VarGetValue(const char* __restrict name, NH3API_LIFETIMEBOUND const ValueType default_value = ValueType{}) const
     {
         if constexpr (sizeof(ValueType) > 4)
             return default_value;

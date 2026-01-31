@@ -16,7 +16,7 @@
 
 #include <type_traits>
 
-#if defined(_MSC_VER) && !defined(__MINGW32__)
+#if defined(_MSC_VER) && !defined(__MINGW32__) && __has_include(<vcruntime_exception.h>)
 #include <vcruntime_exception.h>
 #else
 #pragma pack(push, 4)
