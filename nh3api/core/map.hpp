@@ -391,7 +391,7 @@ struct type_creature_bank_traits
 
 // Creature bank type /
 // Тип банка существ.
-enum ECreatureBankType : int32_t
+enum ECreatureBankType : int16_t
 {
     BANK_CYCLOPS_STOCKPILE    = 0,  // Склады Циклопов
     BANK_DWARVEN_TREASURY     = 1,  // Сокровищница Гномов
