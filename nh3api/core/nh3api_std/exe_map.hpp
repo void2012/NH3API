@@ -58,11 +58,11 @@ class exe_map : public nh3api::exe_rbtree<KeyType,
     protected:
         struct value_compare
         {
-            #ifdef __cpp_static_call_operator
+            #if defined(__cpp_static_call_operator) && NH3API_CHECK_CPP23
                 static
             #endif
                 inline bool operator()(const value_type& _Left, const value_type& _Right)
-            #ifndef __cpp_static_call_operator
+            #if !(defined(__cpp_static_call_operator) && NH3API_CHECK_CPP23)
                 const
             #endif
                 noexcept

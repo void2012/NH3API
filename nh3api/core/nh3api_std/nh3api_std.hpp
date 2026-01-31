@@ -646,7 +646,7 @@ using bool32_t = uint32_t;
 #endif
 
 #ifndef NH3API_CAPTURELESS_LAMBDA
-    #ifdef  __cpp_static_call_operator
+    #if defined(__cpp_static_call_operator) && NH3API_CHECK_CPP23
         #if NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__always_inline__)
             #define NH3API_CAPTURELESS_LAMBDA(...) [] [[__gnu__::__always_inline__]] (__VA_ARGS__) static
         #elif NH3API_HAS_CPP_ATTRIBUTE(msvc::always_inline)

@@ -564,11 +564,11 @@ template<>
 struct std::hash<type_point>
 {
     public:
-    #ifdef __cpp_static_call_operator
+    #if defined(__cpp_static_call_operator) && NH3API_CHECK_CPP23
         static
     #endif
         size_t operator()(const type_point& arg)
-    #ifndef __cpp_static_call_operator
+    #if !(defined(__cpp_static_call_operator) && NH3API_CHECK_CPP23)
         const
     #endif
         noexcept

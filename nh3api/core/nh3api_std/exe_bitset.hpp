@@ -682,11 +682,11 @@ template<size_t N>
 struct std::hash< exe_bitset<N> >
 {
     public:
-    #ifdef __cpp_static_call_operator
+    #if defined(__cpp_static_call_operator) && NH3API_CHECK_CPP23
         static
     #endif
         size_t operator()(const exe_bitset<N>& arg)
-    #ifndef __cpp_static_call_operator
+    #if !(defined(__cpp_static_call_operator) && NH3API_CHECK_CPP23)
         const
     #endif
         noexcept
