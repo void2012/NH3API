@@ -376,12 +376,6 @@ struct HookContext
         *reinterpret_cast<int32_t*>(esp) = v;
     }
 
-    NH3API_NO_SANITIZE_ADDRESS inline void Push(uint32_t v) noexcept
-    {
-        esp -= 4;
-        *reinterpret_cast<uint32_t*>(esp) = v;
-    }
-
     // the Pop function has a similar action to the POP command for the LoHook hook context /
     // функция Pop имеет аналогичное действие команде процессора POP для контекста LoHook хука.
     NH3API_NO_SANITIZE_ADDRESS inline int32_t Pop() noexcept
@@ -875,10 +869,7 @@ public:
     // пишет однобайтовое число по адресу address
     // (создает и применяет DATA_ патч)
     // Возвращает указатель на патч.
-    virtual Patch* __stdcall WriteByte(uintptr_t address, int8_t value) = 0;
-
-    NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteByte(uintptr_t address, uint8_t value)
-    { return WriteByte(address, static_cast<int8_t>(value)); }
+    virtual Patch* __stdcall WriteByte(uintptr_t address, uint8_t value) = 0;
 
     // WriteWord method
     // write a two-byte number at address
@@ -889,10 +880,7 @@ public:
     // пишет двухбайтовое число по адресу address
     // (создает и применяет DATA_ патч)
     // Возвращает указатель на патч.
-    virtual Patch* __stdcall WriteWord(uintptr_t address, uint32_t value) = 0;
-
-    NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteWord(uintptr_t address, int32_t value)
-    { return WriteWord(address, static_cast<uint32_t>(value)); }
+    virtual Patch* __stdcall WriteWord(uintptr_t address, uint16_t value) = 0;
 
     // WriteDword method
     // write a four-byte number at address
@@ -904,9 +892,6 @@ public:
     // (создает и применяет DATA_ патч)
     // Возвращает указатель на патч.
     virtual Patch* __stdcall WriteDword(uintptr_t address, uint32_t value) = 0;
-
-    NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteDword(uintptr_t address, int32_t value)
-    { return WriteDword(address, static_cast<uint32_t>(value)); }
 
     // WriteAddressOf template
     // writes a pointer of data type (its address)
@@ -935,7 +920,7 @@ public:
     // т.е. размер патча >= 5, разница заполнятеся NOP'ами.
     virtual Patch* __stdcall WriteJmp(uintptr_t address, uintptr_t to) = 0;
 
-    inline Patch* WriteJmp(uintptr_t address, void* to)
+    NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteJmp(uintptr_t address, void* to)
     { return WriteJmp(address, reinterpret_cast<uintptr_t>(to)); }
 
     // WriteHexPatch method
@@ -1448,7 +1433,7 @@ protected:
     virtual void __stdcall BlockAllExceptVA(uintptr_t* va_args) = 0;
 
     template <typename...Args>
-    struct all_types_of_uintptr
+    struct all_types_of_uintptr_t
         : std::bool_constant<(std::is_same_v<uintptr_t, Args> && ...)>
     {};
 
@@ -1456,7 +1441,7 @@ public:
     template<typename ...Args> NH3API_NO_SANITIZE_ADDRESS
     inline Patch* BlockAllExcept(Args... args)
     {
-        static_assert(all_types_of_uintptr<Args...>::value, "PatcherInstance::BlockAllExcept: arguments should be a list of uintptr_t-s");
+        static_assert(all_types_of_uintptr_t<Args...>::value, "PatcherInstance::BlockAllExcept: arguments should be a list of uintptr_t-s");
         const uintptr_t va_args[] = { args... };
         return BlockAllExceptVA(&va_args[0]);
     }
