@@ -487,6 +487,9 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         [[nodiscard]] int32_t GetGridIndex(int32_t x, int32_t y) const
         { return THISCALL_3(int32_t, 0x464380, this, x, y); }
 
+        [[nodiscard]] inline TTerrainType GetTerrain() const noexcept
+        { return EventCell ? static_cast<TTerrainType>(EventCell->GroundSet) : TERRAIN_TYPE_NONE; }
+
         // Combat is over /
         // Битва завершилась.
         [[nodiscard]] bool CombatIsOver() const
@@ -752,13 +755,16 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         EMagicTerrain magic_terrain;
 
         // offset: +0x53C4 = +21444,  size = 0x1 = 1
-        bool OnBoats;
+        bool OnAntiMagicGarrison;
 
         // offset: +0x53C5 = +21445,  size = 0x1 = 1
-        bool OnBeach;
+        bool IsSurrounded;
 
-        unsigned char : 8;
-        unsigned char : 8;
+        // offset: +0x53C6 = +21446,  size = 0x1 = 1
+        bool OnBoats;
+
+        // offset: +0x53C7 = +21447,  size = 0x1 = 1
+        bool OnBeach;
 
         // offset: +0x53C8 = +21448,  size = 0x4 = 4
         town* combatTown;
