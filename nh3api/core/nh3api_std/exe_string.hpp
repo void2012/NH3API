@@ -1687,6 +1687,7 @@ class exe_string
                 const size_t _Rightsize = __builtin_strlen(_String);
                 if ( _Mysize < _Rightsize )
                     return false;
+
                 return __builtin_memcmp(_Myptr, _String, _Rightsize) == 0;
             }
 
@@ -1696,6 +1697,9 @@ class exe_string
         [[nodiscard]] bool starts_with(const std::string_view _String) const noexcept
         {
             const size_t _Rightsize = _String.size();
+            if ( _Rightsize == 0 )
+                return true;
+
             if ( _String.data() && _Rightsize )
             {
                 if ( _Mysize < _Rightsize )
@@ -1725,6 +1729,9 @@ class exe_string
         [[nodiscard]] bool ends_with(const std::string_view _String) const noexcept
         {
             const size_t _Rightsize = _String.size();
+            if ( _Rightsize == 0 )
+                return true;
+
             if ( _String.data() && _Rightsize )
             {
                 if ( _Mysize < _Rightsize )
