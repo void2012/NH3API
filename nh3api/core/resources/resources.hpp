@@ -1313,6 +1313,14 @@ NH3API_VIRTUAL_STRUCT Bitmap24Bit : public resource
     public:
         NH3API_VIRTUAL_OVERRIDE_RESOURCE(Bitmap24Bit)
 
+    public:
+        void Draw(int32_t sx, int32_t sy, int32_t sw, int32_t sh, Bitmap16Bit* dst, int32_t dx, int32_t dy)
+        { THISCALL_8(void, 0x44ECA0, this, sx, sy, sw, sh, dst, dx, dy); }
+
+        void Draw(int32_t sx, int32_t sy, int32_t sw, int32_t sh, void* dst, int32_t dx, int32_t dy, int32_t dw, int32_t dh, int32_t dpitch)
+        { THISCALL_11(void, 0x44ECE0, this, sx, sy, sw, sh, dst, dx, dy, dw, dh, dpitch); }
+
+
     // member variables
     public:
         // offset: +0x1C = +28,  size = 0x4 = 4
