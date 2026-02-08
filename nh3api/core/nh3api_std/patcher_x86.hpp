@@ -404,6 +404,22 @@ struct HookContext
     inline constexpr int16_t& SI() noexcept { return si; }
     inline constexpr int16_t& DI() noexcept { return di; }
 
+    [[nodiscard]] inline constexpr const int8_t&   AL() const noexcept { return al; }
+    [[nodiscard]] inline constexpr const int8_t&   AH() const noexcept { return ah; }
+    [[nodiscard]] inline constexpr const int16_t&  AX() const noexcept { return ax; }
+    [[nodiscard]] inline constexpr const int8_t&   CL() const noexcept { return cl; }
+    [[nodiscard]] inline constexpr const int8_t&   CH() const noexcept { return ch; }
+    [[nodiscard]] inline constexpr const int16_t&  CX() const noexcept { return cx; }
+    [[nodiscard]] inline constexpr const int8_t&   DL() const noexcept { return dl; }
+    [[nodiscard]] inline constexpr const int8_t&   DH() const noexcept { return dh; }
+    [[nodiscard]] inline constexpr const int16_t&  DX() const noexcept { return dx; }
+    [[nodiscard]] inline constexpr const int8_t&   BL() const noexcept { return bl; }
+    [[nodiscard]] inline constexpr const int8_t&   BH() const noexcept { return bh; }
+    [[nodiscard]] inline constexpr const int16_t&  BX() const noexcept { return bx; }
+    [[nodiscard]] inline constexpr const uint16_t& BP() const noexcept { return bp; }
+    [[nodiscard]] inline constexpr const int16_t&  SI() const noexcept { return si; }
+    [[nodiscard]] inline constexpr const int16_t&  DI() const noexcept { return di; }
+
 } NH3API_MSVC_LAYOUT;
 
 
@@ -534,6 +550,22 @@ struct SafeLoHookContext
     inline constexpr uint16_t& BP() noexcept { return bp; }
     inline constexpr int16_t&  SI() noexcept { return si; }
     inline constexpr int16_t&  DI() noexcept { return di; }
+
+    [[nodiscard]] inline constexpr const int8_t&   AL() const noexcept { return al; }
+    [[nodiscard]] inline constexpr const int8_t&   AH() const noexcept { return ah; }
+    [[nodiscard]] inline constexpr const int16_t&  AX() const noexcept { return ax; }
+    [[nodiscard]] inline constexpr const int8_t&   CL() const noexcept { return cl; }
+    [[nodiscard]] inline constexpr const int8_t&   CH() const noexcept { return ch; }
+    [[nodiscard]] inline constexpr const int16_t&  CX() const noexcept { return cx; }
+    [[nodiscard]] inline constexpr const int8_t&   DL() const noexcept { return dl; }
+    [[nodiscard]] inline constexpr const int8_t&   DH() const noexcept { return dh; }
+    [[nodiscard]] inline constexpr const int16_t&  DX() const noexcept { return dx; }
+    [[nodiscard]] inline constexpr const int8_t&   BL() const noexcept { return bl; }
+    [[nodiscard]] inline constexpr const int8_t&   BH() const noexcept { return bh; }
+    [[nodiscard]] inline constexpr const int16_t&  BX() const noexcept { return bx; }
+    [[nodiscard]] inline constexpr const uint16_t& BP() const noexcept { return bp; }
+    [[nodiscard]] inline constexpr const int16_t&  SI() const noexcept { return si; }
+    [[nodiscard]] inline constexpr const int16_t&  DI() const noexcept { return di; }
 
 } NH3API_MSVC_LAYOUT;
 
@@ -752,8 +784,8 @@ using slhrfunc_t = _SafeLoHookReferenceFunc_;
 // значения передаваемые как аргумент hooktype в PatcherInstance::WriteHiHook и PatcherInstance::CreateHiHook.
 enum EHiHookSetupPolicy : int32_t
 {
-    CALL_ = 0,
-    SPLICE_ = 1,
+    CALL_    = 0,
+    SPLICE_  = 1,
     FUNCPTR_ = 2
 };
 
@@ -761,20 +793,20 @@ enum EHiHookSetupPolicy : int32_t
 // значения передаваемые как аргумент subtype в PatcherInstance::WriteHiHook и PatcherInstance::CreateHiHook.
 enum EHiHookType : int32_t
 {
-    DIRECT_ = 0,
+    DIRECT_   = 0,
     EXTENDED_ = 1,
-    SAFE_ = 2
+    SAFE_     = 2
 };
 
 // values passed as a calltype argument to PatcherInstance::WriteHiHook and PatcherInstance::CreateHiHook
 // значения передаваемые как аргумент calltype в PatcherInstance::WriteHiHook и PatcherInstance::CreateHiHook.
 enum EHiHookCallingConvention : int32_t
 {
-    STDCALL_ = 0,
-    ANY_ = STDCALL_,
+    STDCALL_  = 0,
+    ANY_      = STDCALL_,
     THISCALL_ = 1,
     FASTCALL_ = 2,
-    CDECL_ = 3,
+    CDECL_    = 3,
     FASTCALL1 = THISCALL_
 };
 
@@ -920,7 +952,7 @@ public:
     // т.е. размер патча >= 5, разница заполнятеся NOP'ами.
     virtual Patch* __stdcall WriteJmp(uintptr_t address, uintptr_t to) = 0;
 
-    NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteJmp(uintptr_t address, void* to)
+    NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteJmp(uintptr_t address, const void* to)
     { return WriteJmp(address, reinterpret_cast<uintptr_t>(to)); }
 
     // WriteHexPatch method
@@ -1085,7 +1117,7 @@ protected:
     #endif
 
     // protected
-    virtual HiHook* __stdcall xWriteHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, void* new_func) = 0;
+    virtual HiHook* __stdcall xWriteHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, const void* new_func) = 0;
 
 public:
     // Method WriteHiHook
@@ -1199,7 +1231,7 @@ public:
         }
         #endif
         hihook_function_condition(new_func);
-        return xWriteHiHook(address, hooktype, subtype, calltype, reinterpret_cast<void*>(new_func));
+        return xWriteHiHook(address, hooktype, subtype, calltype, static_cast<const void*>(new_func));
     }
 
     // Create Methods ...
@@ -1232,7 +1264,7 @@ public:
     { return xCreateLoHook(address, reinterpret_cast<lhfunc_t>(func)); }
 
 protected:
-    virtual HiHook* __stdcall xCreateHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, void* new_func) = 0;
+    virtual HiHook* __stdcall xCreateHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, const void* new_func) = 0;
 
 public:
     template<typename F> NH3API_NO_SANITIZE_ADDRESS
@@ -1250,7 +1282,7 @@ public:
         }
         #endif
         hihook_function_condition(new_func);
-        return xCreateHiHook(address, hooktype, subtype, calltype, reinterpret_cast<void*>(new_func));
+        return xCreateHiHook(address, hooktype, subtype, calltype, static_cast<const void*>(new_func));
     }
 
     // ApplyAll method
@@ -1349,7 +1381,7 @@ public:
     // Метод Write
     // пишет по адресу address данные/код из памяти по адресу data размером size байт
     // Возвращает указатель на патч.
-    virtual Patch* __stdcall Write(uintptr_t address, void* data, size_t size, EPatcherInstanceWriteMode mode = DATA_) = 0;
+    virtual Patch* __stdcall Write(uintptr_t address, const void* data, size_t size, EPatcherInstanceWriteMode mode = DATA_) = 0;
 
     // CreatePatch method
     // creates a patch in the same manner Write method,
@@ -1360,7 +1392,7 @@ public:
     // создаёт патч так же как и метод Write,
     // но НЕ ПРИМЕНЯЕТ его
     // возвращают указатель на патч.
-    virtual Patch* __stdcall CreatePatch(uintptr_t address, void* data, size_t size, EPatcherInstanceWriteMode mode = DATA_) = 0;
+    virtual Patch* __stdcall CreatePatch(uintptr_t address, const void* data, size_t size, EPatcherInstanceWriteMode mode = DATA_) = 0;
 
     [[deprecated("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")]]
     // # ver 2.1, deprecated since version v5.0
@@ -1375,7 +1407,7 @@ public:
     // stack_delta - размер памяти который можно поместить в стэк контекста
     // используя HookContext::esp и HookContext::Push внутри func.
     // Возвращают указатель на LoHook хук.
-    virtual LoHook* __stdcall WriteLoHookEx(uintptr_t address, void* func, uint32_t stack_delta) = 0;
+    virtual LoHook* __stdcall WriteLoHookEx(uintptr_t address, const void* func, uint32_t stack_delta) = 0;
 
     [[deprecated("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")]]
     // # ver 2.1, deprecated since version v5.0
@@ -1388,7 +1420,7 @@ public:
     // создает хук так же как и WriteLoHookEx,
     // но НЕ ПРИМЕНЯЕТ его.
     // Возвращают указатель на LoHook хук.
-    virtual LoHook* __stdcall CreateLoHookEx(uintptr_t address, void* func, uint32_t stack_delta) = 0;
+    virtual LoHook* __stdcall CreateLoHookEx(uintptr_t address, const void* func, uint32_t stack_delta) = 0;
 
 protected:
     // In the original form, the method is not supposed to be used,
@@ -2097,13 +2129,18 @@ public:
     template<typename ValueType> NH3API_NO_SANITIZE_ADDRESS
     inline ValueType VarGetValue(const char* __restrict name, NH3API_LIFETIMEBOUND const ValueType default_value = ValueType{}) const
     {
-        if constexpr (sizeof(ValueType) > 4)
+        if constexpr ( sizeof(ValueType) > 4 )
             return default_value;
         const Variable* const v = VarFind(name);
-        if (v == nullptr)
+        if ( v == nullptr )
             return default_value;
 
-        return nh3api::cast<ValueType>(v->GetValue());
+        if constexpr ( std::is_integral_v<ValueType> || std::is_enum_v<ValueType> )
+            return static_cast<ValueType>(v->GetValue());
+        else if constexpr ( std::is_pointer_v<ValueType> )
+            return reinterpret_cast<ValueType>(v->GetValue());
+        else
+            return nh3api::bit_cast<ValueType>(v->GetValue());
     }
 
     // The VarValue method returns a reference to the value of the "variable" named name
@@ -2117,10 +2154,10 @@ public:
     {
         static_assert(sizeof(ValueType) <= 4, "Patcher_x86's variables cannot be larger than 4 bytes.");
         Variable* v = VarFind(name);
-        if (v == nullptr)
+        if ( v == nullptr )
             v = VarInit(name, 0);
 
-        if (v == nullptr)
+        if ( v == nullptr )
             __debugbreak();
 
         return *reinterpret_cast<ValueType*>(v->GetPValue());

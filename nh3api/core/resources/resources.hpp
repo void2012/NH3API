@@ -1414,7 +1414,7 @@ NH3API_VIRTUAL_STRUCT font : public resource
         };
 
     public:
-        inline font(const char* __restrict name, const TFontSpec& __restrict fontspec, int32_t dsize, bool* __restrict d) noexcept
+        inline font(const char* __restrict name, const TFontSpec& __restrict fontspec, size_t dsize, const bool* __restrict d) noexcept
             : font(nh3api::dummy_tag)
         { THISCALL_5(void, 0x4B4DD0, this, name, &fontspec, dsize, d); }
 
