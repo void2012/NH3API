@@ -348,7 +348,7 @@ class LODFile
         bool      pointAt(const char* const itemName) noexcept
         { return THISCALL_2(bool, 0x4FB100, this, itemName); }
 
-        int32_t   read(void* dest, int32_t numBytes) noexcept
+        int32_t   read(void* dest, size_t numBytes) noexcept
         { return THISCALL_3(int32_t, 0x4FB1B0, this, dest, numBytes); }
 
     public:

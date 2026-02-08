@@ -30,6 +30,21 @@ void __thiscall Dispose() override\
 { return get_type_vftable(this)->GetSize(this); }
 #endif // NH3API_VIRTUAL_OVERRIDE_RESOURCE
 
+namespace ResourceManager
+{
+
+inline uint32_t& RedBits    = get_global_var_ref(0x69E5DC, uint32_t);
+inline uint32_t& RedShift   = get_global_var_ref(0x69E5E4, uint32_t);
+inline uint32_t& RedMask    = get_global_var_ref(0x69E5E8, uint32_t);
+inline uint32_t& GreenBits  = get_global_var_ref(0x69E5D0, uint32_t);
+inline uint32_t& GreenShift = get_global_var_ref(0x69E5E0, uint32_t);
+inline uint32_t& GreenMask  = get_global_var_ref(0x69E5EC, uint32_t);
+inline uint32_t& BlueBits   = get_global_var_ref(0x69E5F0, uint32_t);
+inline uint32_t& BlueShift  = get_global_var_ref(0x69E5D8, uint32_t);
+inline uint32_t& BlueMask   = get_global_var_ref(0x69E5D4, uint32_t);
+
+} // namespace ResourceManager
+
 #pragma pack(push, 4)
 // Game resource abstract class /
 // Ресурс игры(базовый класс).
@@ -264,7 +279,7 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
             : TPalette16(nh3api::dummy_tag)
         { THISCALL_2(void, 0x522DD0, this, &other); }
 
-        inline TPalette16(const uint16_t* data) noexcept
+        inline TPalette16(const void* data) noexcept
             : TPalette16(nh3api::dummy_tag)
         { THISCALL_2(void, 0x522B90, this, data); }
 
@@ -280,12 +295,12 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
 
         inline TPalette16(const char*       name,
                           const TPalette24& p24,
-                          uint32_t          rbits,
-                          uint32_t          rshift,
-                          uint32_t          gbits,
-                          uint32_t          gshift,
-                          uint32_t          bbits,
-                          uint32_t          bshift) noexcept
+                          uint32_t          rbits  = ResourceManager::RedBits,
+                          uint32_t          rshift = ResourceManager::RedShift,
+                          uint32_t          gbits  = ResourceManager::GreenBits,
+                          uint32_t          gshift = ResourceManager::GreenShift,
+                          uint32_t          bbits  = ResourceManager::BlueBits,
+                          uint32_t          bshift = ResourceManager::BlueShift) noexcept
             : TPalette16(nh3api::dummy_tag)
         { THISCALL_9(void, 0x522C60, this, name, &p24, rbits, rshift, gbits, gshift, bbits, bshift); }
 
@@ -306,7 +321,7 @@ NH3API_VIRTUAL_STRUCT TPalette16 : public resource
         inline void Convert24to16(const TRGB* p24, uint32_t rbits, uint32_t rshift, uint32_t gbits, uint32_t gshift, uint32_t bbits, uint32_t bshift) noexcept
         {
             for ( size_t i = 0; i < Palette.size(); ++i )
-                Palette[i] = static_cast<uint16_t>(((p24[i].Blue >> (8u - bbits) << bshift) | (p24[i].Green >> (8u - gbits) << gshift) | (p24[i].Red >> (8u - rbits) << rshift)) & UINT16_MAX);
+                Palette[i] = static_cast<uint16_t>(((p24[i].Blue >> (8U - bbits) << bshift) | (p24[i].Green >> (8U - gbits) << gshift) | (p24[i].Red >> (8U - rbits) << rshift)) & UINT16_MAX);
         }
 
         inline void Convert24to16(const TPalette24& p24, uint32_t rbits, uint32_t rshift, uint32_t gbits, uint32_t gshift, uint32_t bbits, uint32_t bshift) noexcept
@@ -1181,12 +1196,12 @@ NH3API_VIRTUAL_STRUCT Bitmap816 : public resource
 
         inline Bitmap816(const char* __restrict name,
                          const char* __restrict path,
-                         uint32_t rbits,
-                         uint32_t rshift,
-                         uint32_t gbits,
-                         uint32_t gshift,
-                         uint32_t bbits,
-                         uint32_t bshift) noexcept
+                         uint32_t rbits  = ResourceManager::RedBits,
+                         uint32_t rshift = ResourceManager::RedShift,
+                         uint32_t gbits  = ResourceManager::GreenBits,
+                         uint32_t gshift = ResourceManager::GreenShift,
+                         uint32_t bbits  = ResourceManager::BlueBits,
+                         uint32_t bshift = ResourceManager::BlueShift) noexcept
             : Bitmap816(nh3api::dummy_tag)
         { THISCALL_9(void, 0x44F5A0, this, name, path, rbits, rshift, gbits, gshift, bbits, bshift); }
 
@@ -1207,6 +1222,15 @@ NH3API_VIRTUAL_STRUCT Bitmap816 : public resource
                   int32_t      dy,
                   bool         tblit)
         { THISCALL_9(void, 0x44FA80, this, sx, sy, sw, sh, dst, dx, dy, tblit); }
+
+        void SetPalette(const void* pal)
+        { THISCALL_2(void, 0x44FB10, this, pal); }
+
+        void SetPalette(TPalette24* p24)
+        { THISCALL_2(void, 0x44FB30, this, p24); }
+
+        void ResetPalette()
+        { THISCALL_1(void, 0x44FB50, this); }
 
     // virtual functions
     public:
@@ -1973,16 +1997,6 @@ inline void Dispose(resource* arg)
 
 inline void AddToCache(resource* r)
 { FASTCALL_1(void, 0x5596F0, r); }
-
-inline uint32_t& RedBits    = get_global_var_ref(0x69E5DC, uint32_t);
-inline uint32_t& RedShift   = get_global_var_ref(0x69E5E4, uint32_t);
-inline uint32_t& RedMask    = get_global_var_ref(0x69E5E8, uint32_t);
-inline uint32_t& GreenBits  = get_global_var_ref(0x69E5D0, uint32_t);
-inline uint32_t& GreenShift = get_global_var_ref(0x69E5E0, uint32_t);
-inline uint32_t& GreenMask  = get_global_var_ref(0x69E5EC, uint32_t);
-inline uint32_t& BlueBits   = get_global_var_ref(0x69E5F0, uint32_t);
-inline uint32_t& BlueShift  = get_global_var_ref(0x69E5D8, uint32_t);
-inline uint32_t& BlueMask   = get_global_var_ref(0x69E5D4, uint32_t);
 
 } // namespace ResourceManager
 
