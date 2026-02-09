@@ -293,7 +293,7 @@ class exe_string
         inline static constexpr uint8_t _FROZEN = 255;
 
     public:
-        inline static constexpr size_t npos = size_t(-1);
+        inline static constexpr size_t npos = static_cast<size_t>(-1);
 
     public:
         exe_string& assign(exe_string&& _Other) noexcept
@@ -849,18 +849,27 @@ class exe_string
 
         iterator insert(const const_iterator _Where, char _Character)
         {
-            const size_t _Offset = (_Inside(_Where)) ? static_cast<size_t>(_Where - cbegin()) : 0;
-            if ( _Offset )
-                insert( _Offset, 1, _Character );
-            return begin() + static_cast<ptrdiff_t>(_Offset);
+            const bool _Is_inside = _Inside_exclusive(_Where);
+            if ( _Is_inside )
+            {
+                const size_t _Offset = static_cast<size_t>(_Where - cbegin());
+                insert(_Offset, 1, _Character);
+                return begin() + static_cast<ptrdiff_t>(_Offset);
+            }
+            return _Where > end() ? end() : begin();
         }
 
         iterator insert(const const_iterator _Where, const size_t _Count, char _Character)
         {
-            const size_t _Offset = (_Inside(_Where)) ? static_cast<size_t>(_Where - cbegin()) : 0;
-            if ( _Offset )
-                insert( _Offset, _Count, _Character );
-            return begin() + static_cast<ptrdiff_t>(_Offset);
+            const bool _Is_inside = _Inside_exclusive(_Where);
+            if ( _Is_inside )
+            {
+                const size_t _Offset = static_cast<size_t>(_Where - cbegin());
+                insert(_Offset, _Count, _Character);
+                return begin() + static_cast<ptrdiff_t>(_Offset);
+            }
+
+            return _Where > end() ? end() : begin();
         }
 
     #if defined(__cpp_lib_concepts) && !defined(__INTELLISENSE__)
@@ -871,11 +880,12 @@ class exe_string
         iterator insert(const const_iterator _Where, const _Iter _First, const _Iter _Last)
         {
             nh3api::verify_range(_First, _Last);
-            const size_t _Offset = (_Inside(_Where)) ? static_cast<size_t>(_Where - cbegin()) : 0;
-            if ( _Offset )
+            const bool _Is_inside = _Inside(_Where);
+            if ( _Is_inside )
             {
-                const auto _UFirst = nh3api::unfancy(_First);
-                const auto _ULast  = nh3api::unfancy(_Last);
+                const size_t _Offset = static_cast<size_t>(_Where - cbegin());
+                const auto   _UFirst = nh3api::unfancy(_First);
+                const auto   _ULast  = nh3api::unfancy(_Last);
                 if constexpr ( is_elem_cptr<decltype(_UFirst)>::value )
                 {
                     const size_t _Count = static_cast<size_t>(_ULast - _UFirst);
@@ -902,8 +912,9 @@ class exe_string
                         },
                         _Offset, _First, _Count);
                 }
+                return begin() + static_cast<ptrdiff_t>(_Offset);
             }
-            return begin() + static_cast<ptrdiff_t>(_Offset);
+            return _Where > end() ? end() : begin();
         }
 
     #ifdef __cpp_lib_containers_ranges
@@ -914,10 +925,12 @@ class exe_string
     #endif
         iterator insert_range(const const_iterator _Where, _Range&& _Rng)
         {
-            const size_t _Offset = (_Inside(_Where)) ? static_cast<size_t>(_Where - cbegin()) : 0;
-            const size_t _Count = std::ranges::size(_Rng);
-            if ( _Count == 0 ) NH3API_UNLIKELY
-                return begin() + static_cast<difference_type>(_Offset);
+            const bool _Is_inside = _Inside_exclusive(_Where);
+            if ( !_Is_inside )
+                return _Where > end() ? end() : begin();
+
+            const size_t _Offset = static_cast<size_t>(_Where - cbegin());
+            const size_t _Count  = std::ranges::size(_Rng);
 
             if constexpr ( std::ranges::sized_range<_Range> && nh3api::contiguous_chars_range<_Range>)
             {
@@ -1240,8 +1253,12 @@ class exe_string
                 return *this;
 
             nh3api::verify_range(_First, _Last);
+            const bool _Is_inside = _Inside_exclusive(_First) && _Inside_exclusive(_Last);
+            if ( !_Is_inside )
+                return *this;
+
             const size_t _Difference = (_First < _Last) ? static_cast<size_t>(_Last - _First) : 0;
-            const size_t _Offset     = (_Inside(_First)) ? static_cast<size_t>(_First - _Myptr) : 0;
+            const size_t _Offset     = static_cast<size_t>(_First - _Myptr);
             if ( _Offset && _Difference )
                 return replace(_Offset, _Difference, _Other);
 
@@ -1256,8 +1273,12 @@ class exe_string
                 return *this;
 
             nh3api::verify_range(_First, _Last);
+            const bool _Is_inside = _Inside_exclusive(_First) && _Inside_exclusive(_Last);
+            if ( !_Is_inside )
+                return *this;
+
             const size_t _Difference = (_First < _Last) ? static_cast<size_t>(_Last - _First) : 0;
-            const size_t _Offset     = (_Inside(_First)) ? static_cast<size_t>(_First - _Myptr) : 0;
+            const size_t _Offset     = static_cast<size_t>(_First - _Myptr);
             if ( _Offset && _Difference )
                 return replace(_Offset, _Difference, _Other.data(), _Other.size());
 
@@ -1273,8 +1294,12 @@ class exe_string
                 return *this;
 
             nh3api::verify_range(_First, _Last);
+            const bool _Is_inside = _Inside_exclusive(_First) && _Inside_exclusive(_Last);
+            if ( !_Is_inside )
+                return *this;
+
             const size_t _Difference = (_First < _Last) ? static_cast<size_t>(_Last - _First) : 0;
-            const size_t _Offset     = (_Inside(_First)) ? static_cast<size_t>(_First - begin()) : 0;
+            const size_t _Offset     = static_cast<size_t>(_First - begin());
             if ( _Offset && _Difference && _String )
                 return replace(_Offset, _Difference, _String, _Count);
 
@@ -1286,8 +1311,12 @@ class exe_string
                             const char* const    _String)
         {
             nh3api::verify_range(_First, _Last);
+            const bool _Is_inside = _Inside_exclusive(_First) && _Inside_exclusive(_Last);
+            if ( !_Is_inside )
+                return *this;
+
             const size_t _Difference = (_First < _Last) ? static_cast<size_t>(_Last - _First) : 0;
-            const size_t _Offset     = (_Inside(_First)) ? static_cast<size_t>(_First - begin()) : 0;
+            const size_t _Offset     = static_cast<size_t>(_First - begin());
             if ( _Offset && _Difference && _String )
                 return replace(_Offset, _Difference, _String);
 
@@ -1300,8 +1329,12 @@ class exe_string
                             char                 _Character)
         {
             nh3api::verify_range(_First, _Last);
+            const bool _Is_inside = _Inside_exclusive(_First) && _Inside_exclusive(_Last);
+            if ( !_Is_inside )
+                return *this;
+
             const size_t _Difference = (_First < _Last) ? static_cast<size_t>(_Last - _First) : 0;
-            const size_t _Offset     = (_Inside(_First)) ? static_cast<size_t>(_First - begin()) : 0;
+            const size_t _Offset     = static_cast<size_t>(_First - begin());
             if ( _Offset && _Difference )
                 return replace(_Offset, _Difference, _Count, _Character);
 
