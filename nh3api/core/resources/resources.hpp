@@ -1599,7 +1599,7 @@ struct THelpText
 NH3API_VIRTUAL_STRUCT TTextResource : public resource
 {
     public:
-        inline TTextResource(const char* name, int32_t size, const char* data) noexcept
+        inline TTextResource(const char* name, size_t size, const char* data) noexcept
             : TTextResource(nh3api::dummy_tag)
         { THISCALL_4(void,  0x5BBF90, this, name, size, data); }
 
@@ -1680,7 +1680,7 @@ inline const TTextResource* const& AdventureEventText = get_global_var_ref(0x696
 NH3API_VIRTUAL_STRUCT TSpreadsheetResource : public resource
 {
     public:
-        TSpreadsheetResource(const char* name, int32_t size, const char* data) noexcept
+        TSpreadsheetResource(const char* name, size_t size, const char* data) noexcept
             : TSpreadsheetResource(nh3api::dummy_tag) // resource(name, RType_text)
         { THISCALL_4(void, 0x5BC260, this, name, size, data); }
 

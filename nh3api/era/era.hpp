@@ -605,15 +605,15 @@ inline void* __stdcall GetRealAddr(void* Addr) noexcept
  * @param NewValue New string value.
  * @param BufSize  Maximal buffer size or -1 to ignore it (buffer overflow may occur).
  */
-inline void SetPcharValue(char * __restrict Buf, const char * __restrict NewValue, int32_t BufSize)  noexcept
+inline void SetPcharValue(char * __restrict Buf, const char * __restrict NewValue, size_t BufSize)  noexcept
 {
     if (BufSize < 0)
     {
-        ::lstrcpyA(Buf, NewValue);
+        ::std::strcpy(Buf, NewValue);
     }
     else if (BufSize > 0)
     {
-        int32_t NumBytesToCopy = ::lstrlenA(NewValue);
+        size_t NumBytesToCopy = ::std::strlen(NewValue);
 
         if (NumBytesToCopy >= BufSize)
             NumBytesToCopy = BufSize - 1;
