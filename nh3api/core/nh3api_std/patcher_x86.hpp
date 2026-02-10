@@ -937,6 +937,18 @@ public:
     template<typename T> NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteAddressOf(uintptr_t address, const T& data)
     { return WriteDword(address, *reinterpret_cast<uint32_t*>(__builtin_addressof(data))); }
 
+    // WriteFloat method
+    // write a four-byte floating point number at address
+    // (creates and applies DATA_ patch)
+    // Returns the pointer to the patch
+    /////////////////////////////////////////////////
+    // Метод WriteFloat
+    // пишет четырехбайтовое число с плавающей точкой по адресу address
+    // (создает и применяет DATA_ патч)
+    // Возвращает указатель на патч.
+    NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteFloat(uintptr_t address, float data)
+    { return WriteDword(address, nh3api::bit_cast<uint32_t>(data)); }
+
     // WriteJmp method
     // writes jmp to opcode at address
     // (creates and applies a CODE_ patch)
