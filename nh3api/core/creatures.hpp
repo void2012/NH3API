@@ -677,7 +677,7 @@ class armyGroup
         // Не нужен указатель this. Получить название количества существ в армии.
         /// @param howMany количество существ
         /// @param iNameSet 0 or 2 is upper limit, 1 is interval / 0 или 2 это верхнее ограничение, 1 это интервал
-        [[nodiscard]] static char const* GetArmySizeName(int32_t howMany, int32_t iNameSet)
+        [[nodiscard]] static const char* GetArmySizeName(int32_t howMany, int32_t iNameSet)
         { return FASTCALL_2(const char*, 0x44AAB0, howMany, iNameSet); }
 
         // Get army morale /

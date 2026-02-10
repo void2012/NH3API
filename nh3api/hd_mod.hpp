@@ -327,7 +327,7 @@ struct Palette : public ::resource
             return *this;
         }
 
-        inline Palette(Palette const& other) noexcept
+        inline Palette(const Palette& other) noexcept
             : Palette(nh3api::dummy_tag)
         { THISCALL_2(void, 0x522DD0, this, &other); }
 

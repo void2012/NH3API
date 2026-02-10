@@ -1728,7 +1728,7 @@ NH3API_VIRTUAL_STRUCT TSpreadsheetResource : public resource
 
         // Get spreadsheet cell (intersection of row <r> and column <c>) /
         // Колонка таблицы на пересечении строки <r> и столбца <c>
-        [[nodiscard]] char const* GetSpreadsheet(size_t r, size_t c) const
+        [[nodiscard]] const char* GetSpreadsheet(size_t r, size_t c) const
         {
             if ( SpreadSheet[r] )
             {

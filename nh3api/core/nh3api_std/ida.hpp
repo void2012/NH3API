@@ -207,7 +207,7 @@ NH3API_IDA_INTRIN T saturated_mul(T count, T elsize) noexcept
 }
 
 #if NH3API_CHECK_MSVC
-void __movsb(unsigned char*, unsigned char const*, size_t);
+void __movsb(unsigned char*, const unsigned char*, size_t);
 #endif
 
 // memcpy() with determined behavior: it always copies

@@ -699,7 +699,7 @@ class army
         void SetSpellInfluence(SpellID       spell,
                                int32_t       power,
                                TSkillMastery mastery,
-                               hero const*   casting_hero)
+                               const hero*   casting_hero)
         { THISCALL_5(void, 0x444610, this, spell, power, mastery, casting_hero); }
 
         // Decrement each spell influence (by round) /

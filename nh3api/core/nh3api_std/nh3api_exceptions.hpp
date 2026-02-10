@@ -22,7 +22,7 @@
 #pragma pack(push, 4)
 struct __std_exception_data
 {
-    char const* _What;
+    const char* _What;
     bool        _DoFree;
 };
 #pragma pack(pop)
