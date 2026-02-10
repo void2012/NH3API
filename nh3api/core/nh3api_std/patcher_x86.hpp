@@ -2066,6 +2066,11 @@ public:
     // больше копируемого.
     virtual int32_t __stdcall MemCopyCodeEx(uintptr_t dst, uintptr_t src, size_t size) = 0;
 
+protected:
+    virtual Variable* __stdcall xVarInit(const char* __restrict name, uint32_t value) = 0;
+    virtual Variable* __stdcall xVarFind(const char* name) = 0;
+
+public:
     // # ver 2.3
     // VarInit Method
     // initializes a "variable" named name and sets the value of "variable" to value
@@ -2075,12 +2080,24 @@ public:
     // инициализирует "переменную" c именем name и устанавливает значение "переменной" равным value
     // если "переменная" с таким именем уже существует, то просто устанавливает ее значение равным value
     // возвращает указатель на "переменную" в случае успеха и nullptr в противном случае.
-    virtual Variable* __stdcall VarInit(const char* name, uint32_t value) = 0;
+    template<typename ValueType> NH3API_NO_SANITIZE_ADDRESS
+    inline Variable* __stdcall VarInit(const char* __restrict name, ValueType value)
+#ifdef __cpp_concepts
+    requires ( ::std::is_trivially_default_constructible_v<ValueType> && ::std::is_trivially_copyable_v<ValueType> && sizeof(ValueType) <= 4 )
+#endif
+    {
+        #ifndef __cpp_concepts
+        static_assert(::std::is_trivially_default_constructible_v<ValueType> && ::std::is_trivially_copyable_v<ValueType> && sizeof(ValueType) <= 4, "ValueType must be trivial");
+        #endif
 
-protected:
-    virtual Variable* __stdcall xVarFind(const char* name) = 0;
+        if constexpr ( std::is_integral_v<ValueType> || std::is_enum_v<ValueType> )
+            return xVarInit(name, static_cast<uint32_t>(value));
+        else if constexpr ( std::is_pointer_v<ValueType> )
+            return xVarInit(name, reinterpret_cast<uint32_t>(value));
+        else
+            return xVarInit(name, nh3api::bit_cast<uint32_t>(value));
+    }
 
-public:
     // # ver 2.3
     // VarFind method
     // returns a pointer to a "variable" named name, if such was initialized
