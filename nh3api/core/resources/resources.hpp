@@ -1499,10 +1499,9 @@ NH3API_VIRTUAL_STRUCT font : public resource
                 return 0;
 
             size_t result = 0;
-            char   c      = '\0';
             while ( *arg )
             {
-                c       = *arg++;
+                char c  = *arg++;
                 result += static_cast<size_t>(GetCharacterWidth(c));
             }
             return result;

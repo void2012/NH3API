@@ -1436,7 +1436,7 @@ struct ExtraInfoUnion
             wagon_info.resource_amount = 0;
             wagon_info.visited_bits    = 0;
             wagon_info.resource        = static_cast<uint8_t>(GAME_RESOURCE_NONE) & 0b1111U;
-            wagon_info.artifact        = ARTIFACT_NONE;
+            wagon_info.artifact        = artifact;
             wagon_info.full            = true;
         }
 

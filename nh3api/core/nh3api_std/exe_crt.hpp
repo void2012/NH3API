@@ -11,7 +11,9 @@
 
 #include "patcher_x86.hpp"
 
-NH3API_DISABLE_WARNING_BEGIN("-Wattributes", 4714)
+NH3API_WARNING(push)
+NH3API_WARNING_GNUC_DISABLE("-Wattributes")
+NH3API_WARNING_MSVC_DISABLE(4714)
 
 using exe_PHNDLR = void (__cdecl*)(int32_t);
 using exe_new_handler = void (__cdecl*)();
@@ -232,14 +234,14 @@ inline exe_tiddata* exe_getptd() noexcept
 inline exe_new_handler exe_set_new_handler(exe_new_handler handler) noexcept
 {
     exe_new_handler old_handler = reinterpret_cast<exe_new_handler>(0x6AB86C);
-    _InterlockedExchange(*get_global_var_ptr(0x6AB86C, uintptr_t*), reinterpret_cast<uintptr_t>(handler));
+    _InterlockedExchange(*get_global_var_ptr(0x6AB86C, long*), reinterpret_cast<long>(handler));
     return old_handler;
 }
 
 inline exe_se_translator exe_set_se_translator(exe_se_translator translator, exe_tiddata* curr_thread_data = exe_getptd()) noexcept
 {
     exe_se_translator old_translator = curr_thread_data->_translator;
-    _InterlockedExchange(reinterpret_cast<volatile uintptr_t*>(curr_thread_data->_translator), reinterpret_cast<uintptr_t>(translator));
+    _InterlockedExchange(reinterpret_cast<volatile long*>(curr_thread_data->_translator), reinterpret_cast<long>(translator));
     return old_translator;
 }
 
@@ -263,4 +265,4 @@ inline errno_t exe_set_errno(int32_t error_value) noexcept
 inline int32_t exe_crtMessageBoxA(const char* lpText, const char* lpCaption, uint32_t uType) noexcept
 { return CDECL_3(int32_t, 0x626267, lpText, lpCaption, uType); }
 
-NH3API_DISABLE_WARNING_END
+NH3API_WARNING(pop)

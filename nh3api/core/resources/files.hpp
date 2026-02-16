@@ -526,20 +526,10 @@ NH3API_VIRTUAL_CLASS t_stdio_file_adapter final : public TAbstractFile
         { get_type_vftable(this)->scalar_deleting_destructor(this, flag); }
 
         int32_t __thiscall read(void* buf, size_t len) override
-        {
-            if ( buf && len && file )
-                return static_cast<int32_t>(exe_fread(buf, len, 1, file.get()));
-
-            return 0;
-        }
+        { return get_type_vftable(this)->read(this, buf, len); }
 
         int32_t __thiscall write(const void* buf, size_t len) override
-        {
-            if ( buf && len && file )
-                return static_cast<int32_t>(exe_fwrite(buf, len, 1, file.get()));
-
-            return 0;
-        }
+        { return get_type_vftable(this)->write(this, buf, len); }
 
     protected:
         // offset: +0x4 = +4,  size = 0x4 = 4
@@ -553,5 +543,6 @@ NH3API_SPECIALIZE_TYPE_VFTABLE(0x63E74C, TGzFile)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63DACC, TStreamBufFile)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63E710, TGzInflateBuf)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x641138, t_lod_file_adapter)
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x641144, t_stdio_file_adapter)
 
 NH3API_WARNING(pop)

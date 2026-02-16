@@ -242,8 +242,7 @@ class exe_string
             NH3API_ASSUME(_Left_ptr != nullptr && _Right_ptr != nullptr);
 
             const size_t _New_size     = _Left_size + _Right_size;
-            size_t       _New_capacity = _MIN_SIZE;
-            _New_capacity              = _Calculate_growth(_New_size, _MIN_SIZE, max_size());
+            const size_t _New_capacity = _Calculate_growth(_New_size, _MIN_SIZE, max_size());
             _Myptr                     = _Allocate_for_capacity(_New_capacity) + 1;
             _Refcnt(_Myptr)            = 0;
             _Mysize                    = _New_size;
@@ -780,6 +779,9 @@ class exe_string
             if ( _String == nullptr || _Count == 0 ) NH3API_UNLIKELY
                 return *this;
 
+            if ( empty() ) NH3API_UNLIKELY
+                return assign(_String, _Count);
+
             return _Reallocate_grow_by(
             _Count,
             NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const size_t _Src_offset,
@@ -809,6 +811,9 @@ class exe_string
             if ( _Length == 0 ) NH3API_UNLIKELY
                 return *this;
 
+            if ( empty() ) NH3API_UNLIKELY
+                return assign(_String, _Length);
+
             return _Reallocate_grow_by(
             _Length,
             NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const size_t _Off,
@@ -832,6 +837,9 @@ class exe_string
         {
             if ( _Count == 0 ) NH3API_UNLIKELY
                 return *this;
+
+            if ( empty() ) NH3API_UNLIKELY
+                return assign(_Count, _Character);
 
             _Check_offset(static_cast<size_t>(_Offset));
             return _Reallocate_grow_by(
@@ -900,6 +908,12 @@ class exe_string
                     if ( _Count == 0 )
                         return begin() + static_cast<ptrdiff_t>(_Offset);
 
+                    if ( empty() )
+                    {
+                        assign(_First, _Last);
+                        return _First;
+                    }
+
                     _Reallocate_grow_by(
                         _Count,
                         NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const char* const _Old_ptr, const size_t _Old_size, const size_t _Src_offset,
@@ -931,6 +945,11 @@ class exe_string
 
             const size_t _Offset = static_cast<size_t>(_Where - cbegin());
             const size_t _Count  = std::ranges::size(_Rng);
+            if ( empty() )
+            {
+                assign_range(_Rng);
+                return begin();
+            }
 
             if constexpr ( std::ranges::sized_range<_Range> && nh3api::contiguous_chars_range<_Range>)
             {
@@ -1733,7 +1752,7 @@ class exe_string
             if ( _Rightsize == 0 )
                 return true;
 
-            if ( _String.data() && _Rightsize )
+            if ( _String.data() )
             {
                 if ( _Mysize < _Rightsize )
                     return false;
@@ -1765,7 +1784,7 @@ class exe_string
             if ( _Rightsize == 0 )
                 return true;
 
-            if ( _String.data() && _Rightsize )
+            if ( _String.data() )
             {
                 if ( _Mysize < _Rightsize )
                     return false;
@@ -2364,7 +2383,7 @@ class exe_string
             return 0;
         }
 
-        inline void _Check_size(const size_t _Requested_size) const
+        inline static void _Check_size(const size_t _Requested_size)
         {
             if ( _Requested_size > max_size() ) NH3API_UNLIKELY
                 _Throw_length_exception();

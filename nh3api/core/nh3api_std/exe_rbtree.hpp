@@ -722,9 +722,10 @@ class exe_rbtree
         template<class... _Args>
         ::std::pair<iterator, bool> emplace(_Args&&... _Values)
         {
-            using _In_place_key_extractor = ::std::conditional_t<TreeType == rbtree_type::map_like,
-                                                                 in_place_key_extract_map<_Args...>,
-                                                                 in_place_key_extract_set<_Args...>>;
+            using _In_place_key_extractor
+                    = ::std::conditional_t<TreeType == rbtree_type::map_like,
+                                           in_place_key_extract_map<_Args...>,
+                                           in_place_key_extract_set<_Args...>>;
 
             _Tree_find_result _Loc;
             _Nodeptr          _Inserted = nullptr;
@@ -756,9 +757,10 @@ class exe_rbtree
         template<class... _Args>
         iterator emplace_hint(const_iterator _Hint, _Args&&... _Values)
         {
-            using _In_place_key_extractor = ::std::conditional_t<TreeType == rbtree_type::map_like,
-                                                                 in_place_key_extract_map<_Args...>,
-                                                                 in_place_key_extract_set<_Args...>>;
+            using _In_place_key_extractor
+                    = ::std::conditional_t<TreeType == rbtree_type::map_like,
+                                           in_place_key_extract_map<_Args...>,
+                                           in_place_key_extract_set<_Args...>>;
 
             _Tree_find_result _Loc;
             _Nodeptr          _Inserted = nullptr;
@@ -773,8 +775,8 @@ class exe_rbtree
             }
             else
             {
-                _Nodeptr    _Newnode = _Tree_node::_Buynode(_Myhead, ::std::forward<_Args>(_Values)...);
-                const auto& _Keyval  = _Key_access(_Newnode->_Myval);
+                _Nodeptr _Newnode = _Tree_node::_Buynode(_Myhead, ::std::forward<_Args>(_Values)...);
+                _Loc              = _Find_hint(_Hint._Ptr, _Key_access(_Newnode->_Myval));
                 if ( _Loc._Duplicate )
                     return _Loc._Location._Parent;
 

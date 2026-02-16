@@ -1058,11 +1058,11 @@ inline constexpr bool use_era
 // rather that using global variables which is double indirection
 // whole program optimization doesn't always fix this issue though.
 #if NH3API_HAS_BUILTIN_CONSTANT_P && !defined(NH3API_CLANGD)
-    #define get_global_var_ptr(address,...) (__builtin_constant_p(reinterpret_cast<__VA_ARGS__* const>(address)) ? reinterpret_cast<__VA_ARGS__* const>(address) : reinterpret_cast<__VA_ARGS__* const>(address))  // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
-    #define get_global_var_ref(address,...) (*((__builtin_constant_p(reinterpret_cast<__VA_ARGS__* const>(address)) ? reinterpret_cast<__VA_ARGS__* const>(address) : reinterpret_cast<__VA_ARGS__* const>(address)))) // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
+    #define get_global_var_ptr(address,...) (__builtin_constant_p(reinterpret_cast<__VA_ARGS__*>(address)) ? reinterpret_cast<__VA_ARGS__* const>(address) : reinterpret_cast<__VA_ARGS__*>(address))  // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
+    #define get_global_var_ref(address,...) (*((__builtin_constant_p(reinterpret_cast<__VA_ARGS__*>(address)) ? reinterpret_cast<__VA_ARGS__* const>(address) : reinterpret_cast<__VA_ARGS__*>(address)))) // use '-fwhole-program' or '-flto'('-O1' on clang) flag to make it constexpr
 #else
-    #define get_global_var_ptr(address,...) (reinterpret_cast<__VA_ARGS__* const>(address))
-    #define get_global_var_ref(address,...) (*reinterpret_cast<__VA_ARGS__* const>(address))
+    #define get_global_var_ptr(address,...) (reinterpret_cast<__VA_ARGS__*>(address))
+    #define get_global_var_ref(address,...) (*reinterpret_cast<__VA_ARGS__*>(address))
 #endif
 
 #ifndef NH3API_SCALAR_DELETING_DESTRUCTOR
