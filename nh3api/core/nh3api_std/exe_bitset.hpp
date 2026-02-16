@@ -29,6 +29,17 @@
 #include <functional> // std::hash
 #include <string>     // std::string, std::string_view, std::char_traits
 
+#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+#include <stdexcept> // std::invalid_argument, std::overflow_error, std::out_of_range
+#else
+namespace std
+{
+class invalid_argument;
+class overflow_error;
+class out_of_range;
+} // namespace std
+#endif
+
 #include "stl_extras.hpp"        // in_range
 #include "exe_string.hpp"        // exe_string
 #include "intrin.hpp"            // bitpopcnt

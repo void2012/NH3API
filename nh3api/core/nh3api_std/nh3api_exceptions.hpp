@@ -9,11 +9,6 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-#include <exception>
-#include <stdexcept> // std::length_error, std::out_of_range
-#endif
-
 #include <type_traits>
 
 #if defined(_MSC_VER) && !defined(__MINGW32__) && __has_include(<vcruntime_exception.h>) && defined(_HAS_EXCEPTIONS) && _HAS_EXCEPTIONS
@@ -32,14 +27,14 @@ struct __std_exception_data
 #include "memory.hpp"
 
 // size = 0xC = 12, align = 4
-struct exe_exception
+class exe_exception
 {
 	// vftable
 	public:
 		struct vftable_t
 		{
-			void (__thiscall* scalar_deleting_destructor)(exe_exception*, uint8_t);
-			const char* (__thiscall* what)(exe_exception*);
+			void        (__thiscall* scalar_deleting_destructor)(exe_exception*, uint8_t);
+			const char* (__thiscall* what)(const exe_exception*);
 			// void (__thiscall* _Doraise)(const exe_exception*);
 		};
 
@@ -50,7 +45,7 @@ struct exe_exception
 		{ return get_vftable(this)->scalar_deleting_destructor(this, flag); }
 
 		// vftable shift: +4
-		virtual const char* __thiscall what() noexcept
+		[[nodiscard]] virtual const char* __thiscall what() const noexcept
 		{ return get_vftable(this)->what(this); }
 
 		// vftable shift: +8

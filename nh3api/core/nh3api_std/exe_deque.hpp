@@ -27,15 +27,27 @@
 
 #pragma once
 
-#include <utility>               // std::swap
 #include <algorithm>             // std::copy, std::copy_backward
+#include <utility>               // std::swap
 #ifdef __cpp_lib_three_way_comparison
 #include <compare>               // std::strong_ordering
 #endif
+
+#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+#include <stdexcept> // std::out_of_range
+#else
+namespace std
+{
+class bad_alloc;
+class out_of_range;
+} // namespace std
+#endif
+
 #include "nh3api_exceptions.hpp" // exceptions
+#include "iterator.hpp"          // iterator_for_container concept OR tt::is_iterator_v<T> type trait
 #include "memory.hpp"            // exe_allocator
 #include "stl_extras.hpp"        // std::strong_ordering
-#include "iterator.hpp"          // iterator_for_container concept OR tt::is_iterator_v<T> type trait
+
 
 #pragma pack(push, 4)
 // Visual C++ 6.0 std::deque implementation used by heroes3.exe
@@ -1108,12 +1120,18 @@ protected:
     void _Allocate_map() noexcept
     {
         _Map = static_cast<_Mapptr>(::operator new(_Mapsize * sizeof(pointer), exe_heap, std::nothrow));
+        if ( _Map == nullptr )
+            nh3api::throw_exception<std::bad_alloc>();
+
         std::memset(_Map, 0, _Mapsize * sizeof(pointer));
     }
 
     _Mapptr _Growmap(size_t _Newsize)
     {
         _Mapptr _M = static_cast<_Mapptr>(::operator new(_Newsize * sizeof(pointer), exe_heap, std::nothrow));
+        if ( _M == nullptr )
+            nh3api::throw_exception<std::bad_alloc>();
+
         std::copy(_Myfirst._Map, _Mylast._Map + 1, _M + _Newsize / 4);
         _Freeptr(_Map);
         _Map     = _M;
@@ -1123,9 +1141,9 @@ protected:
 
     void _Tidy() noexcept
     {
-        while (!empty())
+        while ( !empty() )
             pop_front();
-        if (_Map)
+        if ( _Map )
             _Freemap();
     }
 

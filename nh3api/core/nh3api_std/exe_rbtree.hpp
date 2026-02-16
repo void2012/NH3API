@@ -29,13 +29,22 @@
 
 #include <array>        // std::array
 #include <cassert>      // assert
-#include <functional>   // std::less
-#ifdef __cpp_lib_ranges
+#include <functional>   // std::less<>
+#if (__cplusplus >= 202002L) || defined(__cpp_lib_ranges)
 #include <ranges>       // std::default_sentinel_t
 #endif
-#include <stdexcept>
 #include <type_traits>  // std::add_pointer_t, std::conditional_t
 #include <utility>      // std::exchange, std::pair, std::swap
+
+#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+#include <stdexcept> // std::length_error
+#else
+namespace std
+{
+class bad_alloc;
+class length_error;
+} // namespace std
+#endif
 
 #include "iterator.hpp"          // iterator_for_container
 #include "memory.hpp"            // exe_allocator, exe_scoped_lock
@@ -296,6 +305,9 @@ class exe_rbtree
             {
                 _Nodeptr _Pnode = static_cast<_Nodeptr>(::operator new(sizeof(_Tree_node), ::exe_heap));
                 assert(_Pnode);
+                if ( _Pnode == nullptr )
+                    ::nh3api::throw_exception<::std::bad_alloc>();
+
                 _Pnode->_Left   = _Pnode;
                 _Pnode->_Parent = _Pnode;
                 _Pnode->_Right  = _Pnode;
@@ -308,6 +320,10 @@ class exe_rbtree
             static _Nodeptr _Buynode(_Nodeptr _Myhead, _Args&&... _Values) noexcept
             {
                 _Nodeptr _Pnode = static_cast<_Nodeptr>(::operator new(sizeof(_Tree_node), ::exe_heap));
+                assert(_Pnode);
+                if ( _Pnode == nullptr )
+                    ::nh3api::throw_exception<::std::bad_alloc>();
+
                 ::new (static_cast<void*>(__builtin_addressof(_Pnode->_Myval))) value_type(::std::forward<_Args>(_Values)...);
                 _Pnode->_Left   = _Myhead;
                 _Pnode->_Parent = _Myhead;
@@ -1545,6 +1561,9 @@ class exe_rbtree
             if ( _Getnil() == nullptr )
             {
                 _Getnil()      = static_cast<_Nodeptr>(::operator new(sizeof(_Tree_node), ::exe_heap));
+                if ( _Getnil() == nullptr )
+                    ::nh3api::throw_exception<::std::bad_alloc>();
+
                 _Nodeptr& _Nil = _Getnil();
                 _Nil->_Left    = nullptr;
                 _Nil->_Right   = nullptr;
@@ -1576,7 +1595,12 @@ class exe_rbtree
         void _Check_grow_by_1()
         {
             if ( max_size() == this->_Mysize ) NH3API_UNLIKELY
-                ::nh3api::throw_exception<::std::length_error>("map/set too long");
+            {
+                if constexpr ( TreeType == rbtree_type::map_like)
+                    ::nh3api::throw_exception<::std::length_error>("map too long");
+                else
+                    ::nh3api::throw_exception<::std::length_error>("set too long");
+            }
         }
 
         static _Nodeptr _Max(_Nodeptr _Pnode) noexcept

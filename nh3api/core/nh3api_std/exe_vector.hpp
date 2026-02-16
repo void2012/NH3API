@@ -19,6 +19,17 @@
 #include <initializer_list>      // std::initializer_list
 #include <type_traits>
 
+#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+#include <stdexcept> // std::length_error, std::out_of_range
+#else
+namespace std
+{
+class bad_alloc;
+class length_error;
+class out_of_range;
+} // namespace std
+#endif
+
 #include "iterator.hpp"          // nh3api::is_iterator
 #include "memory.hpp"            // exe_allocator<_Ty>, exe_heap_t
 #include "nh3api_exceptions.hpp" // std::length_error, std::out_of_range, std::runtime_error
@@ -1124,7 +1135,13 @@ public:
         { return this->_Myfirst + _Offset; }
 
         [[nodiscard]] static inline pointer _Allocate(size_t _Requested) noexcept
-        { return static_cast<pointer>(::operator new(_Requested * sizeof(value_type), exe_heap, std::nothrow)); }
+        {
+            pointer _Allocated_ptr = static_cast<pointer>(::operator new(_Requested * sizeof(value_type), exe_heap, std::nothrow));
+            if ( _Allocated_ptr != nullptr ) NH3API_LIKELY
+                return _Allocated_ptr;
+
+            nh3api::throw_exception<std::bad_alloc>();
+        }
 
         inline static void _Deallocate(void* _Ptr) noexcept
         { ::operator delete(_Ptr, exe_heap); }

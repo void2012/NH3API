@@ -32,11 +32,21 @@
 #include <cmath>                 // std::fpclassify
 #include <initializer_list>      // std::initializer_list
 #include <utility>               // std::swap, std::forward
-#if ( __cplusplus >= 202002L ) || defined(__cpp_lib_ranges)
+#if (__cplusplus >= 202002L) || defined(__cpp_lib_ranges)
 #include <ranges>                // std::ranges::begin, std::ranges::contiguous_range, std::ranges::data, std::ranges::forward_range, std::from_range
 #endif
-#include <stdexcept>             // std::length_error, std::out_of_range
 #include <string>                // std::string, std::wstring, std::char_traits
+
+#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
+#include <stdexcept> // std::bad_alloc, std::length_error, std::out_of_range
+#else
+namespace std
+{
+class bad_alloc;
+class length_error;
+class out_of_range;
+} // namespace std
+#endif
 
 #include "nh3api_exceptions.hpp" // nh3api::throw_exception
 #include "hash.hpp"              // nh3api::default_hash
