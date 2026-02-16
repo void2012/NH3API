@@ -56,20 +56,6 @@ struct is_iterator : ::std::bool_constant<is_iterator_v<IterT>> {};
 #endif
 } // namespace tt
 
-#ifdef __cpp_concepts
-template<tt::iterator_for_container IterT> constexpr
-tt::iterator_category_t<IterT> iter_category() noexcept
-{
-    return tt::iterator_category_t<IterT>{};
-};
-#else
-template<typename IterT, std::enable_if_t<tt::is_iterator_v<IterT>, int> = 0> constexpr
-tt::iterator_category_t<IterT> iter_category() noexcept
-{
-    return tt::iterator_category_t<IterT>{};
-};
-#endif
-
 template <class IterT>
 constexpr bool is_cpp17_fwd_iter_v = ::std::is_convertible_v<typename ::std::iterator_traits<IterT>::iterator_category, ::std::forward_iterator_tag>;
 
@@ -93,7 +79,7 @@ constexpr void verify_range_n(const IterT& _First, const _Size_type _N)
 // verify range on GNU libstdc++ debug iterators
 template<typename _InputIterator>
 NH3API_CONSTEXPR_CPP_20 inline void
-verify_range(_InputIterator _First, _InputIterator _Last)
+verify_range([[maybe_unused]] _InputIterator _First, [[maybe_unused]] _InputIterator _Last)
 { __glibcxx_requires_valid_range(_First, _Last); }
 
 template<typename _InputIterator, typename _Size_type>
