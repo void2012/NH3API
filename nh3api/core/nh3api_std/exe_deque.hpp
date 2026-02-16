@@ -29,25 +29,15 @@
 
 #include <algorithm>             // std::copy, std::copy_backward
 #include <utility>               // std::swap
-#ifdef __cpp_lib_three_way_comparison
+#if (__cplusplus >= 202002L) || defined(__cpp_lib_three_way_comparison)
 #include <compare>               // std::strong_ordering
 #endif
-
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
 #include <stdexcept> // std::out_of_range
-#else
-namespace std
-{
-class bad_alloc;
-class out_of_range;
-} // namespace std
-#endif
 
 #include "nh3api_exceptions.hpp" // exceptions
 #include "iterator.hpp"          // iterator_for_container concept OR tt::is_iterator_v<T> type trait
 #include "memory.hpp"            // exe_allocator
 #include "stl_extras.hpp"        // std::strong_ordering
-
 
 #pragma pack(push, 4)
 // Visual C++ 6.0 std::deque implementation used by heroes3.exe

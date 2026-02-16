@@ -33,18 +33,9 @@
 #if (__cplusplus >= 202002L) || defined(__cpp_lib_ranges)
 #include <ranges>       // std::default_sentinel_t
 #endif
+#include <stdexcept> // std::length_error
 #include <type_traits>  // std::add_pointer_t, std::conditional_t
 #include <utility>      // std::exchange, std::pair, std::swap
-
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-#include <stdexcept> // std::length_error
-#else
-namespace std
-{
-class bad_alloc;
-class length_error;
-} // namespace std
-#endif
 
 #include "iterator.hpp"          // iterator_for_container
 #include "memory.hpp"            // exe_allocator, exe_scoped_lock

@@ -14,21 +14,11 @@
 
 #pragma once
 
-#include <array>                 // std::array
-#include <cassert>               // assert
-#include <initializer_list>      // std::initializer_list
+#include <array>            // std::array
+#include <cassert>          // assert
+#include <initializer_list> // std::initializer_list
+#include <stdexcept>        // std::length_error, std::out_of_range
 #include <type_traits>
-
-#ifndef NH3API_FLAG_NO_CPP_EXCEPTIONS
-#include <stdexcept> // std::length_error, std::out_of_range
-#else
-namespace std
-{
-class bad_alloc;
-class length_error;
-class out_of_range;
-} // namespace std
-#endif
 
 #include "iterator.hpp"          // nh3api::is_iterator
 #include "memory.hpp"            // exe_allocator<_Ty>, exe_heap_t
