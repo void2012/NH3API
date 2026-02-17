@@ -420,6 +420,16 @@ struct HookContext
     [[nodiscard]] inline constexpr const int16_t&  SI() const noexcept { return si; }
     [[nodiscard]] inline constexpr const int16_t&  DI() const noexcept { return di; }
 
+    template<typename T>
+    static inline T* as(uintptr_t address) noexcept
+    {
+    #if defined(__cpp_lib_start_lifetime_as) && NH3API_CHECK_CPP23
+        return ::std::start_lifetime_as<T>(reinterpret_cast<void*>(address));
+    #else
+        return __builtin_launder(reinterpret_cast<T*>(address));
+    #endif
+    }
+
 } NH3API_MSVC_LAYOUT;
 
 
@@ -566,6 +576,16 @@ struct SafeLoHookContext
     [[nodiscard]] inline constexpr const uint16_t& BP() const noexcept { return bp; }
     [[nodiscard]] inline constexpr const int16_t&  SI() const noexcept { return si; }
     [[nodiscard]] inline constexpr const int16_t&  DI() const noexcept { return di; }
+
+    template<typename T>
+    static inline T* as(uintptr_t address) noexcept
+    {
+    #if defined(__cpp_lib_start_lifetime_as) && NH3API_CHECK_CPP23
+        return ::std::start_lifetime_as<T>(reinterpret_cast<void*>(address));
+    #else
+        return __builtin_launder(reinterpret_cast<T*>(address));
+    #endif
+    }
 
 } NH3API_MSVC_LAYOUT;
 
