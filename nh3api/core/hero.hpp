@@ -21,7 +21,7 @@
 #include "player.hpp"                // playerData
 #include "resources/resources.hpp"   // EGameResource
 #include "skills.hpp"                // TSkillMastery
-#include "utils.hpp"                 // bstruct_t
+#include "bstruct.hpp"               // bstruct_t
 
 NH3API_WARNING(push)
 NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")

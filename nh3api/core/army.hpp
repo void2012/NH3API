@@ -19,7 +19,7 @@
 #include "resources/sounds.hpp"     // gpSoundManager, sample
 #include "skills.hpp"               // TSkillMastery
 #include "spells.hpp"               // SpellID
-#include "utils.hpp"                // bstruct_t, get_bstruct
+#include "bstruct.hpp"              // bstruct_t, get_bstruct
 
 NH3API_WARNING(push)
 NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
