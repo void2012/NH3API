@@ -209,7 +209,7 @@ public:
 
     // returns a pointer to a value (accessing the value through the pointer is not secure) /
     // возвращает указатель на значение (обращение к значению через указатель непотокобезопасно).
-    [[nodiscard]] virtual uint32_t* __stdcall GetPValue() = 0;
+    [[nodiscard]] virtual void* __stdcall GetPValue() = 0;
 };
 
 // тип 'регистр флагов', размер - 32 бита
