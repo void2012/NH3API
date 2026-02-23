@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //
 // Part of the NH3API, under the Apache License v2.0.
-// Copyright (C) devoider17 (aka void_17), 2024-2025
+// Copyright (C) devoider17 (aka void_17), 2024-2026
 // You may use this file freely as long as you list the author and the license
 // In the source code files of your project
 // SPDX-License-Identifier: Apache-2.0
@@ -53,14 +53,14 @@ To bit_cast(const From& from) noexcept
 
 template<class To, class From>
 constexpr To cast(const From& from) noexcept
-requires(::std::is_trivially_copyable_v<To> && 
+requires(::std::is_trivially_copyable_v<To> &&
          ::std::is_trivially_copyable_v<From>)
 {
-    if constexpr ( ::std::is_integral_v<To> || ::std::is_enum_v<To> ) 
+    if constexpr ( ::std::is_integral_v<To> || ::std::is_enum_v<To> )
         return static_cast<To>(from);
-    else if constexpr ( ::std::is_pointer_v<To> || ::std::is_pointer_v<From> ) 
+    else if constexpr ( ::std::is_pointer_v<To> || ::std::is_pointer_v<From> )
         return reinterpret_cast<To>(from);
-    else 
+    else
         return bit_cast<To>(from);
 }
 
@@ -68,7 +68,7 @@ requires(::std::is_trivially_copyable_v<To> &&
 
 template<class To, class From,
          typename = ::std::enable_if_t<
-             ::std::is_trivially_copyable_v<To> && 
+             ::std::is_trivially_copyable_v<To> &&
              ::std::is_trivially_copyable_v<From>>>
 inline
 #if NH3API_HAS_BUILTIN_BIT_CAST
@@ -76,12 +76,12 @@ constexpr
 #endif
 To cast(const From& from) noexcept
 {
-    if constexpr ( ::std::is_integral_v<To> || ::std::is_enum_v<To> ) 
+    if constexpr ( ::std::is_integral_v<To> || ::std::is_enum_v<To> )
         return static_cast<To>(from);
-     else if constexpr ( ::std::is_pointer_v<To> || ::std::is_pointer_v<From> ) 
+     else if constexpr ( ::std::is_pointer_v<To> || ::std::is_pointer_v<From> )
         return reinterpret_cast<To>(from);
-     else 
-        return bit_cast<To>(from); 
+     else
+        return bit_cast<To>(from);
 }
 
 #endif // __cpp_lib_concepts
