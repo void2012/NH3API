@@ -822,8 +822,8 @@ class exe_string
                 NH3API_ASSUME(_Src);
                 NH3API_ASSUME(_Src_count);
                 traits_type::copy(_New_ptr, _Old_ptr, _Off);
-                traits_type::copy(_New_ptr + _Off, _Src, _Src_count);
                 traits_type::copy(_New_ptr + _Off + _Src_count, _Old_ptr + _Off, _Old_size - _Off + 1);
+                traits_type::copy(_New_ptr + _Off, _Src, _Src_count);
             },
             static_cast<size_t>(_Offset), _String, _Length);
         }
@@ -849,8 +849,8 @@ class exe_string
             {
                 NH3API_ASSUME(_Characters_num);
                 traits_type::copy(_New_ptr, _Old_ptr, _Off);
-                traits_type::assign(_New_ptr + _Off, _Characters_num, _Ch);
                 traits_type::copy(_New_ptr + _Off + _Characters_num, _Old_ptr + _Off, _Old_size - _Off + 1);
+                traits_type::assign(_New_ptr + _Off, _Characters_num, _Ch);
             },
             static_cast<size_t>(_Offset), _Count, _Character);
         }
