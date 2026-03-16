@@ -134,7 +134,7 @@ enum TAdventureObjectType : int32_t
     OBJECT_FAERIE_RING                 = 28,  // Кольцо фей
     OBJECT_FLOTSAM                     = 29,  // Навес
     OBJECT_FOUNTAIN_OF_YOUTH           = 31,  // Фонтан молодости
-    OBJECT_FOUNTAIN_O_FORTUNE          = 30,  // Фонтан удачи
+    OBJECT_FOUNTAIN_OF_FORTUNE         = 30,  // Фонтан удачи
     OBJECT_GARDEN_OF_REVELATION        = 32,  // Сад откровений
     OBJECT_GARRISON                    = 33,  // Гарнизон
     OBJECT_HERO                        = 34,  // Герой(объект)
