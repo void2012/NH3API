@@ -1263,7 +1263,7 @@ public:
         }
         #endif
         hihook_function_condition(new_func);
-        return xWriteHiHook(address, hooktype, subtype, calltype, static_cast<const void*>(new_func));
+        return xWriteHiHook(address, hooktype, subtype, calltype, reinterpret_cast<const void*>(new_func));
     }
 
     // Create Methods ...
