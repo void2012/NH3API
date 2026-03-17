@@ -1767,8 +1767,8 @@ class NewmapCell : public ExtraInfoUnion
         struct TObjectCell
         {
             public:
-                // Object type /
-                // Тип объекта.
+                // Current object index among all map objects /
+                // Индекс объекта среди всех объектов карты.
                 // offset: +0x0 = +0,  size = 0x2 = 2
                 int16_t ObjectIndex;
 
@@ -1889,8 +1889,8 @@ class NewmapCell : public ExtraInfoUnion
         // offset: +0x22 = +34,  size = 0x2 = 2
         int16_t objectIndex;
 
-        // Filled with random values. Do not use. /
-        // Заполняется случайными значениями. Лучше не трогать.
+        // Index of the current object on the cell among all map objects /
+        // Индекс текущего (основного) объекта на клетке среди всех объектов карты.
         // offset: +0x24 = +36,  size = 0x2 = 2
         int16_t object_type_index;
 
