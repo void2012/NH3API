@@ -181,7 +181,7 @@ public:
         if ( _String == nullptr )
             return;
 
-        if ( _Count == std::string::npos )
+        if ( _Count == std::string_view::npos )
             _Count = __builtin_strlen(_String);
 
         _Construct_from_string<std::char_traits<char>>(_String, _Count, _Zero, _One);
@@ -197,10 +197,10 @@ public:
             return;
 
         #if NH3API_HAS_BUILTIN(__builtin_wcslen)
-        if ( _Count == std::string::npos )
+        if ( _Count == std::wstring_view::npos )
             _Count = __builtin_wcslen(_String);
         #else
-        if ( _Count == std::string::npos )
+        if ( _Count == std::wstring_view::npos )
             _Count = std::char_traits<wchar_t>::length(_String);
         #endif
 
@@ -411,10 +411,10 @@ public:
         return result;
     }
 
-    #ifdef __clang__
+#ifdef __clang__
     NH3API_WARNING(push)
     NH3API_WARNING_GNUC_DISABLE("-Wbit-int-extension")
-    #endif
+#endif
     [[nodiscard]] constexpr size_t count() const noexcept
     {
         if constexpr ( _Bits == 0 )
@@ -423,30 +423,30 @@ public:
         }
         else if constexpr (_Bits <= _Bitsperword)
         {
-            #if defined(__BITINT_MAXWIDTH__) && NH3API_HAS_BUILTIN(__builtin_popcountg)
-                return static_cast<size_t>(__builtin_popcountg(static_cast<unsigned _BitInt(_Bits)>(_Array[0])));
-            #elif NH3API_HAS_BUILTIN(__builtin_popcount)
-                return static_cast<size_t>(__builtin_popcount(_Array[0]));
-            #else
-                return static_cast<size_t>(bitpopcnt(_Array[0]));
-            #endif
+        #if defined(__BITINT_MAXWIDTH__) && NH3API_HAS_BUILTIN(__builtin_popcountg)
+            return static_cast<size_t>(__builtin_popcountg(static_cast<unsigned _BitInt(_Bits)>(_Array[0])));
+        #elif NH3API_HAS_BUILTIN(__builtin_popcount)
+            return static_cast<size_t>(__builtin_popcount(_Array[0]));
+        #else
+            return static_cast<size_t>(bitpopcnt(_Array[0]));
+        #endif
         }
         else
         {
             size_t result = 0;
             for (size_t i = 0; i < _Words + 1; ++i)
-            #if NH3API_HAS_BUILTIN(__builtin_popcount)
+        #if NH3API_HAS_BUILTIN(__builtin_popcount)
                 result += static_cast<size_t>(__builtin_popcount(_Array[i]));
-            #else
+        #else
                 result += static_cast<size_t>(bitpopcnt(_Array[i]));
-            #endif
+        #endif
 
             return result;
         }
     }
-    #ifdef __clang__
+#ifdef __clang__
     NH3API_WARNING(pop)
-    #endif
+#endif
 
     [[nodiscard]] constexpr size_t size() const noexcept
     { return _Bits; }
@@ -634,12 +634,11 @@ protected:
     }
 
     // allow access to _Hash_code() for std::hash
-    friend std::hash< exe_bitset<_Bits> >;
+    friend std::hash<exe_bitset<_Bits>>;
 
     template<typename StringT> NH3API_FORCEINLINE
-    StringT _To_std_string(
-        typename StringT::value_type _Zero = typename StringT::value_type('0'),
-        typename StringT::value_type _One = typename StringT::value_type('1')) const
+    StringT _To_std_string(typename StringT::value_type _Zero = typename StringT::value_type('0'),
+                           typename StringT::value_type _One = typename StringT::value_type('1')) const
     {
         StringT result(_Bits, _Zero);
         typename StringT::value_type* dst = const_cast<typename StringT::value_type*>(result.c_str());
@@ -680,7 +679,7 @@ inline constexpr exe_bitset<N> operator^(const exe_bitset<N>& lhs, const exe_bit
 }
 // std::hash support for exe_bitset
 template<size_t N>
-struct std::hash< exe_bitset<N> >
+struct std::hash<exe_bitset<N>>
 {
     public:
     #if defined(__cpp_static_call_operator) && NH3API_CHECK_CPP23
