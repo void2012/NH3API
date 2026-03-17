@@ -955,7 +955,7 @@ public:
     // по определенному адресу программы
     // Тип может быть любым, даже функция.
     template<typename T> NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteAddressOf(uintptr_t address, const T& data)
-    { return WriteDword(address, *reinterpret_cast<uint32_t*>(__builtin_addressof(data))); }
+    { return WriteDword(address, reinterpret_cast<uintptr_t>(__builtin_addressof(data))); }
 
     // WriteFloat method
     // write a four-byte floating point number at address
