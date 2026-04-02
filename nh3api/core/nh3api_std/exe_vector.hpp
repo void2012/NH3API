@@ -970,7 +970,7 @@ public:
         }
 
         iterator erase(const_iterator _Where)
-        noexcept(std::is_nothrow_move_assignable_v<value_type>)
+        noexcept(std::is_nothrow_move_assignable_v<value_type>) NH3API_LIFETIMEBOUND
         {
             iterator _Whereptr = const_cast<iterator>(_Where);
             if ( _Where >= _Myfirst && _Where <= _Mylast )
@@ -982,7 +982,7 @@ public:
             return _Whereptr;
         }
 
-        iterator erase(const_iterator _First, const_iterator _Last)
+        iterator erase(const_iterator _First, const_iterator _Last) NH3API_LIFETIMEBOUND
         {
             nh3api::verify_range(_First, _Last);
             if (_First < _Myfirst || _Last > _Mylast || _First > _Last) NH3API_UNLIKELY
@@ -1016,46 +1016,46 @@ public:
             std::swap(_Lhs, _Rhs);
         }
 
-        inline pointer data() noexcept
+        inline pointer data() noexcept NH3API_LIFETIMEBOUND
         { return _Myfirst; }
 
-        [[nodiscard]] inline const_pointer data() const noexcept
+        [[nodiscard]] inline const_pointer data() const noexcept NH3API_LIFETIMEBOUND
         { return _Myfirst; }
 
-        iterator begin() noexcept
+        iterator begin() noexcept NH3API_LIFETIMEBOUND
         { return _Myfirst; }
 
-        const_iterator begin() const noexcept
+        const_iterator begin() const noexcept NH3API_LIFETIMEBOUND
         { return _Myfirst; }
 
-        const_iterator cbegin() const noexcept
+        const_iterator cbegin() const noexcept NH3API_LIFETIMEBOUND
         { return _Myfirst; }
 
-        iterator end() noexcept
+        iterator end() noexcept NH3API_LIFETIMEBOUND
         { return _Mylast; }
 
-        const_iterator end() const noexcept
+        const_iterator end() const noexcept NH3API_LIFETIMEBOUND
         { return _Mylast; }
 
-        const_iterator cend() const noexcept
+        const_iterator cend() const noexcept NH3API_LIFETIMEBOUND
         { return _Mylast; }
 
-        reverse_iterator rbegin() noexcept
+        reverse_iterator rbegin() noexcept NH3API_LIFETIMEBOUND
         { return reverse_iterator { end() }; }
 
-        const_reverse_iterator rbegin() const noexcept
+        const_reverse_iterator rbegin() const noexcept NH3API_LIFETIMEBOUND
         { return const_reverse_iterator { end() }; }
 
-        const_reverse_iterator crbegin() const noexcept
+        const_reverse_iterator crbegin() const noexcept NH3API_LIFETIMEBOUND
         { return const_reverse_iterator { end() }; }
 
-        reverse_iterator rend() noexcept
+        reverse_iterator rend() noexcept NH3API_LIFETIMEBOUND
         { return reverse_iterator { begin() }; }
 
-        const_reverse_iterator rend() const noexcept
+        const_reverse_iterator rend() const noexcept NH3API_LIFETIMEBOUND
         { return const_reverse_iterator { begin() }; }
 
-        const_reverse_iterator crend() const noexcept
+        const_reverse_iterator crend() const noexcept NH3API_LIFETIMEBOUND
         { return const_reverse_iterator { begin() }; }
 
         [[nodiscard]] inline size_t size() const noexcept
@@ -1073,7 +1073,7 @@ public:
         inline constexpr static allocator_type get_allocator() noexcept
         { return {}; }
 
-        const_reference at(size_t pos) const
+        const_reference at(size_t pos) const NH3API_LIFETIMEBOUND
         {
             if ( pos >= size() ) NH3API_UNLIKELY
                 nh3api::throw_exception<std::out_of_range>("vector: invalid subscript");
@@ -1081,7 +1081,7 @@ public:
             return *(_Myfirst + pos);
         }
 
-        reference at(size_t pos)
+        reference at(size_t pos) NH3API_LIFETIMEBOUND
         {
             if ( size() <= pos ) NH3API_UNLIKELY
                 nh3api::throw_exception<std::out_of_range>("vector: invalid subscript");
@@ -1089,31 +1089,31 @@ public:
             return *(_Myfirst + pos);
         }
 
-        inline const_reference operator[](size_t pos) const noexcept
+        inline const_reference operator[](size_t pos) const noexcept NH3API_LIFETIMEBOUND
         { return *(_Myfirst + pos); }
 
-        inline reference operator[](size_t pos) noexcept
+        inline reference operator[](size_t pos) noexcept NH3API_LIFETIMEBOUND
         { return *(_Myfirst + pos); }
 
-        inline reference front() noexcept
+        inline reference front() noexcept NH3API_LIFETIMEBOUND
         {
             assert(_Myfirst);
             return *_Myfirst;
         }
 
-        inline const_reference front() const noexcept
+        inline const_reference front() const noexcept NH3API_LIFETIMEBOUND
         {
             assert(_Myfirst);
             return *_Myfirst;
         }
 
-        inline reference back() noexcept
+        inline reference back() noexcept NH3API_LIFETIMEBOUND
         {
             assert(_Mylast);
             return _Mylast[-1];
         }
 
-        inline const_reference back() const noexcept
+        inline const_reference back() const noexcept NH3API_LIFETIMEBOUND
         {
             assert(_Mylast);
             return _Mylast[-1];
@@ -1121,7 +1121,7 @@ public:
 
     private:
         // return the iterator begin() + _Offset
-        iterator _Make_iterator_offset(const size_t _Offset) noexcept
+        iterator _Make_iterator_offset(const size_t _Offset) noexcept NH3API_LIFETIMEBOUND
         { return this->_Myfirst + _Offset; }
 
         [[nodiscard]] static inline pointer _Allocate(size_t _Requested) noexcept

@@ -317,7 +317,7 @@ class exe_string
         exe_string& append(std::initializer_list<char> _Initializer_list)
         { return append(_Initializer_list.begin(), _Initializer_list.size()); }
 
-        iterator insert(const_pointer _Where, const std::initializer_list<char> _Initializer_list)
+        iterator insert(const_pointer _Where, const std::initializer_list<char> _Initializer_list) NH3API_LIFETIMEBOUND
         {
             const size_t _Offset = static_cast<size_t>(_Where - _Myptr);
             insert(_Offset, _Initializer_list.begin(), _Initializer_list.size());
@@ -855,7 +855,7 @@ class exe_string
             static_cast<size_t>(_Offset), _Count, _Character);
         }
 
-        iterator insert(const const_iterator _Where, char _Character)
+        iterator insert(const const_iterator _Where, char _Character) NH3API_LIFETIMEBOUND
         {
             const bool _Is_inside = _Inside_exclusive(_Where);
             if ( _Is_inside )
@@ -867,7 +867,7 @@ class exe_string
             return _Where > end() ? end() : begin();
         }
 
-        iterator insert(const const_iterator _Where, const size_t _Count, char _Character)
+        iterator insert(const const_iterator _Where, const size_t _Count, char _Character) NH3API_LIFETIMEBOUND
         {
             const bool _Is_inside = _Inside_exclusive(_Where);
             if ( _Is_inside )
@@ -885,7 +885,7 @@ class exe_string
     #else
         template<class _Iter, std::enable_if_t<nh3api::tt::is_iterator_v<_Iter>, bool> = false>
     #endif
-        iterator insert(const const_iterator _Where, const _Iter _First, const _Iter _Last)
+        iterator insert(const const_iterator _Where, const _Iter _First, const _Iter _Last) NH3API_LIFETIMEBOUND
         {
             nh3api::verify_range(_First, _Last);
             const bool _Is_inside = _Inside(_Where);
@@ -937,7 +937,7 @@ class exe_string
     #else
         template<nh3api::tt::container_compatible_range<char> _Range>
     #endif
-        iterator insert_range(const const_iterator _Where, _Range&& _Rng)
+        iterator insert_range(const const_iterator _Where, _Range&& _Rng) NH3API_LIFETIMEBOUND
         {
             const bool _Is_inside = _Inside_exclusive(_Where);
             if ( !_Is_inside )
@@ -1049,7 +1049,7 @@ class exe_string
             return _Erase_without_checks(_Offset, _Count);
         }
 
-        iterator erase(const const_iterator _Where)
+        iterator erase(const const_iterator _Where) NH3API_LIFETIMEBOUND
         {
             if ( empty() ) NH3API_UNLIKELY
                 return _Myptr;
@@ -1064,7 +1064,7 @@ class exe_string
             return _Myptr;
         }
 
-        iterator erase(const const_iterator _First, const const_iterator _Last)
+        iterator erase(const const_iterator _First, const const_iterator _Last) NH3API_LIFETIMEBOUND
         {
             if ( empty() ) NH3API_UNLIKELY
                 return _Myptr;
@@ -1416,64 +1416,64 @@ class exe_string
     #endif
 
     public:
-        [[nodiscard]] reference front() noexcept
+        [[nodiscard]] reference front() noexcept NH3API_LIFETIMEBOUND
         {
             _Freeze();
             return _Myptr[0];
         }
 
-        [[nodiscard]] const_reference front() const noexcept
+        [[nodiscard]] const_reference front() const noexcept NH3API_LIFETIMEBOUND
         { return _Myptr[0]; }
 
-        [[nodiscard]] reference back() noexcept
+        [[nodiscard]] reference back() noexcept NH3API_LIFETIMEBOUND
         {
             _Freeze();
             return _Myptr[_Mysize - 1];
         }
 
-        [[nodiscard]] const_reference back() const noexcept
+        [[nodiscard]] const_reference back() const noexcept NH3API_LIFETIMEBOUND
         { return _Myptr[_Mysize - 1]; }
 
-        [[nodiscard]] iterator begin() noexcept
+        [[nodiscard]] iterator begin() noexcept NH3API_LIFETIMEBOUND
         {
             _Freeze();
             return _Myptr;
         }
 
-        [[nodiscard]] const_iterator begin() const noexcept
+        [[nodiscard]] const_iterator begin() const noexcept NH3API_LIFETIMEBOUND
         { return _Myptr; }
 
-        [[nodiscard]] const_iterator cbegin() const noexcept
+        [[nodiscard]] const_iterator cbegin() const noexcept NH3API_LIFETIMEBOUND
         { return _Myptr; }
 
-        [[nodiscard]] iterator end() noexcept
+        [[nodiscard]] iterator end() noexcept NH3API_LIFETIMEBOUND
         {
             _Freeze();
             return _Myptr + _Mysize;
         }
 
-        [[nodiscard]] const_iterator end() const noexcept
+        [[nodiscard]] const_iterator end() const noexcept NH3API_LIFETIMEBOUND
         { return static_cast<const_iterator>(_Myptr + _Mysize); }
 
-        [[nodiscard]] const_iterator cend() const noexcept
+        [[nodiscard]] const_iterator cend() const noexcept NH3API_LIFETIMEBOUND
         { return static_cast<const_iterator>(_Myptr + _Mysize); }
 
-        [[nodiscard]] reverse_iterator rbegin() noexcept
+        [[nodiscard]] reverse_iterator rbegin() noexcept NH3API_LIFETIMEBOUND
         { return reverse_iterator(end()); }
 
-        [[nodiscard]] const_reverse_iterator rbegin() const noexcept
+        [[nodiscard]] const_reverse_iterator rbegin() const noexcept NH3API_LIFETIMEBOUND
         { return const_reverse_iterator(end()); }
 
-        [[nodiscard]] const_reverse_iterator crbegin() const noexcept
+        [[nodiscard]] const_reverse_iterator crbegin() const noexcept NH3API_LIFETIMEBOUND
         { return const_reverse_iterator(end()); }
 
-        [[nodiscard]] reverse_iterator rend() noexcept
+        [[nodiscard]] reverse_iterator rend() noexcept NH3API_LIFETIMEBOUND
         { return reverse_iterator(begin()); }
 
-        [[nodiscard]] const_reverse_iterator rend() const noexcept
+        [[nodiscard]] const_reverse_iterator rend() const noexcept NH3API_LIFETIMEBOUND
         { return const_reverse_iterator(begin()); }
 
-        [[nodiscard]] const_reverse_iterator crend() const noexcept
+        [[nodiscard]] const_reverse_iterator crend() const noexcept NH3API_LIFETIMEBOUND
         {  return const_reverse_iterator(begin()); }
 
         // reduce capacity
@@ -1491,29 +1491,29 @@ class exe_string
             this->_Myres          = _Mysize;
         }
 
-        reference at(const size_t _Offset)
+        reference at(const size_t _Offset) NH3API_LIFETIMEBOUND
         {
             _Check_offset_exclusive(_Offset);
             _Freeze();
             return _Myptr[_Offset];
         }
 
-        [[nodiscard]] const_reference at(const size_t _Offset) const
+        [[nodiscard]] const_reference at(const size_t _Offset) const NH3API_LIFETIMEBOUND
         {
             _Check_offset_exclusive(_Offset);
             return _Myptr[_Offset];
         }
 
-        [[nodiscard]] reference operator[](size_t _Offset) noexcept
+        [[nodiscard]] reference operator[](size_t _Offset) noexcept NH3API_LIFETIMEBOUND
         {
             _Freeze();
             return _Myptr[_Offset];
         }
 
-        [[nodiscard]] const_reference operator[](size_t _Offset) const
+        [[nodiscard]] const_reference operator[](size_t _Offset) const NH3API_LIFETIMEBOUND
         { return _Myptr[_Offset]; }
 
-        operator std::string_view() const noexcept
+        operator std::string_view() const noexcept NH3API_LIFETIMEBOUND
         { return {_Myptr, _Mysize}; }
 
         void push_back(char _Character)
@@ -1564,13 +1564,13 @@ class exe_string
             }
         }
 
-        [[nodiscard]] const char* c_str() const noexcept
+        [[nodiscard]] const char* c_str() const noexcept NH3API_LIFETIMEBOUND
         { return _Myptr ? _Myptr : ""; }
 
-        [[nodiscard]] const char* data() const noexcept
+        [[nodiscard]] const char* data() const noexcept NH3API_LIFETIMEBOUND
         { return _Myptr; }
 
-        [[nodiscard]] char* data() noexcept
+        [[nodiscard]] char* data() noexcept NH3API_LIFETIMEBOUND
         {
             _Freeze();
             return _Myptr;
@@ -1884,9 +1884,13 @@ class exe_string
         [[nodiscard]] size_t find_last_not_of(const char* const _String, const size_t _Offset = npos) const noexcept
         { return _String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
+        // Backported from C++23 for performance reasons
+        // https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2438r2.html
         [[nodiscard]] exe_string substr(const size_t _Offset, const size_t _Count = npos) const&
         { return { *this, _Offset, _Count }; }
 
+        // Backported from C++23 for performance reasons
+        // https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2438r2.html
         [[nodiscard]] exe_string substr(const size_t _Offset, const size_t _Count = npos) &&
         { return { std::move(*this), _Offset, _Count }; }
 
@@ -1895,6 +1899,11 @@ class exe_string
 
         [[nodiscard]] exe_string substr() && noexcept
         { return { std::move(*this) }; }
+
+        // Backported from C++26
+        // https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2025/p3044r2.pdf
+        [[nodiscard]] std::string_view subview(const size_t _Offset = 0, const size_t _Count = npos) const noexcept NH3API_LIFETIMEBOUND
+        { return std::string_view{_Myptr, _Mysize}.substr(_Offset, _Count); }
 
         [[nodiscard]] int compare(const std::string_view _String) const noexcept
         { return _Compare(this->_Myptr, this->_Mysize, _String.data(), _String.size()); }
@@ -2240,10 +2249,10 @@ class exe_string
                     : _Ptr { ptr_ }, _Need_free { need_free_ }
                 {}
 
-                [[nodiscard]] NH3API_FORCEINLINE char* get() noexcept
+                [[nodiscard]] NH3API_FORCEINLINE char* get() noexcept NH3API_LIFETIMEBOUND
                 { return _Ptr; }
 
-                [[nodiscard]] NH3API_FORCEINLINE const char* get() const noexcept
+                [[nodiscard]] NH3API_FORCEINLINE const char* get() const noexcept NH3API_LIFETIMEBOUND
                 { return _Ptr; }
 
                 NH3API_FORCEINLINE void set(char* const _New_ptr) noexcept
@@ -2278,10 +2287,10 @@ class exe_string
                     : _Ptr { ptr_ }
                 {}
 
-                [[nodiscard]] NH3API_FORCEINLINE char* get() noexcept
+                [[nodiscard]] NH3API_FORCEINLINE char* get() noexcept NH3API_LIFETIMEBOUND
                 { return _Ptr; }
 
-                [[nodiscard]] NH3API_FORCEINLINE const char* get() const noexcept
+                [[nodiscard]] NH3API_FORCEINLINE const char* get() const noexcept NH3API_LIFETIMEBOUND
                 { return _Ptr; }
 
                 NH3API_FORCEINLINE void set(char* const _New_ptr) noexcept
@@ -2331,7 +2340,7 @@ class exe_string
             return _Refcnt_fresh_buffer { _New_ptr };
         }
 
-        inline bool _Is_shared() const noexcept
+        [[nodiscard]] inline bool _Is_shared() const noexcept
         { return _Myptr && _Refcnt(_Myptr) != 0 && _Refcnt(_Myptr) != _FROZEN; }
 
     #if defined(__GNUC__) || defined(__clang__)
