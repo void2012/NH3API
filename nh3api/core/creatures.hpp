@@ -215,11 +215,20 @@ enum TCreatureType : int32_t
     CREATURE_ARROW_TOWER         = 149, // Стрелковая башня (на поле боя)
     CREATURE_NONE                = -1,  // Пустой (используется для проверок)
 
-    CREATURE_ROE_CATAPULT       = 118, // ID Катапульты на поле боя в RoE
-    CREATURE_ROE_BALLISTA       = 119, // ID Баллисты на поле боя в RoE
-    CREATURE_ROE_FIRST_AID_TENT = 120, // ID Палатки первой помощи на поле боя в RoE
-    CREATURE_ROE_AMMO_CART      = 121, // ID Тележки с боеприпасами на поле боя в RoE
+    CREATURE_CATAPULT_ROE       = 118, // ID Катапульты на поле боя в RoE
+    CREATURE_BALLISTA_ROE       = 119, // ID Баллисты на поле боя в RoE
+    CREATURE_FIRST_AID_TENT_ROE = 120, // ID Палатки первой помощи на поле боя в RoE
+    CREATURE_AMMO_CART_ROE      = 121, // ID Тележки с боеприпасами на поле боя в RoE
 
+    FIRST_CREATURE     = CREATURE_PIKEMAN,
+    LAST_CREATURE_ROE  = CREATURE_DIAMOND_GOLEM,
+    LAST_CREATURE_AB   = CREATURE_TROLL,
+    LAST_CREATURE_SOD  = LAST_CREATURE_AB,
+    LAST_CREATURE      = LAST_CREATURE_SOD,
+    LAST_COMBAT_CREATURE_ROE = CREATURE_AMMO_CART_ROE,
+    LAST_COMBAT_CREATURE_AB = CREATURE_ARROW_TOWER,
+    LAST_COMBAT_CREATURE_SOD = LAST_COMBAT_CREATURE_AB,
+    LAST_COMBAT_CREATURE = LAST_COMBAT_CREATURE_SOD,
     MAX_CREATURES_ROE  = 118, // Количество существ в RoE
     MAX_CREATURES_AB   = 145, // Количество существ в AB
     MAX_CREATURES_SOD  = MAX_CREATURES_AB, // Количество существ в SoD
@@ -232,7 +241,111 @@ enum TCreatureType : int32_t
 
 template<>
 struct nh3api::enum_limits<TCreatureType>
-    : nh3api::enum_limits_base<TCreatureType, CREATURE_PIKEMAN, CREATURE_TROLL>
+    : nh3api::enum_limits_base<TCreatureType, FIRST_CREATURE, LAST_CREATURE>
+{ static inline constexpr bool is_specialized = true; };
+
+enum ECreatureGenerator : int32_t
+{
+    GENERATOR_NONE              = -1,
+    GENERATOR_ELEMENTAL_CONFLUX = 0, // OBJECT_CREATURE_GENERATOR4
+    GENERATOR_GOLEM_FACTORY     = 1, // OBJECT_CREATURE_GENERATOR4
+
+    GENERATOR_BASILISK            = 0,
+    GENERATOR_BEHEMOTH            = 1,
+    GENERATOR_BEHOLDER            = 2,
+    GENERATOR_BLACK_KNIGHT        = 3,
+    GENERATOR_BONE_DRAGON         = 4,
+    GENERATOR_CAVALIER            = 5,
+    GENERATOR_CENTAUR             = 6,
+    GENERATOR_AIR_ELEMENTAL_ROE   = 7,
+    GENERATOR_ANGEL               = 8,
+    GENERATOR_CYCLOPS             = 9,
+    GENERATOR_DEVIL               = 10,
+    GENERATOR_SERPENT_FLY         = 11,
+    GENERATOR_GNOME               = 12,
+    GENERATOR_EARTH_ELEMENTAL_ROE = 13,
+    GENERATOR_EFREET              = 14,
+    GENERATOR_WOOD_ELF            = 15,
+    GENERATOR_FIRE_ELEMENTAL_ROE  = 16,
+    GENERATOR_STONE_GARGOYLE      = 17,
+    GENERATOR_GENIE               = 18,
+    GENERATOR_WOLF_RIDER          = 19,
+    GENERATOR_GNOLL               = 20,
+    GENERATOR_GOBLIN              = 21,
+    GENERATOR_GOG                 = 22,
+    GENERATOR_GORGON              = 23,
+    GENERATOR_GREEN_DRAGON        = 24,
+    GENERATOR_GRIFFIN             = 25,
+    GENERATOR_HARPY               = 26,
+    GENERATOR_HELL_HOUND          = 27,
+    GENERATOR_HYDRA               = 28,
+    GENERATOR_IMP                 = 29,
+    GENERATOR_LIZARDMAN           = 30,
+    GENERATOR_MAGE                = 31,
+    GENERATOR_MANTICORE           = 32,
+    GENERATOR_MEDUSA              = 33,
+    GENERATOR_MINOTAUR            = 34,
+    GENERATOR_MONK                = 35,
+    GENERATOR_NAGA                = 36,
+    GENERATOR_DEMON               = 37,
+    GENERATOR_OGRE                = 38,
+    GENERATOR_ORC                 = 39,
+    GENERATOR_PIT_FIEND           = 40,
+    GENERATOR_RED_DRAGON          = 41,
+    GENERATOR_ROC                 = 42,
+    GENERATOR_GREMLIN             = 43,
+    GENERATOR_GIANT               = 44,
+    GENERATOR_DENDROID            = 45,
+    GENERATOR_TROGLODYTE          = 46,
+    GENERATOR_WATER_ELEMENTAL_ROE = 47,
+    GENERATOR_WIGHT               = 48,
+    GENERATOR_WYVERN              = 49,
+    GENERATOR_PEGASUS             = 50,
+    GENERATOR_UNICORN_ROE         = 51,
+    GENERATOR_LICH                = 52,
+    GENERATOR_VAMPIRE             = 53,
+    GENERATOR_SKELETON            = 54,
+    GENERATOR_ZOMBIE              = 55,
+    GENERATOR_PIKEMAN             = 56,
+    GENERATOR_ARCHER              = 57,
+    GENERATOR_SWORDSMAN           = 58,
+    GENERATOR_PIXIE               = 59,
+    GENERATOR_PSYCHIC_ELEMENTAL   = 60,
+    GENERATOR_FIREBIRD            = 61,
+    GENERATOR_AZURE_DRAGON        = 62,
+    GENERATOR_CRYSTAL_DRAGON      = 63,
+    GENERATOR_FAERIE_DRAGON       = 64,
+    GENERATOR_RUST_DRAGON         = 65,
+    GENERATOR_ENCHANTER           = 66,
+    GENERATOR_SHARPSHOOTER        = 67,
+    GENERATOR_UNICORN             = 68, // AB version, RoE version is GENERATOR_UNICORN_ROE
+    GENERATOR_AIR_ELEMENTAL       = 69, // AB version, RoE version is GENERATOR_AIR_ELEMENTAL_ROE
+    GENERATOR_EARTH_ELEMENTAL     = 70, // AB version, RoE version is GENERATOR_EARTH_ELEMENTAL_ROE
+    GENERATOR_FIRE_ELEMENTAL      = 71, // AB version, RoE version is GENERATOR_FIRE_ELEMENTAL_ROE
+    GENERATOR_WATER_ELEMENTAL     = 72, // AB version, RoE version is GENERATOR_WATER_ELEMENTAL_ROE
+    GENERATOR_HALFLING            = 73,
+    GENERATOR_PEASANT             = 74,
+    GENERATOR_BOAR                = 75,
+    GENERATOR_MUMMY               = 76,
+    GENERATOR_NOMAD               = 77,
+    GENERATOR_ROGUE               = 78,
+    GENERATOR_TROLL               = 80,
+
+    MAX_GENERATORS_ROE = 60,
+    MAX_GENERATORS_AB  = 81,
+    MAX_GENERATORS_SOD = MAX_GENERATORS_AB,
+    MAX_GENERATORS     = MAX_GENERATORS_SOD,
+    FIRST_GENERATOR    = GENERATOR_BASILISK,
+    LAST_GENERATOR_ROE = GENERATOR_SWORDSMAN,
+    LAST_GENERATOR_AB  = GENERATOR_TROLL,
+    LAST_GENERATOR_SOD = LAST_GENERATOR_AB,
+    LAST_GENERATOR     = LAST_GENERATOR_SOD,
+
+};
+
+template<>
+struct nh3api::enum_limits<ECreatureGenerator>
+    : nh3api::enum_limits_base<ECreatureGenerator, FIRST_GENERATOR, LAST_GENERATOR>
 { static inline constexpr bool is_specialized = true; };
 
 // Creature sprite sequences ID during combat /
