@@ -30,7 +30,7 @@
 #include <array>        // std::array
 #include <cassert>      // assert
 #include <functional>   // std::less<>
-#if (__cplusplus >= 202002L) || defined(__cpp_lib_ranges)
+#if __has_include(<ranges>) && ((__cplusplus >= 202002L) || defined(__cpp_lib_ranges))
 #include <ranges>       // std::default_sentinel_t
 #endif
 #include <stdexcept> // std::length_error

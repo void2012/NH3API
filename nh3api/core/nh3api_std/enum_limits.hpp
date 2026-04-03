@@ -12,7 +12,7 @@
 #include <limits>      // std::numeric_limits
 #include <type_traits> // std::underlying_type_t
 
-#if (__cplusplus >= 202002L) || defined(__cpp_lib_ranges)
+#if __has_include(<ranges>) && (__cplusplus >= 202002L) || defined(__cpp_lib_ranges)
 #include <ranges>      // std::ranges::view_interface
 #endif
 

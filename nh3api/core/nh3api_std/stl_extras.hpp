@@ -14,11 +14,11 @@
 #include <type_traits> // std::make_unsigned_t
 #include <utility>
 
-#if (__cplusplus >= 202002L) || defined(__cpp_lib_concepts)
+#if __has_include(<concepts>) && ((__cplusplus >= 202002L) || defined(__cpp_lib_concepts))
 #include <concepts>    // std::integral concept
 #endif
 
-#if (__cplusplus >= 202002L) || defined(__cpp_lib_bit_cast)
+#if __has_include(<bit>) && ((__cplusplus >= 202002L) || defined(__cpp_lib_bit_cast))
 #include <bit>         // std::bit_cast
 #endif
 

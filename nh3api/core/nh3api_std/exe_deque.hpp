@@ -29,7 +29,7 @@
 
 #include <algorithm>             // std::copy, std::copy_backward
 #include <utility>               // std::swap
-#if (__cplusplus >= 202002L) || defined(__cpp_lib_three_way_comparison)
+#if __has_include(<compare>) && ((__cplusplus >= 202002L) || defined(__cpp_lib_three_way_comparison))
 #include <compare>               // std::strong_ordering
 #endif
 #include <stdexcept> // std::out_of_range

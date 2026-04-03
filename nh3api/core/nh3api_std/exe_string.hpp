@@ -32,7 +32,7 @@
 #include <cmath>                 // std::fpclassify
 #include <initializer_list>      // std::initializer_list
 #include <utility>               // std::swap, std::forward
-#if (__cplusplus >= 202002L) || defined(__cpp_lib_ranges)
+#if __has_include(<ranges>) && ((__cplusplus >= 202002L) || defined(__cpp_lib_ranges))
 #include <ranges>                // std::ranges::begin, std::ranges::contiguous_range, std::ranges::data, std::ranges::forward_range, std::from_range
 #endif
 #include <stdexcept> // std::bad_alloc, std::length_error, std::out_of_range

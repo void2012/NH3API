@@ -18,7 +18,7 @@
 #include <cstring>     // std::memcpy, std::memset
 #include <limits>      // std::numeric_limits
 #include <type_traits> // std::common_type_t, std::enable_if_t, std::make_unsigned_t
-#if (__cplusplus >= 202002L) || defined(__cpp_lib_concepts)
+#if __has_include(<concepts>) && ((__cplusplus >= 202002L) || defined(__cpp_lib_concepts))
 #include <concepts>    // std::integral
 #endif
 

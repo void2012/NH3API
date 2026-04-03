@@ -12,7 +12,7 @@
 #include "nh3api_std/nh3api_std.hpp"
 
 #include <type_traits>
-#if (__cplusplus >= 202002L) || defined(__cpp_lib_concepts)
+#if __has_include(<concepts>) && ((__cplusplus >= 202002L) || defined(__cpp_lib_concepts))
 #include <concepts>    // std::integral
 #endif
 
