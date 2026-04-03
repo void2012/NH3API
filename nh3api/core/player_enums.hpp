@@ -71,15 +71,12 @@ inline constexpr EPlayerBit operator~(EPlayerBit arg) noexcept
 inline constexpr EPlayerBit& operator<<=(EPlayerBit& lhs, std::integral auto shift) noexcept
 { return lhs = lhs << shift; }
 
-template <class _Integer>
 inline constexpr EPlayerBit operator<<(EPlayerBit lhs, std::integral auto shift) noexcept
 { return static_cast<EPlayerBit>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) << shift)); }
 
-template <class _Integer>
 inline constexpr EPlayerBit& operator>>=(EPlayerBit& lhs, std::integral auto shift) noexcept
 { return lhs = lhs >> shift; }
 
-template <class _Integer>
 inline constexpr EPlayerBit operator>>(EPlayerBit lhs, std::integral auto shift) noexcept
 { return static_cast<EPlayerBit>(static_cast<uint8_t>(static_cast<uint32_t>(lhs) >> shift)); }
 #else
