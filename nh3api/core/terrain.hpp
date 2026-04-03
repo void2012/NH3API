@@ -467,9 +467,17 @@ class type_point
             : x {-1}, y {-1}, z {-1}
         {}
 
-        inline NH3API_CONSTEXPR_CPP_20 type_point(uint32_t data) noexcept
+        inline
+    #if NH3API_HAS_BUILTIN_BIT_CAST
+        constexpr
+    #endif
+        type_point(uint32_t data) noexcept
         {
-            *this = nh3api::bit_cast<type_point>(data);
+        #if NH3API_HAS_BUILTIN_BIT_CAST
+            *this = __builtin_bit_cast(type_point, data);
+        #else
+            memcpy(this, &data, sizeof(*this));
+        #endif
         }
 
         inline type_point(const nh3api::dummy_tag_t&) noexcept
@@ -477,7 +485,7 @@ class type_point
 
     // setters
     public:
-        constexpr type_point& set(int8_t X, int8_t Y, int8_t Z) noexcept
+        inline constexpr type_point& set(int8_t X, int8_t Y, int8_t Z) noexcept
         {
             x = static_cast<unsigned char>(X);
             y = static_cast<unsigned char>(Y);
@@ -485,53 +493,55 @@ class type_point
             return *this;
         }
 
-        #if NH3API_HAS_BUILTIN_BIT_CAST
+        inline
+    #if NH3API_HAS_BUILTIN_BIT_CAST
         constexpr
-        #endif
+    #endif
         type_point& set(uint32_t data) noexcept
         {
-            #if NH3API_HAS_BUILTIN_BIT_CAST
+        #if NH3API_HAS_BUILTIN_BIT_CAST
             *this = __builtin_bit_cast(type_point, data);
-            #else
+        #else
             memcpy(this, &data, sizeof(*this));
-            #endif
+        #endif
             return *this;
         }
 
-        constexpr type_point& set_x(int8_t X) noexcept
+        inline constexpr type_point& set_x(int8_t X) noexcept
         { x = static_cast<unsigned char>(X); return *this; }
 
-        constexpr type_point& set_y(int8_t Y) noexcept
+        inline constexpr type_point& set_y(int8_t Y) noexcept
         { y = static_cast<unsigned char>(Y); return *this; }
 
-        constexpr type_point& set_z(int8_t Z) noexcept
+        inline constexpr type_point& set_z(int8_t Z) noexcept
         { z = static_cast<unsigned char>(Z); return *this; }
 
     // getters
     public:
-        [[nodiscard]] constexpr int16_t get_x() const noexcept
+        [[nodiscard]] inline constexpr int16_t get_x() const noexcept
         { return x; }
 
-        [[nodiscard]] constexpr int16_t get_y() const noexcept
+        [[nodiscard]] inline constexpr int16_t get_y() const noexcept
         { return y; }
 
-        [[nodiscard]] constexpr int8_t get_z() const noexcept
+        [[nodiscard]] inline constexpr int8_t get_z() const noexcept
         { return static_cast<int8_t>(static_cast<unsigned char>(z) & 0xFU); }
 
         [[nodiscard]]
-        #if NH3API_HAS_BUILTIN_BIT_CAST
+        inline
+    #if NH3API_HAS_BUILTIN_BIT_CAST
         constexpr
-        #endif
+    #endif
         // return the underlying data
         uint32_t to_uint() const noexcept
         {
-            #if NH3API_HAS_BUILTIN_BIT_CAST
+        #if NH3API_HAS_BUILTIN_BIT_CAST
             return __builtin_bit_cast(uint32_t, *this);
-            #else
+        #else
             uint32_t result;
             memcpy(&result, this, sizeof(*this));
             return result;
-            #endif
+        #endif
         }
 
         // This point is on map
@@ -539,7 +549,7 @@ class type_point
         [[nodiscard]] bool is_valid() const noexcept
         { return THISCALL_1(bool, 0x4B1090, this); }
 
-        [[nodiscard]] constexpr size_t hash() const noexcept
+        [[nodiscard]] inline constexpr size_t hash() const noexcept
         {
             // for hash we simply return 32-bit mask of tuple [x,y,z] but without
             // unused bits which may be filled with different default values depending on
