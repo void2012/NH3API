@@ -2649,6 +2649,12 @@ inline bool operator!=(const exe_string& _Left, const char* _Right_string) noexc
 { return (!(_Left == _Right_string)); }
 #endif
 
+#if defined(_MSVC_STL_VERSION) && defined(__cpp_lib_flat_set) && defined(__cpp_lib_flat_map)
+// exe_string comparison optimization for MSVC STL implementation of std::flat_set and std::flat_map
+template<>
+constexpr bool std::_Equivalence_is_equality_impl<exe_string> = true;
+#endif
+
 namespace nh3api
 {
 
