@@ -37,10 +37,11 @@ _Post_writable_byte_size_(size)
 // address: 0x617492
 // Heroes3.exe internal operator delete /
 // Внутренняя реализация CRT-функции operator new Heroes3.exe.
-inline void* __cdecl exe_new(size_t size) noexcept
+inline void* exe_new(size_t size) noexcept
 {
 #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
-    return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+    void* const ptr = CDECL_1(void*, 0x617492, size);
+    return __builtin_assume_aligned(ptr, 8);
 #else // __has_builtin(__builtin_assume_aligned)
     return CDECL_1(void*, 0x617492, size);
 #endif // __has_builtin(__builtin_assume_aligned)
@@ -50,7 +51,7 @@ NH3API_NONNULL(1)
 // address: 0x60B0F0
 // Heroes3.exe internal operator delete /
 // Внутренняя реализация CRT-функции operator delete Heroes3.exe.
-inline void __cdecl exe_delete(void* ptr) noexcept
+inline void exe_delete(void* ptr) noexcept
 { CDECL_1(void, 0x60B0F0, ptr); }
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1)
@@ -67,10 +68,11 @@ _Post_writable_byte_size_(size)
 // address: 0x61A9D5
 // Heroes3.exe internal malloc /
 // Внутренняя реализация CRT-функции malloc Heroes3.exe.
-inline void* __cdecl exe_malloc(size_t size) noexcept
+inline void* exe_malloc(size_t size) noexcept
 {
 #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
-    return __builtin_assume_aligned(CDECL_1(void*, 0x61A9D5, size), 8);
+    void* const ptr = CDECL_1(void*, 0x61A9D5, size);
+    return __builtin_assume_aligned(ptr, 8);
 #else // __has_builtin(__builtin_assume_aligned)
     return CDECL_1(void*, 0x61A9D5, size);
 #endif // __has_builtin(__builtin_assume_aligned)
@@ -80,7 +82,7 @@ NH3API_NONNULL(1)
 // address: 0x61A9D5
 // Heroes3.exe internal free /
 // Внутренняя реализация CRT-функции free Heroes3.exe.
-inline void __cdecl exe_free(void* ptr) noexcept
+inline void exe_free(void* ptr) noexcept
 { CDECL_1(void, 0x619BB0, ptr); }
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_NONNULL(1)
@@ -93,7 +95,7 @@ _Post_writable_byte_size_(size)
 // address: 0x619890
 // Heroes3.exe internal realloc /
 // Внутренняя реализация CRT-функции realloc Heroes3.exe.
-inline void* __cdecl exe_realloc(void* ptr, size_t size) noexcept
+inline void* exe_realloc(void* ptr, size_t size) noexcept
 { return CDECL_2(void*, 0x619890, ptr, size); }
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1, 2)
@@ -110,7 +112,7 @@ _Post_writable_byte_size_(numOfElements * sizeOfElements)
 // address: 0x61AA61
 // Heroes3.exe internal calloc /
 // Внутренняя реализация CRT-функции calloc Heroes3.exe.
-inline void* __cdecl exe_calloc(size_t numOfElements, size_t sizeOfElements) noexcept
+inline void* exe_calloc(size_t numOfElements, size_t sizeOfElements) noexcept
 { return CDECL_2(void*, 0x61AA61, numOfElements, sizeOfElements); }
 
 NH3API_NONNULL(1)
@@ -120,7 +122,7 @@ NH3API_NONNULL(1)
 // address: 0x61E504
 // Heroes3.exe internal _msize /
 // Внутренняя реализация CRT-функции _msize Heroes3.exe.
-[[nodiscard]] inline size_t __cdecl exe_msize(const void* ptr) noexcept
+[[nodiscard]] inline size_t exe_msize(const void* ptr) noexcept
 { return CDECL_1(size_t, 0x61E504, ptr); }
 
 // exe_heap flag passed to the placement new form to allocate via the exe_new /
@@ -156,10 +158,11 @@ _Post_writable_byte_size_(size)
 #endif
 #endif
 // usage: new (exe_heap) new-initializer...
-inline void* __cdecl operator new(size_t size, const exe_heap_t&) noexcept
+inline void* operator new(size_t size, const exe_heap_t&) noexcept
 {
 #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
-    return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+    void* const ptr = CDECL_1(void*, 0x617492, size);
+    return __builtin_assume_aligned(ptr, 8);
 #else // __has_builtin(__builtin_assume_aligned)
     return CDECL_1(void*, 0x617492, size);
 #endif // __has_builtin(__builtin_assume_aligned)
@@ -177,10 +180,11 @@ _Post_writable_byte_size_(size)
 #endif
 #endif
 // usage: new (exe_heap, std::nothrow) new-initializer...
-inline void* __cdecl operator new(size_t size, const exe_heap_t&, const std::nothrow_t&) noexcept
+inline void* operator new(size_t size, const exe_heap_t&, const std::nothrow_t&) noexcept
 {
 #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
-    return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+    void* const ptr = CDECL_1(void*, 0x617492, size);
+    return __builtin_assume_aligned(ptr, 8);
 #else // __has_builtin(__builtin_assume_aligned)
     return CDECL_1(void*, 0x617492, size);
 #endif // __has_builtin(__builtin_assume_aligned)
@@ -200,10 +204,11 @@ _Post_writable_byte_size_(size)
 // usage: new (exe_heap) new-initializer...
 // NOTE: It appears that both Itanium ABI and MSVC ABI implicitly allocate size + 4,
 // and return exe_new(size) + 4 pointer, so we don't do manual handling
-inline void* __cdecl operator new[](size_t size, const exe_heap_t&) noexcept
+inline void* operator new[](size_t size, const exe_heap_t&) noexcept
 {
 #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
-    return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+    void* const ptr = CDECL_1(void*, 0x617492, size);
+    return __builtin_assume_aligned(ptr, 8);
 #else // __has_builtin(__builtin_assume_aligned)
     return CDECL_1(void*, 0x617492, size);
 #endif // __has_builtin(__builtin_assume_aligned)
@@ -223,10 +228,11 @@ _Post_writable_byte_size_(size)
 // usage: new (exe_heap, std::nothrow) new-initializer...
 // NOTE: It appears that both Itanium ABI and MSVC ABI implicitly allocate size + 4,
 // and return exe_new(size) + 4 pointer, so we don't do manual handling
-inline void* __cdecl operator new[](size_t size, const exe_heap_t&, const std::nothrow_t&) noexcept
+inline void* operator new[](size_t size, const exe_heap_t&, const std::nothrow_t&) noexcept
 {
 #if NH3API_HAS_BUILTIN_ASSUME_ALIGNED
-    return __builtin_assume_aligned(CDECL_1(void*, 0x617492, size), 8);
+    void* const ptr = CDECL_1(void*, 0x617492, size);
+    return __builtin_assume_aligned(ptr, 8);
 #else // __has_builtin(__builtin_assume_aligned)
     return CDECL_1(void*, 0x617492, size);
 #endif // __has_builtin(__builtin_assume_aligned)
@@ -234,22 +240,22 @@ inline void* __cdecl operator new[](size_t size, const exe_heap_t&, const std::n
 
 NH3API_NONNULL(1)
 // added for the parity
-inline void __cdecl operator delete(void* ptr, const exe_heap_t&) noexcept
+inline void operator delete(void* ptr, const exe_heap_t&) noexcept
 { CDECL_1(void, 0x60B0F0, ptr); }
 
 NH3API_NONNULL(1)
 // added for the parity
-inline void __cdecl operator delete[](void* ptr, const exe_heap_t&) noexcept
+inline void operator delete[](void* ptr, const exe_heap_t&) noexcept
 { CDECL_1(void, 0x60B0F0, ptr); }
 
 NH3API_NONNULL(1)
 // added for the parity
-inline void __cdecl operator delete(void* ptr, const exe_heap_t&, const std::nothrow_t&) noexcept
+inline void operator delete(void* ptr, const exe_heap_t&, const std::nothrow_t&) noexcept
 { CDECL_1(void, 0x60B0F0, ptr); }
 
 NH3API_NONNULL(1)
 // added for the parity
-inline void __cdecl operator delete[](void* ptr, const exe_heap_t&, const std::nothrow_t&) noexcept
+inline void operator delete[](void* ptr, const exe_heap_t&, const std::nothrow_t&) noexcept
 { CDECL_1(void, 0x60B0F0, ptr); }
 
 namespace nh3api
