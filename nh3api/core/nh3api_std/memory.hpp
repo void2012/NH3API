@@ -35,7 +35,7 @@ _Post_writable_byte_size_(size)
 #endif
 #endif
 // address: 0x617492
-// Heroes3.exe internal operator delete /
+// Heroes3.exe internal operator new /
 // Внутренняя реализация CRT-функции operator new Heroes3.exe.
 inline void* exe_new(size_t size) noexcept
 {
