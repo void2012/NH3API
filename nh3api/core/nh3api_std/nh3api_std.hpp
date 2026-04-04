@@ -386,9 +386,9 @@ NH3API_WARNING_MSVC_DISABLE(4201) // Nonstandard extension used: nameless struct
 
     #ifndef NH3API_MALLOC
         #if NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__malloc__) && NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__alloc_size__)
-            #define NH3API_MALLOC(...) [[__gnu__::__malloc__, __gnu__::__alloc_size__(__VA_ARGS__)]] __declspec(allocator) __declspec(restrict) __declspec(noalias)
+            #define NH3API_MALLOC(...) [[__gnu__::__malloc__, __gnu__::__alloc_size__(__VA_ARGS__)]] __declspec(allocator) __declspec(restrict)
         #else
-            #define NH3API_MALLOC(...) __declspec(allocator) __declspec(restrict) __declspec(noalias)
+            #define NH3API_MALLOC(...) __declspec(allocator) __declspec(restrict)
         #endif
     #endif
 #else
@@ -703,6 +703,14 @@ using bool32_t = uint32_t;
     #else
         #define NH3API_LIKELY
         #define NH3API_UNLIKELY
+    #endif
+#endif
+
+#ifndef NH3API_NONNULL
+    #if NH3API_CHECK_MSVC
+        #define NH3API_NONNULL(...)
+    #else
+        #define NH3API_NONNULL(...) [[__gnu__::__nonull__(__VA_ARGS__)]]
     #endif
 #endif
 
@@ -1068,11 +1076,23 @@ inline constexpr bool use_era
 
 // requires T::vftable_t
 template<class T> [[nodiscard]]
+#if !NH3API_CHECK_MSVC
+[[__gnu__::__pure__]]
+#if __has_attribute(access)
+[[__gnu__::__access__(read_only, 1)]]
+#endif // __has_attribute(access)
+#endif
 inline typename T::vftable_t* get_vftable(T* ptr) noexcept
 { return __builtin_launder(*reinterpret_cast<typename T::vftable_t**>(ptr)); }
 
 // requires T::vftable_t
 template<class T> [[nodiscard]]
+#if !NH3API_CHECK_MSVC
+[[__gnu__::__pure__]]
+#if __has_attribute(access)
+[[__gnu__::__access__(read_only, 1)]]
+#endif // __has_attribute(access)
+#endif
 inline const typename T::vftable_t* get_vftable(const T* ptr) noexcept
 { return __builtin_launder(*reinterpret_cast<const typename T::vftable_t* const*>(ptr)); }
 

@@ -24,6 +24,16 @@ NH3API_WARNING_GNUC_DISABLE("-Wattributes")
 // maximum allocated size per call: 520177 bytes
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1)
+#if NH3API_CHECK_MSVC
+#if defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+_Check_return_
+_Post_writable_byte_size_(size)
+#endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+#elif NH3API_CHECK_MINGW
+#if __GNUC__ >= 11
+[[__gnu__::__malloc__((exe_delete, 1))]]
+#endif
+#endif
 // address: 0x617492
 // Heroes3.exe internal operator delete /
 // Внутренняя реализация CRT-функции operator new Heroes3.exe.
@@ -36,6 +46,7 @@ inline void* __cdecl exe_new(size_t size) noexcept
 #endif // __has_builtin(__builtin_assume_aligned)
 }
 
+NH3API_NONNULL(1)
 // address: 0x60B0F0
 // Heroes3.exe internal operator delete /
 // Внутренняя реализация CRT-функции operator delete Heroes3.exe.
@@ -43,6 +54,16 @@ inline void __cdecl exe_delete(void* ptr) noexcept
 { CDECL_1(void, 0x60B0F0, ptr); }
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1)
+#if NH3API_CHECK_MSVC
+#if defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+_Check_return_
+_Post_writable_byte_size_(size)
+#endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+#elif NH3API_CHECK_MINGW
+#if __GNUC__ >= 11
+[[__gnu__::__malloc__((exe_free, 1))]]
+#endif
+#endif
 // address: 0x61A9D5
 // Heroes3.exe internal malloc /
 // Внутренняя реализация CRT-функции malloc Heroes3.exe.
@@ -55,43 +76,63 @@ inline void* __cdecl exe_malloc(size_t size) noexcept
 #endif // __has_builtin(__builtin_assume_aligned)
 }
 
-
+NH3API_NONNULL(1)
 // address: 0x61A9D5
 // Heroes3.exe internal free /
 // Внутренняя реализация CRT-функции free Heroes3.exe.
 inline void __cdecl exe_free(void* ptr) noexcept
 { CDECL_1(void, 0x619BB0, ptr); }
 
-[[nodiscard]] NH3API_RETURNS_ALIGNED(8)
+[[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_NONNULL(1)
+#if NH3API_CHECK_MSVC
+#if defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+_Check_return_
+_Post_writable_byte_size_(size)
+#endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+#endif // MSVC
 // address: 0x619890
 // Heroes3.exe internal realloc /
 // Внутренняя реализация CRT-функции realloc Heroes3.exe.
-inline void* __cdecl exe_realloc(void* ptr, size_t newSize) noexcept
-{ return CDECL_2(void*, 0x619890, ptr, newSize); }
+inline void* __cdecl exe_realloc(void* ptr, size_t size) noexcept
+{ return CDECL_2(void*, 0x619890, ptr, size); }
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1, 2)
+#if NH3API_CHECK_MSVC
+#if defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+_Check_return_
+_Post_writable_byte_size_(numOfElements * sizeOfElements)
+#endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+#elif NH3API_CHECK_MINGW
+#if __GNUC__ >= 11
+[[__gnu__::__malloc__((exe_free, 1))]]
+#endif
+#endif
 // address: 0x61AA61
 // Heroes3.exe internal calloc /
 // Внутренняя реализация CRT-функции calloc Heroes3.exe.
 inline void* __cdecl exe_calloc(size_t numOfElements, size_t sizeOfElements) noexcept
 { return CDECL_2(void*, 0x61AA61, numOfElements, sizeOfElements); }
 
+NH3API_NONNULL(1)
+#if NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__access__)
+[[__gnu__::__access__(none, 1)]]
+#endif
 // address: 0x61E504
 // Heroes3.exe internal _msize /
 // Внутренняя реализация CRT-функции _msize Heroes3.exe.
-[[nodiscard]] inline int32_t __cdecl exe_msize(const void* ptr) noexcept
-{ return CDECL_1(int32_t, 0x61E504, ptr); }
+[[nodiscard]] inline size_t __cdecl exe_msize(const void* ptr) noexcept
+{ return CDECL_1(size_t, 0x61E504, ptr); }
 
 // exe_heap flag passed to the placement new form to allocate via the exe_new /
 // exe_heap флаг, который можно передать в placement new для выделения памяти с помощью exe_new.
 struct exe_heap_t
 {
-    inline static constexpr uintptr_t handle_address = 0x6ABD60;
-    static HANDLE& get_handle() noexcept
+    static inline constexpr uintptr_t handle_address = 0x6ABD60;
+    static inline HANDLE& get_handle() noexcept
     { return get_global_var_ref(handle_address, HANDLE); }
 
     // maximum size a heap can manage
-    static constexpr size_t max_size() noexcept
+    static inline constexpr size_t max_size() noexcept
     { return size_t(~0U); }
 
 }
@@ -104,6 +145,16 @@ inline constexpr exe_heap;
 // doing the same thing as without it.
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1)
+#if NH3API_CHECK_MSVC
+#if defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+_Check_return_
+_Post_writable_byte_size_(size)
+#endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+#elif NH3API_CHECK_MINGW
+#if __GNUC__ >= 11
+[[__gnu__::__malloc__((exe_delete, 1))]]
+#endif
+#endif
 // usage: new (exe_heap) new-initializer...
 inline void* __cdecl operator new(size_t size, const exe_heap_t&) noexcept
 {
@@ -115,6 +166,16 @@ inline void* __cdecl operator new(size_t size, const exe_heap_t&) noexcept
 }
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1)
+#if NH3API_CHECK_MSVC
+#if defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+_Check_return_
+_Post_writable_byte_size_(size)
+#endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+#elif NH3API_CHECK_MINGW
+#if __GNUC__ >= 11
+[[__gnu__::__malloc__((exe_delete, 1))]]
+#endif
+#endif
 // usage: new (exe_heap, std::nothrow) new-initializer...
 inline void* __cdecl operator new(size_t size, const exe_heap_t&, const std::nothrow_t&) noexcept
 {
@@ -126,6 +187,16 @@ inline void* __cdecl operator new(size_t size, const exe_heap_t&, const std::not
 }
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1)
+#if NH3API_CHECK_MSVC
+#if defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+_Check_return_
+_Post_writable_byte_size_(size)
+#endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+#elif NH3API_CHECK_MINGW
+#if __GNUC__ >= 11
+[[__gnu__::__malloc__((exe_delete, 1))]]
+#endif
+#endif
 // usage: new (exe_heap) new-initializer...
 // NOTE: It appears that both Itanium ABI and MSVC ABI implicitly allocate size + 4,
 // and return exe_new(size) + 4 pointer, so we don't do manual handling
@@ -139,6 +210,16 @@ inline void* __cdecl operator new[](size_t size, const exe_heap_t&) noexcept
 }
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1)
+#if NH3API_CHECK_MSVC
+#if defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+_Check_return_
+_Post_writable_byte_size_(size)
+#endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
+#elif NH3API_CHECK_MINGW
+#if __GNUC__ >= 11
+[[__gnu__::__malloc__((exe_delete, 1))]]
+#endif
+#endif
 // usage: new (exe_heap, std::nothrow) new-initializer...
 // NOTE: It appears that both Itanium ABI and MSVC ABI implicitly allocate size + 4,
 // and return exe_new(size) + 4 pointer, so we don't do manual handling
@@ -151,28 +232,22 @@ inline void* __cdecl operator new[](size_t size, const exe_heap_t&, const std::n
 #endif // __has_builtin(__builtin_assume_aligned)
 }
 
-/*
-// what I mean is that if both ABIs didn't do that, we would have to manually handle that:
-void* __cdecl operator new[](size_t size, const exe_heap_t&)
-{
-    int32_t* ptr = reinterpret_cast<int32_t*>(exe_new(size + sizeof(int32_t)));
-    *ptr = size;
-    return reinterpret_cast<void*>(ptr + 4);
-}
-*/
-
+NH3API_NONNULL(1)
 // added for the parity
 inline void __cdecl operator delete(void* ptr, const exe_heap_t&) noexcept
 { CDECL_1(void, 0x60B0F0, ptr); }
 
+NH3API_NONNULL(1)
 // added for the parity
 inline void __cdecl operator delete[](void* ptr, const exe_heap_t&) noexcept
 { CDECL_1(void, 0x60B0F0, ptr); }
 
+NH3API_NONNULL(1)
 // added for the parity
 inline void __cdecl operator delete(void* ptr, const exe_heap_t&, const std::nothrow_t&) noexcept
 { CDECL_1(void, 0x60B0F0, ptr); }
 
+NH3API_NONNULL(1)
 // added for the parity
 inline void __cdecl operator delete[](void* ptr, const exe_heap_t&, const std::nothrow_t&) noexcept
 { CDECL_1(void, 0x60B0F0, ptr); }
@@ -236,6 +311,9 @@ template<typename T> void __stdcall exe_vector_destructor_iterator(T* array_star
 
 // invoke delete and destroy (use this instead of plain exe_delete)
 template<typename T>
+#if NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__access__)
+[[__gnu__::__access__(read_write, 1)]]
+#endif
 inline void exe_invoke_delete(T* ptr) noexcept
 {
     if constexpr ( nh3api::tt::has_scalar_deleting_destructor_v<T> )
@@ -251,6 +329,9 @@ inline void exe_invoke_delete(T* ptr) noexcept
 
 // overload for void*
 template<>
+#if NH3API_HAS_CPP_ATTRIBUTE(__gnu__::__access__)
+[[__gnu__::__access__(none, 1)]]
+#endif
 inline void exe_invoke_delete<void>(void* ptr) noexcept
 { exe_delete(ptr); }
 
