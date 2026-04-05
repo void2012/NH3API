@@ -468,7 +468,7 @@ class type_point
         {}
 
         inline
-    #if NH3API_HAS_BUILTIN_BIT_CAST
+    #if NH3API_HAS_BUILTIN_BIT_CAST && NH3API_CHECK_CPP20
         constexpr
     #endif
         type_point(uint32_t data) noexcept
