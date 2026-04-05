@@ -244,7 +244,7 @@ struct nh3api::enum_limits<TCreatureType>
     : nh3api::enum_limits_base<TCreatureType, FIRST_CREATURE, LAST_CREATURE>
 { static inline constexpr bool is_specialized = true; };
 
-enum ECreatureGenerator : int32_t
+enum ECreatureGenerator : int16_t
 {
     GENERATOR_NONE              = -1,
     GENERATOR_ELEMENTAL_CONFLUX = 0, // OBJECT_CREATURE_GENERATOR4
