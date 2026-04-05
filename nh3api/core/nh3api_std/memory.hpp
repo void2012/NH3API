@@ -31,7 +31,7 @@ _Post_writable_byte_size_(size)
 #endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
 #elif NH3API_CHECK_MINGW
 #if __GNUC__ >= 11
-[[__gnu__::__malloc__((exe_delete, 1))]]
+[[__gnu__::__malloc__(exe_delete, 1)]]
 #endif
 #endif
 // address: 0x617492
@@ -62,7 +62,7 @@ _Post_writable_byte_size_(size)
 #endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
 #elif NH3API_CHECK_MINGW
 #if __GNUC__ >= 11
-[[__gnu__::__malloc__((exe_free, 1))]]
+[[__gnu__::__malloc__(exe_free, 1)]]
 #endif
 #endif
 // address: 0x61A9D5
@@ -106,7 +106,7 @@ _Post_writable_byte_size_(numOfElements * sizeOfElements)
 #endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
 #elif NH3API_CHECK_MINGW
 #if __GNUC__ >= 11
-[[__gnu__::__malloc__((exe_free, 1))]]
+[[__gnu__::__malloc__(exe_free, 1)]]
 #endif
 #endif
 // address: 0x61AA61
@@ -154,7 +154,7 @@ _Post_writable_byte_size_(size)
 #endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
 #elif NH3API_CHECK_MINGW
 #if __GNUC__ >= 11
-[[__gnu__::__malloc__((exe_delete, 1))]]
+[[__gnu__::__malloc__(exe_delete, 1)]]
 #endif
 #endif
 // usage: new (exe_heap) new-initializer...
@@ -176,7 +176,7 @@ _Post_writable_byte_size_(size)
 #endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
 #elif NH3API_CHECK_MINGW
 #if __GNUC__ >= 11
-[[__gnu__::__malloc__((exe_delete, 1))]]
+[[__gnu__::__malloc__(exe_delete, 1)]]
 #endif
 #endif
 // usage: new (exe_heap, std::nothrow) new-initializer...
@@ -198,7 +198,7 @@ _Post_writable_byte_size_(size)
 #endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
 #elif NH3API_CHECK_MINGW
 #if __GNUC__ >= 11
-[[__gnu__::__malloc__((exe_delete, 1))]]
+[[__gnu__::__malloc__(exe_delete, 1)]]
 #endif
 #endif
 // usage: new (exe_heap) new-initializer...
@@ -222,7 +222,7 @@ _Post_writable_byte_size_(size)
 #endif // defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
 #elif NH3API_CHECK_MINGW
 #if __GNUC__ >= 11
-[[__gnu__::__malloc__((exe_delete, 1))]]
+[[__gnu__::__malloc__(exe_delete, 1)]]
 #endif
 #endif
 // usage: new (exe_heap, std::nothrow) new-initializer...
