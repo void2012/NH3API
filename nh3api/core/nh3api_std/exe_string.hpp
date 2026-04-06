@@ -472,12 +472,10 @@ class exe_string
 
         exe_string& append(const char* const _String)
         {
-            if ( _String == nullptr ) NH3API_UNLIKELY
+            if ( _String == nullptr || *_String == '\0' ) NH3API_UNLIKELY
                 return *this;
 
             const size_t _Count = __builtin_strlen(_String);
-            if ( _Count == 0 ) NH3API_UNLIKELY
-                return *this;
 
             return _Reallocate_grow_by(
                 _Count,
@@ -648,19 +646,13 @@ class exe_string
 
         exe_string& assign(const char* const _String)
         {
-            if ( _String == nullptr ) NH3API_UNLIKELY
+            if ( _String == nullptr || *_String == '\0' ) NH3API_UNLIKELY
             {
                 clear();
                 return *this;
             }
 
             const size_t _Length = __builtin_strlen(_String);
-            if ( _Length == 0 ) NH3API_UNLIKELY
-            {
-                clear();
-                return *this;
-            }
-
             return _Reallocate_for(_Length,
             NH3API_CAPTURELESS_LAMBDA(char* const _New_ptr, const size_t _Count, const char* const _Src)
             {
@@ -803,16 +795,14 @@ class exe_string
     #endif
         exe_string& insert(const SizeType _Offset, const char* const _String)
         {
-            _Check_offset(static_cast<size_t>(_Offset));
-            if ( _String == nullptr ) NH3API_UNLIKELY
+            if ( _String == nullptr || *_String == '\0' ) NH3API_UNLIKELY
                 return *this;
 
             const size_t _Length = __builtin_strlen(_String);
-            if ( _Length == 0 ) NH3API_UNLIKELY
-                return *this;
-
             if ( empty() ) NH3API_UNLIKELY
                 return assign(_String, _Length);
+
+            _Check_offset(static_cast<size_t>(_Offset));
 
             return _Reallocate_grow_by(
             _Length,
@@ -1211,7 +1201,7 @@ class exe_string
     #endif
         exe_string& replace(const _Size_type _Offset, const _Size_type _Nx, const char* const _String)
         {
-            if ( !this->empty() && _String != nullptr ) NH3API_LIKELY
+            if ( !this->empty() && _String != nullptr && *_String ) NH3API_LIKELY
                 return replace(_Offset, _Nx, _String, __builtin_strlen(_String));
 
             return *this;
@@ -1772,6 +1762,7 @@ class exe_string
                 const size_t _Rightsize = __builtin_strlen(_String);
                 if ( _Mysize < _Rightsize )
                     return false;
+
                 return __builtin_memcmp(_Myptr + (_Mysize - _Rightsize), _String, _Rightsize) == 0;
             }
 
@@ -1804,10 +1795,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.find(_Character, _Offset); }
 
         [[nodiscard]] size_t find(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.find(_String, _Offset, _Count) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t find(const char* const _String, const size_t _Offset = 0) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.find(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         [[nodiscard]] size_t rfind(const exe_string& _Other, const size_t _Offset = npos) const noexcept
         { return std::string_view{_Myptr, _Mysize}.rfind(_Other._Myptr, _Offset, _Other._Mysize); }
@@ -1819,10 +1810,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.rfind(_Character, _Offset); }
 
         [[nodiscard]] size_t rfind(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.rfind(_String, _Offset, _Count) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.rfind(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t rfind(const char* const _String, const size_t _Offset = npos) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.rfind(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.rfind(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         [[nodiscard]] size_t find_first_of(const exe_string& _Other, const size_t _Offset = 0) const noexcept
         { return std::string_view{_Myptr, _Mysize}.find_first_of(_Other._Myptr, _Offset, _Other._Mysize); }
@@ -1834,10 +1825,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.find_first_of(_Character, _Offset); }
 
         [[nodiscard]] size_t find_first_of(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_of(_String, _Offset, _Count) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_first_of(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t find_first_of(const char* const _String, const size_t _Offset = 0) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_first_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         [[nodiscard]] size_t find_last_of(const exe_string& _Other, const size_t _Offset = npos) const noexcept
         { return std::string_view{_Myptr, _Mysize}.find_last_of(_Other._Myptr, _Offset, _Other._Mysize); }
@@ -1849,10 +1840,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.find_last_of(_Character, _Offset); }
 
         [[nodiscard]] size_t find_last_of(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_of(_String, _Offset, _Count) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_last_of(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t find_last_of(const char* const _String, const size_t _Offset = npos) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_last_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         [[nodiscard]] size_t find_first_not_of(const exe_string& _Other, const size_t _Offset = 0) const noexcept
         { return std::string_view{_Myptr, _Mysize}.find_first_not_of(_Other._Myptr, _Offset, _Other._Mysize); }
@@ -1864,10 +1855,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.find_first_not_of(_Character, _Offset); }
 
         [[nodiscard]] size_t find_first_not_of(const char* const _String, size_t _Offset, const size_t _Count) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_not_of(_String, _Offset, _Count) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_first_not_of(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t find_first_not_of(const char* const _String, const size_t _Offset = 0) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_first_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         [[nodiscard]] size_t find_last_not_of(const exe_string& _Other, const size_t _Offset = npos) const noexcept
         { return std::string_view{_Myptr, _Mysize}.find_last_not_of(_Other._Myptr, _Offset, _Other._Mysize); }
@@ -1879,10 +1870,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.find_last_not_of(_Character, _Offset); }
 
         [[nodiscard]] size_t find_last_not_of(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, _Count) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t find_last_not_of(const char* const _String, const size_t _Offset = npos) const noexcept
-        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         // Backported from C++23 for performance reasons
         // https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2438r2.html
@@ -1951,7 +1942,7 @@ class exe_string
 
         int compare(const char* const _String) const noexcept
         {
-            if ( _String )
+            if ( _String && *_String )
                 return _Compare(this->_Myptr, this->_Mysize, _String, __builtin_strlen(_String));
 
             // compare to null string: if this string is empty, return 0, because null strings are equal
@@ -1962,7 +1953,7 @@ class exe_string
         int compare(const size_t _Offset, const size_t _Nx, const char* const _String) const
         {
             _Check_offset(_Offset);
-            if ( _String )
+            if ( _String && *_String )
                 return _Compare(this->_Myptr + _Offset, _Clamp_suffix_size(_Offset, _Nx), _String, __builtin_strlen(_String));
 
             // the same logic as in int compare(const char*), but if there are any symbols left after the offset
@@ -1975,7 +1966,7 @@ class exe_string
                     const size_t      _Count) const
         {
             _Check_offset(_Offset);
-            if ( _String && _Count )
+            if ( _String && *_String && _Count )
                 return _Compare(this->_Myptr + _Offset, _Clamp_suffix_size(_Offset, _Nx), _String, std::min<size_t>(_Count, __builtin_strlen(_String)));
 
             // the same logic as in int compare(const char*), but if there are any symbols left after the offset
@@ -2432,7 +2423,7 @@ struct nh3api::private_accessor<exe_string>
 
     inline static bool equal(const exe_string& _Left, const char* const _Right_string) noexcept
     {
-        if ( _Right_string )
+        if ( _Right_string && *_Right_string )
             return exe_string::_Equal(_Left.c_str(), _Left.size(), _Right_string, __builtin_strlen(_Right_string));
 
         return _Left.empty();
@@ -2440,7 +2431,7 @@ struct nh3api::private_accessor<exe_string>
 
     inline static bool equal(const char* const _Left_string, const exe_string& _Right) noexcept
     {
-        if ( _Left_string )
+        if ( _Left_string && *_Left_string )
             return exe_string::_Equal(_Left_string, __builtin_strlen(_Left_string), _Right.c_str(), _Right.size());
 
         return _Right.empty();
@@ -2489,7 +2480,7 @@ inline exe_string operator+(const exe_string& _Left, const exe_string& _Right)
 
 inline exe_string operator+(const char* const _Left_string, const exe_string& _Right)
 {
-    if ( _Left_string == nullptr )
+    if ( _Left_string == nullptr || *_Left_string == '\0' )
         return _Right;
 
     const char* const _Right_ptr = _Right.data();
@@ -2519,8 +2510,8 @@ inline exe_string operator+(char _Left_character, const exe_string& _Right)
 
 inline exe_string operator+(const exe_string& _Left, const char* const _Right_string)
 {
-    if ( _Right_string == nullptr )
-        return exe_string { _Right_string };
+    if ( _Right_string == nullptr || *_Right_string == '\0' )
+        return _Left;
 
     const char* const _Left_ptr  = _Left.data();
     const size_t      _Left_size = _Left.size();
@@ -2555,13 +2546,10 @@ inline exe_string operator+(exe_string&& _Left, const exe_string& _Right)
 
 inline exe_string operator+(exe_string&& _Left, exe_string&& _Right)
 {
-    if ( (_Left.data() == nullptr && _Right.data() == nullptr) || (_Left.empty() && _Right.empty()) )
-        return {};
-
-    if ( _Right.data() == nullptr || _Right.empty() )
+    if (_Right.empty())
         return std::move(_Left);
 
-    if ( _Left.data() == nullptr || _Left.empty() )
+    if (_Left.empty())
         return std::move(_Right);
 
     return { exe_string_constructor_concat_tag{}, _Left, _Right };
@@ -2596,9 +2584,6 @@ inline std::strong_ordering operator<=>(const exe_string& _Left, const exe_strin
 
 inline std::strong_ordering operator<=>(const exe_string& _Left, const char* const _Right_string) noexcept
 { return static_cast<std::strong_ordering>(_Left.compare(_Right_string) <=> 0); }
-
-inline std::strong_ordering operator<=>(const char* const _Left_string, const exe_string& _Right) noexcept
-{ return static_cast<std::strong_ordering>(_Right.compare(_Left_string) <=> 0); }
 #else
 inline bool operator==(const exe_string& _Left, const char* const _Right_string) noexcept
 { return nh3api::private_accessor<exe_string>::equal(_Left, _Right_string); }
