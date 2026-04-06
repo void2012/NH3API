@@ -23,6 +23,13 @@ NH3API_WARNING_GNUC_DISABLE("-Wattributes")
 
 // maximum allocated size per call: 520177 bytes
 
+NH3API_NONNULL(1)
+// address: 0x60B0F0
+// Heroes3.exe internal operator delete /
+// Внутренняя реализация CRT-функции operator delete Heroes3.exe.
+inline void exe_delete(void* ptr) noexcept
+{ CDECL_1(void, 0x60B0F0, ptr); }
+
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1)
 #if NH3API_CHECK_MSVC
 #if defined(_MSC_VER) && defined(_Check_return_) && defined(_Post_writable_byte_size_)
@@ -48,11 +55,11 @@ inline void* exe_new(size_t size) noexcept
 }
 
 NH3API_NONNULL(1)
-// address: 0x60B0F0
-// Heroes3.exe internal operator delete /
-// Внутренняя реализация CRT-функции operator delete Heroes3.exe.
-inline void exe_delete(void* ptr) noexcept
-{ CDECL_1(void, 0x60B0F0, ptr); }
+// address: 0x61A9D5
+// Heroes3.exe internal free /
+// Внутренняя реализация CRT-функции free Heroes3.exe.
+inline void exe_free(void* ptr) noexcept
+{ CDECL_1(void, 0x619BB0, ptr); }
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_MALLOC(1)
 #if NH3API_CHECK_MSVC
@@ -77,13 +84,6 @@ inline void* exe_malloc(size_t size) noexcept
     return CDECL_1(void*, 0x61A9D5, size);
 #endif // __has_builtin(__builtin_assume_aligned)
 }
-
-NH3API_NONNULL(1)
-// address: 0x61A9D5
-// Heroes3.exe internal free /
-// Внутренняя реализация CRT-функции free Heroes3.exe.
-inline void exe_free(void* ptr) noexcept
-{ CDECL_1(void, 0x619BB0, ptr); }
 
 [[nodiscard]] NH3API_RETURNS_ALIGNED(8) NH3API_NONNULL(1)
 #if NH3API_CHECK_MSVC
