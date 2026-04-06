@@ -795,14 +795,13 @@ class exe_string
     #endif
         exe_string& insert(const SizeType _Offset, const char* const _String)
         {
+            _Check_offset(static_cast<size_t>(_Offset));
             if ( _String == nullptr || *_String == '\0' ) NH3API_UNLIKELY
                 return *this;
 
             const size_t _Length = __builtin_strlen(_String);
             if ( empty() ) NH3API_UNLIKELY
                 return assign(_String, _Length);
-
-            _Check_offset(static_cast<size_t>(_Offset));
 
             return _Reallocate_grow_by(
             _Length,
