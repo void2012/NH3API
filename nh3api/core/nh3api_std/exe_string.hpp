@@ -1572,7 +1572,7 @@ class exe_string
         { return _Mysize; }
 
         [[nodiscard]] inline constexpr static size_t max_size() noexcept
-        { return size_t(~0U); }
+        { return static_cast<size_t>(PTRDIFF_MAX); }
 
         void resize(const size_t _New_size, char _Character = '\0')
         {

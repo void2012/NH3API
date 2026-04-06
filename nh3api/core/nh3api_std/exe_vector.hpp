@@ -1062,7 +1062,7 @@ public:
         { return static_cast<size_t>(this->_Mylast - this->_Myfirst); }
 
         [[nodiscard]] inline constexpr static size_t max_size() noexcept
-        { return size_t(~0U) / sizeof(value_type); }
+        { return static_cast<size_t>(PTRDIFF_MAX) / sizeof(value_type); }
 
         [[nodiscard]] inline bool empty() const noexcept
         { return _Myfirst == _Mylast; }
