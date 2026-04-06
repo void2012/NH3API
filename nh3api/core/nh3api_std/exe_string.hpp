@@ -1795,10 +1795,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.find(_Character, _Offset); }
 
         [[nodiscard]] size_t find(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find(_String, _Offset, _Count) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.find(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t find(const char* const _String, const size_t _Offset = 0) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.find(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         [[nodiscard]] size_t rfind(const exe_string& _Other, const size_t _Offset = npos) const noexcept
         { return std::string_view{_Myptr, _Mysize}.rfind(_Other._Myptr, _Offset, _Other._Mysize); }
@@ -1810,10 +1810,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.rfind(_Character, _Offset); }
 
         [[nodiscard]] size_t rfind(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.rfind(_String, _Offset, _Count) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.rfind(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t rfind(const char* const _String, const size_t _Offset = npos) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.rfind(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.rfind(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         [[nodiscard]] size_t find_first_of(const exe_string& _Other, const size_t _Offset = 0) const noexcept
         { return std::string_view{_Myptr, _Mysize}.find_first_of(_Other._Myptr, _Offset, _Other._Mysize); }
@@ -1825,10 +1825,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.find_first_of(_Character, _Offset); }
 
         [[nodiscard]] size_t find_first_of(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_first_of(_String, _Offset, _Count) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_of(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t find_first_of(const char* const _String, const size_t _Offset = 0) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_first_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         [[nodiscard]] size_t find_last_of(const exe_string& _Other, const size_t _Offset = npos) const noexcept
         { return std::string_view{_Myptr, _Mysize}.find_last_of(_Other._Myptr, _Offset, _Other._Mysize); }
@@ -1840,10 +1840,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.find_last_of(_Character, _Offset); }
 
         [[nodiscard]] size_t find_last_of(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_last_of(_String, _Offset, _Count) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_of(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t find_last_of(const char* const _String, const size_t _Offset = npos) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_last_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         [[nodiscard]] size_t find_first_not_of(const exe_string& _Other, const size_t _Offset = 0) const noexcept
         { return std::string_view{_Myptr, _Mysize}.find_first_not_of(_Other._Myptr, _Offset, _Other._Mysize); }
@@ -1855,10 +1855,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.find_first_not_of(_Character, _Offset); }
 
         [[nodiscard]] size_t find_first_not_of(const char* const _String, size_t _Offset, const size_t _Count) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_first_not_of(_String, _Offset, _Count) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_not_of(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t find_first_not_of(const char* const _String, const size_t _Offset = 0) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_first_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_first_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         [[nodiscard]] size_t find_last_not_of(const exe_string& _Other, const size_t _Offset = npos) const noexcept
         { return std::string_view{_Myptr, _Mysize}.find_last_not_of(_Other._Myptr, _Offset, _Other._Mysize); }
@@ -1870,10 +1870,10 @@ class exe_string
         { return std::string_view{_Myptr, _Mysize}.find_last_not_of(_Character, _Offset); }
 
         [[nodiscard]] size_t find_last_not_of(const char* const _String, const size_t _Offset, const size_t _Count) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, _Count) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, _Count) : npos; }
 
         [[nodiscard]] size_t find_last_not_of(const char* const _String, const size_t _Offset = npos) const noexcept
-        { return _String && *_String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
+        { return _String ? std::string_view{_Myptr, _Mysize}.find_last_not_of(_String, _Offset, __builtin_strlen(_String)) : npos; }
 
         // Backported from C++23 for performance reasons
         // https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p2438r2.html
@@ -1942,7 +1942,7 @@ class exe_string
 
         int compare(const char* const _String) const noexcept
         {
-            if ( _String && *_String )
+            if ( _String )
                 return _Compare(this->_Myptr, this->_Mysize, _String, __builtin_strlen(_String));
 
             // compare to null string: if this string is empty, return 0, because null strings are equal
@@ -1953,7 +1953,7 @@ class exe_string
         int compare(const size_t _Offset, const size_t _Nx, const char* const _String) const
         {
             _Check_offset(_Offset);
-            if ( _String && *_String )
+            if ( _String )
                 return _Compare(this->_Myptr + _Offset, _Clamp_suffix_size(_Offset, _Nx), _String, __builtin_strlen(_String));
 
             // the same logic as in int compare(const char*), but if there are any symbols left after the offset
@@ -1966,7 +1966,7 @@ class exe_string
                     const size_t      _Count) const
         {
             _Check_offset(_Offset);
-            if ( _String && *_String && _Count )
+            if ( _String && _Count )
                 return _Compare(this->_Myptr + _Offset, _Clamp_suffix_size(_Offset, _Nx), _String, std::min<size_t>(_Count, __builtin_strlen(_String)));
 
             // the same logic as in int compare(const char*), but if there are any symbols left after the offset
