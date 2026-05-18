@@ -791,6 +791,7 @@ NH3API_VIRTUAL_CLASS LoHook : public Patch
 };
 
 using SafeLoHook                = LoHook;
+
 using _LoHookFunc_              = int32_t(__stdcall*)(LoHook*, HookContext*);
 using _LoHookReferenceFunc_     = int32_t(__stdcall*)(LoHook&, HookContext&);
 using _SafeLoHookFunc_          = int32_t(__stdcall*)(SafeLoHook*, SafeLoHookContext*);
@@ -1058,7 +1059,7 @@ public:
     // размер памяти, которая может быть помещена в стек контекста
     // с помощью использования c->esp и с->Push, ограничен 128 байтами.
     // если требуется иное ограничение используйте метод WriteLoHookEx или CreateLoHookEx.
-    virtual LoHook* __stdcall WriteLoHook(uintptr_t address, lhfunc_t func) = 0;
+    virtual LoHook* __stdcall WriteLoHook(uintptr_t address, const void* func) = 0;
 
     #ifndef DECLARE_LH
         // declare lohook function
@@ -1284,16 +1285,9 @@ public:
 
 protected:
     virtual Patch* __stdcall CreateCodePatchVA(uintptr_t address, const char* __restrict format, uint32_t* __restrict va_args) = 0;
-    virtual LoHook* __stdcall xCreateLoHook(uintptr_t address, lhfunc_t func) = 0;
 
-public:
-    [[deprecated("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")]] NH3API_NO_SANITIZE_ADDRESS
-    inline LoHook* CreateLoHook(uintptr_t address, lhfunc_t func)
-    { return xCreateLoHook(address, func); }
-
-    [[deprecated("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")]] NH3API_NO_SANITIZE_ADDRESS
-    inline LoHook* CreateLoHook(uintptr_t address, lhrfunc_t func)
-    { return xCreateLoHook(address, reinterpret_cast<lhfunc_t>(func)); }
+public:    
+    virtual LoHook* __stdcall CreateLoHook(uintptr_t address, const void* func) = 0;
 
 protected:
     virtual HiHook* __stdcall xCreateHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, const void* new_func) = 0;
@@ -1540,9 +1534,7 @@ public:
     // # ver 5.0
     // Applies thread-safe lohook, see CreateSafeLoHook() /
     // Применяет потокобезопасный лоухук, см. CreateSafeLoHook().
-    virtual SafeLoHook* __stdcall WriteSafeLoHook(uintptr_t address, slhfunc_t func, uint32_t = 0) = 0;
-    inline SafeLoHook* WriteSafeLoHook(uintptr_t address, slhrfunc_t func)
-    { return WriteSafeLoHook(address, reinterpret_cast<slhfunc_t>(func)); }
+    virtual SafeLoHook* __stdcall WriteSafeLoHook(uintptr_t address, const void* func, uint32_t = 0) = 0;
 
     // # ver 5.0
     // Creates thread-safe lohook. The interface difference is:
