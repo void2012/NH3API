@@ -423,8 +423,8 @@ struct HookContext
     template<typename T>
     static inline T* as(uintptr_t address) noexcept
     {
-    #if defined(__cpp_lib_start_lifetime_as) && NH3API_CHECK_CPP23
-        return ::std::start_lifetime_as<T>(reinterpret_cast<void*>(address));
+    #if NH3API_CHECK_MSVC && defined(__cpp_lib_start_lifetime_as) && !defined(__INTELLISENSE__)
+        return __builtin_start_lifetime_as<T>(reinterpret_cast<void*>(address));
     #else
         return __builtin_launder(reinterpret_cast<T*>(address));
     #endif
@@ -580,8 +580,8 @@ struct SafeLoHookContext
     template<typename T>
     static inline T* as(uintptr_t address) noexcept
     {
-    #if defined(__cpp_lib_start_lifetime_as) && NH3API_CHECK_CPP23
-        return ::std::start_lifetime_as<T>(reinterpret_cast<void*>(address));
+    #if NH3API_CHECK_MSVC && defined(__cpp_lib_start_lifetime_as) && !defined(__INTELLISENSE__)
+        return __builtin_start_lifetime_as<T>(reinterpret_cast<void*>(address));
     #else
         return __builtin_launder(reinterpret_cast<T*>(address));
     #endif
