@@ -49,7 +49,7 @@ inline bool isHDModPresent(const Patcher* patcher)
     return false;
 }
 
-template<typename T, T DefaultValue = T {}>
+template<typename T, T DefaultValue = T{}>
 inline T getHDModVariable(const Patcher* __restrict patcher, const char* __restrict name)
 { return patcher->VarGetValue(name, DefaultValue); }
 
@@ -70,12 +70,12 @@ inline bool isHDPlusPresent(const Patcher* patcher)
 { return getHDModVariable<bool>(patcher, "HD+.On"); }
 
 inline TPoint getHDModResolution(const Patcher* patcher)
-{ return { getHDModVariable<int32_t>(patcher, "HD.Option.RezX"), getHDModVariable<int32_t>(patcher, "HD.Option.RezY")}; }
+{ return { getHDModVariable<int32_t, 800>(patcher, "HD.Rez.X"), getHDModVariable<int32_t, 600>(patcher, "HD.Rez.Y")}; }
 
 inline int32_t getScreenWidth(const Patcher* patcher)
 {
     if ( isHDModPresent(patcher) )
-        return getHDModVariable<int32_t>(patcher, "HD.Option.RezX");
+        return getHDModVariable<int32_t, 800>(patcher, "HD.Rez.X");
 
     return 800;
 }
@@ -83,7 +83,7 @@ inline int32_t getScreenWidth(const Patcher* patcher)
 inline int32_t getScreenHeight(const Patcher* patcher)
 {
     if ( isHDModPresent(patcher) )
-        return getHDModVariable<int32_t>(patcher, "HD.Option.RezY");
+        return getHDModVariable<int32_t, 600>(patcher, "HD.Rez.Y");
 
     return 600;
 }
@@ -153,7 +153,7 @@ struct FileTree
 
 // Check for WINE /
 // Проверить наличие WINE.
-[[nodiscard]] inline bool isWinePresent()
+[[nodiscard]] inline bool isWinePresent() noexcept
 {
     static bool    initialized = false;
     static HMODULE library     = nullptr;
@@ -271,6 +271,8 @@ struct Bitmap : public ::resource
         union {
         // offset: +0x30 = +48,  size = 0x4 = 4
         uint16_t* map;
+         
+        // offset: +0x30 = +48,  size = 0x4 = 4
         uint32_t* map32;
         };
 
@@ -387,5 +389,5 @@ template<>
 struct vftable_address<HD::Palette>
 { static const uintptr_t address = vftable_address<TPalette16>::address; };
 
-inline bool isHDMod32Bit(const TPalette16* pal /* = gGamePalette */)
+inline bool isHDMod32Bit(const TPalette16* pal = gGamePalette)
 { return pal->resType == RType_palette32; }
