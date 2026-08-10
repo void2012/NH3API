@@ -385,7 +385,7 @@ struct HookContext
         return r;
     }
 
-    // These getters are for the compability with the RoseKavailer's H3API...
+    // These getters are for the compatibility with the RoseKavailer's H3API...
 
     //
     inline constexpr int8_t& AL() noexcept { return al; }
@@ -791,7 +791,6 @@ NH3API_VIRTUAL_CLASS LoHook : public Patch
 };
 
 using SafeLoHook                = LoHook;
-
 using _LoHookFunc_              = int32_t(__stdcall*)(LoHook*, HookContext*);
 using _LoHookReferenceFunc_     = int32_t(__stdcall*)(LoHook&, HookContext&);
 using _SafeLoHookFunc_          = int32_t(__stdcall*)(SafeLoHook*, SafeLoHookContext*);
@@ -801,35 +800,75 @@ using lhrfunc_t  = _LoHookReferenceFunc_;
 using slhfunc_t  = _SafeLoHookFunc_;
 using slhrfunc_t = _SafeLoHookReferenceFunc_;
 
-// values passed as the hooktype argument in PatcherInstance::WriteHiHook and PatcherInstance::CreateHiHook /
-// значения передаваемые как аргумент hooktype в PatcherInstance::WriteHiHook и PatcherInstance::CreateHiHook.
-enum EHiHookSetupPolicy : int32_t
-{
-    CALL_    = 0,
-    SPLICE_  = 1,
-    FUNCPTR_ = 2
-};
+struct HiHookSetupPolicy_t
+{};
 
-// values passed as the subtype argument in PatcherInstance::WriteHiHook and PatcherInstance::CreateHiHook /
-// значения передаваемые как аргумент subtype в PatcherInstance::WriteHiHook и PatcherInstance::CreateHiHook.
-enum EHiHookType : int32_t
-{
-    DIRECT_   = 0,
-    EXTENDED_ = 1,
-    SAFE_     = 2
-};
+struct HiHookSetupPolicy_CALL_t final : HiHookSetupPolicy_t
+{ inline static constexpr int32_t value = 0; }
+// Hook on a CALL instruction, so that the hook applies only to an exact call site /
+// Хайхук на инструкцию CALL (на конкретный вызов функции), срабатывает только когда функция вызвана по адресу хука.
+inline constexpr CALL_;
 
-// values passed as a calltype argument to PatcherInstance::WriteHiHook and PatcherInstance::CreateHiHook
-// значения передаваемые как аргумент calltype в PatcherInstance::WriteHiHook и PatcherInstance::CreateHiHook.
-enum EHiHookCallingConvention : int32_t
-{
-    STDCALL_  = 0,
-    ANY_      = STDCALL_,
-    THISCALL_ = 1,
-    FASTCALL_ = 2,
-    CDECL_    = 3,
-    FASTCALL1 = THISCALL_
-};
+struct HiHookSetupPolicy_SPLICE_t final : HiHookSetupPolicy_t
+{ inline static constexpr int32_t value = 1; }
+// Hook on a function itself, i.e. this hook is called every time the function is called /
+// Хайхук на саму функцию - срабатывает на любой вызов функции.
+inline constexpr SPLICE_;
+
+struct HiHookSetupPolicy_FUNCPTR_t final : HiHookSetupPolicy_t
+{ inline static constexpr int32_t value = 2; }
+// Hook on a function pointer, e.g. on a virtual function table function entry (.rdata) or the import table function from .dll-s /
+// Хук на указатель на функцию, например на функцию в таблице виртуальных функций (.rdata) или на функцию из таблицы импорта .dll.
+inline constexpr FUNCPTR_;
+
+struct HiHookType_t
+{};
+
+struct HiHookType_DIRECT_t final : HiHookType_t
+{ inline static constexpr int32_t value = 0; }
+// Hook on a function with the same signature and calling convention as the original function (that is being hooked), so without the HiHook{&/*} as the first argument /
+// Хук на функцию с такой же сигнатурой и соглашением о вызове, как и оригинальная функция (на которую ставится хук), т.е. без HiHook{&/*} в качестве первого аргумента.
+inline constexpr DIRECT_;
+
+struct HiHookType_EXTENDED_t final : HiHookType_t
+{ inline static constexpr int32_t value = 1; }
+// Hook on a function with the ability to have HiHook{&/*} as the first argument (allowing you to call the original function inside), requires __stdcall calling convention /
+// Хук на функцию с возможность иметь HiHook{&/*} в качестве первого аргумента (что позволяет вызвать оригинальную функцию внутри), требует соглашения о вызове __stdcall.
+inline constexpr EXTENDED_;
+
+struct HiHookType_SAFE_t final : HiHookType_t
+{ inline static constexpr int32_t value = 2; }
+inline constexpr SAFE_;
+
+struct HiHookCallingConvention_t
+{};
+
+struct HiHookCallingConvention_STDCALL_t final : HiHookCallingConvention_t
+{ inline static constexpr int32_t value = 0; }
+// Hook on a __stdcall function /
+// Хук на функцию __stdcall.
+inline constexpr STDCALL_, ANY_;
+
+struct HiHookCallingConvention_THISCALL_t final : HiHookCallingConvention_t
+{ inline static constexpr int32_t value = 1; }
+// Hook on a __thiscall function /
+// Хук на функцию __thiscall.
+inline constexpr THISCALL_,
+// Hook on a __fastcall function with one argument /
+// Хук на функцию __fastcall с одним аргументом.
+FASTCALL1;
+
+struct HiHookCallingConvention_FASTCALL_t final : HiHookCallingConvention_t
+{ inline static constexpr int32_t value = 2; }
+// Hook on a __fastcall function with 2 or more arguments /
+// Хук на функцию __fastcall с двумя или более аргументами.
+inline constexpr FASTCALL_;
+
+struct HiHookCallingConvention_CDECL_t final : HiHookCallingConvention_t
+{ inline static constexpr int32_t value = 3; }
+// Hook on a __fastcall function with 2 or more arguments /
+// Хук на функцию __fastcall с двумя или более аргументами.
+inline constexpr CDECL_;
 
 // Abstract class HiHook (inherited from Patch, that is, essentially hi-hook is a patch)
 // you can create an instance using methods from the class PatcherInstance /
@@ -970,6 +1009,18 @@ public:
     NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteFloat(uintptr_t address, float data)
     { return WriteDword(address, nh3api::bit_cast<uint32_t>(data)); }
 
+    // WriteFloat method
+    // write a four-byte floating point number at address
+    // (creates and applies DATA_ patch)
+    // Returns the pointer to the patch
+    /////////////////////////////////////////////////
+    // Метод WriteFloat
+    // пишет четырехбайтовое число с плавающей точкой по адресу address
+    // (создает и применяет DATA_ патч)
+    // Возвращает указатель на патч.
+    NH3API_NO_SANITIZE_ADDRESS inline Patch* WriteDouble(uintptr_t address, double data)
+    { return Write(address, &data, sizeof(double)); }
+
     // WriteJmp method
     // writes jmp to opcode at address
     // (creates and applies a CODE_ patch)
@@ -1021,7 +1072,7 @@ protected:
     // Метод WriteCodePatchVA
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки WriteCodePatch.
-    virtual Patch* __stdcall WriteCodePatchVA(uintptr_t address, const char* __restrict format, uint32_t* __restrict va_args) = 0;
+    virtual Patch* __stdcall WriteCodePatchVA(uintptr_t address, const char* __restrict format, const uint32_t* __restrict va_args) = 0;
 
 public:
     [[deprecated("LoHooks are deprecated(unless you REALLY need to modify to esp). Use SafeLoHooks instead.")]]
@@ -1076,81 +1127,59 @@ public:
     #endif
 
 protected:
-    #if NH3API_CHECK_MSVC || NH3API_CHECK_MINGW
-    template<typename R, typename... Args> NH3API_NO_SANITIZE_ADDRESS NH3API_FORCEINLINE static constexpr
-    void hihook_function_condition_stdcall(R (*func)(Args...)) noexcept
-    {
-        (void) func;
-        static_assert(false, "HiHook function must have the __stdcall calling convention "
-                             "and have the first argument of type HiHook*");
-    }
+    template <typename F>
+    struct is_stdcall_function_t : std::false_type
+    {};
 
-    template<typename R, typename Arg1, typename... Args> NH3API_NO_SANITIZE_ADDRESS NH3API_FORCEINLINE static constexpr
-    void hihook_function_condition_argument(R (__stdcall* func)(Arg1, Args...)) noexcept
-    {
-        (void) func;
-        static_assert(std::is_same_v<Arg1, HiHook*>, "HiHook function must have the first argument of type HiHook*");
-    }
+    template <typename R, typename... Args>
+    struct is_stdcall_function_t<R(__stdcall*)(Args...)> : std::true_type
+    {};
 
-    template<typename R, typename... Args> NH3API_NO_SANITIZE_ADDRESS NH3API_FORCEINLINE static constexpr
-    void hihook_function_condition_stdcall(R (__stdcall * func)(Args...)) noexcept
-    {
-        static_assert(sizeof...(Args) > 0, "HiHook function must have at least one argument of type HiHook*.");
-        hihook_function_condition_argument(func);
-    }
+    template <typename F>
+    struct is_cdecl_function_t : std::false_type
+    {};
 
-    template<typename F> NH3API_NO_SANITIZE_ADDRESS NH3API_FORCEINLINE static constexpr
-    void hihook_function_condition(F* func) noexcept
-    {
-        static_assert(std::is_function_v<F>, "HiHook must be a function.");
-        hihook_function_condition_stdcall(func);
-    }
+    template <typename R, typename... Args>
+    struct is_cdecl_function_t<R(__cdecl*)(Args...)> : std::true_type
+    {};
 
-    #else // MSVC or MinGW GCC
+    template <typename F>
+    struct is_fastcall_function_t : std::false_type
+    {};
 
-    template<typename>
-    struct is_stdcall_function_helper_t
-    { using type = std::false_type; };
+    template <typename R, typename... Args>
+    struct is_fastcall_function_t<R(__fastcall*)(Args...)> : std::true_type
+    {};
 
-    template<typename... Args, typename R>
-    struct is_stdcall_function_helper_t<R (__stdcall *)(HiHook*, Args...)>
-    { using type = std::true_type; };
+    template <typename F>
+    struct is_thiscall_function_t : std::false_type
+    {};
 
-    template<typename... Args, typename R>
-    struct is_stdcall_function_helper_t<R (__stdcall *)(HiHook&, Args...)>
-    { using type = std::true_type; };
+    template <typename R, typename... Args>
+    struct is_thiscall_function_t<R(__thiscall*)(Args...)> : std::true_type
+    {};
 
-    template<typename... Args, typename R>
-    struct is_stdcall_function_helper_t<R (__stdcall *)(const HiHook*, Args...)>
-    { using type = std::true_type; };
+    template <typename F>
+    struct is_valid_extended_hihook_t : std::false_type
+    {};
 
-    template<typename... Args, typename R>
-    struct is_stdcall_function_helper_t<R (__stdcall *)(const HiHook&, Args...)>
-    { using type = std::true_type; };
+    template <typename R, typename... Args>
+    struct is_valid_extended_hihook_t<R(__stdcall*)(HiHook*, Args...)> : std::true_type
+    {};
 
-    template<typename F> NH3API_NO_SANITIZE_ADDRESS NH3API_FORCEINLINE static constexpr
-    void hihook_function_condition(F*) noexcept
-    {
-        static_assert(std::is_function_v<F>, "HiHook must be a function.");
+    template <typename R, typename... Args>
+    struct is_valid_extended_hihook_t<R(__stdcall*)(const HiHook*, Args...)> : std::true_type
+    {};
 
-        constexpr bool is_stdcall = is_stdcall_function_helper_t<std::add_pointer_t<F>>::type::value;
-        static_assert(is_stdcall, "HiHook function must have the __stdcall calling convention "
-                                  "and have the first argument of type HiHook* or HiHook&");
-    }
+    template <typename R, typename... Args>
+    struct is_valid_extended_hihook_t<R(__stdcall*)(HiHook&, Args...)> : std::true_type
+    {};
 
-    template<typename C, typename R> NH3API_NO_SANITIZE_ADDRESS NH3API_FORCEINLINE static constexpr
-    void hihook_function_condition(R C::*) noexcept
-    { static_assert(false, "HiHook function must not be a member of some class"); }
+    template <typename R, typename... Args>
+    struct is_valid_extended_hihook_t<R(__stdcall*)(const HiHook&, Args...)> : std::true_type
+    {};
 
-    #endif // MSVC or MinGW GCC
-
-    #if NH3API_HAS_BUILTIN_CONSTANT_P
-    [[__gnu__::__error__("HiHooks do not support fastcall and thiscall calling conventions in SPLICE_ mode with DIRECT_, use EXTENDED_ or SAFE_ instead.")]]
-    static void hihook_splice_error();
-    #endif
-
-    // protected
-    virtual HiHook* __stdcall xWriteHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, const void* new_func) = 0;
+    virtual HiHook* __stdcall xWriteHiHook(uintptr_t address, int32_t hooktype, int32_t subtype, int32_t calltype, const void* new_func) = 0;
 
 public:
     // Method WriteHiHook
@@ -1249,22 +1278,65 @@ public:
     // CALL_, SPLICE_ хук является CODE_ патчем
     // FUNCPTR_ хук является DATA_ патчем
     //
-    template<typename F> NH3API_NO_SANITIZE_ADDRESS
-    HiHook* WriteHiHook(uintptr_t                address,
-                        EHiHookSetupPolicy       hooktype,
-                        EHiHookType              subtype,
-                        EHiHookCallingConvention calltype,
-                        F*                       new_func)
+    template <
+        typename HookSetupPolicy,
+        typename HookType,
+        typename HookCallingConvention,
+        typename FunctionPtr
+    > NH3API_NO_SANITIZE_ADDRESS
+    HiHook* WriteHiHook(uintptr_t address,
+                        HookSetupPolicy,
+                        HookType,
+                        HookCallingConvention,
+                        FunctionPtr func)
     {
-        #if NH3API_HAS_BUILTIN_CONSTANT_P
-        if ( __builtin_constant_p(hooktype) && __builtin_constant_p(subtype) && __builtin_constant_p(calltype) )
+        static_assert(std::is_pointer_v<FunctionPtr>, "You must provide function pointer to WriteHiHook");
+        using Function = std::remove_pointer_t<FunctionPtr>;
+        static_assert(std::is_function_v<Function>, "HiHook must be a function");
+        constexpr bool valid_setup_policy = std::is_base_of_v<HiHookSetupPolicy_t, HookSetupPolicy>
+                                            && !std::is_same_v<HiHookSetupPolicy_t, HookSetupPolicy>;
+        constexpr bool valid_type = std::is_base_of_v<HiHookType_t, HookType>
+                                    && !std::is_same_v<HiHookType_t, HookType>;
+        constexpr bool valid_calling_convention = std::is_base_of_v<HiHookCallingConvention_t, HookCallingConvention>
+                                                  && !std::is_same_v<HiHookCallingConvention_t, HookCallingConvention>;
+        if constexpr ( !valid_setup_policy || !valid_type || !valid_calling_convention )
         {
-            if ( hooktype == SPLICE_ && subtype == DIRECT_ && (calltype == THISCALL_ || calltype == FASTCALL_) )
-                hihook_splice_error();
+            static_assert(valid_setup_policy, "Invalid HiHook setup policy - must be CALL_, SPLICE_ or FUNCPTR_");
+            static_assert(valid_type, "Invalid HiHook type - must be DIRECT_, EXTENDED or SAFE_");
+            static_assert(valid_calling_convention, "Invalid HiHook calling convention argument - must be STDCALL_, ANY_, FASTCALL1, THISCALL_, FASTCALL_ or CDECL_");
         }
-        #endif
-        hihook_function_condition(new_func);
-        return xWriteHiHook(address, hooktype, subtype, calltype, reinterpret_cast<const void*>(new_func));
+        else
+        {
+            // For DIRECT_, the signature of the function must have no HiHook{*/&} as the first argument and
+            // have the same calling convention as passed to WriteHiHook function (except for __fastcall for THISCALL_)
+            if constexpr ( std::is_same_v<HiHookType_DIRECT_t, HookType> )
+            {
+                if constexpr ( std::is_same_v<HiHookCallingConvention_FASTCALL_t, HookCallingConvention>
+                              || std::is_same_v<HiHookCallingConvention_THISCALL_t, HookCallingConvention> )
+                {
+                    constexpr bool is_fastcall_or_thiscall = is_fastcall_function_t<FunctionPtr>::value
+                                                             || is_thiscall_function_t<FunctionPtr>::value;
+                    static_assert(is_fastcall_or_thiscall, "DIRECT_ HiHook of FASTCALL_, THISCALL_ or FASTCALL1 must have either __fastcall or __thiscall calling convention");
+                }
+                else if constexpr ( std::is_same_v<HiHookCallingConvention_CDECL_t, HookCallingConvention> )
+                {
+                    static_assert(is_cdecl_function_t<FunctionPtr>::value, "DIRECT_ HiHook of CDECL_ must have the __cdecl calling convention");
+                }
+                else if constexpr ( std::is_same_v<HiHookCallingConvention_STDCALL_t, HookCallingConvention> )
+                {
+                    static_assert(is_stdcall_function_t<FunctionPtr>::value, "DIRECT_ HiHook of STDCALL_ or ANY_ must have the __stdcall calling convention");
+                }
+            }
+            else
+            {
+                static_assert(is_valid_extended_hihook_t<FunctionPtr>::value, "EXTENDED_ or SAFE_ HiHook must have the first argument of type HiHook{*|&} and __stdcall calling convention");
+            }
+            return xWriteHiHook(address,
+                                HookSetupPolicy::value,
+                                HookType::value,
+                                HookCallingConvention::value,
+                                reinterpret_cast<const void*>(func));
+        }
     }
 
     // Create Methods ...
@@ -1284,31 +1356,74 @@ public:
     virtual Patch* __stdcall CreateHexPatch(uintptr_t address, const char* hex_str) = 0;
 
 protected:
-    virtual Patch* __stdcall CreateCodePatchVA(uintptr_t address, const char* __restrict format, uint32_t* __restrict va_args) = 0;
+    virtual Patch* __stdcall CreateCodePatchVA(uintptr_t address, const char* __restrict format, const uint32_t* __restrict va_args) = 0;
 
-public:    
+public:
     virtual LoHook* __stdcall CreateLoHook(uintptr_t address, const void* func) = 0;
 
 protected:
-    virtual HiHook* __stdcall xCreateHiHook(uintptr_t address, EHiHookSetupPolicy hooktype, EHiHookType subtype, EHiHookCallingConvention calltype, const void* new_func) = 0;
+    virtual HiHook* __stdcall xCreateHiHook(uintptr_t address, int32_t hooktype, int32_t subtype, int32_t calltype, const void* new_func) = 0;
 
 public:
-    template<typename F> NH3API_NO_SANITIZE_ADDRESS
-    inline HiHook* CreateHiHook(uintptr_t                address,
-                                EHiHookSetupPolicy       hooktype,
-                                EHiHookType              subtype,
-                                EHiHookCallingConvention calltype,
-                                F*                       new_func)
+    template <
+        typename HookSetupPolicy,
+        typename HookType,
+        typename HookCallingConvention,
+        typename FunctionPtr
+    > NH3API_NO_SANITIZE_ADDRESS
+    HiHook* CreateHiHook(uintptr_t address,
+                        HookSetupPolicy,
+                        HookType,
+                        HookCallingConvention,
+                        FunctionPtr func)
     {
-        #if NH3API_HAS_BUILTIN_CONSTANT_P
-        if ( __builtin_constant_p(hooktype) && __builtin_constant_p(subtype) && __builtin_constant_p(calltype) )
+        static_assert(std::is_pointer_v<FunctionPtr>, "You must provide function pointer to CreateHiHook");
+        using Function = std::remove_pointer_t<FunctionPtr>;
+        static_assert(std::is_function_v<Function>, "HiHook must be a function");
+        constexpr bool valid_setup_policy = std::is_base_of_v<HiHookSetupPolicy_t, HookSetupPolicy>
+                                            && !std::is_same_v<HiHookSetupPolicy_t, HookSetupPolicy>;
+        constexpr bool valid_type = std::is_base_of_v<HiHookType_t, HookType>
+                                    && !std::is_same_v<HiHookType_t, HookType>;
+        constexpr bool valid_calling_convention = std::is_base_of_v<HiHookCallingConvention_t, HookCallingConvention>
+                                                  && !std::is_same_v<HiHookCallingConvention_t, HookCallingConvention>;
+        if constexpr ( !valid_setup_policy || !valid_type || !valid_calling_convention )
         {
-            if ( hooktype == SPLICE_ && subtype == DIRECT_ && (calltype == THISCALL_ || calltype == FASTCALL_) )
-                hihook_splice_error();
+            static_assert(valid_setup_policy, "Invalid HiHook setup policy - must be CALL_, SPLICE_ or FUNCPTR_");
+            static_assert(valid_type, "Invalid HiHook type - must be DIRECT_, EXTENDED or SAFE_");
+            static_assert(valid_calling_convention, "Invalid HiHook calling convention argument - must be STDCALL_, ANY_, FASTCALL1, THISCALL_, FASTCALL_ or CDECL_");
         }
-        #endif
-        hihook_function_condition(new_func);
-        return xCreateHiHook(address, hooktype, subtype, calltype, static_cast<const void*>(new_func));
+        else
+        {
+            // For DIRECT_, the signature of the function must have no HiHook{*/&} as the first argument and
+            // have the same calling convention as passed to WriteHiHook function (except for __fastcall for THISCALL_)
+            if constexpr ( std::is_same_v<HiHookType_DIRECT_t, HookType> )
+            {
+                if constexpr ( std::is_same_v<HiHookCallingConvention_FASTCALL_t, HookCallingConvention>
+                              || std::is_same_v<HiHookCallingConvention_THISCALL_t, HookCallingConvention> )
+                {
+                    constexpr bool is_fastcall_or_thiscall = is_fastcall_function_t<FunctionPtr>::value
+                                                             || is_thiscall_function_t<FunctionPtr>::value;
+                    static_assert(is_fastcall_or_thiscall, "DIRECT_ HiHook of FASTCALL_, THISCALL_ or FASTCALL1 must have either __fastcall or __thiscall calling convention");
+                }
+                else if constexpr ( std::is_same_v<HiHookCallingConvention_CDECL_t, HookCallingConvention> )
+                {
+                    static_assert(is_cdecl_function_t<FunctionPtr>::value, "DIRECT_ HiHook of CDECL_ must have the __cdecl calling convention");
+                }
+                else if constexpr ( std::is_same_v<HiHookCallingConvention_STDCALL_t, HookCallingConvention> )
+                {
+                    static_assert(is_stdcall_function_t<FunctionPtr>::value, "DIRECT_ HiHook of STDCALL_ or ANY_ must have the __stdcall calling convention");
+                }
+            }
+            else
+            {
+                static_assert(is_valid_extended_hihook_t<FunctionPtr>::value, "EXTENDED_ or SAFE_ HiHook must have the first argument of type HiHook{*|&} and __stdcall calling convention");
+            }
+            return xCreateHiHook(address,
+                                 HookSetupPolicy::value,
+                                 HookType::value,
+                                 HookCallingConvention::value,
+                                 reinterpret_cast<const void*>(func));
+        }
     }
 
     // ApplyAll method
@@ -1453,7 +1568,7 @@ protected:
     // see (below) the description of the WriteHexHook shell method /
     // В оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки WriteHexHook.
-    virtual LoHook* __stdcall WriteHexHookVA(uintptr_t address, bool32_t exec_default, const char* __restrict hex_str, uint32_t* __restrict va_args) = 0;
+    virtual LoHook* __stdcall WriteHexHookVA(uintptr_t address, bool32_t exec_default, const char* __restrict hex_str, const uint32_t* __restrict va_args) = 0;
 
     // In the original form, the method is not supposed to be used,
     // see (below) the description of the CreateHexHook shell method /
@@ -1488,18 +1603,13 @@ protected:
     // после чего данный экземпляр PatcherInstance не может применять
     // патчи по всем адресам кроме указанных.
     // список адресов в va_args должен заканчиваться 0 (нулем)
-    virtual void __stdcall BlockAllExceptVA(uintptr_t* va_args) = 0;
-
-    template <typename...Args>
-    struct all_types_of_uintptr_t
-        : std::bool_constant<(std::is_same_v<uintptr_t, Args> && ...)>
-    {};
+    virtual void __stdcall BlockAllExceptVA(const uintptr_t* va_args) = 0;
 
 public:
     template<typename ...Args> NH3API_NO_SANITIZE_ADDRESS
     inline Patch* BlockAllExcept(Args... args)
     {
-        static_assert(all_types_of_uintptr_t<Args...>::value, "PatcherInstance::BlockAllExcept: arguments should be a list of uintptr_t-s");
+        static_assert((std::is_convertible_v<Args, uintptr_t> && ...), "PatcherInstance::BlockAllExcept: arguments should be a list of uintptr_t-s");
         const uintptr_t va_args[] = { args... };
         return BlockAllExceptVA(&va_args[0]);
     }
@@ -1508,27 +1618,27 @@ public:
 
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки WriteAsmPatch.
-    virtual Patch* __stdcall WriteAsmPatchVA(uintptr_t address, uint32_t* va_args) = 0;
+    virtual Patch* __stdcall WriteAsmPatchVA(uintptr_t address, const uint32_t* va_args) = 0;
 
     // # ver 4.0
     // in the original form, the method is not supposed to be used,
     // see (below) the description of the wrapper method WriteAsmPatch /
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки CreateAsmPatch.
-    virtual Patch* __stdcall CreateAsmPatchVA(uintptr_t address, uint32_t* va_args) = 0;
+    virtual Patch* __stdcall CreateAsmPatchVA(uintptr_t address, const uint32_t* va_args) = 0;
 
     // # ver 4.0
     // in the original form, the method is not supposed to be used,
     // see (below) the description of the CreateAsmPatch shell method /
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки WriteAsmHook.
-    virtual LoHook* __stdcall WriteAsmHookVA(uintptr_t address, uint32_t* va_args) = 0;
+    virtual LoHook* __stdcall WriteAsmHookVA(uintptr_t address, const uint32_t* va_args) = 0;
 
     // in the original form, the method is not supposed to be used,
     // see (below) the description of the wrapper method WriteAsmHook /
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки CreateAsmHook
-    virtual LoHook* __stdcall CreateAsmHookVA(uintptr_t address, uint32_t* va_args) = 0;
+    virtual LoHook* __stdcall CreateAsmHookVA(uintptr_t address, const uint32_t* va_args) = 0;
 
 public:
     // # ver 5.0
@@ -2021,7 +2131,7 @@ protected:
     // Метод WriteComplexDataVA
     // в оригинальном виде применение метода не предполагается,
     // смотрите (ниже) описание метода-оболочки WriteComplexString.
-    virtual int32_t __stdcall WriteComplexDataVA(uintptr_t address, const char* __restrict format, uint32_t* __restrict args) = 0;
+    virtual int32_t __stdcall WriteComplexDataVA(uintptr_t address, const char* __restrict format, const uint32_t* __restrict args) = 0;
 
 public:
     // GetOpcodeLength method
@@ -2107,12 +2217,12 @@ public:
     template<typename ValueType> NH3API_NO_SANITIZE_ADDRESS
     inline Variable* __stdcall VarInit(const char* __restrict name, ValueType value)
 #ifdef __cpp_concepts
-    requires ( ::std::is_trivially_default_constructible_v<ValueType> && ::std::is_trivially_copyable_v<ValueType> && sizeof(ValueType) <= 4 )
+    requires ( std::is_trivially_default_constructible_v<ValueType> && std::is_trivially_copyable_v<ValueType> && sizeof(ValueType) <= 4 )
 #endif
     {
-        #ifndef __cpp_concepts
-        static_assert(::std::is_trivially_default_constructible_v<ValueType> && ::std::is_trivially_copyable_v<ValueType> && sizeof(ValueType) <= 4, "ValueType must be trivial");
-        #endif
+    #ifndef __cpp_concepts
+        static_assert(std::is_trivially_default_constructible_v<ValueType> && std::is_trivially_copyable_v<ValueType> && sizeof(ValueType) <= 4, "ValueType must be trivial");
+    #endif
 
         if constexpr ( std::is_integral_v<ValueType> || std::is_enum_v<ValueType> )
             return xVarInit(name, static_cast<uint32_t>(value));
@@ -2160,8 +2270,8 @@ public:
 
     // # ver 4.1
 
-    virtual int32_t __stdcall WriteAsmCodeVA(uintptr_t address, uint32_t* args) = 0;
-    virtual uintptr_t __stdcall CreateCodeBlockVA(uint32_t* args) = 0;
+    virtual int32_t __stdcall WriteAsmCodeVA(uintptr_t address, const uint32_t* args) = 0;
+    virtual uintptr_t __stdcall CreateCodeBlockVA(const uint32_t* args) = 0;
 
     // The VarGetValue method returns the value of a "variable" named name
     // if the "variable" with this name was not initialized, it returns default_value /
@@ -2277,7 +2387,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 NH3API_NO_SANITIZE_ADDRESS inline HMODULE GetPatcherHandle() noexcept
-{ return LoadLibraryW(L"patcher_x86.dll"); }
+{ return ::LoadLibraryW(L"patcher_x86.dll"); }
 
 // Function GetPatcher
 // loads the library and, by calling the only exported
@@ -2298,7 +2408,7 @@ NH3API_NO_SANITIZE_ADDRESS inline Patcher* GetPatcher() noexcept
     HMODULE patcherHandle = GetPatcherHandle();
     if ( patcherHandle )
     {
-        GetPatcher_f func = reinterpret_cast<GetPatcher_f>(GetProcAddress(patcherHandle, "_GetPatcherX86@0"));
+        GetPatcher_f func = reinterpret_cast<GetPatcher_f>(::GetProcAddress(patcherHandle, "_GetPatcherX86@0"));
         if ( func )
             return func();
 
@@ -2316,7 +2426,7 @@ NH3API_NO_SANITIZE_ADDRESS inline uint32_t GetPatcherVersion() noexcept
     HMODULE patcherHandle        = GetPatcherHandle();
     if ( patcherHandle )
     {
-        GetPatcherX86Version_f func = reinterpret_cast<GetPatcherX86Version_f>(GetProcAddress(patcherHandle, "_GetPatcherX86Version@0"));
+        GetPatcherX86Version_f func = reinterpret_cast<GetPatcherX86Version_f>(::GetProcAddress(patcherHandle, "_GetPatcherX86Version@0"));
         if ( func )
             return func();
 
