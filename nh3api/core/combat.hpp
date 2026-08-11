@@ -22,52 +22,55 @@ NH3API_WARNING(push)
 NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
 NH3API_WARNING_MSVC_DISABLE(26495)
 
+// Combat cursor ID (crcombat.def) /
+// ID Курсора битвы (crcombat.def).
 enum type_combat_cursor : int32_t
 {
-    SELECT_NULL                  = 0,  //
-    SELECT_MOVE                  = 1,  //
-    SELECT_FLY                   = 2,  //
-    SELECT_SPECIAL_ATTACK        = 3,  //
-    SELECT_TENT                  = 4,  //
-    SELECT_ARMY_INFO             = 5,  //
-    CBT_ARROW_POINTER            = 6,  //
-    const_attack_northeast       = 7,  //
-    SELECT_ATTACK                = 7,  //
-    const_attack_east            = 8,  //
-    const_attack_southeast       = 9,  //
-    const_attack_southwest       = 10, //
-    const_attack_west            = 11, //
-    const_attack_northwest       = 12, //
-    const_attack_up              = 13, //
-    const_attack_down            = 14, //
-    SELECT_SPECIAL_ATTACK_BROKEN = 15, //
-    SELECT_ATTACK_WALL           = 16, //
-    SELECT_FIRST_AID             = 17, //
-    SELECT_SACRIFICE             = 18, //
-    SELECT_TELEPORT              = 19, //
-    SELECT_CREATURE_SPELL        = 20, //
-    SELECT_ENEMY_TENT            = 21, //
-    const_select_tower_info      = 22, //
+    SELECT_NULL                  = 0,  // Ничего/отмена (похоже на символ %C3%98)
+    SELECT_MOVE                  = 1,  // Движение
+    SELECT_FLY                   = 2,  // Полёт
+    SELECT_SPECIAL_ATTACK        = 3,  // Атака на расстоянии (выстрел)
+    SELECT_TENT                  = 4,  // Информация о герое
+    SELECT_ARMY_INFO             = 5,  // Информация о юните
+    CBT_ARROW_POINTER            = 6,  // Обычный курсор
+    const_attack_northeast       = 7,  // Атака вправо вверх
+    SELECT_ATTACK                = 7,  // Атака вправо вверх
+    const_attack_east            = 8,  // Атака вправо
+    const_attack_southeast       = 9,  // Атака вправо вниз
+    const_attack_southwest       = 10, // Атака влево вниз
+    const_attack_west            = 11, // Атака влево
+    const_attack_northwest       = 12, // Атака влево вверх
+    const_attack_up              = 13, // Атака вверх
+    const_attack_down            = 14, // Атака вниз
+    SELECT_SPECIAL_ATTACK_BROKEN = 15, // Штраф при стрельбе ("сломанная стрела")
+    SELECT_ATTACK_WALL           = 16, // Атака городской стены
+    SELECT_FIRST_AID             = 17, // Лечение палаткой
+    SELECT_SACRIFICE             = 18, // Жертвоприношение
+    SELECT_TELEPORT              = 19, // Телепорт
+    SELECT_CREATURE_SPELL        = 20,
+    SELECT_ENEMY_TENT            = 21,
+    const_select_tower_info      = 22,
 
-    COMBAT_CURSOR_MOVE                  = SELECT_MOVE,
-    COMBAT_CURSOR_FLY                   = SELECT_FLY,
-    COMBAT_CURSOR_SPECIAL_ATTACK        = SELECT_SPECIAL_ATTACK,
-    COMBAT_CURSOR_TENT                  = SELECT_TENT,
-    COMBAT_CURSOR_ARMY_INFO             = SELECT_ARMY_INFO,
-    COMBAT_CURSOR_ARROW_POINTER         = CBT_ARROW_POINTER,
-    COMBAT_CURSOR_ATTACK_NORTHEAST      = const_attack_northeast,
-    COMBAT_CURSOR_ATTACK                = COMBAT_CURSOR_ATTACK_NORTHEAST,
-    COMBAT_CURSOR_ATTACK_EAST           = const_attack_east,
-    COMBAT_CURSOR_ATTACK_SOUTHEAST      = const_attack_southeast,
-    COMBAT_CURSOR_ATTACK_SOUTWEST       = const_attack_southwest,
-    COMBAT_CURSOR_ATTACK_WEST           = const_attack_west,
-    COMBAT_CURSOR_ATTACK_NORTHWEST      = const_attack_northwest,
-    COMBAT_CURSOR_ATTACK_UP             = const_attack_up,
-    COMBAT_CURSOR_ATTACK_DOWN           = const_attack_down,
-    COMBAT_CURSOR_SPECIAL_ATTACK_BROKEN = SELECT_SPECIAL_ATTACK_BROKEN,
-    COMBAT_CURSOR_ATTACK_WALL           = SELECT_ATTACK_WALL,
-    COMBAT_CURSOR_FIRST_AID             = SELECT_FIRST_AID,
-    COMBAT_CURSOR_SACRIFICE             = SELECT_SACRIFICE,
+    COMBAT_CURSOR_NULL                  = SELECT_NULL,                  // Ничего/отмена (похоже на символ %C3%98)
+    COMBAT_CURSOR_MOVE                  = SELECT_MOVE,                  // Движение
+    COMBAT_CURSOR_FLY                   = SELECT_FLY,                   // Полёт
+    COMBAT_CURSOR_SPECIAL_ATTACK        = SELECT_SPECIAL_ATTACK,        // Атака на расстоянии (выстрел)
+    COMBAT_CURSOR_TENT                  = SELECT_TENT,                  // Информация о герое
+    COMBAT_CURSOR_ARMY_INFO             = SELECT_ARMY_INFO,             // Информация о юните
+    COMBAT_CURSOR_ARROW_POINTER         = CBT_ARROW_POINTER,            // Обычный курсор
+    COMBAT_CURSOR_ATTACK_NORTHEAST      = const_attack_northeast,       // Атака вправо вверх
+    COMBAT_CURSOR_ATTACK                = SELECT_ATTACK,                // Атака вправо вверх
+    COMBAT_CURSOR_ATTACK_EAST           = const_attack_east,            // Атака вправо
+    COMBAT_CURSOR_ATTACK_SOUTHEAST      = const_attack_southeast,       // Атака вправо вниз
+    COMBAT_CURSOR_ATTACK_SOUTWEST       = const_attack_southwest,       // Атака влево вниз
+    COMBAT_CURSOR_ATTACK_WEST           = const_attack_west,            // Атака влево
+    COMBAT_CURSOR_ATTACK_NORTHWEST      = const_attack_northwest,       // Атака влево вверх
+    COMBAT_CURSOR_ATTACK_UP             = const_attack_up,              // Атака вверх
+    COMBAT_CURSOR_ATTACK_DOWN           = const_attack_down,            // Атака вниз
+    COMBAT_CURSOR_SPECIAL_ATTACK_BROKEN = SELECT_SPECIAL_ATTACK_BROKEN, // Штраф при стрельбе ("сломанная стрела")
+    COMBAT_CURSOR_ATTACK_WALL           = SELECT_ATTACK_WALL,           // Атака городской стены
+    COMBAT_CURSOR_FIRST_AID             = SELECT_FIRST_AID,             // Лечение палаткой
+    COMBAT_CURSOR_SACRIFICE             = SELECT_SACRIFICE,             // Телепорт
     COMBAT_CURSOR_TELEPORT              = SELECT_TELEPORT,
     COMBAT_CURSOR_CREATURE_SPELL        = SELECT_CREATURE_SPELL,
     COMBAT_CURSOR_SELECT_HERO_INFO      = SELECT_ENEMY_TENT,
@@ -79,21 +82,23 @@ struct nh3api::enum_limits<type_combat_cursor>
     : nh3api::enum_limits_base<type_combat_cursor, COMBAT_CURSOR_MOVE, COMBAT_CURSOR_SELECT_TOWER_INFO>
 { static inline constexpr bool is_specialized = true; };
 
+// combatManager events IDs. /
+// Типы событий, обрабатываемые combatManager.
 enum ECombatAction : int32_t
 {
-    COMBAT_ACTION_NONE                = 0,
-    COMBAT_ACTION_CAST_SPELL          = 1,
-    COMBAT_ACTION_ARMY_MOVE           = 2,
-    COMBAT_ACTION_ARMY_DEFENSE        = 3,
-    COMBAT_ACTION_RETREAT             = 4,
-    COMBAT_ACTION_SURRENDER           = 5,
-    COMBAT_ACTION_ARMY_MELEE_ATTACK   = 6,
-    COMBAT_ACTION_ARMY_SHOOT_ATTACK   = 7,
-    COMBAT_ACTION_ARMY_WAIT           = 8,
-    COMBAT_ACTION_CATAPULT_SHOOT      = 9,
-    COMBAT_ACTION_ARMY_CAST_SPELL     = 10,
-    COMBAT_ACTION_FIRST_AID_TENT_CURE = 11,
-    COMBAT_ACTION_SKIP_TURN           = 12,
+    COMBAT_ACTION_NONE                = 0,  // Пустой запрос
+    COMBAT_ACTION_CAST_SPELL          = 1,  // Заклинание
+    COMBAT_ACTION_ARMY_MOVE           = 2,  // Движение
+    COMBAT_ACTION_ARMY_DEFENSE        = 3,  // Защитная стойка
+    COMBAT_ACTION_RETREAT             = 4,  // Отступление
+    COMBAT_ACTION_SURRENDER           = 5,  // Сдаться за деньги
+    COMBAT_ACTION_ARMY_MELEE_ATTACK   = 6,  // Атака в ближнем бою
+    COMBAT_ACTION_ARMY_SHOOT_ATTACK   = 7,  // Атака в дальнем бою
+    COMBAT_ACTION_ARMY_WAIT           = 8,  // Ожидание
+    COMBAT_ACTION_CATAPULT_SHOOT      = 9,  // Выстрел катапультой
+    COMBAT_ACTION_ARMY_CAST_SPELL     = 10, // Заклинание существа
+    COMBAT_ACTION_FIRST_AID_TENT_CURE = 11, // Лечение палаткой
+    COMBAT_ACTION_SKIP_TURN           = 12, // Пропуск хода
     MAX_COMBAT_ACTIONS                = 13
 };
 
@@ -102,12 +107,19 @@ struct nh3api::enum_limits<ECombatAction>
     : nh3api::enum_limits_base<ECombatAction, COMBAT_ACTION_CAST_SPELL, COMBAT_ACTION_SKIP_TURN>
 { static inline constexpr bool is_specialized = true; };
 
+
+// Town fortification level (see combatManager::fortificationLevel) /
+// Уровень фортификации города (см. combatManager::fortificationLevel).
 enum TFortificationLevel : uint32_t
 {
-    eFortificationNone    = 0, //
-    eFortificationFort    = 1, //
-    eFortificationCitadel = 2, //
-    eFortificationCastle  = 3  //
+    eFortificationNone    = 0, // Ничего
+    eFortificationFort    = 1, // Форт
+    eFortificationCitadel = 2, // Цитадель
+    eFortificationCastle  = 3, // Замок
+    FORTIFICATION_NONE    = eFortificationNone,
+    FORTIFICATION_FORT    = eFortificationFort,
+    FORTIFICATION_CITADEL = eFortificationCitadel,
+    FORTIFICATION_CASTLE  = eFortificationCastle
 };
 
 template<>
@@ -119,11 +131,11 @@ struct nh3api::enum_limits<TFortificationLevel>
 // Последовательности кадров спрайта героя на поле боя.
 enum combat_hero_seqid : uint32_t
 {
-    chs_stand   = 0,
-    chs_fidget  = 1,
-    chs_defeat  = 2,
-    chs_victory = 3,
-    chs_cast    = 4
+    chs_stand   = 0, // Положение неподвижно
+    chs_fidget  = 1, // Кривляние
+    chs_defeat  = 2, // Поражение ("facepalm")
+    chs_victory = 3, // Радость
+    chs_cast    = 4  // Заклинание
 };
 
 #pragma pack(push, 4)
@@ -170,9 +182,13 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
         };
 
+        // Combat hero sprite traits /
+        // Свойства спрайта героя в бою.
         // size = 0x10 = 16, align = 4
         struct SCmbtHero
         {
+            // Sprite name /
+            // Название файла спрайта.
             // offset: +0x0 = +0,  size = 0x4 = 4
             const char* SpriteName;
 
@@ -186,27 +202,41 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             int32_t castFrame;
         };
 
+        // Fortification wall traits /
+        // Свойства стены фортификации города.
         // size = 0x24 = 36, align = 4
         struct TWallTraits
         {
+            // X coordinate /
+            // X координата.
             // offset: +0x0 = +0,  size = 0x2 = 2
             int16_t x;
 
+            // Y coordinate /
+            // Y координата.
             // offset: +0x2 = +2,  size = 0x2 = 2
             int16_t y;
 
             unsigned char : 8;
             unsigned char : 8;
 
+            // Hex occupied by the wall /
+            // Клетка, на которой стоит стена.
             // offset: +0x4 = +4,  size = 0x2 = 2
             int16_t hex;
 
+            // Wall bitmap file names /
+            // Названия файлов изображений стены.
             // offset: +0x8 = +8,  size = 0x14 = 20
-            std::array<char*, 5> filenames;
+            std::array<const char*, 5> filenames;
 
+            // Name of the wall /
+            // Название стены
             // offset: +0x1C = +28,  size = 0x4 = 4
             const char* name;
 
+            // Wall HP (filled from "walls.txt") /
+            // HP Стены (заполняется через "walls.txt").
             // offset: +0x20 = +32,  size = 0x2 = 2
             int16_t hitpoints;
 
@@ -241,32 +271,50 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
 
         };
 
+        // Combat obstacle /
+        // Препятствие на поле боя.
         // size = 0x18 = 24, align = 4
         struct TObstacle
         {
+            // Obstacle sprite /
+            // Спрайт препятствия.
             // offset: +0x0 = +0,  size = 0x4 = 4
-            CSprite* sprite;
+            const CSprite* sprite;
 
+            // Obstacle traits /
+            // Свойства препятствия.
             // offset: +0x4 = +4,  size = 0x4 = 4
             const TObstacleInfo* info;
 
+            // Obstacle anchor hex /
+            // Головная клетка препятствия.
             // offset: +0x8 = +8,  size = 0x1 = 1
             uint8_t grid_index;
 
+            // Player that created the current obstacle (fire wall, force field, etc.) /
+            // Игрок, создавший текущее препятствие (стена огня, силовое поле и т.д.).
             // offset: +0x9 = +9,  size = 0x1 = 1
             int8_t owner;
 
+            // Obstacle is visible /
+            // Препятствие видимо.
             // offset: +0xA = +10,  size = 0x1 = 1
             bool is_visible;
 
             unsigned char : 8;
 
+            // Obstacle damage (for example fire wall) /
+            // Урон препятствия (например огненной стены).
             // offset: +0xC = +12,  size = 0x4 = 4
             int32_t damage;
 
+            // Obstacle duration (fire wall, force field, etc.) /
+            // Длительность действия препятствия (стена огня, силовое поле и т.д.).
             // offset: +0x10 = +16,  size = 0x4 = 4
             int32_t duration;
 
+            // Spell effect caused by the obstacle dispel /
+            // Эффект заклинания, который происходит при уничтожении препятствия заклинанием.
             // offset: +0x14 = +20,  size = 0x4 = 4
             TSpellEffectID dispel_effect;
 
@@ -381,7 +429,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             DOOR_BROKEN = 0, //
             DOOR_DOWN   = 1, //
             DOOR_DOWN_1 = 2, //
-            DOOR_UP     = 3 //
+            DOOR_UP     = 3  //
         };
 
         enum TArcherID : uint32_t
@@ -389,44 +437,44 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
             eArcherMainBuilding = 0, //
             eArcherLowerTower   = 1, //
             eArcherUpperTower   = 2, //
-            kNumArchers         = 3 //
+            kNumArchers         = 3  //
         };
 
         enum
         {
-            INVALID_HEX_INDEX            = -1, //
-            LEFT_AMMOCART_GRIDINDEX      = 18, //
-            RIGHT_AMMOCART_GRIDINDEX     = 32, //
-            LEFT_BALLISTA_GRIDINDEX      = 51, //
-            RIGHT_BALLISTA_GRIDINDEX     = 67, //
-            DOOR_GRIDINDEX               = 96, //
-            LEFT_FIRSTAID_GRIDINDEX      = 153, //
-            RIGHT_FIRSTAID_GRIDINDEX     = 169, //
-            LEFT_CATAPULT_GRIDINDEX      = 119, //
-            RIGHT_CATAPULT_GRIDINDEX     = 135, //
-            LOWER_WALL_RIGHT_GRIDINDEX   = 200, //
-            LOWER_TOWER_DRAW_GRIDINDEX   = 251, //
-            LEFT_GENERAL_GRIDINDEX       = 252, //
-            RIGHT_GENERAL_GRIDINDEX      = 253, //
-            MAIN_BUILDING_GRIDINDEX      = 254, //
-            UPPER_TOWER_GRIDINDEX        = 255, //
-            DRAWBRIDGE_HEX_Y             = 5, //
-            DP_MIN                       = 0, //
-            DP_WALLS                     = 0, //
-            DP_DEAD_ARMIES               = 1, //
-            DP_OBSTACLES                 = 2, //
-            DP_WALKING_UP                = 3, //
-            DP_NORMAL                    = 4, //
-            DP_WINCING                   = 5, //
-            DP_ATTACKING                 = 6, //
-            DP_WALKING_DOWN              = 7, //
-            DP_MAX                       = 7, //
-            DP_ALL                       = 8, //
-            NUM_SIDES                    = 2, //
-            MAX_COMBAT_ARMIES            = 20, //
-            BASE_COMBAT_ANIMATION_PERIOD = 50, //
+            INVALID_HEX_INDEX            = -1,   //
+            LEFT_AMMOCART_GRIDINDEX      = 18,   //
+            RIGHT_AMMOCART_GRIDINDEX     = 32,   //
+            LEFT_BALLISTA_GRIDINDEX      = 51,   //
+            RIGHT_BALLISTA_GRIDINDEX     = 67,   //
+            DOOR_GRIDINDEX               = 96,   //
+            LEFT_FIRSTAID_GRIDINDEX      = 153,  //
+            RIGHT_FIRSTAID_GRIDINDEX     = 169,  //
+            LEFT_CATAPULT_GRIDINDEX      = 119,  //
+            RIGHT_CATAPULT_GRIDINDEX     = 135,  //
+            LOWER_WALL_RIGHT_GRIDINDEX   = 200,  //
+            LOWER_TOWER_DRAW_GRIDINDEX   = 251,  //
+            LEFT_GENERAL_GRIDINDEX       = 252,  //
+            RIGHT_GENERAL_GRIDINDEX      = 253,  //
+            MAIN_BUILDING_GRIDINDEX      = 254,  //
+            UPPER_TOWER_GRIDINDEX        = 255,  //
+            DRAWBRIDGE_HEX_Y             = 5,    //
+            DP_MIN                       = 0,    //
+            DP_WALLS                     = 0,    //
+            DP_DEAD_ARMIES               = 1,    //
+            DP_OBSTACLES                 = 2,    //
+            DP_WALKING_UP                = 3,    //
+            DP_NORMAL                    = 4,    //
+            DP_WINCING                   = 5,    //
+            DP_ATTACKING                 = 6,    //
+            DP_WALKING_DOWN              = 7,    //
+            DP_MAX                       = 7,    //
+            DP_ALL                       = 8,    //
+            NUM_SIDES                    = 2,    //
+            MAX_COMBAT_ARMIES            = 20,   //
+            BASE_COMBAT_ANIMATION_PERIOD = 50,   //
             COMBAT_HERO_FIDGET_TIME      = 4500, //
-            MAX_WALL_LEVELS              = 5, //
+            MAX_WALL_LEVELS              = 5,    //
             MAX_COMBAT_HEXES             = 187
         };
 
@@ -867,29 +915,29 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         std::array<std::array<army, MAX_COMBAT_ARMIES + 1>, NUM_SIDES> Armies;
         };
 
-        unsigned char : 8;
-        unsigned char : 8;
+        // Is the side on its native terrain /
+        // Земля является родной для каждой из сторон.
+        // offset: +0x1329C = +78492,  size = 0x2 = 2
+        std::array<bool, NUM_SIDES> OnNativeTerrain;
         unsigned char : 8;
         unsigned char : 8;
 
         // offset: +0x132A0 = +78496,  size = 0x8 = 8
-        std::array<int32_t, NUM_SIDES> turnSinceLastEnchanter;
+        std::array<int32_t, NUM_SIDES> EnchanterCooldown;
 
-        // Native terrain of each side /
-        // Родная земля каждой из сторон.
         // offset: +0x132A8 = +78504,  size = 0x8 = 8
-        std::array<TTerrainType, NUM_SIDES> nativeTerrain;
+        std::array<TCreatureType, NUM_SIDES> SummonedElemental;
 
         // Side summoned elemental at least once /
         // Сторона вызывала элементаля хотя бы один раз.
         // offset: +0x132B0 = +78512,  size = 0x2 = 2
-        std::array<bool, NUM_SIDES> SummonedElemental;
+        std::array<bool, NUM_SIDES> SideRetreated;
 
-        unsigned char : 8;
-        unsigned char : 8;
+        // offset: +0x132B0 = +78512,  size = 0x2 = 2
+        std::array<bool, NUM_SIDES> SideSurrendered;
 
         // offset: +0x132B4 = +78516,  size = 0x4 = 4
-        int32_t SideRetreated;
+        bool32_t gbThisNetHasControl;
 
         // offset: +0x132B8 = +78520,  size = 0x4 = 4
         int32_t currArmyGroup;
@@ -901,7 +949,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         int32_t currControl;
 
         // offset: +0x132C4 = +78532,  size = 0x4 = 4
-        int32_t autoCombatOn;
+        bool32_t autoCombatOn;
 
         // offset: +0x132C8 = +78536,  size = 0x4 = 4
         army* currTroop;
@@ -944,7 +992,7 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         TFortificationLevel fortificationLevel;
 
         // offset: +0x132F8 = +78584,  size = 0x4 = 4
-        int32_t bBattleOver;
+        bool32_t bBattleOver;
 
         // offset: +0x132FC = +78588,  size = 0x4 = 4
         heroWindow* mainWindow;
@@ -968,12 +1016,14 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         // offset: +0x1342C = +78892,  size = 0x4 = 4
         type_combat_cursor last_attack_cursor;
 
+    protected:
         // offset: +0x13430 = +78896,  size = 0x4 = 4
         int32_t iTtlCombatDirections;
 
         // offset: +0x13434 = +78900,  size = 0x4 = 4
         int32_t iBackgroundFrame;
 
+    public:
         // Dead creatures status /
         // Является ли каждая из существ мертвым?
         // offset: +0x13438 = +78904,  size = 0x28 = 40
@@ -1109,9 +1159,10 @@ NH3API_VIRTUAL_CLASS combatManager : public baseManager
         std::array<bool, kNumArchers> bArcherEffect;
 
         // offset: +0x1402F = +81967,  size = 0x1 = 1
-        bool any_action_taken;
+        bool auto_retreat_on;
 
-        unsigned char : 8;
+        // offset: +0x1402F = +81968,  size = 0x1 = 1
+        bool any_action_taken;
 
         // offset: +0x14031 = +81969,  size = 0xBB = 187
         std::array<bool, MAX_COMBAT_HEXES> creaturePath;
