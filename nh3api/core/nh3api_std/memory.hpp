@@ -125,17 +125,21 @@ NH3API_NONNULL(1)
 [[nodiscard]] inline size_t exe_msize(const void* ptr) noexcept
 { return CDECL_1(size_t, 0x61E504, ptr); }
 
+// Returns the handle of the heap that's used by Heroes3.exe runtime (returns intptr_t to conform to _get_heap_handle).
+[[nodiscard]] inline intptr_t exe_get_heap_handle() noexcept
+{ return *reinterpret_cast<intptr_t*>(0x6ABD60); }
+
 // exe_heap flag passed to the placement new form to allocate via the exe_new /
 // exe_heap флаг, который можно передать в placement new для выделения памяти с помощью exe_new.
 struct exe_heap_t
 {
     static inline constexpr uintptr_t handle_address = 0x6ABD60;
-    static inline HANDLE& get_handle() noexcept
+    [[nodiscard]] static inline HANDLE& get_handle() noexcept
     { return get_global_var_ref(handle_address, HANDLE); }
 
     // maximum size a heap can manage
-    static inline constexpr size_t max_size() noexcept
-    { return size_t(~0U); }
+    [[nodiscard]] static inline constexpr size_t max_size() noexcept
+    { return static_cast<size_t>(PTRDIFF_MAX); }
 
 }
 // exe_heap constant / константа exe_heap
@@ -485,7 +489,7 @@ public:
     { exe_delete(ptr); }
 
     [[nodiscard]] inline constexpr static size_t max_size() noexcept
-    { return size_t(~0U) / sizeof(value_type); }
+    { return static_cast<size_t>(PTRDIFF_MAX) / sizeof(value_type); }
 
     [[nodiscard]] inline constexpr exe_allocator& select_on_container_copy_construction() const noexcept
     { return *this; }
@@ -660,11 +664,7 @@ void exe_make_unique_for_overwrite(Args&&...) = delete;
 struct exe_scoped_lock
 {
     exe_scoped_lock() noexcept
-    {
-        NH3API_MEMSHIELD_BEGIN
-        THISCALL_1(void*, 0x60BB58, this);
-        NH3API_MEMSHIELD_END
-    }
+    { THISCALL_1(void*, 0x60BB58, this); }
 
     exe_scoped_lock(const exe_scoped_lock&)            = delete;
     exe_scoped_lock(exe_scoped_lock&&)                 = delete;
@@ -672,11 +672,7 @@ struct exe_scoped_lock
     exe_scoped_lock& operator=(exe_scoped_lock&&)      = delete;
 
     ~exe_scoped_lock() noexcept
-    {
-        NH3API_MEMSHIELD_BEGIN
-        THISCALL_1(void, 0x60BBF4, this);
-        NH3API_MEMSHIELD_END
-    }
+    { THISCALL_1(void, 0x60BBF4, this); }
 };
 
 #ifdef _MSVC_STL_UPDATE
