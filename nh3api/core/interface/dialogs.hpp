@@ -8,11 +8,13 @@
 
 #include "widgets.hpp"
 #include "../creatures.hpp"
+#include "../spells.hpp"
 
 NH3API_WARNING(push)
 NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
 NH3API_WARNING_MSVC_DISABLE(26495)
 
+class army;
 class hero;
 #pragma pack(push, 4)
 // size = 0x78 = 120, align = 4, baseclass: TSubWindow
