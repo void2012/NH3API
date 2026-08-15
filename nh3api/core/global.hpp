@@ -741,5 +741,6 @@ inline exe_bitset<48>& puzzlePiecesRemoved = get_global_var_ref(0x697738, exe_bi
 inline eNetGameType& iMPNetProtocol = get_global_var_ref(0x698A40, eNetGameType);
 
 inline std::array<char, 256>& gMapName = get_global_var_ref(0x699430, std::array<char, 256>);
+inline std::array<char, 352>& saved_game_filename = get_global_var_ref(0x69FC88, std::array<char, 352>);
 
 NH3API_WARNING(pop)
