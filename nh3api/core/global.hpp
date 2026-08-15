@@ -711,6 +711,10 @@ inline bool OnMySide(int32_t iWhichPlayer)
 inline configStruct& gConfig = get_global_var_ref(0x6987A8, configStruct);
 
 inline int32_t&  giThisGamePos                = get_global_var_ref(0x6995A4, int32_t);
+inline bool32_t& gbBlackoutPlayer             = get_global_var_ref(0x69942C, bool32_t);
+inline int32_t&  giDebugLevel                 = get_global_var_ref(0x698A18, int32_t);
+inline int32_t&  giLimitPlayer                = get_global_var_ref(0x699540, int32_t);
+inline int32_t&  giShowIntro                  = get_global_var_ref(0x699410, int32_t);
 inline bool32_t& gbThisNetGotAdventureControl = get_global_var_ref(0x6977D8, bool32_t);
 inline bool32_t& gbInNewGameSetup             = get_global_var_ref(0x698450, bool32_t);
 inline bool32_t& gbInReplay                   = get_global_var_ref(0x696A54, bool32_t);
