@@ -159,6 +159,9 @@ struct message
 inline void PollSound()
 { FASTCALL_0(void, 0x4EDB20); }
 
+inline void ShutDown(const char* cInExitMessage)
+{ FASTCALL_1(void, 0x4F3D20, cInExitMessage); }
+
 // Keep processing Windows messages:
 // this is useful when we're dealing with a process that takes too long to calculate.
 // Basically, this function prevents Windows from freezing the program with "Heroes3.exe is not responding" /
