@@ -1972,8 +1972,7 @@ inline void Dispose(resource* arg)
         arg->Dispose();
 }
 
-[[nodiscard]] inline exe_string& GetDataPath() noexcept
-{ return get_global_var_ref(0x69E528, exe_string); }
+inline exe_string& LODPath = get_global_var_ref(0x69E528, exe_string);
 
 [[nodiscard]] inline resource* GetFromCache(const char *name) noexcept
 {
