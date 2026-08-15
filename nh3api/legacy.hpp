@@ -12,7 +12,6 @@
 #include <cstdlib> // free, malloc, realloc, calloc
 #include <malloc.h> // _msize
 #include "core/nh3api_std/exe_string.hpp" // exe_string, to_exe_string, string printing
-#include "core/utils.hpp"
 
 NH3API_WARNING(push)
 NH3API_WARNING_GNUC_DISABLE("-Wattributes")
@@ -20,20 +19,20 @@ NH3API_WARNING_MSVC_DISABLE(4714)
 
 // legacy typedefs
 
-[[deprecated("WoG types are deprecated. use int64_t")]] typedef int64_t _qword_;
-[[deprecated("WoG types are deprecated. use int32_t")]] typedef int32_t _int32_;
-[[deprecated("WoG types are deprecated. use int16_t")]] typedef int16_t _int16_;
-[[deprecated("WoG types are deprecated. use int8_t")]] typedef int8_t _int8_;
-[[deprecated("WoG types are deprecated. use uint8_t")]] typedef uint8_t _byte_;
-[[deprecated("WoG types are deprecated. use uint16_t")]] typedef uint16_t _word_;
-[[deprecated("WoG types are deprecated. use uint32_t")]] typedef uint32_t _dword_;
-[[deprecated("WoG types are deprecated. use uintptr_t")]] typedef uintptr_t _ptr_;
-[[deprecated("WoG types are deprecated. use char")]] typedef char _char_;
-[[deprecated("WoG types are deprecated. use bool")]] typedef bool _bool8_;
-[[deprecated("WoG types are deprecated. use bool32_t")]] typedef int32_t _bool32_;
-[[deprecated("WoG types are deprecated. use float")]] typedef float _float_;
-[[deprecated("WoG types are deprecated. use double")]] typedef double _double_;
-[[deprecated("WoG types are deprecated. use const char*")]] typedef const char* _cstr_;
+using _qword_ [[deprecated("WoG types are deprecated. use int64_t")]]    = int64_t;
+using _int32_ [[deprecated("WoG types are deprecated. use int32_t")]]    = int32_t;
+using _int16_ [[deprecated("WoG types are deprecated. use int16_t")]]    = int16_t;
+using _int8_ [[deprecated("WoG types are deprecated. use int8_t")]]      = int8_t;
+using _byte_ [[deprecated("WoG types are deprecated. use uint8_t")]]     = uint8_t;
+using _word_ [[deprecated("WoG types are deprecated. use uint16_t")]]    = uint16_t;
+using _dword_ [[deprecated("WoG types are deprecated. use uint32_t")]]   = uint32_t;
+using _ptr_ [[deprecated("WoG types are deprecated. use uintptr_t")]]    = uintptr_t;
+using _char_ [[deprecated("WoG types are deprecated. use char")]]        = char;
+using _bool8_ [[deprecated("WoG types are deprecated. use bool")]]       = bool;
+using _bool32_ [[deprecated("WoG types are deprecated. use bool32_t")]]  = int32_t;
+using _float_ [[deprecated("WoG types are deprecated. use float")]]      = float;
+using _double_ [[deprecated("WoG types are deprecated. use double")]]    = double;
+using _cstr_ [[deprecated("WoG types are deprecated. use const char*")]] = char*;
 
 template<typename T> NH3API_FORCEINLINE
 int32_t IntAt(const T* ptr) noexcept
@@ -119,7 +118,7 @@ template<typename T, typename V, typename Size>
 inline void* Memset(T* ptr, V value, Size size) noexcept
 { return ::std::memset(reinterpret_cast<void*>(ptr), static_cast<uint8_t>(value), static_cast<size_t>(size)); }
 
-template<typename Size>
+template<typename Size> [[nodiscard]]
 inline void* MemAlloc(Size size) noexcept
 { return ::std::malloc(static_cast<size_t>(size)); }
 
@@ -127,15 +126,15 @@ template<typename T>
 inline void MemFree(T* ptr) noexcept
 { ::std::free(reinterpret_cast<void*>(ptr)); }
 
-template<typename T, typename Size>
+template<typename T, typename Size> [[nodiscard]]
 inline void* MemRealloc(T* ptr, Size size) noexcept
-{ ::std::realloc(reinterpret_cast<void*>(ptr), static_cast<size_t>(size)); }
+{ return ::std::realloc(reinterpret_cast<void*>(ptr), static_cast<size_t>(size)); }
 
-template<typename Size>
+template<typename Size> [[nodiscard]]
 inline void* MemCalloc(Size num, Size size) noexcept
 { return ::std::calloc(reinterpret_cast<size_t>(num), static_cast<size_t>(size)); }
 
-template<typename T>
+template<typename T> [[nodiscard]]
 inline size_t MemSize(T* ptr) noexcept
 { return ::_msize(reinterpret_cast<void*>(ptr)); }
 
