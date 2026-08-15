@@ -1592,6 +1592,30 @@ struct THelpText
 
 };
 
+inline std::array<THelpText, 5>&   gMainMenuHelp           = get_global_var_ref(0x6A6C88, std::array<THelpText, 5>);
+inline std::array<THelpText, 5>&   gNewGameHelp            = get_global_var_ref(0x6A6C60, std::array<THelpText, 5>);
+inline std::array<THelpText, 245>& gSingleSelectionHelp    = get_global_var_ref(0x6A6CE8, std::array<THelpText, 245>);
+inline std::array<THelpText, 25>&  gMultiSelectionHelp     = get_global_var_ref(0x6A65D8, std::array<THelpText, 25>);
+inline std::array<THelpText, 27>&  gAdventureWindowHelp    = get_global_var_ref(0x6A5748, std::array<THelpText, 27>);
+inline std::array<THelpText, 48>&  gSystemOptionsHelp      = get_global_var_ref(0x6A75E8, std::array<THelpText, 48>);
+inline std::array<THelpText, 7>&   gAdventureOptionsHelp   = get_global_var_ref(0x6A6598, std::array<THelpText, 7>);
+inline std::array<THelpText, 11>&  gCombatWindowHelp       = get_global_var_ref(0x6A69D0, std::array<THelpText, 11>);
+inline std::array<THelpText, 39>&  gCombatOptionsHelp      = get_global_var_ref(0x6A5610, std::array<THelpText, 39>);
+inline std::array<THelpText, 15>&  gViewArmyHelp           = get_global_var_ref(0x6A74C0, std::array<THelpText, 15>);
+inline std::array<THelpText, 11>&  gSpellbookHelp          = get_global_var_ref(0x6A5338, std::array<THelpText, 11>);
+inline std::array<THelpText, 62>&  gCampaignBriefHelp      = get_global_var_ref(0x6A5A30, std::array<THelpText, 62>);
+inline std::array<THelpText, 24>&  gCampaignWindowHelp     = get_global_var_ref(0x6A5FE8, std::array<THelpText, 24>);
+inline std::array<THelpText, 3>&   gRecruitHelp            = get_global_var_ref(0x6A75C0, std::array<THelpText, 3>);
+inline std::array<THelpText, 8>&   gMPHelp                 = get_global_var_ref(0x6A77B8, std::array<THelpText, 8>);
+inline std::array<THelpText, 20>&  gSacrificeWindowHelp    = get_global_var_ref(0x6A66A0, std::array<THelpText, 20>);
+inline std::array<THelpText, 3>&   gTransformerWindowHelp  = get_global_var_ref(0x6A7838, std::array<THelpText, 3>);
+inline std::array<THelpText, 6>&   gResourceWindowHelp     = get_global_var_ref(0x6A58D0, std::array<THelpText, 6>);
+inline std::array<THelpText, 5>&   gGiveResourceWindowHelp = get_global_var_ref(0x6A5410, std::array<THelpText, 5>);
+inline std::array<THelpText, 5>&   gBuyArtifactWindowHelp  = get_global_var_ref(0x6A7E10, std::array<THelpText, 5>);
+inline std::array<THelpText, 5>&   gSellArtifactWindowHelp = get_global_var_ref(0x6A6CB8, std::array<THelpText, 5>);
+inline std::array<THelpText, 5>&   gSellCreatureWindowHelp = get_global_var_ref(0x6A7F00, std::array<THelpText, 5>);
+inline std::array<THelpText, 4>&   gUniversityWindowHelp   = get_global_var_ref(0x6A7E40, std::array<THelpText, 4>);
+
 // Text resource /
 // Игровой ресурс - текстовый файл.
 // size = 0x30 = 48, align = 4, baseclass: resource
