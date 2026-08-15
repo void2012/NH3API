@@ -7,14 +7,16 @@
 #pragma once
 
 #include "widgets.hpp"
-#include "../creatures.hpp"
-#include "../spells.hpp"
 
 NH3API_WARNING(push)
 NH3API_WARNING_GNUC_DISABLE("-Wuninitialized")
 NH3API_WARNING_MSVC_DISABLE(26495)
 
+enum TCreatureType : int32_t;
+enum SpellID : int32_t;
+class armyGroup;
 class army;
+class town;
 class hero;
 #pragma pack(push, 4)
 // size = 0x78 = 120, align = 4, baseclass: TSubWindow
