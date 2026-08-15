@@ -788,7 +788,6 @@ NH3API_VIRTUAL_CLASS CAdvPopup : public CHeroWindowEx
 
 #ifndef NH3API_VIRTUAL_OVERRIDE_CADVPOPUP
 #define NH3API_VIRTUAL_OVERRIDE_CADVPOPUP(CLASS_NAME)\
-NH3API_VIRTUAL_OVERRIDE_HEROWINDOW(CLASS_NAME)\
 NH3API_VIRTUAL_OVERRIDE_CHEROWINDOWEX(CLASS_NAME)\
 int32_t __thiscall ExitDialog(message& msg) override\
 { return get_type_vftable(this)->ExitDialog(this, &msg); }
