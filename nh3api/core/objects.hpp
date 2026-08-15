@@ -627,6 +627,10 @@ class mine
 
 };
 
+// Mine type daily yield /
+// Доходность каждого типа шахты.
+inline const std::array<int32_t, 7>& gMineCharacteristics = get_global_var_ref(0x678288, const std::array<int32_t, 7>);
+
 // Garrison /
 // Гарнизон.
 // size = 0x40 = 64, align = 4
