@@ -6,8 +6,12 @@
 //===----------------------------------------------------------------------===//
 #pragma once
 
-#include "../creatures.hpp"
 #include "../base_manager.hpp"
+
+enum TCreatureType : int32_t;
+class armyGroup;
+class hero;
+class town;
 
 #pragma pack(push, 4)
 // size = 0xBC = 188, align = 4, baseclass: baseManager
