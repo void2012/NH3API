@@ -249,8 +249,93 @@ NH3API_VIRTUAL_CLASS TAdventureMapWindow : public heroWindow
         void* immersion;
 
 } NH3API_MSVC_LAYOUT;
+
+// Army information view window /
+// Окно просмотра информации о стеке армии.
+// size = 0xB8 = 184, align = 4, baseclass: CAdvPopup
+class TViewArmyWindow : public CAdvPopup
+{
+public:
+    struct vftable_t : CAdvPopup::vftable_t {};
+
+public:
+    inline TViewArmyWindow(const army* this_army, int32_t x0, int32_t y0, bool show_ok)
+        : CAdvPopup(nh3api::dummy_tag)
+    { THISCALL_5(void, 0x5F3700, this, this_army, x0, y0, show_ok); }
+
+    inline TViewArmyWindow(armyGroup const& group, int32_t iarmy, const hero* this_hero, const town* this_town, int32_t x0, int32_t y0, int32_t upgrade, bool show_dismiss, bool show_ok)
+        : CAdvPopup(nh3api::dummy_tag)
+    { THISCALL_10(void, 0x5F3EF0, this, &group, iarmy, this_hero, this_town, x0, y0, upgrade, show_dismiss, show_ok); }
+
+    inline TViewArmyWindow(int32_t army_type, int32_t x0, int32_t y0, bool show_ok)
+        : CAdvPopup(nh3api::dummy_tag)
+    { THISCALL_5(void, 0x5F45B0, this, army_type, x0, y0, show_ok); }
+
+    inline ~TViewArmyWindow() noexcept
+    { THISCALL_1(void, 0x5F4980, this); }
+
+    TViewArmyWindow() = delete;
+    TViewArmyWindow(const TViewArmyWindow&)            = delete;
+    TViewArmyWindow(TViewArmyWindow&&)                 = delete;
+    TViewArmyWindow& operator=(const TViewArmyWindow&) = delete;
+    TViewArmyWindow& operator=(TViewArmyWindow&&)      = delete;
+public:
+    [[nodiscard]] int32_t convertID2HelpID(int32_t id) const
+    { return THISCALL_2(int32_t, 0x5F4A60, this, id); }
+
+    void DoModal()
+    { THISCALL_1(void, 0x5F4BA0, this); }
+
+public:
+    NH3API_VIRTUAL_OVERRIDE_CADVPOPUP(TViewArmyWindow)
+
+public:
+    // offset: +0x60 = +96,  size = 0x4 = 4
+    TCreatureType ArmyType;
+
+    // offset: +0x64 = +100,  size = 0x4 = 4
+    int32_t ArmySize;
+
+    // offset: +0x68 = +104,  size = 0x4 = 4
+    int32_t morale;
+
+    // offset: +0x6C = +108,  size = 0x10 = 16
+    exe_string morale_help;
+
+    // offset: +0x7C = +124,  size = 0x4 = 4
+    int32_t luck;
+
+    // offset: +0x80 = +128,  size = 0x10 = 16
+    exe_string luck_help;
+
+    // offset: +0x90 = +144,  size = 0x4 = 4
+    int32_t Upgrade;
+
+    // offset: +0x94 = +148,  size = 0x1 = 1
+    bool ShowingUpgradeButton;
+
+    // offset: +0x95 = +149,  size = 0x1 = 1
+    bool ShowingDismissButton;
+
+    // offset: +0x96 = +150,  size = 0x1 = 1
+    bool ShowingOkButton;
+
+    // offset: +0x98 = +152,  size = 0xC = 12
+    std::array<SpellID, 3> Influence;
+
+    // offset: +0xA4 = +164,  size = 0xC = 12
+    std::array<int32_t, 3> Duration;
+
+    // offset: +0xB0 = +176,  size = 0x4 = 4
+    bitmapBackedTextWidget* RolloverWidget;
+
+    // offset: +0xB4 = +180,  size = 0x4 = 4
+    iconWidget* SpriteWidget;
+
+};
 #pragma pack(pop)
 
+NH3API_SPECIALIZE_TYPE_VFTABLE(0x643C24, TViewArmyWindow)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x641034, TResourceDisplay)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63BB04, type_bottom_view_window)
 NH3API_SPECIALIZE_TYPE_VFTABLE(0x63A5E4, TAdventureMapWindow)
