@@ -548,7 +548,7 @@ NH3API_VIRTUAL_CLASS advManager : public baseManager
         // Boat flag sprites /
         // Спрайты флагов лодок.
         // offset: +0x18C = +396,  size = 0x60 = 96
-        std::array<CSprite*, 24> boatFlagIcons;
+        std::array<std::array<CSprite*, 8>, 3> boatFlagIcons;
 
         // Is current hero visible? /
         // Виден ли текущий герой?
