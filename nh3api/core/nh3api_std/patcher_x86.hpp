@@ -2400,32 +2400,21 @@ public:
 // функцию вызывать 1 раз, что очевидно из ее определения
 NH3API_NO_SANITIZE_ADDRESS inline Patcher* GetPatcher() noexcept
 {
-    using GetPatcher_f      = Patcher*(__stdcall*)();
-    bool    mustFreeLibrary = false;
-    HMODULE patcherHandle   = ::GetModuleHandleW(L"patcher_x86.dll");
+    using GetPatcher_f = Patcher*(__stdcall*)();
+
+    HMODULE patcherHandle = ::LoadLibraryW(L"patcher_x86.dll");
     if ( patcherHandle == nullptr )
-    {
-        patcherHandle = ::LoadLibraryW(L"patcher_x86.dll");
-        if ( patcherHandle != nullptr )
-            mustFreeLibrary = true;
-    }
-
-    if ( patcherHandle )
-    {
-        GetPatcher_f func = reinterpret_cast<GetPatcher_f>(::GetProcAddress(patcherHandle, "_GetPatcherX86@0"));
-        if ( func )
-        {
-            if ( mustFreeLibrary )
-                ::FreeLibrary(patcherHandle);
-            return func();
-        }
-
-        if ( mustFreeLibrary )
-            ::FreeLibrary(patcherHandle);
         return nullptr;
-    }
 
-    return nullptr;
+    Patcher*     result = nullptr;
+    GetPatcher_f func   = reinterpret_cast<GetPatcher_f>(::GetProcAddress(patcherHandle, "_GetPatcherX86@0"));
+
+    if ( func )
+        result = func();
+
+    ::FreeLibrary(patcherHandle);
+
+    return result;
 }
 
 // Функция GetPatcherVersion возвращает версию патчера /
@@ -2433,31 +2422,20 @@ NH3API_NO_SANITIZE_ADDRESS inline Patcher* GetPatcher() noexcept
 NH3API_NO_SANITIZE_ADDRESS inline uint32_t GetPatcherVersion() noexcept
 {
     using GetPatcherX86Version_f = uint32_t(__stdcall*)();
-    bool    mustFreeLibrary      = false;
-    HMODULE patcherHandle        = ::GetModuleHandleW(L"patcher_x86.dll");
+
+    HMODULE patcherHandle = ::LoadLibraryW(L"patcher_x86.dll");
     if ( patcherHandle == nullptr )
-    {
-        patcherHandle = ::LoadLibraryW(L"patcher_x86.dll");
-        if ( patcherHandle != nullptr )
-            mustFreeLibrary = true;
-    }
-
-    if ( patcherHandle )
-    {
-        GetPatcherX86Version_f func = reinterpret_cast<GetPatcherX86Version_f>(::GetProcAddress(patcherHandle, "_GetPatcherX86Version@0"));
-        if ( func )
-        {
-            if ( mustFreeLibrary )
-                ::FreeLibrary(patcherHandle);
-            return func();
-        }
-
-        if ( mustFreeLibrary )
-            ::FreeLibrary(patcherHandle);
         return 0;
-    }
 
-    return 0;
+    uint32_t               result = 0;
+    GetPatcherX86Version_f func   = reinterpret_cast<GetPatcherX86Version_f>(::GetProcAddress(patcherHandle, "_GetPatcherX86Version@0"));
+
+    if ( func )
+        result = func();
+
+    ::FreeLibrary(patcherHandle);
+
+    return result;
 }
 
 NH3API_WARNING(pop)
