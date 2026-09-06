@@ -2385,10 +2385,6 @@ public:
 // восстанавливаем выравнивание членов структур и классов.
 #pragma pack(pop)
 
-//////////////////////////////////////////////////////////////////
-NH3API_NO_SANITIZE_ADDRESS inline HMODULE GetPatcherHandle() noexcept
-{ return ::GetModuleHandleW(L"patcher_x86.dll"); }
-
 // Function GetPatcher
 // loads the library and, by calling the only exported
 // function _GetPatcherX86@0, returns a pointer to the Patcher object,
