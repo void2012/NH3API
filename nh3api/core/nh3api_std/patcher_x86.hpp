@@ -2412,7 +2412,7 @@ NH3API_NO_SANITIZE_ADDRESS inline Patcher* GetPatcher() noexcept
     if ( func )
         result = func();
 
-    ::FreeLibrary(patcherHandle);
+    // ::FreeLibrary(patcherHandle);
 
     return result;
 }
@@ -2433,7 +2433,7 @@ NH3API_NO_SANITIZE_ADDRESS inline uint32_t GetPatcherVersion() noexcept
     if ( func )
         result = func();
 
-    ::FreeLibrary(patcherHandle);
+    // ::FreeLibrary(patcherHandle);
 
     return result;
 }
